@@ -18,7 +18,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
  * A descriptor for identifying a solutions catalog, ie: a location that implements the Eclipse Marketplace API.
  * 
  * @author David Green
- * @see MarketplaceClientUI#addCatalogDescriptor(CatalogDescriptor)
+ * @see MarketplaceClient#addCatalogDescriptor(CatalogDescriptor)
  */
 public final class CatalogDescriptor {
 	private URL url;

@@ -22,7 +22,7 @@ import org.eclipse.epp.internal.mpc.ui.commands.MarketplaceWizardCommand;
  * 
  * @author David Green
  */
-public class MarketplaceClientUI {
+public class MarketplaceClient {
 	/**
 	 * Add a catalog descriptor to those available to be the user when accessing the marketplace.
 	 * 
