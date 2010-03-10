@@ -212,14 +212,17 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 				executor.shutdownNow();
 				monitor.done();
 			}
-			if (result.getMatchCount() != null && result.getMatchCount() > result.getNodes().size()) {
-				// add an item here to indicate that the search matched more items than were returned by the server
-				CatalogItem catalogItem = new CatalogItem();
-				catalogItem.setSource(source);
-				catalogItem.setData(catalogDescriptor);
-				catalogItem.setId(catalogDescriptor.getUrl().toString());
-				catalogItem.setCategoryId(catalogCategory.getId());
-				items.add(catalogItem);
+			if (result.getMatchCount() != null) {
+				catalogCategory.setMatchCount(result.getMatchCount());
+				if (result.getMatchCount() > result.getNodes().size()) {
+					// add an item here to indicate that the search matched more items than were returned by the server
+					CatalogItem catalogItem = new CatalogItem();
+					catalogItem.setSource(source);
+					catalogItem.setData(catalogDescriptor);
+					catalogItem.setId(catalogDescriptor.getUrl().toString());
+					catalogItem.setCategoryId(catalogCategory.getId());
+					items.add(catalogItem);
+				}
 			}
 		}
 	}

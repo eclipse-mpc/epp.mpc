@@ -13,6 +13,7 @@ package org.eclipse.epp.internal.mpc.ui.catalog;
 import java.util.List;
 
 import org.eclipse.epp.internal.mpc.core.service.Market;
+import org.eclipse.epp.internal.mpc.core.service.SearchResult;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 
 /**
@@ -27,6 +28,8 @@ public class MarketplaceCategory extends CatalogCategory {
 	private List<Market> markets;
 
 	private Contents contents;
+
+	private int matchCount;
 
 	public void setMarkets(List<Market> markets) {
 		this.markets = markets;
@@ -47,4 +50,18 @@ public class MarketplaceCategory extends CatalogCategory {
 	public void setContents(Contents contents) {
 		this.contents = contents;
 	}
+
+	/**
+	 * Indicate how many solutions matched the query, which may not be the same as the number of nodes returned.
+	 * 
+	 * @see SearchResult#getMatchCount()
+	 */
+	public int getMatchCount() {
+		return matchCount;
+	}
+
+	public void setMatchCount(int matchCount) {
+		this.matchCount = matchCount;
+	}
+
 }

@@ -134,7 +134,8 @@ public class MarketplaceViewer extends CatalogViewer {
 			CatalogItem catalogItem = (CatalogItem) element;
 			if (catalogItem.getData() instanceof CatalogDescriptor) {
 				CatalogDescriptor catalogDescriptor = (CatalogDescriptor) catalogItem.getData();
-				return new BrowseCatalogItem(parent, getResources(), shellProvider, catalogDescriptor, this);
+				return new BrowseCatalogItem(parent, getResources(), shellProvider,
+						(MarketplaceCategory) catalogItem.getCategory(), catalogDescriptor, this);
 			} else {
 				DiscoveryItem discoveryItem = new DiscoveryItem(parent, SWT.NONE, getResources(), shellProvider,
 						catalogItem, this);

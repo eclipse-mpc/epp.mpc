@@ -15,6 +15,7 @@ import java.net.URISyntaxException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUI;
+import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.AbstractDiscoveryItem;
@@ -43,11 +44,14 @@ public class BrowseCatalogItem extends AbstractDiscoveryItem<CatalogDescriptor> 
 
 	private final IShellProvider shellProvider;
 
+	private final MarketplaceCategory category;
+
 	public BrowseCatalogItem(Composite parent, DiscoveryResources resources, IShellProvider shellProvider,
-			CatalogDescriptor element, MarketplaceViewer viewer) {
+			MarketplaceCategory category, CatalogDescriptor element, MarketplaceViewer viewer) {
 		super(parent, SWT.NULL, resources, element);
 		this.resources = resources;
 		this.shellProvider = shellProvider;
+		this.category = category;
 		this.viewer = viewer;
 		createContent();
 	}
@@ -58,7 +62,7 @@ public class BrowseCatalogItem extends AbstractDiscoveryItem<CatalogDescriptor> 
 		GridLayoutFactory.swtDefaults().applyTo(parent);
 
 		Link link = new Link(parent, SWT.NULL);
-		link.setText("<a>Browse for more solutions</a>");
+		link.setText(NLS.bind("<a>{0} matches.  Browse for more solutions...</a>", category.getMatchCount()));
 		link.setToolTipText(NLS.bind("Open {0} in a browser", getData().getUrl()));
 		link.setBackground(null);
 		link.addListener(SWT.Selection, new Listener() {
