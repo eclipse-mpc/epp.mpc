@@ -126,7 +126,7 @@ public class DefaultMarketplaceService implements MarketplaceService {
 				// should never happen
 				throw new IllegalStateException(e);
 			}
-			marketplace = processRequest("node/" + encodedId + API_URI_SUFFIX, monitor); //$NON-NLS-1$
+			marketplace = processRequest("node/" + encodedId + '/' + API_URI_SUFFIX, monitor); //$NON-NLS-1$
 		} else {
 			marketplace = processRequest(node.getUrl(), API_URI_SUFFIX, monitor);
 		}
