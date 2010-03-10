@@ -59,10 +59,12 @@ public class DefaultMarketplaceService implements MarketplaceService {
 //
 //	Once we've locked down the provisional API it will likely be named api/1.
 
-	private static final String UTF_8 = "UTF-8";
+	private static final String API_URI_SUFFIX = "api/p"; //$NON-NLS-1$
+
+	private static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
 
 	public static final String DEFAULT_SERVICE_LOCATION = System.getProperty(MarketplaceService.class.getName()
-			+ ".url", "http://www.eclipseplugincentral.net"); // FIXME "http://marketplace.eclipse.org");
+			+ ".url", "http://marketplace.eclipse.org"); //$NON-NLS-1$//$NON-NLS-2$
 
 	private URL baseUrl;
 
@@ -88,12 +90,12 @@ public class DefaultMarketplaceService implements MarketplaceService {
 	}
 
 	public List<Market> listMarkets(IProgressMonitor monitor) throws CoreException {
-		Marketplace marketplace = processRequest("api/p", monitor);
+		Marketplace marketplace = processRequest(API_URI_SUFFIX, monitor);
 		return marketplace.getMarket();
 	}
 
 	public Market getMarket(Market market, IProgressMonitor monitor) throws CoreException {
-		Marketplace marketplace = processRequest(market.getUrl(), "api/p", monitor);
+		Marketplace marketplace = processRequest(market.getUrl(), API_URI_SUFFIX, monitor);
 		if (marketplace.getMarket().isEmpty()) {
 			throw new CoreException(createErrorStatus("Market not found", null));
 		} else if (marketplace.getMarket().size() > 1) {
@@ -103,7 +105,7 @@ public class DefaultMarketplaceService implements MarketplaceService {
 	}
 
 	public Category getCategory(Category category, IProgressMonitor monitor) throws CoreException {
-		Marketplace marketplace = processRequest(category.getUrl(), "api/p", monitor);
+		Marketplace marketplace = processRequest(category.getUrl(), API_URI_SUFFIX, monitor);
 		if (marketplace.getCategory().isEmpty()) {
 			throw new CoreException(createErrorStatus("Category not found", null));
 		} else if (marketplace.getCategory().size() > 1) {
@@ -113,7 +115,21 @@ public class DefaultMarketplaceService implements MarketplaceService {
 	}
 
 	public Node getNode(Node node, IProgressMonitor monitor) throws CoreException {
-		Marketplace marketplace = processRequest(node.getUrl(), "api/p", monitor);
+		Marketplace marketplace;
+		if (node.getId() != null) {
+			// bug 304928: prefer the id method rather than the URL, since the id provides a stable URL and the
+			// URL is based on the name, which could change.
+			String encodedId;
+			try {
+				encodedId = URLEncoder.encode(node.getId(), UTF_8);
+			} catch (UnsupportedEncodingException e) {
+				// should never happen
+				throw new IllegalStateException(e);
+			}
+			marketplace = processRequest("node/" + encodedId + API_URI_SUFFIX, monitor); //$NON-NLS-1$
+		} else {
+			marketplace = processRequest(node.getUrl(), API_URI_SUFFIX, monitor);
+		}
 		if (marketplace.getNode().isEmpty()) {
 			throw new CoreException(createErrorStatus("Node not found", null));
 		} else if (marketplace.getNode().size() > 1) {
@@ -133,18 +149,19 @@ public class DefaultMarketplaceService implements MarketplaceService {
 		} else {
 			String relativeUrl;
 			try {
-				relativeUrl = "api/p/search/apachesolr_search/" + URLEncoder.encode(queryText.trim(), UTF_8);
-				String queryString = "";
+				relativeUrl = API_URI_SUFFIX + "/search/apachesolr_search/" //$NON-NLS-1$
+						+ URLEncoder.encode(queryText.trim(), UTF_8);
+				String queryString = ""; //$NON-NLS-1$
 				if (market != null || category != null) {
-					queryString += "filters=";
+					queryString += "filters="; //$NON-NLS-1$
 					if (market != null) {
-						queryString += "tid:" + URLEncoder.encode(market.getId(), UTF_8);
+						queryString += "tid:" + URLEncoder.encode(market.getId(), UTF_8); //$NON-NLS-1$
 						if (category != null) {
-							queryString += "%20";
+							queryString += "%20"; //$NON-NLS-1$
 						}
 					}
 					if (category != null) {
-						queryString += "tid:" + URLEncoder.encode(category.getId(), UTF_8);
+						queryString += "tid:" + URLEncoder.encode(category.getId(), UTF_8); //$NON-NLS-1$
 					}
 				}
 				if (queryString.length() > 0) {
@@ -165,22 +182,22 @@ public class DefaultMarketplaceService implements MarketplaceService {
 	}
 
 	public SearchResult featured(IProgressMonitor monitor) throws CoreException {
-		Marketplace marketplace = processRequest("featured/api/p", monitor);
+		Marketplace marketplace = processRequest("featured/" + API_URI_SUFFIX, monitor); //$NON-NLS-1$
 		return createSearchResult(marketplace.getFeatured());
 	}
 
 	public SearchResult recent(IProgressMonitor monitor) throws CoreException {
-		Marketplace marketplace = processRequest("recent/api/p", monitor);
+		Marketplace marketplace = processRequest("recent/" + API_URI_SUFFIX, monitor); //$NON-NLS-1$
 		return createSearchResult(marketplace.getRecent());
 	}
 
 	public SearchResult favorites(IProgressMonitor monitor) throws CoreException {
-		Marketplace marketplace = processRequest("favorites/top/api/p", monitor);
+		Marketplace marketplace = processRequest("favorites/top/" + API_URI_SUFFIX, monitor); //$NON-NLS-1$
 		return createSearchResult(marketplace.getFavorites());
 	}
 
 	public SearchResult popular(IProgressMonitor monitor) throws CoreException {
-		Marketplace marketplace = processRequest("popular/top/api/p", monitor);
+		Marketplace marketplace = processRequest("popular/top/" + API_URI_SUFFIX, monitor); //$NON-NLS-1$
 		return createSearchResult(marketplace.getActive());
 	}
 
@@ -215,9 +232,12 @@ public class DefaultMarketplaceService implements MarketplaceService {
 	private Marketplace processRequest(String baseUri, String relativePath, IProgressMonitor monitor)
 			throws CoreException {
 		checkConfiguration();
+		if (baseUri == null || relativePath == null) {
+			throw new IllegalArgumentException();
+		}
 
 		String uri = baseUri;
-		if (!uri.endsWith("/") && !relativePath.startsWith("/")) {
+		if (!uri.endsWith("/") && !relativePath.startsWith("/")) { //$NON-NLS-1$ //$NON-NLS-2$
 			uri += '/';
 		}
 		uri += relativePath;

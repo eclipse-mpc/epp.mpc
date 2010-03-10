@@ -40,13 +40,11 @@ import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUI;
  */
 public class MarketplaceInfo {
 
-	private static final String PERSISTENT_FILE = MarketplaceInfo.class.getSimpleName() + ".xml";
+	private static final String PERSISTENT_FILE = MarketplaceInfo.class.getSimpleName() + ".xml"; //$NON-NLS-1$
 
 	private Map<String, List<String>> nodeKeyToIU = new HashMap<String, List<String>>();
 
 	private Map<String, List<String>> iuToNodeKey = new HashMap<String, List<String>>();
-
-	private Map<String, String> nodeKeyToUrl = new HashMap<String, String>();
 
 	public MarketplaceInfo() {
 	}
@@ -65,14 +63,6 @@ public class MarketplaceInfo {
 
 	public void setIuToNodeKey(Map<String, List<String>> iuToNodeKey) {
 		this.iuToNodeKey = iuToNodeKey;
-	}
-
-	public Map<String, String> getNodeKeyToUrl() {
-		return nodeKeyToUrl;
-	}
-
-	public void setNodeKeyToUrl(Map<String, String> nodeKeyToUrl) {
-		this.nodeKeyToUrl = nodeKeyToUrl;
 	}
 
 	/**
@@ -95,7 +85,6 @@ public class MarketplaceInfo {
 					String nodeId = entry.getKey().substring(keyPrefix.length());
 					Node node = new Node();
 					node.setId(nodeId);
-					node.setUrl(nodeKeyToUrl.get(entry.getKey()));
 					nodes.add(node);
 				}
 			}
@@ -133,7 +122,6 @@ public class MarketplaceInfo {
 				}
 			}
 		}
-		nodeKeyToUrl.put(itemKey, node.getUrl());
 	}
 
 	private String computeItemKey(URL marketUrl, Node item) {

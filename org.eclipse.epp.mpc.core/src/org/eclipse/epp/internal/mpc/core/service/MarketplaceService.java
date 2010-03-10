@@ -49,7 +49,7 @@ public interface MarketplaceService {
 	 * Get a node by its id
 	 * 
 	 * @param node
-	 *            the node which must have an {@link Node#getUrl() url}.
+	 *            the node which must either have an {@link Node#getUrl() url} or an {@link Node#getId() id}.
 	 * @return the identified node
 	 */
 	public Node getNode(Node node, IProgressMonitor monitor) throws CoreException;
