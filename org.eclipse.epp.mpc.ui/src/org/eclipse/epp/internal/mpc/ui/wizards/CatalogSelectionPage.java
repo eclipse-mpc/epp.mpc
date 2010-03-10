@@ -19,6 +19,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
@@ -91,4 +92,8 @@ public class CatalogSelectionPage extends WizardPage {
 		Dialog.applyDialogFont(container);
 	}
 
+	@Override
+	public IWizardPage getPreviousPage() {
+		return null;
+	}
 }

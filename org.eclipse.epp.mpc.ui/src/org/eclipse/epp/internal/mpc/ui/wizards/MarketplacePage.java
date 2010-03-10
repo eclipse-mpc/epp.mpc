@@ -19,6 +19,7 @@ import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogPage;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -33,11 +34,13 @@ import org.eclipse.swt.widgets.TabItem;
  */
 public class MarketplacePage extends CatalogPage {
 
-	private MarketplaceCatalogConfiguration configuration;
+	private final MarketplaceCatalogConfiguration configuration;
 
 	private CatalogDescriptor previousCatalogDescriptor;
 
 	private boolean updated;
+
+	private boolean switchLinkActivated;
 
 	public MarketplacePage(MarketplaceCatalog catalog, MarketplaceCatalogConfiguration configuration) {
 		super(catalog);
@@ -104,7 +107,7 @@ public class MarketplacePage extends CatalogPage {
 			link.setToolTipText("Select an alternate catalog");
 			link.addSelectionListener(new SelectionListener() {
 				public void widgetSelected(SelectionEvent e) {
-					getWizard().getContainer().showPage(getWizard().getCatalogSelectionPage());
+					switchMarketplaceLinkActivated();
 				}
 
 				public void widgetDefaultSelected(SelectionEvent e) {
@@ -117,6 +120,19 @@ public class MarketplacePage extends CatalogPage {
 		}
 
 		setControl(parent == originalParent ? tabFolder : parent);
+	}
+
+	protected void switchMarketplaceLinkActivated() {
+		switchLinkActivated = true;
+		getWizard().getContainer().showPage(getWizard().getCatalogSelectionPage());
+	}
+
+	@Override
+	public IWizardPage getPreviousPage() {
+		if (!switchLinkActivated) {
+			return null;
+		}
+		return super.getPreviousPage();
 	}
 
 	@Override
