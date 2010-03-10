@@ -37,6 +37,7 @@ import org.eclipse.epp.internal.mpc.core.service.MarketplaceService;
 import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.core.service.SearchResult;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUI;
+import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory.Contents;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
@@ -53,7 +54,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	private final CatalogDescriptor catalogDescriptor;
 
-	private MarketplaceService marketplaceService;
+	private final MarketplaceService marketplaceService;
 
 	private MarketplaceCatalogSource source;
 
@@ -106,6 +107,8 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			catalogCategory.setMarkets(markets);
 
 			categories.add(catalogCategory);
+
+			catalogCategory.setContents(Contents.FEATURED);
 
 			SearchResult featured = marketplaceService.featured(new SubProgressMonitor(monitor, workSegment));
 			handleSearchResult(catalogCategory, featured, new SubProgressMonitor(monitor, workSegment));
@@ -236,6 +239,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		monitor.beginTask("Searching Marketplace", totalWork);
 		try {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory();
+			catalogCategory.setContents(Contents.QUERY);
 			SearchResult result = marketplaceService.search(market, category, queryText, new SubProgressMonitor(
 					monitor, totalWork / 2));
 			handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
@@ -249,6 +253,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		monitor.beginTask("Searching Marketplace", totalWork);
 		try {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory();
+			catalogCategory.setContents(Contents.RECENT);
 			SearchResult result = marketplaceService.recent(new SubProgressMonitor(monitor, totalWork / 2));
 			handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
 		} finally {
@@ -261,8 +266,10 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		monitor.beginTask("Searching Marketplace", totalWork);
 		try {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory();
+			catalogCategory.setContents(Contents.FEATURED);
 			SearchResult result = marketplaceService.featured(new SubProgressMonitor(monitor, totalWork / 2));
 			handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
+
 		} finally {
 			monitor.done();
 		}
@@ -274,6 +281,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		monitor.beginTask("Searching Marketplace", totalWork);
 		try {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory();
+			catalogCategory.setContents(Contents.POPULAR);
 			SearchResult result = marketplaceService.favorites(new SubProgressMonitor(monitor, totalWork / 2));
 			handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
 		} finally {
@@ -286,6 +294,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		monitor.beginTask("Finding Installed", totalWork);
 		try {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory();
+			catalogCategory.setContents(Contents.INSTALLED);
 			SearchResult result = new SearchResult();
 			result.setNodes(new ArrayList<Node>());
 			Set<String> installedFeatures = computeInstalledFeatures(monitor);

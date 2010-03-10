@@ -15,9 +15,18 @@ import java.util.List;
 import org.eclipse.epp.internal.mpc.core.service.Market;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 
+/**
+ * @author David Green
+ */
 public class MarketplaceCategory extends CatalogCategory {
 
+	public enum Contents {
+		FEATURED, POPULAR, INSTALLED, RECENT, QUERY
+	}
+
 	private List<Market> markets;
+
+	private Contents contents;
 
 	public void setMarkets(List<Market> markets) {
 		this.markets = markets;
@@ -27,4 +36,15 @@ public class MarketplaceCategory extends CatalogCategory {
 		return markets;
 	}
 
+	/**
+	 * Indicate what kind of contents are populated in this category. The marketplace catalog is large and therefore the
+	 * client side model for this data is sparse.
+	 */
+	public Contents getContents() {
+		return contents;
+	}
+
+	public void setContents(Contents contents) {
+		this.contents = contents;
+	}
 }

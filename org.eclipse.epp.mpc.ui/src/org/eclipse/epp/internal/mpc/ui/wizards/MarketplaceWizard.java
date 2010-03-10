@@ -117,6 +117,9 @@ public class MarketplaceWizard extends DiscoveryWizard {
 				// ignore
 			}
 		}
+		if (getCatalog() != null) {
+			getCatalog().dispose();
+		}
 		super.dispose();
 	}
 }

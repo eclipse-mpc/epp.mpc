@@ -31,6 +31,9 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.statushandlers.StatusManager;
 
+/**
+ * @author David Green
+ */
 @SuppressWarnings("restriction")
 public class BrowseCatalogItem extends AbstractDiscoveryItem<CatalogDescriptor> {
 
