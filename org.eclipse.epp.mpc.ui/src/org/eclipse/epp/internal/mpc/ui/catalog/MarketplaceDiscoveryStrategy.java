@@ -92,21 +92,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		final int workSegment = totalWork / 3;
 		monitor.beginTask("Loading marketplace", totalWork);
 		try {
-			List<Market> markets = marketplaceService.listMarkets(new SubProgressMonitor(monitor, workSegment));
-
-			monitor.worked(workSegment);
-
-			// marketplace has markets and categories, however a node and/or category can appear in multiple
-			// markets.  This doesn't match well with discovery's concept of a category.  Discovery requires all
-			// items to be in a category, so we use a single root category and tagging.
-			MarketplaceCategory catalogCategory = new MarketplaceCategory();
-			catalogCategory.setId("<root>");
-			catalogCategory.setName("<root>");
-			catalogCategory.setSource(source);
-
-			catalogCategory.setMarkets(markets);
-
-			categories.add(catalogCategory);
+			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, workSegment));
 
 			catalogCategory.setContents(Contents.FEATURED);
 
@@ -241,7 +227,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		final int totalWork = 1000000;
 		monitor.beginTask("Searching Marketplace", totalWork);
 		try {
-			MarketplaceCategory catalogCategory = findMarketplaceCategory();
+			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
 			catalogCategory.setContents(Contents.QUERY);
 			SearchResult result = marketplaceService.search(market, category, queryText, new SubProgressMonitor(
 					monitor, totalWork / 2));
@@ -255,7 +241,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		final int totalWork = 1000000;
 		monitor.beginTask("Searching Marketplace", totalWork);
 		try {
-			MarketplaceCategory catalogCategory = findMarketplaceCategory();
+			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
 			catalogCategory.setContents(Contents.RECENT);
 			SearchResult result = marketplaceService.recent(new SubProgressMonitor(monitor, totalWork / 2));
 			handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
@@ -268,7 +254,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		final int totalWork = 1000000;
 		monitor.beginTask("Searching Marketplace", totalWork);
 		try {
-			MarketplaceCategory catalogCategory = findMarketplaceCategory();
+			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
 			catalogCategory.setContents(Contents.FEATURED);
 			SearchResult result = marketplaceService.featured(new SubProgressMonitor(monitor, totalWork / 2));
 			handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
@@ -283,7 +269,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		final int totalWork = 1000000;
 		monitor.beginTask("Searching Marketplace", totalWork);
 		try {
-			MarketplaceCategory catalogCategory = findMarketplaceCategory();
+			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
 			catalogCategory.setContents(Contents.POPULAR);
 			SearchResult result = marketplaceService.favorites(new SubProgressMonitor(monitor, totalWork / 2));
 			handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
@@ -296,7 +282,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		final int totalWork = 1000000;
 		monitor.beginTask("Finding Installed", totalWork);
 		try {
-			MarketplaceCategory catalogCategory = findMarketplaceCategory();
+			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
 			catalogCategory.setContents(Contents.INSTALLED);
 			SearchResult result = new SearchResult();
 			result.setNodes(new ArrayList<Node>());
@@ -341,16 +327,34 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		return features;
 	}
 
-	protected MarketplaceCategory findMarketplaceCategory() {
+	protected MarketplaceCategory findMarketplaceCategory(IProgressMonitor monitor) throws CoreException {
 		MarketplaceCategory catalogCategory = null;
-		for (CatalogCategory candidate : getCategories()) {
-			if (candidate.getSource() == source) {
-				catalogCategory = (MarketplaceCategory) candidate;
-			}
-		}
 
-		if (catalogCategory == null) {
-			throw new IllegalStateException();
+		monitor.beginTask("Catalog category", 10000);
+		try {
+			for (CatalogCategory candidate : getCategories()) {
+				if (candidate.getSource() == source) {
+					catalogCategory = (MarketplaceCategory) candidate;
+				}
+			}
+
+			if (catalogCategory == null) {
+				List<Market> markets = marketplaceService.listMarkets(new SubProgressMonitor(monitor, 10000));
+
+				// marketplace has markets and categories, however a node and/or category can appear in multiple
+				// markets.  This doesn't match well with discovery's concept of a category.  Discovery requires all
+				// items to be in a category, so we use a single root category and tagging.
+				catalogCategory = new MarketplaceCategory();
+				catalogCategory.setId("<root>");
+				catalogCategory.setName("<root>");
+				catalogCategory.setSource(source);
+
+				catalogCategory.setMarkets(markets);
+
+				categories.add(catalogCategory);
+			}
+		} finally {
+			monitor.done();
 		}
 		return catalogCategory;
 	}
