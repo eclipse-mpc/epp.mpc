@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
-import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
-import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.PatternFilter;
 import org.eclipse.jface.viewers.Viewer;
 
@@ -36,20 +34,8 @@ class MarketplacePatternFilter extends PatternFilter {
 
 	@Override
 	protected boolean isLeafMatch(Viewer filteredViewer, Object element) {
-		if (element instanceof CatalogItem) {
-			CatalogItem item = (CatalogItem) element;
-			Object data = item.getData();
-			if (data instanceof CatalogDescriptor) {
-				// always allow these to pass through
-				return true;
-			}
-			if (!(filterMatches(item.getName()) || filterMatches(item.getDescription())
-					|| filterMatches(item.getProvider()) || filterMatches(item.getLicense()))) {
-				return false;
-			}
-			return true;
-		}
-		return false;
+		// always match, since filtering is performed server-side
+		return true;
 	}
 
 }

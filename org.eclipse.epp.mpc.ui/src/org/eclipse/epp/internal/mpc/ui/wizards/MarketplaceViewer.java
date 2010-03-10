@@ -257,11 +257,8 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	@Override
 	protected boolean doFilter(CatalogItem item) {
-		if (item.getData() instanceof CatalogDescriptor) {
-			// never filter these, since it's an indicator for the user
-			return true;
-		}
-		return super.doFilter(item);
+		// all filtering is done server-side, so never filter here
+		return true;
 	}
 
 	@Override
