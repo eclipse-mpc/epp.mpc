@@ -45,13 +45,13 @@ public class DefaultMarketplaceService implements MarketplaceService {
 
 //	This provisional API will be identified by /api/p at the end of most urls.
 //
-//	/api/p � Returns Markets + Categories
-//	/node/%/api/p OR /content/%/api/p � Returns a single listing's detail
-//	/taxonomy/term/%/api/p � Returns a category listing of results
-//	/featured/api/p � Returns a server-defined number of featured results.
-//	/recent/api/p � Returns a server-defined number of recent updates
-//	/favorites/top/api/p � Returns a server-defined number of top favorites
-//	/popular/top/api/p � Returns a server-defined number of most active results
+//	/api/p - Returns Markets + Categories
+//	/node/%/api/p OR /content/%/api/p - Returns a single listing's detail
+//	/taxonomy/term/%/api/p - Returns a category listing of results
+//	/featured/api/p - Returns a server-defined number of featured results.
+//	/recent/api/p - Returns a server-defined number of recent updates
+//	/favorites/top/api/p - Returns a server-defined number of top favorites
+//	/popular/top/api/p - Returns a server-defined number of most active results
 //
 //	There is one exception to adding /api/p at the end and that is for search results.
 //
