@@ -13,9 +13,17 @@ package org.eclipse.epp.internal.mpc.ui.catalog;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.concurrent.Callable;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUI;
+import org.eclipse.equinox.internal.p2.repository.RepositoryTransport;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -23,33 +31,48 @@ import org.eclipse.osgi.util.NLS;
  * 
  * @author David Green
  */
-abstract class AbstractResourceRunnable implements Runnable {
+abstract class AbstractResourceRunnable implements IRunnableWithProgress, Callable<Object> {
 
 	protected ResourceProvider resourceProvider;
 
 	protected String resourceUrl;
 
-	public AbstractResourceRunnable(ResourceProvider resourceProvider, String resourceUrl) {
+	private final IProgressMonitor cancellationMonitor;
+
+	public AbstractResourceRunnable(IProgressMonitor cancellationMonitor, ResourceProvider resourceProvider,
+			String resourceUrl) {
+		this.cancellationMonitor = cancellationMonitor;
 		this.resourceProvider = resourceProvider;
 		this.resourceUrl = resourceUrl;
 	}
 
-	public void run() {
+	public Object call() throws Exception {
+		run(new NullProgressMonitor() {
+			@Override
+			public boolean isCanceled() {
+				return cancellationMonitor.isCanceled();
+			}
+		});
+		return this;
+	}
+
+	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		try {
 			URL imageUrl = new URL(resourceUrl);
 
-			// FIXME replace by InputStream in =
-			// RepositoryTransport.getInstance().stream(location,
-			// monitor);
-			InputStream in = imageUrl.openStream();
+			InputStream in = RepositoryTransport.getInstance().stream(imageUrl.toURI(), monitor);
 			try {
 				resourceProvider.putResource(resourceUrl, in);
 			} finally {
 				in.close();
 			}
+		} catch (URISyntaxException e) {
+			MarketplaceClientUI.error(NLS.bind("Bad URI: {0}", resourceUrl), e);
 		} catch (FileNotFoundException e) {
 			MarketplaceClientUI.error(NLS.bind("Resource not found: {0}", resourceUrl), e);
 		} catch (IOException e) {
+			MarketplaceClientUI.error(e);
+		} catch (CoreException e) {
 			MarketplaceClientUI.error(e);
 		}
 		if (resourceProvider.containsResource(resourceUrl)) {

@@ -140,8 +140,8 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 						catalogItem.setOverview(overview);
 
 						if (node.getScreenshot() != null) {
-							futures.add(executor.submit(new AbstractResourceRunnable(source.getResourceProvider(),
-									node.getScreenshot()) {
+							futures.add(executor.submit(new AbstractResourceRunnable(monitor,
+									source.getResourceProvider(), node.getScreenshot()) {
 								@Override
 								protected void resourceRetrieved() {
 									overview.setScreenshot(node.getScreenshot());
@@ -152,8 +152,8 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 					if (node.getImage() != null) {
 						// FIXME: icon sizing
 						if (!source.getResourceProvider().containsResource(node.getImage())) {
-							futures.add(executor.submit(new AbstractResourceRunnable(source.getResourceProvider(),
-									node.getImage()) {
+							futures.add(executor.submit(new AbstractResourceRunnable(monitor,
+									source.getResourceProvider(), node.getImage()) {
 								@Override
 								protected void resourceRetrieved() {
 									createIcon(catalogItem, node);

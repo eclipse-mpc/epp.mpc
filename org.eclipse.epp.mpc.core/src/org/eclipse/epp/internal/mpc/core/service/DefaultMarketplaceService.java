@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.service.xml.Unmarshaller;
+import org.eclipse.equinox.internal.p2.repository.RepositoryTransport;
 import org.eclipse.osgi.util.NLS;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -262,8 +263,7 @@ public class DefaultMarketplaceService implements MarketplaceService {
 			}
 			xmlReader.setContentHandler(unmarshaller);
 
-			// FIXME replace by InputStream in = RepositoryTransport.getInstance().stream(location, monitor);
-			InputStream in = location.toURL().openStream();
+			InputStream in = RepositoryTransport.getInstance().stream(location, monitor);
 			try {
 				monitor.worked(30);
 
