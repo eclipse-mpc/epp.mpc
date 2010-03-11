@@ -41,7 +41,12 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.statushandlers.StatusManager;
 
 /**
@@ -102,7 +107,23 @@ public class MarketplaceViewer extends CatalogViewer {
 				((MarketplaceFilter) filter).createControl(parent);
 			}
 		}
-		super.doCreateHeaderControls(parent);
+		// FIXME: placeholder until we can get a better search control in place.
+		Button goButton = new Button(parent, SWT.PUSH);
+		goButton.setText("Go");
+		goButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				doQuery();
+			}
+		});
+
+		// FIXME: this should be pushed to FilterViewer
+		for (Control control : parent.getChildren()) {
+			Object layoutData = control.getLayoutData();
+			if (layoutData instanceof GridData) {
+				((GridData) layoutData).verticalAlignment = SWT.CENTER;
+			}
+		}
 	}
 
 	@Override
@@ -124,8 +145,6 @@ public class MarketplaceViewer extends CatalogViewer {
 	@Override
 	protected void doFind(String text) {
 		this.queryText = text;
-
-		doQuery();
 	}
 
 	@Override
