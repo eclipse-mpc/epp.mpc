@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: EPP Marketplace Client
+Bundle-SymbolicName: org.eclipse.epp.mpc.ui;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Eclipse.org - EPP
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Require-Bundle: org.eclipse.core.runtime;bundle-version="3.6.0",
+ org.eclipse.epp.mpc.core;bundle-version="1.0.0",
+ org.eclipse.ui;bundle-version="3.6.0",
+ org.eclipse.equinox.p2.ui.discovery;bundle-version="[1.0.0,1.1.0)",
+ org.eclipse.equinox.p2.discovery;bundle-version="[1.0.0,1.1.0)",
+ org.eclipse.ui.intro,
+ org.eclipse.ui.intro.universal
+Export-Package: org.eclipse.epp.internal.mpc.ui;x-internal:=true,
+ org.eclipse.epp.internal.mpc.ui.actions;x-internal:=true,
+ org.eclipse.epp.internal.mpc.ui.catalog;x-internal:=true,
+ org.eclipse.epp.internal.mpc.ui.commands;x-internal:=true,
+ org.eclipse.epp.internal.mpc.ui.util;x-internal:=true,
+ org.eclipse.epp.internal.mpc.ui.wizards;x-internal:=true,
+ org.eclipse.epp.mpc.ui
+Bundle-ActivationPolicy: lazy
+Bundle-Activator: org.eclipse.epp.internal.mpc.ui.MarketplaceClientUIPlugin

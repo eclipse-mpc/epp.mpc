@@ -1,0 +1,409 @@
+<?xml version='1.0' encoding='UTF-8'?><marketplace>
+  <favorites count="6">
+    <node id="206" name="Mylyn" url="http://www.eclipseplugincentral.net/content/mylyn">
+      <type>resource</type>
+      <categories>
+        <category id='18' name='UI' url='http://www.eclipseplugincentral.net/taxonomy/term/18'/>
+      </categories>
+      <owner>Robert Elves</owner>
+
+      <favorited>16</favorited>
+      <body><![CDATA[Mylyn is a task-focused interface for Eclipse that reduces information overload and makes multi-tasking easy. It does this by making tasks a first class part of Eclipse, and integrating rich and offline editing for repositories such as Bugzilla, Trac, and JIRA. Once your tasks are integrated, Mylyn monitors your work activity to identify information relevant to the task-at-hand, and uses this task context to focus the Eclipse UI on the interesting information, hide the uninteresting, and automatically find what&#039;s related. This puts the information you need to get work done at your fingertips and improves productivity by reducing searching, scrolling, and navigation. By making task context explicit Mylyn also facilitates multitasking, planning, reusing past efforts, and sharing expertise. ]]></body>
+      <created>1147875891</created>
+      <changed>1260326701</changed>
+      <foundationmember>1</foundationmember>
+      <homepageurl><![CDATA[http://eclipse.org/mylyn]]></homepageurl>
+      <image><![CDATA[http://www.eclipse.org/mylyn/images/image-epic.gif]]></image>
+
+      <version>3.3</version>
+      <license>EPL</license>
+      <companyname><![CDATA[Eclipse.org]]></companyname>
+      <status>Production/Stable</status>
+      <eclipseversion><![CDATA[3.5, 3.4 and 3.3]]></eclipseversion>
+      <supporturl><![CDATA[http://eclipse.org/mylyn/community/]]></supporturl>
+      <updateurl><![CDATA[http://download.eclipse.org/tools/mylyn/update/e3.4]]></updateurl>
+
+    </node>
+    <node id="886" name="Emacs+ " url="http://www.eclipseplugincentral.net/content/emacs">
+      <type>resource</type>
+      <categories>
+        <category id='6' name='Editor' url='http://www.eclipseplugincentral.net/taxonomy/term/6'/>
+        <category id='17' name='Tools' url='http://www.eclipseplugincentral.net/taxonomy/term/17'/>
+        <category id='18' name='UI' url='http://www.eclipseplugincentral.net/taxonomy/term/18'/>
+      </categories>
+
+      <owner>Mark Feber</owner>
+      <favorited>13</favorited>
+      <body><![CDATA[<b>Emacs+ - <font color="#363696"><i>Eclipse Extensions for Emacs Expatriates</i></font></b>  - provides an enhanced <i>Emacs-like</i> experience in the Eclipse text editors.  Included are: 
+<ul>
+<li><b><i>M-x</i></b> command execution</li>
+<li><b><i>C-u</i></b> universal-argument</li>
+<li><b><i>C-x b</i></b> with search</li>
+<li>Emacs style point/mark selection with both global and buffer-local mark rings</li>
+<li>Emacs style search and query/replace with regular expressions</li>
+<li>A kill ring for deleted text</li>
+<li>Balanced expression (s-expression) commands</li>
+<li>Split editor windows (<b><i>C-x 2</i></b>, <b><i>C-x 3</i></b>)</li>
+<li>Rectangle Commands</li>
+<li>Named registers </li>
+<li>Tags search (<i>without tags</i>)</li>
+<li>Transposition of characters, words, lines and s-expressions</li>
+<li>Line and character commands</li>
+<li>Space and blank line handling</li>
+<li>Simple text manipulation commands</li>
+<li>End-of-line comment operations</li> 
+</ul>
+In cases where the normal Emacs binding interferes with an Eclipse binding, the Emacs binding is preferred. As an optional feature, additional command and convenience override bindings can be installed.
+<br>
+<a href="mailto:support@mulgasoft.com?subject=RFE:" target="_blank"><b>Feature requests</b></a> and <a href="mailto:support@mulgasoft.com?subject=Defect:" target="_blank"><b>defect reports</b></a> made in the <i>Reviews</i> section are unlikely to be noticed.  Submit <a href="mailto:support@mulgasoft.com" target="_blank"><b>them here</b></a>.
+
+]]></body>
+      <created>1236632886</created>
+      <changed>1260750505</changed>
+      <foundationmember>0</foundationmember>
+
+      <homepageurl><![CDATA[http://www.mulgasoft.com/emacsplus]]></homepageurl>
+      <image><![CDATA[http://marketplace.eclipse.org/sites/default/files/BlueLogo.png]]></image>
+      <version>2.7.5</version>
+      <license>EPL</license>
+      <companyname><![CDATA[Mark Feber]]></companyname>
+      <status>Production/Stable</status>
+      <eclipseversion><![CDATA[Ganymede or later]]></eclipseversion>
+
+      <supporturl><![CDATA[mailto:support@mulgasoft.com]]></supporturl>
+      <updateurl><![CDATA[http://www.mulgasoft.com/emacsplus/update-site]]></updateurl>
+    </node>
+    <node id="979" name="Subclipse" url="http://www.eclipseplugincentral.net/content/subclipse">
+      <type>resource</type>
+      <categories>
+        <category id='2' name='Code Management' url='http://www.eclipseplugincentral.net/taxonomy/term/2'/>
+        <category id='15' name='Team Development' url='http://www.eclipseplugincentral.net/taxonomy/term/15'/>
+
+        <category id='17' name='Tools' url='http://www.eclipseplugincentral.net/taxonomy/term/17'/>
+        <category id='26' name='SCM' url='http://www.eclipseplugincentral.net/taxonomy/term/26'/>
+        <category id='38' name='Mylyn Connectors' url='http://www.eclipseplugincentral.net/category/categories/mylyn-connectors'/>
+      </categories>
+      <owner>Mark Phippard</owner>
+      <favorited>12</favorited>
+      <body><![CDATA[An Eclipse Team Provider plug-in providing support for Subversion within the Eclipse IDE.  Developed and maintained by Subversion core committers, Subclipse is always in synch with the latest Subversion features and releases.
+
+Subclipse includes the CollabNet Merge Client originally developed as part of the <a href="http://marketplace.eclipse.org/content/collabnet-desktop-eclipse-edition">CollabNet Desktop - Eclipse Edition</a>.  The CollabNet Merge Client provides powerful graphical merge capabilities that leverages the merge tracking functionality that was added as part of the Subversion 1.5 release.
+
+Subclipse includes an optional Mylyn connector that enables Mylyn to create automatic changesets based on the tasks you are working on.  It also enables links to tasks when viewing history of Subversion commits.
+
+Finally, Subclipse includes a powerful revision graph feature that is built with Eclipse GEF/Draw2D.  This allows you to visualize commits and merges across Subversion branches.
+
+<a href="http://subclipse.tigris.org/servlets/ProjectProcess?pageID=rr1TIx">Subclipse Screenshots on tigris.org</a>]]></body>
+      <created>1249478432</created>
+
+      <changed>1260805609</changed>
+      <foundationmember>0</foundationmember>
+      <homepageurl><![CDATA[http://subclipse.tigris.org/]]></homepageurl>
+      <image><![CDATA[http://marketplace.eclipse.org/sites/default/files/cn_svn.png]]></image>
+      <version>1.6.5</version>
+      <license>EPL</license>
+      <companyname><![CDATA[Subclipse Project]]></companyname>
+
+      <status>Production/Stable</status>
+      <eclipseversion><![CDATA[3.2, 3.3, 3.4, 3.5]]></eclipseversion>
+      <supporturl><![CDATA[http://subclipse.tigris.org/ds/viewForumSummary.do?dsForumId=1047]]></supporturl>
+      <updateurl><![CDATA[http://subclipse.tigris.org/update_1.6.x]]></updateurl>
+    </node>
+    <node id="940" name="MobiOne  ::  Mobile Web Development" url="http://www.eclipseplugincentral.net/content/mobione-mobile-web-development">
+      <type>resource</type>
+      <categories>
+
+        <category id='17' name='Tools' url='http://www.eclipseplugincentral.net/taxonomy/term/17'/>
+        <category id='23' name='Other' url='http://www.eclipseplugincentral.net/taxonomy/term/23'/>
+        <category id='24' name='IDE' url='http://www.eclipseplugincentral.net/taxonomy/term/24'/>
+      </categories>
+      <owner>Jens Eckels</owner>
+      <favorited>8</favorited>
+      <body><![CDATA[<TABLE WIDTH=550 BORDER=0 align="left" CELLPADDING=0 CELLSPACING=0>
+  <tr><TD colspan=10"><div align="left"><font face="trebuchet ms"><strong>You already have the skills and resources to program for mobile devices. You just didn't know it until now! <br /><br /><em>Also now available: <a href="http://www.genuitec.com/mobiledredge">Mobile News</a> & <a href="http://www.genuitec.com/mobiledredge">Wireless News</a> for free! 
+  
+</em></strong></font></div><font face="trebuchet ms"><br><font size="2"><a href="http://www.genuitec.com/mobile" target="_blank" title="mobile web development">Genuitec&#039;s MobiOne</a> is the best <a href="http://www.genuitec.com/mobile" target="_blank" title="iPhone simulator">iPhone emulator</a> on the market today, and has added a <a href="http://www.genuitec.com/mobile" target="_blank" title="Palm Pre simulator">Palm Pre emulator</a> and PhoneGap support in the latest milestone version! Try MobiOne today and learn how you already have the skills and resources to program for these popular mobile devices. It's more simple than you think.  </font></font></td></tr>
+  <TR> 
+    <TD colspan="11"><br><font face="trebuchet ms"><small><br /><center><img src="http://www.genuitec.com/images/epic_mobi_homeb.jpg" border="0" usemap="#map1"></center><br />
+      MobiOne is available for developers using Windows, with plans soon for Mac and Linux. MobiOne is currently targeted at both iPhone and Palm Pre development, but will soon include Android and other smartphone modes!<br /><br /><a href="http://www.genuitec.com/mobile/download.html">Download MobiOne</a> now!</small></font></TD>
+    <TD><br></TD>
+  </TR>
+</TABLE>
+<map name="map1">
+  <area href="http://www.genuitec.com/about" shape="rect" coords="187,25,254,37" target="_blank" alt="About Genuitec">
+  <area href="http://www.genuitec.com/mobile/products.html" shape="rect" coords="278,25,320,37" target="_blank" alt="Genuitec Products">
+  <area href="http://www.genuitec.com/support" shape="rect" coords="338,25,374,37" target="_blank" alt="Genuitec Support">
+  <area href="http://www.genuitec.com/services" shape="rect" coords="397,25,425,37" target="_blank" alt="Genuitec Services">
+  <area href="http://www.genuitec.com/clients.html" shape="rect" coords="454,25,489,37" target="_blank" alt="Genuitec Clients">
+  <area href="http://www.genuitec.com/contact.html" shape="rect" coords="509,25,546,37" target="_blank" alt="Contact Genuitec">
+  <area href="http://www.genuitec.com/mobile" shape="rect" coords="10,119,83,131" target="_blank" alt="MobiOne Home">
+  <area href="http://www.genuitec.com/mobile/download.html" shape="rect" coords="10,147,83,161" target="_blank" alt="Download MobiOne">
+  <area href="http://www.genuitec.com/mobile/nn.html" shape="rect" coords="10,175,83,191" target="_blank" alt="MobiOne Resources">
+  <area href="http://www.genuitec.com/download.html" shape="rect" coords="371,191,537,292" target="_blank" alt="Download MobiOne">
+ 
+</map>
+]]></body>
+      <created>1243450561</created>
+
+      <changed>1260566389</changed>
+      <foundationmember>1</foundationmember>
+      <homepageurl><![CDATA[http://www.genuitec.com/mobile]]></homepageurl>
+      <image><![CDATA[http://www.genuitec.com/images/epic_logo.gif]]></image>
+      <version>1.0 M5</version>
+      <license>Commercial</license>
+      <companyname><![CDATA[Genuitec, LLC]]></companyname>
+
+      <status>Beta</status>
+      <eclipseversion><![CDATA[3.5.1]]></eclipseversion>
+      <supporturl><![CDATA[http://genuitec.com/support-mobi]]></supporturl>
+      <updateurl><![CDATA[http://]]></updateurl>
+    </node>
+    <node id="645" name="MyEclipse Blue Edition" url="http://www.eclipseplugincentral.net/content/myeclipse-blue-edition">
+      <type>resource</type>
+      <categories>
+
+        <category id='4' name='Build and Deploy' url='http://www.eclipseplugincentral.net/taxonomy/term/4'/>
+        <category id='17' name='Tools' url='http://www.eclipseplugincentral.net/taxonomy/term/17'/>
+        <category id='21' name='Web Services' url='http://www.eclipseplugincentral.net/taxonomy/term/21'/>
+        <category id='24' name='IDE' url='http://www.eclipseplugincentral.net/taxonomy/term/24'/>
+      </categories>
+      <owner>Jens Eckels</owner>
+      <favorited>8</favorited>
+      <body><![CDATA[<font class="pn-normal"><center><b>MyEclipse Blue Edition: the powerful IDE for WebSphere development<br>Now migrate from RAD or WSAD into MyEclipse with ease in 8.0 Blue Edition and take advantage of Internet Explorer Debugging, VisualVM Java Profiling, RESTful Web Service support, and a powerful Visual SQL Builder!</b><br><br><a href="http://www.myeclipseide.com/blue.php" target="_blank"><img src="http://www.myeclipseide.com/images/footer-images/myeclipseblue-logo.png" border="0" alt="MyEclipse Blue Edition | RAD and WebSphere Development"></a> <br></center><a href="http://www.myeclipseide.com/blue.php"><br></a><a href="http://www.myeclipseide.com/blue.php">MyEclipse Blue Edition</a> is a custom version of MyEclipse Enterprise Workbench tailored specifically for IBM WebSphere application server development. As a low cost compliment to Rational Application Developer (RAD), MyEclipse Blue Edition includes advanced customized tooling and capabilities for WebSphere's web services specifications, integrates seamlessly with ClearCase and is compatible with WebSphere 5.x, 6.0, 6.1 and 7. Blue Edition is available for Windows only at this time.<br><br><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-4.html"><strong>Download here!</strong></a><br><br><a href="http://cdn4.libsyn.com/interarbor/BriefingsDirect_Genuitec1.mp3" target="_blank">Listen to a podcast about Blue and choice in this development space</a><br><br>MyEclipse Blue Edition features include:  
+<br>
+<br>
+<table width="754">
+  <tbody>
+    <tr>
+      <td colspan="2" valign="top"><div align="center"><strong><br><u>Feature</u></strong></div>        </td>
+      <td width="153" valign="top"><div align="center">
+        <small>$149.95/yr</small>
+        <br>
+        <u><strong>Blue Edition</strong></u>
+      </div></td>
+      <td width="138" valign="top"><br></td>
+      <td width="146" valign="top"><br></td>
+    </tr>
+    <tr>
+      <td width="90" valign="top"><div align="center"><a href="http://www.myeclipseide.com/blue.php.html" target="_blank"><img src="http://www.myeclipseide.com/images/footer-images/myeclipseblue-logo.png" border="0" width="90"></a></div></td>
+      <td width="203" valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-357.html" target="_blank">Advanced WebSphere tooling</a> </td>
+      <td valign="middle"><div align="center"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_win.gif"></div></td>
+      <td valign="middle"><br></td>
+      <td valign="middle"><br></td>
+    </tr><tr>
+      <td width="90" valign="top"><div align="center"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-62.html" target="_blank"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_pgms_jsdebug.gif" border="0"></a></div></td>
+      <td width="203" valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-62.html" target="_blank">JavaScript Debugger</a> </td>
+      <td valign="middle"><div align="center"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_win.gif"></div></td>
+      <td valign="middle"><br></td>
+      <td valign="middle"><br></td>
+    </tr>
+    <tr>
+      <td valign="top"><div align="center"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-5.html" target="_blank"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/matisse_f.gif" border="0"></a></div></td>
+      <td valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-5.html" target="_blank">Matisse4MyEclipse<br>Swing UI Designer<br>(from NetBeans 6)</a></td>
+      <td valign="middle"><div align="center"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_win.gif"></div></td>
+      <td valign="middle"><br></td>
+      <td valign="middle"><br></td>
+    </tr>
+    <tr>
+      <td valign="top"><div align="center"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-19.html" target="_blank"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/features/myeclipseUML.jpg" border="1"></a></div></td>
+      <td valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-19.html" target="_blank">MyEclipse UML</a> </td>
+      <td valign="middle"><div align="center"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_win.gif"></div></td>
+      <td valign="middle"><br></td>
+      <td valign="middle"><br></td>
+    </tr>
+    <tr>
+      <td valign="middle"><div align="center"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-63.html" target="_blank"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_pgms_eds.gif" border="0"></a></div></td>
+      <td valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-63.html" target="_blank">Extended Database Support</a>:<small><li>Oracle Connector<li>MySQL Connector<li>Sybase Connector
+      <li>Microsoft sqlServer Connector</li></small></td>
+      <td valign="middle"><div align="center"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_win.gif"></div></td>
+      <td valign="middle"><br></td>
+      <td valign="middle"><br></td>
+    </tr>
+    <tr>
+      <td valign="top"><div align="center"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-309.html" target="_blank"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/image_preview.gif" border="0"></a></div></td>
+      <td valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-309.html" target="_blank">Java Image Editor</a> </td>
+      <td valign="middle"><div align="center"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_win.gif"></div></td>
+      <td valign="middle"><br></td>
+      <td valign="middle"><br></td>
+    </tr>
+    <tr>
+      <td valign="top"><div align="center"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-57.html" target="_blank"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/features/ajax.gif" border="0"></a></div></td>
+      <td valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-57.html" target="_blank">Ajax Tools</a> </td>
+      <td valign="middle"><div align="center"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_win.gif"></div></td>
+      <td valign="middle"><br></td>
+      <td valign="middle"><br></td>
+    </tr><tr>
+      <td valign="top"><div align="center"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-57.html" target="_blank"><img src="http://www.myeclipseide.com/images/features/reporting_overview_70.gif" border="0"></a></div></td>
+      <td valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-353.html" target="_blank">MyEclipse Reports</a> </td>
+      <td valign="middle"><div align="center"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_win.gif"></div></td>
+      <td valign="middle"><br></td>
+      <td valign="middle"><br></td>
+    </tr>
+    <tr>
+      <td valign="top"><div align="center"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-12.html" target="_blank"><img border="0" src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/vishtml.jpg"></a></div></td>
+      <td valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-12.html" target="_blank">Visual Web Designer</a> </td>
+      <td valign="middle"><div align="center"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_win.gif"></div></td>
+      <td valign="middle"><br></td>
+      <td valign="middle"><br></td>
+    </tr>
+    <tr>
+      <td valign="top"><div align="center"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-15.html" target="_blank"><img border="0" src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/xmledit.jpg"></a></div></td>
+      <td valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-15.html" target="_blank">XML Editor</a> </td>
+      <td valign="middle"><div align="center"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_win.gif"></div></td>
+      <td valign="middle"><br></td>
+      <td valign="middle"><br></td>
+    </tr>
+    <tr>
+      <td valign="top"><div align="center"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-18.html" target="_blank"><img border="0" src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/features_persistence.gif"></a></div></td>
+      <td valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-18.html" target="_blank">MyEclipse 
+        Persistence Tools- JPA, Toplink & Hibernate</a> </td>
+      <td valign="middle"><div align="center"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_win.gif"></div></td>
+      <td valign="middle"><br></td>
+      <td valign="middle"><br></td>
+    </tr>
+    <tr>
+      <td valign="top"><div align="center"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-17.html" target="_blank"><img border="0" src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/spring_tools.gif"></a></div></td>
+      <td valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-17.html" target="_blank">MyEclipse Spring Tools</a> </td>
+      <td valign="middle"><div align="center"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_win.gif"></div></td>
+      <td valign="middle"><br></td>
+      <td valign="middle"><br></td>
+    </tr>
+    <tr>
+      <td valign="top"><div align="center"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-16.html" target="_blank"><img border="0" src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/dbase_explore.gif"></a></div></td>
+      <td valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-16.html" target="_blank">Database Explorer</a> </td>
+      <td valign="middle"><div align="center"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_win.gif"></div></td>
+      <td valign="middle"><br></td>
+      <td valign="middle"><br></td>
+    </tr>
+    <tr>
+      <td valign="top"><div align="center"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-57.html" target="_blank"><img border="0" src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/javascript.jpg"></a></div></td>
+      <td valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-57.html" target="_blank">Javascript Editor</a> </td>
+      <td valign="middle"><div align="center"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_win.gif"></div></td>
+      <td valign="middle"><br></td>
+      <td valign="middle"><br></td>
+    </tr>
+    <tr>
+      <td valign="top"><div align="center"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-10.html" target="_blank"><img border="0" src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/webservices_f.gif"></a></div></td>
+      <td valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-10.html" target="_blank">Web Services</a> </td>
+      <td valign="middle"><div align="center"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_win.gif"></div></td>
+      <td valign="middle"><br></td>
+      <td valign="middle"><br></td>
+    </tr>
+    <tr>
+      <td valign="top"><div align="center"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-13.html" target="_blank"><img border="0" src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/strutsedit.jpg"></a></div></td>
+      <td valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-13.html" target="_blank">Struts Designer</a> </td>
+      <td valign="middle"><div align="center"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_win.gif"></div></td>
+      <td valign="middle"><br></td>
+      <td valign="middle"><br></td>
+    </tr>
+    <tr>
+      <td valign="top"><div align="center"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-14.html" target="_blank"><img border="0" src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/jsfedit.jpg"></a></div></td>
+      <td valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-14.html" target="_blank">JSF Designer</a> </td>
+      <td valign="middle"><div align="center"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_win.gif"></div></td>
+      <td valign="middle"><br></td>
+      <td valign="middle"><br></td>
+    </tr>
+    <tr>
+      <td valign="top"><div align="center"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-55.html" target="_blank"><img border="0" src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/features/connector.jpg"></a></div></td>
+      <td valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-55.html" target="_blank">Application Server Connectors</a> </td>
+      <td valign="middle"><div align="center"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_win.gif"></div></td>
+      <td valign="middle"><br></td>
+      <td valign="middle"><br></td>
+    </tr>
+    <tr>
+      <td valign="top"><div align="center"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-11.html" target="_blank"><img border="0" src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/jspedit.gif"></a></div></td>
+      <td valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-11.html" target="_blank">JSP Development</a> </td>
+      <td valign="middle"><div align="center"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_win.gif"></div></td>
+      <td valign="middle"><br></td>
+      <td valign="middle"><br></td>
+    </tr>
+    <tr>
+      <td valign="top"><div align="center"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-220.html" target="_blank"><img border="0" src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/features/EJB.jpg"></a></div></td>
+      <td valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-220.html" target="_blank">EJB Support (3.0)</a> </td>
+      <td valign="middle"><div align="center"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_win.gif"></div></td>
+      <td valign="middle"><br></td>
+      <td valign="middle"><br></td>
+    </tr>
+    <tr>
+      <td valign="top"><div align="center"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-58.html" target="_blank"><img border="0" src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/features/update.jpg"></a></div></td>
+      <td valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-58.html" target="_blank">Sync-on-demand Deployment</a> </td>
+      <td valign="middle"><div align="center"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_win.gif"></div></td>
+      <td valign="middle"><br></td>
+      <td valign="middle"><br></td>
+    </tr>
+    <tr>
+      <td valign="top"><div align="center"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-56.html" target="_blank"><img border="0" src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/features/xdoclet2.jpg"></a></div></td>
+      <td valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-56.html" target="_blank">Xdoclet Support</a> </td>
+      <td valign="middle"><div align="center"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_win.gif"></div></td>
+      <td valign="middle"><br></td>
+      <td valign="middle"><br></td>
+    </tr>
+    <tr>
+      <td valign="top"><div align="center"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-305.html" target="_blank"><img border="0" src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/cssedit.jpg"></a></div></td>
+      <td valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-305.html" target="_blank">CSS Editor</a> </td>
+      <td valign="middle"><div align="center"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_win.gif"></div></td>
+      <td valign="middle"><br></td>
+      <td valign="middle"><br></td>
+    </tr>
+    
+  </tbody>
+</table> <br><p><b>MyEclipse Innovations</b><br>The innovation and application of Eclipse technology is Genuitec's sole business. With well over 10 million downloads, MyEclipse Enterprise Workbench has grown to be the most popular and successful Eclipse-based JEE IDE. Our history of blending the best of open source with commercial-grade developed tools has created a long chain of Eclipse technology innovation that includes:<ul>
+    <li>First JSR-045 compliant source-level <a href="http://sandbox.myeclipseide.com/index.php?module=htmlpages&func=display&pid=62" target="_blank" title="JSP Debugger">JSP debugger</a> for Eclipse 
+    <li>First <a href="http://www.myeclipseide.com/static/java-ide.htm" target="_blank" title="RCP">public article</a> explaining that Eclipse could be used as a rich-client platform in early 2002 
+    <li>First commercial RCP applications shipped on Eclipse 2.0, well before the Eclipse 3.0 RCP
+    <li>First and most comprehensive suite of <a href="http://www.myeclipseide.com/index.php?module=htmlpages&func=display&pid=55" target="_blank" title="Application Server Connectors">application server connectors</a> for Eclipse 
+    <li>First 'hot sync' JEE application deployer to enable continuous web development without server restarts
+    <li>Firstnative <a href="http://www.myeclipseide.com/index.php?module=htmlpages&func=display&pid=62" target="_blank" title="JavaScript Debugger">JavaScript debugger</a> for Eclipse 
+    <li>First <a href="http://www.myeclipseide.com/index.php?module=htmlpages&func=display&pid=57" target="_blank" title="Ajax Tools">Ajax tool</a> feature-set for Eclipse
+    <li>Most database connectors supported on Eclipse
+    <li>First IDE to fully support Hibernate / Spring integration
+    <li>First full featured image editor for Eclipse
+    <li>First Eclipse IDE to offer a low-cost, all-inclusive subscription pricing model
+    <li>The most comprehensive set of <a href="http://www.myeclipseide.com/" target="_blank" title="Eclipse Plugins">Eclipse Plugins</a> available 
+</ul>]]></body>
+
+      <created>1202827170</created>
+      <changed>1260566641</changed>
+      <foundationmember>1</foundationmember>
+      <homepageurl><![CDATA[http://www.myeclipseide.com/blue.php]]></homepageurl>
+      <image><![CDATA[http://www.myeclipseide.com/modules/ContentExpress/img_repository/epic_blue_logo.png]]></image>
+      <version>8.0</version>
+      <license>Commercial</license>
+
+      <companyname><![CDATA[Genuitec, LLC]]></companyname>
+      <status>Production/Stable</status>
+      <eclipseversion><![CDATA[3.3.x/3.4.x/3.5.1]]></eclipseversion>
+      <supporturl><![CDATA[http://www.myeclipseide.com/module-htmlpages-display-pid-8.html]]></supporturl>
+      <updateurl><![CDATA[http://downloads.myeclipseide.com/downloads/products/eworkbench/galileo/blue-stable/]]></updateurl>
+    </node>
+    <node id="171" name="UMLet - UML Tool for Fast UML Diagrams" url="http://www.eclipseplugincentral.net/content/umlet-uml-tool-fast-uml-diagrams">
+      <type>resource</type>
+
+      <categories>
+        <category id='5' name='Documentation' url='http://www.eclipseplugincentral.net/taxonomy/term/5'/>
+        <category id='8' name='Graphics' url='http://www.eclipseplugincentral.net/taxonomy/term/8'/>
+        <category id='11' name='Modeling Tools' url='http://www.eclipseplugincentral.net/category/categories/modeling-tools'/>
+        <category id='17' name='Tools' url='http://www.eclipseplugincentral.net/taxonomy/term/17'/>
+        <category id='19' name='UML' url='http://www.eclipseplugincentral.net/taxonomy/term/19'/>
+      </categories>
+      <owner>info</owner>
+
+      <favorited>8</favorited>
+      <body><![CDATA[The free UML tool UMLet (http://www.umlet.com) lets you draw UML diagrams with a light-weight, pop-up-free user interface. It lets you draw diagram sketches fast; export diagrams to pdf, eps, jpg, gif, svg, bmp, png, and system clipboard; share diagrams using Eclipse 3+; and create your own custom graphical elements.]]></body>
+      <created>1131252620</created>
+      <changed>1260192445</changed>
+      <foundationmember>0</foundationmember>
+      <homepageurl><![CDATA[http://www.umlet.com]]></homepageurl>
+      <image><![CDATA[http://marketplace.eclipse.org/sites/default/files/umlet_logo.jpg]]></image>
+
+      <version>10.2</version>
+      <license>GPL</license>
+      <companyname><![CDATA[The UMLet Team]]></companyname>
+      <status>Production/Stable</status>
+      <eclipseversion><![CDATA[3.2+]]></eclipseversion>
+      <supporturl><![CDATA[]]></supporturl>
+      <updateurl><![CDATA[]]></updateurl>
+
+    </node>
+  </favorites>
+</marketplace>

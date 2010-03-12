@@ -1,0 +1,351 @@
+<?xml version='1.0' encoding='UTF-8'?><marketplace>
+  <active count="6">
+    <node id="213" name="Beyond CVS" url="http://www.eclipseplugincentral.net/content/beyond-cvs">
+      <type>resource</type>
+      <categories>
+        <category id='2' name='Code Management' url='http://www.eclipseplugincentral.net/taxonomy/term/2'/>
+      </categories>
+      <owner>Chris Callendar</owner>
+
+      <favorited>0</favorited>
+      <body><![CDATA[This Eclipse plug-in enables the use of Beyond Compare (externally) to compare files and folders. You can also compare a file to a previous revision in CVS or in your Local History. It also allows you to open up Putty and WinSCP from inside Eclipse.
+
+It adds extra actions to the package explorer context menu under the &#039;Compare With...&#039; menu as well as some toolbar buttons.  
+
+There is also a separate Commit action under the &#039;Team&#039; menu which allows you to revert, refresh, or compare (using Beyond Compare) the files being committed to the latest head revison.
+
+Also now supports both Subversion plug-ins: Subclipse and Subversive.]]></body>
+      <created>1148046454</created>
+      <changed>1259778564</changed>
+      <foundationmember>0</foundationmember>
+      <homepageurl><![CDATA[http://sourceforge.net/projects/beyondcvs/]]></homepageurl>
+      <image><![CDATA[http://www.cs.uvic.ca/~ccallend/images/beyondcvs110x80.png]]></image>
+
+      <version>0.8.2</version>
+      <license>Free EPL</license>
+      <companyname><![CDATA[Chris Callendar, Nick Boldt]]></companyname>
+      <status>Beta</status>
+      <eclipseversion><![CDATA[3.2, 3.3, 3.4]]></eclipseversion>
+      <supporturl><![CDATA[http://sourceforge.net/projects/beyondcvs/]]></supporturl>
+      <updateurl><![CDATA[]]></updateurl>
+
+    </node>
+    <node id="769" name="Agile Grid - a new implement of table control based on the Eclipse SWT." url="http://www.eclipseplugincentral.net/content/agile-grid-new-implement-table-control-based-eclipse-swt">
+      <type>resource</type>
+      <categories>
+        <category id='18' name='UI' url='http://www.eclipseplugincentral.net/taxonomy/term/18'/>
+      </categories>
+      <owner>fourbroad</owner>
+      <favorited>0</favorited>
+
+      <body><![CDATA[Agile Grid  Version 1.0.1.M20080914-0002
+
+URL: http://agilegrid.sourceforge.net/
+_______________________________________________________________________
+
+Agile Grid is a new implement of table control based on the Eclipse SWT. You 
+can implement various complex electronic table with agile grid. Agile grid&#039;s 
+design results from many references to the TableViewer of Eclipse JFace and 
+pay attention to the design of agility and extendablity especially. According 
+to the requirement of some application, programmers can customize the layout, 
+rendering, cell editor and keybord&#039;s navigation of agile grid. The main features 
+as follow:
+1. Different cells may have different rendering style. Agile Grid provides 
+   some of rendering class such as TextCellRenderer, HeaderCellRenderer, 
+   ButtonCellRenderer, CheckboxCellRenderer etc. Programmer can implement more 
+   individualizing rendering class by implementing the interface ICellRenderer.
+2. According to the cell content, Agile grid can provides appropriate editor,  
+   for examples  editing  text with  TextCellEditor,  providing a series of 
+   valid value for selecting with ComboBoxCellEditor, making a boolean choice 
+   with CheckboxCellEditor,  using  DialogCellEditor to provide more complex 
+   and  intuitionistic editing manner. Programmer can implement more 
+   individualizing editing class by extending the abstract class CellEditor.
+3. A cell may span over several rows and/or columns.
+4. Agile Grid has a left header and a top header, the left header indicates row 
+   number, the top header indicates column number, which style and label can be 
+   customized. The left and top header can be hidden or visible individually.
+5. The indicated row or column can be froze, which still keep visible at all 
+   times when scrolling other rows or columns.
+6. The grid line can be shown or hidden.
+
+For a detailed function description refer to the api documentation that 
+is included in the source files.
+
+Agile Grid is a open source project,  please visit the project through : 
+http://sourceforge.net/projects/agilegrid/, Any feedbacks are welcome by the 
+author :  Sihong Zhu (fourbroad@gmail.com)
+]]></body>
+      <created>1221757638</created>
+      <changed>1259779086</changed>
+      <foundationmember>0</foundationmember>
+      <homepageurl><![CDATA[http://sourceforge.net/projects/agilegrid]]></homepageurl>
+      <image><![CDATA[http://agilegrid.sourceforge.net/]]></image>
+      <version>1.0.1</version>
+
+      <license>Free EPL</license>
+      <companyname><![CDATA[Sihong Zhu ( fourbroad@gmail.com )]]></companyname>
+      <status>Beta</status>
+      <eclipseversion><![CDATA[3.4]]></eclipseversion>
+      <supporturl><![CDATA[http://sourceforge.net/projects/agilegrid]]></supporturl>
+      <updateurl><![CDATA[http://agilegrid.sourceforge.net/agilegrid/updatesite/]]></updateurl>
+    </node>
+    <node id="503" name="APT Editor" url="http://www.eclipseplugincentral.net/content/apt-editor">
+
+      <type>resource</type>
+      <categories>
+        <category id='5' name='Documentation' url='http://www.eclipseplugincentral.net/taxonomy/term/5'/>
+      </categories>
+      <owner>avoinemt</owner>
+      <favorited>0</favorited>
+      <body><![CDATA[An Eclipse plugin for the APT (Almost Plain Text) format. Accelerates documentation by generating a formatted version of a (almost) plain text file.]]></body>
+
+      <created>1184683992</created>
+      <changed>1259778802</changed>
+      <foundationmember>0</foundationmember>
+      <homepageurl><![CDATA[http://apteditor.sourceforge.net/]]></homepageurl>
+      <image><![CDATA[]]></image>
+      <version>1.0.5</version>
+      <license>Free GPL</license>
+
+      <companyname><![CDATA[]]></companyname>
+      <status>Alpha</status>
+      <eclipseversion><![CDATA[3.0]]></eclipseversion>
+      <supporturl><![CDATA[http://sourceforge.net/forum/?group_id=193560]]></supporturl>
+      <updateurl><![CDATA[]]></updateurl>
+    </node>
+    <node id="445" name="Akrogen" url="http://www.eclipseplugincentral.net/content/akrogen">
+      <type>resource</type>
+
+      <categories>
+        <category id='2' name='Code Management' url='http://www.eclipseplugincentral.net/taxonomy/term/2'/>
+      </categories>
+      <owner>azerr</owner>
+      <favorited>0</favorited>
+      <body><![CDATA[Akrogen is code generation Eclipse Plugin (version 3.2.*) oriented components.
+
+With Akrogen you can describe your Eclipse Wizards pages with XML/XUL which are linked to a template which is able to generate your components (Service, DAO, JSP, HTML...).
+
+The code generation of component is the result of the merge of a template (which can be written in Freemarker, Velocity, XSLT) with parameters, XML document, JAVA class model.
+
+With Akrogen you can create easily your own catalog of components to generate. Here the Akrogen concepts :
+
+    * Wizard page/XML component : a component is generated with Eclipse Wizard page which display template parameters. The Wizard page has following characteristics :
+          o static XUL : the Wizard page is written in XML/XUL with a XML component. XUL fields define template parameters.
+          o Javascript XUL : events (onkeyup, onchange,...) of XUL fields can be linked to Javascript functions to update another XUL fields.
+
+            It&#039;s possible to test your Javascript/XUL with Firefox by setting .xul extension into the XML components file.
+          o Model : when template use XML document or JAVA class, XML component must define a XML/class JAVA model pour oblige user to select the file before displaying the Wizard page.
+          o dynamic XUL : the Wizard page can use the model defined on below to display a XUL which depends on selected XML file/JAVA class.
+
+            With dynamic XUL you can for instance display list of selected JAVA class getters into a tree which contains checkbox (to select getters to use into the template). The Freemarker syntaxe (square bracket) is used in this case.
+    * Catalogue : a catalog contains components, templates that you wish generate.
+
+      To open XML component Wizrad page, you can use Catalog view or contextual Akrogen menu (after having selected a file of your Eclipse project).
+    * Template engine :
+          o Templates : templates can be written in Freemarker, Velocity ou XSLT. It&#039;s possible to implement another template with Spring descriptor.
+          o Modèle : model which is used into templates are String parameters or XML/class JAVA (before having selected a file). ]]></body>
+      <created>1177508329</created>
+
+      <changed>1259778740</changed>
+      <foundationmember>0</foundationmember>
+      <homepageurl><![CDATA[http://akrogen.sourceforge.net/]]></homepageurl>
+      <image><![CDATA[http://akrogen.sourceforge.net/images/akrogen/akrogen_bannerleft.png]]></image>
+      <version>1.0.2</version>
+      <license>Free LGPL</license>
+      <companyname><![CDATA[]]></companyname>
+
+      <status>Beta</status>
+      <eclipseversion><![CDATA[3.2]]></eclipseversion>
+      <supporturl><![CDATA[http://sourceforge.net/forum/?group_id=164259]]></supporturl>
+      <updateurl><![CDATA[]]></updateurl>
+    </node>
+    <node id="447" name="airTODO - Project Management Tool" url="http://www.eclipseplugincentral.net/content/airtodo-project-management-tool">
+      <type>resource</type>
+      <categories>
+
+        <category id='17' name='Tools' url='http://www.eclipseplugincentral.net/taxonomy/term/17'/>
+      </categories>
+      <owner>Alexander</owner>
+      <favorited>0</favorited>
+      <body><![CDATA[<b>airTODO</b> is a minimalist project management tool, intended for customer, project, module, operation, task and time management.<br>
+airTODO composed as single file with both, client and server functionality, which can work with local and/or remote repositories.<br>
+<br><br>
+- Fixed usability issue: OpenOffice integration Preferences: button "Test" disabled if text field "OpenOffice folder" is empty;<br>
+- Fixed usability issue: Edit dialogs have more relevant title, when item name/subject is empty;<br>
+- New Table: Events (folder Attachments);<br>
+- Columns dialog now come with Drug and Drop support<br>
+- Arrow icons on buttons Right/Left, Up/Down.<br>
+- Server engine code improvements.<br>
+
+
+<br>
+]]></body>
+      <created>1177942919</created>
+      <changed>1259778742</changed>
+
+      <foundationmember>0</foundationmember>
+      <homepageurl><![CDATA[http://airtodo.sourceforge.net]]></homepageurl>
+      <image><![CDATA[http://airtodo.sourceforge.net/img/misc/airtodo_110x80.png]]></image>
+      <version>1.28.14</version>
+      <license>Free GPL</license>
+      <companyname><![CDATA[]]></companyname>
+      <status>Production/Stable</status>
+
+      <eclipseversion><![CDATA[3.2]]></eclipseversion>
+      <supporturl><![CDATA[http://sourceforge.net/forum/forum.php?forum_id=569041]]></supporturl>
+      <updateurl><![CDATA[]]></updateurl>
+    </node>
+    <node id="137" name="ASN.1 Editor" url="http://www.eclipseplugincentral.net/content/asn1-editor">
+      <type>resource</type>
+      <categories>
+        <category id='6' name='Editor' url='http://www.eclipseplugincentral.net/taxonomy/term/6'/>
+
+      </categories>
+      <owner>bogdans10</owner>
+      <favorited>0</favorited>
+      <body><![CDATA[ASNEditor provides an Eclipse 3 editor plugin for ASN.1 (Abstract Syntax Notation One) files. It presents Dump view for ASN.1 BER encoded messages, an outline page, code folding, syntax highlighting, compare view, content assist, goto declaration under cursor, bracket matching, ASN.1 nature, problem markers for errors and warnings. The plugin should be useful in the telecommunication branch.]]></body>
+      <created>1109332859</created>
+      <changed>1259778502</changed>
+      <foundationmember>0</foundationmember>
+
+      <homepageurl><![CDATA[http://asneditor.sourceforge.net]]></homepageurl>
+      <image><![CDATA[http://asneditor.sourceforge.net/images/logo/asneditor_logo.png]]></image>
+      <version>1.1.2</version>
+      <license>Free EPL</license>
+      <companyname><![CDATA[Bogdan Stanca]]></companyname>
+      <status>Production/Stable</status>
+      <eclipseversion><![CDATA[>=3.2]]></eclipseversion>
+
+      <supporturl><![CDATA[http://sourceforge.net/forum/forum.php?forum_id=448642]]></supporturl>
+      <updateurl><![CDATA[http://asneditor.sourceforge.net/updates]]></updateurl>
+    </node>
+    <node id="505" name="Archive Builder" url="http://www.eclipseplugincentral.net/content/archive-builder">
+      <type>resource</type>
+      <categories>
+        <category id='4' name='Build and Deploy' url='http://www.eclipseplugincentral.net/taxonomy/term/4'/>
+      </categories>
+
+      <owner>ddard</owner>
+      <favorited>0</favorited>
+      <body><![CDATA[This Archive Builder project provides an Eclipse plug-in compatible with Eclipse 3.2.2. The current implementation includes the following functionalities :<br/>
+* An export wizard which creates the Archive Builder XML file that specify project archives; <br/>
+* The Archive Builder XML file can be modify through a dialog (accessed via the export wizard or via the XML file context menu). What this dialog permit to do is :<br/>
+  - add archives<br/>
+  - add folders to the archives<br/>
+  - add resources to the folders : the user can easily add project libraries, project folders using a browser.<br/>
+  - add filters on the resources : the user can give an expression to describe which files should be added an which files should not be added.<br/>
+  - specify how libraries will be added to the archives : only copying the library or merging the library with the archive.<br/>
+  - specify order of the archives, folder and resources.<br/>
+When the Archive Builder XML file is written, the user interface provides a context menu in the Eclipse Project Explorer view to launch the build of all the archives (in the order detailed in the Archive Builder XML file) or the build of only one archive. The current implementation use ANT to build the archives. <br/><br/>
+The advantage of this plug-in beside writing a ANT file is that :
+* you don&#039;t have to write exactly the paths of the resources : you can browse for it an the plug-in will write the exact path for you, so it prevents you from misspelling paths;<br/>
+* you can do everything using the interface, you don&#039;t have any XML manual configuration so you don&#039;t need lots of skills to use it.<br/>]]></body>
+      <created>1184856910</created>
+      <changed>1259778803</changed>
+      <foundationmember>0</foundationmember>
+
+      <homepageurl><![CDATA[http://sourceforge.net/projects/archivebuilder]]></homepageurl>
+      <image><![CDATA[http://sourceforge.net/dbimage.php?id=132676]]></image>
+      <version>1.0.1.0</version>
+      <license>Free LGPL</license>
+      <companyname><![CDATA[Lapeyre Services]]></companyname>
+      <status>Mature</status>
+      <eclipseversion><![CDATA[3.2.2]]></eclipseversion>
+
+      <supporturl><![CDATA[http://sourceforge.net/forum/?group_id=201127]]></supporturl>
+      <updateurl><![CDATA[]]></updateurl>
+    </node>
+    <node id="1076" name="Phurnace Deliver" url="http://www.eclipseplugincentral.net/content/phurnace-deliver">
+      <type>resource</type>
+      <categories>
+        <category id='1' name='Application Server' url='http://www.eclipseplugincentral.net/taxonomy/term/1'/>
+        <category id='4' name='Build and Deploy' url='http://www.eclipseplugincentral.net/taxonomy/term/4'/>
+
+        <category id='9' name='J2EE Development Platform' url='http://www.eclipseplugincentral.net/taxonomy/term/9'/>
+        <category id='25' name='Rich Client Applications' url='http://www.eclipseplugincentral.net/taxonomy/term/25'/>
+        <category id='30' name='Process' url='http://www.eclipseplugincentral.net/taxonomy/term/30'/>
+      </categories>
+      <owner>Casey Marshall</owner>
+      <favorited>1</favorited>
+      <body><![CDATA[<a href="http://www.phurnace.com/">Phurnace Software</a> helps companies drive revenue and dramatically reduce costs by accelerating the deployment of business critical applications into physical environments, virtual images or to cloud computing providers.  Leveraging patent-pending technology, Phurnace automates web application deployments – from installation to deployment to upgrades – eliminating manual, error-prone processes and delivering tangible ROI within weeks.
+
+<a href="http://www.phurnace.com/products/phurnace-deliver-2.html">Phurnace Deliver</a> builds on the Eclipse Rich Client Platform (RCP) to present a familiar and rich user experience for managing application server deployments.  With the power of Eclipse, Deliver provides powerful and intuitive configuration visualization, comparison, editing and deployment reports.]]></body>
+      <created>1260397544</created>
+
+      <changed>1260471691</changed>
+      <foundationmember>0</foundationmember>
+      <homepageurl><![CDATA[http://www.phurnace.com/products/phurnace-deliver-2.html]]></homepageurl>
+      <image><![CDATA[http://marketplace.eclipse.org/sites/default/files/g5650.png]]></image>
+      <version>3.6</version>
+      <license>Commercial</license>
+      <companyname><![CDATA[Phurnace Software]]></companyname>
+
+      <status>Mature</status>
+      <eclipseversion><![CDATA[3.4.2]]></eclipseversion>
+      <supporturl><![CDATA[http://www.phurnace.com/support/index.php]]></supporturl>
+      <updateurl><![CDATA[]]></updateurl>
+    </node>
+    <node id="632" name="ANTLR IDE" url="http://www.eclipseplugincentral.net/content/antlr-ide">
+      <type>resource</type>
+      <categories>
+
+        <category id='24' name='IDE' url='http://www.eclipseplugincentral.net/taxonomy/term/24'/>
+      </categories>
+      <owner>devx_edg</owner>
+      <favorited>1</favorited>
+      <body><![CDATA[Features
+* Support for ANTLR 3.0.x/3.1.x/3.2.x
+* ANTLR Launcher and Debugger
+* ANTLR Built-in Interpreter
+* Source Formatter
+* Custom targets
+* Automatically (Ctrl+S)/Manually (Ctrl+Shift+G) code generator
+* Problem markers for errors and warnings in grammar files    
+* Advanced text editor, code selection (F3) and code completion (Ctrl+Space)
+* Simple syntax highlighting for target language (action code)
+* Outline and quick outline (Ctrl + O) views for options, tokens, scopes, actions and rules
+* Search rules references
+* Mark generated resources as derived
+* Advanced StringTemplate Editor (*.st and *.stg)
+* Advanced gUnit Editor (*.gunit and *.testsuite)]]></body>
+      <created>1200667599</created>
+      <changed>1259778931</changed>
+
+      <foundationmember>0</foundationmember>
+      <homepageurl><![CDATA[http://antlrv3ide.sourceforge.net/]]></homepageurl>
+      <image><![CDATA[http://antlrv3ide.sourceforge.net/resources/screenshot.png]]></image>
+      <version>2.0.0-rc4</version>
+      <license>Free EPL</license>
+      <companyname><![CDATA[Edgar Espina]]></companyname>
+      <status>Production/Stable</status>
+
+      <eclipseversion><![CDATA[3.3/3.4/3.5]]></eclipseversion>
+      <supporturl><![CDATA[https://sourceforge.net/forum/forum.php?forum_id=768683]]></supporturl>
+      <updateurl><![CDATA[http://antlrv3ide.sourceforge.net/updates]]></updateurl>
+    </node>
+    <node id="306" name="iWay Terminal Emulators" url="http://www.eclipseplugincentral.net/content/iway-terminal-emulators">
+      <type>resource</type>
+      <categories>
+        <category id='12' name='Network' url='http://www.eclipseplugincentral.net/taxonomy/term/12'/>
+
+      </categories>
+      <owner>iway</owner>
+      <favorited>0</favorited>
+      <body><![CDATA[Basic 3270 and 5250 Terminal Emulators.]]></body>
+      <created>1163618267</created>
+      <changed>1259778632</changed>
+      <foundationmember>0</foundationmember>
+
+      <homepageurl><![CDATA[http://iwse.ibi.com/telnet]]></homepageurl>
+      <image><![CDATA[http://iwse.ibi.com/telnet/iwlogo4eclipse.gif]]></image>
+      <version>5.5.4053</version>
+      <license>Free EPL</license>
+      <companyname><![CDATA[iWay Software]]></companyname>
+      <status>Production/Stable</status>
+      <eclipseversion><![CDATA[3.1 and above]]></eclipseversion>
+
+      <supporturl><![CDATA[http://iwse.ibi.com/telnet]]></supporturl>
+      <updateurl><![CDATA[http://iwse.ibi.com/telnet]]></updateurl>
+    </node>
+  </active>
+</marketplace>

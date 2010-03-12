@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8'?>   <!--
+    Copyright (c) 2010 The Eclipse Foundation and others.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+   
+    Contributors:
+    	The Eclipse Foundation - initial API and implementation
+ -->
+ <marketplace>
+      <category id="38,31" name="Mylyn Connectors" url="http://www.eclipseplugincentral.net/taxonomy/term/38%2C31">
+	      	      <node id="641" name="Tasktop Pro" url="http://www.eclipseplugincentral.net/content/tasktop-pro">
+	        <favorited>3</favorited>        
+	      </node>    
+	      	      <node id="758" name="Foglyn - Integrate FogBugz into Eclipse (via Mylyn)" url="http://www.eclipseplugincentral.net/content/foglyn-integrate-fogbugz-eclipse-mylyn">
+	        <favorited>1</favorited>        
+	      </node>    
+	      	      <node id="870" name="CollabNet Desktop - Eclipse Edition" url="http://www.eclipseplugincentral.net/content/collabnet-desktop-eclipse-edition">
+	        <favorited>2</favorited>        
+	      </node>    
+	      	      <node id="950" name="Atlassian Connector for Eclipse" url="http://www.eclipseplugincentral.net/content/atlassian-connector-eclipse">
+
+	        <favorited>5</favorited>        
+	      </node>    
+	      	      <node id="979" name="Subclipse" url="http://www.eclipseplugincentral.net/content/subclipse">
+	        <favorited>12</favorited>        
+	      </node>    
+	      	      <node id="1013" name="Eclipse-Subversion Plugin integrated with a total ALM solution - Easy!Flow" url="http://www.eclipseplugincentral.net/content/eclipse-subversion-plugin-integrated-total-alm-solution-easyflow">
+	        <favorited>0</favorited>        
+	      </node>    
+	      	      <node id="1026" name="Industrial SQL Connector for Mylyn" url="http://www.eclipseplugincentral.net/content/industrial-sql-connector-mylyn">
+	        <favorited>0</favorited>        
+	      </node>    
+	      	      <node id="1065" name="Mylyn WikiText - Lightweight Markup Editing, Tools and Framework" url="http://www.eclipseplugincentral.net/content/mylyn-wikitext-lightweight-markup-editing-tools-and-framework">
+
+	        <favorited>3</favorited>        
+	      </node>    
+	      	      <node id="1091" name="API Demonstration Listing" url="http://www.eclipseplugincentral.net/content/api-demonstration-listing">
+	        <favorited>0</favorited>        
+	      </node>    
+	            </category>
+    </marketplace>
+    

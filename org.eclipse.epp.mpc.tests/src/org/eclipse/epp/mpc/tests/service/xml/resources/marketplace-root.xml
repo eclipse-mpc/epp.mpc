@@ -1,0 +1,133 @@
+<!--
+    Copyright (c) 2010 The Eclipse Foundation and others.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+   
+    Contributors:
+    	The Eclipse Foundation - initial API and implementation
+ -->
+<marketplace>
+            <market name="Tools" id="31" url="http://www.eclipseplugincentral.net/category/markets/tools">
+                    <category id="28" count="44" url="http://www.eclipseplugincentral.net/taxonomy/term/28%2C31" name="Application Management"/>
+                              <category id="1" count="17" url="http://www.eclipseplugincentral.net/taxonomy/term/1%2C31" name="Application Server"/>
+                              <category id="4" count="45" url="http://www.eclipseplugincentral.net/taxonomy/term/4%2C31" name="Build and Deploy"/>
+                              <category id="2" count="44" url="http://www.eclipseplugincentral.net/taxonomy/term/2%2C31" name="Code Management"/>
+                              <category id="3" count="33" url="http://www.eclipseplugincentral.net/taxonomy/term/3%2C31" name="Database"/>
+                              <category id="36" count="3" url="http://www.eclipseplugincentral.net/taxonomy/term/36%2C31" name="Database Persistence"/>
+                              <category id="5" count="26" url="http://www.eclipseplugincentral.net/taxonomy/term/5%2C31" name="Documentation"/>
+                              <category id="6" count="82" url="http://www.eclipseplugincentral.net/taxonomy/term/6%2C31" name="Editor"/>
+
+                              <category id="7" count="10" url="http://www.eclipseplugincentral.net/taxonomy/term/7%2C31" name="Entertainment"/>
+                              <category id="8" count="16" url="http://www.eclipseplugincentral.net/taxonomy/term/8%2C31" name="Graphics"/>
+                              <category id="24" count="101" url="http://www.eclipseplugincentral.net/taxonomy/term/24%2C31" name="IDE"/>
+                              <category id="9" count="22" url="http://www.eclipseplugincentral.net/taxonomy/term/9%2C31" name="J2EE Development Platform"/>
+                              <category id="27" count="11" url="http://www.eclipseplugincentral.net/taxonomy/term/27%2C31" name="J2ME"/>
+                              <category id="10" count="58" url="http://www.eclipseplugincentral.net/taxonomy/term/10%2C31" name="Languages"/>
+                              <category id="37" count="4" url="http://www.eclipseplugincentral.net/taxonomy/term/37%2C31" name="Logging"/>
+                              <category id="11" count="71" url="http://www.eclipseplugincentral.net/taxonomy/term/11%2C31" name="Modeling Tools"/>
+                              <category id="38" count="9" url="http://www.eclipseplugincentral.net/taxonomy/term/38%2C31" name="Mylyn Connectors"/>
+
+                              <category id="12" count="9" url="http://www.eclipseplugincentral.net/taxonomy/term/12%2C31" name="Network"/>
+                              <category id="23" count="38" url="http://www.eclipseplugincentral.net/taxonomy/term/23%2C31" name="Other"/>
+                              <category id="30" count="15" url="http://www.eclipseplugincentral.net/taxonomy/term/30%2C31" name="Process"/>
+                              <category id="13" count="11" url="http://www.eclipseplugincentral.net/taxonomy/term/13%2C31" name="Profiling"/>
+                              <category id="39" count="4" url="http://www.eclipseplugincentral.net/taxonomy/term/39%2C31" name="Reporting"/>
+                              <category id="25" count="7" url="http://www.eclipseplugincentral.net/taxonomy/term/25%2C31" name="Rich Client Applications"/>
+                              <category id="26" count="13" url="http://www.eclipseplugincentral.net/taxonomy/term/26%2C31" name="SCM"/>
+                              <category id="40" count="2" url="http://www.eclipseplugincentral.net/taxonomy/term/40%2C31" name="Search"/>
+                              <category id="14" count="53" url="http://www.eclipseplugincentral.net/taxonomy/term/14%2C31" name="Source Code Analyzer"/>
+
+                              <category id="29" count="15" url="http://www.eclipseplugincentral.net/taxonomy/term/29%2C31" name="Systems Development"/>
+                              <category id="15" count="48" url="http://www.eclipseplugincentral.net/taxonomy/term/15%2C31" name="Team Development"/>
+                              <category id="16" count="58" url="http://www.eclipseplugincentral.net/taxonomy/term/16%2C31" name="Testing"/>
+                              <category id="17" count="189" url="http://www.eclipseplugincentral.net/taxonomy/term/17%2C31" name="Tools"/>
+                              <category id="35" count="2" url="http://www.eclipseplugincentral.net/taxonomy/term/35%2C31" name="Training &amp; Consulting"/>
+                              <category id="18" count="56" url="http://www.eclipseplugincentral.net/taxonomy/term/18%2C31" name="UI"/>
+                              <category id="19" count="31" url="http://www.eclipseplugincentral.net/taxonomy/term/19%2C31" name="UML"/>
+                              <category id="20" count="39" url="http://www.eclipseplugincentral.net/taxonomy/term/20%2C31" name="Web"/>
+                              <category id="21" count="14" url="http://www.eclipseplugincentral.net/taxonomy/term/21%2C31" name="Web Services"/>
+
+                              <category id="22" count="15" url="http://www.eclipseplugincentral.net/taxonomy/term/22%2C31" name="XML"/>
+                   
+      </market>
+            <market name="Middleware" id="32" url="http://www.eclipseplugincentral.net/category/markets/middleware">
+                    <category id="28" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/28%2C32" name="Application Management"/>
+                              <category id="1" count="2" url="http://www.eclipseplugincentral.net/taxonomy/term/1%2C32" name="Application Server"/>
+                              <category id="4" count="2" url="http://www.eclipseplugincentral.net/taxonomy/term/4%2C32" name="Build and Deploy"/>
+                              <category id="2" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/2%2C32" name="Code Management"/>
+                              <category id="3" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/3%2C32" name="Database"/>
+                                              <category id="6" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/6%2C32" name="Editor"/>
+
+                                              <category id="24" count="4" url="http://www.eclipseplugincentral.net/taxonomy/term/24%2C32" name="IDE"/>
+                              <category id="9" count="2" url="http://www.eclipseplugincentral.net/taxonomy/term/9%2C32" name="J2EE Development Platform"/>
+                              <category id="27" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/27%2C32" name="J2ME"/>
+                              <category id="10" count="2" url="http://www.eclipseplugincentral.net/taxonomy/term/10%2C32" name="Languages"/>
+                                      <category id="11" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/11%2C32" name="Modeling Tools"/>
+                              <category id="38" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/38%2C32" name="Mylyn Connectors"/>
+                                              <category id="30" count="2" url="http://www.eclipseplugincentral.net/taxonomy/term/30%2C32" name="Process"/>
+                                                      <category id="26" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/26%2C32" name="SCM"/>
+                                                      <category id="15" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/15%2C32" name="Team Development"/>
+
+                                      <category id="17" count="3" url="http://www.eclipseplugincentral.net/taxonomy/term/17%2C32" name="Tools"/>
+                              <category id="35" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/35%2C32" name="Training &amp; Consulting"/>
+                              <category id="18" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/18%2C32" name="UI"/>
+                                      <category id="20" count="2" url="http://www.eclipseplugincentral.net/taxonomy/term/20%2C32" name="Web"/>
+                              <category id="21" count="2" url="http://www.eclipseplugincentral.net/taxonomy/term/21%2C32" name="Web Services"/>
+                           
+      </market>
+            <market name="RCP Applications" id="33" url="http://www.eclipseplugincentral.net/category/markets/rcp-applications">
+                    <category id="28" count="2" url="http://www.eclipseplugincentral.net/taxonomy/term/28%2C33" name="Application Management"/>
+                              <category id="1" count="2" url="http://www.eclipseplugincentral.net/taxonomy/term/1%2C33" name="Application Server"/>
+
+                              <category id="4" count="3" url="http://www.eclipseplugincentral.net/taxonomy/term/4%2C33" name="Build and Deploy"/>
+                              <category id="2" count="2" url="http://www.eclipseplugincentral.net/taxonomy/term/2%2C33" name="Code Management"/>
+                              <category id="3" count="2" url="http://www.eclipseplugincentral.net/taxonomy/term/3%2C33" name="Database"/>
+                                      <category id="5" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/5%2C33" name="Documentation"/>
+                              <category id="6" count="3" url="http://www.eclipseplugincentral.net/taxonomy/term/6%2C33" name="Editor"/>
+                              <category id="7" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/7%2C33" name="Entertainment"/>
+                                      <category id="24" count="4" url="http://www.eclipseplugincentral.net/taxonomy/term/24%2C33" name="IDE"/>
+                              <category id="9" count="3" url="http://www.eclipseplugincentral.net/taxonomy/term/9%2C33" name="J2EE Development Platform"/>
+                              <category id="27" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/27%2C33" name="J2ME"/>
+
+                                              <category id="11" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/11%2C33" name="Modeling Tools"/>
+                              <category id="38" count="2" url="http://www.eclipseplugincentral.net/taxonomy/term/38%2C33" name="Mylyn Connectors"/>
+                              <category id="12" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/12%2C33" name="Network"/>
+                              <category id="23" count="2" url="http://www.eclipseplugincentral.net/taxonomy/term/23%2C33" name="Other"/>
+                              <category id="30" count="2" url="http://www.eclipseplugincentral.net/taxonomy/term/30%2C33" name="Process"/>
+                                              <category id="25" count="62" url="http://www.eclipseplugincentral.net/taxonomy/term/25%2C33" name="Rich Client Applications"/>
+                              <category id="26" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/26%2C33" name="SCM"/>
+                                      <category id="14" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/14%2C33" name="Source Code Analyzer"/>
+                                      <category id="15" count="2" url="http://www.eclipseplugincentral.net/taxonomy/term/15%2C33" name="Team Development"/>
+
+                              <category id="16" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/16%2C33" name="Testing"/>
+                              <category id="17" count="8" url="http://www.eclipseplugincentral.net/taxonomy/term/17%2C33" name="Tools"/>
+                              <category id="35" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/35%2C33" name="Training &amp; Consulting"/>
+                              <category id="18" count="3" url="http://www.eclipseplugincentral.net/taxonomy/term/18%2C33" name="UI"/>
+                                              <category id="21" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/21%2C33" name="Web Services"/>
+                           
+      </market>
+            <market name="Training &amp; Consulting" id="34" url="http://www.eclipseplugincentral.net/category/markets/training-consulting">
+                    <category id="28" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/28%2C34" name="Application Management"/>
+                                      <category id="4" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/4%2C34" name="Build and Deploy"/>
+
+                              <category id="2" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/2%2C34" name="Code Management"/>
+                                                                              <category id="24" count="2" url="http://www.eclipseplugincentral.net/taxonomy/term/24%2C34" name="IDE"/>
+                              <category id="9" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/9%2C34" name="J2EE Development Platform"/>
+                              <category id="27" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/27%2C34" name="J2ME"/>
+                              <category id="10" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/10%2C34" name="Languages"/>
+                                      <category id="11" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/11%2C34" name="Modeling Tools"/>
+                              <category id="38" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/38%2C34" name="Mylyn Connectors"/>
+                                              <category id="30" count="2" url="http://www.eclipseplugincentral.net/taxonomy/term/30%2C34" name="Process"/>
+                                                      <category id="26" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/26%2C34" name="SCM"/>
+
+                                                      <category id="15" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/15%2C34" name="Team Development"/>
+                                      <category id="17" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/17%2C34" name="Tools"/>
+                              <category id="35" count="58" url="http://www.eclipseplugincentral.net/taxonomy/term/35%2C34" name="Training &amp; Consulting"/>
+                              <category id="18" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/18%2C34" name="UI"/>
+                                      <category id="20" count="2" url="http://www.eclipseplugincentral.net/taxonomy/term/20%2C34" name="Web"/>
+                              <category id="21" count="1" url="http://www.eclipseplugincentral.net/taxonomy/term/21%2C34" name="Web Services"/>
+                           
+      </market>
+          </marketplace>

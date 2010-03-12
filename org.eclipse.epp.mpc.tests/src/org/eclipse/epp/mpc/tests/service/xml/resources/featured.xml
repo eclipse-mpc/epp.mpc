@@ -1,0 +1,212 @@
+<?xml version='1.0' encoding='UTF-8'?><marketplace>
+  <featured count="6">
+    <node id="248" name="eUML2 free edition" url="http://www.eclipseplugincentral.net/content/euml2-free-edition">
+      <type>resource</type>
+      <categories>
+        <category id='19' name='UML' url='http://www.eclipseplugincentral.net/taxonomy/term/19'/>
+      </categories>
+      <owner>Yves YANG</owner>
+
+      <favorited>0</favorited>
+      <body><![CDATA[&lt;P&gt;&lt;STRONG&gt;eUML2 for Java&lt;/STRONG&gt; is a powerful UML modeler designed for Java developper in Eclipse. The free edition can be used for commercial use. It supports the following features:&lt;/P&gt;&lt;UL&gt;&lt;LI&gt;&lt;STRONG&gt;CVS and Team Support&lt;/STRONG&gt;&lt;/LI&gt;&lt;STRONG&gt;&lt;LI&gt;&lt;STRONG&gt;Designed for large project with multiple and customizable model views&lt;/STRONG&gt; &lt;/LI&gt;&lt;LI&gt;Callisto Compliant&lt;/STRONG&gt; 
+&lt;LI&gt;Real-time code/model synchronization 
+&lt;LI&gt;UML2.1 compliant and support of OMG XMI 
+&lt;LI&gt;JDK 1.4 and 1.5 support &lt;/LI&gt;&lt;/UL&gt;&lt;P&gt;The commercial edition provides:&lt;/P&gt;&lt;UL&gt;&lt;LI&gt;Advanced reversed engineering 
+&lt;LI&gt;Powerful true dependency analyze tools 
+&lt;LI&gt;UML Profile and MDD&lt;/LI&gt;&lt;LI&gt;Database tools &lt;/LI&gt;&lt;LI&gt;Customizable template support &lt;/LI&gt;&lt;/UL&gt;]]></body>
+      <created>1156434668</created>
+      <changed>1259778589</changed>
+      <foundationmember>1</foundationmember>
+      <homepageurl><![CDATA[http://www.soyatec.com/]]></homepageurl>
+      <image>http://www.soyatec.com/euml2/images/product_euml2_110x80.png</image>
+
+      <version>3.4</version>
+      <license>Free for non-commercial use</license>
+      <companyname><![CDATA[Soyatec]]></companyname>
+      <status>Mature</status>
+      <eclipseversion><![CDATA[3.4.x/3.5.x]]></eclipseversion>
+      <supporturl><![CDATA[http://www.soyatec.com/forum]]></supporturl>
+      <updateurl><![CDATA[http://www.soyatec.com/update]]></updateurl>
+
+    </node>
+    <node id="578" name="Pulse | Download, manage and maintain Eclipse tools" url="http://www.eclipseplugincentral.net/content/pulse-download-manage-and-maintain-eclipse-tools">
+      <type>resource</type>
+      <categories>
+        <category id='4' name='Build and Deploy' url='http://www.eclipseplugincentral.net/taxonomy/term/4'/>
+        <category id='15' name='Team Development' url='http://www.eclipseplugincentral.net/taxonomy/term/15'/>
+        <category id='17' name='Tools' url='http://www.eclipseplugincentral.net/taxonomy/term/17'/>
+        <category id='24' name='IDE' url='http://www.eclipseplugincentral.net/taxonomy/term/24'/>
+
+        <category id='28' name='Application Management' url='http://www.eclipseplugincentral.net/taxonomy/term/28'/>
+      </categories>
+      <owner>Jens Eckels</owner>
+      <favorited>8</favorited>
+      <body><![CDATA[<TABLE WIDTH=560 BORDER=0 align="left" CELLPADDING=0 CELLSPACING=0>
+  <tr><TD colspan=10"><font face="trebuchet ms"><strong>Supports Europa, Ganymede and Galileo configurations!</strong> 
+  <br><br>Pulse is a FREE, easy-to-use product that gives software developers the most effective and efficient way to locate, install and manage their Eclipse-based tool suite. With Pulse Freelance Team Edition, you can even share what you create. No more development teams on the wrong software configuration or workspaces.  Even add and share your own plugins behind the firewall without exposing your proprietary information.<br /><br /></font><img width="550" height="360" border="0" src="http://www.genuitec.com/images/pulse_mktplc.png" usemap="#menumap3"><br><br>You can focus on getting your job done, not on setting up or maintaining environments; FREE with Pulse.</td></tr>
+</TABLE>
+<br />
+
+<map name="menumap3">
+<area href="http://www.poweredbypulse.com" shape="rect" coords="23,76,64,92" target="_blank" alt="Pulse home">
+<area href="http://www.poweredbypulse.com/download.php" shape="rect" coords="83,76,142,92" target="_blank" alt="download pulse">
+<area href="http://www.poweredbypulse.com/products.php" shape="rect" coords="165,76,216,92" target="_blank" alt="Pulse products">
+<area href="http://www.poweredbypulse.com/why.php" shape="rect" coords="240,76,306,92" target="_blank" alt="using Pulse">
+<area href="http://www.poweredbypulse.com/support.php" shape="rect" coords="336,76,380,92" target="_blank" alt="Pulse support">
+<area href="http://www.poweredbypulse.com/about.php" shape="rect" coords="409,76,447,92" target="_blank" alt="About Pulse">
+<area href="http://www.poweredbypulse.com/catalog.php" shape="rect" coords="23,76,527,92" target="_blank" alt="Pulse catalog">
+<area href="http://www.poweredbypulse.com/catalog.php" shape="rect" coords="51,241,205,311" target="_blank" alt="Pulse download">
+<area href="http://www.poweredbypulse.com/catalog.php" shape="rect" coords="288,274,400,333" target="_blank" alt="Pulse demos">
+</map>]]></body>
+      <created>1194877404</created>
+      <changed>1260395027</changed>
+
+      <foundationmember>1</foundationmember>
+      <homepageurl><![CDATA[http://www.poweredbypulse.com/eclipse_packages.php]]></homepageurl>
+      <image>http://genuitec.com/images/pulse_epic.jpg</image>
+      <version>2.5</version>
+      <license>Other</license>
+      <companyname><![CDATA[Genuitec, LLC]]></companyname>
+      <status>Production/Stable</status>
+
+      <eclipseversion><![CDATA[3.3.x, 3.4.x. 3.5.x]]></eclipseversion>
+      <supporturl><![CDATA[http://www.poweredbypulse.com/support.php]]></supporturl>
+      <updateurl><![CDATA[]]></updateurl>
+    </node>
+    <node id="370" name="Wind River Workbench" url="http://www.eclipseplugincentral.net/content/wind-river-workbench">
+      <type>resource</type>
+      <categories>
+        <category id='29' name='Systems Development' url='http://www.eclipseplugincentral.net/taxonomy/term/29'/>
+
+      </categories>
+      <owner>dgaff</owner>
+      <favorited>0</favorited>
+      <body><![CDATA[Wind River Workbench is an Eclipse-based tools suite that accelerates time-to-market for developers building devices with VxWorks and Wind River Linux. Workbench is the only device software development suite with visual configuration and analysis tools that streamline design, development, debugging, test, and management.]]></body>
+      <created>1169239249</created>
+      <changed>1259778678</changed>
+      <foundationmember>1</foundationmember>
+
+      <homepageurl><![CDATA[http://www.windriver.com/products/workbench/]]></homepageurl>
+      <image>http://www.windriver.com/images/logo-110-x-80-rgb.jpg</image>
+      <version>3.1</version>
+      <license>Commercial</license>
+      <companyname><![CDATA[Wind River]]></companyname>
+      <status>Mature</status>
+      <eclipseversion><![CDATA[3.4]]></eclipseversion>
+
+      <supporturl><![CDATA[http://www.windriver.com/support/index.html]]></supporturl>
+      <updateurl><![CDATA[]]></updateurl>
+    </node>
+    <node id="940" name="MobiOne  ::  Mobile Web Development" url="http://www.eclipseplugincentral.net/content/mobione-mobile-web-development">
+      <type>resource</type>
+      <categories>
+        <category id='17' name='Tools' url='http://www.eclipseplugincentral.net/taxonomy/term/17'/>
+        <category id='23' name='Other' url='http://www.eclipseplugincentral.net/taxonomy/term/23'/>
+
+        <category id='24' name='IDE' url='http://www.eclipseplugincentral.net/taxonomy/term/24'/>
+      </categories>
+      <owner>Jens Eckels</owner>
+      <favorited>8</favorited>
+      <body><![CDATA[<TABLE WIDTH=550 BORDER=0 align="left" CELLPADDING=0 CELLSPACING=0>
+  <tr><TD colspan=10"><div align="left"><font face="trebuchet ms"><strong>You already have the skills and resources to program for mobile devices. You just didn't know it until now! <br /><br /><em>Also now available: <a href="http://www.genuitec.com/mobiledredge">Mobile News</a> &amp; <a href="http://www.genuitec.com/mobiledredge">Wireless News</a> for free! 
+  
+</em></strong></font></div><font face="trebuchet ms"><br><font size="2"><a href="http://www.genuitec.com/mobile" target="_blank" title="mobile web development">Genuitec&#039;s MobiOne</a> is the best <a href="http://www.genuitec.com/mobile" target="_blank" title="iPhone simulator">iPhone emulator</a> on the market today, and has added a <a href="http://www.genuitec.com/mobile" target="_blank" title="Palm Pre simulator">Palm Pre emulator</a> and PhoneGap support in the latest milestone version! Try MobiOne today and learn how you already have the skills and resources to program for these popular mobile devices. It's more simple than you think.  </font></font></td></tr>
+  <TR> 
+    <TD colspan="11"><br><font face="trebuchet ms"><small><br /><center><img src="http://www.genuitec.com/images/epic_mobi_homeb.jpg" border="0" usemap="#map1"></center><br />
+      MobiOne is available for developers using Windows, with plans soon for Mac and Linux. MobiOne is currently targeted at both iPhone and Palm Pre development, but will soon include Android and other smartphone modes!<br /><br /><a href="http://www.genuitec.com/mobile/download.html">Download MobiOne</a> now!</small></font></TD>
+    <TD><br></TD>
+  </TR>
+</TABLE>
+<map name="map1">
+  <area href="http://www.genuitec.com/about" shape="rect" coords="187,25,254,37" target="_blank" alt="About Genuitec">
+  <area href="http://www.genuitec.com/mobile/products.html" shape="rect" coords="278,25,320,37" target="_blank" alt="Genuitec Products">
+  <area href="http://www.genuitec.com/support" shape="rect" coords="338,25,374,37" target="_blank" alt="Genuitec Support">
+  <area href="http://www.genuitec.com/services" shape="rect" coords="397,25,425,37" target="_blank" alt="Genuitec Services">
+  <area href="http://www.genuitec.com/clients.html" shape="rect" coords="454,25,489,37" target="_blank" alt="Genuitec Clients">
+  <area href="http://www.genuitec.com/contact.html" shape="rect" coords="509,25,546,37" target="_blank" alt="Contact Genuitec">
+  <area href="http://www.genuitec.com/mobile" shape="rect" coords="10,119,83,131" target="_blank" alt="MobiOne Home">
+  <area href="http://www.genuitec.com/mobile/download.html" shape="rect" coords="10,147,83,161" target="_blank" alt="Download MobiOne">
+  <area href="http://www.genuitec.com/mobile/nn.html" shape="rect" coords="10,175,83,191" target="_blank" alt="MobiOne Resources">
+  <area href="http://www.genuitec.com/download.html" shape="rect" coords="371,191,537,292" target="_blank" alt="Download MobiOne">
+ 
+</map>
+]]></body>
+      <created>1243450561</created>
+      <changed>1260566389</changed>
+
+      <foundationmember>1</foundationmember>
+      <homepageurl><![CDATA[http://www.genuitec.com/mobile]]></homepageurl>
+      <image>http://www.genuitec.com/images/epic_logo.gif</image>
+      <version>1.0 M5</version>
+      <license>Commercial</license>
+      <companyname><![CDATA[Genuitec, LLC]]></companyname>
+      <status>Beta</status>
+
+      <eclipseversion><![CDATA[3.5.1]]></eclipseversion>
+      <supporturl><![CDATA[http://genuitec.com/support-mobi]]></supporturl>
+      <updateurl><![CDATA[http://]]></updateurl>
+    </node>
+    <node id="702" name="Compuware DevPartner Java" url="http://www.eclipseplugincentral.net/content/compuware-devpartner-java">
+      <type>resource</type>
+      <categories>
+        <category id='13' name='Profiling' url='http://www.eclipseplugincentral.net/taxonomy/term/13'/>
+
+      </categories>
+      <owner>mschuetze</owner>
+      <favorited>0</favorited>
+      <body><![CDATA[DevPartner Java Edition helps developers resolve problems associated with runtime performance, memory utilization and multi threading while allowing cross-functional teams to work together on detailed analysis and profiling techniques to fix underlying issues fast.  DevPartner&#039;s capabilities also automates development productivity tasks such as distributed application analysis, memory analysis, performance analysis, code coverage analysis, thread analysis, code review, and design analysis and refactoring. DevPartner ships with plugins for Eclipse 3.3 and 3.2, providing one-click launchers for common Java runners inside the Eclipse Workbench. The plugins leverage DevPartner&#039;s robust application server support, particularly for JBoss, WebLogic, and Tomcat containers. The DevPartner plugin for Eclipse 3.3 leverages the Eclipse Web Tools Project (&quot;WTP&quot;) to further simplify profiling almost any web or J2EE application.
+]]></body>
+      <created>1212094530</created>
+      <changed>1259779013</changed>
+      <foundationmember>1</foundationmember>
+
+      <homepageurl><![CDATA[http://www.compuware.com/products/devpartner/java.htm]]></homepageurl>
+      <image>http://images.compuware.com/m/images/assets/logos/CPWR_rgb_logo_p_110x80.jpg</image>
+      <version>4.3</version>
+      <license>Commercial</license>
+      <companyname><![CDATA[Compuware Corporation]]></companyname>
+      <status>Production/Stable</status>
+      <eclipseversion><![CDATA[3.3]]></eclipseversion>
+
+      <supporturl><![CDATA[http://frontline.compuware.com/]]></supporturl>
+      <updateurl><![CDATA[]]></updateurl>
+    </node>
+    <node id="629" name="MOTODEV Studio for Java ME" url="http://www.eclipseplugincentral.net/content/motodev-studio-java-me">
+      <type>resource</type>
+      <categories>
+        <category id='27' name='J2ME' url='http://www.eclipseplugincentral.net/taxonomy/term/27'/>
+      </categories>
+
+      <owner>Mototools</owner>
+      <favorited>0</favorited>
+      <body><![CDATA[MOTODEV Studio for Java ME provides a powerful set of APIs, tools, and documentation for creating applications that run on Motorola handsets and other products. All tools are pre-integrated and packaged with the Eclipse platform. Over 20 of the most popular handsets are currently supported, and the update management system adds support for new products dynamically.
+
+MOTODEV Studio for Java ME features include:
+â€¢	A unique Java ME Emulator that simulates the MIDlet environment in Motorola handsets
+â€¢	A Bluetooth Service that enables Bluetooth communication among multiple emulated handsets 
+â€¢	A WMA Test Server that enables multiple emulated handsets to send and receive SMS and MMS messages 
+â€¢	The SIMConfig Service that allows the user to create SIM card configurations that can be used with emulated handsets 
+â€¢	Libraries for Java ME development for Motorola handsets, including CLDC 1.1, MIDP 2.0, JSRs, and many other Motorola-specific APIs, such as Secondary Display API and Scalable Image Enhancements 
+â€¢	Mway, which loads MIDlets onto handsets via USB cable and generates system logs for debugging (Motorola OS handsets only) 
+â€¢	A Signing Tool that allows developers to import certificates and then sign MIDlet suites with them. 
+â€¢	A Config Tool that provides an easy way to read/write some specific internal handset configurations  
+â€¢	Context-sensitive Help and integrated documentation that includes Javadocs, user guides, and Motorola device specifications listing supported Java and Motorola APIs as well as media formats
+ 
+]]></body>
+      <created>1200407288</created>
+      <changed>1259778926</changed>
+      <foundationmember>1</foundationmember>
+
+      <homepageurl><![CDATA[http://developer.motorola.com/docstools/motodevstudio/javame?WT.ac=ECLIPSEPLUGINCENTRAL]]></homepageurl>
+      <image>http://developer.motorola.com/docstools/motodevstudio/images/StudioIcon89x80.gif</image>
+      <version>1.1</version>
+      <license>Commercial</license>
+      <companyname><![CDATA[Motorola]]></companyname>
+      <status>Production/Stable</status>
+      <eclipseversion><![CDATA[3.3]]></eclipseversion>
+
+      <supporturl><![CDATA[]]></supporturl>
+      <updateurl><![CDATA[]]></updateurl>
+    </node>
+  </featured>
+</marketplace>

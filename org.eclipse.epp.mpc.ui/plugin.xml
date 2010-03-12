@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.6"?>
+
+<plugin>
+   <extension-point id="catalog" name="Marketplace Catalog" schema="schema/catalog.exsd"/>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.eclipse.epp.internal.mpc.ui.commands.MarketplaceWizardCommand"
+            commandId="org.eclipse.epp.mpc.ui.command.showMarketplaceWizard">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            description="Show the Eclipse Solution Catalogs wizard"
+            id="org.eclipse.epp.mpc.ui.command.showMarketplaceWizard"
+            name="Eclipse Solution Catalogs">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:help?after=additions">
+         <command
+               commandId="org.eclipse.epp.mpc.ui.command.showMarketplaceWizard"
+               label="Eclipse Solution Catalogs..."
+               style="push"
+               tooltip="Open the Eclipse Solution Catalogs wizard">
+         </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.intro.configExtension">
+      <configExtension
+            configId="org.eclipse.ui.intro.universalConfig"
+            content="intro/default.xml">
+      </configExtension>
+   </extension>
+   <extension
+         point="org.eclipse.epp.mpc.ui.catalog">
+      <catalog
+            icon="icons/marketplace32.png"
+            label="Eclipse Plugin Central"
+            url="http://www.eclipseplugincentral.net">
+      </catalog>
+      <catalog
+            description="TODO: provide description text."
+            icon="icons/marketplace32.png"
+            label="Eclipse Marketplace"
+            url="http://marketplace.eclipse.org">
+      </catalog>
+   </extension>
+
+</plugin>

@@ -1,0 +1,216 @@
+<?xml version='1.0' encoding='UTF-8'?><marketplace>
+  <search term="test" url="http://www.eclipseplugincentral.net/search/apachesolr/test?filters=tid%3A16%20tid%3A31" count="62">
+        <node id="983" name="Run All Tests" url="http://www.eclipseplugincentral.net/content/run-all-tests">
+      <type>resource</type>
+      <categories>
+        <category id='16' name='Testing' url='http://www.eclipseplugincentral.net/taxonomy/term/16'/>
+      </categories>
+      <owner>ipreuss</owner>
+
+      <favorited>0</favorited>
+      <body><![CDATA[Allows the execution of JUnit tests for several projects at once.]]></body>
+      <created>1249479291</created>
+      <changed>1259779290</changed>
+      <foundationmember>0</foundationmember>
+      <homepageurl><![CDATA[https://sourceforge.net/projects/e-rat/]]></homepageurl>
+      <image></image>
+
+      <version>1.0.1</version>
+      <license>Other</license>
+      <companyname><![CDATA[Ilja Preuß]]></companyname>
+      <status>Production/Stable</status>
+      <eclipseversion><![CDATA[3.5]]></eclipseversion>
+      <supporturl><![CDATA[https://sourceforge.net/projects/e-rat/support]]></supporturl>
+      <updateurl><![CDATA[http://e-rat.sf.net/updatesite]]></updateurl>
+
+    </node>
+    <node id="888" name="Arcad 5250 Unit Test for Eclipse" url="http://www.eclipseplugincentral.net/content/arcad-5250-unit-test-eclipse">
+      <type>resource</type>
+      <categories>
+        <category id='16' name='Testing' url='http://www.eclipseplugincentral.net/taxonomy/term/16'/>
+      </categories>
+      <owner>marylangen</owner>
+      <favorited>0</favorited>
+
+      <body><![CDATA[This complimentary tool allows you to test executable IBM i components from within your WDSc 6 or 7 workspace. Our free plug-in for 5250 Unit Test requires you to create an RSE connection to your IBM i (provided with WDSc) and install the ARCAD 5250 Emulator for Eclipse (above).]]></body>
+      <created>1236779848</created>
+      <changed>1259779198</changed>
+      <foundationmember>0</foundationmember>
+      <homepageurl><![CDATA[http://www.arcadsoftware.com/index.php?option=com_content&task=view&id=40&Itemid=160]]></homepageurl>
+      <image>http://www.arcadsoftware.com/images/logoEPC.gif</image>
+      <version>1.0.0.4</version>
+
+      <license>Free GPL</license>
+      <companyname><![CDATA[Arcad Software]]></companyname>
+      <status>Production/Stable</status>
+      <eclipseversion><![CDATA[3.0.x-3.2.x]]></eclipseversion>
+      <supporturl><![CDATA[http://]]></supporturl>
+      <updateurl><![CDATA[http://]]></updateurl>
+    </node>
+    <node id="1077" name="MakeGood" url="http://www.eclipseplugincentral.net/content/makegood-0">
+
+      <type>resource</type>
+      <categories>
+        <category id='16' name='Testing' url='http://www.eclipseplugincentral.net/taxonomy/term/16'/>
+      </categories>
+      <owner>matsufuji</owner>
+      <favorited>1</favorited>
+      <body><![CDATA[<p>
+  MakeGood provides a test runner to run unit tests on <a href="http://eclipse.org/pdt/" target="_blank">Eclipse PDT</a>. MakeGood strongly supports <a href="http://en.wikipedia.org/wiki/Test-driven_development" target="_blank">Test Driven Development</a> (TDD) by various features.
+</p>
+<p>
+  <img src="http://redmine.piece-framework.com/attachments/104/makegood-result-view-en-550.png">
+</p>
+<p>
+  Click <a href="http://redmine.piece-framework.com/attachments/91/makegood-result-view-en.png" target="_blank">here</a> to see the original size.
+</p>
+<h2>Features</h2>
+<ul>
+  <li>Runs tests from the PHP Explorer and Package Explorer.</li>
+  <li>Runs tests from the PHP Editor.</li>
+  <li>Can use the system include path when running tests.</li>
+</ul>
+<h2>Requirements</h2>
+<ul>
+  <li><a href="http://www.php.net/" target="_blank">PHP</a> and Zend Debugger</li>
+  <li><a href="http://eclipse.org/" target="_blank">Eclipse</a> 3.5.0 or greater</li>
+  <li><a href="http://eclipse.org/pdt/" target="_blank">PDT</a> 2.1.0 or greater</li>
+  <li><a href="http://redmine.piece-framework.com/projects/show/stagehand-testrunner" target="_blank">Stagehand_TestRunner</a> 2.9.0 or greater</li>
+  <li><a href="http://www.phpunit.de/" target="_blank">PHPUnit</a> 3.4.1 or greater</li>
+</ul>]]></body>
+
+      <created>1260428597</created>
+      <changed>1260497830</changed>
+      <foundationmember>0</foundationmember>
+      <homepageurl><![CDATA[http://redmine.piece-framework.com/wiki/makegood]]></homepageurl>
+      <image></image>
+      <version>0.1.1</version>
+      <license>EPL</license>
+
+      <companyname><![CDATA[Piece Project]]></companyname>
+      <status>Alpha</status>
+      <eclipseversion><![CDATA[3.5]]></eclipseversion>
+      <supporturl><![CDATA[http://redmine.piece-framework.com/projects/makegood/boards]]></supporturl>
+      <updateurl><![CDATA[http://eclipse.piece-framework.com]]></updateurl>
+    </node>
+    <node id="1053" name="MakeGood" url="http://www.eclipseplugincentral.net/content/makegood">
+      <type>resource</type>
+
+      <categories>
+        <category id='16' name='Testing' url='http://www.eclipseplugincentral.net/taxonomy/term/16'/>
+      </categories>
+      <owner>matsu_hide</owner>
+      <favorited>0</favorited>
+      <body><![CDATA[MakeGood provides a test runner to run unit tests on PDT. MakeGood strongly supports Test Driven Development (TDD) by various features.
+
+Features
+
+* Runs tests from the PHP Explorer and Package Explorer.
+* Runs tests from the PHP Editor.
+* Can use the system include path when running tests.
+
+Requirements
+
+* PHP and Zend Debugger
+* PDT 2.1.0 or greater
+* Stagehand_TestRunner 2.9.0 or greater
+* PHPUnit 3.4.1 or greater
+]]></body>
+      <created>1259161270</created>
+
+      <changed>1259779387</changed>
+      <foundationmember>0</foundationmember>
+      <homepageurl><![CDATA[http://redmine.piece-framework.com/wiki/makegood]]></homepageurl>
+      <image></image>
+      <version>0.1.0</version>
+      <license>Free EPL</license>
+      <companyname><![CDATA[Piece Project]]></companyname>
+
+      <status>Alpha</status>
+      <eclipseversion><![CDATA[3.5]]></eclipseversion>
+      <supporturl><![CDATA[http://redmine.piece-framework.com/projects/show/makegood]]></supporturl>
+      <updateurl><![CDATA[http://eclipse.piece-framework.com]]></updateurl>
+    </node>
+    <node id="784" name="Parasoft C++test" url="http://www.eclipseplugincentral.net/content/parasoft-ctest">
+      <type>resource</type>
+      <categories>
+
+        <category id='16' name='Testing' url='http://www.eclipseplugincentral.net/taxonomy/term/16'/>
+      </categories>
+      <owner>lisarod</owner>
+      <favorited>0</favorited>
+      <body><![CDATA[Parasoft C++test is an integrated solution for automating a broad range of best practices proven to improve software development team productivity and software quality. C++test enables coding policy enforcement, static analysis, comprehensive code review, and unit and component testing to provide teams a practical way to ensure that their C and C++ code works as expected. C++test can be used both on the desktop under leading IDEs as well as in batch processes via command line interface for regression testing. C++test integrates with Parasoft&rsquo;s GRS reporting system, which provides interactive Web-based dashboards with drill-down capability, allowing teams to track project status and trends based on C++test results and other key process metrics. For embedded and cross-platform development, C++test can be used in both host-based and target-based code analysis and test flows.
+
+Parasoft C++test is an integrated solution for automating a broad range of best practices proven to improve software development team productivity and software quality. C++test enables coding policy enforcement, static analysis, comprehensive code review, and unit and component testing to provide teams a practical way to ensure that their C and C++ code works as expected. C++test can be used both on the desktop under leading IDEs as well as in batch processes via command line interface for regression testing. C++test integrates with Parasoft’s GRS reporting system, which provides interactive Web-based dashboards with drill-down capability, allowing teams to track project status and trends based on C++test results and other key process metrics. For embedded and cross-platform development, C++test can be used in both host-based and target-based code analysis and test flows.
+
+]]></body>
+      <created>1223562402</created>
+      <changed>1259943594</changed>
+
+      <foundationmember>0</foundationmember>
+      <homepageurl><![CDATA[http://www.parasoft.com/cpptest]]></homepageurl>
+      <image></image>
+      <version>7.1</version>
+      <license>Commercial</license>
+      <companyname><![CDATA[Parasoft Corporation]]></companyname>
+      <status>Production/Stable</status>
+
+      <eclipseversion><![CDATA[3.1, 3.2, 3.3]]></eclipseversion>
+      <supporturl><![CDATA[http://www.parasoft.com/cpptest]]></supporturl>
+      <updateurl><![CDATA[http://]]></updateurl>
+    </node>
+    <node id="748" name="Eclipse C++ Unit Testing (ECUT) Plug-in" url="http://www.eclipseplugincentral.net/content/eclipse-c-unit-testing-ecut-plug">
+      <type>resource</type>
+      <categories>
+        <category id='16' name='Testing' url='http://www.eclipseplugincentral.net/taxonomy/term/16'/>
+
+      </categories>
+      <owner>gerhard.leonhartsberger</owner>
+      <favorited>0</favorited>
+      <body><![CDATA[The ECUT (Eclipse CppUnit Tool) plugin integrations CppUnit into Eclipse C/C++ development tooling. The goal of the ECUT project is to provide the same and better seamless support as JDT does with JUnit. This implementation is originally based on the source of CDT cppunit plugin. The CDT plugin implementation is completely reworked and improved.
+
+There is the Release Candidate 1 for 1.0-M3 ready for download and testing.]]></body>
+      <created>1219086185</created>
+      <changed>1259779066</changed>
+      <foundationmember>0</foundationmember>
+
+      <homepageurl><![CDATA[http://sourceforge.net/projects/ecut/]]></homepageurl>
+      <image>http://sourceforge.net/dbimage.php?id=183088</image>
+      <version>0.3.0.0 RC1</version>
+      <license>Free EPL</license>
+      <companyname><![CDATA[Gerhard H. Leonhartsberger]]></companyname>
+      <status>Alpha</status>
+      <eclipseversion><![CDATA[3.4]]></eclipseversion>
+
+      <supporturl><![CDATA[http://]]></supporturl>
+      <updateurl><![CDATA[http://]]></updateurl>
+    </node>
+    <node id="1011" name="JUnit Flux" url="http://www.eclipseplugincentral.net/content/junit-flux">
+      <type>resource</type>
+      <categories>
+        <category id='16' name='Testing' url='http://www.eclipseplugincentral.net/taxonomy/term/16'/>
+      </categories>
+
+      <owner>ktitorenko</owner>
+      <favorited>0</favorited>
+      <body><![CDATA[JUnit Flux is an Eclipse plugin that will execute JUnit tests automatically, when you save your Java class or test itself, provided that class under test and unit test lie in the same package and unit test name follows naming convention of prefixing or suffixing with test (&quot;.*&quot;+name+&quot;.*Test.*&quot; or &quot;.*Test.*&quot;+name+&quot;.*&quot;).
+
+These conventions allow JUnit Flux to find relevant unit tests very quickly, thus providing you immediate feedback on your code change. JUnit Flux will react on multiple file changes as well, like those resulting from automatic refactorings. ]]></body>
+      <created>1253543952</created>
+      <changed>1259779322</changed>
+      <foundationmember>0</foundationmember>
+
+      <homepageurl><![CDATA[http://code.google.com/p/junitflux/]]></homepageurl>
+      <image></image>
+      <version>1.0.0</version>
+      <license>Free EPL</license>
+      <companyname><![CDATA[]]></companyname>
+      <status>Beta</status>
+      <eclipseversion><![CDATA[3.5]]></eclipseversion>
+
+      <supporturl><![CDATA[http://]]></supporturl>
+      <updateurl><![CDATA[http://]]></updateurl>
+    </node>
+  </search>  
+</marketplace>
+    
