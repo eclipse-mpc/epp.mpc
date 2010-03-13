@@ -10,15 +10,28 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUI;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUIPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
+import org.eclipse.epp.internal.mpc.ui.operations.ProvisioningOperation;
+import org.eclipse.epp.internal.mpc.ui.operations.ProvisioningOperation.OperationType;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
+import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogPage;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryWizard;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.osgi.util.NLS;
+import org.eclipse.ui.statushandlers.StatusManager;
 
 /**
  * @author David Greenx
@@ -121,5 +134,34 @@ public class MarketplaceWizard extends DiscoveryWizard {
 			getCatalog().dispose();
 		}
 		super.dispose();
+	}
+
+	@Override
+	public boolean performFinish() {
+		try {
+			// FIXME: this is a placeholder until bug 305441 is complete
+			Map<CatalogItem, Operation> itemToOperation = ((MarketplacePage) getCatalogPage()).getItemToOperation();
+			OperationType operationType = null;
+			List<CatalogItem> items = new ArrayList<CatalogItem>();
+			for (Map.Entry<CatalogItem, Operation> entry : itemToOperation.entrySet()) {
+				if (entry.getValue().getOperationType() != null) {
+					operationType = entry.getValue().getOperationType();
+					items.add(entry.getKey());
+				}
+			}
+			IRunnableWithProgress runner = new ProvisioningOperation(operationType,
+					getCatalogPage().getInstallableConnectors());
+			getContainer().run(true, true, runner);
+		} catch (InvocationTargetException e) {
+			IStatus status = new Status(IStatus.ERROR, MarketplaceClientUI.BUNDLE_ID, NLS.bind(
+					"Problems occurred while performing provisioning operation: {0}", new Object[] { e.getCause()
+							.getMessage() }), e.getCause());
+			StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
+			return false;
+		} catch (InterruptedException e) {
+			// canceled
+			return false;
+		}
+		return true;
 	}
 }

@@ -10,11 +10,15 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import java.util.Collections;
+import java.util.Map;
+
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
+import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogPage;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -187,4 +191,43 @@ public class MarketplacePage extends CatalogPage {
 		super.setVisible(visible);
 	}
 
+	public Map<CatalogItem, Operation> getItemToOperation() {
+		if (getViewer() == null) {
+			return Collections.emptyMap();
+		}
+		return getViewer().getItemToOperation();
+	}
+
+	@Override
+	public void setPageComplete(boolean complete) {
+		if (complete) {
+			complete = computeCanCompleteProvisioningOperation();
+		}
+		super.setPageComplete(complete);
+	}
+
+	public boolean computeCanCompleteProvisioningOperation() {
+		boolean complete = true;
+		// can only perform one kind of operation (update, install or uninstall)
+		Map<CatalogItem, Operation> itemToOperation = getItemToOperation();
+		if (itemToOperation.isEmpty()) {
+			complete = false;
+		} else {
+			Operation operation = null;
+			for (Operation o : itemToOperation.values()) {
+				if (o != Operation.NONE) {
+					if (operation == null) {
+						operation = o;
+					} else if (operation != o) {
+						complete = false;
+						break;
+					}
+				}
+			}
+			if (operation == null || operation == Operation.NONE) {
+				complete = false;
+			}
+		}
+		return complete;
+	}
 }

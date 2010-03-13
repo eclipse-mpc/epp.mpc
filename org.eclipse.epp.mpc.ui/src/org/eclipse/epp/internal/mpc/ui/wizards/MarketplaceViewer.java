@@ -402,4 +402,7 @@ public class MarketplaceViewer extends CatalogViewer {
 		}
 	}
 
+	public Map<CatalogItem, Operation> getItemToOperation() {
+		return itemToOperation;
+	}
 }

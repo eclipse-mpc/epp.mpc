@@ -10,11 +10,26 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import org.eclipse.epp.internal.mpc.ui.operations.ProvisioningOperation.OperationType;
+
 /**
  * Represents kinds of provisioning operations supported by the wizard
  * 
  * @author David Green
  */
 public enum Operation {
-	INSTALL, UNINSTALL, CHECK_FOR_UPDATES, NONE
+	INSTALL(OperationType.INSTALL), //
+	UNINSTALL(OperationType.UNINSTALL), //
+	CHECK_FOR_UPDATES(OperationType.UPDATE), // 
+	NONE(null);
+
+	private final OperationType operationType;
+
+	private Operation(OperationType operationType) {
+		this.operationType = operationType;
+	}
+
+	public OperationType getOperationType() {
+		return operationType;
+	}
 }
