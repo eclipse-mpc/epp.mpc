@@ -5,6 +5,7 @@
 
 	<!-- defaults -->
 	<property name="maven" value="mvn"/>
+	<property name="maven.extraArgs" value=""/>
 	<property name="version" value="1.0.0"/>
 	<property name="sign.dir" value="target/dist"/>
 		
@@ -20,7 +21,15 @@
 	</target>
 
 	<target name="dist">
+		<mvn dir=".." targets="clean install"/>
 		<mvn targets="clean package"/>
+		<antcall target="sign"/>
+		<echo>waiting 60 seconds for signed bits</echo>
+		<waitfor maxwait="60" maxwaitunit="second" timeoutproperty="timeout">
+			<available file="${sign.dir}/output/org.eclipse.epp.mpc.repository-${version}-site.zip"/>
+		</waitfor>
+		<fail if="timeout">invoke "ant promote" to release signed bits when ${sign.dir}/output/org.eclipse.epp.mpc.repository-${version}-site.zip becomes available</fail>
+		<antcall target="promote"/>
 	</target>
 
 	<target name="sign">
@@ -34,11 +43,21 @@
 			<arg value="nomail"/>
 			<arg value="${sign.dir}/output"/>
 		</exec>
+	</target>
+
+	<target name="promote">
+		<available file="${sign.dir}/output/org.eclipse.epp.mpc.repository-${version}-site.zip" property="file.exists"/>
+		<fail unless="file.exists">${sign.dir}/output/org.eclipse.epp.mpc.repository-${version}-site.zip does not exist</fail>
+		
 		<delete dir="target/site"/>
-		<unzip dest="target/site">
-			<fileset file="${sign.dir}/output/org.eclipse.epp.mpc.repository-${version}-site.zip"/>
-		</unzip>
-		<mvn targets="org.sonatype.tycho:tycho-p2-plugin:update-site-p2-metadata"/>
+		<unzip dest="target/site" src="${sign.dir}/output/org.eclipse.epp.mpc.repository-${version}-site.zip"/>
+		
+		<antcall target="metadata"/>
+	</target>
+
+	<target name="metadata">
+		<delete dir="target/site" includes="artifacts.*,content.*"/>
+		<mvn targets="-Dtarget=${dir} org.sonatype.tycho:tycho-p2-plugin:update-site-p2-metadata"/>
 	</target>
 	
 	<macrodef name="mvn">
@@ -49,6 +68,7 @@
 				<arg value="-Dmaven.test.skip=true"/>
 				<arg value="-f"/>
 				<arg value="@{dir}/pom.xml"/>
+				<arg line="${maven.extraArgs}"/>
 				<arg line="@{targets}"/>
 			</exec>
 		</sequential>

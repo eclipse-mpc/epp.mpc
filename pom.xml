@@ -36,7 +36,6 @@
 
   <properties>
     <tycho-version>0.7.0</tycho-version>
-    <eclipse-site>http://download.eclipse.org/releases/galileo</eclipse-site>
   </properties>
 
   <modules>
@@ -51,19 +50,14 @@
 
   <repositories>
     <repository>
-      <id>galileo</id>
-      <layout>p2</layout>
-      <url>${eclipse-site}</url>
-    </repository>
-    <repository>
       <id>platform</id>
       <layout>p2</layout>
-      <url>http://download.eclipse.org/eclipse/updates/3.6-I-builds/I20100312-0800</url>
+      <url>http://download.eclipse.org/eclipse/updates/3.6-I-builds/I20100312-1448</url>
     </repository>
     <repository>
       <id>p2</id>
       <layout>p2</layout>
-      <url>https://build.eclipse.org/hudson/job/eclipse-equinox-test/135/artifact/builds/transfer/files/testUpdates-N/N20100309-1647/</url>
+      <url>http://download.eclipse.org/mpc/discovery</url>
     </repository>
   </repositories>
 
