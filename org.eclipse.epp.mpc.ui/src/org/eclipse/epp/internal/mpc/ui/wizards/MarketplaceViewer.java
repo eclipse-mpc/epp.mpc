@@ -12,10 +12,14 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.service.Category;
 import org.eclipse.epp.internal.mpc.core.service.Market;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
@@ -93,6 +97,8 @@ public class MarketplaceViewer extends CatalogViewer {
 	private ViewerFilter[] filters;
 
 	private ContentType contentType = ContentType.SEARCH;
+
+	private final Map<CatalogItem, Operation> itemToOperation = new HashMap<CatalogItem, Operation>();
 
 	public MarketplaceViewer(Catalog catalog, IShellProvider shellProvider, IRunnableContext context,
 			CatalogConfiguration configuration) {
@@ -350,10 +356,50 @@ public class MarketplaceViewer extends CatalogViewer {
 		return viewer;
 	}
 
+	/**
+	 * not supported, instead usee {@link #modifySelection(CatalogItem, Operation)}
+	 */
 	@Override
 	protected void modifySelection(CatalogItem connector, boolean selected) {
-		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException();
+	}
+
+	protected void modifySelection(CatalogItem connector, Operation operation) {
+		if (operation == null) {
+			throw new IllegalArgumentException();
+		}
+
+		boolean selected = operation == Operation.NONE ? false : true;
+		if (selected) {
+			itemToOperation.put(connector, operation);
+		} else {
+			itemToOperation.remove(connector);
+		}
 		super.modifySelection(connector, selected);
+	}
+
+	/**
+	 * get the operation for the given catalog item
+	 * 
+	 * @see #modifySelection(CatalogItem, Operation)
+	 */
+	public Operation getOperation(CatalogItem catalogItem) {
+		Operation operation = itemToOperation.get(catalogItem);
+		return operation == null ? Operation.NONE : operation;
+	}
+
+	@Override
+	protected void postDiscovery() {
+		Set<String> installedFeatures;
+		try {
+			installedFeatures = getInstalledFeatures(new NullProgressMonitor());
+			for (CatalogItem connector : getCatalog().getItems()) {
+				connector.setInstalled(installedFeatures != null && !installedFeatures.isEmpty()
+						&& installedFeatures.containsAll(connector.getInstallableUnits()));
+			}
+		} catch (InterruptedException e) {
+			// should never happen
+		}
 	}
 
 }

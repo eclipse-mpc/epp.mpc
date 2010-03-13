@@ -173,14 +173,27 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		Composite composite = new Composite(this, SWT.NULL); // prevent the button from changing the layout of the title
 		{
 			GridDataFactory.fillDefaults().span(2, 1).grab(true, false).applyTo(composite);
-			GridLayoutFactory.fillDefaults().numColumns(2).margins(0, 0).spacing(5, 0).applyTo(composite);
 
 			createProviderLabel(composite);
 
 			Button button = new Button(composite, SWT.BORDER | SWT.INHERIT_NONE);
-			buttonController = new ItemButtonController(viewer, this, button);
+			Button secondaryButton = null;
+			if (connector.isInstalled()) {
+				secondaryButton = new Button(composite, SWT.BORDER | SWT.INHERIT_NONE);
+			}
+
+			GridLayoutFactory.fillDefaults()
+					.numColumns(composite.getChildren().length)
+					.margins(0, 0)
+					.spacing(5, 0)
+					.applyTo(composite);
+
+			buttonController = new ItemButtonController(viewer, this, button, secondaryButton);
 
 			GridDataFactory.swtDefaults().align(SWT.END, SWT.CENTER).applyTo(button);
+			if (secondaryButton != null) {
+				GridDataFactory.swtDefaults().align(SWT.END, SWT.CENTER).applyTo(secondaryButton);
+			}
 		}
 	}
 
@@ -199,27 +212,18 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 				&& connector.getOverview().getSummary().length() > 0;
 	}
 
-	protected boolean maybeModifySelection(boolean selected) {
-		if (selected) {
-			// FIXME
-			// if (connector.isInstalled()) {
-			// MessageDialog.openWarning(shellProvider.getShell(), "Install Connector",
-			// NLS.bind("{0} is already installed.", connector.getName()));
-			// return false;
-			// }
-			// if (connector.getAvailable() != null && !connector.getAvailable()) {
-			// MessageDialog.openWarning(shellProvider.getShell(), "Selection Unavailable", NLS.bind(
-			// "Sorry, {0} is unavailable.  Please try again later.", connector.getName()));
-			// return false;
-			// }
-		}
-		viewer.modifySelection(connector, selected);
+	protected boolean maybeModifySelection(Operation operation) {
+		viewer.modifySelection(connector, operation);
 		return true;
 	}
 
 	@Override
 	public boolean isSelected() {
 		return getData().isSelected();
+	}
+
+	public Operation getOperation() {
+		return viewer.getOperation(getData());
 	}
 
 	public void propertyChange(PropertyChangeEvent evt) {
@@ -266,6 +270,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		}
 	}
 
+	@Override
 	protected void hookTooltip(final Control parent, final Widget tipActivator, final Control exitControl,
 			final Control titleControl, AbstractCatalogSource source, Overview overview, Image image) {
 		final OverviewToolTip toolTip = new OverviewToolTip(parent, source, overview, image);

@@ -13,7 +13,6 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Button;
 
 /**
@@ -23,13 +22,55 @@ import org.eclipse.swt.widgets.Button;
  */
 class ItemButtonController {
 	private enum ButtonState {
-		INSTALL("Install"), UNINSTALL("Uninstall"), INSTALL_PENDING("Pending"), UNINSTALL_PENDING("Pending"), DISABLED(
-				"Install");
+		INSTALL("Install", Operation.NONE), //
+		UNINSTALL("Uninstall", Operation.NONE), //
+		INSTALL_PENDING("Install Pending", Operation.INSTALL), //
+		UNINSTALL_PENDING("Uninstall Pending", Operation.UNINSTALL), //
+		DISABLED("Install", Operation.NONE), // 
+		UPDATE("Update", Operation.NONE), //
+		UPDATE_PENDING("Update Pending", Operation.CHECK_FOR_UPDATES);
 
 		final String label;
 
-		private ButtonState(String label) {
+		private final Operation operation;
+
+		private ButtonState(String label, Operation operation) {
 			this.label = label;
+			this.operation = operation;
+		}
+
+		public Operation getOperation() {
+			return operation;
+		}
+
+		public ButtonState nextState() {
+			switch (this) {
+			case INSTALL:
+				return INSTALL_PENDING;
+			case INSTALL_PENDING:
+				return INSTALL;
+			case UNINSTALL:
+				return UNINSTALL_PENDING;
+			case UNINSTALL_PENDING:
+				return UNINSTALL;
+			case UPDATE:
+				return UPDATE_PENDING;
+			case UPDATE_PENDING:
+				return UPDATE;
+			}
+			return this;
+		}
+
+		public ButtonState noActionState() {
+			switch (this) {
+			case INSTALL_PENDING:
+				return INSTALL;
+			case UNINSTALL_PENDING:
+				return UNINSTALL;
+			case UPDATE_PENDING:
+				return UPDATE;
+			}
+			return this;
 		}
 	}
 
@@ -39,49 +80,84 @@ class ItemButtonController {
 
 	private ButtonState buttonState;
 
-	private Color originalBackground;
+	private final Button secondaryButton;
 
-	private MarketplaceViewer viewer;
+	private ButtonState secondaryButtonState;
 
-	public ItemButtonController(MarketplaceViewer marketplaceViewer, DiscoveryItem discoveryItem, Button button) {
+	private final MarketplaceViewer viewer;
+
+	public ItemButtonController(MarketplaceViewer marketplaceViewer, DiscoveryItem discoveryItem, Button button,
+			Button secondaryButton) {
 		this.item = discoveryItem;
 		this.button = button;
 		this.viewer = marketplaceViewer;
-		originalBackground = button.getBackground();
+		this.secondaryButton = secondaryButton;
 		updateButtonState();
 		updateAppearance();
 		button.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
-				if (buttonState != ButtonState.DISABLED) {
-					item.maybeModifySelection(!item.isSelected());
-				}
-				refresh();
+				buttonClicked(buttonState, secondaryButtonState);
 			}
 
 			public void widgetDefaultSelected(SelectionEvent e) {
 				widgetSelected(e);
 			}
 		});
+		if (secondaryButton != null) {
+			secondaryButton.addSelectionListener(new SelectionListener() {
+				public void widgetSelected(SelectionEvent e) {
+					buttonClicked(secondaryButtonState, buttonState);
+				}
+
+				public void widgetDefaultSelected(SelectionEvent e) {
+					widgetSelected(e);
+				}
+			});
+		}
+	}
+
+	private void buttonClicked(ButtonState primary, ButtonState secondary) {
+		if (primary != ButtonState.DISABLED) {
+			primary = primary.nextState();
+			secondary = secondary.noActionState();
+			item.maybeModifySelection(primary.operation);
+		}
+		refresh();
 	}
 
 	private void updateButtonState() {
 		CatalogItem catalogItem = (CatalogItem) item.getData();
 		if (catalogItem.getInstallableUnits().isEmpty()) {
 			buttonState = ButtonState.DISABLED;
+			secondaryButtonState = ButtonState.DISABLED;
 		} else {
+			Operation operation = item.getOperation();
 			boolean installed = isItemInstalled();
-			if (catalogItem.isSelected()) {
-				if (installed) {
-					buttonState = ButtonState.UNINSTALL_PENDING;
-				} else {
-					buttonState = ButtonState.INSTALL_PENDING;
+			if (installed) {
+				switch (operation) {
+				case CHECK_FOR_UPDATES:
+					buttonState = ButtonState.UPDATE_PENDING;
+					secondaryButtonState = ButtonState.UNINSTALL;
+					break;
+				case UNINSTALL:
+					buttonState = ButtonState.UPDATE;
+					secondaryButtonState = ButtonState.UNINSTALL_PENDING;
+					break;
+				case NONE:
+					buttonState = ButtonState.UPDATE;
+					secondaryButtonState = ButtonState.UNINSTALL;
+					break;
 				}
 			} else {
-				if (installed) {
-					buttonState = ButtonState.UNINSTALL;
-				} else {
+				switch (operation) {
+				case INSTALL:
+					buttonState = ButtonState.INSTALL_PENDING;
+					break;
+				case NONE:
 					buttonState = ButtonState.INSTALL;
+					break;
 				}
+				secondaryButtonState = ButtonState.DISABLED;
 			}
 		}
 	}
@@ -92,8 +168,10 @@ class ItemButtonController {
 
 	private void updateAppearance() {
 		button.setText(buttonState.label);
-		if (buttonState == ButtonState.DISABLED) {
-			button.setEnabled(false);
+		button.setEnabled(buttonState != ButtonState.DISABLED);
+		if (secondaryButton != null) {
+			secondaryButton.setText(secondaryButtonState.label);
+			secondaryButton.setEnabled(secondaryButtonState != ButtonState.DISABLED);
 		}
 		// FIXME button image? Due to platform limitations we can't set the button color
 

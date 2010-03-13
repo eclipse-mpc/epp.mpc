@@ -19,7 +19,6 @@ import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUI;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
 import org.eclipse.equinox.internal.p2.discovery.AbstractCatalogSource;
 import org.eclipse.equinox.internal.p2.discovery.model.Overview;
-import org.eclipse.equinox.internal.p2.ui.discovery.util.GradientToolTip;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -38,6 +37,7 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
@@ -56,7 +56,7 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 /**
  * @author David Green
  */
-class OverviewToolTip extends GradientToolTip {
+class OverviewToolTip extends ToolTip {
 
 	final int SCREENSHOT_HEIGHT = 240;
 
@@ -82,11 +82,12 @@ class OverviewToolTip extends GradientToolTip {
 	}
 
 	@Override
-	protected Composite createToolTipArea(Event event, final Composite parent) {
+	protected Composite createToolTipContentArea(Event event, final Composite parent) {
 		GridLayoutFactory.fillDefaults().applyTo(parent);
 
-		Composite container = new Composite(parent, SWT.NULL);
-		container.setBackground(null);
+		Color backgroundColor = parent.getDisplay().getSystemColor(SWT.COLOR_WHITE);
+		final Composite container = new Composite(parent, SWT.NULL);
+		container.setBackground(backgroundColor);
 
 		Image image = null;
 		if (overview.getScreenshot() != null) {
@@ -119,6 +120,7 @@ class OverviewToolTip extends GradientToolTip {
 		if (leftImage != null) {
 			Label imageLabel = new Label(container, SWT.NONE);
 			imageLabel.setImage(leftImage);
+			imageLabel.setBackground(backgroundColor);
 			int imageWidthHint = leftImage.getBounds().width + 5;
 			GridDataFactory.fillDefaults()
 					.align(SWT.BEGINNING, SWT.BEGINNING)
@@ -129,7 +131,7 @@ class OverviewToolTip extends GradientToolTip {
 		String summary = overview.getSummary();
 
 		Composite summaryContainer = new Composite(container, SWT.NULL);
-		summaryContainer.setBackground(null);
+		summaryContainer.setBackground(backgroundColor);
 		GridLayoutFactory.fillDefaults().applyTo(summaryContainer);
 
 		GridDataFactory gridDataFactory = GridDataFactory.fillDefaults()
@@ -144,15 +146,14 @@ class OverviewToolTip extends GradientToolTip {
 
 		Font dialogFont = JFaceResources.getDialogFont();
 		FontData[] fontData = dialogFont.getFontData();
-		String cssStyle = "body, p, div, *  {" + "font-family:\"" + fontData[0].getName()
-				+ "\",Arial,sans-serif !important;font-size:" + fontData[0].getHeight() + "px !important;"
-				+ "} body { margin: 0px;}";
-		// FIXME: font styles in the HTML header
+		String cssStyle = "body, p, div, *  {" + "font-family:\"" + fontData[0].getName() //$NON-NLS-1$ //$NON-NLS-2$
+				+ "\",Arial,sans-serif !important;font-size:" + fontData[0].getHeight() + "px !important;" //$NON-NLS-1$ //$NON-NLS-2$
+				+ "} body { margin: 0px; background-color: white;}"; //$NON-NLS-1$
 		summaryLabel.setFont(dialogFont);
-		String html = "<html><style>" + cssStyle + "</style><body>" + TextUtil.cleanInformalHtmlMarkup(summary)
-				+ "</body></html>";
+		String html = "<html><style>" + cssStyle + "</style><body>" + TextUtil.cleanInformalHtmlMarkup(summary) //$NON-NLS-1$//$NON-NLS-2$
+				+ "</body></html>"; //$NON-NLS-1$
 		summaryLabel.setText(html);
-		summaryLabel.setBackground(null);
+		summaryLabel.setBackground(backgroundColor);
 		// instead of opening links in the tooltip, open a new browser window
 		summaryLabel.addLocationListener(new LocationListener() {
 			public void changing(LocationEvent event) {
@@ -179,7 +180,7 @@ class OverviewToolTip extends GradientToolTip {
 			GridDataFactory.fillDefaults().hint(widthHint, SCREENSHOT_HEIGHT).indent(borderWidth, borderWidth).applyTo(
 					imageLabel);
 			imageLabel.setImage(image);
-			imageLabel.setBackground(null);
+			imageLabel.setBackground(backgroundColor);
 			imageLabel.setSize(widthHint, SCREENSHOT_HEIGHT);
 
 			final Cursor handCursor = new Cursor(image.getDevice(), SWT.CURSOR_HAND);
@@ -198,13 +199,13 @@ class OverviewToolTip extends GradientToolTip {
 			});
 
 			// creates a border
-			imageContainer.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_BLACK));
+			imageContainer.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
 		}
 		if (hasLearnMoreLink) {
 			Link link = new Link(summaryContainer, SWT.NULL);
 			GridDataFactory.fillDefaults().grab(false, false).align(SWT.BEGINNING, SWT.CENTER).applyTo(link);
 			link.setText("<a>Learn More</a>");
-			link.setBackground(null);
+			link.setBackground(backgroundColor);
 			link.setToolTipText(NLS.bind("Open {0} in an external browser", overview.getUrl()));
 			link.addSelectionListener(new SelectionListener() {
 				public void widgetSelected(SelectionEvent e) {
