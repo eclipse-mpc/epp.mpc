@@ -394,7 +394,7 @@ public class MarketplaceViewer extends CatalogViewer {
 		try {
 			installedFeatures = getInstalledFeatures(new NullProgressMonitor());
 			for (CatalogItem connector : getCatalog().getItems()) {
-				connector.setInstalled(installedFeatures != null && !installedFeatures.isEmpty()
+				connector.setInstalled(installedFeatures != null && !connector.getInstallableUnits().isEmpty()
 						&& installedFeatures.containsAll(connector.getInstallableUnits()));
 			}
 		} catch (InterruptedException e) {
