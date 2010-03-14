@@ -284,13 +284,16 @@ public class SelectionModel {
 			return false;
 		}
 		IStatus status = computeFinishValidation();
-		switch (status.getSeverity()) {
-		case IStatus.INFO:
-		case IStatus.OK:
-		case IStatus.WARNING:
-			return true;
+		if (status != null) {
+			switch (status.getSeverity()) {
+			case IStatus.INFO:
+			case IStatus.OK:
+			case IStatus.WARNING:
+				return true;
+			}
+			return false;
 		}
-		return false;
+		return true;
 	}
 
 	/**
@@ -307,9 +310,11 @@ public class SelectionModel {
 
 		if (operationToItem.size() == 1) {
 			Entry<Operation, List<CatalogItem>> entry = operationToItem.entrySet().iterator().next();
-			return new Status(IStatus.INFO, MarketplaceClientUi.BUNDLE_ID, NLS.bind(Messages.SelectionModel_count_selectedFor_operation,
-					entry.getValue().size() == 1 ? Messages.SelectionModel_oneSolution : NLS.bind(Messages.SelectionModel_countSolutions, entry.getValue().size()),
-					entry.getKey().getLabel()));
+			return new Status(IStatus.INFO, MarketplaceClientUi.BUNDLE_ID,
+					NLS.bind(Messages.SelectionModel_count_selectedFor_operation,
+							entry.getValue().size() == 1 ? Messages.SelectionModel_oneSolution : NLS.bind(
+									Messages.SelectionModel_countSolutions, entry.getValue().size()), entry.getKey()
+									.getLabel()));
 		} else if (operationToItem.size() == 2 && operationToItem.containsKey(Operation.INSTALL)
 				&& operationToItem.containsKey(Operation.CHECK_FOR_UPDATES)) {
 			int count = 0;
