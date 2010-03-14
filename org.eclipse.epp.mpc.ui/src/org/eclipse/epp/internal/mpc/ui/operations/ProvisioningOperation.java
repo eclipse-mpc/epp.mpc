@@ -31,10 +31,9 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
-import org.eclipse.equinox.internal.p2.ui.discovery.DiscoveryUi;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
-import org.eclipse.equinox.internal.p2.ui.discovery.wizards.Messages;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.equinox.p2.metadata.Version;
 import org.eclipse.equinox.p2.operations.InstallOperation;
@@ -193,7 +192,7 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 			pruneUnselected(installableUnits);
 			return installableUnits.toArray(new IInstallableUnit[installableUnits.size()]);
 
-			//			MultiStatus status = new MultiStatus(DiscoveryUi.ID_PLUGIN, 0, Messages.PrepareInstallProfileJob_ok, null);
+			//			MultiStatus status = new MultiStatus(MarketplaceClientUi.BUNDLE_ID, 0, Messages.PrepareInstallProfileJob_ok, null);
 			//			ius = installableUnits.toArray(new IInstallableUnit[installableUnits.size()]);
 			//			ProfileChangeRequest profileChangeRequest = InstallAction.computeProfileChangeRequest(ius, profileId,
 			//					status, new SubProgressMonitor(monitor, installableConnectors.size()));
@@ -202,7 +201,7 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 			//			}
 			//			if (profileChangeRequest == null) {
 			//				// failed but no indication as to why
-			//				throw new CoreException(new Status(IStatus.ERROR, DiscoveryUi.ID_PLUGIN,
+			//				throw new CoreException(new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
 			//						Messages.PrepareInstallProfileJob_computeProfileChangeRequestFailed, null));
 			//			}
 			//			PlannerResolutionOperation operation = new PlannerResolutionOperation(
@@ -217,12 +216,12 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 
 		} catch (URISyntaxException e) {
 			// should never happen, since we already validated URLs.
-			throw new CoreException(new Status(IStatus.ERROR, DiscoveryUi.ID_PLUGIN,
-					Messages.InstallConnectorsJob_unexpectedError_url, e));
+			throw new CoreException(new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
+					"Unexpected error handling repository URL", e));
 		} catch (MalformedURLException e) {
 			// should never happen, since we already validated URLs.
-			throw new CoreException(new Status(IStatus.ERROR, DiscoveryUi.ID_PLUGIN,
-					Messages.InstallConnectorsJob_unexpectedError_url, e));
+			throw new CoreException(new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
+					"Unexpected error handling repository URL", e));
 		} finally {
 			monitor.done();
 		}
@@ -297,7 +296,7 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 				}
 			});
 			if (!okayToProceed[0]) {
-				throw new CoreException(new Status(IStatus.ERROR, DiscoveryUi.ID_PLUGIN, NLS.bind(
+				throw new CoreException(new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
 						"The following connectors are not available: {0}", detailedMessage), null));
 			}
 		}
