@@ -307,8 +307,8 @@ public class SelectionModel {
 
 		if (operationToItem.size() == 1) {
 			Entry<Operation, List<CatalogItem>> entry = operationToItem.entrySet().iterator().next();
-			return new Status(IStatus.INFO, MarketplaceClientUi.BUNDLE_ID, NLS.bind("{0} selected for {1}",
-					entry.getValue().size() == 1 ? "one solution" : NLS.bind("{0} solutions", entry.getValue().size()),
+			return new Status(IStatus.INFO, MarketplaceClientUi.BUNDLE_ID, NLS.bind(Messages.SelectionModel_count_selectedFor_operation,
+					entry.getValue().size() == 1 ? Messages.SelectionModel_oneSolution : NLS.bind(Messages.SelectionModel_countSolutions, entry.getValue().size()),
 					entry.getKey().getLabel()));
 		} else if (operationToItem.size() == 2 && operationToItem.containsKey(Operation.INSTALL)
 				&& operationToItem.containsKey(Operation.CHECK_FOR_UPDATES)) {
@@ -317,11 +317,11 @@ public class SelectionModel {
 				count += items.size();
 			}
 			new Status(IStatus.INFO, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
-					"{0} solutions selected for install or update", count));
+					Messages.SelectionModel_countSolutionsSelectedForInstallUpdate, count));
 		} else if (operationToItem.size() > 1) {
 			if (!(operationToItem.size() == 2 && operationToItem.containsKey(Operation.INSTALL) && operationToItem.containsKey(Operation.CHECK_FOR_UPDATES))) {
 				new Status(IStatus.INFO, MarketplaceClientUi.BUNDLE_ID,
-						"Cannot install and remove solutions concurrently");
+						Messages.SelectionModel_cannotInstallRemoveConcurrently);
 			}
 		}
 		return null;

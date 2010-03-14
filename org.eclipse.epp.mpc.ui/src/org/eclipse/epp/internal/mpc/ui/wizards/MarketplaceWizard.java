@@ -53,7 +53,7 @@ public class MarketplaceWizard extends DiscoveryWizard {
 
 	public MarketplaceWizard(MarketplaceCatalog catalog, MarketplaceCatalogConfiguration configuration) {
 		super(catalog, configuration);
-		setWindowTitle("Eclipse Solution Catalogs");
+		setWindowTitle(Messages.MarketplaceWizard_eclipseSolutionCatalogs);
 		selectionModel = new SelectionModel(this);
 	}
 
@@ -121,7 +121,7 @@ public class MarketplaceWizard extends DiscoveryWizard {
 					URL url = descriptor.getUrl();
 
 					String host = url.getHost();
-					if (host.endsWith(".eclipse.org")) {
+					if (host.endsWith(".eclipse.org")) { //$NON-NLS-1$
 						getConfiguration().setCatalogDescriptor(descriptor);
 						break;
 					}
@@ -168,7 +168,7 @@ public class MarketplaceWizard extends DiscoveryWizard {
 			getContainer().run(true, true, runner);
 		} catch (InvocationTargetException e) {
 			IStatus status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
-					"Problems occurred while performing provisioning operation: {0}", new Object[] { e.getCause()
+					Messages.MarketplaceWizard_problemsPerformingProvisioningOperation, new Object[] { e.getCause()
 							.getMessage() }), e.getCause());
 			StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			return false;

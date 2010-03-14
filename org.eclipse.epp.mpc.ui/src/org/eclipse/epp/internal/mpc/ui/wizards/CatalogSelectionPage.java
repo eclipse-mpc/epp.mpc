@@ -37,8 +37,8 @@ public class CatalogSelectionPage extends WizardPage {
 	public CatalogSelectionPage(MarketplaceCatalogConfiguration configuration) {
 		super(CatalogSelectionPage.class.getName());
 		this.configuration = configuration;
-		setTitle("Solution Marketplace Catalog");
-		setDescription("Select a solution catalog.");
+		setTitle(Messages.CatalogSelectionPage_solutionMarketplaceCatalog);
+		setDescription(Messages.CatalogSelectionPage_selectASolutionCatalog);
 		setPageComplete(configuration.getCatalogDescriptor() != null);
 	}
 

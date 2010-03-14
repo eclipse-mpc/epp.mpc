@@ -40,7 +40,7 @@ public class ResolveFeatureNamesOperation extends AbstractProvisioningOperation 
 
 	public void run(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
 		try {
-			SubMonitor monitor = SubMonitor.convert(progressMonitor, "Resolving features", 100);
+			SubMonitor monitor = SubMonitor.convert(progressMonitor, Messages.ResolveFeatureNamesOperation_resolvingFeatures, 100);
 			try {
 				List<IMetadataRepository> repositories = addRepositories(monitor.newChild(50));
 				List<IInstallableUnit> installableUnits = queryInstallableUnits(monitor.newChild(50), repositories);
@@ -72,7 +72,7 @@ public class ResolveFeatureNamesOperation extends AbstractProvisioningOperation 
 
 	public String getProperty(IInstallableUnit candidate, String key) {
 		String value = TranslationSupport.getInstance().getIUProperty(candidate, key);
-		return (value != null) ? value : "";
+		return (value != null) ? value : ""; //$NON-NLS-1$
 	}
 
 	public Set<FeatureDescriptor> getFeatureDescriptors() {

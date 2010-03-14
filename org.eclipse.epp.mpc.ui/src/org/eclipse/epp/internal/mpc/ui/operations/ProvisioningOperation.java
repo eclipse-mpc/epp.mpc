@@ -98,7 +98,7 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 
 	public void run(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
 		try {
-			SubMonitor monitor = SubMonitor.convert(progressMonitor, "Configuring provisioning operation", 100);
+			SubMonitor monitor = SubMonitor.convert(progressMonitor, Messages.ProvisioningOperation_configuringProvisioningOperation, 100);
 			try {
 				final IInstallableUnit[] ius = computeInstallableUnits(monitor.newChild(50));
 
@@ -195,11 +195,11 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 		} catch (URISyntaxException e) {
 			// should never happen, since we already validated URLs.
 			throw new CoreException(new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
-					"Unexpected error handling repository URL", e));
+					Messages.ProvisioningOperation_unexpectedErrorUrl, e));
 		} catch (MalformedURLException e) {
 			// should never happen, since we already validated URLs.
 			throw new CoreException(new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
-					"Unexpected error handling repository URL", e));
+					Messages.ProvisioningOperation_unexpectedErrorUrl, e));
 		} finally {
 			monitor.done();
 		}
@@ -240,21 +240,21 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 					if (unavailableIds == null) {
 						unavailableIds = new StringBuilder();
 					} else {
-						unavailableIds.append(", ");
+						unavailableIds.append(Messages.ProvisioningOperation_commaSeparator);
 					}
 					unavailableIds.append(id);
 				}
 			}
 			if (unavailableIds != null) {
 				if (message.length() > 0) {
-					message += ", ";
+					message += Messages.ProvisioningOperation_commaSeparator;
 				}
 				message += descriptor.getName();
 
 				if (detailedMessage.length() > 0) {
-					detailedMessage += ", ";
+					detailedMessage += Messages.ProvisioningOperation_commaSeparator;
 				}
-				detailedMessage += NLS.bind("{0} (id={1}, site={2})", new Object[] { descriptor.getName(),
+				detailedMessage += NLS.bind(Messages.ProvisioningOperation_unavailableFeatures, new Object[] { descriptor.getName(),
 						unavailableIds.toString(), descriptor.getSiteUrl() });
 			}
 		}
@@ -267,15 +267,15 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 				public void run() {
 					okayToProceed[0] = MessageDialog.openQuestion(
 							WorkbenchUtil.getShell(),
-							"Proceed With Installation?",
+							Messages.ProvisioningOperation_proceedQuestion,
 							NLS.bind(
-									"The following connectors are not available: {0}\nProceed with the installation anyways?",
+									Messages.ProvisioningOperation_unavailableConnectors_proceedQuestion,
 									new Object[] { finalMessage }));
 				}
 			});
 			if (!okayToProceed[0]) {
 				throw new CoreException(new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
-						"The following connectors are not available: {0}", detailedMessage), null));
+						Messages.ProvisioningOperation_unavailableConnectors, detailedMessage), null));
 			}
 		}
 	}

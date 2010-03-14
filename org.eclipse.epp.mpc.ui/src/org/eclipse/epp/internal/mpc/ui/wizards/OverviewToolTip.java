@@ -204,9 +204,9 @@ class OverviewToolTip extends ToolTip {
 		if (hasLearnMoreLink) {
 			Link link = new Link(summaryContainer, SWT.NULL);
 			GridDataFactory.fillDefaults().grab(false, false).align(SWT.BEGINNING, SWT.CENTER).applyTo(link);
-			link.setText("<a>Learn More</a>");
+			link.setText(Messages.OverviewToolTip_learnMoreLink);
 			link.setBackground(backgroundColor);
-			link.setToolTipText(NLS.bind("Open {0} in an external browser", overview.getUrl()));
+			link.setToolTipText(NLS.bind(Messages.OverviewToolTip_openUrlInBrowser, overview.getUrl()));
 			link.addSelectionListener(new SelectionListener() {
 				public void widgetSelected(SelectionEvent e) {
 					OverviewToolTip.this.hide();
@@ -254,7 +254,7 @@ class OverviewToolTip extends ToolTip {
 				return image;
 			} catch (SWTException e) {
 				// ignore, probably a bad image format
-				MarketplaceClientUi.error(NLS.bind("Cannot render image {0}: {1}", imagePath, e.getMessage()), e);
+				MarketplaceClientUi.error(NLS.bind(Messages.OverviewToolTip_cannotRenderImage_reason, imagePath, e.getMessage()), e);
 			}
 		}
 		return null;

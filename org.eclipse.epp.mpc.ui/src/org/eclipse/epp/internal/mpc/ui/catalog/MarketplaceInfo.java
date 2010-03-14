@@ -233,10 +233,10 @@ public class MarketplaceInfo {
 		}
 
 		// platform config location no good, so let's try the user's home directory
-		String userHome = System.getProperty("user.home");
+		String userHome = System.getProperty("user.home"); //$NON-NLS-1$
 		File userHomeFile = new File(userHome);
 		if (userHomeFile.exists()) {
-			File mpcConfigLocation = new File(userHomeFile, ".eclipse_mpc");
+			File mpcConfigLocation = new File(userHomeFile, ".eclipse_mpc"); //$NON-NLS-1$
 			if (!mpcConfigLocation.exists()) {
 				if (!mpcConfigLocation.mkdir()) {
 					return null;

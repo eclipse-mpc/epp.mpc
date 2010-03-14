@@ -81,13 +81,13 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 			}
 		};
 		marketFilter.setSelectAllOnNoSelection(true);
-		marketFilter.setNoSelectionLabel("All Markets");
+		marketFilter.setNoSelectionLabel(Messages.MarketplaceWizardCommand_allMarkets);
 		marketFilter.setTagClassification(Category.class);
 		marketFilter.setChoices(new ArrayList<Tag>());
 
 		final ComboTagFilter marketCategoryTagFilter = new ComboTagFilter();
 		marketCategoryTagFilter.setSelectAllOnNoSelection(true);
-		marketCategoryTagFilter.setNoSelectionLabel("All Categories");
+		marketCategoryTagFilter.setNoSelectionLabel(Messages.MarketplaceWizardCommand_allCategories);
 		marketCategoryTagFilter.setTagClassification(Category.class);
 		marketCategoryTagFilter.setChoices(new ArrayList<Tag>());
 		marketFilter.addPropertyChangeListener(new IPropertyChangeListener() {
@@ -120,7 +120,7 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 
 		DiscoveryWizard wizard = new MarketplaceWizard(catalog, configuration);
 
-		wizard.setWindowTitle("Eclipse Marketplace");
+		wizard.setWindowTitle(Messages.MarketplaceWizardCommand_eclipseMarketplace);
 
 		WizardDialog dialog = new WizardDialog(WorkbenchUtil.getShell(), wizard);
 		dialog.open();

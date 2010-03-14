@@ -22,13 +22,13 @@ import org.eclipse.swt.widgets.Button;
  */
 class ItemButtonController {
 	private enum ButtonState {
-		INSTALL("Install", Operation.NONE), //
-		UNINSTALL("Uninstall", Operation.NONE), //
-		INSTALL_PENDING("Install Pending", Operation.INSTALL), //
-		UNINSTALL_PENDING("Uninstall Pending", Operation.UNINSTALL), //
-		DISABLED("Install", Operation.NONE), // 
-		UPDATE("Update", Operation.NONE), //
-		UPDATE_PENDING("Update Pending", Operation.CHECK_FOR_UPDATES);
+		INSTALL(Messages.ItemButtonController_install, Operation.NONE), //
+		UNINSTALL(Messages.ItemButtonController_uninstall, Operation.NONE), //
+		INSTALL_PENDING(Messages.ItemButtonController_installPending, Operation.INSTALL), //
+		UNINSTALL_PENDING(Messages.ItemButtonController_uninstallPending, Operation.UNINSTALL), //
+		DISABLED(Messages.ItemButtonController_install, Operation.NONE), // 
+		UPDATE(Messages.ItemButtonController_update, Operation.NONE), //
+		UPDATE_PENDING(Messages.ItemButtonController_updatePending, Operation.CHECK_FOR_UPDATES);
 
 		final String label;
 

@@ -111,7 +111,7 @@ public class MarketplaceViewer extends CatalogViewer {
 		}
 		// FIXME: placeholder until we can get a better search control in place.
 		Button goButton = new Button(parent, SWT.PUSH);
-		goButton.setText("Go");
+		goButton.setText(Messages.MarketplaceViewer_go);
 		goButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -166,7 +166,7 @@ public class MarketplaceViewer extends CatalogViewer {
 		} else if (element instanceof MarketplaceCategory) {
 			MarketplaceCategory category = (MarketplaceCategory) element;
 			if (category.getContents() == Contents.FEATURED) {
-				category.setName("Featured");
+				category.setName(Messages.MarketplaceViewer_featured);
 			} else {
 				throw new IllegalStateException();
 			}
@@ -230,7 +230,7 @@ public class MarketplaceViewer extends CatalogViewer {
 						StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			}
 		} catch (InvocationTargetException e) {
-			IStatus status = computeStatus(e, "Unexpected exception");
+			IStatus status = computeStatus(e, Messages.MarketplaceViewer_unexpectedException);
 			StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 		} catch (InterruptedException e) {
 			// cancelled by user so nothing to do here.

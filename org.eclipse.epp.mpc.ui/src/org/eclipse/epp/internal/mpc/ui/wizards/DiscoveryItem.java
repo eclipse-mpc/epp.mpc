@@ -125,7 +125,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 				iconLabel.setImage(image);
 			} catch (SWTException e) {
 				// ignore, probably a bad image format
-				MarketplaceClientUi.error(NLS.bind("Cannot render image {0}: {1}", connector.getIcon().getImage32(),
+				MarketplaceClientUi.error(NLS.bind(Messages.DiscoveryItem_cannotRenderImage_reason, connector.getIcon().getImage32(),
 						e.getMessage()), e);
 			}
 		}
@@ -146,7 +146,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 			if (hasTooltip(connector)) {
 				infoButton = new ToolItem(toolBar, SWT.PUSH);
 				infoButton.setImage(resources.getInfoImage());
-				infoButton.setToolTipText("Show Overview");
+				infoButton.setToolTipText(Messages.DiscoveryItem_showOverview);
 				hookTooltip(toolBar, infoButton, this, nameLabel, connector.getSource(), connector.getOverview(), null);
 			}
 		} else {
@@ -168,7 +168,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		}
 		description.setText(descriptionText.replaceAll("(\\r\\n)|\\n|\\r|\\s{2,}", " ")); //$NON-NLS-1$ //$NON-NLS-2$
 
-		new Label(this, SWT.NONE).setText(" "); // spacer
+		new Label(this, SWT.NONE).setText(" "); // spacer //$NON-NLS-1$
 
 		Composite composite = new Composite(this, SWT.NULL); // prevent the button from changing the layout of the title
 		{
@@ -204,7 +204,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		// always disabled color to make it less prominent
 		providerLabel.setForeground(resources.getColorDisabled());
 
-		providerLabel.setText(NLS.bind("by {0}, {1}", connector.getProvider(), connector.getLicense()));
+		providerLabel.setText(NLS.bind(Messages.DiscoveryItem_byProviderLicense, connector.getProvider(), connector.getLicense()));
 	}
 
 	protected boolean hasTooltip(final CatalogItem connector) {

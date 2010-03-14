@@ -42,7 +42,7 @@ public class CatalogListItem extends ControlListItem<CatalogDescriptor> {
 
 		Label iconLabel = new Label(parent, SWT.NULL);
 		if (catalogDescriptor.getIcon() != null) {
-			String iconKey = catalogDescriptor.getUrl().toString() + "#icon";
+			String iconKey = catalogDescriptor.getUrl().toString() + "#icon"; //$NON-NLS-1$
 			imageRegistry.put(iconKey, catalogDescriptor.getIcon());
 			iconLabel.setImage(imageRegistry.get(iconKey));
 		}

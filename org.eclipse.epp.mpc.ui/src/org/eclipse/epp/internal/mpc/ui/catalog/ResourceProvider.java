@@ -33,7 +33,7 @@ class ResourceProvider {
 	private Map<String, File> resources = new ConcurrentHashMap<String, File>();
 
 	public ResourceProvider() throws IOException {
-		dir = File.createTempFile(ResourceProvider.class.getSimpleName(), ".tmp");
+		dir = File.createTempFile(ResourceProvider.class.getSimpleName(), ".tmp"); //$NON-NLS-1$
 		dir.delete();
 		if (!dir.mkdirs()) {
 			throw new IOException(dir.getAbsolutePath());
@@ -59,11 +59,11 @@ class ResourceProvider {
 		if (filenameHint.lastIndexOf('/') != -1) {
 			filenameHint = filenameHint.substring(filenameHint.lastIndexOf('/') + 1);
 		}
-		filenameHint = filenameHint.replaceAll("[^a-zA-Z0-9\\.]", "_");
+		filenameHint = filenameHint.replaceAll("[^a-zA-Z0-9\\.]", "_"); //$NON-NLS-1$ //$NON-NLS-2$
 		if (filenameHint.length() > 32) {
 			filenameHint = filenameHint.substring(filenameHint.length() - 32);
 		}
-		File outputFile = File.createTempFile("res_", filenameHint, dir);
+		File outputFile = File.createTempFile("res_", filenameHint, dir); //$NON-NLS-1$
 		BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(outputFile));
 		try {
 			input = new BufferedInputStream(input);

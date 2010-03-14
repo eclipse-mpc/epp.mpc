@@ -22,7 +22,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class MarketplaceClientUi {
 
-	public static final String BUNDLE_ID = "org.eclipse.epp.mpc.ui";
+	public static final String BUNDLE_ID = "org.eclipse.epp.mpc.ui"; //$NON-NLS-1$
 
 	public static ILog getLog() {
 		return Platform.getLog(Platform.getBundle(BUNDLE_ID));
@@ -30,7 +30,7 @@ public class MarketplaceClientUi {
 
 	public static void error(String message, Throwable exception) {
 		if (message == null) {
-			message = NLS.bind("Unexpected exception: {0}", exception.getMessage());
+			message = NLS.bind(Messages.MarketplaceClientUi_unexpectedException_reason, exception.getMessage());
 		}
 		getLog().log(new Status(IStatus.ERROR, BUNDLE_ID, IStatus.ERROR, message, exception));
 	}
@@ -48,7 +48,7 @@ public class MarketplaceClientUi {
 			statusCause = new Status(IStatus.ERROR, BUNDLE_ID, cause.getMessage(), cause);
 		}
 		if (statusCause.getMessage() != null) {
-			message = NLS.bind("{0}: {1}", message, statusCause.getMessage());
+			message = NLS.bind(Messages.MarketplaceClientUi_message_message2, message, statusCause.getMessage());
 		}
 		IStatus status = new MultiStatus(BUNDLE_ID, 0, new IStatus[] { statusCause }, message, cause);
 		return status;

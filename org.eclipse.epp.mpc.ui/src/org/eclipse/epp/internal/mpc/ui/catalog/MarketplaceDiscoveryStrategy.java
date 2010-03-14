@@ -92,7 +92,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		}
 		final int totalWork = 10000000;
 		final int workSegment = totalWork / 3;
-		monitor.beginTask("Loading marketplace", totalWork);
+		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_loadingMarketplace, totalWork);
 		try {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, workSegment));
 
@@ -108,7 +108,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	protected void handleSearchResult(MarketplaceCategory catalogCategory, SearchResult result, IProgressMonitor monitor) {
 		if (!result.getNodes().isEmpty()) {
 			int totalWork = 10000000;
-			monitor.beginTask("Loading resources", totalWork);
+			monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_loadingResources, totalWork);
 			ExecutorService executor = Executors.newFixedThreadPool(Math.min(result.getNodes().size(), 10));
 			try {
 				List<Future<?>> futures = new ArrayList<Future<?>>();
@@ -228,7 +228,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	public void performQuery(Market market, Category category, String queryText, IProgressMonitor monitor)
 			throws CoreException {
 		final int totalWork = 1000000;
-		monitor.beginTask("Searching Marketplace", totalWork);
+		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_searchingMarketplace, totalWork);
 		try {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
 			catalogCategory.setContents(Contents.QUERY);
@@ -242,7 +242,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	public void recent(IProgressMonitor monitor) throws CoreException {
 		final int totalWork = 1000000;
-		monitor.beginTask("Searching Marketplace", totalWork);
+		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_searchingMarketplace, totalWork);
 		try {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
 			catalogCategory.setContents(Contents.RECENT);
@@ -255,7 +255,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	public void featured(IProgressMonitor monitor) throws CoreException {
 		final int totalWork = 1000000;
-		monitor.beginTask("Searching Marketplace", totalWork);
+		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_searchingMarketplace, totalWork);
 		try {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
 			catalogCategory.setContents(Contents.FEATURED);
@@ -270,7 +270,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	public void popular(IProgressMonitor monitor) throws CoreException {
 		// FIXME: do we want popular or favorites?
 		final int totalWork = 1000000;
-		monitor.beginTask("Searching Marketplace", totalWork);
+		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_searchingMarketplace, totalWork);
 		try {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
 			catalogCategory.setContents(Contents.POPULAR);
@@ -283,7 +283,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	public void installed(IProgressMonitor monitor) throws CoreException {
 		final int totalWork = 1000000;
-		monitor.beginTask("Finding Installed", totalWork);
+		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_findingInstalled, totalWork);
 		try {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
 			catalogCategory.setContents(Contents.INSTALLED);
@@ -331,7 +331,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	protected MarketplaceCategory findMarketplaceCategory(IProgressMonitor monitor) throws CoreException {
 		MarketplaceCategory catalogCategory = null;
 
-		monitor.beginTask("Catalog category", 10000);
+		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_catalogCategory, 10000);
 		try {
 			for (CatalogCategory candidate : getCategories()) {
 				if (candidate.getSource() == source) {
@@ -346,8 +346,8 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 				// markets.  This doesn't match well with discovery's concept of a category.  Discovery requires all
 				// items to be in a category, so we use a single root category and tagging.
 				catalogCategory = new MarketplaceCategory();
-				catalogCategory.setId("<root>");
-				catalogCategory.setName("<root>");
+				catalogCategory.setId("<root>"); //$NON-NLS-1$
+				catalogCategory.setName("<root>"); //$NON-NLS-1$
 				catalogCategory.setSource(source);
 
 				catalogCategory.setMarkets(markets);

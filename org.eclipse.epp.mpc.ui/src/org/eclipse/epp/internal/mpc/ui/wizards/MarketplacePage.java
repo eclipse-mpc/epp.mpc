@@ -50,8 +50,8 @@ public class MarketplacePage extends CatalogPage {
 	public MarketplacePage(MarketplaceCatalog catalog, MarketplaceCatalogConfiguration configuration) {
 		super(catalog);
 		this.configuration = configuration;
-		setDescription("Select solutions to install. Press Finish to proceed with installation.\nPress the information button to see a detailed overview and a link to more information.");
-		setTitle("Eclipse Marketplace Solutions");
+		setDescription(Messages.MarketplacePage_selectSolutionsToInstall);
+		setTitle(Messages.MarketplacePage_eclipseMarketplaceSolutions);
 	}
 
 	@Override
@@ -69,13 +69,13 @@ public class MarketplacePage extends CatalogPage {
 		}
 
 		final TabItem searchTabItem = new TabItem(tabFolder, SWT.NULL);
-		searchTabItem.setText("Search");
+		searchTabItem.setText(Messages.MarketplacePage_search);
 		final TabItem recentTabItem = new TabItem(tabFolder, SWT.NULL);
-		recentTabItem.setText("Recent");
+		recentTabItem.setText(Messages.MarketplacePage_recent);
 		final TabItem popularTabItem = new TabItem(tabFolder, SWT.NULL);
-		popularTabItem.setText("Popular");
+		popularTabItem.setText(Messages.MarketplacePage_popular);
 		final TabItem installedTabItem = new TabItem(tabFolder, SWT.NULL);
-		installedTabItem.setText("Installed");
+		installedTabItem.setText(Messages.MarketplacePage_installed);
 
 		super.createControl(tabFolder);
 
@@ -108,8 +108,8 @@ public class MarketplacePage extends CatalogPage {
 
 		if (needSwitchMarketplaceLink) {
 			Link link = new Link(parent, SWT.NULL);
-			link.setText("<a>Switch Marketplace Catalog</a>");
-			link.setToolTipText("Select an alternate catalog");
+			link.setText(Messages.MarketplacePage_switchCatalog_link);
+			link.setToolTipText(Messages.MarketplacePage_selectAlternateCatalog);
 			link.addSelectionListener(new SelectionListener() {
 				public void widgetSelected(SelectionEvent e) {
 					switchMarketplaceLinkActivated();

@@ -76,7 +76,7 @@ public class FeatureSelectionWizardPage extends WizardPage {
 					return entry.getFeatureDescriptor().getName();
 				}
 			}
-			return "" + columnIndex;
+			return "" + columnIndex; //$NON-NLS-1$
 		}
 
 		public Image getColumnImage(Object element, int columnIndex) {
@@ -149,8 +149,8 @@ public class FeatureSelectionWizardPage extends WizardPage {
 
 	protected FeatureSelectionWizardPage() {
 		super(FeatureSelectionWizardPage.class.getName());
-		setTitle("Confirm Selected Features");
-		setDescription("Confirm the features to include in this provisioning operation");
+		setTitle(Messages.FeatureSelectionWizardPage_confirmSelectedFeatures);
+		setDescription(Messages.FeatureSelectionWizardPage_confirmSelectedFeatures_description);
 		setPageComplete(true);
 	}
 
@@ -241,7 +241,7 @@ public class FeatureSelectionWizardPage extends WizardPage {
 		try {
 			getContainer().run(true, true, operation);
 		} catch (InvocationTargetException e) {
-			IStatus status = MarketplaceClientUi.computeStatus(e, "Unexpected exception while verifying features");
+			IStatus status = MarketplaceClientUi.computeStatus(e, Messages.FeatureSelectionWizardPage_unexpectedException_verifyingFeatures);
 			StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 		} catch (InterruptedException e) {
 			// canceled
@@ -259,11 +259,11 @@ public class FeatureSelectionWizardPage extends WizardPage {
 		if (unresolvedFeatureDescriptors != null && !unresolvedFeatureDescriptors.isEmpty()) {
 			if (featureDescriptors == null || featureDescriptors.isEmpty()) {
 				IStatus status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
-						"None of the selected features are not available.  Please choose another solution to install.");
+						Messages.FeatureSelectionWizardPage_noneAvailable);
 				StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			} else {
 				IStatus status = new Status(IStatus.WARNING, MarketplaceClientUi.BUNDLE_ID,
-						"One or more selected features are not available");
+						Messages.FeatureSelectionWizardPage_oneOrMoreUnavailable);
 				StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			}
 		}

@@ -82,7 +82,7 @@ public class MarketplaceCatalog extends Catalog {
 	}
 
 	protected IStatus performDiscovery(DiscoveryOperation operation, IProgressMonitor monitor) {
-		MultiStatus status = new MultiStatus(MarketplaceClientUi.BUNDLE_ID, 0, "Query failed to complete", null);
+		MultiStatus status = new MultiStatus(MarketplaceClientUi.BUNDLE_ID, 0, Messages.MarketplaceCatalog_queryFailed, null);
 		if (getDiscoveryStrategies().isEmpty()) {
 			throw new IllegalStateException();
 		}
@@ -98,7 +98,7 @@ public class MarketplaceCatalog extends Catalog {
 
 		final int totalTicks = 100000;
 		final int discoveryTicks = totalTicks - (totalTicks / 10);
-		monitor.beginTask("Querying marketplace", totalTicks);
+		monitor.beginTask(Messages.MarketplaceCatalog_queryingMarketplace, totalTicks);
 		try {
 			int strategyTicks = discoveryTicks / getDiscoveryStrategies().size();
 			for (AbstractDiscoveryStrategy discoveryStrategy : getDiscoveryStrategies()) {
@@ -117,7 +117,7 @@ public class MarketplaceCatalog extends Catalog {
 
 					} catch (CoreException e) {
 						status.add(new Status(IStatus.ERROR, DiscoveryCore.ID_PLUGIN, NLS.bind(
-								"{0} failed with an error", discoveryStrategy.getClass().getSimpleName()), e));
+								Messages.MarketplaceCatalog_failedWithError, discoveryStrategy.getClass().getSimpleName()), e));
 					}
 				}
 			}

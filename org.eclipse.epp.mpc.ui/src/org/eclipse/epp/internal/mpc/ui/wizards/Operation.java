@@ -18,9 +18,9 @@ import org.eclipse.epp.internal.mpc.ui.operations.ProvisioningOperation.Operatio
  * @author David Green
  */
 public enum Operation {
-	INSTALL(OperationType.INSTALL, "install"), //
-	UNINSTALL(OperationType.UNINSTALL, "uninstall"), //
-	CHECK_FOR_UPDATES(OperationType.UPDATE, "update"), // 
+	INSTALL(OperationType.INSTALL, Messages.Operation_install), //
+	UNINSTALL(OperationType.UNINSTALL, Messages.Operation_uninstall), //
+	CHECK_FOR_UPDATES(OperationType.UPDATE, Messages.Operation_update), // 
 	NONE(null, null);
 
 	private final OperationType operationType;

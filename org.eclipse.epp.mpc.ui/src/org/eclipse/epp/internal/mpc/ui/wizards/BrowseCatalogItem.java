@@ -62,8 +62,8 @@ public class BrowseCatalogItem extends AbstractDiscoveryItem<CatalogDescriptor> 
 		GridLayoutFactory.swtDefaults().applyTo(parent);
 
 		Link link = new Link(parent, SWT.NULL);
-		link.setText(NLS.bind("<a>{0} matches.  Browse for more solutions...</a>", category.getMatchCount()));
-		link.setToolTipText(NLS.bind("Open {0} in a browser", getData().getUrl()));
+		link.setText(NLS.bind(Messages.BrowseCatalogItem_browseMoreLink, category.getMatchCount()));
+		link.setToolTipText(NLS.bind(Messages.BrowseCatalogItem_openUrlBrowser, getData().getUrl()));
 		link.setBackground(null);
 		link.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
@@ -80,7 +80,7 @@ public class BrowseCatalogItem extends AbstractDiscoveryItem<CatalogDescriptor> 
 		try {
 			WorkbenchUtil.openUrl(catalogDescriptor.getUrl().toURI().toString(), IWorkbenchBrowserSupport.AS_EXTERNAL);
 		} catch (URISyntaxException e) {
-			String message = String.format("Cannot open browser");
+			String message = String.format(Messages.BrowseCatalogItem_cannotOpenBrowser);
 			IStatus status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, IStatus.ERROR, message, e);
 			StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 		}
