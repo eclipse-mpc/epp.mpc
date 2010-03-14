@@ -263,22 +263,22 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 					if (unavailableIds == null) {
 						unavailableIds = new StringBuilder();
 					} else {
-						unavailableIds.append(Messages.InstallConnectorsJob_commaSeparator);
+						unavailableIds.append(", ");
 					}
 					unavailableIds.append(id);
 				}
 			}
 			if (unavailableIds != null) {
 				if (message.length() > 0) {
-					message += Messages.InstallConnectorsJob_commaSeparator;
+					message += ", ";
 				}
 				message += descriptor.getName();
 
 				if (detailedMessage.length() > 0) {
-					detailedMessage += Messages.InstallConnectorsJob_commaSeparator;
+					detailedMessage += ", ";
 				}
-				detailedMessage += NLS.bind(Messages.PrepareInstallProfileJob_notFoundDescriptorDetail, new Object[] {
-						descriptor.getName(), unavailableIds.toString(), descriptor.getSiteUrl() });
+				detailedMessage += NLS.bind("{0} (id={1}, site={2})", new Object[] { descriptor.getName(),
+						unavailableIds.toString(), descriptor.getSiteUrl() });
 			}
 		}
 
@@ -288,14 +288,17 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 			final String finalMessage = message;
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
-					okayToProceed[0] = MessageDialog.openQuestion(WorkbenchUtil.getShell(),
-							Messages.InstallConnectorsJob_questionProceed, NLS.bind(
-									Messages.InstallConnectorsJob_questionProceed_long, new Object[] { finalMessage }));
+					okayToProceed[0] = MessageDialog.openQuestion(
+							WorkbenchUtil.getShell(),
+							"Proceed With Installation?",
+							NLS.bind(
+									"The following connectors are not available: {0}\nProceed with the installation anyways?",
+									new Object[] { finalMessage }));
 				}
 			});
 			if (!okayToProceed[0]) {
 				throw new CoreException(new Status(IStatus.ERROR, DiscoveryUi.ID_PLUGIN, NLS.bind(
-						Messages.InstallConnectorsJob_connectorsNotAvailable, detailedMessage), null));
+						"The following connectors are not available: {0}", detailedMessage), null));
 			}
 		}
 	}
