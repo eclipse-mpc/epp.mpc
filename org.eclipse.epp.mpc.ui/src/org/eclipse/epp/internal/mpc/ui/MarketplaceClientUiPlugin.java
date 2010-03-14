@@ -20,10 +20,21 @@ import org.osgi.framework.BundleContext;
  * @author David Green
  */
 public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
+
 	/**
 	 * image registry key
 	 */
-	public static final String NO_ICON_PROVIDED = "NO_ICON_PROVIDED";
+	public static final String IU_ICON_UPDATE = "IU_ICON_UPDATE"; //$NON-NLS-1$
+
+	/**
+	 * image registry key
+	 */
+	public static final String IU_ICON = "IU_ICON"; //$NON-NLS-1$
+
+	/**
+	 * image registry key
+	 */
+	public static final String NO_ICON_PROVIDED = "NO_ICON_PROVIDED"; //$NON-NLS-1$
 
 	private static MarketplaceClientUiPlugin instance;
 
@@ -54,6 +65,9 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 		ImageRegistry imageRegistry = super.createImageRegistry();
 		imageRegistry.put(NO_ICON_PROVIDED, imageDescriptorFromPlugin(getBundle().getSymbolicName(),
 				"icons/noiconprovided.png"));
+		imageRegistry.put(IU_ICON, imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/iu_obj.gif"));
+		imageRegistry.put(IU_ICON_UPDATE, imageDescriptorFromPlugin(getBundle().getSymbolicName(),
+				"icons/iu_update_obj.gif"));
 		return imageRegistry;
 	}
 }
