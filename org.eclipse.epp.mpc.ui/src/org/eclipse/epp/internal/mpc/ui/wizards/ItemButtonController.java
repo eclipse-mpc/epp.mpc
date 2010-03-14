@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Button;
  * 
  * @author David Green
  */
+@SuppressWarnings("rawtypes")
 class ItemButtonController {
 	private enum ButtonState {
 		INSTALL(Messages.ItemButtonController_install, Operation.NONE), //
@@ -37,10 +38,6 @@ class ItemButtonController {
 		private ButtonState(String label, Operation operation) {
 			this.label = label;
 			this.operation = operation;
-		}
-
-		public Operation getOperation() {
-			return operation;
 		}
 
 		public ButtonState nextState() {
@@ -84,6 +81,7 @@ class ItemButtonController {
 
 	private ButtonState secondaryButtonState;
 
+	@SuppressWarnings("unused")
 	private final MarketplaceViewer viewer;
 
 	public ItemButtonController(MarketplaceViewer marketplaceViewer, DiscoveryItem discoveryItem, Button button,

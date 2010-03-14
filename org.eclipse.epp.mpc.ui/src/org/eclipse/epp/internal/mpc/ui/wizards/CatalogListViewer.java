@@ -22,9 +22,9 @@ import org.eclipse.swt.widgets.Composite;
 
 public class CatalogListViewer extends ControlListViewer {
 
-	private DiscoveryResources resources;
+	private final DiscoveryResources resources;
 
-	private ImageRegistry imageRegistry;
+	private final ImageRegistry imageRegistry;
 
 	public CatalogListViewer(Composite parent, int style) {
 		super(parent, style);
@@ -39,6 +39,7 @@ public class CatalogListViewer extends ControlListViewer {
 		});
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	protected ControlListItem doCreateItem(Composite parent, Object element) {
 		MarketplaceCatalogConfiguration configuration = (MarketplaceCatalogConfiguration) getInput();

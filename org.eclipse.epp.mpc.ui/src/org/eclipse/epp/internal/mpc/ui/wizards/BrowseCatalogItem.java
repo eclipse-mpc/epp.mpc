@@ -35,7 +35,7 @@ import org.eclipse.ui.statushandlers.StatusManager;
 /**
  * @author David Green
  */
-@SuppressWarnings("restriction")
+@SuppressWarnings("unused")
 public class BrowseCatalogItem extends AbstractDiscoveryItem<CatalogDescriptor> {
 
 	private final MarketplaceViewer viewer;

@@ -27,7 +27,6 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.discovery.model.Tag;
 import org.eclipse.equinox.internal.p2.discovery.util.CatalogCategoryComparator;
-import org.eclipse.equinox.internal.p2.discovery.util.CatalogItemComparator;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.ControlListItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.PatternFilter;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogConfiguration;
@@ -149,6 +148,7 @@ public class MarketplaceViewer extends CatalogViewer {
 		this.queryText = text;
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	protected ControlListItem<?> doCreateViewerItem(Composite parent, Object element) {
 		if (element instanceof CatalogItem) {
@@ -289,8 +289,6 @@ public class MarketplaceViewer extends CatalogViewer {
 		StructuredViewer viewer = super.doCreateViewer(container);
 		viewer.setSorter(new ViewerSorter() {
 			CatalogCategoryComparator categoryComparator = new CatalogCategoryComparator();
-
-			CatalogItemComparator itemComparator = new CatalogItemComparator();
 
 			@Override
 			public int compare(Viewer viewer, Object o1, Object o2) {

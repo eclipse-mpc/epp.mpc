@@ -49,7 +49,6 @@ import org.eclipse.equinox.internal.p2.discovery.model.Tag;
 /**
  * @author David Green
  */
-@SuppressWarnings("restriction")
 public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	private final CatalogDescriptor catalogDescriptor;

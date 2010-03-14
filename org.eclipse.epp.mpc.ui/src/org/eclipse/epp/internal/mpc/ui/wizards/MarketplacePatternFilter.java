@@ -14,14 +14,13 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.PatternFilter;
 import org.eclipse.jface.viewers.Viewer;
 
+/**
+ * @author David Green
+ */
 class MarketplacePatternFilter extends PatternFilter {
 
 	public MarketplacePatternFilter() {
 		setIncludeLeadingWildcard(true);
-	}
-
-	private boolean filterMatches(String text) {
-		return text != null && wordMatches(text);
 	}
 
 	@Override

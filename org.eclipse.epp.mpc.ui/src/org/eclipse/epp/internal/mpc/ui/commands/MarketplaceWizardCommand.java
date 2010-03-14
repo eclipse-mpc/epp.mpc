@@ -42,7 +42,6 @@ import org.eclipse.jface.wizard.WizardDialog;
 /**
  * @author David Green
  */
-@SuppressWarnings("restriction")
 public class MarketplaceWizardCommand extends AbstractHandler implements IHandler {
 
 	private List<CatalogDescriptor> catalogDescriptors;

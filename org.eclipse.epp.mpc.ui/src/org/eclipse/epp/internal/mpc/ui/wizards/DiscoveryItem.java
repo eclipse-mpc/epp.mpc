@@ -52,6 +52,7 @@ import org.eclipse.swt.widgets.Widget;
  * @author Steffen Pingel
  * @author David Green
  */
+@SuppressWarnings("unused")
 public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<T> implements PropertyChangeListener {
 
 	private static final int MAX_IMAGE_HEIGHT = 40;
@@ -125,8 +126,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 				iconLabel.setImage(image);
 			} catch (SWTException e) {
 				// ignore, probably a bad image format
-				MarketplaceClientUi.error(NLS.bind(Messages.DiscoveryItem_cannotRenderImage_reason, connector.getIcon().getImage32(),
-						e.getMessage()), e);
+				MarketplaceClientUi.error(NLS.bind(Messages.DiscoveryItem_cannotRenderImage_reason, connector.getIcon()
+						.getImage32(), e.getMessage()), e);
 			}
 		}
 		if (iconLabel.getImage() == null) {
@@ -204,7 +205,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		// always disabled color to make it less prominent
 		providerLabel.setForeground(resources.getColorDisabled());
 
-		providerLabel.setText(NLS.bind(Messages.DiscoveryItem_byProviderLicense, connector.getProvider(), connector.getLicense()));
+		providerLabel.setText(NLS.bind(Messages.DiscoveryItem_byProviderLicense, connector.getProvider(),
+				connector.getLicense()));
 	}
 
 	protected boolean hasTooltip(final CatalogItem connector) {

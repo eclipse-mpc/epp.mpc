@@ -145,8 +145,6 @@ public class FeatureSelectionWizardPage extends WizardPage {
 
 	private ResolveFeatureNamesOperation operation;
 
-	private List<CatalogItemEntry> model;
-
 	protected FeatureSelectionWizardPage() {
 		super(FeatureSelectionWizardPage.class.getName());
 		setTitle(Messages.FeatureSelectionWizardPage_confirmSelectedFeatures);
@@ -241,7 +239,8 @@ public class FeatureSelectionWizardPage extends WizardPage {
 		try {
 			getContainer().run(true, true, operation);
 		} catch (InvocationTargetException e) {
-			IStatus status = MarketplaceClientUi.computeStatus(e, Messages.FeatureSelectionWizardPage_unexpectedException_verifyingFeatures);
+			IStatus status = MarketplaceClientUi.computeStatus(e,
+					Messages.FeatureSelectionWizardPage_unexpectedException_verifyingFeatures);
 			StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 		} catch (InterruptedException e) {
 			// canceled
