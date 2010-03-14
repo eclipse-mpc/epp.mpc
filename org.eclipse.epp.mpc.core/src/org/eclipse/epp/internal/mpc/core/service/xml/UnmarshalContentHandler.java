@@ -96,7 +96,7 @@ public abstract class UnmarshalContentHandler {
 		if (string.length() == 0) {
 			return null;
 		}
-		return "1".equals(string) || "true".equals(string);
+		return "1".equals(string) || "true".equals(string); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	protected Integer toInteger(String string) {

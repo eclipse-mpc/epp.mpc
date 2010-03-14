@@ -19,15 +19,14 @@ import org.xml.sax.SAXException;
  */
 public class CategoriesContentHandler extends UnmarshalContentHandler {
 
-	private static final String NS_URI = "";
-
 	private Categories model;
 
+	@Override
 	public void startElement(String uri, String localName, Attributes attributes) {
-		if (localName.equals("categories")) {
+		if (localName.equals("categories")) { //$NON-NLS-1$
 			model = new Categories();
 
-		} else if (localName.equals("category")) {
+		} else if (localName.equals("category")) { //$NON-NLS-1$
 			org.eclipse.epp.internal.mpc.core.service.xml.CategoryContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.CategoryContentHandler();
 			childHandler.setParentModel(model);
 			childHandler.setParentHandler(this);
@@ -37,8 +36,9 @@ public class CategoriesContentHandler extends UnmarshalContentHandler {
 		}
 	}
 
+	@Override
 	public boolean endElement(String uri, String localName) throws SAXException {
-		if (localName.equals("categories")) {
+		if (localName.equals("categories")) { //$NON-NLS-1$
 			if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Node) {
 				((org.eclipse.epp.internal.mpc.core.service.Node) parentModel).setCategories(model);
 			}
@@ -49,7 +49,7 @@ public class CategoriesContentHandler extends UnmarshalContentHandler {
 				parentHandler.endElement(uri, localName);
 			}
 			return true;
-		} else if (localName.equals("category")) {
+		} else if (localName.equals("category")) { //$NON-NLS-1$
 			// nothing to do
 		}
 		return false;

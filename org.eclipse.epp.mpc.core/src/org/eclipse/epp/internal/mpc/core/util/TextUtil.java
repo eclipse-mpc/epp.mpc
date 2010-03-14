@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
  */
 public class TextUtil {
 	private static final Pattern STRIP_TAG_PATTERN = Pattern.compile(
-			"</?[a-zA-Z]+[0-6]?(\\s+[a-zA-Z]+\\s*=\\s*((('|\")[^>]*?\\4)|(\\S+)))*\\s*/?>", Pattern.MULTILINE);
+			"</?[a-zA-Z]+[0-6]?(\\s+[a-zA-Z]+\\s*=\\s*((('|\")[^>]*?\\4)|(\\S+)))*\\s*/?>", Pattern.MULTILINE); //$NON-NLS-1$
 
 	/**
 	 * Strip HTML tags such that the returned text is suitable for display.
@@ -33,7 +33,7 @@ public class TextUtil {
 		if (text == null) {
 			return null;
 		}
-		String result = "";
+		String result = ""; //$NON-NLS-1$
 		int lastOffset = 0;
 		Matcher matcher = STRIP_TAG_PATTERN.matcher(text);
 		while (matcher.find()) {
@@ -62,7 +62,7 @@ public class TextUtil {
 			return null;
 		}
 		// replace dual newlines with paragraph tags, but not if between tags
-		text = Pattern.compile("(?<!>)\\s*?((\\r\\n)|\\n|\\r){2,}\\s*(?!<)").matcher(text).replaceAll("<p>");
+		text = Pattern.compile("(?<!>)\\s*?((\\r\\n)|\\n|\\r){2,}\\s*(?!<)").matcher(text).replaceAll("<p>"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		return text;
 	}

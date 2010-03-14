@@ -19,66 +19,66 @@ import org.xml.sax.SAXException;
  */
 public class NodeContentHandler extends UnmarshalContentHandler {
 
-	private static final String NS_URI = "";
+	private static final String NS_URI = ""; //$NON-NLS-1$
 
 	private Node model;
 
 	public void startElement(String uri, String localName, Attributes attributes) {
-		if (localName.equals("node")) {
+		if (localName.equals("node")) { //$NON-NLS-1$
 			model = new Node();
 
-			model.setId(attributes.getValue(NS_URI, "id"));
-			model.setName(attributes.getValue(NS_URI, "name"));
-			model.setUrl(attributes.getValue(NS_URI, "url"));
-		} else if (localName.equals("favorited")) {
+			model.setId(attributes.getValue(NS_URI, "id")); //$NON-NLS-1$
+			model.setName(attributes.getValue(NS_URI, "name")); //$NON-NLS-1$
+			model.setUrl(attributes.getValue(NS_URI, "url")); //$NON-NLS-1$
+		} else if (localName.equals("favorited")) { //$NON-NLS-1$
 			capturingContent = true;
-		} else if (localName.equals("type")) {
+		} else if (localName.equals("type")) { //$NON-NLS-1$
 			capturingContent = true;
-		} else if (localName.equals("categories")) {
+		} else if (localName.equals("categories")) { //$NON-NLS-1$
 			org.eclipse.epp.internal.mpc.core.service.xml.CategoriesContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.CategoriesContentHandler();
 			childHandler.setParentModel(model);
 			childHandler.setParentHandler(this);
 			childHandler.setUnmarshaller(getUnmarshaller());
 			getUnmarshaller().setCurrentHandler(childHandler);
 			childHandler.startElement(uri, localName, attributes);
-		} else if (localName.equals("owner")) {
+		} else if (localName.equals("owner")) { //$NON-NLS-1$
 			capturingContent = true;
-		} else if (localName.equals("body")) {
+		} else if (localName.equals("body")) { //$NON-NLS-1$
 			capturingContent = true;
-		} else if (localName.equals("created")) {
+		} else if (localName.equals("created")) { //$NON-NLS-1$
 			capturingContent = true;
-		} else if (localName.equals("changed")) {
+		} else if (localName.equals("changed")) { //$NON-NLS-1$
 			capturingContent = true;
-		} else if (localName.equals("foundationmember")) {
+		} else if (localName.equals("foundationmember")) { //$NON-NLS-1$
 			capturingContent = true;
-		} else if (localName.equals("homepageurl")) {
+		} else if (localName.equals("homepageurl")) { //$NON-NLS-1$
 			capturingContent = true;
-		} else if (localName.equals("image")) {
+		} else if (localName.equals("image")) { //$NON-NLS-1$
 			capturingContent = true;
-		} else if (localName.equals("screenshot")) {
+		} else if (localName.equals("screenshot")) { //$NON-NLS-1$
 			capturingContent = true;
-		} else if (localName.equals("version")) {
+		} else if (localName.equals("version")) { //$NON-NLS-1$
 			capturingContent = true;
-		} else if (localName.equals("license")) {
+		} else if (localName.equals("license")) { //$NON-NLS-1$
 			capturingContent = true;
-		} else if (localName.equals("companyname")) {
+		} else if (localName.equals("companyname")) { //$NON-NLS-1$
 			capturingContent = true;
-		} else if (localName.equals("status")) {
+		} else if (localName.equals("status")) { //$NON-NLS-1$
 			capturingContent = true;
-		} else if (localName.equals("eclipseversion")) {
+		} else if (localName.equals("eclipseversion")) { //$NON-NLS-1$
 			capturingContent = true;
-		} else if (localName.equals("supporturl")) {
+		} else if (localName.equals("supporturl")) { //$NON-NLS-1$
 			capturingContent = true;
-		} else if (localName.equals("updateurl")) {
+		} else if (localName.equals("updateurl")) { //$NON-NLS-1$
 			capturingContent = true;
-		} else if (localName.equals("ius")) {
+		} else if (localName.equals("ius")) { //$NON-NLS-1$
 			org.eclipse.epp.internal.mpc.core.service.xml.IusContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.IusContentHandler();
 			childHandler.setParentModel(model);
 			childHandler.setParentHandler(this);
 			childHandler.setUnmarshaller(getUnmarshaller());
 			getUnmarshaller().setCurrentHandler(childHandler);
 			childHandler.startElement(uri, localName, attributes);
-		} else if (localName.equals("platforms")) {
+		} else if (localName.equals("platforms")) { //$NON-NLS-1$
 			org.eclipse.epp.internal.mpc.core.service.xml.PlatformsContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.PlatformsContentHandler();
 			childHandler.setParentModel(model);
 			childHandler.setParentHandler(this);
@@ -89,7 +89,7 @@ public class NodeContentHandler extends UnmarshalContentHandler {
 	}
 
 	public boolean endElement(String uri, String localName) throws SAXException {
-		if (localName.equals("node")) {
+		if (localName.equals("node")) { //$NON-NLS-1$
 			if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Marketplace) {
 				((org.eclipse.epp.internal.mpc.core.service.Marketplace) parentModel).getNode().add(model);
 			} else if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Category) {
@@ -112,113 +112,113 @@ public class NodeContentHandler extends UnmarshalContentHandler {
 				parentHandler.endElement(uri, localName);
 			}
 			return true;
-		} else if (localName.equals("favorited")) {
+		} else if (localName.equals("favorited")) { //$NON-NLS-1$
 			if (content != null) {
 				model.setFavorited(toInteger(content.toString()));
 				content = null;
 			}
 			capturingContent = false;
-		} else if (localName.equals("type")) {
+		} else if (localName.equals("type")) { //$NON-NLS-1$
 			if (content != null) {
 				model.setType(content.toString());
 				content = null;
 			}
 			capturingContent = false;
-		} else if (localName.equals("categories")) {
+		} else if (localName.equals("categories")) { //$NON-NLS-1$
 			// nothing to do
-		} else if (localName.equals("owner")) {
+		} else if (localName.equals("owner")) { //$NON-NLS-1$
 			if (content != null) {
 				model.setOwner(content.toString());
 				content = null;
 			}
 			capturingContent = false;
-		} else if (localName.equals("body")) {
+		} else if (localName.equals("body")) { //$NON-NLS-1$
 			if (content != null) {
 				model.setBody(content.toString());
 				content = null;
 			}
 			capturingContent = false;
-		} else if (localName.equals("created")) {
+		} else if (localName.equals("created")) { //$NON-NLS-1$
 			if (content != null) {
 				model.setCreated(toDate(content.toString()));
 				content = null;
 			}
 			capturingContent = false;
-		} else if (localName.equals("changed")) {
+		} else if (localName.equals("changed")) { //$NON-NLS-1$
 			if (content != null) {
 				model.setChanged(toDate(content.toString()));
 				content = null;
 			}
 			capturingContent = false;
-		} else if (localName.equals("foundationmember")) {
+		} else if (localName.equals("foundationmember")) { //$NON-NLS-1$
 			if (content != null) {
 				model.setFoundationmember(toBoolean(content.toString()));
 				content = null;
 			}
 			capturingContent = false;
-		} else if (localName.equals("homepageurl")) {
+		} else if (localName.equals("homepageurl")) { //$NON-NLS-1$
 			if (content != null) {
 				model.setHomepageurl(content.toString());
 				content = null;
 			}
 			capturingContent = false;
-		} else if (localName.equals("image")) {
+		} else if (localName.equals("image")) { //$NON-NLS-1$
 			if (content != null) {
 				model.setImage(content.toString());
 				content = null;
 			}
 			capturingContent = false;
-		} else if (localName.equals("screenshot")) {
+		} else if (localName.equals("screenshot")) { //$NON-NLS-1$
 			if (content != null) {
 				model.setScreenshot(content.toString());
 				content = null;
 			}
 			capturingContent = false;
-		} else if (localName.equals("version")) {
+		} else if (localName.equals("version")) { //$NON-NLS-1$
 			if (content != null) {
 				model.setVersion(content.toString());
 				content = null;
 			}
 			capturingContent = false;
-		} else if (localName.equals("license")) {
+		} else if (localName.equals("license")) { //$NON-NLS-1$
 			if (content != null) {
 				model.setLicense(content.toString());
 				content = null;
 			}
 			capturingContent = false;
-		} else if (localName.equals("companyname")) {
+		} else if (localName.equals("companyname")) { //$NON-NLS-1$
 			if (content != null) {
 				model.setCompanyname(content.toString());
 				content = null;
 			}
 			capturingContent = false;
-		} else if (localName.equals("status")) {
+		} else if (localName.equals("status")) { //$NON-NLS-1$
 			if (content != null) {
 				model.setStatus(content.toString());
 				content = null;
 			}
 			capturingContent = false;
-		} else if (localName.equals("eclipseversion")) {
+		} else if (localName.equals("eclipseversion")) { //$NON-NLS-1$
 			if (content != null) {
 				model.setEclipseversion(content.toString());
 				content = null;
 			}
 			capturingContent = false;
-		} else if (localName.equals("supporturl")) {
+		} else if (localName.equals("supporturl")) { //$NON-NLS-1$
 			if (content != null) {
 				model.setSupporturl(content.toString());
 				content = null;
 			}
 			capturingContent = false;
-		} else if (localName.equals("updateurl")) {
+		} else if (localName.equals("updateurl")) { //$NON-NLS-1$
 			if (content != null) {
 				model.setUpdateurl(content.toString());
 				content = null;
 			}
 			capturingContent = false;
-		} else if (localName.equals("ius")) {
+		} else if (localName.equals("ius")) { //$NON-NLS-1$
 			// nothing to do
-		} else if (localName.equals("platforms")) {
+		} else if (localName.equals("platforms")) { //$NON-NLS-1$
 			// nothing to do
 		}
 		return false;

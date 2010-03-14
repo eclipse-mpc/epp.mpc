@@ -19,21 +19,21 @@ import org.xml.sax.SAXException;
  */
 public class IusContentHandler extends UnmarshalContentHandler {
 
-	private static final String NS_URI = "";
-
 	private Ius model;
 
+	@Override
 	public void startElement(String uri, String localName, Attributes attributes) {
-		if (localName.equals("ius")) {
+		if (localName.equals("ius")) { //$NON-NLS-1$
 			model = new Ius();
 
-		} else if (localName.equals("iu")) {
+		} else if (localName.equals("iu")) { //$NON-NLS-1$
 			capturingContent = true;
 		}
 	}
 
+	@Override
 	public boolean endElement(String uri, String localName) throws SAXException {
-		if (localName.equals("ius")) {
+		if (localName.equals("ius")) { //$NON-NLS-1$
 			if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Node) {
 				((org.eclipse.epp.internal.mpc.core.service.Node) parentModel).setIus(model);
 			}
@@ -44,7 +44,7 @@ public class IusContentHandler extends UnmarshalContentHandler {
 				parentHandler.endElement(uri, localName);
 			}
 			return true;
-		} else if (localName.equals("iu")) {
+		} else if (localName.equals("iu")) { //$NON-NLS-1$
 			if (content != null) {
 				model.getIu().add(content.toString());
 				content = null;

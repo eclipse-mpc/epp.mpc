@@ -19,16 +19,16 @@ import org.xml.sax.SAXException;
  */
 public class FavoritesContentHandler extends UnmarshalContentHandler {
 
-	private static final String NS_URI = "";
+	private static final String NS_URI = ""; //$NON-NLS-1$
 
 	private Favorites model;
 
 	public void startElement(String uri, String localName, Attributes attributes) {
-		if (localName.equals("favorites")) {
+		if (localName.equals("favorites")) { //$NON-NLS-1$
 			model = new Favorites();
 
-			model.setCount(toInteger(attributes.getValue(NS_URI, "count")));
-		} else if (localName.equals("node")) {
+			model.setCount(toInteger(attributes.getValue(NS_URI, "count"))); //$NON-NLS-1$
+		} else if (localName.equals("node")) { //$NON-NLS-1$
 			org.eclipse.epp.internal.mpc.core.service.xml.NodeContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.NodeContentHandler();
 			childHandler.setParentModel(model);
 			childHandler.setParentHandler(this);
@@ -39,7 +39,7 @@ public class FavoritesContentHandler extends UnmarshalContentHandler {
 	}
 
 	public boolean endElement(String uri, String localName) throws SAXException {
-		if (localName.equals("favorites")) {
+		if (localName.equals("favorites")) { //$NON-NLS-1$
 			if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Marketplace) {
 				((org.eclipse.epp.internal.mpc.core.service.Marketplace) parentModel).setFavorites(model);
 			}
@@ -50,7 +50,7 @@ public class FavoritesContentHandler extends UnmarshalContentHandler {
 				parentHandler.endElement(uri, localName);
 			}
 			return true;
-		} else if (localName.equals("node")) {
+		} else if (localName.equals("node")) { //$NON-NLS-1$
 			// nothing to do
 		}
 		return false;

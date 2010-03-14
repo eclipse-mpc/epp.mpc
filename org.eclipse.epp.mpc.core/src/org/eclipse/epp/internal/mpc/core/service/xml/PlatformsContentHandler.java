@@ -19,21 +19,21 @@ import org.xml.sax.SAXException;
  */
 public class PlatformsContentHandler extends UnmarshalContentHandler {
 
-	private static final String NS_URI = "";
-
 	private Platforms model;
 
+	@Override
 	public void startElement(String uri, String localName, Attributes attributes) {
-		if (localName.equals("platforms")) {
+		if (localName.equals("platforms")) { //$NON-NLS-1$
 			model = new Platforms();
 
-		} else if (localName.equals("platform")) {
+		} else if (localName.equals("platform")) { //$NON-NLS-1$
 			capturingContent = true;
 		}
 	}
 
+	@Override
 	public boolean endElement(String uri, String localName) throws SAXException {
-		if (localName.equals("platforms")) {
+		if (localName.equals("platforms")) { //$NON-NLS-1$
 			if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Node) {
 				((org.eclipse.epp.internal.mpc.core.service.Node) parentModel).setPlatforms(model);
 			}
@@ -44,7 +44,7 @@ public class PlatformsContentHandler extends UnmarshalContentHandler {
 				parentHandler.endElement(uri, localName);
 			}
 			return true;
-		} else if (localName.equals("platform")) {
+		} else if (localName.equals("platform")) { //$NON-NLS-1$
 			if (content != null) {
 				model.getPlatform().add(content.toString());
 				content = null;

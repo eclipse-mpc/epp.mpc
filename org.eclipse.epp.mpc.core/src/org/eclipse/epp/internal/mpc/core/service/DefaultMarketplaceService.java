@@ -32,7 +32,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.service.xml.Unmarshaller;
-import org.eclipse.equinox.internal.p2.repository.RepositoryTransport;
 import org.eclipse.osgi.util.NLS;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -98,9 +97,9 @@ public class DefaultMarketplaceService implements MarketplaceService {
 	public Market getMarket(Market market, IProgressMonitor monitor) throws CoreException {
 		Marketplace marketplace = processRequest(market.getUrl(), API_URI_SUFFIX, monitor);
 		if (marketplace.getMarket().isEmpty()) {
-			throw new CoreException(createErrorStatus("Market not found", null));
+			throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_marketNotFound, null));
 		} else if (marketplace.getMarket().size() > 1) {
-			throw new CoreException(createErrorStatus("Unexpected response", null));
+			throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_unexpectedResponse, null));
 		}
 		return marketplace.getMarket().get(0);
 	}
@@ -108,9 +107,9 @@ public class DefaultMarketplaceService implements MarketplaceService {
 	public Category getCategory(Category category, IProgressMonitor monitor) throws CoreException {
 		Marketplace marketplace = processRequest(category.getUrl(), API_URI_SUFFIX, monitor);
 		if (marketplace.getCategory().isEmpty()) {
-			throw new CoreException(createErrorStatus("Category not found", null));
+			throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_categoryNotFound, null));
 		} else if (marketplace.getCategory().size() > 1) {
-			throw new CoreException(createErrorStatus("Unexpected response", null));
+			throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_unexpectedResponse, null));
 		}
 		return marketplace.getCategory().get(0);
 	}
@@ -132,9 +131,9 @@ public class DefaultMarketplaceService implements MarketplaceService {
 			marketplace = processRequest(node.getUrl(), API_URI_SUFFIX, monitor);
 		}
 		if (marketplace.getNode().isEmpty()) {
-			throw new CoreException(createErrorStatus("Node not found", null));
+			throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_nodeNotFound, null));
 		} else if (marketplace.getNode().size() > 1) {
-			throw new CoreException(createErrorStatus("Unexpected response", null));
+			throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_unexpectedResponse, null));
 		}
 		return marketplace.getNode().get(0);
 	}
@@ -174,7 +173,7 @@ public class DefaultMarketplaceService implements MarketplaceService {
 			Marketplace marketplace = processRequest(relativeUrl, monitor);
 			Search search = marketplace.getSearch();
 			if (search == null) {
-				throw new CoreException(createErrorStatus("Unexpected response", null));
+				throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_unexpectedResponse, null));
 			}
 			result.setMatchCount(search.getCount());
 			result.setNodes(search.getNode());
@@ -204,7 +203,7 @@ public class DefaultMarketplaceService implements MarketplaceService {
 
 	protected SearchResult createSearchResult(NodeListing nodeList) throws CoreException {
 		if (nodeList == null) {
-			throw new CoreException(createErrorStatus("Unexpected response", null));
+			throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_unexpectedResponse, null));
 		}
 		SearchResult result = new SearchResult();
 		result.setMatchCount(nodeList.getCount());
@@ -214,7 +213,7 @@ public class DefaultMarketplaceService implements MarketplaceService {
 
 	private void checkConfiguration() {
 		if (baseUrl == null) {
-			throw new IllegalStateException("Must configure Marketplace base url");
+			throw new IllegalStateException(Messages.DefaultMarketplaceService_mustConfigureBaseUrl);
 		}
 	}
 
@@ -230,6 +229,7 @@ public class DefaultMarketplaceService implements MarketplaceService {
 		return processRequest(baseUri.toString(), relativeUrl, monitor);
 	}
 
+	@SuppressWarnings("restriction")
 	private Marketplace processRequest(String baseUri, String relativePath, IProgressMonitor monitor)
 			throws CoreException {
 		checkConfiguration();
@@ -246,12 +246,12 @@ public class DefaultMarketplaceService implements MarketplaceService {
 		try {
 			location = new URI(uri);
 		} catch (URISyntaxException e) {
-			String message = NLS.bind("Cannot complete request: Invalid location ''{0}'' specified", uri);
+			String message = NLS.bind(Messages.DefaultMarketplaceService_invalidLocation, uri);
 			throw new CoreException(createErrorStatus(message, e));
 		}
 
 		final Unmarshaller unmarshaller = new Unmarshaller();
-		monitor.beginTask(NLS.bind("Retrieving data from {0}", baseUri), 100);
+		monitor.beginTask(NLS.bind(Messages.DefaultMarketplaceService_retrievingDataFrom, baseUri), 100);
 		try {
 			SAXParserFactory parserFactory = SAXParserFactory.newInstance();
 			parserFactory.setNamespaceAware(true);
@@ -263,7 +263,8 @@ public class DefaultMarketplaceService implements MarketplaceService {
 			}
 			xmlReader.setContentHandler(unmarshaller);
 
-			InputStream in = RepositoryTransport.getInstance().stream(location, monitor);
+			InputStream in = org.eclipse.equinox.internal.p2.repository.RepositoryTransport.getInstance().stream(
+					location, monitor);
 			try {
 				monitor.worked(30);
 
@@ -272,7 +273,8 @@ public class DefaultMarketplaceService implements MarketplaceService {
 				try {
 					xmlReader.parse(new InputSource(reader));
 				} catch (final SAXException e) {
-					MarketplaceClientCore.error(NLS.bind("Cannot parse XML at URL {0}", location.toString()), e);
+					MarketplaceClientCore.error(NLS.bind(Messages.DefaultMarketplaceService_parseError,
+							location.toString()), e);
 					throw new IOException(e.getMessage()) {
 						@Override
 						public Throwable getCause() {
@@ -284,7 +286,8 @@ public class DefaultMarketplaceService implements MarketplaceService {
 				in.close();
 			}
 		} catch (IOException e) {
-			String message = NLS.bind("Cannot complete request to {0}: {1}", location.toString(), e.getMessage());
+			String message = NLS.bind(Messages.DefaultMarketplaceService_cannotCompleteRequest_reason,
+					location.toString(), e.getMessage());
 			throw new CoreException(createErrorStatus(message, e));
 		} finally {
 			monitor.done();
@@ -297,7 +300,8 @@ public class DefaultMarketplaceService implements MarketplaceService {
 		} else if (model instanceof Marketplace) {
 			return (Marketplace) model;
 		} else {
-			String message = NLS.bind("Unexpected response content: {0}", model.getClass().getSimpleName());
+			String message = NLS.bind(Messages.DefaultMarketplaceService_unexpectedResponseContent, model.getClass()
+					.getSimpleName());
 			throw new CoreException(createErrorStatus(message, null));
 		}
 	}

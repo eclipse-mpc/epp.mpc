@@ -19,64 +19,63 @@ import org.xml.sax.SAXException;
  */
 public class MarketplaceContentHandler extends UnmarshalContentHandler {
 
-	private static final String NS_URI = "";
-
 	private Marketplace model;
 
+	@Override
 	public void startElement(String uri, String localName, Attributes attributes) {
-		if (localName.equals("marketplace")) {
+		if (localName.equals("marketplace")) { //$NON-NLS-1$
 			model = new Marketplace();
 
-		} else if (localName.equals("market")) {
+		} else if (localName.equals("market")) { //$NON-NLS-1$
 			org.eclipse.epp.internal.mpc.core.service.xml.MarketContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.MarketContentHandler();
 			childHandler.setParentModel(model);
 			childHandler.setParentHandler(this);
 			childHandler.setUnmarshaller(getUnmarshaller());
 			getUnmarshaller().setCurrentHandler(childHandler);
 			childHandler.startElement(uri, localName, attributes);
-		} else if (localName.equals("category")) {
+		} else if (localName.equals("category")) { //$NON-NLS-1$
 			org.eclipse.epp.internal.mpc.core.service.xml.CategoryContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.CategoryContentHandler();
 			childHandler.setParentModel(model);
 			childHandler.setParentHandler(this);
 			childHandler.setUnmarshaller(getUnmarshaller());
 			getUnmarshaller().setCurrentHandler(childHandler);
 			childHandler.startElement(uri, localName, attributes);
-		} else if (localName.equals("node")) {
+		} else if (localName.equals("node")) { //$NON-NLS-1$
 			org.eclipse.epp.internal.mpc.core.service.xml.NodeContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.NodeContentHandler();
 			childHandler.setParentModel(model);
 			childHandler.setParentHandler(this);
 			childHandler.setUnmarshaller(getUnmarshaller());
 			getUnmarshaller().setCurrentHandler(childHandler);
 			childHandler.startElement(uri, localName, attributes);
-		} else if (localName.equals("featured")) {
+		} else if (localName.equals("featured")) { //$NON-NLS-1$
 			org.eclipse.epp.internal.mpc.core.service.xml.FeaturedContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.FeaturedContentHandler();
 			childHandler.setParentModel(model);
 			childHandler.setParentHandler(this);
 			childHandler.setUnmarshaller(getUnmarshaller());
 			getUnmarshaller().setCurrentHandler(childHandler);
 			childHandler.startElement(uri, localName, attributes);
-		} else if (localName.equals("search")) {
+		} else if (localName.equals("search")) { //$NON-NLS-1$
 			org.eclipse.epp.internal.mpc.core.service.xml.SearchContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.SearchContentHandler();
 			childHandler.setParentModel(model);
 			childHandler.setParentHandler(this);
 			childHandler.setUnmarshaller(getUnmarshaller());
 			getUnmarshaller().setCurrentHandler(childHandler);
 			childHandler.startElement(uri, localName, attributes);
-		} else if (localName.equals("favorites")) {
+		} else if (localName.equals("favorites")) { //$NON-NLS-1$
 			org.eclipse.epp.internal.mpc.core.service.xml.FavoritesContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.FavoritesContentHandler();
 			childHandler.setParentModel(model);
 			childHandler.setParentHandler(this);
 			childHandler.setUnmarshaller(getUnmarshaller());
 			getUnmarshaller().setCurrentHandler(childHandler);
 			childHandler.startElement(uri, localName, attributes);
-		} else if (localName.equals("active")) {
+		} else if (localName.equals("active")) { //$NON-NLS-1$
 			org.eclipse.epp.internal.mpc.core.service.xml.ActiveContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.ActiveContentHandler();
 			childHandler.setParentModel(model);
 			childHandler.setParentHandler(this);
 			childHandler.setUnmarshaller(getUnmarshaller());
 			getUnmarshaller().setCurrentHandler(childHandler);
 			childHandler.startElement(uri, localName, attributes);
-		} else if (localName.equals("recent")) {
+		} else if (localName.equals("recent")) { //$NON-NLS-1$
 			org.eclipse.epp.internal.mpc.core.service.xml.RecentContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.RecentContentHandler();
 			childHandler.setParentModel(model);
 			childHandler.setParentHandler(this);
@@ -86,8 +85,9 @@ public class MarketplaceContentHandler extends UnmarshalContentHandler {
 		}
 	}
 
+	@Override
 	public boolean endElement(String uri, String localName) throws SAXException {
-		if (localName.equals("marketplace")) {
+		if (localName.equals("marketplace")) { //$NON-NLS-1$
 
 			getUnmarshaller().setModel(model);
 			model = null;
@@ -96,21 +96,21 @@ public class MarketplaceContentHandler extends UnmarshalContentHandler {
 				parentHandler.endElement(uri, localName);
 			}
 			return true;
-		} else if (localName.equals("market")) {
+		} else if (localName.equals("market")) { //$NON-NLS-1$
 			// nothing to do
-		} else if (localName.equals("category")) {
+		} else if (localName.equals("category")) { //$NON-NLS-1$
 			// nothing to do
-		} else if (localName.equals("node")) {
+		} else if (localName.equals("node")) { //$NON-NLS-1$
 			// nothing to do
-		} else if (localName.equals("featured")) {
+		} else if (localName.equals("featured")) { //$NON-NLS-1$
 			// nothing to do
-		} else if (localName.equals("search")) {
+		} else if (localName.equals("search")) { //$NON-NLS-1$
 			// nothing to do
-		} else if (localName.equals("favorites")) {
+		} else if (localName.equals("favorites")) { //$NON-NLS-1$
 			// nothing to do
-		} else if (localName.equals("active")) {
+		} else if (localName.equals("active")) { //$NON-NLS-1$
 			// nothing to do
-		} else if (localName.equals("recent")) {
+		} else if (localName.equals("recent")) { //$NON-NLS-1$
 			// nothing to do
 		}
 		return false;

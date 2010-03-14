@@ -50,18 +50,18 @@ public class Unmarshaller extends DefaultHandler {
 
 	private final Map<String, UnmarshalContentHandler> elementNameToUnmarshalContentHandler = new HashMap<String, UnmarshalContentHandler>();
 	{
-		elementNameToUnmarshalContentHandler.put("marketplace", new MarketplaceContentHandler());
-		elementNameToUnmarshalContentHandler.put("market", new MarketContentHandler());
-		elementNameToUnmarshalContentHandler.put("category", new CategoryContentHandler());
-		elementNameToUnmarshalContentHandler.put("node", new NodeContentHandler());
-		elementNameToUnmarshalContentHandler.put("categories", new CategoriesContentHandler());
-		elementNameToUnmarshalContentHandler.put("ius", new IusContentHandler());
-		elementNameToUnmarshalContentHandler.put("platforms", new PlatformsContentHandler());
-		elementNameToUnmarshalContentHandler.put("search", new SearchContentHandler());
-		elementNameToUnmarshalContentHandler.put("recent", new RecentContentHandler());
-		elementNameToUnmarshalContentHandler.put("featured", new FeaturedContentHandler());
-		elementNameToUnmarshalContentHandler.put("active", new ActiveContentHandler());
-		elementNameToUnmarshalContentHandler.put("favorites", new FavoritesContentHandler());
+		elementNameToUnmarshalContentHandler.put("marketplace", new MarketplaceContentHandler()); //$NON-NLS-1$
+		elementNameToUnmarshalContentHandler.put("market", new MarketContentHandler()); //$NON-NLS-1$
+		elementNameToUnmarshalContentHandler.put("category", new CategoryContentHandler()); //$NON-NLS-1$
+		elementNameToUnmarshalContentHandler.put("node", new NodeContentHandler()); //$NON-NLS-1$
+		elementNameToUnmarshalContentHandler.put("categories", new CategoriesContentHandler()); //$NON-NLS-1$
+		elementNameToUnmarshalContentHandler.put("ius", new IusContentHandler()); //$NON-NLS-1$
+		elementNameToUnmarshalContentHandler.put("platforms", new PlatformsContentHandler()); //$NON-NLS-1$
+		elementNameToUnmarshalContentHandler.put("search", new SearchContentHandler()); //$NON-NLS-1$
+		elementNameToUnmarshalContentHandler.put("recent", new RecentContentHandler()); //$NON-NLS-1$
+		elementNameToUnmarshalContentHandler.put("featured", new FeaturedContentHandler()); //$NON-NLS-1$
+		elementNameToUnmarshalContentHandler.put("active", new ActiveContentHandler()); //$NON-NLS-1$
+		elementNameToUnmarshalContentHandler.put("favorites", new FavoritesContentHandler()); //$NON-NLS-1$
 	}
 
 	private UnmarshalContentHandler currentHandler;

@@ -19,18 +19,18 @@ import org.xml.sax.SAXException;
  */
 public class SearchContentHandler extends UnmarshalContentHandler {
 
-	private static final String NS_URI = "";
+	private static final String NS_URI = ""; //$NON-NLS-1$
 
 	private Search model;
 
 	public void startElement(String uri, String localName, Attributes attributes) {
-		if (localName.equals("search")) {
+		if (localName.equals("search")) { //$NON-NLS-1$
 			model = new Search();
 
-			model.setCount(toInteger(attributes.getValue(NS_URI, "count")));
-			model.setUrl(attributes.getValue(NS_URI, "url"));
-			model.setTerm(attributes.getValue(NS_URI, "term"));
-		} else if (localName.equals("node")) {
+			model.setCount(toInteger(attributes.getValue(NS_URI, "count"))); //$NON-NLS-1$
+			model.setUrl(attributes.getValue(NS_URI, "url")); //$NON-NLS-1$
+			model.setTerm(attributes.getValue(NS_URI, "term")); //$NON-NLS-1$
+		} else if (localName.equals("node")) { //$NON-NLS-1$
 			org.eclipse.epp.internal.mpc.core.service.xml.NodeContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.NodeContentHandler();
 			childHandler.setParentModel(model);
 			childHandler.setParentHandler(this);
@@ -41,7 +41,7 @@ public class SearchContentHandler extends UnmarshalContentHandler {
 	}
 
 	public boolean endElement(String uri, String localName) throws SAXException {
-		if (localName.equals("search")) {
+		if (localName.equals("search")) { //$NON-NLS-1$
 			if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Marketplace) {
 				((org.eclipse.epp.internal.mpc.core.service.Marketplace) parentModel).setSearch(model);
 			}
@@ -52,7 +52,7 @@ public class SearchContentHandler extends UnmarshalContentHandler {
 				parentHandler.endElement(uri, localName);
 			}
 			return true;
-		} else if (localName.equals("node")) {
+		} else if (localName.equals("node")) { //$NON-NLS-1$
 			// nothing to do
 		}
 		return false;

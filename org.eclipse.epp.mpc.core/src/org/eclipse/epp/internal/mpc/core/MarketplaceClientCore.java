@@ -21,7 +21,7 @@ import org.eclipse.osgi.util.NLS;
  */
 public class MarketplaceClientCore {
 
-	public static final String BUNDLE_ID = "org.eclipse.epp.mpc.core";
+	public static final String BUNDLE_ID = "org.eclipse.epp.mpc.core"; //$NON-NLS-1$
 
 	public static ILog getLog() {
 		return Platform.getLog(Platform.getBundle(BUNDLE_ID));
@@ -29,7 +29,7 @@ public class MarketplaceClientCore {
 
 	public static void error(String message, Throwable exception) {
 		if (message == null) {
-			message = NLS.bind("Unexpected exception: {0}", exception.getMessage());
+			message = NLS.bind(Messages.MarketplaceClientCore_unexpectedException, exception.getMessage());
 		}
 		getLog().log(new Status(IStatus.ERROR, BUNDLE_ID, IStatus.ERROR, message, exception));
 	}
