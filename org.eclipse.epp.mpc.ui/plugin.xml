@@ -41,12 +41,7 @@
    <extension
          point="org.eclipse.epp.mpc.ui.catalog">
       <catalog
-            icon="icons/marketplace32.png"
-            label="Eclipse Plugin Central"
-            url="http://www.eclipseplugincentral.net">
-      </catalog>
-      <catalog
-            description="TODO: provide description text."
+            description="Eclipse Marketplace (MP) is a place to find and keep track of Eclipse-based solutions."
             icon="icons/marketplace32.png"
             label="Eclipse Marketplace"
             url="http://marketplace.eclipse.org">
