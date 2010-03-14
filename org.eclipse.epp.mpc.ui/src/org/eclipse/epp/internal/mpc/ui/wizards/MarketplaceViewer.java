@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,7 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.discovery.model.Tag;
 import org.eclipse.equinox.internal.p2.discovery.util.CatalogCategoryComparator;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.ControlListItem;
+import org.eclipse.equinox.internal.p2.ui.discovery.util.FilteredViewer;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.PatternFilter;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogConfiguration;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogFilter;
@@ -42,10 +44,13 @@ import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.statushandlers.StatusManager;
 
 /**
@@ -124,6 +129,26 @@ public class MarketplaceViewer extends CatalogViewer {
 			if (layoutData instanceof GridData) {
 				((GridData) layoutData).verticalAlignment = SWT.CENTER;
 			}
+		}
+
+		// FIXME: placeholder until after M6
+		Text filterText = null;
+		try {
+			Field filterTextField = FilteredViewer.class.getDeclaredField("filterText"); //$NON-NLS-1$
+			filterTextField.setAccessible(true);
+			filterText = (Text) filterTextField.get(this);
+		} catch (Throwable t) {
+			// ignore
+		}
+		if (filterText != null) {
+			filterText.addTraverseListener(new TraverseListener() {
+				public void keyTraversed(TraverseEvent e) {
+					if (e.detail == SWT.TRAVERSE_RETURN) {
+						e.doit = false;
+						doQuery();
+					}
+				}
+			});
 		}
 	}
 
