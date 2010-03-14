@@ -14,7 +14,7 @@ import java.net.URISyntaxException;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUI;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
@@ -81,7 +81,7 @@ public class BrowseCatalogItem extends AbstractDiscoveryItem<CatalogDescriptor> 
 			WorkbenchUtil.openUrl(catalogDescriptor.getUrl().toURI().toString(), IWorkbenchBrowserSupport.AS_EXTERNAL);
 		} catch (URISyntaxException e) {
 			String message = String.format("Cannot open browser");
-			IStatus status = new Status(IStatus.ERROR, MarketplaceClientUI.BUNDLE_ID, IStatus.ERROR, message, e);
+			IStatus status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, IStatus.ERROR, message, e);
 			StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 		}
 	}

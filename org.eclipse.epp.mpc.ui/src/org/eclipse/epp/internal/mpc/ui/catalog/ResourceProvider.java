@@ -21,7 +21,7 @@ import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUI;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 
 /**
  * @author David Green
@@ -45,7 +45,7 @@ class ResourceProvider {
 		try {
 			return resource == null ? null : resource.toURL();
 		} catch (MalformedURLException e) {
-			MarketplaceClientUI.error(e);
+			MarketplaceClientUi.error(e);
 			return null;
 		}
 	}

@@ -30,7 +30,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.epp.internal.mpc.core.service.Node;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUI;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 
 /**
  * A means of knowing about how nodes map to IUs and visa versa. Can handle nodes from multiple marketplaces, and does a
@@ -192,6 +192,7 @@ public class MarketplaceInfo {
 					}
 				} catch (Throwable t) {
 					// ignore, fallback
+					MarketplaceClientUi.error(t);
 				}
 			}
 		}
@@ -225,7 +226,7 @@ public class MarketplaceInfo {
 	 */
 	private static final File computeRegistryFile() {
 		// compute the file we'll use for registry persistence, starting with the platform configuration location
-		File dataFile = Platform.getBundle(MarketplaceClientUI.BUNDLE_ID).getBundleContext().getDataFile(
+		File dataFile = Platform.getBundle(MarketplaceClientUi.BUNDLE_ID).getBundleContext().getDataFile(
 				PERSISTENT_FILE);
 		if (dataFile != null) {
 			return dataFile;

@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.service.Category;
 import org.eclipse.epp.internal.mpc.core.service.Market;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUI;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.equinox.internal.p2.discovery.Catalog;
 import org.eclipse.equinox.internal.p2.discovery.DiscoveryCore;
@@ -82,7 +82,7 @@ public class MarketplaceCatalog extends Catalog {
 	}
 
 	protected IStatus performDiscovery(DiscoveryOperation operation, IProgressMonitor monitor) {
-		MultiStatus status = new MultiStatus(MarketplaceClientUI.BUNDLE_ID, 0, "Query failed to complete", null);
+		MultiStatus status = new MultiStatus(MarketplaceClientUi.BUNDLE_ID, 0, "Query failed to complete", null);
 		if (getDiscoveryStrategies().isEmpty()) {
 			throw new IllegalStateException();
 		}

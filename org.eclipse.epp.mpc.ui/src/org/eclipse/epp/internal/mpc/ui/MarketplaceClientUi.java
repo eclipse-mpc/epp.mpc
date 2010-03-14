@@ -10,13 +10,17 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui;
 
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 
-public class MarketplaceClientUI {
+public class MarketplaceClientUi {
 
 	public static final String BUNDLE_ID = "org.eclipse.epp.mpc.ui";
 
@@ -34,4 +38,20 @@ public class MarketplaceClientUI {
 	public static void error(Throwable exception) {
 		error(null, exception);
 	}
+
+	public static IStatus computeStatus(InvocationTargetException e, String message) {
+		Throwable cause = e.getCause();
+		IStatus statusCause;
+		if (cause instanceof CoreException) {
+			statusCause = ((CoreException) cause).getStatus();
+		} else {
+			statusCause = new Status(IStatus.ERROR, BUNDLE_ID, cause.getMessage(), cause);
+		}
+		if (statusCause.getMessage() != null) {
+			message = NLS.bind("{0}: {1}", message, statusCause.getMessage());
+		}
+		IStatus status = new MultiStatus(BUNDLE_ID, 0, new IStatus[] { statusCause }, message, cause);
+		return status;
+	}
+
 }

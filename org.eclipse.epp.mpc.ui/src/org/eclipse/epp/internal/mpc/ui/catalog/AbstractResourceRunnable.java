@@ -21,7 +21,7 @@ import java.util.concurrent.Callable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUI;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.equinox.internal.p2.repository.RepositoryTransport;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.osgi.util.NLS;
@@ -67,13 +67,13 @@ abstract class AbstractResourceRunnable implements IRunnableWithProgress, Callab
 				in.close();
 			}
 		} catch (URISyntaxException e) {
-			MarketplaceClientUI.error(NLS.bind("Bad URI: {0}", resourceUrl), e);
+			MarketplaceClientUi.error(NLS.bind("Bad URI: {0}", resourceUrl), e);
 		} catch (FileNotFoundException e) {
-			MarketplaceClientUI.error(NLS.bind("Resource not found: {0}", resourceUrl), e);
+			MarketplaceClientUi.error(NLS.bind("Resource not found: {0}", resourceUrl), e);
 		} catch (IOException e) {
-			MarketplaceClientUI.error(e);
+			MarketplaceClientUi.error(e);
 		} catch (CoreException e) {
-			MarketplaceClientUI.error(e);
+			MarketplaceClientUi.error(e);
 		}
 		if (resourceProvider.containsResource(resourceUrl)) {
 			resourceRetrieved();

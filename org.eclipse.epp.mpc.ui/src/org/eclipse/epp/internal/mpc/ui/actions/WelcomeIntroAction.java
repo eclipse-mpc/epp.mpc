@@ -30,7 +30,7 @@ public class WelcomeIntroAction implements IViewActionDelegate {
 			MarketplaceClient.openMarketplaceWizard(null);
 		} catch (ExecutionException e) {
 			String message = String.format("Cannot open marketplace wizard");
-			IStatus status = new Status(IStatus.ERROR, org.eclipse.epp.internal.mpc.ui.MarketplaceClientUI.BUNDLE_ID,
+			IStatus status = new Status(IStatus.ERROR, org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi.BUNDLE_ID,
 					IStatus.ERROR, message, e);
 			StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 		}

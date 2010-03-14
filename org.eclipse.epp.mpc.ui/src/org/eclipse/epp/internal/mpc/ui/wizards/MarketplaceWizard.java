@@ -14,13 +14,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUI;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUIPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.operations.ProvisioningOperation;
 import org.eclipse.epp.internal.mpc.ui.operations.ProvisioningOperation.OperationType;
@@ -34,7 +35,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.statushandlers.StatusManager;
 
 /**
- * @author David Greenx
+ * @author David Green
  */
 public class MarketplaceWizard extends DiscoveryWizard {
 
@@ -69,6 +70,7 @@ public class MarketplaceWizard extends DiscoveryWizard {
 			addPage(getCatalogSelectionPage());
 		}
 		super.addPages();
+		addPage(new FeatureSelectionWizardPage());
 	}
 
 	public CatalogSelectionPage getCatalogSelectionPage() {
@@ -88,7 +90,7 @@ public class MarketplaceWizard extends DiscoveryWizard {
 
 	private void doDefaultCatalogSelection() {
 		if (getConfiguration().getCatalogDescriptor() == null) {
-			String defaultCatalogUrl = MarketplaceClientUIPlugin.getInstance().getPreferenceStore().getString(
+			String defaultCatalogUrl = MarketplaceClientUiPlugin.getInstance().getPreferenceStore().getString(
 					PREF_DEFAULT_CATALOG);
 			// if a preferences was set, we default to that catalog descriptor
 			if (defaultCatalogUrl != null && defaultCatalogUrl.length() > 0) {
@@ -124,7 +126,7 @@ public class MarketplaceWizard extends DiscoveryWizard {
 		if (getConfiguration().getCatalogDescriptor() != null) {
 			// remember the catalog for next time.
 			try {
-				MarketplaceClientUIPlugin.getInstance().getPreferenceStore().setValue(PREF_DEFAULT_CATALOG,
+				MarketplaceClientUiPlugin.getInstance().getPreferenceStore().setValue(PREF_DEFAULT_CATALOG,
 						getConfiguration().getCatalogDescriptor().getUrl().toURI().toString());
 			} catch (URISyntaxException e) {
 				// ignore
@@ -140,12 +142,15 @@ public class MarketplaceWizard extends DiscoveryWizard {
 	public boolean performFinish() {
 		try {
 			// FIXME: this is a placeholder until bug 305441 is complete
-			Map<CatalogItem, Operation> itemToOperation = ((MarketplacePage) getCatalogPage()).getItemToOperation();
+			Map<CatalogItem, Operation> itemToOperation = (getCatalogPage()).getItemToOperation();
 			OperationType operationType = null;
 			List<CatalogItem> items = new ArrayList<CatalogItem>();
 			for (Map.Entry<CatalogItem, Operation> entry : itemToOperation.entrySet()) {
-				if (entry.getValue().getOperationType() != null) {
-					operationType = entry.getValue().getOperationType();
+				OperationType entryOperationType = entry.getValue().getOperationType();
+				if (entryOperationType != null) {
+					if (operationType == null || operationType == OperationType.UPDATE) {
+						operationType = entryOperationType;
+					}
 					items.add(entry.getKey());
 				}
 			}
@@ -153,7 +158,7 @@ public class MarketplaceWizard extends DiscoveryWizard {
 					getCatalogPage().getInstallableConnectors());
 			getContainer().run(true, true, runner);
 		} catch (InvocationTargetException e) {
-			IStatus status = new Status(IStatus.ERROR, MarketplaceClientUI.BUNDLE_ID, NLS.bind(
+			IStatus status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
 					"Problems occurred while performing provisioning operation: {0}", new Object[] { e.getCause()
 							.getMessage() }), e.getCause());
 			StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
@@ -163,5 +168,17 @@ public class MarketplaceWizard extends DiscoveryWizard {
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	public MarketplacePage getCatalogPage() {
+		return (MarketplacePage) super.getCatalogPage();
+	}
+
+	public Map<CatalogItem, Operation> getItemToOperation() {
+		if (getCatalogPage() == null) {
+			return Collections.emptyMap();
+		}
+		return getCatalogPage().getItemToOperation();
 	}
 }

@@ -61,7 +61,7 @@ class CatalogExtensionPointReader {
 						descriptors.add(descriptor);
 					}
 				} catch (Exception e) {
-					MarketplaceClientUI.error(NLS.bind("Cannot register catalog for bundle {0}: {1}",
+					MarketplaceClientUi.error(NLS.bind("Cannot register catalog for bundle {0}: {1}",
 							element.getContributor().getName(), e.getMessage()), e);
 				}
 			}

@@ -15,19 +15,19 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 /**
- * bundle activator. Prefer {@link MarketplaceClientUI} where possible.
+ * bundle activator. Prefer {@link MarketplaceClientUi} where possible.
  * 
  * @author David Green
  */
-public class MarketplaceClientUIPlugin extends AbstractUIPlugin {
+public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 	/**
 	 * image registry key
 	 */
 	public static final String NO_ICON_PROVIDED = "NO_ICON_PROVIDED";
 
-	private static MarketplaceClientUIPlugin instance;
+	private static MarketplaceClientUiPlugin instance;
 
-	public MarketplaceClientUIPlugin() {
+	public MarketplaceClientUiPlugin() {
 	}
 
 	@Override
@@ -43,9 +43,9 @@ public class MarketplaceClientUIPlugin extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Get the singleton instance. Prefer {@link MarketplaceClientUI} where possible.
+	 * Get the singleton instance. Prefer {@link MarketplaceClientUi} where possible.
 	 */
-	public static MarketplaceClientUIPlugin getInstance() {
+	public static MarketplaceClientUiPlugin getInstance() {
 		return instance;
 	}
 

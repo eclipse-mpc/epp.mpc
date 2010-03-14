@@ -15,8 +15,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUI;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUIPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
 import org.eclipse.equinox.internal.p2.discovery.AbstractCatalogSource;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
@@ -125,13 +125,13 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 				iconLabel.setImage(image);
 			} catch (SWTException e) {
 				// ignore, probably a bad image format
-				MarketplaceClientUI.error(NLS.bind("Cannot render image {0}: {1}", connector.getIcon().getImage32(),
+				MarketplaceClientUi.error(NLS.bind("Cannot render image {0}: {1}", connector.getIcon().getImage32(),
 						e.getMessage()), e);
 			}
 		}
 		if (iconLabel.getImage() == null) {
-			iconLabel.setImage(MarketplaceClientUIPlugin.getInstance().getImageRegistry().get(
-					MarketplaceClientUIPlugin.NO_ICON_PROVIDED));
+			iconLabel.setImage(MarketplaceClientUiPlugin.getInstance().getImageRegistry().get(
+					MarketplaceClientUiPlugin.NO_ICON_PROVIDED));
 		}
 
 		nameLabel = new Label(this, SWT.NONE);

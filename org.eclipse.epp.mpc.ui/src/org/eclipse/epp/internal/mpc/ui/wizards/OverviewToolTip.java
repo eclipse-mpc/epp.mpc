@@ -15,7 +15,7 @@ import java.net.URL;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUI;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
 import org.eclipse.equinox.internal.p2.discovery.AbstractCatalogSource;
 import org.eclipse.equinox.internal.p2.discovery.model.Overview;
@@ -254,7 +254,7 @@ class OverviewToolTip extends ToolTip {
 				return image;
 			} catch (SWTException e) {
 				// ignore, probably a bad image format
-				MarketplaceClientUI.error(NLS.bind("Cannot render image {0}: {1}", imagePath, e.getMessage()), e);
+				MarketplaceClientUi.error(NLS.bind("Cannot render image {0}: {1}", imagePath, e.getMessage()), e);
 			}
 		}
 		return null;

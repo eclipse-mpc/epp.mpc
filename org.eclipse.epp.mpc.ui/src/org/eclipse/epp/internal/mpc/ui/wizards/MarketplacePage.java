@@ -280,4 +280,22 @@ public class MarketplacePage extends CatalogPage {
 		}
 		return complete;
 	}
+
+	@Override
+	public IWizardPage getNextPage() {
+		// no need for next page if each selected item corresponds to exactly one feature.
+		Map<CatalogItem, Operation> itemToOperation = getItemToOperation();
+		if (!itemToOperation.isEmpty()) {
+			boolean oneFeaturePerItem = true;
+			for (CatalogItem item : itemToOperation.keySet()) {
+				if (item.getInstallableUnits().size() > 1) {
+					oneFeaturePerItem = false;
+				}
+			}
+			if (oneFeaturePerItem == true) {
+				return null;
+			}
+		}
+		return super.getNextPage();
+	}
 }

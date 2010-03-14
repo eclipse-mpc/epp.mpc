@@ -36,7 +36,7 @@ import org.eclipse.epp.internal.mpc.core.service.Market;
 import org.eclipse.epp.internal.mpc.core.service.MarketplaceService;
 import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.core.service.SearchResult;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUI;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory.Contents;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
@@ -190,7 +190,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 							} catch (InterruptedException e) {
 								break;
 							} catch (ExecutionException e) {
-								MarketplaceClientUI.error(e);
+								MarketplaceClientUi.error(e);
 								break;
 							}
 						}

@@ -27,4 +27,4 @@ Export-Package: org.eclipse.epp.internal.mpc.ui;x-internal:=true,
  org.eclipse.epp.internal.mpc.ui.wizards;x-internal:=true,
  org.eclipse.epp.mpc.ui
 Bundle-ActivationPolicy: lazy
-Bundle-Activator: org.eclipse.epp.internal.mpc.ui.MarketplaceClientUIPlugin
+Bundle-Activator: org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin
