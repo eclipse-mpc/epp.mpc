@@ -40,6 +40,8 @@ import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUI;
  */
 public class MarketplaceInfo {
 
+	private static final String P2_FEATURE_GROUP_SUFFIX = ".feature.group"; //$NON-NLS-1$
+
 	private static final String PERSISTENT_FILE = MarketplaceInfo.class.getSimpleName() + ".xml"; //$NON-NLS-1$
 
 	private Map<String, List<String>> nodeKeyToIU = new HashMap<String, List<String>>();
@@ -81,7 +83,7 @@ public class MarketplaceInfo {
 		for (Map.Entry<String, List<String>> entry : nodeKeyToIU.entrySet()) {
 			if (entry.getKey().startsWith(keyPrefix)) {
 				List<String> ius = nodeKeyToIU.get(entry.getKey());
-				if (installedIus.containsAll(ius)) {
+				if (computeInstalled(installedIus, ius)) {
 					String nodeId = entry.getKey().substring(keyPrefix.length());
 					Node node = new Node();
 					node.setId(nodeId);
@@ -93,6 +95,39 @@ public class MarketplaceInfo {
 		return nodes;
 	}
 
+	/**
+	 * compute if the given node is installed. The given node must be fully realized, including its
+	 * {@link Node#getIus() ius}.
+	 */
+	public boolean computeInstalled(Set<String> installedFeatures, Node node) {
+		if (node.getIus() != null && !node.getIus().getIu().isEmpty()) {
+			List<String> ius = new ArrayList<String>(new HashSet<String>(node.getIus().getIu()));
+			return computeInstalled(installedFeatures, ius);
+		}
+		return false;
+	}
+
+	public boolean computeInstalled(Set<String> installedIus, List<String> ius) {
+		int installCount = 0;
+		for (String iu : ius) {
+			boolean installed = false;
+			if (installedIus.contains(iu)) {
+				installed = true;
+			} else {
+				if (iu.endsWith(P2_FEATURE_GROUP_SUFFIX)) {
+					if (installedIus.contains(iu.substring(0, iu.length() - P2_FEATURE_GROUP_SUFFIX.length()))) {
+						installed = true;
+					}
+				}
+			}
+			if (installed) {
+				++installCount;
+			}
+		}
+		// FIXME: review do we need to have _all_ installed, or just a minimum of one?  relates to bug 305441
+		return installCount > 0;
+	}
+
 	public synchronized void map(URL marketUrl, Node node) {
 		String itemKey = computeItemKey(marketUrl, node);
 		if (node.getIus() != null && !node.getIus().getIu().isEmpty()) {
@@ -101,7 +136,9 @@ public class MarketplaceInfo {
 			for (String iu : ius) {
 				List<String> catalogNodes = iuToNodeKey.get(iu);
 				if (catalogNodes != null) {
-					catalogNodes.add(itemKey);
+					if (!catalogNodes.contains(itemKey)) {
+						catalogNodes.add(itemKey);
+					}
 				} else {
 					catalogNodes = new ArrayList<String>(1);
 					catalogNodes.add(itemKey);
@@ -212,4 +249,5 @@ public class MarketplaceInfo {
 	private static File computeConfigFile(File mpcConfigLocation) {
 		return new File(mpcConfigLocation, PERSISTENT_FILE);
 	}
+
 }

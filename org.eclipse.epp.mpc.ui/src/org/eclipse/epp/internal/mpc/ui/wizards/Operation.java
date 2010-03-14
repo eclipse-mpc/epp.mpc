@@ -18,18 +18,25 @@ import org.eclipse.epp.internal.mpc.ui.operations.ProvisioningOperation.Operatio
  * @author David Green
  */
 public enum Operation {
-	INSTALL(OperationType.INSTALL), //
-	UNINSTALL(OperationType.UNINSTALL), //
-	CHECK_FOR_UPDATES(OperationType.UPDATE), // 
-	NONE(null);
+	INSTALL(OperationType.INSTALL, "install"), //
+	UNINSTALL(OperationType.UNINSTALL, "uninstall"), //
+	CHECK_FOR_UPDATES(OperationType.UPDATE, "update"), // 
+	NONE(null, null);
 
 	private final OperationType operationType;
 
-	private Operation(OperationType operationType) {
+	private final String label;
+
+	private Operation(OperationType operationType, String label) {
 		this.operationType = operationType;
+		this.label = label;
 	}
 
 	public OperationType getOperationType() {
 		return operationType;
+	}
+
+	public String getLabel() {
+		return label;
 	}
 }

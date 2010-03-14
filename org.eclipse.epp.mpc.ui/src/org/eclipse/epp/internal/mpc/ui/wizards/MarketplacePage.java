@@ -10,8 +10,12 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
@@ -21,9 +25,11 @@ import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogPage;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -203,7 +209,55 @@ public class MarketplacePage extends CatalogPage {
 		if (complete) {
 			complete = computeCanCompleteProvisioningOperation();
 		}
+		computeMessage();
 		super.setPageComplete(complete);
+	}
+
+	private void computeMessage() {
+		String message = null;
+		int messageType = IMessageProvider.NONE;
+
+		Map<CatalogItem, Operation> itemToOperation = getItemToOperation();
+		if (!itemToOperation.isEmpty()) {
+			Map<Operation, List<CatalogItem>> operationToItem = computeOperationToItem();
+
+			if (operationToItem.size() == 1) {
+				Entry<Operation, List<CatalogItem>> entry = operationToItem.entrySet().iterator().next();
+				message = NLS.bind("{0} selected for {1}", entry.getValue().size() == 1 ? "one solution" : NLS.bind(
+						"{0} solutions", entry.getValue().size()), entry.getKey().getLabel());
+				messageType = IMessageProvider.INFORMATION;
+			} else if (operationToItem.size() == 2 && operationToItem.containsKey(Operation.INSTALL)
+					&& operationToItem.containsKey(Operation.CHECK_FOR_UPDATES)) {
+				int count = 0;
+				for (List<CatalogItem> items : operationToItem.values()) {
+					count += items.size();
+				}
+				message = NLS.bind("{0} solutions selected for install or update", count);
+				messageType = IMessageProvider.INFORMATION;
+			} else if (operationToItem.size() > 1) {
+				message = "Cannot install/update and remove solutions concurrently";
+				messageType = IMessageProvider.ERROR;
+			}
+		}
+
+		setMessage(message, messageType);
+	}
+
+	private Map<Operation, List<CatalogItem>> computeOperationToItem() {
+		Map<CatalogItem, Operation> itemToOperation = getItemToOperation();
+		Map<Operation, List<CatalogItem>> catalogItemByOperation = new HashMap<Operation, List<CatalogItem>>();
+		for (Map.Entry<CatalogItem, Operation> entry : itemToOperation.entrySet()) {
+			if (entry.getValue() == Operation.NONE) {
+				continue;
+			}
+			List<CatalogItem> list = catalogItemByOperation.get(entry.getValue());
+			if (list == null) {
+				list = new ArrayList<CatalogItem>();
+				catalogItemByOperation.put(entry.getValue(), list);
+			}
+			list.add(entry.getKey());
+		}
+		return catalogItemByOperation;
 	}
 
 	public boolean computeCanCompleteProvisioningOperation() {
@@ -213,19 +267,15 @@ public class MarketplacePage extends CatalogPage {
 		if (itemToOperation.isEmpty()) {
 			complete = false;
 		} else {
-			Operation operation = null;
-			for (Operation o : itemToOperation.values()) {
-				if (o != Operation.NONE) {
-					if (operation == null) {
-						operation = o;
-					} else if (operation != o) {
+			Map<Operation, List<CatalogItem>> operationToItem = computeOperationToItem();
+			if (operationToItem.isEmpty()) {
+				complete = false;
+			} else {
+				if (operationToItem.size() > 1) {
+					if (!(operationToItem.size() == 2 && operationToItem.containsKey(Operation.INSTALL) && operationToItem.containsKey(Operation.CHECK_FOR_UPDATES))) {
 						complete = false;
-						break;
 					}
 				}
-			}
-			if (operation == null || operation == Operation.NONE) {
-				complete = false;
 			}
 		}
 		return complete;
