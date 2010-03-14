@@ -58,7 +58,9 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	private MarketplaceCatalogSource source;
 
-	private MarketplaceInfo catalogRegistry;
+	private MarketplaceInfo marketplaceInfo;
+
+	private Set<String> installedFeatures;
 
 	public MarketplaceDiscoveryStrategy(CatalogDescriptor catalogDescriptor) {
 		if (catalogDescriptor == null) {
@@ -67,7 +69,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		this.catalogDescriptor = catalogDescriptor;
 		marketplaceService = new DefaultMarketplaceService(this.catalogDescriptor.getUrl());
 		source = new MarketplaceCatalogSource(marketplaceService);
-		catalogRegistry = MarketplaceInfo.getInstance();
+		marketplaceInfo = MarketplaceInfo.getInstance();
 	}
 
 	@Override
@@ -76,9 +78,9 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			source.dispose();
 			source = null;
 		}
-		if (catalogRegistry != null) {
-			catalogRegistry.save();
-			catalogRegistry = null;
+		if (marketplaceInfo != null) {
+			marketplaceInfo.save();
+			marketplaceInfo = null;
 		}
 		super.dispose();
 	}
@@ -165,7 +167,8 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 						}
 					}
 					items.add(catalogItem);
-					catalogRegistry.map(catalogItem.getMarketplaceUrl(), node);
+					marketplaceInfo.map(catalogItem.getMarketplaceUrl(), node);
+					catalogItem.setInstalled(marketplaceInfo.computeInstalled(computeInstalledFeatures(monitor), node));
 				}
 				if (!futures.isEmpty()) {
 					final int workUnit = totalWork / futures.size();
@@ -288,7 +291,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			result.setNodes(new ArrayList<Node>());
 			Set<String> installedFeatures = computeInstalledFeatures(monitor);
 			if (!monitor.isCanceled()) {
-				Set<Node> catalogNodes = catalogRegistry.computeInstalledNodes(catalogDescriptor.getUrl(),
+				Set<Node> catalogNodes = marketplaceInfo.computeInstalledNodes(catalogDescriptor.getUrl(),
 						installedFeatures);
 				if (!catalogNodes.isEmpty()) {
 					int unitWork = totalWork / (2 * catalogNodes.size());
@@ -301,11 +304,6 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 					monitor.worked(totalWork / 2);
 				}
 				handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
-				for (CatalogItem item : items) {
-					if (catalogNodes.contains(item.getData())) {
-						item.setInstalled(true);
-					}
-				}
 			}
 		} finally {
 			monitor.done();
@@ -313,18 +311,21 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	}
 
 	protected Set<String> computeInstalledFeatures(IProgressMonitor monitor) {
-		Set<String> features = new HashSet<String>();
-		IBundleGroupProvider[] bundleGroupProviders = Platform.getBundleGroupProviders();
-		for (IBundleGroupProvider provider : bundleGroupProviders) {
-			if (monitor.isCanceled()) {
-				break;
+		if (installedFeatures == null) {
+			Set<String> features = new HashSet<String>();
+			IBundleGroupProvider[] bundleGroupProviders = Platform.getBundleGroupProviders();
+			for (IBundleGroupProvider provider : bundleGroupProviders) {
+				if (monitor.isCanceled()) {
+					break;
+				}
+				IBundleGroup[] bundleGroups = provider.getBundleGroups();
+				for (IBundleGroup group : bundleGroups) {
+					features.add(group.getIdentifier());
+				}
 			}
-			IBundleGroup[] bundleGroups = provider.getBundleGroups();
-			for (IBundleGroup group : bundleGroups) {
-				features.add(group.getIdentifier());
-			}
+			installedFeatures = features;
 		}
-		return features;
+		return installedFeatures;
 	}
 
 	protected MarketplaceCategory findMarketplaceCategory(IProgressMonitor monitor) throws CoreException {

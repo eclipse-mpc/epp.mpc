@@ -15,11 +15,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.service.Category;
 import org.eclipse.epp.internal.mpc.core.service.Market;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
@@ -390,16 +388,7 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	@Override
 	protected void postDiscovery() {
-		Set<String> installedFeatures;
-		try {
-			installedFeatures = getInstalledFeatures(new NullProgressMonitor());
-			for (CatalogItem connector : getCatalog().getItems()) {
-				connector.setInstalled(installedFeatures != null && !connector.getInstallableUnits().isEmpty()
-						&& installedFeatures.containsAll(connector.getInstallableUnits()));
-			}
-		} catch (InterruptedException e) {
-			// should never happen
-		}
+		// nothing to do.
 	}
 
 	public Map<CatalogItem, Operation> getItemToOperation() {
