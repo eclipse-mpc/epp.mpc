@@ -15,6 +15,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -40,17 +41,17 @@ public abstract class AbstractProvisioningOperation implements IRunnableWithProg
 
 	protected static final String P2_FEATURE_GROUP_SUFFIX = ".feature.group"; //$NON-NLS-1$
 
-	protected final List<CatalogItem> installableConnectors;
+	protected final List<CatalogItem> items;
 
 	protected final ProvisioningUI provisioningUI;
 
 	protected Set<URI> repositoryLocations;
 
-	protected AbstractProvisioningOperation(List<CatalogItem> installableConnectors) {
+	protected AbstractProvisioningOperation(Collection<CatalogItem> installableConnectors) {
 		if (installableConnectors == null || installableConnectors.isEmpty()) {
 			throw new IllegalArgumentException();
 		}
-		this.installableConnectors = new ArrayList<CatalogItem>(installableConnectors);
+		this.items = new ArrayList<CatalogItem>(installableConnectors);
 		this.provisioningUI = ProvisioningUI.getDefaultUI();
 	}
 
@@ -60,8 +61,8 @@ public abstract class AbstractProvisioningOperation implements IRunnableWithProg
 		ProvisioningSession session = ProvisioningUI.getDefaultUI().getSession();
 		RepositoryTracker repositoryTracker = ProvisioningUI.getDefaultUI().getRepositoryTracker();
 		repositoryLocations = new HashSet<URI>();
-		monitor.setWorkRemaining(installableConnectors.size() * 5);
-		for (CatalogItem descriptor : installableConnectors) {
+		monitor.setWorkRemaining(items.size() * 5);
+		for (CatalogItem descriptor : items) {
 			URI uri = new URL(descriptor.getSiteUrl()).toURI();
 			if (repositoryLocations.add(uri)) {
 				checkCancelled(monitor);
@@ -118,7 +119,7 @@ public abstract class AbstractProvisioningOperation implements IRunnableWithProg
 	private Set<String> getDescriptorIds(final IMetadataRepository repository) throws URISyntaxException {
 		final Set<String> installableUnitIdsThisRepository = new HashSet<String>();
 		// determine all installable units for this repository
-		for (CatalogItem descriptor : installableConnectors) {
+		for (CatalogItem descriptor : items) {
 			try {
 				if (repository.getLocation().equals(new URL(descriptor.getSiteUrl()).toURI())) {
 					installableUnitIdsThisRepository.addAll(getFeatureIds(descriptor));

@@ -10,13 +10,9 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
@@ -29,7 +25,6 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -158,7 +153,7 @@ public class MarketplacePage extends CatalogPage {
 	@Override
 	protected CatalogViewer doCreateViewer(Composite parent) {
 		MarketplaceViewer viewer = new MarketplaceViewer(getCatalog(), this, getContainer(),
-				getWizard().getConfiguration());
+				getWizard().getConfiguration(), getWizard().getSelectionModel());
 		viewer.setMinimumHeight(MINIMUM_HEIGHT);
 		viewer.createControl(parent);
 		return viewer;
@@ -197,17 +192,10 @@ public class MarketplacePage extends CatalogPage {
 		super.setVisible(visible);
 	}
 
-	public Map<CatalogItem, Operation> getItemToOperation() {
-		if (getViewer() == null) {
-			return Collections.emptyMap();
-		}
-		return getViewer().getItemToOperation();
-	}
-
 	@Override
 	public void setPageComplete(boolean complete) {
 		if (complete) {
-			complete = computeCanCompleteProvisioningOperation();
+			complete = getWizard().getSelectionModel().computeCanFinish();
 		}
 		computeMessage();
 		super.setPageComplete(complete);
@@ -217,74 +205,32 @@ public class MarketplacePage extends CatalogPage {
 		String message = null;
 		int messageType = IMessageProvider.NONE;
 
-		Map<CatalogItem, Operation> itemToOperation = getItemToOperation();
-		if (!itemToOperation.isEmpty()) {
-			Map<Operation, List<CatalogItem>> operationToItem = computeOperationToItem();
-
-			if (operationToItem.size() == 1) {
-				Entry<Operation, List<CatalogItem>> entry = operationToItem.entrySet().iterator().next();
-				message = NLS.bind("{0} selected for {1}", entry.getValue().size() == 1 ? "one solution" : NLS.bind(
-						"{0} solutions", entry.getValue().size()), entry.getKey().getLabel());
-				messageType = IMessageProvider.INFORMATION;
-			} else if (operationToItem.size() == 2 && operationToItem.containsKey(Operation.INSTALL)
-					&& operationToItem.containsKey(Operation.CHECK_FOR_UPDATES)) {
-				int count = 0;
-				for (List<CatalogItem> items : operationToItem.values()) {
-					count += items.size();
+		if (getWizard() != null) {
+			IStatus finishValidation = getWizard().getSelectionModel().computeFinishValidation();
+			if (finishValidation != null) {
+				message = finishValidation.getMessage();
+				switch (finishValidation.getSeverity()) {
+				case IStatus.OK:
+				case IStatus.INFO:
+					messageType = IMessageProvider.INFORMATION;
+					break;
+				case IStatus.WARNING:
+					messageType = IMessageProvider.WARNING;
+					break;
+				default:
+					messageType = IMessageProvider.ERROR;
+					break;
 				}
-				message = NLS.bind("{0} solutions selected for install or update", count);
-				messageType = IMessageProvider.INFORMATION;
-			} else if (operationToItem.size() > 1) {
-				message = "Cannot install/update and remove solutions concurrently";
-				messageType = IMessageProvider.ERROR;
 			}
 		}
 
 		setMessage(message, messageType);
 	}
 
-	private Map<Operation, List<CatalogItem>> computeOperationToItem() {
-		Map<CatalogItem, Operation> itemToOperation = getItemToOperation();
-		Map<Operation, List<CatalogItem>> catalogItemByOperation = new HashMap<Operation, List<CatalogItem>>();
-		for (Map.Entry<CatalogItem, Operation> entry : itemToOperation.entrySet()) {
-			if (entry.getValue() == Operation.NONE) {
-				continue;
-			}
-			List<CatalogItem> list = catalogItemByOperation.get(entry.getValue());
-			if (list == null) {
-				list = new ArrayList<CatalogItem>();
-				catalogItemByOperation.put(entry.getValue(), list);
-			}
-			list.add(entry.getKey());
-		}
-		return catalogItemByOperation;
-	}
-
-	public boolean computeCanCompleteProvisioningOperation() {
-		boolean complete = true;
-		// can only perform one kind of operation (update, install or uninstall)
-		Map<CatalogItem, Operation> itemToOperation = getItemToOperation();
-		if (itemToOperation.isEmpty()) {
-			complete = false;
-		} else {
-			Map<Operation, List<CatalogItem>> operationToItem = computeOperationToItem();
-			if (operationToItem.isEmpty()) {
-				complete = false;
-			} else {
-				if (operationToItem.size() > 1) {
-					if (!(operationToItem.size() == 2 && operationToItem.containsKey(Operation.INSTALL) && operationToItem.containsKey(Operation.CHECK_FOR_UPDATES))) {
-						complete = false;
-					}
-				}
-			}
-		}
-		return complete;
-	}
-
 	@Override
 	public IWizardPage getNextPage() {
 		// no need for next page if each selected item corresponds to exactly one feature.
-		Map<CatalogItem, Operation> itemToOperation = getItemToOperation();
+		Map<CatalogItem, Operation> itemToOperation = getWizard().getSelectionModel().getItemToOperation();
 		if (!itemToOperation.isEmpty()) {
 			boolean oneFeaturePerItem = true;
 			for (CatalogItem item : itemToOperation.keySet()) {

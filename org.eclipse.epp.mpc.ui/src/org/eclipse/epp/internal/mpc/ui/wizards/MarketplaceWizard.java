@@ -14,11 +14,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.eclipse.core.runtime.IBundleGroup;
+import org.eclipse.core.runtime.IBundleGroupProvider;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
@@ -43,9 +47,14 @@ public class MarketplaceWizard extends DiscoveryWizard {
 
 	private CatalogSelectionPage catalogSelectionPage;
 
+	private Set<String> installedFeatures;
+
+	private final SelectionModel selectionModel;
+
 	public MarketplaceWizard(MarketplaceCatalog catalog, MarketplaceCatalogConfiguration configuration) {
 		super(catalog, configuration);
 		setWindowTitle("Eclipse Solution Catalogs");
+		selectionModel = new SelectionModel(this);
 	}
 
 	@Override
@@ -142,7 +151,7 @@ public class MarketplaceWizard extends DiscoveryWizard {
 	public boolean performFinish() {
 		try {
 			// FIXME: this is a placeholder until bug 305441 is complete
-			Map<CatalogItem, Operation> itemToOperation = (getCatalogPage()).getItemToOperation();
+			Map<CatalogItem, Operation> itemToOperation = getSelectionModel().getItemToOperation();
 			OperationType operationType = null;
 			List<CatalogItem> items = new ArrayList<CatalogItem>();
 			for (Map.Entry<CatalogItem, Operation> entry : itemToOperation.entrySet()) {
@@ -154,8 +163,8 @@ public class MarketplaceWizard extends DiscoveryWizard {
 					items.add(entry.getKey());
 				}
 			}
-			IRunnableWithProgress runner = new ProvisioningOperation(operationType,
-					getCatalogPage().getInstallableConnectors());
+			IRunnableWithProgress runner = new ProvisioningOperation(operationType, itemToOperation.keySet(),
+					getSelectionModel().getSelectedFeatureDescriptors());
 			getContainer().run(true, true, runner);
 		} catch (InvocationTargetException e) {
 			IStatus status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
@@ -175,10 +184,22 @@ public class MarketplaceWizard extends DiscoveryWizard {
 		return (MarketplacePage) super.getCatalogPage();
 	}
 
-	public Map<CatalogItem, Operation> getItemToOperation() {
-		if (getCatalogPage() == null) {
-			return Collections.emptyMap();
+	protected synchronized Set<String> getInstalledFeatures() {
+		if (installedFeatures == null) {
+			Set<String> features = new HashSet<String>();
+			IBundleGroupProvider[] bundleGroupProviders = Platform.getBundleGroupProviders();
+			for (IBundleGroupProvider provider : bundleGroupProviders) {
+				IBundleGroup[] bundleGroups = provider.getBundleGroups();
+				for (IBundleGroup group : bundleGroups) {
+					features.add(group.getIdentifier());
+				}
+			}
+			installedFeatures = features;
 		}
-		return getCatalogPage().getItemToOperation();
+		return installedFeatures;
+	}
+
+	public SelectionModel getSelectionModel() {
+		return selectionModel;
 	}
 }

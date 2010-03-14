@@ -223,7 +223,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 	}
 
 	public Operation getOperation() {
-		return viewer.getOperation(getData());
+		return viewer.getSelectionModel().getOperation(getData());
 	}
 
 	public void propertyChange(PropertyChangeEvent evt) {

@@ -12,9 +12,7 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -96,12 +94,12 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	private ContentType contentType = ContentType.SEARCH;
 
-	private final Map<CatalogItem, Operation> itemToOperation = new HashMap<CatalogItem, Operation>();
+	private final SelectionModel selectionModel;
 
 	public MarketplaceViewer(Catalog catalog, IShellProvider shellProvider, IRunnableContext context,
-			CatalogConfiguration configuration) {
+			CatalogConfiguration configuration, SelectionModel selectionModel) {
 		super(catalog, shellProvider, context, configuration);
-		setRefreshJobDelay(100L);
+		this.selectionModel = selectionModel;
 	}
 
 	@Override
@@ -367,23 +365,8 @@ public class MarketplaceViewer extends CatalogViewer {
 			throw new IllegalArgumentException();
 		}
 
-		boolean selected = operation == Operation.NONE ? false : true;
-		if (selected) {
-			itemToOperation.put(connector, operation);
-		} else {
-			itemToOperation.remove(connector);
-		}
-		super.modifySelection(connector, selected);
-	}
-
-	/**
-	 * get the operation for the given catalog item
-	 * 
-	 * @see #modifySelection(CatalogItem, Operation)
-	 */
-	public Operation getOperation(CatalogItem catalogItem) {
-		Operation operation = itemToOperation.get(catalogItem);
-		return operation == null ? Operation.NONE : operation;
+		selectionModel.select(connector, operation);
+		super.modifySelection(connector, operation != Operation.NONE);
 	}
 
 	@Override
@@ -391,7 +374,7 @@ public class MarketplaceViewer extends CatalogViewer {
 		// nothing to do.
 	}
 
-	public Map<CatalogItem, Operation> getItemToOperation() {
-		return itemToOperation;
+	public SelectionModel getSelectionModel() {
+		return selectionModel;
 	}
 }

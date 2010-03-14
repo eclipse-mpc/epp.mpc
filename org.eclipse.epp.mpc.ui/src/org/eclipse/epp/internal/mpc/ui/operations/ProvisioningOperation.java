@@ -16,8 +16,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,13 +57,40 @@ import org.eclipse.swt.widgets.Display;
 public class ProvisioningOperation extends AbstractProvisioningOperation {
 
 	public enum OperationType {
-		INSTALL, UPDATE, UNINSTALL
+		/**
+		 * Install and update features
+		 */
+		INSTALL,
+		/**
+		 * update only, use {@link #INSTALL} if features are to be installed and updated in a single operation
+		 */
+		UPDATE,
+		/**
+		 * uninstall features
+		 */
+		UNINSTALL
 	}
 
 	private final OperationType operationType;
 
-	public ProvisioningOperation(OperationType operationType, List<CatalogItem> installableConnectors) {
-		super(installableConnectors);
+	private final List<FeatureDescriptor> featureDescriptors;
+
+	/**
+	 * @param operationType
+	 *            the type of operation to perform
+	 * @param items
+	 *            the items for which features are being installed
+	 * @param featureDescriptors
+	 *            the features to install/update/uninstall, which must correspond to features provided by the given
+	 *            items
+	 */
+	public ProvisioningOperation(OperationType operationType, Collection<CatalogItem> items,
+			Set<FeatureDescriptor> featureDescriptors) {
+		super(items);
+		if (featureDescriptors == null || featureDescriptors.isEmpty()) {
+			throw new IllegalArgumentException();
+		}
+		this.featureDescriptors = new ArrayList<FeatureDescriptor>(featureDescriptors);
 		if (operationType == null) {
 			throw new IllegalArgumentException();
 		}
@@ -70,8 +99,7 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 
 	public void run(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
 		try {
-			SubMonitor monitor = SubMonitor.convert(progressMonitor, Messages.InstallConnectorsJob_task_configuring,
-					100);
+			SubMonitor monitor = SubMonitor.convert(progressMonitor, "Configuring provisioning operation", 100);
 			try {
 				final IInstallableUnit[] ius = computeInstallableUnits(monitor.newChild(50));
 
@@ -148,7 +176,7 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 	}
 
 	public void resolveModal(IProgressMonitor monitor, ProfileChangeOperation operation) throws CoreException {
-		IStatus operationStatus = operation.resolveModal(new SubProgressMonitor(monitor, installableConnectors.size()));
+		IStatus operationStatus = operation.resolveModal(new SubProgressMonitor(monitor, items.size()));
 		if (operationStatus.getSeverity() > IStatus.WARNING) {
 			throw new CoreException(operationStatus);
 		}
@@ -162,6 +190,7 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 			final List<IInstallableUnit> installableUnits = queryInstallableUnits(monitor.newChild(50), repositories);
 			removeOldVersions(installableUnits);
 			checkForUnavailable(installableUnits);
+			pruneUnselected(installableUnits);
 			return installableUnits.toArray(new IInstallableUnit[installableUnits.size()]);
 
 			//			MultiStatus status = new MultiStatus(DiscoveryUi.ID_PLUGIN, 0, Messages.PrepareInstallProfileJob_ok, null);
@@ -199,6 +228,20 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 		}
 	}
 
+	private void pruneUnselected(List<IInstallableUnit> installableUnits) {
+		Set<String> installableFeatureIds = new HashSet<String>();
+		for (FeatureDescriptor descriptor : featureDescriptors) {
+			installableFeatureIds.add(descriptor.getId());
+		}
+		Iterator<IInstallableUnit> it = installableUnits.iterator();
+		while (it.hasNext()) {
+			IInstallableUnit iu = it.next();
+			if (!installableFeatureIds.contains(iu.getId())) {
+				it.remove();
+			}
+		}
+	}
+
 	/**
 	 * Verifies that we found what we were looking for: it's possible that we have connector descriptors that are no
 	 * longer available on their respective sites. In that case we must inform the user. Unfortunately this is the
@@ -213,7 +256,7 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 
 		String message = ""; //$NON-NLS-1$
 		String detailedMessage = ""; //$NON-NLS-1$
-		for (CatalogItem descriptor : installableConnectors) {
+		for (CatalogItem descriptor : items) {
 			StringBuilder unavailableIds = null;
 			for (String id : getFeatureIds(descriptor)) {
 				if (!foundIds.contains(id)) {

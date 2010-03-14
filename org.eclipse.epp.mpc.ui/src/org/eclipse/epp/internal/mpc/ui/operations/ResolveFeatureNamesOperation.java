@@ -51,7 +51,7 @@ public class ResolveFeatureNamesOperation extends AbstractProvisioningOperation 
 					resolvedFeatureIds.add(descriptor.getSimpleId());
 					featureDescriptors.add(descriptor);
 				}
-				for (CatalogItem catalogItem : installableConnectors) {
+				for (CatalogItem catalogItem : items) {
 					for (String iu : catalogItem.getInstallableUnits()) {
 						if (!resolvedFeatureIds.contains(iu)) {
 							FeatureDescriptor descriptor = new FeatureDescriptor(iu);
