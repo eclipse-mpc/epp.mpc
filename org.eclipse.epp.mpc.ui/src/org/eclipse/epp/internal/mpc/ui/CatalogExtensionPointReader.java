@@ -29,31 +29,31 @@ import org.eclipse.osgi.util.NLS;
 class CatalogExtensionPointReader {
 
 	public List<CatalogDescriptor> getCatalogDescriptors() {
-		IExtensionPoint extensionPoint = Platform.getExtensionRegistry().getExtensionPoint("org.eclipse.epp.mpc.ui",
-				"catalog");
+		IExtensionPoint extensionPoint = Platform.getExtensionRegistry().getExtensionPoint("org.eclipse.epp.mpc.ui", //$NON-NLS-1$
+				"catalog"); //$NON-NLS-1$
 		if (extensionPoint == null) {
 			throw new IllegalStateException();
 		}
 		List<CatalogDescriptor> descriptors = new ArrayList<CatalogDescriptor>();
 		for (IConfigurationElement element : extensionPoint.getConfigurationElements()) {
-			if (element.getName().equals("catalog")) {
+			if (element.getName().equals("catalog")) { //$NON-NLS-1$
 				try {
-					String urlText = element.getAttribute("url");
+					String urlText = element.getAttribute("url"); //$NON-NLS-1$
 					if (urlText == null || urlText.trim().length() == 0) {
-						throw new Exception("Must specify url");
+						throw new Exception(Messages.CatalogExtensionPointReader_urlRequired);
 					}
 					URL url = new URL(urlText);
-					String label = element.getAttribute("label");
+					String label = element.getAttribute("label"); //$NON-NLS-1$
 					if (label == null || label.trim().length() == 0) {
-						throw new Exception("Must specify label");
+						throw new Exception(Messages.CatalogExtensionPointReader_labelRequired);
 					}
 					CatalogDescriptor descriptor = new CatalogDescriptor(url, label);
-					descriptor.setDescription(element.getAttribute("description"));
-					final String icon = element.getAttribute("icon");
+					descriptor.setDescription(element.getAttribute("description")); //$NON-NLS-1$
+					final String icon = element.getAttribute("icon"); //$NON-NLS-1$
 					if (icon != null) {
 						URL iconResource = Platform.getBundle(element.getContributor().getName()).getResource(icon);
 						if (iconResource == null) {
-							throw new Exception(NLS.bind("Cannot find resourcce {0}", icon));
+							throw new Exception(NLS.bind(Messages.CatalogExtensionPointReader_cannotFindResource, icon));
 						}
 						descriptor.setIcon(ImageDescriptor.createFromURL(iconResource));
 					}
@@ -61,7 +61,7 @@ class CatalogExtensionPointReader {
 						descriptors.add(descriptor);
 					}
 				} catch (Exception e) {
-					MarketplaceClientUi.error(NLS.bind("Cannot register catalog for bundle {0}: {1}",
+					MarketplaceClientUi.error(NLS.bind(Messages.CatalogExtensionPointReader_cannotRegisterCatalog_bundle_reason,
 							element.getContributor().getName(), e.getMessage()), e);
 				}
 			}

@@ -64,10 +64,10 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 	protected ImageRegistry createImageRegistry() {
 		ImageRegistry imageRegistry = super.createImageRegistry();
 		imageRegistry.put(NO_ICON_PROVIDED, imageDescriptorFromPlugin(getBundle().getSymbolicName(),
-				"icons/noiconprovided.png"));
-		imageRegistry.put(IU_ICON, imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/iu_obj.gif"));
+				"icons/noiconprovided.png")); //$NON-NLS-1$
+		imageRegistry.put(IU_ICON, imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/iu_obj.gif")); //$NON-NLS-1$
 		imageRegistry.put(IU_ICON_UPDATE, imageDescriptorFromPlugin(getBundle().getSymbolicName(),
-				"icons/iu_update_obj.gif"));
+				"icons/iu_update_obj.gif")); //$NON-NLS-1$
 		return imageRegistry;
 	}
 }
