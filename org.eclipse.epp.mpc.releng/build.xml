@@ -1,77 +1,96 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="build" default="all" basedir=".">
-	
+
 	<property file="local.properties" />
 
 	<!-- defaults -->
-	<property name="maven" value="mvn"/>
-	<property name="maven.extraArgs" value=""/>
-	<property name="version" value="1.0.0"/>
-	<property name="sign.dir" value="target/dist"/>
-		
+	<property name="maven" value="mvn" />
+	<property name="maven.extraArgs" value="" />
+	<property name="version" value="1.0.0" />
+	<property name="sign.dir" value="target/dist" />
+
 	<target name="all" depends="clean,build,dist">
 	</target>
 
 	<target name="clean">
-		<mvn dir=".." targets="clean"/>
+		<mvn dir=".." targets="clean" />
 	</target>
-	
+
 	<target name="build">
-		<mvn dir=".." targets="install"/>
+		<mvn dir=".." targets="install" />
 	</target>
 
 	<target name="dist">
-		<mvn dir=".." targets="clean install"/>
-		<mvn targets="clean package"/>
-		<antcall target="sign"/>
-		<echo>waiting 60 seconds for signed bits</echo>
-		<waitfor maxwait="60" maxwaitunit="second" timeoutproperty="timeout">
-			<available file="${sign.dir}/output/org.eclipse.epp.mpc.repository-${version}-site.zip"/>
+		<mvn dir=".." targets="clean install" />
+		<mvn targets="clean package" />
+		<antcall target="sign" />
+		<echo>waiting 120 seconds for signed bits</echo>
+		<waitfor maxwait="120" maxwaitunit="second" timeoutproperty="timeout">
+			<available file="${sign.dir}/output/org.eclipse.epp.mpc.repository-${version}-site.zip" />
 		</waitfor>
 		<fail if="timeout">invoke "ant promote" to release signed bits when ${sign.dir}/output/org.eclipse.epp.mpc.repository-${version}-site.zip becomes available</fail>
-		<antcall target="promote"/>
+		<antcall target="promote" />
 	</target>
 
 	<target name="sign">
-		<mkdir dir="${sign.dir}"/>
-		<mkdir dir="${sign.dir}/output"/>
-			
-		<copy file="target/org.eclipse.epp.mpc.repository-${version}-site.zip" todir="${sign.dir}"/>
-		<delete file="${sign.dir}/output/org.eclipse.epp.mpc.repository-${version}-site.zip"/>
+		<mkdir dir="${sign.dir}" />
+		<mkdir dir="${sign.dir}/output" />
+
+		<copy file="target/org.eclipse.epp.mpc.repository-${version}-site.zip" todir="${sign.dir}" />
+		<delete file="${sign.dir}/output/org.eclipse.epp.mpc.repository-${version}-site.zip" />
 		<exec executable="sign" failonerror="true">
-			<arg value="${sign.dir}/org.eclipse.epp.mpc.repository-${version}-site.zip"/>
-			<arg value="nomail"/>
-			<arg value="${sign.dir}/output"/>
+			<arg value="${sign.dir}/org.eclipse.epp.mpc.repository-${version}-site.zip" />
+			<arg value="nomail" />
+			<arg value="${sign.dir}/output" />
 		</exec>
 	</target>
 
 	<target name="promote">
-		<available file="${sign.dir}/output/org.eclipse.epp.mpc.repository-${version}-site.zip" property="file.exists"/>
+		<available file="${sign.dir}/output/org.eclipse.epp.mpc.repository-${version}-site.zip" property="file.exists" />
 		<fail unless="file.exists">${sign.dir}/output/org.eclipse.epp.mpc.repository-${version}-site.zip does not exist</fail>
-		
-		<delete dir="target/site"/>
-		<unzip dest="target/site" src="${sign.dir}/output/org.eclipse.epp.mpc.repository-${version}-site.zip"/>
-		
-		<antcall target="metadata"/>
+
+		<delete dir="target/site" />
+		<unzip dest="target/site" src="${sign.dir}/output/org.eclipse.epp.mpc.repository-${version}-site.zip" />
+		<copy todir="target/site/features">
+			<fileset dir="${user.home}/downloads/mpc/discovery/features" />
+		</copy>
+		<copy todir="target/site/plugins">
+			<fileset dir="${user.home}/downloads/mpc/discovery/plugins" />
+		</copy>
+
+		<antcall target="metadata" />
+
+
+		<chmod perm="g+w">
+			<fileset dir="site/target"/>
+		</chmod>
+		<exec executable="/bin/chgrp" failonerror="false">
+			<arg value="-R"/>
+			<arg value="technology.packaging.mpc"/>
+			<arg value="site/target"/>
+		</exec>
+		<copy todir="${user.home}/downloads/mpc/repo">
+			<fileset dir="target/site" />
+		</copy>		
 	</target>
 
 	<target name="metadata">
-		<delete dir="target/site" includes="artifacts.*,content.*"/>
-		<mvn targets="-Dtarget=${dir} org.sonatype.tycho:tycho-p2-plugin:update-site-p2-metadata"/>
+		<delete dir="target/site" includes="artifacts.*,content.*" />
+		<mvn targets="-Dtarget=${dir} org.sonatype.tycho:tycho-p2-plugin:update-site-p2-metadata" />
 	</target>
-	
+
 	<macrodef name="mvn">
-		<attribute name="targets"/>
-		<attribute name="dir" default="${basedir}"/>
-		<sequential>			
+		<attribute name="targets" />
+		<attribute name="dir" default="${basedir}" />
+		<sequential>
 			<exec executable="${maven}" failonerror="true">
-				<arg value="-Dmaven.test.skip=true"/>
-				<arg value="-f"/>
-				<arg value="@{dir}/pom.xml"/>
-				<arg line="${maven.extraArgs}"/>
-				<arg line="@{targets}"/>
+				<arg value="-Dmaven.test.skip=true" />
+				<arg value="-f" />
+				<arg value="@{dir}/pom.xml" />
+				<arg line="${maven.extraArgs}" />
+				<arg line="@{targets}" />
 			</exec>
 		</sequential>
 	</macrodef>
-		
+
 </project>
