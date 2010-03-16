@@ -14,6 +14,7 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 import java.net.URL;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
@@ -146,8 +147,12 @@ class OverviewToolTip extends ToolTip {
 
 		Font dialogFont = JFaceResources.getDialogFont();
 		FontData[] fontData = dialogFont.getFontData();
+		String fontSizeUnitOfMeasure = "px"; //$NON-NLS-1$
+		if (Platform.OS_LINUX.equals(Platform.getOS())) {
+			fontSizeUnitOfMeasure = "pt"; //$NON-NLS-1$
+		}
 		String cssStyle = "body, p, div, *  {" + "font-family:\"" + fontData[0].getName() //$NON-NLS-1$ //$NON-NLS-2$
-				+ "\",Arial,sans-serif !important;font-size:" + fontData[0].getHeight() + "px !important;" //$NON-NLS-1$ //$NON-NLS-2$
+				+ "\",Arial,sans-serif !important;font-size:" + fontData[0].getHeight() + fontSizeUnitOfMeasure + " !important;" //$NON-NLS-1$ //$NON-NLS-2$
 				+ "} body { margin: 0px; background-color: white;}"; //$NON-NLS-1$
 		summaryLabel.setFont(dialogFont);
 		String html = "<html><style>" + cssStyle + "</style><body>" + TextUtil.cleanInformalHtmlMarkup(summary) //$NON-NLS-1$//$NON-NLS-2$
@@ -254,7 +259,8 @@ class OverviewToolTip extends ToolTip {
 				return image;
 			} catch (SWTException e) {
 				// ignore, probably a bad image format
-				MarketplaceClientUi.error(NLS.bind(Messages.OverviewToolTip_cannotRenderImage_reason, imagePath, e.getMessage()), e);
+				MarketplaceClientUi.error(NLS.bind(Messages.OverviewToolTip_cannotRenderImage_reason, imagePath,
+						e.getMessage()), e);
 			}
 		}
 		return null;
