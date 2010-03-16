@@ -60,14 +60,13 @@
 
 		<antcall target="metadata" />
 
-
 		<chmod perm="g+w">
-			<fileset dir="site/target"/>
+			<fileset dir="target/site"/>
 		</chmod>
 		<exec executable="/bin/chgrp" failonerror="false">
 			<arg value="-R"/>
 			<arg value="technology.packaging.mpc"/>
-			<arg value="site/target"/>
+			<arg value="target/site"/>
 		</exec>
 		<copy todir="${user.home}/downloads/mpc/repo">
 			<fileset dir="target/site" />
