@@ -177,10 +177,10 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 			createProviderLabel(composite);
 
-			Button button = new Button(composite, SWT.BORDER | SWT.INHERIT_NONE);
+			Button button = new Button(composite, SWT.INHERIT_NONE);
 			Button secondaryButton = null;
 			if (connector.isInstalled()) {
-				secondaryButton = new Button(composite, SWT.BORDER | SWT.INHERIT_NONE);
+				secondaryButton = new Button(composite, SWT.INHERIT_NONE);
 			}
 
 			GridLayoutFactory.fillDefaults()

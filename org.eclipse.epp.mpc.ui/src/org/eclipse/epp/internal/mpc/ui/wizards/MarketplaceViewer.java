@@ -92,13 +92,13 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	}
 
-	private String queryText;
-
 	private ViewerFilter[] filters;
 
 	private ContentType contentType = ContentType.SEARCH;
 
 	private final SelectionModel selectionModel;
+
+	private Text filterText;
 
 	public MarketplaceViewer(Catalog catalog, IShellProvider shellProvider, IRunnableContext context,
 			CatalogConfiguration configuration, SelectionModel selectionModel) {
@@ -132,7 +132,6 @@ public class MarketplaceViewer extends CatalogViewer {
 		}
 
 		// FIXME: placeholder until after M6
-		Text filterText = null;
 		try {
 			Field filterTextField = FilteredViewer.class.getDeclaredField("filterText"); //$NON-NLS-1$
 			filterTextField.setAccessible(true);
@@ -170,7 +169,6 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	@Override
 	protected void doFind(String text) {
-		this.queryText = text;
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -218,7 +216,9 @@ public class MarketplaceViewer extends CatalogViewer {
 				}
 			}
 		}
-		doQuery(market, category, queryText);
+		if (filterText != null) {
+			doQuery(market, category, filterText.getText());
+		}
 	}
 
 	private void doQuery(final Market market, final Category category, final String queryText) {

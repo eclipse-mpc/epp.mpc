@@ -147,9 +147,9 @@ class OverviewToolTip extends ToolTip {
 
 		Font dialogFont = JFaceResources.getDialogFont();
 		FontData[] fontData = dialogFont.getFontData();
-		String fontSizeUnitOfMeasure = "px"; //$NON-NLS-1$
-		if (Platform.OS_LINUX.equals(Platform.getOS())) {
-			fontSizeUnitOfMeasure = "pt"; //$NON-NLS-1$
+		String fontSizeUnitOfMeasure = "pt"; //$NON-NLS-1$
+		if (Platform.OS_MACOSX.equals(Platform.getOS())) {
+			fontSizeUnitOfMeasure = "px"; //$NON-NLS-1$
 		}
 		String cssStyle = "body, p, div, *  {" + "font-family:\"" + fontData[0].getName() //$NON-NLS-1$ //$NON-NLS-2$
 				+ "\",Arial,sans-serif !important;font-size:" + fontData[0].getHeight() + fontSizeUnitOfMeasure + " !important;" //$NON-NLS-1$ //$NON-NLS-2$
@@ -162,6 +162,9 @@ class OverviewToolTip extends ToolTip {
 		// instead of opening links in the tooltip, open a new browser window
 		summaryLabel.addLocationListener(new LocationListener() {
 			public void changing(LocationEvent event) {
+				if (event.location.equals("about:blank")) { //$NON-NLS-1$
+					return;
+				}
 				event.doit = false;
 				OverviewToolTip.this.hide();
 				WorkbenchUtil.openUrl(event.location, IWorkbenchBrowserSupport.AS_EXTERNAL);
