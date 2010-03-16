@@ -321,11 +321,11 @@ public class SelectionModel {
 			for (List<CatalogItem> items : operationToItem.values()) {
 				count += items.size();
 			}
-			new Status(IStatus.INFO, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
+			return new Status(IStatus.INFO, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
 					Messages.SelectionModel_countSolutionsSelectedForInstallUpdate, count));
 		} else if (operationToItem.size() > 1) {
 			if (!(operationToItem.size() == 2 && operationToItem.containsKey(Operation.INSTALL) && operationToItem.containsKey(Operation.CHECK_FOR_UPDATES))) {
-				new Status(IStatus.INFO, MarketplaceClientUi.BUNDLE_ID,
+				return new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
 						Messages.SelectionModel_cannotInstallRemoveConcurrently);
 			}
 		}
