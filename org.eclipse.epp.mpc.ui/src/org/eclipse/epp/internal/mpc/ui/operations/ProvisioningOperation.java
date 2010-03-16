@@ -98,7 +98,8 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 
 	public void run(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
 		try {
-			SubMonitor monitor = SubMonitor.convert(progressMonitor, Messages.ProvisioningOperation_configuringProvisioningOperation, 100);
+			SubMonitor monitor = SubMonitor.convert(progressMonitor,
+					Messages.ProvisioningOperation_configuringProvisioningOperation, 100);
 			try {
 				final IInstallableUnit[] ius = computeInstallableUnits(monitor.newChild(50));
 
@@ -175,10 +176,7 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 	}
 
 	public void resolveModal(IProgressMonitor monitor, ProfileChangeOperation operation) throws CoreException {
-		IStatus operationStatus = operation.resolveModal(new SubProgressMonitor(monitor, items.size()));
-		if (operationStatus.getSeverity() > IStatus.WARNING) {
-			throw new CoreException(operationStatus);
-		}
+		operation.resolveModal(new SubProgressMonitor(monitor, items.size()));
 	}
 
 	public IInstallableUnit[] computeInstallableUnits(SubMonitor monitor) throws CoreException {
@@ -254,8 +252,8 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 				if (detailedMessage.length() > 0) {
 					detailedMessage += Messages.ProvisioningOperation_commaSeparator;
 				}
-				detailedMessage += NLS.bind(Messages.ProvisioningOperation_unavailableFeatures, new Object[] { descriptor.getName(),
-						unavailableIds.toString(), descriptor.getSiteUrl() });
+				detailedMessage += NLS.bind(Messages.ProvisioningOperation_unavailableFeatures, new Object[] {
+						descriptor.getName(), unavailableIds.toString(), descriptor.getSiteUrl() });
 			}
 		}
 
@@ -265,10 +263,8 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 			final String finalMessage = message;
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
-					okayToProceed[0] = MessageDialog.openQuestion(
-							WorkbenchUtil.getShell(),
-							Messages.ProvisioningOperation_proceedQuestion,
-							NLS.bind(
+					okayToProceed[0] = MessageDialog.openQuestion(WorkbenchUtil.getShell(),
+							Messages.ProvisioningOperation_proceedQuestion, NLS.bind(
 									Messages.ProvisioningOperation_unavailableConnectors_proceedQuestion,
 									new Object[] { finalMessage }));
 				}
