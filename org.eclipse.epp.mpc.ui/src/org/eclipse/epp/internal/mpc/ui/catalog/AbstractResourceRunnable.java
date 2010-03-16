@@ -69,7 +69,7 @@ abstract class AbstractResourceRunnable implements IRunnableWithProgress, Callab
 		} catch (URISyntaxException e) {
 			MarketplaceClientUi.error(NLS.bind(Messages.AbstractResourceRunnable_badUri, resourceUrl), e);
 		} catch (FileNotFoundException e) {
-			MarketplaceClientUi.error(NLS.bind(Messages.AbstractResourceRunnable_resourceNotFound, resourceUrl), e);
+			//MarketplaceClientUi.error(NLS.bind(Messages.AbstractResourceRunnable_resourceNotFound, resourceUrl), e);
 		} catch (IOException e) {
 			MarketplaceClientUi.error(e);
 		} catch (CoreException e) {

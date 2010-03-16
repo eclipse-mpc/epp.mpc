@@ -48,7 +48,7 @@ public class FeatureDescriptor {
 	}
 
 	private static String getProperty(IInstallableUnit candidate, String key) {
-		String value = TranslationSupport.getInstance().getIUProperty(candidate, key);
+		String value = TranslationSupport.getInstance().getIUProperty(candidate, key, null);
 		return (value != null) ? value : ""; //$NON-NLS-1$
 	}
 

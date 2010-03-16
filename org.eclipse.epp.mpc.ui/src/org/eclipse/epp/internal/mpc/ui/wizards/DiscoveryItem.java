@@ -15,7 +15,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
 import org.eclipse.equinox.internal.p2.discovery.AbstractCatalogSource;
@@ -126,8 +125,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 				iconLabel.setImage(image);
 			} catch (SWTException e) {
 				// ignore, probably a bad image format
-				MarketplaceClientUi.error(NLS.bind(Messages.DiscoveryItem_cannotRenderImage_reason, connector.getIcon()
-						.getImage32(), e.getMessage()), e);
+//				MarketplaceClientUi.error(NLS.bind(Messages.DiscoveryItem_cannotRenderImage_reason, connector.getIcon()
+//						.getImage32(), e.getMessage()), e);
 			}
 		}
 		if (iconLabel.getImage() == null) {
