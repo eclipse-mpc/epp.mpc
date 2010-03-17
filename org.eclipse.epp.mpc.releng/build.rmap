@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rm:rmap xmlns:bc="http://www.eclipse.org/buckminster/Common-1.0" xmlns:rm="http://www.eclipse.org/buckminster/RMap-1.0">
+  <rm:property key="eclipse.download.prefix" value="http://download.eclipse.org"/>
+  <rm:locator pattern="^org\.eclipse\.epp\.mpc(\..+)?$" searchPathRef="git"/>
+  <rm:locator pattern="^org\.eclipse\.equinox\.p2\.(ui\.)?discovery$" searchPathRef="p2.discovery"/>
+  <rm:locator pattern="" searchPathRef="platform"/>
+  <rm:searchPath name="platform">
+    <rm:provider componentTypes="osgi.bundle,eclipse.feature" readerType="p2" source="false" mutable="false" resolutionFilter="(build.type=I)">
+      <rm:uri format="{0}/eclipse/updates/3.6-I-builds">
+        <bc:propertyRef key="eclipse.download.prefix"/>
+      </rm:uri>
+    </rm:provider>
+    <rm:provider componentTypes="osgi.bundle,eclipse.feature" readerType="p2" source="false" mutable="false" resolutionFilter="(build.type=M)">
+      <rm:uri format="{0}/eclipse/updates/3.6-I-builds/I20100312-1448">
+        <bc:propertyRef key="eclipse.download.prefix"/>
+      </rm:uri>
+    </rm:provider>
+    <rm:provider componentTypes="osgi.bundle,eclipse.feature" readerType="p2" source="false" mutable="false" resolutionFilter="(build.type=R)">
+      <rm:uri format="{0}/eclipse/updates/3.6">
+        <bc:propertyRef key="eclipse.download.prefix"/>
+      </rm:uri>
+    </rm:provider>
+  </rm:searchPath>
+  <rm:searchPath name="p2.discovery">
+    <rm:provider componentTypes="osgi.bundle" readerType="p2" source="false" mutable="false">
+      <rm:uri format="{0}/mpc/discovery">
+        <bc:propertyRef key="eclipse.download.prefix"/>
+      </rm:uri>
+    </rm:provider>
+  </rm:searchPath>
+  <rm:searchPath name="git">
+    <rm:provider componentTypes="buckminster,osgi.bundle,eclipse.feature" readerType="git" resolutionFilter="">
+      <rm:uri format="{0},{1}">
+        <bc:propertyRef key="build.root"/>
+        <bc:propertyRef key="buckminster.component"/>
+      </rm:uri>
+    </rm:provider>
+  </rm:searchPath>
+</rm:rmap>
