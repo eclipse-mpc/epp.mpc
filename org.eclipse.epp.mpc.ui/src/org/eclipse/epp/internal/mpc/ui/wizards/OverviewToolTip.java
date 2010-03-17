@@ -147,11 +147,14 @@ class OverviewToolTip extends ToolTip {
 
 		Font dialogFont = JFaceResources.getDialogFont();
 		FontData[] fontData = dialogFont.getFontData();
+		String attr = ""; //$NON-NLS-1$
 		String fontSizeUnitOfMeasure = "pt"; //$NON-NLS-1$
 		if (Platform.OS_MACOSX.equals(Platform.getOS())) {
 			fontSizeUnitOfMeasure = "px"; //$NON-NLS-1$
+		} else if (Platform.OS_WIN32.equals(Platform.getOS())) {
+			attr = "overflow: auto; "; //$NON-NLS-1$
 		}
-		String cssStyle = "body, p, div, *  {" + "overflow: auto; font-family:\"" + fontData[0].getName() //$NON-NLS-1$ //$NON-NLS-2$
+		String cssStyle = "body, p, div, *  {" + attr + "font-family:\"" + fontData[0].getName() //$NON-NLS-1$ //$NON-NLS-2$
 				+ "\",Arial,sans-serif !important;font-size:" + fontData[0].getHeight() + fontSizeUnitOfMeasure + " !important;" //$NON-NLS-1$ //$NON-NLS-2$
 				+ "} body { margin: 0px; background-color: white;}"; //$NON-NLS-1$
 		summaryLabel.setFont(dialogFont);
