@@ -30,7 +30,7 @@
 	<property name="targetPlatformPath" location="${result}/tp" />
 
 	<property name="buckminster.output.root" location="${result}/output" />
-	<property name="buckminster.output.temp" location="${result}/temp" />
+	<property name="buckminster.temp.root" location="${result}/temp" />
 	<property name="template.dir" location="${tools}/templates" />
 
 	<!-- This macro executes the default application of an eclipse installation that resides
