@@ -23,6 +23,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.SAXParserFactory;
 
@@ -66,7 +67,14 @@ public class DefaultMarketplaceService implements MarketplaceService {
 	public static final String DEFAULT_SERVICE_LOCATION = System.getProperty(MarketplaceService.class.getName()
 			+ ".url", "http://marketplace.eclipse.org"); //$NON-NLS-1$//$NON-NLS-2$
 
+	/**
+	 * @see {@link #setRequestMetaParameters(Map)}
+	 */
+	public static final String META_PARAM_CLIENT = "client"; //$NON-NLS-1$
+
 	private URL baseUrl;
+
+	private Map<String, String> requestMetaParameters;
 
 	public DefaultMarketplaceService(URL baseUrl) {
 		this.baseUrl = baseUrl;
@@ -242,6 +250,31 @@ public class DefaultMarketplaceService implements MarketplaceService {
 			uri += '/';
 		}
 		uri += relativePath;
+
+		if (requestMetaParameters != null) {
+			try {
+				boolean hasQueryString = uri.indexOf('?') != -1;
+				for (Map.Entry<String, String> param : requestMetaParameters.entrySet()) {
+					if (param.getKey() == null) {
+						continue;
+					}
+					if (hasQueryString) {
+						uri += '&';
+					} else {
+						hasQueryString = true;
+						uri += '?';
+					}
+					uri += URLEncoder.encode(param.getKey(), UTF_8);
+					uri += '=';
+					if (param.getValue() != null) {
+						uri += URLEncoder.encode(param.getValue(), UTF_8);
+					}
+				}
+			} catch (UnsupportedEncodingException e) {
+				throw new IllegalStateException(e);
+			}
+		}
+
 		URI location;
 		try {
 			location = new URI(uri);
@@ -263,8 +296,15 @@ public class DefaultMarketplaceService implements MarketplaceService {
 			}
 			xmlReader.setContentHandler(unmarshaller);
 
-			InputStream in = org.eclipse.equinox.internal.p2.repository.RepositoryTransport.getInstance().stream(
-					location, monitor);
+			InputStream in;
+			try {
+				in = org.eclipse.equinox.internal.p2.repository.RepositoryTransport.getInstance().stream(location,
+						monitor);
+			} catch (NullPointerException e) {
+				// probably a unit test scenario
+				in = location.toURL().openStream();
+			}
+
 			try {
 				monitor.worked(30);
 
@@ -308,6 +348,25 @@ public class DefaultMarketplaceService implements MarketplaceService {
 
 	private IStatus createErrorStatus(String message, Throwable t) {
 		return new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID, 0, message, t);
+	}
+
+	/**
+	 * The meta-parameters to be included in API requests, or null if there are none. Typically clients will use this
+	 * facility to pass client meta-data to the server. For example, metadata might include the client identity,
+	 * operating system, etc.
+	 */
+	public Map<String, String> getRequestMetaParameters() {
+		return requestMetaParameters;
+	}
+
+	/**
+	 * The meta-parameters to be included in API requests
+	 * 
+	 * @param requestMetaParameters
+	 *            the parameters or null if there should be none
+	 */
+	public void setRequestMetaParameters(Map<String, String> requestMetaParameters) {
+		this.requestMetaParameters = requestMetaParameters;
 	}
 
 }

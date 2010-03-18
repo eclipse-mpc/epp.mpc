@@ -11,8 +11,10 @@
 package org.eclipse.epp.internal.mpc.ui.catalog;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -28,6 +30,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.service.Categories;
 import org.eclipse.epp.internal.mpc.core.service.Category;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
@@ -66,9 +69,17 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			throw new IllegalArgumentException();
 		}
 		this.catalogDescriptor = catalogDescriptor;
-		marketplaceService = new DefaultMarketplaceService(this.catalogDescriptor.getUrl());
+		marketplaceService = createMarketplaceService();
 		source = new MarketplaceCatalogSource(marketplaceService);
 		marketplaceInfo = MarketplaceInfo.getInstance();
+	}
+
+	public MarketplaceService createMarketplaceService() {
+		DefaultMarketplaceService service = new DefaultMarketplaceService(this.catalogDescriptor.getUrl());
+		Map<String, String> requestMetaParameters = new HashMap<String, String>();
+		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_CLIENT, MarketplaceClientCore.BUNDLE_ID);
+		service.setRequestMetaParameters(requestMetaParameters);
+		return service;
 	}
 
 	@Override

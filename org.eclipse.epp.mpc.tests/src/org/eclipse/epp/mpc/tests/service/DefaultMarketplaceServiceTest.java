@@ -15,9 +15,10 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
-import java.net.URL;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -43,7 +44,10 @@ public class DefaultMarketplaceServiceTest {
 
 	@Before
 	public void setUp() throws Exception {
-		marketplaceService = new DefaultMarketplaceService(new URL("http://www.eclipseplugincentral.net")); // FIXME: switch to marketplace.eclipse.org
+		marketplaceService = new DefaultMarketplaceService();
+		Map<String, String> requestMetaParameters = new HashMap<String, String>();
+		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_CLIENT, "org.eclipse.epp.mpc.tests");
+		marketplaceService.setRequestMetaParameters(requestMetaParameters);
 	}
 
 	@Test
