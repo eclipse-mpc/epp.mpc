@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.eclipse.epp.mpc.site"
+      label="MPC Update Site project"
+      version="1.0.0.qualifier"
+      provider-name="Eclipse Packaging Project">
+
+   <description>
+      The EPP Marketplace Client provides access to the Eclipse Marketplace solution catalog.
+   </description>
+
+   <copyright url="http://www.example.com/copyright">
+      [Enter Copyright Description here.]
+   </copyright>
+
+   <license url="http://www.example.com/license">
+      [Enter License Description here.]
+   </license>
+
+   <url>
+      <update label="EPP Marketplace Client" url="http://www.eclipse.org/downloads/download.php?file=/mpc/repo/&amp;protocol=http&amp;format=xml"/>
+   </url>
+
+   <includes
+         id="org.eclipse.epp.mpc"
+         version="0.0.0"/>
+
+</feature>

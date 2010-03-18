@@ -1,95 +1,196 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project name="build" default="all" basedir=".">
+<?xml version="1.0"?>
+<!--************************************************************************
+ * Copyright (c) 2006-2007, Cloudsmith Inc.
+ * The code, documentation and other materials contained herein have been
+ * licensed under the Eclipse Public License - v 1.0 by the copyright holder
+ * listed above, as the Initial Contributor under such license. The text of
+ * such license is available at www.eclipse.org.
+ ************************************************************************-->
 
+<project name="project">
+	<!--Property file containing overrides for the default properties
+	  -->
+	<property environment="env" />
 	<property file="local.properties" />
+	<property file="build.properties" />
+	<property name="perform.command" value="org.eclipse.epp.mpc.site#site.p2" />
 
-	<!-- defaults -->
-	<property name="maven" value="mvn" />
-	<property name="maven.extraArgs" value="" />
-	<property name="version" value="1.0.0" />
-	<property name="sign.dir" value="target/dist" />
+	<!-- if we are not running in Huson, we some up with a reasonable default -->
+	<condition property="build.root.string" value="${env.WORKSPACE}" else="${basedir}/..">
+		<isset property="env.WORKSPACE" />
+	</condition>
+	<property name="build.root" location="${build.root.string}"/>
 
-	<target name="all" depends="clean,build,dist">
-	</target>
+	<!--Default properties intended to be overridden by entries in the
+		above property file.
+	-->
+	<property name="tools" location="${build.root}/tools" />
+	<property name="result" location="${build.root}/result" />
+	<property name="workspace" location="${result}/workspace" />
+	<property name="targetPlatformPath" location="${result}/tp" />
 
-	<target name="clean">
-		<mvn dir=".." targets="clean" />
-	</target>
+	<property name="buckminster.output.root" location="${result}/output" />
+	<property name="buckminster.temp.root" location="${result}/temp" />
+	<property name="template.dir" location="${tools}/templates" />
 
-	<target name="build">
-		<mvn dir=".." targets="install" />
-	</target>
-
-	<target name="dist">
-		<mvn dir=".." targets="clean install" />
-		<mvn targets="clean package" />
-		<antcall target="sign" />
-		<echo>waiting 120 seconds for signed bits</echo>
-		<waitfor maxwait="120" maxwaitunit="second" timeoutproperty="timeout">
-			<available file="${sign.dir}/output/org.eclipse.epp.mpc.repository-${version}-site.zip" />
-		</waitfor>
-		<fail if="timeout">invoke "ant promote" to release signed bits when ${sign.dir}/output/org.eclipse.epp.mpc.repository-${version}-site.zip becomes available</fail>
-		<antcall target="promote" />
-	</target>
-
-	<target name="sign">
-		<mkdir dir="${sign.dir}" />
-		<mkdir dir="${sign.dir}/output" />
-
-		<copy file="target/org.eclipse.epp.mpc.repository-${version}-site.zip" todir="${sign.dir}" />
-		<delete file="${sign.dir}/output/org.eclipse.epp.mpc.repository-${version}-site.zip" />
-		<exec executable="sign" failonerror="true">
-			<arg value="${sign.dir}/org.eclipse.epp.mpc.repository-${version}-site.zip" />
-			<arg value="nomail" />
-			<arg value="${sign.dir}/output" />
-		</exec>
-	</target>
-
-	<target name="promote">
-		<available file="${sign.dir}/output/org.eclipse.epp.mpc.repository-${version}-site.zip" property="file.exists" />
-		<fail unless="file.exists">${sign.dir}/output/org.eclipse.epp.mpc.repository-${version}-site.zip does not exist</fail>
-
-		<delete dir="target/site" />
-		<unzip dest="target/site" src="${sign.dir}/output/org.eclipse.epp.mpc.repository-${version}-site.zip" />
-		<copy todir="target/site/features">
-			<fileset dir="${user.home}/downloads/mpc/discovery/features" />
-		</copy>
-		<copy todir="target/site/plugins">
-			<fileset dir="${user.home}/downloads/mpc/discovery/plugins" />
-		</copy>
-
-		<antcall target="metadata" />
-
-		<chmod perm="g+w">
-			<fileset dir="target/site"/>
-		</chmod>
-		<exec executable="/bin/chgrp" failonerror="false">
-			<arg value="-R"/>
-			<arg value="technology.packaging.mpc"/>
-			<arg value="target/site"/>
-		</exec>
-		<copy todir="${user.home}/downloads/mpc/repo">
-			<fileset dir="target/site" />
-		</copy>		
-	</target>
-
-	<target name="metadata">
-		<delete dir="target/site" includes="artifacts.*,content.*" />
-		<mvn targets="-Dtarget=${dir} org.sonatype.tycho:tycho-p2-plugin:update-site-p2-metadata" />
-	</target>
-
-	<macrodef name="mvn">
-		<attribute name="targets" />
-		<attribute name="dir" default="${basedir}" />
+	<!-- This macro executes the default application of an eclipse installation that resides
+	     in the folder ${buildtools}/@app
+	  -->
+	<macrodef name="eclipse.launch">
+		<attribute name="app" />
+		<element name="args" optional="true" />
 		<sequential>
-			<exec executable="${maven}" failonerror="true">
-				<arg value="-Dmaven.test.skip=true" />
-				<arg value="-f" />
-				<arg value="@{dir}/pom.xml" />
-				<arg line="${maven.extraArgs}" />
-				<arg line="@{targets}" />
-			</exec>
+			<!-- We assume that the eclipse installation is beneath ${buildtools} -->
+			<property name="@{app}.deploy.dir" value="${tools}/@{app}" />
+
+			<!-- Find the Eclipse launcher and assing its location to the @{app}.launcher property -->
+			<pathconvert property="@{app}.launcher">
+				<first count="1">
+					<sort>
+						<fileset dir="${@{app}.deploy.dir}/plugins" includes="**/org.eclipse.equinox.launcher_*.jar" />
+						<reverse xmlns="antlib:org.apache.tools.ant.types.resources.comparators">
+							<date />
+						</reverse>
+					</sort>
+				</first>
+			</pathconvert>
+
+			<!-- Launch the eclipse application -->
+			<java fork="true" jar="${@{app}.launcher}" dir="${@{app}.deploy.dir}" failonerror="true">
+				<args />
+			</java>
 		</sequential>
 	</macrodef>
 
+	<macrodef name="buckminster">
+		<attribute name="command" />
+		<attribute name="workspace" default="${workspace}" />
+		<element name="globargs" optional="true" />
+		<element name="cmdargs" optional="true" />
+		<sequential>
+			<eclipse.launch app="buckminster">
+				<args>
+					<jvmarg value="-Dbugfix.288796=true"/>
+					<arg value="-data" />
+					<arg value="@{workspace}" />
+					<arg value="--loglevel" />
+					<arg value="${buckminster.loglevel}" />
+					<arg value="--displaystacktrace" />
+					<globargs />
+					<arg value="@{command}" />
+					<arg value="-P" />
+					<arg value="${properties.tmp}" />
+					<cmdargs />
+				</args>
+			</eclipse.launch>
+		</sequential>
+	</macrodef>
+
+	<target name="init.checks">
+		<available file="${tools}/director/director" property="director.exists" />
+		<available file="${tools}/buckminster/buckminster" property="buckminster.exists" />
+		<available file="${workspace}" type="dir" property="workspace.exists" />
+	</target>
+
+	<target name="get.director" unless="director.exists">
+		<echo message="Fetching headless director application" />
+		<tempfile destdir="${java.io.tmpdir}" prefix="director-" suffix=".zip" property="director.zip" deleteonexit="true" />
+		<get src="${director.url}" dest="${director.zip}" />
+		<mkdir dir="${tools}" />
+		<unzip src="${director.zip}" dest="${tools}" />
+		<delete file="${director.zip}" />
+	</target>
+
+	<target name="install.buckminster" unless="buckminster.exists" depends="get.director">
+		<echo message="Configuring headless buckminster with needed features" />
+		<echo message="Headless site: ${bm.headless.site}" />
+		<eclipse.launch app="director">
+			<args>
+				<arg value="-r" />
+				<arg value="${bm.headless.site}" />
+				<arg value="-d" />
+				<arg value="${tools}/buckminster" />
+				<arg value="-p" />
+				<arg value="Buckminster" />
+				<arg value="-i" />
+				<arg value="org.eclipse.buckminster.cmdline.product" />
+				<arg value="-i" />
+				<arg value="org.eclipse.buckminster.core.headless.feature.feature.group" />
+				<arg value="-i" />
+				<arg value="org.eclipse.buckminster.pde.headless.feature.feature.group" />
+				<arg value="-i" />
+				<arg value="org.eclipse.buckminster.git.headless.feature.feature.group" />
+			</args>
+		</eclipse.launch>
+	</target>
+
+	<target name="init.workspace" unless="workspace.exists">
+		<mkdir dir="${workspace}" />
+	</target>
+
+	<target name="init.build.properties">
+		<!-- Echo relevant properties to a temporary file so that Buckminster can read them
+		  -->
+		<tempfile destdir="${java.io.tmpdir}" prefix="build-" suffix=".properties" deleteonexit="true" property="properties.tmp" />
+		<echoproperties destfile="${properties.tmp}">
+			<!-- We don't want these. basedir in particular will cause problems if passed explicitly -->
+			<propertyset negate="true">
+				<propertyref name="basedir" />
+				<propertyref name="eclipse.home" />
+				<propertyref name="properties.tmp" />
+				<propertyref name="line.separator" />
+				<propertyref name="path.separator" />
+				<propertyref prefix="ant." />
+				<propertyref prefix="file." />
+				<propertyref prefix="java." />
+				<propertyref prefix="sun." />
+				<propertyref prefix="user." />
+			</propertyset>
+		</echoproperties>
+	</target>
+
+	<target name="provision" depends="init.checks,init.workspace,install.buckminster,init.build.properties">
+		<echo message="Importing projects into workspace ${workspace} and binaries into target platform ${targetPlatformPath}" />
+		<buckminster command="setpref">
+			<cmdargs>
+				<arg value="targetPlatformPath=${targetPlatformPath}" />
+			</cmdargs>
+		</buckminster>
+		<buckminster command="import">
+			<cmdargs>
+				<arg value="${basedir}/build.cquery" />
+			</cmdargs>
+		</buckminster>
+
+		<echo message="Running Eclipse builders on workspace ${workspace}" />
+		<buckminster command="build" />
+	</target>
+
+	<target name="buckminster.perform" depends="clean.workspace,clean.output,provision">
+		<echo message="Performing ${perform.command}" />
+		<buckminster command="perform">
+			<cmdargs>
+				<arg value="${perform.command}" />
+			</cmdargs>
+		</buckminster>
+	</target>
+
+	<target name="clean.all" depends="clean.tools,clean.workspace,clean.tp,clean.output" />
+	<target name="clean.tools">
+		<delete dir="${tools}/director" failonerror="true" quiet="true" />
+		<delete dir="${tools}/buckminster" failonerror="true" quiet="true" />
+	</target>
+
+	<target name="clean.tp">
+		<delete dir="${targetPlatformPath}" failonerror="true" quiet="true" />
+	</target>
+
+	<target name="clean.workspace">
+		<delete dir="${workspace}" failonerror="true" quiet="true" />
+	</target>
+
+	<target name="clean.output">
+		<delete dir="${buckminster.output.temp}" failonerror="true" quiet="true" />
+		<delete dir="${buckminster.output.root}" failonerror="true" quiet="true" />
+	</target>
 </project>
