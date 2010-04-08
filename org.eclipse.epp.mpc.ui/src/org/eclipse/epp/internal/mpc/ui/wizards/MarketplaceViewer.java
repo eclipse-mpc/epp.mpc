@@ -265,6 +265,11 @@ public class MarketplaceViewer extends CatalogViewer {
 		} catch (InterruptedException e) {
 			// cancelled by user so nothing to do here.
 		}
+		if (contentType == ContentType.INSTALLED) {
+			getViewer().setSorter(new MarketplaceViewerSorter());
+		} else {
+			getViewer().setSorter(null);
+		}
 		super.doFind(queryText);
 		// bug 305274: scrollbars don't always appear after switching tabs, so we re-do the layout
 		getViewer().getControl().getParent().layout(true, true);
