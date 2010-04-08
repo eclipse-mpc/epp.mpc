@@ -27,7 +27,6 @@ import org.eclipse.equinox.internal.p2.discovery.Catalog;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.discovery.model.Tag;
-import org.eclipse.equinox.internal.p2.discovery.util.CatalogCategoryComparator;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.ControlListItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.FilteredViewer;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.PatternFilter;
@@ -37,9 +36,7 @@ import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.StructuredViewer;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -81,7 +78,7 @@ public class MarketplaceViewer extends CatalogViewer {
 					if (category instanceof MarketplaceCategory) {
 						MarketplaceCategory marketplaceCategory = (MarketplaceCategory) category;
 						if (marketplaceCategory.getContents() == Contents.FEATURED) {
-							items.add(category);
+							items.add(0, category);
 						}
 					}
 				}
@@ -320,66 +317,7 @@ public class MarketplaceViewer extends CatalogViewer {
 	@Override
 	protected StructuredViewer doCreateViewer(Composite container) {
 		StructuredViewer viewer = super.doCreateViewer(container);
-		viewer.setSorter(new ViewerSorter() {
-			CatalogCategoryComparator categoryComparator = new CatalogCategoryComparator();
-
-			@Override
-			public int compare(Viewer viewer, Object o1, Object o2) {
-				if (o1 == o2) {
-					return 0;
-				}
-				CatalogCategory cat1 = getCategory(o1);
-				CatalogCategory cat2 = getCategory(o2);
-
-				// FIXME filter uncategorized items?
-				if (cat1 == null) {
-					return (cat2 != null) ? 1 : 0;
-				} else if (cat2 == null) {
-					return 1;
-				}
-
-				int i = categoryComparator.compare(cat1, cat2);
-				if (i == 0) {
-					if (o1 instanceof CatalogCategory) {
-						return -1;
-					}
-					if (o2 instanceof CatalogCategory) {
-						return 1;
-					}
-
-					CatalogItem i1 = (CatalogItem) o1;
-					CatalogItem i2 = (CatalogItem) o2;
-
-					// catalog descriptor comes last
-					if (i1.getData() instanceof CatalogDescriptor) {
-						i = 1;
-					} else if (i2.getData() instanceof CatalogDescriptor) {
-						i = -1;
-					} else {
-						// otherwise we sort by name
-						i = i1.getName().compareToIgnoreCase(i2.getName());
-						if (i == 0) {
-							i = i1.getName().compareTo(i2.getName());
-							if (i == 0) {
-								// same name, so we sort by id.
-								i = i1.getId().compareTo(i2.getId());
-							}
-						}
-					}
-				}
-				return i;
-			}
-
-			private CatalogCategory getCategory(Object o) {
-				if (o instanceof CatalogCategory) {
-					return (CatalogCategory) o;
-				}
-				if (o instanceof CatalogItem) {
-					return ((CatalogItem) o).getCategory();
-				}
-				return null;
-			}
-		});
+		viewer.setSorter(null);
 		return viewer;
 	}
 
