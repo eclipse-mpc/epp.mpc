@@ -100,6 +100,12 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	private Text filterText;
 
+	private String queryText;
+
+	private Market queryMarket;
+
+	private Category queryCategory;
+
 	public MarketplaceViewer(Catalog catalog, IShellProvider shellProvider, IRunnableContext context,
 			CatalogConfiguration configuration, SelectionModel selectionModel) {
 		super(catalog, shellProvider, context, configuration);
@@ -198,8 +204,9 @@ public class MarketplaceViewer extends CatalogViewer {
 	}
 
 	private void doQuery() {
-		Market market = null;
-		Category category = null;
+		queryMarket = null;
+		queryCategory = null;
+		queryText = null;
 
 		for (CatalogFilter filter : getConfiguration().getFilters()) {
 			if (filter instanceof AbstractTagFilter) {
@@ -208,17 +215,18 @@ public class MarketplaceViewer extends CatalogViewer {
 					Tag tag = tagFilter.getSelected().isEmpty() ? null : tagFilter.getSelected().iterator().next();
 					if (tag != null) {
 						if (tag.getTagClassifier() == Market.class) {
-							market = (Market) tag.getData();
+							queryMarket = (Market) tag.getData();
 						} else if (tag.getTagClassifier() == Category.class) {
-							category = (Category) tag.getData();
+							queryCategory = (Category) tag.getData();
 						}
 					}
 				}
 			}
 		}
 		if (filterText != null) {
-			doQuery(market, category, filterText.getText());
+			queryText = filterText.getText();
 		}
+		doQuery(queryMarket, queryCategory, queryText);
 	}
 
 	private void doQuery(final Market market, final Category category, final String queryText) {
@@ -399,5 +407,26 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	public SelectionModel getSelectionModel() {
 		return selectionModel;
+	}
+
+	/**
+	 * the text for the current query
+	 */
+	String getQueryText() {
+		return queryText;
+	}
+
+	/**
+	 * the category for the current query
+	 */
+	Category getQueryCategory() {
+		return queryCategory;
+	}
+
+	/**
+	 * the market for the current query
+	 */
+	Market getQueryMarket() {
+		return queryMarket;
 	}
 }

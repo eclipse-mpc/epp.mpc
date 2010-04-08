@@ -10,7 +10,11 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLEncoder;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -37,6 +41,10 @@ import org.eclipse.ui.statushandlers.StatusManager;
  */
 @SuppressWarnings("unused")
 public class BrowseCatalogItem extends AbstractDiscoveryItem<CatalogDescriptor> {
+
+	private static final String TID = "tid:"; //$NON-NLS-1$
+
+	private static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
 
 	private final MarketplaceViewer viewer;
 
@@ -78,7 +86,38 @@ public class BrowseCatalogItem extends AbstractDiscoveryItem<CatalogDescriptor> 
 		CatalogDescriptor catalogDescriptor = getData();
 
 		try {
-			WorkbenchUtil.openUrl(catalogDescriptor.getUrl().toURI().toString(), IWorkbenchBrowserSupport.AS_EXTERNAL);
+			URL url = catalogDescriptor.getUrl();
+			String queryText = viewer.getQueryText();
+			if (queryText != null && queryText.trim().length() > 0) {
+				// append something like this:
+				// /search/apachesolr_search/mylyn%20wikitext?filters=tid:38%20tid:31
+				try {
+					String path = "search/apachesolr_search/" + URLEncoder.encode(queryText.trim(), UTF_8); //$NON-NLS-1$
+					String filter = ""; //$NON-NLS-1$
+					if (viewer.getQueryMarket() != null) {
+						filter += TID;
+						filter += viewer.getQueryMarket().getId();
+					}
+					if (viewer.getQueryCategory() != null) {
+						if (filter.length() > 0) {
+							filter += ' ';
+						}
+						filter += TID;
+						filter += viewer.getQueryCategory().getId();
+					}
+					if (filter.length() > 0) {
+						path += "?filters=" + URLEncoder.encode(filter, UTF_8); //$NON-NLS-1$
+					}
+					url = new URL(url, path);
+				} catch (UnsupportedEncodingException e) {
+					// should never happen
+					MarketplaceClientUi.error(e);
+				} catch (MalformedURLException e) {
+					// should never happen
+					MarketplaceClientUi.error(e);
+				}
+			}
+			WorkbenchUtil.openUrl(url.toURI().toString(), IWorkbenchBrowserSupport.AS_EXTERNAL);
 		} catch (URISyntaxException e) {
 			String message = String.format(Messages.BrowseCatalogItem_cannotOpenBrowser);
 			IStatus status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, IStatus.ERROR, message, e);
