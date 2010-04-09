@@ -29,7 +29,13 @@ class Messages extends NLS {
 
 	public static String DiscoveryItem_cannotRenderImage_reason;
 
+	public static String DiscoveryItem_installInstructions;
+
+	public static String DiscoveryItem_installInstructionsTooltip;
+
 	public static String DiscoveryItem_showOverview;
+
+	public static String DiscoveryItem_truncatedTextSuffix;
 
 	public static String FeatureSelectionWizardPage_confirmSelectedFeatures;
 

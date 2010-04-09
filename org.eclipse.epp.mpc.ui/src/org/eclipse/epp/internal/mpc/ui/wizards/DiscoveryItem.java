@@ -16,12 +16,14 @@ import java.beans.PropertyChangeListener;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
 import org.eclipse.equinox.internal.p2.discovery.AbstractCatalogSource;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.discovery.model.Overview;
+import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.AbstractDiscoveryItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryResources;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -48,6 +50,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Widget;
+import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 /**
  * @author Steffen Pingel
@@ -83,6 +86,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 	private final MarketplaceViewer viewer;
 
 	private ItemButtonController buttonController;
+
+	private Link installInfoLink;
 
 	public DiscoveryItem(Composite parent, int style, DiscoveryResources resources, IShellProvider shellProvider,
 			final T connector, MarketplaceViewer viewer) {
@@ -180,7 +185,14 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 			descriptionText = TextUtil.stripHtmlMarkup(descriptionText).trim();
 		}
 		if (descriptionText.length() > maxDescriptionLength) {
-			descriptionText = descriptionText.substring(0, maxDescriptionLength);
+			int truncationIndex = maxDescriptionLength;
+			for (int x = truncationIndex; x > 0; --x) {
+				if (Character.isWhitespace(descriptionText.charAt(x))) {
+					truncationIndex = x;
+					break;
+				}
+			}
+			descriptionText = descriptionText.substring(0, truncationIndex) + Messages.DiscoveryItem_truncatedTextSuffix;
 		}
 		description.setText(descriptionText.replaceAll("(\\r\\n)|\\n|\\r|\\s{2,}", " ")); //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -192,25 +204,42 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 			createProviderLabel(composite);
 
-			Button button = new Button(composite, SWT.INHERIT_NONE);
-			Button secondaryButton = null;
-			if (connector.isInstalled()) {
-				secondaryButton = new Button(composite, SWT.INHERIT_NONE);
-			}
+			if (hasInstallMetadata()) {
+				Button button = new Button(composite, SWT.INHERIT_NONE);
+				Button secondaryButton = null;
+				if (connector.isInstalled()) {
+					secondaryButton = new Button(composite, SWT.INHERIT_NONE);
+				}
 
+				buttonController = new ItemButtonController(viewer, this, button, secondaryButton);
+
+				GridDataFactory.swtDefaults().align(SWT.END, SWT.CENTER).applyTo(button);
+				if (secondaryButton != null) {
+					GridDataFactory.swtDefaults().align(SWT.END, SWT.CENTER).applyTo(secondaryButton);
+				}
+			} else {
+				installInfoLink = new Link(composite, SWT.NULL);
+				installInfoLink.setText(Messages.DiscoveryItem_installInstructions);
+				installInfoLink.setToolTipText(Messages.DiscoveryItem_installInstructionsTooltip);
+				installInfoLink.setBackground(null);
+				installInfoLink.addListener(SWT.Selection, new Listener() {
+					public void handleEvent(Event event) {
+						WorkbenchUtil.openUrl(((Node) connector.getData()).getUrl(),
+								IWorkbenchBrowserSupport.AS_EXTERNAL);
+					}
+				});
+				GridDataFactory.swtDefaults().align(SWT.END, SWT.CENTER).applyTo(installInfoLink);
+			}
 			GridLayoutFactory.fillDefaults()
 					.numColumns(composite.getChildren().length)
 					.margins(0, 0)
 					.spacing(5, 0)
 					.applyTo(composite);
-
-			buttonController = new ItemButtonController(viewer, this, button, secondaryButton);
-
-			GridDataFactory.swtDefaults().align(SWT.END, SWT.CENTER).applyTo(button);
-			if (secondaryButton != null) {
-				GridDataFactory.swtDefaults().align(SWT.END, SWT.CENTER).applyTo(secondaryButton);
-			}
 		}
+	}
+
+	private boolean hasInstallMetadata() {
+		return !connector.getInstallableUnits().isEmpty() && connector.getSiteUrl() != null;
 	}
 
 	protected void createProviderLabel(Composite parent) {
@@ -270,7 +299,12 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		}
 		nameLabel.setForeground(foreground);
 		description.setForeground(foreground);
-		buttonController.refresh();
+		if (installInfoLink != null) {
+			installInfoLink.setForeground(foreground);
+		}
+		if (buttonController != null) {
+			buttonController.refresh();
+		}
 	}
 
 	private void hookRecursively(Control control, Listener listener) {
