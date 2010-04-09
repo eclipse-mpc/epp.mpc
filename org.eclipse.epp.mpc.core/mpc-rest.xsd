@@ -79,6 +79,14 @@
 						<xs:element name="owner" type="xs:string" maxOccurs="1"
 							minOccurs="0">
 						</xs:element>
+						<xs:element name="shortdescription" type="xs:string" maxOccurs="1"
+							minOccurs="0">
+		                    <xs:annotation>
+		                    	<xs:documentation>The short description of this listing, may include HTML markup (escaped).  Note that the
+		                    	sort description may or may not be shorter than the body.
+		                    	</xs:documentation>
+		                    </xs:annotation>
+						</xs:element>
 						<xs:element name="body" type="xs:string" maxOccurs="1"
 							minOccurs="0">
 		                    <xs:annotation>

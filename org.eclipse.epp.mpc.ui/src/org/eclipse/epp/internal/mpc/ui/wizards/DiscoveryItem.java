@@ -13,8 +13,6 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
@@ -58,8 +56,6 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
  */
 @SuppressWarnings("unused")
 public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<T> implements PropertyChangeListener {
-
-	private static final Pattern BREAK_PATTERN = Pattern.compile("<!--\\s*break\\s*-->"); //$NON-NLS-1$
 
 	private static final int MAX_IMAGE_HEIGHT = 40;
 
@@ -170,18 +166,6 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		if (descriptionText == null) {
 			descriptionText = ""; //$NON-NLS-1$
 		} else {
-			// bug 306653 <!--break--> marks the end of the short description.
-			// FIXME revisit if/when API provides short description per bug 306655
-			Matcher matcher = BREAK_PATTERN.matcher(descriptionText);
-			if (matcher.find()) {
-				int start = matcher.start();
-				if (start > 0) {
-					String shortDescriptionText = descriptionText.substring(0, start).trim();
-					if (shortDescriptionText.length() > 0) {
-						descriptionText = shortDescriptionText;
-					}
-				}
-			}
 			descriptionText = TextUtil.stripHtmlMarkup(descriptionText).trim();
 		}
 		if (descriptionText.length() > maxDescriptionLength) {
@@ -192,7 +176,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 					break;
 				}
 			}
-			descriptionText = descriptionText.substring(0, truncationIndex) + Messages.DiscoveryItem_truncatedTextSuffix;
+			descriptionText = descriptionText.substring(0, truncationIndex)
+					+ Messages.DiscoveryItem_truncatedTextSuffix;
 		}
 		description.setText(descriptionText.replaceAll("(\\r\\n)|\\n|\\r|\\s{2,}", " ")); //$NON-NLS-1$ //$NON-NLS-2$
 

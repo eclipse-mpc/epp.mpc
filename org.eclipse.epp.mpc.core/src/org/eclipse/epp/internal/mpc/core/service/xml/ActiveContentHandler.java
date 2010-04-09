@@ -10,44 +10,46 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service.xml;
 
+
 import org.eclipse.epp.internal.mpc.core.service.Active;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+
 
 /**
  * @author David Green
  */
 public class ActiveContentHandler extends UnmarshalContentHandler {
-
+	
 	private static final String NS_URI = ""; //$NON-NLS-1$
-
+	
 	private Active model;
-
+	
 	public void startElement(String uri, String localName, Attributes attributes) {
 		if (localName.equals("active")) { //$NON-NLS-1$
 			model = new Active();
-
-			model.setCount(toInteger(attributes.getValue(NS_URI, "count"))); //$NON-NLS-1$
+			
+			model.setCount(toInteger(attributes.getValue(NS_URI,"count"))); //$NON-NLS-1$
 		} else if (localName.equals("node")) { //$NON-NLS-1$
 			org.eclipse.epp.internal.mpc.core.service.xml.NodeContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.NodeContentHandler();
 			childHandler.setParentModel(model);
 			childHandler.setParentHandler(this);
 			childHandler.setUnmarshaller(getUnmarshaller());
 			getUnmarshaller().setCurrentHandler(childHandler);
-			childHandler.startElement(uri, localName, attributes);
+			childHandler.startElement(uri,localName,attributes);
 		}
 	}
-
+	
 	public boolean endElement(String uri, String localName) throws SAXException {
 		if (localName.equals("active")) { //$NON-NLS-1$
 			if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Marketplace) {
-				((org.eclipse.epp.internal.mpc.core.service.Marketplace) parentModel).setActive(model);
+				((org.eclipse.epp.internal.mpc.core.service.Marketplace)parentModel).setActive(model);
 			}
 			getUnmarshaller().setModel(model);
 			model = null;
 			getUnmarshaller().setCurrentHandler(parentHandler);
 			if (parentHandler != null) {
-				parentHandler.endElement(uri, localName);
+				parentHandler.endElement(uri,localName);
 			}
 			return true;
 		} else if (localName.equals("node")) { //$NON-NLS-1$
@@ -55,5 +57,5 @@ public class ActiveContentHandler extends UnmarshalContentHandler {
 		}
 		return false;
 	}
-
+	
 }

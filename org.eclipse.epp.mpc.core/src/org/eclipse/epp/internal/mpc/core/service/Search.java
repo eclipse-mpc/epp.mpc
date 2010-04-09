@@ -10,32 +10,32 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service;
 
+
 /**
  * @author David Green
  */
 public class Search extends NodeListing {
-
+	
 	protected String term;
-
 	protected String url;
-
+	
 	public Search() {
 	}
-
+	
 	public String getTerm() {
 		return term;
 	}
-
+	
 	public void setTerm(String term) {
 		this.term = term;
 	}
-
+	
 	public String getUrl() {
 		return url;
 	}
-
+	
 	public void setUrl(String url) {
 		this.url = url;
 	}
-
+	
 }

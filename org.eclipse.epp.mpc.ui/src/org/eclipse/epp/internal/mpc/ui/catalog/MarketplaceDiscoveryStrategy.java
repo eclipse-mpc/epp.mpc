@@ -22,6 +22,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IBundleGroup;
@@ -53,6 +55,8 @@ import org.eclipse.equinox.internal.p2.discovery.model.Tag;
  * @author David Green
  */
 public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
+
+	private static final Pattern BREAK_PATTERN = Pattern.compile("<!--\\s*break\\s*-->"); //$NON-NLS-1$
 
 	private final CatalogDescriptor catalogDescriptor;
 
@@ -141,7 +145,23 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 					if (ius != null) {
 						catalogItem.setInstallableUnits(ius.getIu());
 					}
-					catalogItem.setDescription(node.getBody());
+					if (node.getShortdescription() == null && node.getBody() != null) {
+						// bug 306653 <!--break--> marks the end of the short description.
+						String descriptionText = node.getBody();
+						Matcher matcher = BREAK_PATTERN.matcher(node.getBody());
+						if (matcher.find()) {
+							int start = matcher.start();
+							if (start > 0) {
+								String shortDescriptionText = descriptionText.substring(0, start).trim();
+								if (shortDescriptionText.length() > 0) {
+									descriptionText = shortDescriptionText;
+								}
+							}
+						}
+						catalogItem.setDescription(descriptionText);
+					} else {
+						catalogItem.setDescription(node.getShortdescription());
+					}
 					catalogItem.setProvider(node.getCompanyname());
 					catalogItem.setSiteUrl(node.getUpdateurl());
 					if (node.getBody() != null || node.getScreenshot() != null) {

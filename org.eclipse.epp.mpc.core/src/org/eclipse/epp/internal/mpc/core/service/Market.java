@@ -10,22 +10,23 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service;
 
+
 /**
  * @author David Green
  */
 public class Market extends Identifiable {
-
+	
 	protected java.util.List<Category> category = new java.util.ArrayList<Category>();
-
+	
 	public Market() {
 	}
-
+	
 	public java.util.List<Category> getCategory() {
 		return category;
 	}
-
+	
 	public void setCategory(java.util.List<Category> category) {
 		this.category = category;
 	}
-
+	
 }

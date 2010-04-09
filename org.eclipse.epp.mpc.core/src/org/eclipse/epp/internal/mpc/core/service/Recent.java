@@ -10,12 +10,14 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service;
 
+
 /**
  * @author David Green
  */
 public class Recent extends NodeListing {
-
+	
+	
 	public Recent() {
 	}
-
+	
 }

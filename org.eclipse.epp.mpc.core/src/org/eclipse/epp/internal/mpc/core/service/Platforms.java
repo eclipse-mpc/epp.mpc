@@ -10,22 +10,23 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service;
 
+
 /**
  * @author David Green
  */
 public class Platforms {
-
+	
 	protected java.util.List<String> platform = new java.util.ArrayList<String>();
-
+	
 	public Platforms() {
 	}
-
+	
 	public java.util.List<String> getPlatform() {
 		return platform;
 	}
-
+	
 	public void setPlatform(java.util.List<String> platform) {
 		this.platform = platform;
 	}
-
+	
 }

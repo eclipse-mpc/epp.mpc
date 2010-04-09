@@ -10,26 +10,28 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service.xml;
 
+
 import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+
 
 /**
  * @author David Green
  */
 public class NodeContentHandler extends UnmarshalContentHandler {
-
+	
 	private static final String NS_URI = ""; //$NON-NLS-1$
-
+	
 	private Node model;
-
+	
 	public void startElement(String uri, String localName, Attributes attributes) {
 		if (localName.equals("node")) { //$NON-NLS-1$
 			model = new Node();
-
-			model.setId(attributes.getValue(NS_URI, "id")); //$NON-NLS-1$
-			model.setName(attributes.getValue(NS_URI, "name")); //$NON-NLS-1$
-			model.setUrl(attributes.getValue(NS_URI, "url")); //$NON-NLS-1$
+			
+			model.setId(attributes.getValue(NS_URI,"id")); //$NON-NLS-1$
+			model.setName(attributes.getValue(NS_URI,"name")); //$NON-NLS-1$
+			model.setUrl(attributes.getValue(NS_URI,"url")); //$NON-NLS-1$
 		} else if (localName.equals("favorited")) { //$NON-NLS-1$
 			capturingContent = true;
 		} else if (localName.equals("type")) { //$NON-NLS-1$
@@ -40,8 +42,10 @@ public class NodeContentHandler extends UnmarshalContentHandler {
 			childHandler.setParentHandler(this);
 			childHandler.setUnmarshaller(getUnmarshaller());
 			getUnmarshaller().setCurrentHandler(childHandler);
-			childHandler.startElement(uri, localName, attributes);
+			childHandler.startElement(uri,localName,attributes);
 		} else if (localName.equals("owner")) { //$NON-NLS-1$
+			capturingContent = true;
+		} else if (localName.equals("shortdescription")) { //$NON-NLS-1$
 			capturingContent = true;
 		} else if (localName.equals("body")) { //$NON-NLS-1$
 			capturingContent = true;
@@ -77,39 +81,39 @@ public class NodeContentHandler extends UnmarshalContentHandler {
 			childHandler.setParentHandler(this);
 			childHandler.setUnmarshaller(getUnmarshaller());
 			getUnmarshaller().setCurrentHandler(childHandler);
-			childHandler.startElement(uri, localName, attributes);
+			childHandler.startElement(uri,localName,attributes);
 		} else if (localName.equals("platforms")) { //$NON-NLS-1$
 			org.eclipse.epp.internal.mpc.core.service.xml.PlatformsContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.PlatformsContentHandler();
 			childHandler.setParentModel(model);
 			childHandler.setParentHandler(this);
 			childHandler.setUnmarshaller(getUnmarshaller());
 			getUnmarshaller().setCurrentHandler(childHandler);
-			childHandler.startElement(uri, localName, attributes);
+			childHandler.startElement(uri,localName,attributes);
 		}
 	}
-
+	
 	public boolean endElement(String uri, String localName) throws SAXException {
 		if (localName.equals("node")) { //$NON-NLS-1$
 			if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Marketplace) {
-				((org.eclipse.epp.internal.mpc.core.service.Marketplace) parentModel).getNode().add(model);
+				((org.eclipse.epp.internal.mpc.core.service.Marketplace)parentModel).getNode().add(model);
 			} else if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Category) {
-				((org.eclipse.epp.internal.mpc.core.service.Category) parentModel).getNode().add(model);
+				((org.eclipse.epp.internal.mpc.core.service.Category)parentModel).getNode().add(model);
 			} else if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Search) {
-				((org.eclipse.epp.internal.mpc.core.service.Search) parentModel).getNode().add(model);
+				((org.eclipse.epp.internal.mpc.core.service.Search)parentModel).getNode().add(model);
 			} else if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Recent) {
-				((org.eclipse.epp.internal.mpc.core.service.Recent) parentModel).getNode().add(model);
+				((org.eclipse.epp.internal.mpc.core.service.Recent)parentModel).getNode().add(model);
 			} else if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Featured) {
-				((org.eclipse.epp.internal.mpc.core.service.Featured) parentModel).getNode().add(model);
+				((org.eclipse.epp.internal.mpc.core.service.Featured)parentModel).getNode().add(model);
 			} else if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Active) {
-				((org.eclipse.epp.internal.mpc.core.service.Active) parentModel).getNode().add(model);
+				((org.eclipse.epp.internal.mpc.core.service.Active)parentModel).getNode().add(model);
 			} else if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Favorites) {
-				((org.eclipse.epp.internal.mpc.core.service.Favorites) parentModel).getNode().add(model);
+				((org.eclipse.epp.internal.mpc.core.service.Favorites)parentModel).getNode().add(model);
 			}
 			getUnmarshaller().setModel(model);
 			model = null;
 			getUnmarshaller().setCurrentHandler(parentHandler);
 			if (parentHandler != null) {
-				parentHandler.endElement(uri, localName);
+				parentHandler.endElement(uri,localName);
 			}
 			return true;
 		} else if (localName.equals("favorited")) { //$NON-NLS-1$
@@ -129,6 +133,12 @@ public class NodeContentHandler extends UnmarshalContentHandler {
 		} else if (localName.equals("owner")) { //$NON-NLS-1$
 			if (content != null) {
 				model.setOwner(content.toString());
+				content = null;
+			}
+			capturingContent = false;
+		} else if (localName.equals("shortdescription")) { //$NON-NLS-1$
+			if (content != null) {
+				model.setShortdescription(content.toString());
 				content = null;
 			}
 			capturingContent = false;
@@ -223,5 +233,5 @@ public class NodeContentHandler extends UnmarshalContentHandler {
 		}
 		return false;
 	}
-
+	
 }

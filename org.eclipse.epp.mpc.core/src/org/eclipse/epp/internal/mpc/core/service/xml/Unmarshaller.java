@@ -111,5 +111,4 @@ public class Unmarshaller extends DefaultHandler {
 	protected void setCurrentHandler(UnmarshalContentHandler currentHandler) {
 		this.currentHandler = currentHandler;
 	}
-
 }
