@@ -12,7 +12,6 @@ package org.eclipse.epp.internal.mpc.ui.catalog;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,11 +25,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IBundleGroup;
-import org.eclipse.core.runtime.IBundleGroupProvider;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.service.Categories;
@@ -55,6 +51,8 @@ import org.eclipse.equinox.internal.p2.discovery.model.Tag;
  * @author David Green
  */
 public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
+
+	private static final String DOT_FEATURE_DOT_GROUP = ".feature.group"; //$NON-NLS-1$
 
 	private static final Pattern BREAK_PATTERN = Pattern.compile("<!--\\s*break\\s*-->"); //$NON-NLS-1$
 
@@ -143,7 +141,14 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 					catalogItem.setLicense(node.getLicense());
 					Ius ius = node.getIus();
 					if (ius != null) {
-						catalogItem.setInstallableUnits(ius.getIu());
+						List<String> discoveryIus = new ArrayList<String>(ius.getIu());
+						for (int x = 0; x < discoveryIus.size(); ++x) {
+							String iu = discoveryIus.get(x);
+							if (!iu.endsWith(DOT_FEATURE_DOT_GROUP)) {
+								discoveryIus.set(x, iu + DOT_FEATURE_DOT_GROUP);
+							}
+						}
+						catalogItem.setInstallableUnits(discoveryIus);
 					}
 					if (node.getShortdescription() == null && node.getBody() != null) {
 						// bug 306653 <!--break--> marks the end of the short description.
@@ -342,18 +347,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	protected Set<String> computeInstalledFeatures(IProgressMonitor monitor) {
 		if (installedFeatures == null) {
-			Set<String> features = new HashSet<String>();
-			IBundleGroupProvider[] bundleGroupProviders = Platform.getBundleGroupProviders();
-			for (IBundleGroupProvider provider : bundleGroupProviders) {
-				if (monitor.isCanceled()) {
-					break;
-				}
-				IBundleGroup[] bundleGroups = provider.getBundleGroups();
-				for (IBundleGroup group : bundleGroups) {
-					features.add(group.getIdentifier());
-				}
-			}
-			installedFeatures = features;
+			installedFeatures = MarketplaceClientUi.computeInstalledFeatures(monitor);
 		}
 		return installedFeatures;
 	}

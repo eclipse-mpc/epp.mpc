@@ -110,17 +110,7 @@ public class MarketplaceInfo {
 	public boolean computeInstalled(Set<String> installedIus, List<String> ius) {
 		int installCount = 0;
 		for (String iu : ius) {
-			boolean installed = false;
-			if (installedIus.contains(iu)) {
-				installed = true;
-			} else {
-				if (iu.endsWith(P2_FEATURE_GROUP_SUFFIX)) {
-					if (installedIus.contains(iu.substring(0, iu.length() - P2_FEATURE_GROUP_SUFFIX.length()))) {
-						installed = true;
-					}
-				}
-			}
-			if (installed) {
+			if (installedIus.contains(iu) || installedIus.contains(iu + P2_FEATURE_GROUP_SUFFIX)) {
 				++installCount;
 			}
 		}

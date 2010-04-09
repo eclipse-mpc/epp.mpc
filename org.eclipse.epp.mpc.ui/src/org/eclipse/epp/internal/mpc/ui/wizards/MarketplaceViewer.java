@@ -14,11 +14,13 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.epp.internal.mpc.core.service.Category;
 import org.eclipse.epp.internal.mpc.core.service.Market;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory.Contents;
@@ -371,5 +373,10 @@ public class MarketplaceViewer extends CatalogViewer {
 	 */
 	Market getQueryMarket() {
 		return queryMarket;
+	}
+
+	@Override
+	protected Set<String> getInstalledFeatures(IProgressMonitor monitor) {
+		return MarketplaceClientUi.computeInstalledFeatures(monitor);
 	}
 }
