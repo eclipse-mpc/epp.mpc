@@ -19,6 +19,8 @@ class Messages extends NLS {
 
 	public static String ProvisioningOperation_configuringProvisioningOperation;
 
+	public static String ProvisioningOperation_nothingToUpdate;
+
 	public static String ProvisioningOperation_proceedQuestion;
 
 	public static String ProvisioningOperation_unavailableConnectors;

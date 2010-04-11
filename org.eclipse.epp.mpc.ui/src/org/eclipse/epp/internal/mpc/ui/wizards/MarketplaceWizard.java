@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IBundleGroup;
 import org.eclipse.core.runtime.IBundleGroupProvider;
 import org.eclipse.core.runtime.IStatus;
@@ -167,9 +168,15 @@ public class MarketplaceWizard extends DiscoveryWizard {
 					getSelectionModel().getSelectedFeatureDescriptors());
 			getContainer().run(true, true, runner);
 		} catch (InvocationTargetException e) {
-			IStatus status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
-					Messages.MarketplaceWizard_problemsPerformingProvisioningOperation, new Object[] { e.getCause()
-							.getMessage() }), e.getCause());
+			Throwable cause = e.getCause();
+			IStatus status;
+			if (cause instanceof CoreException) {
+				status = ((CoreException) cause).getStatus();
+			} else {
+				status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
+						Messages.MarketplaceWizard_problemsPerformingProvisioningOperation,
+						new Object[] { cause.getMessage() }), cause);
+			}
 			StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			return false;
 		} catch (InterruptedException e) {

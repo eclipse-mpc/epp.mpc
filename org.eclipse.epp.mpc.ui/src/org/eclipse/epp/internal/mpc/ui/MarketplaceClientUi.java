@@ -11,8 +11,10 @@
 package org.eclipse.epp.internal.mpc.ui;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -73,6 +75,32 @@ public class MarketplaceClientUi {
 
 	public static BundleContext getBundleContext() {
 		return MarketplaceClientUiPlugin.getInstance().getBundle().getBundleContext();
+	}
+
+	public static Map<String, IInstallableUnit> computeInstalledIUsById(IProgressMonitor monitor) {
+		Map<String, IInstallableUnit> iUs = new HashMap<String, IInstallableUnit>();
+		BundleContext bundleContext = MarketplaceClientUi.getBundleContext();
+		ServiceReference serviceReference = bundleContext.getServiceReference(IProvisioningAgent.SERVICE_NAME);
+		if (serviceReference != null) {
+			IProvisioningAgent agent = (IProvisioningAgent) bundleContext.getService(serviceReference);
+			try {
+				IProfileRegistry profileRegistry = (IProfileRegistry) agent.getService(IProfileRegistry.SERVICE_NAME);
+				if (profileRegistry != null) {
+					IProfile profile = profileRegistry.getProfile(ProvisioningUI.getDefaultUI().getProfileId());
+					if (profile != null) {
+						IQueryResult<IInstallableUnit> result = profile.available(QueryUtil.createIUGroupQuery(),
+								monitor);
+						for (Iterator<IInstallableUnit> it = result.iterator(); it.hasNext();) {
+							IInstallableUnit unit = it.next();
+							iUs.put(unit.getId(), unit);
+						}
+					}
+				}
+			} finally {
+				bundleContext.ungetService(serviceReference);
+			}
+		}
+		return iUs;
 	}
 
 	public static Set<String> computeInstalledFeatures(IProgressMonitor monitor) {

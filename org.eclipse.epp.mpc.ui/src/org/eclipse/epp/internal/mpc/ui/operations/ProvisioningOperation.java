@@ -27,6 +27,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
@@ -188,6 +189,12 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 			removeOldVersions(installableUnits);
 			checkForUnavailable(installableUnits);
 			pruneUnselected(installableUnits);
+
+			if (operationType != OperationType.UNINSTALL) {
+				// bug 306446 we never want to downgrade the installed version
+				pruneOlderVersions(installableUnits);
+			}
+
 			return installableUnits.toArray(new IInstallableUnit[installableUnits.size()]);
 
 		} catch (URISyntaxException e) {
@@ -200,6 +207,32 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 					Messages.ProvisioningOperation_unexpectedErrorUrl, e));
 		} finally {
 			monitor.done();
+		}
+	}
+
+	/**
+	 * Remove ius from the given list where the current profile already contains a newer version of that iu.
+	 * 
+	 * @param installableUnits
+	 * @throws CoreException
+	 */
+	private void pruneOlderVersions(List<IInstallableUnit> installableUnits) throws CoreException {
+		if (!installableUnits.isEmpty()) {
+			Map<String, IInstallableUnit> iUsById = MarketplaceClientUi.computeInstalledIUsById(new NullProgressMonitor());
+			Iterator<IInstallableUnit> it = installableUnits.iterator();
+			while (it.hasNext()) {
+				IInstallableUnit iu = it.next();
+				IInstallableUnit installedIu = iUsById.get(iu.getId());
+				if (installedIu != null) {
+					if (installedIu.getVersion().compareTo(iu.getVersion()) >= 0) {
+						it.remove();
+					}
+				}
+			}
+			if (installableUnits.isEmpty()) {
+				throw new CoreException(new Status(IStatus.INFO, MarketplaceClientUi.BUNDLE_ID,
+						Messages.ProvisioningOperation_nothingToUpdate));
+			}
 		}
 	}
 
