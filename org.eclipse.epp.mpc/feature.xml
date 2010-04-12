@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.eclipse.epp.mpc"
-      label="Marketplace Client"
+      label="%featureName"
       version="1.0.0.qualifier"
-      provider-name="Eclipse Packaging Project">
+      provider-name="%providerName">
 
    <description url="http://www.eclipse.org/epp/mpc/">
       The Eclipse Marketplace Client provides access to extension catalogs.
