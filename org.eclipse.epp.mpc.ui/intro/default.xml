@@ -13,10 +13,10 @@
   	<extensionContent id="org.eclipse.epp.mpc.ui" name="Marketplace Client" 
   		style="css/default.css" path="overview/@">
 		<group style-id="content-group" id="content-group">
-       		<link label="Install Eclipse Extensions and Solutions"  
+       		<link label="Marketplace Client"  
        			url="http://org.eclipse.ui.intro/runAction?class=org.eclipse.epp.internal.mpc.ui.actions.WelcomeIntroAction&amp;pluginId=org.eclipse.epp.mpc.ui&amp;standby=true" 
        			id="orgeclipseeppmpcui-introLink" style-id="content-link">
-          		<text>Open the Eclipse Marketplace Client.</text>
+          		<text>Install Eclipse extensions and solutions</text>
        		</link>
        	</group>
   	</extensionContent>
