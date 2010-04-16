@@ -170,7 +170,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 						final Overview overview = new Overview();
 						overview.setItem(catalogItem);
 						overview.setSummary(node.getBody());
-						overview.setUrl(node.getHomepageurl());
+						overview.setUrl(node.getUrl());
 						catalogItem.setOverview(overview);
 
 						if (node.getScreenshot() != null) {
