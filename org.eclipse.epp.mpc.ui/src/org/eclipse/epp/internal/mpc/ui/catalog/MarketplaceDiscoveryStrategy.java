@@ -108,6 +108,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 			SearchResult featured = marketplaceService.featured(new SubProgressMonitor(monitor, workSegment));
 			handleSearchResult(catalogCategory, featured, new SubProgressMonitor(monitor, workSegment));
+			maybeAddCatalogItem(catalogCategory);
 		} finally {
 			monitor.done();
 		}
@@ -217,15 +218,28 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 				catalogCategory.setMatchCount(result.getMatchCount());
 				if (result.getMatchCount() > result.getNodes().size()) {
 					// add an item here to indicate that the search matched more items than were returned by the server
-					CatalogItem catalogItem = new CatalogItem();
-					catalogItem.setSource(source);
-					catalogItem.setData(catalogDescriptor);
-					catalogItem.setId(catalogDescriptor.getUrl().toString());
-					catalogItem.setCategoryId(catalogCategory.getId());
-					items.add(catalogItem);
+					addCatalogItem(catalogCategory);
 				}
 			}
 		}
+	}
+
+	public void maybeAddCatalogItem(MarketplaceCategory catalogCategory) {
+		if (!items.isEmpty()) {
+			CatalogItem catalogItem = items.get(items.size() - 1);
+			if (catalogItem.getData() != catalogDescriptor) {
+				addCatalogItem(catalogCategory);
+			}
+		}
+	}
+
+	public void addCatalogItem(MarketplaceCategory catalogCategory) {
+		CatalogItem catalogItem = new CatalogItem();
+		catalogItem.setSource(source);
+		catalogItem.setData(catalogDescriptor);
+		catalogItem.setId(catalogDescriptor.getUrl().toString());
+		catalogItem.setCategoryId(catalogCategory.getId());
+		items.add(catalogItem);
 	}
 
 	private void createIcon(CatalogItem catalogItem, final Node node) {
@@ -260,6 +274,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			catalogCategory.setContents(Contents.RECENT);
 			SearchResult result = marketplaceService.recent(new SubProgressMonitor(monitor, totalWork / 2));
 			handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
+			maybeAddCatalogItem(catalogCategory);
 		} finally {
 			monitor.done();
 		}
@@ -274,7 +289,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			SearchResult result = marketplaceService.featured(new SubProgressMonitor(monitor, totalWork / 2), market,
 					category);
 			handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
-
+			maybeAddCatalogItem(catalogCategory);
 		} finally {
 			monitor.done();
 		}
@@ -289,6 +304,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			catalogCategory.setContents(Contents.POPULAR);
 			SearchResult result = marketplaceService.favorites(new SubProgressMonitor(monitor, totalWork / 2));
 			handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
+			maybeAddCatalogItem(catalogCategory);
 		} finally {
 			monitor.done();
 		}

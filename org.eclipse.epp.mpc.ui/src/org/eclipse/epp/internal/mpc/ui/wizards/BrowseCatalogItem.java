@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
+import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.AbstractDiscoveryItem;
@@ -70,7 +71,11 @@ public class BrowseCatalogItem extends AbstractDiscoveryItem<CatalogDescriptor> 
 		GridLayoutFactory.swtDefaults().applyTo(parent);
 
 		Link link = new Link(parent, SWT.NULL);
-		link.setText(NLS.bind(Messages.BrowseCatalogItem_browseMoreLink, category.getMatchCount()));
+		if (viewer.getQueryContentType() == ContentType.SEARCH) {
+			link.setText(NLS.bind(Messages.BrowseCatalogItem_browseMoreLink, category.getMatchCount()));
+		} else {
+			link.setText(Messages.BrowseCatalogItem_browseMoreLinkNoCount);
+		}
 		link.setToolTipText(NLS.bind(Messages.BrowseCatalogItem_openUrlBrowser, getData().getUrl()));
 		link.setBackground(null);
 		link.addListener(SWT.Selection, new Listener() {
@@ -87,35 +92,39 @@ public class BrowseCatalogItem extends AbstractDiscoveryItem<CatalogDescriptor> 
 
 		try {
 			URL url = catalogDescriptor.getUrl();
-			String queryText = viewer.getQueryText();
-			if (queryText != null && queryText.trim().length() > 0) {
-				// append something like this:
-				// /search/apachesolr_search/mylyn%20wikitext?filters=tid:38%20tid:31
-				try {
-					String path = "search/apachesolr_search/" + URLEncoder.encode(queryText.trim(), UTF_8); //$NON-NLS-1$
-					String filter = ""; //$NON-NLS-1$
-					if (viewer.getQueryMarket() != null) {
-						filter += TID;
-						filter += viewer.getQueryMarket().getId();
-					}
-					if (viewer.getQueryCategory() != null) {
-						if (filter.length() > 0) {
-							filter += ' ';
+			try {
+				ContentType contentType = viewer.getQueryContentType();
+				switch (contentType) {
+				case SEARCH:
+					String queryText = viewer.getQueryText();
+					if (queryText != null && queryText.trim().length() > 0) {
+						// append something like this:
+						// /search/apachesolr_search/mylyn%20wikitext?filters=tid:38%20tid:31
+						String path = "search/apachesolr_search/" + URLEncoder.encode(queryText.trim(), UTF_8); //$NON-NLS-1$
+						String filter = ""; //$NON-NLS-1$
+						if (viewer.getQueryMarket() != null) {
+							filter += TID;
+							filter += viewer.getQueryMarket().getId();
 						}
-						filter += TID;
-						filter += viewer.getQueryCategory().getId();
+						if (viewer.getQueryCategory() != null) {
+							if (filter.length() > 0) {
+								filter += ' ';
+							}
+							filter += TID;
+							filter += viewer.getQueryCategory().getId();
+						}
+						if (filter.length() > 0) {
+							path += "?filters=" + URLEncoder.encode(filter, UTF_8); //$NON-NLS-1$
+						}
+						url = new URL(url, path);
 					}
-					if (filter.length() > 0) {
-						path += "?filters=" + URLEncoder.encode(filter, UTF_8); //$NON-NLS-1$
-					}
-					url = new URL(url, path);
-				} catch (UnsupportedEncodingException e) {
-					// should never happen
-					MarketplaceClientUi.error(e);
-				} catch (MalformedURLException e) {
-					// should never happen
-					MarketplaceClientUi.error(e);
 				}
+			} catch (UnsupportedEncodingException e) {
+				// should never happen
+				MarketplaceClientUi.error(e);
+			} catch (MalformedURLException e) {
+				// should never happen
+				MarketplaceClientUi.error(e);
 			}
 			WorkbenchUtil.openUrl(url.toURI().toString(), IWorkbenchBrowserSupport.AS_EXTERNAL);
 		} catch (URISyntaxException e) {

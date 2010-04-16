@@ -17,6 +17,8 @@ class Messages extends NLS {
 
 	public static String BrowseCatalogItem_browseMoreLink;
 
+	public static String BrowseCatalogItem_browseMoreLinkNoCount;
+
 	public static String BrowseCatalogItem_cannotOpenBrowser;
 
 	public static String BrowseCatalogItem_openUrlBrowser;
