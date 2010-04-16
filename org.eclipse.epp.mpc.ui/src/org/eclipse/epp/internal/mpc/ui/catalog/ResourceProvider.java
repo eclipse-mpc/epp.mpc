@@ -28,9 +28,9 @@ import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
  */
 class ResourceProvider {
 
-	private File dir;
+	private final File dir;
 
-	private Map<String, File> resources = new ConcurrentHashMap<String, File>();
+	private final Map<String, File> resources = new ConcurrentHashMap<String, File>();
 
 	public ResourceProvider() throws IOException {
 		dir = File.createTempFile(ResourceProvider.class.getSimpleName(), ".tmp"); //$NON-NLS-1$
@@ -43,7 +43,7 @@ class ResourceProvider {
 	public URL getResource(String resourceName) {
 		File resource = resources.get(resourceName);
 		try {
-			return resource == null ? null : resource.toURL();
+			return resource == null ? null : resource.toURI().toURL();
 		} catch (MalformedURLException e) {
 			MarketplaceClientUi.error(e);
 			return null;
