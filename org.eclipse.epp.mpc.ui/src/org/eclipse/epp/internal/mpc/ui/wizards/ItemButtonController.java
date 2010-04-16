@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -23,21 +24,25 @@ import org.eclipse.swt.widgets.Button;
 @SuppressWarnings("rawtypes")
 class ItemButtonController {
 	private enum ButtonState {
-		INSTALL(Messages.ItemButtonController_install, Operation.NONE), //
-		UNINSTALL(Messages.ItemButtonController_uninstall, Operation.NONE), //
-		INSTALL_PENDING(Messages.ItemButtonController_installPending, Operation.INSTALL), //
-		UNINSTALL_PENDING(Messages.ItemButtonController_uninstallPending, Operation.UNINSTALL), //
-		DISABLED(Messages.ItemButtonController_install, Operation.NONE), // 
-		UPDATE(Messages.ItemButtonController_update, Operation.NONE), //
-		UPDATE_PENDING(Messages.ItemButtonController_updatePending, Operation.CHECK_FOR_UPDATES);
+		INSTALL(Messages.ItemButtonController_install, Operation.NONE, false), //
+		UNINSTALL(Messages.ItemButtonController_uninstall, Operation.NONE, false), //
+		INSTALL_PENDING(Messages.ItemButtonController_installPending, Operation.INSTALL, false), //
+		UNINSTALL_PENDING(Messages.ItemButtonController_uninstallPending, Operation.UNINSTALL, false), //
+		DISABLED(Messages.ItemButtonController_install, Operation.NONE, true), // 
+		UPDATE_DISABLED(Messages.ItemButtonController_update, Operation.NONE, true), // 
+		UPDATE(Messages.ItemButtonController_update, Operation.NONE, false), //
+		UPDATE_PENDING(Messages.ItemButtonController_updatePending, Operation.CHECK_FOR_UPDATES, false);
 
 		final String label;
 
 		private final Operation operation;
 
-		private ButtonState(String label, Operation operation) {
+		private final boolean disabled;
+
+		private ButtonState(String label, Operation operation, boolean disabled) {
 			this.label = label;
 			this.operation = operation;
+			this.disabled = disabled;
 		}
 
 		public ButtonState nextState() {
@@ -69,6 +74,7 @@ class ItemButtonController {
 			}
 			return this;
 		}
+
 	}
 
 	private final DiscoveryItem item;
@@ -124,7 +130,7 @@ class ItemButtonController {
 	}
 
 	private void updateButtonState() {
-		CatalogItem catalogItem = (CatalogItem) item.getData();
+		MarketplaceNodeCatalogItem catalogItem = (MarketplaceNodeCatalogItem) item.getData();
 		if (catalogItem.getInstallableUnits().isEmpty()) {
 			buttonState = ButtonState.DISABLED;
 			secondaryButtonState = ButtonState.DISABLED;
@@ -146,6 +152,11 @@ class ItemButtonController {
 					secondaryButtonState = ButtonState.UNINSTALL;
 					break;
 				}
+				if (buttonState == ButtonState.UPDATE) {
+					if (catalogItem.getUpdateAvailable() == null || !catalogItem.getUpdateAvailable()) {
+						buttonState = ButtonState.UPDATE_DISABLED;
+					}
+				}
 			} else {
 				switch (operation) {
 				case INSTALL:
@@ -166,12 +177,12 @@ class ItemButtonController {
 
 	private void updateAppearance() {
 		button.setText(buttonState.label);
-		button.setEnabled(buttonState != ButtonState.DISABLED);
+		button.setEnabled(!buttonState.disabled);
 		if (secondaryButton != null) {
 			secondaryButton.setText(secondaryButtonState.label);
-			secondaryButton.setEnabled(secondaryButtonState != ButtonState.DISABLED);
+			secondaryButton.setEnabled(!secondaryButtonState.disabled);
 		}
-		// FIXME button image? Due to platform limitations we can't set the button color
+		// button image? Due to platform limitations we can't set the button color
 
 		item.layout(true, true);
 	}

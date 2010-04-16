@@ -15,12 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,6 +33,7 @@ import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.core.service.SearchResult;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory.Contents;
+import org.eclipse.epp.internal.mpc.ui.util.ConcurrentTaskManager;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
@@ -46,6 +41,7 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.discovery.model.Icon;
 import org.eclipse.equinox.internal.p2.discovery.model.Overview;
 import org.eclipse.equinox.internal.p2.discovery.model.Tag;
+import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 
 /**
  * @author David Green
@@ -64,7 +60,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	private MarketplaceInfo marketplaceInfo;
 
-	private Set<String> installedFeatures;
+	private Map<String, IInstallableUnit> featureIUById;
 
 	public MarketplaceDiscoveryStrategy(CatalogDescriptor catalogDescriptor) {
 		if (catalogDescriptor == null) {
@@ -117,13 +113,14 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		}
 	}
 
-	protected void handleSearchResult(MarketplaceCategory catalogCategory, SearchResult result, IProgressMonitor monitor) {
+	protected void handleSearchResult(MarketplaceCategory catalogCategory, SearchResult result,
+			final IProgressMonitor monitor) {
 		if (!result.getNodes().isEmpty()) {
 			int totalWork = 10000000;
 			monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_loadingResources, totalWork);
-			ExecutorService executor = Executors.newFixedThreadPool(Math.min(result.getNodes().size(), 10));
+			ConcurrentTaskManager executor = new ConcurrentTaskManager(result.getNodes().size(),
+					Messages.MarketplaceDiscoveryStrategy_loadingResources);
 			try {
-				List<Future<?>> futures = new ArrayList<Future<?>>();
 				for (final Node node : result.getNodes()) {
 					final MarketplaceNodeCatalogItem catalogItem = new MarketplaceNodeCatalogItem();
 					catalogItem.setMarketplaceUrl(catalogDescriptor.getUrl());
@@ -177,26 +174,26 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 						catalogItem.setOverview(overview);
 
 						if (node.getScreenshot() != null) {
-							futures.add(executor.submit(new AbstractResourceRunnable(monitor,
-									source.getResourceProvider(), node.getScreenshot()) {
+							executor.submit(new AbstractResourceRunnable(monitor, source.getResourceProvider(),
+									node.getScreenshot()) {
 								@Override
 								protected void resourceRetrieved() {
 									overview.setScreenshot(node.getScreenshot());
 								}
-							}));
+							});
 						}
 					}
 					if (node.getImage() != null) {
 						// FIXME: icon sizing
 						if (!source.getResourceProvider().containsResource(node.getImage())) {
-							futures.add(executor.submit(new AbstractResourceRunnable(monitor,
-									source.getResourceProvider(), node.getImage()) {
+							executor.submit(new AbstractResourceRunnable(monitor, source.getResourceProvider(),
+									node.getImage()) {
 								@Override
 								protected void resourceRetrieved() {
 									createIcon(catalogItem, node);
 								}
 
-							}));
+							});
 						} else {
 							createIcon(catalogItem, node);
 						}
@@ -204,33 +201,13 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 					items.add(catalogItem);
 					marketplaceInfo.map(catalogItem.getMarketplaceUrl(), node);
 					catalogItem.setInstalled(marketplaceInfo.computeInstalled(computeInstalledFeatures(monitor), node));
+
 				}
-				if (!futures.isEmpty()) {
-					final int workUnit = totalWork / futures.size();
-					while (!futures.isEmpty()) {
-						Future<?> future = futures.remove(0);
-						final int maxTimeouts = 15;
-						for (int timeoutCount = 0;; ++timeoutCount) {
-							try {
-								future.get(1L, TimeUnit.SECONDS);
-								break;
-							} catch (TimeoutException e) {
-								if (monitor.isCanceled()) {
-									return;
-								}
-								if (timeoutCount > maxTimeouts) {
-									future.cancel(true);
-									break;
-								}
-							} catch (InterruptedException e) {
-								break;
-							} catch (ExecutionException e) {
-								MarketplaceClientUi.error(e);
-								break;
-							}
-						}
-						monitor.worked(workUnit);
-					}
+				try {
+					executor.waitUntilFinished(new SubProgressMonitor(monitor, totalWork - 10));
+				} catch (CoreException e) {
+					// just log, since this is expected to occur frequently
+					MarketplaceClientUi.error(e);
 				}
 			} finally {
 				executor.shutdownNow();
@@ -346,10 +323,14 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	}
 
 	protected Set<String> computeInstalledFeatures(IProgressMonitor monitor) {
-		if (installedFeatures == null) {
-			installedFeatures = MarketplaceClientUi.computeInstalledFeatures(monitor);
+		return computeInstalledIUs(monitor).keySet();
+	}
+
+	protected synchronized Map<String, IInstallableUnit> computeInstalledIUs(IProgressMonitor monitor) {
+		if (featureIUById == null) {
+			featureIUById = MarketplaceClientUi.computeInstalledIUsById(monitor);
 		}
-		return installedFeatures;
+		return featureIUById;
 	}
 
 	protected MarketplaceCategory findMarketplaceCategory(IProgressMonitor monitor) throws CoreException {

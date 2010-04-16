@@ -12,6 +12,7 @@ package org.eclipse.epp.internal.mpc.ui.catalog;
 
 import java.net.URL;
 
+import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 
 /**
@@ -21,12 +22,27 @@ public class MarketplaceNodeCatalogItem extends CatalogItem {
 
 	private URL marketplaceUrl;
 
+	private Boolean updateAvailable;
+
+	@Override
+	public Node getData() {
+		return (Node) super.getData();
+	}
+
 	public URL getMarketplaceUrl() {
 		return marketplaceUrl;
 	}
 
 	public void setMarketplaceUrl(URL marketplaceUrl) {
 		this.marketplaceUrl = marketplaceUrl;
+	}
+
+	public Boolean getUpdateAvailable() {
+		return updateAvailable;
+	}
+
+	public void setUpdateAvailable(Boolean updateAvailable) {
+		this.updateAvailable = updateAvailable;
 	}
 
 	@Override

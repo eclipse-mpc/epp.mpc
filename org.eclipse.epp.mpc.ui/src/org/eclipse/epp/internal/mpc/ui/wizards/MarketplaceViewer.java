@@ -105,6 +105,8 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	private Category queryCategory;
 
+	private ContentType queryContentType;
+
 	public MarketplaceViewer(Catalog catalog, IShellProvider shellProvider, IRunnableContext context,
 			CatalogConfiguration configuration, SelectionModel selectionModel) {
 		super(catalog, shellProvider, context, configuration);
@@ -231,6 +233,7 @@ public class MarketplaceViewer extends CatalogViewer {
 	private void doQuery(final Market market, final Category category, final String queryText) {
 		try {
 			final ContentType queryType = contentType;
+			queryContentType = queryType;
 			final IStatus[] result = new IStatus[1];
 			context.run(true, true, new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
@@ -247,13 +250,16 @@ public class MarketplaceViewer extends CatalogViewer {
 					case SEARCH:
 					default:
 						if (queryText == null || queryText.length() == 0) {
+							// FIXME: API enhancements
 							result[0] = getCatalog().featured(monitor);
 						} else {
 							result[0] = getCatalog().performQuery(market, category, queryText, monitor);
 						}
 						break;
 					}
-					postDiscovery();
+					if (!monitor.isCanceled()) {
+						getCatalog().checkForUpdates(monitor);
+					}
 				}
 			});
 
@@ -373,6 +379,13 @@ public class MarketplaceViewer extends CatalogViewer {
 	 */
 	Market getQueryMarket() {
 		return queryMarket;
+	}
+
+	/**
+	 * the content type for the current query
+	 */
+	ContentType getQueryContentType() {
+		return queryContentType;
 	}
 
 	@Override
