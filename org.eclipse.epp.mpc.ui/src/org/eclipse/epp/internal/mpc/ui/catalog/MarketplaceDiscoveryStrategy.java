@@ -265,13 +265,14 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		}
 	}
 
-	public void featured(IProgressMonitor monitor) throws CoreException {
+	public void featured(IProgressMonitor monitor, final Market market, final Category category) throws CoreException {
 		final int totalWork = 1000000;
 		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_searchingMarketplace, totalWork);
 		try {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
 			catalogCategory.setContents(Contents.FEATURED);
-			SearchResult result = marketplaceService.featured(new SubProgressMonitor(monitor, totalWork / 2));
+			SearchResult result = marketplaceService.featured(new SubProgressMonitor(monitor, totalWork / 2), market,
+					category);
 			handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
 
 		} finally {

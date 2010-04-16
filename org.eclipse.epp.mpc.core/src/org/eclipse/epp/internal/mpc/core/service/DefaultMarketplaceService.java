@@ -190,7 +190,29 @@ public class DefaultMarketplaceService implements MarketplaceService {
 	}
 
 	public SearchResult featured(IProgressMonitor monitor) throws CoreException {
-		Marketplace marketplace = processRequest("featured/" + API_URI_SUFFIX, monitor); //$NON-NLS-1$
+		return featured(monitor, null, null);
+	}
+
+	public SearchResult featured(IProgressMonitor monitor, Market market, Category category) throws CoreException {
+		String nodePart = ""; //$NON-NLS-1$
+		try {
+			if (market != null) {
+				nodePart += URLEncoder.encode(market.getId(), UTF_8);
+			}
+			if (category != null) {
+				if (nodePart.length() > 0) {
+					nodePart += ","; //$NON-NLS-1$
+				}
+				nodePart += URLEncoder.encode(category.getId(), UTF_8);
+			}
+		} catch (UnsupportedEncodingException e) {
+			throw new IllegalStateException();
+		}
+		String uri = "featured/"; //$NON-NLS-1$
+		if (nodePart.length() > 0) {
+			uri += nodePart + '/';
+		}
+		Marketplace marketplace = processRequest(uri + API_URI_SUFFIX, monitor);
 		return createSearchResult(marketplace.getFeatured());
 	}
 

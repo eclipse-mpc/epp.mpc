@@ -86,10 +86,10 @@ public class MarketplaceCatalog extends Catalog {
 		}, monitor);
 	}
 
-	public IStatus featured(IProgressMonitor monitor) {
+	public IStatus featured(IProgressMonitor monitor, final Market market, final Category category) {
 		return performDiscovery(new DiscoveryOperation() {
 			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
-				strategy.featured(monitor);
+				strategy.featured(monitor, market, category);
 			}
 		}, monitor);
 	}

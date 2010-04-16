@@ -76,6 +76,17 @@ public interface MarketplaceService {
 	public SearchResult featured(IProgressMonitor monitor) throws CoreException;
 
 	/**
+	 * Find featured nodes in the marketplace
+	 * 
+	 * @param market
+	 *            the market in which to return featured, or null if featured should include all markets
+	 * @param category
+	 *            the category in which to return fetured, or null if featured should include all categories
+	 * @return the search result
+	 */
+	public SearchResult featured(IProgressMonitor monitor, Market market, Category category) throws CoreException;
+
+	/**
 	 * Find recently added/modified nodes in the marketplace
 	 * 
 	 * @return the search result

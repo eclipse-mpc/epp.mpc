@@ -35,8 +35,6 @@ import org.eclipse.equinox.internal.p2.discovery.model.Tag;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogFilter;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryWizard;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.wizard.WizardDialog;
 
 /**
@@ -84,31 +82,33 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 		marketFilter.setTagClassification(Category.class);
 		marketFilter.setChoices(new ArrayList<Tag>());
 
-		final ComboTagFilter marketCategoryTagFilter = new ComboTagFilter();
+		final ComboTagFilter marketCategoryTagFilter = new ComboTagFilter() {
+			@Override
+			public void catalogUpdated(boolean wasCancelled) {
+				Set<Tag> newChoices = new HashSet<Tag>();
+				List<Tag> choices = new ArrayList<Tag>();
+				for (CatalogCategory category : catalog.getCategories()) {
+					if (category instanceof MarketplaceCategory) {
+						MarketplaceCategory marketplaceCategory = (MarketplaceCategory) category;
+						for (Market market : marketplaceCategory.getMarkets()) {
+							for (Category marketCategory : market.getCategory()) {
+								Tag categoryTag = new Tag(Category.class, marketCategory.getId(),
+										marketCategory.getName());
+								categoryTag.setData(marketCategory);
+								if (newChoices.add(categoryTag)) {
+									choices.add(categoryTag);
+								}
+							}
+						}
+					}
+				}
+				setChoices(choices);
+			}
+		};
 		marketCategoryTagFilter.setSelectAllOnNoSelection(true);
 		marketCategoryTagFilter.setNoSelectionLabel(Messages.MarketplaceWizardCommand_allCategories);
 		marketCategoryTagFilter.setTagClassification(Category.class);
 		marketCategoryTagFilter.setChoices(new ArrayList<Tag>());
-		marketFilter.addPropertyChangeListener(new IPropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent event) {
-				List<Tag> choices = new ArrayList<Tag>();
-
-				Set<Tag> categoryTags = marketFilter.getSelected();
-				Set<Tag> newChoices = new HashSet<Tag>();
-				for (Tag tag : categoryTags) {
-					Market market = (Market) tag.getData();
-					for (Category marketCategory : market.getCategory()) {
-						Tag categoryTag = new Tag(Category.class, marketCategory.getId(), marketCategory.getName());
-						categoryTag.setData(marketCategory);
-						if (newChoices.add(categoryTag)) {
-							choices.add(categoryTag);
-						}
-					}
-				}
-
-				marketCategoryTagFilter.setChoices(choices);
-			}
-		});
 
 		configuration.getFilters().add(marketFilter);
 		configuration.getFilters().add(marketCategoryTagFilter);

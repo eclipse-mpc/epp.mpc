@@ -250,8 +250,7 @@ public class MarketplaceViewer extends CatalogViewer {
 					case SEARCH:
 					default:
 						if (queryText == null || queryText.length() == 0) {
-							// FIXME: API enhancements
-							result[0] = getCatalog().featured(monitor);
+							result[0] = getCatalog().featured(monitor, market, category);
 						} else {
 							result[0] = getCatalog().performQuery(market, category, queryText, monitor);
 						}
