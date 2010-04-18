@@ -12,6 +12,7 @@ package org.eclipse.epp.internal.mpc.ui.catalog;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -228,6 +229,38 @@ public class MarketplaceCatalog extends Catalog {
 		} finally {
 			monitor.done();
 		}
+	}
+
+	@Override
+	public IStatus performDiscovery(IProgressMonitor monitor) {
+		IStatus status = super.performDiscovery(monitor);
+		if (status.getSeverity() == IStatus.ERROR) {
+			// unwrap a multistatus with one child see bug 309612
+			if (status.isMultiStatus()) {
+				MultiStatus multiStatus = (MultiStatus) status;
+				if (multiStatus.getChildren().length == 1) {
+					status = multiStatus.getChildren()[0];
+				}
+			}
+			if (!status.isMultiStatus()) {
+				Throwable exception = status.getException();
+				while (exception != null) {
+					if (exception instanceof UnknownHostException) {
+						status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
+								"Please check your Internet connection and retry: cannot resolve host",
+								exception.getMessage()), exception);
+						break;
+					}
+					Throwable cause = exception.getCause();
+					if (cause != exception) {
+						exception = cause;
+					} else {
+						break;
+					}
+				}
+			}
+		}
+		return status;
 	}
 
 	protected IStatus performDiscovery(DiscoveryOperation operation, IProgressMonitor monitor) {
