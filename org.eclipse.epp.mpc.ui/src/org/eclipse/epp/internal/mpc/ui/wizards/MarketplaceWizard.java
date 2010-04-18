@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
+import org.eclipse.epp.internal.mpc.ui.operations.FeatureDescriptor;
 import org.eclipse.epp.internal.mpc.ui.operations.ProfileChangeOperationComputer;
 import org.eclipse.epp.internal.mpc.ui.operations.ProfileChangeOperationComputer.OperationType;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
@@ -283,6 +284,13 @@ public class MarketplaceWizard extends DiscoveryWizard {
 					if (entryOperationType != null) {
 						if (operationType == null || operationType == OperationType.UPDATE) {
 							operationType = entryOperationType;
+							if (operationType == OperationType.UPDATE) {
+								for (FeatureDescriptor descriptor : getSelectionModel().getSelectedFeatureDescriptors()) {
+									if (!getInstalledFeatures().contains(descriptor.getId())) {
+										operationType = OperationType.INSTALL;
+									}
+								}
+							}
 						}
 						items.add(entry.getKey());
 					}
