@@ -152,7 +152,7 @@ public class MarketplacePage extends CatalogPage {
 
 	@Override
 	protected CatalogViewer doCreateViewer(Composite parent) {
-		MarketplaceViewer viewer = new MarketplaceViewer(getCatalog(), this, getContainer(),
+		MarketplaceViewer viewer = new MarketplaceViewer(getCatalog(), this, getWizard(), getContainer(),
 				getWizard().getConfiguration(), getWizard().getSelectionModel());
 		viewer.setMinimumHeight(MINIMUM_HEIGHT);
 		viewer.createControl(parent);

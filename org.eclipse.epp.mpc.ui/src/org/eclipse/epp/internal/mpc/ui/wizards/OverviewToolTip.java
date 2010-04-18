@@ -71,7 +71,10 @@ class OverviewToolTip extends ToolTip {
 
 	private final Image leftImage;
 
-	public OverviewToolTip(Control control, AbstractCatalogSource source, Overview overview, Image leftImage) {
+	private final IMarketplaceWebBrowser browser;
+
+	public OverviewToolTip(Control control, IMarketplaceWebBrowser browser, AbstractCatalogSource source,
+			Overview overview, Image leftImage) {
 		super(control, ToolTip.RECREATE, true);
 		Assert.isNotNull(source);
 		Assert.isNotNull(overview);
@@ -79,6 +82,7 @@ class OverviewToolTip extends ToolTip {
 		this.source = source;
 		this.overview = overview;
 		this.leftImage = leftImage;
+		this.browser = browser;
 		setHideOnMouseDown(false); // required for links to work
 	}
 
@@ -221,7 +225,7 @@ class OverviewToolTip extends ToolTip {
 			link.addSelectionListener(new SelectionListener() {
 				public void widgetSelected(SelectionEvent e) {
 					OverviewToolTip.this.hide();
-					WorkbenchUtil.openUrl(overview.getUrl(), IWorkbenchBrowserSupport.AS_EXTERNAL);
+					browser.openUrl(overview.getUrl());
 				}
 
 				public void widgetDefaultSelected(SelectionEvent e) {

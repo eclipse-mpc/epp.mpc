@@ -39,10 +39,10 @@ public class SelectionModel {
 
 	private List<CatalogItemEntry> entries;
 
-	private final MarketplaceWizard wizard;
+	private final InstallProfile installProfile;
 
-	SelectionModel(MarketplaceWizard wizard) {
-		this.wizard = wizard;
+	public SelectionModel(InstallProfile installProfile) {
+		this.installProfile = installProfile;
 	}
 
 	/**
@@ -56,11 +56,13 @@ public class SelectionModel {
 	public void select(CatalogItem item, Operation operation) {
 		if (operation == null || Operation.NONE == operation) {
 			itemToOperation.remove(item);
-			Iterator<CatalogItemEntry> it = entries.iterator();
-			while (it.hasNext()) {
-				CatalogItemEntry entry = it.next();
-				if (entry.getItem().equals(item)) {
-					it.remove();
+			if (entries != null) {
+				Iterator<CatalogItemEntry> it = entries.iterator();
+				while (it.hasNext()) {
+					CatalogItemEntry entry = it.next();
+					if (entry.getItem().equals(item)) {
+						it.remove();
+					}
 				}
 			}
 		} else {
@@ -114,7 +116,7 @@ public class SelectionModel {
 	private void computeInitialChecked(FeatureEntry entry) {
 		Operation operation = entry.parent.operation;
 		if (operation == Operation.CHECK_FOR_UPDATES) {
-			Set<String> installedFeatures = wizard.getInstalledFeatures();
+			Set<String> installedFeatures = installProfile.getInstalledFeatures();
 			if (installedFeatures.contains(entry.featureDescriptor.getId())
 					|| installedFeatures.contains(entry.featureDescriptor.getSimpleId())) {
 				entry.checked = true;
@@ -347,6 +349,11 @@ public class SelectionModel {
 			list.add(entry.getKey());
 		}
 		return catalogItemByOperation;
+	}
+
+	public void clear() {
+		itemToOperation.clear();
+		entries = null;
 	}
 
 }

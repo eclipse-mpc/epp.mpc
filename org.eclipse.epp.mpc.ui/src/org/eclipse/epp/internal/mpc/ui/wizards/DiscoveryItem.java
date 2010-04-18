@@ -21,7 +21,6 @@ import org.eclipse.epp.internal.mpc.ui.util.Util;
 import org.eclipse.equinox.internal.p2.discovery.AbstractCatalogSource;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.discovery.model.Overview;
-import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.AbstractDiscoveryItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryResources;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -48,7 +47,6 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Widget;
-import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 /**
  * @author Steffen Pingel
@@ -85,10 +83,13 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 	private Link installInfoLink;
 
+	private final IMarketplaceWebBrowser browser;
+
 	public DiscoveryItem(Composite parent, int style, DiscoveryResources resources, IShellProvider shellProvider,
-			final T connector, MarketplaceViewer viewer) {
+			IMarketplaceWebBrowser browser, final T connector, MarketplaceViewer viewer) {
 		super(parent, style, resources, connector);
 		this.shellProvider = shellProvider;
+		this.browser = browser;
 		this.connector = connector;
 		this.viewer = viewer;
 		connector.addPropertyChangeListener(this);
@@ -209,8 +210,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 				installInfoLink.setBackground(null);
 				installInfoLink.addListener(SWT.Selection, new Listener() {
 					public void handleEvent(Event event) {
-						WorkbenchUtil.openUrl(((Node) connector.getData()).getUrl(),
-								IWorkbenchBrowserSupport.AS_EXTERNAL);
+						browser.openUrl(((Node) connector.getData()).getUrl());
 					}
 				});
 				GridDataFactory.swtDefaults().align(SWT.END, SWT.CENTER).applyTo(installInfoLink);
@@ -309,7 +309,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 	@Override
 	protected void hookTooltip(final Control parent, final Widget tipActivator, final Control exitControl,
 			final Control titleControl, AbstractCatalogSource source, Overview overview, Image image) {
-		final OverviewToolTip toolTip = new OverviewToolTip(parent, source, overview, image);
+		final OverviewToolTip toolTip = new OverviewToolTip(parent, browser, source, overview, image);
 		Listener listener = new Listener() {
 			public void handleEvent(Event event) {
 				switch (event.type) {

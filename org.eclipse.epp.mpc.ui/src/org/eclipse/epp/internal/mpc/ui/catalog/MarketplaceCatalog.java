@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -98,6 +99,23 @@ public class MarketplaceCatalog extends Catalog {
 		return performDiscovery(new DiscoveryOperation() {
 			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
 				strategy.installed(monitor);
+			}
+		}, monitor);
+	}
+
+	/**
+	 * Query for a set of node ids. Use this method infrequently since it may have to make multiple server round-trips.
+	 * 
+	 * @param monitor
+	 *            the progress monitor
+	 * @param nodeIds
+	 *            the nodes to retrieve
+	 * @return
+	 */
+	public IStatus performQuery(IProgressMonitor monitor, final Set<String> nodeIds) {
+		return performDiscovery(new DiscoveryOperation() {
+			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
+				strategy.performQuery(monitor, nodeIds);
 			}
 		}, monitor);
 	}

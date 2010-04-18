@@ -52,7 +52,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	private static final Pattern BREAK_PATTERN = Pattern.compile("<!--\\s*break\\s*-->"); //$NON-NLS-1$
 
-	private final CatalogDescriptor catalogDescriptor;
+	protected final CatalogDescriptor catalogDescriptor;
 
 	private final MarketplaceService marketplaceService;
 
@@ -333,6 +333,35 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 					monitor.worked(totalWork / 2);
 				}
 				handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
+			}
+		} finally {
+			monitor.done();
+		}
+	}
+
+	public void performQuery(IProgressMonitor monitor, Set<String> nodeIds) throws CoreException {
+		final int totalWork = 1000000;
+		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_searchingMarketplace, totalWork);
+		try {
+			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
+			catalogCategory.setContents(Contents.QUERY);
+			SearchResult result = new SearchResult();
+			result.setNodes(new ArrayList<Node>());
+			if (!monitor.isCanceled()) {
+				if (!nodeIds.isEmpty()) {
+					int unitWork = totalWork / (2 * nodeIds.size());
+					for (String nodeId : nodeIds) {
+						Node node = new Node();
+						node.setId(nodeId);
+						node = marketplaceService.getNode(node, monitor);
+						result.getNodes().add(node);
+						monitor.worked(unitWork);
+					}
+				} else {
+					monitor.worked(totalWork / 2);
+				}
+				handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
+				maybeAddCatalogItem(catalogCategory);
 			}
 		} finally {
 			monitor.done();

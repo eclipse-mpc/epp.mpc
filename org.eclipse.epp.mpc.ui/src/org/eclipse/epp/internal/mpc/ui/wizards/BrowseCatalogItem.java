@@ -22,7 +22,6 @@ import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
-import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.AbstractDiscoveryItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryResources;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -34,7 +33,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.statushandlers.StatusManager;
 
 /**
@@ -55,11 +53,15 @@ public class BrowseCatalogItem extends AbstractDiscoveryItem<CatalogDescriptor> 
 
 	private final MarketplaceCategory category;
 
+	private final IMarketplaceWebBrowser browser;
+
 	public BrowseCatalogItem(Composite parent, DiscoveryResources resources, IShellProvider shellProvider,
-			MarketplaceCategory category, CatalogDescriptor element, MarketplaceViewer viewer) {
+			IMarketplaceWebBrowser browser, MarketplaceCategory category, CatalogDescriptor element,
+			MarketplaceViewer viewer) {
 		super(parent, SWT.NULL, resources, element);
 		this.resources = resources;
 		this.shellProvider = shellProvider;
+		this.browser = browser;
 		this.category = category;
 		this.viewer = viewer;
 		createContent();
@@ -126,7 +128,8 @@ public class BrowseCatalogItem extends AbstractDiscoveryItem<CatalogDescriptor> 
 				// should never happen
 				MarketplaceClientUi.error(e);
 			}
-			WorkbenchUtil.openUrl(url.toURI().toString(), IWorkbenchBrowserSupport.AS_EXTERNAL);
+
+			browser.openUrl(url.toURI().toString());
 		} catch (URISyntaxException e) {
 			String message = String.format(Messages.BrowseCatalogItem_cannotOpenBrowser);
 			IStatus status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, IStatus.ERROR, message, e);

@@ -107,9 +107,12 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	private ContentType queryContentType;
 
-	public MarketplaceViewer(Catalog catalog, IShellProvider shellProvider, IRunnableContext context,
-			CatalogConfiguration configuration, SelectionModel selectionModel) {
+	private final IMarketplaceWebBrowser browser;
+
+	public MarketplaceViewer(Catalog catalog, IShellProvider shellProvider, IMarketplaceWebBrowser browser,
+			IRunnableContext context, CatalogConfiguration configuration, SelectionModel selectionModel) {
 		super(catalog, shellProvider, context, configuration);
+		this.browser = browser;
 		this.selectionModel = selectionModel;
 	}
 
@@ -185,11 +188,11 @@ public class MarketplaceViewer extends CatalogViewer {
 			CatalogItem catalogItem = (CatalogItem) element;
 			if (catalogItem.getData() instanceof CatalogDescriptor) {
 				CatalogDescriptor catalogDescriptor = (CatalogDescriptor) catalogItem.getData();
-				return new BrowseCatalogItem(parent, getResources(), shellProvider,
+				return new BrowseCatalogItem(parent, getResources(), shellProvider, browser,
 						(MarketplaceCategory) catalogItem.getCategory(), catalogDescriptor, this);
 			} else {
 				DiscoveryItem discoveryItem = new DiscoveryItem(parent, SWT.NONE, getResources(), shellProvider,
-						catalogItem, this);
+						browser, catalogItem, this);
 				discoveryItem.setSelected(getCheckedItems().contains(catalogItem));
 				return discoveryItem;
 			}
