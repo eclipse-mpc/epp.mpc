@@ -19,6 +19,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,18 +27,21 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
-import org.eclipse.epp.internal.mpc.ui.operations.ProvisioningOperation;
-import org.eclipse.epp.internal.mpc.ui.operations.ProvisioningOperation.OperationType;
+import org.eclipse.epp.internal.mpc.ui.operations.ProfileChangeOperationComputer;
+import org.eclipse.epp.internal.mpc.ui.operations.ProfileChangeOperationComputer.OperationType;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
-import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogPage;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryWizard;
+import org.eclipse.equinox.p2.metadata.IInstallableUnit;
+import org.eclipse.equinox.p2.operations.ProfileChangeOperation;
+import org.eclipse.equinox.p2.operations.UninstallOperation;
+import org.eclipse.equinox.p2.ui.AcceptLicensesWizardPage;
+import org.eclipse.equinox.p2.ui.ProvisioningUI;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.osgi.util.NLS;
@@ -64,10 +68,24 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	private MarketplaceBrowserIntegration browserListener;
 
+	private ProfileChangeOperation profileChangeOperation;
+
+	private FeatureSelectionWizardPage featureSelectionWizardPage;
+
+	private AcceptLicensesWizardPage acceptLicensesPage;
+
+	private IInstallableUnit[] operationIUs;
+
 	public MarketplaceWizard(MarketplaceCatalog catalog, MarketplaceCatalogConfiguration configuration) {
 		super(catalog, configuration);
 		setWindowTitle(Messages.MarketplaceWizard_eclipseSolutionCatalogs);
-		selectionModel = new SelectionModel(this);
+		selectionModel = new SelectionModel(this) {
+			@Override
+			public void selectionChanged() {
+				super.selectionChanged();
+				profileChangeOperation = null;
+			}
+		};
 	}
 
 	@Override
@@ -81,8 +99,74 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 	}
 
 	@Override
-	protected CatalogPage doCreateCatalogPage() {
+	protected MarketplacePage doCreateCatalogPage() {
 		return new MarketplacePage(getCatalog(), getConfiguration());
+	}
+
+	public ProfileChangeOperation getProfileChangeOperation() {
+		return profileChangeOperation;
+	}
+
+	public void setProfileChangeOperation(ProfileChangeOperation profileChangeOperation) {
+		this.profileChangeOperation = profileChangeOperation;
+	}
+
+	@Override
+	public boolean canFinish() {
+		if (getContainer().getCurrentPage() == featureSelectionWizardPage) {
+			if (profileChangeOperation == null) {
+				updateProfileChangeOperation();
+			}
+		}
+		if (profileChangeOperation == null
+				|| profileChangeOperation.getResolutionResult().getSeverity() == IStatus.ERROR) {
+			return false;
+		}
+		if (computeMustCheckLicenseAcceptance()) {
+			if (acceptLicensesPage != null && acceptLicensesPage.isPageComplete()) {
+				return true;
+			}
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	@Override
+	public IWizardPage getNextPage(IWizardPage page) {
+		if (page == featureSelectionWizardPage) {
+			if (profileChangeOperation == null) {
+				updateProfileChangeOperation();
+				if (profileChangeOperation == null
+						|| profileChangeOperation.getResolutionResult().getSeverity() == IStatus.ERROR) {
+					// can't compute a change operation, so there must be some kind of error
+					// we show these on the the feature selection wizard page
+					return featureSelectionWizardPage;
+				} else if (profileChangeOperation instanceof UninstallOperation) {
+					// next button was used to resolve errors on an uninstall.
+					// by returning the same page the finish button will be enabled, allowing the user to finish.
+					return featureSelectionWizardPage;
+				}
+			}
+			if (computeMustCheckLicenseAcceptance()) {
+				if (acceptLicensesPage == null) {
+					acceptLicensesPage = new AcceptLicensesWizardPage(
+							ProvisioningUI.getDefaultUI().getLicenseManager(), operationIUs, profileChangeOperation);
+					addPage(acceptLicensesPage);
+				} else {
+					acceptLicensesPage.update(operationIUs, profileChangeOperation);
+				}
+				if (acceptLicensesPage.hasLicensesToAccept()) {
+					return acceptLicensesPage;
+				}
+			}
+			return null;
+		}
+		return super.getNextPage(page);
+	}
+
+	public boolean computeMustCheckLicenseAcceptance() {
+		return profileChangeOperation != null && !(profileChangeOperation instanceof UninstallOperation);
 	}
 
 	@Override
@@ -92,7 +176,8 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			addPage(getCatalogSelectionPage());
 		}
 		super.addPages();
-		addPage(new FeatureSelectionWizardPage());
+		featureSelectionWizardPage = new FeatureSelectionWizardPage();
+		addPage(featureSelectionWizardPage);
 	}
 
 	public CatalogSelectionPage getCatalogSelectionPage() {
@@ -162,40 +247,13 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	@Override
 	public boolean performFinish() {
-		try {
-			// FIXME: this is a placeholder until bug 305441 is complete
-			Map<CatalogItem, Operation> itemToOperation = getSelectionModel().getItemToOperation();
-			OperationType operationType = null;
-			List<CatalogItem> items = new ArrayList<CatalogItem>();
-			for (Map.Entry<CatalogItem, Operation> entry : itemToOperation.entrySet()) {
-				OperationType entryOperationType = entry.getValue().getOperationType();
-				if (entryOperationType != null) {
-					if (operationType == null || operationType == OperationType.UPDATE) {
-						operationType = entryOperationType;
-					}
-					items.add(entry.getKey());
-				}
-			}
-			IRunnableWithProgress runner = new ProvisioningOperation(operationType, itemToOperation.keySet(),
-					getSelectionModel().getSelectedFeatureDescriptors());
-			getContainer().run(true, true, runner);
-		} catch (InvocationTargetException e) {
-			Throwable cause = e.getCause();
-			IStatus status;
-			if (cause instanceof CoreException) {
-				status = ((CoreException) cause).getStatus();
-			} else {
-				status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
-						Messages.MarketplaceWizard_problemsPerformingProvisioningOperation,
-						new Object[] { cause.getMessage() }), cause);
-			}
-			StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
-			return false;
-		} catch (InterruptedException e) {
-			// canceled
-			return false;
+		if (profileChangeOperation != null
+				&& profileChangeOperation.getResolutionResult().getSeverity() != IStatus.ERROR) {
+			ProvisioningUI.getDefaultUI().schedule(profileChangeOperation.getProvisioningJob(null),
+					StatusManager.SHOW | StatusManager.LOG);
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 	@Override
@@ -206,19 +264,19 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 	@SuppressWarnings("unchecked")
 	public synchronized Set<String> getInstalledFeatures() {
 		if (installedFeatures == null) {
-			final Set<String>[] features = new Set[1];
 			try {
 				getContainer().run(true, false, new IRunnableWithProgress() {
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						features[0] = MarketplaceClientUi.computeInstalledFeatures(new NullProgressMonitor());
+						installedFeatures = MarketplaceClientUi.computeInstalledFeatures(monitor);
 					}
 				});
-			} catch (InterruptedException e) {
-				// shouldn't happen
 			} catch (InvocationTargetException e) {
 				MarketplaceClientUi.error(e.getCause());
+				installedFeatures = Collections.emptySet();
+			} catch (InterruptedException e) {
+				// should never happen (not cancelable)
+				throw new IllegalStateException(e);
 			}
-			installedFeatures = features[0];
 		}
 		return installedFeatures;
 	}
@@ -325,5 +383,48 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			clazz = clazz.getSuperclass();
 		}
 		return null;
+	}
+
+	public void updateProfileChangeOperation() {
+		profileChangeOperation = null;
+		operationIUs = null;
+		if (getSelectionModel().computeProvisioningOperationViable()) {
+			try {
+				Map<CatalogItem, Operation> itemToOperation = getSelectionModel().getItemToOperation();
+				OperationType operationType = null;
+				List<CatalogItem> items = new ArrayList<CatalogItem>();
+				for (Map.Entry<CatalogItem, Operation> entry : itemToOperation.entrySet()) {
+					OperationType entryOperationType = entry.getValue().getOperationType();
+					if (entryOperationType != null) {
+						if (operationType == null || operationType == OperationType.UPDATE) {
+							operationType = entryOperationType;
+						}
+						items.add(entry.getKey());
+					}
+				}
+				ProfileChangeOperationComputer provisioningOperation = new ProfileChangeOperationComputer(
+						operationType, itemToOperation.keySet(), getSelectionModel().getSelectedFeatureDescriptors());
+				getContainer().run(true, true, provisioningOperation);
+
+				profileChangeOperation = provisioningOperation.getOperation();
+				operationIUs = provisioningOperation.getIus();
+			} catch (InvocationTargetException e) {
+				Throwable cause = e.getCause();
+				IStatus status;
+				if (cause instanceof CoreException) {
+					status = ((CoreException) cause).getStatus();
+				} else {
+					status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
+							Messages.MarketplaceWizard_problemsPerformingProvisioningOperation,
+							new Object[] { cause.getMessage() }), cause);
+				}
+				StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
+			} catch (InterruptedException e) {
+				// canceled
+			}
+		}
+		if (getContainer().getCurrentPage() == featureSelectionWizardPage) {
+			featureSelectionWizardPage.updateMessage();
+		}
 	}
 }

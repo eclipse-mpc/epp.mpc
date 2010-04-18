@@ -54,8 +54,11 @@ public class SelectionModel {
 	 *            the operation to perform. Providing {@link Operation#NONE} removes the selection
 	 */
 	public void select(CatalogItem item, Operation operation) {
+		boolean changed = false;
 		if (operation == null || Operation.NONE == operation) {
-			itemToOperation.remove(item);
+			if (itemToOperation.remove(item) != Operation.NONE) {
+				changed = true;
+			}
 			if (entries != null) {
 				Iterator<CatalogItemEntry> it = entries.iterator();
 				while (it.hasNext()) {
@@ -67,17 +70,23 @@ public class SelectionModel {
 			}
 		} else {
 			Operation previous = itemToOperation.put(item, operation);
-			if (previous != operation && entries != null) {
-				Iterator<CatalogItemEntry> it = entries.iterator();
-				while (it.hasNext()) {
-					CatalogItemEntry entry = it.next();
-					if (entry.getItem().equals(item)) {
-						it.remove();
+			if (previous != operation) {
+				changed = true;
+				if (entries != null) {
+					Iterator<CatalogItemEntry> it = entries.iterator();
+					while (it.hasNext()) {
+						CatalogItemEntry entry = it.next();
+						if (entry.getItem().equals(item)) {
+							it.remove();
+						}
 					}
+					CatalogItemEntry itemEntry = createItemEntry(item, operation);
+					entries.add(itemEntry);
 				}
-				CatalogItemEntry itemEntry = createItemEntry(item, operation);
-				entries.add(itemEntry);
 			}
+		}
+		if (changed) {
+			selectionChanged();
 		}
 	}
 
@@ -182,7 +191,7 @@ public class SelectionModel {
 
 	}
 
-	public static class FeatureEntry {
+	public class FeatureEntry {
 
 		private final CatalogItemEntry parent;
 
@@ -214,6 +223,7 @@ public class SelectionModel {
 
 		public void setChecked(boolean checked) {
 			this.checked = checked;
+			selectionChanged();
 		}
 
 		public CatalogItemEntry getParent() {
@@ -264,6 +274,11 @@ public class SelectionModel {
 		return Collections.unmodifiableMap(itemToOperation);
 	}
 
+	public void selectionChanged() {
+		// ignore
+
+	}
+
 	public Set<FeatureDescriptor> getSelectedFeatureDescriptors() {
 		Set<FeatureDescriptor> featureDescriptors = new HashSet<FeatureDescriptor>();
 		for (CatalogItemEntry entry : getCatalogItemEntries()) {
@@ -281,11 +296,11 @@ public class SelectionModel {
 		return operation == null ? Operation.NONE : operation;
 	}
 
-	public boolean computeCanFinish() {
+	public boolean computeProvisioningOperationViable() {
 		if (getSelectedFeatureDescriptors().isEmpty()) {
 			return false;
 		}
-		IStatus status = computeFinishValidation();
+		IStatus status = computeProvisioningOperationViability();
 		if (status != null) {
 			switch (status.getSeverity()) {
 			case IStatus.INFO:
@@ -303,7 +318,7 @@ public class SelectionModel {
 	 * 
 	 * @return the message, or null if there should be no message.
 	 */
-	public IStatus computeFinishValidation() {
+	public IStatus computeProvisioningOperationViability() {
 		Set<FeatureDescriptor> selectedFeatureDescriptors = getSelectedFeatureDescriptors();
 		if (selectedFeatureDescriptors.isEmpty()) {
 			return null;

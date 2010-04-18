@@ -44,10 +44,11 @@ public class MarketplaceBrowserIntegration implements LocationListener, OpenWind
 
 	public void open(WindowEvent event) {
 		// if the user shift-clicks the button this can happen
+		System.out.println("event:" + event.data);
 	}
 
 	public void changing(LocationEvent event) {
-
+		System.out.println("event:" + event.location);
 	}
 
 	public void changed(LocationEvent event) {

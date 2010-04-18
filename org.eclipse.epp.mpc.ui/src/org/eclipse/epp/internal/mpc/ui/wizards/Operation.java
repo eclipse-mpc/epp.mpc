@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
-import org.eclipse.epp.internal.mpc.ui.operations.ProvisioningOperation.OperationType;
+import org.eclipse.epp.internal.mpc.ui.operations.ProfileChangeOperationComputer.OperationType;
 
 /**
  * Represents kinds of provisioning operations supported by the wizard

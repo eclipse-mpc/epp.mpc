@@ -43,9 +43,15 @@ class Messages extends NLS {
 
 	public static String FeatureSelectionWizardPage_confirmSelectedFeatures_description;
 
+	public static String FeatureSelectionWizardPage_details;
+
 	public static String FeatureSelectionWizardPage_noneAvailable;
 
 	public static String FeatureSelectionWizardPage_oneOrMoreUnavailable;
+
+	public static String FeatureSelectionWizardPage_provisioningErrorAdvisory;
+
+	public static String FeatureSelectionWizardPage_provisioningWarningAdvisory;
 
 	public static String FeatureSelectionWizardPage_unexpectedException_verifyingFeatures;
 

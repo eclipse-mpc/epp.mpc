@@ -54,7 +54,7 @@ import org.eclipse.swt.widgets.Display;
  * @author David Green
  * @author Steffen Pingel
  */
-public class ProvisioningOperation extends AbstractProvisioningOperation {
+public class ProfileChangeOperationComputer extends AbstractProvisioningOperation {
 
 	public enum OperationType {
 		/**
@@ -75,6 +75,10 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 
 	private final List<FeatureDescriptor> featureDescriptors;
 
+	private ProfileChangeOperation operation;
+
+	private IInstallableUnit[] ius;
+
 	/**
 	 * @param operationType
 	 *            the type of operation to perform
@@ -84,7 +88,7 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 	 *            the features to install/update/uninstall, which must correspond to features provided by the given
 	 *            items
 	 */
-	public ProvisioningOperation(OperationType operationType, Collection<CatalogItem> items,
+	public ProfileChangeOperationComputer(OperationType operationType, Collection<CatalogItem> items,
 			Set<FeatureDescriptor> featureDescriptors) {
 		super(items);
 		if (featureDescriptors == null || featureDescriptors.isEmpty()) {
@@ -102,49 +106,24 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 			SubMonitor monitor = SubMonitor.convert(progressMonitor,
 					Messages.ProvisioningOperation_configuringProvisioningOperation, 100);
 			try {
-				final IInstallableUnit[] ius = computeInstallableUnits(monitor.newChild(50));
+				ius = computeInstallableUnits(monitor.newChild(50));
 
 				checkCancelled(monitor);
 
 				switch (operationType) {
-				case INSTALL: {
-					final InstallOperation operation = resolveInstall(monitor.newChild(50), ius,
-							repositoryLocations.toArray(new URI[0]));
-					checkCancelled(monitor);
-					Display.getDefault().asyncExec(new Runnable() {
-						public void run() {
-							provisioningUI.openInstallWizard(Arrays.asList(ius), operation, null);
-						}
-					});
-
-				}
+				case INSTALL:
+					operation = resolveInstall(monitor.newChild(50), ius, repositoryLocations.toArray(new URI[0]));
 					break;
-				case UNINSTALL: {
-					final UninstallOperation operation = resolveUninstall(monitor.newChild(50), ius,
-							repositoryLocations.toArray(new URI[0]));
-					checkCancelled(monitor);
-					Display.getDefault().asyncExec(new Runnable() {
-						public void run() {
-							provisioningUI.openUninstallWizard(Arrays.asList(ius), operation, null);
-						}
-					});
-
-				}
+				case UNINSTALL:
+					operation = resolveUninstall(monitor.newChild(50), ius, repositoryLocations.toArray(new URI[0]));
 					break;
-				case UPDATE: {
-					final UpdateOperation operation = resolveUpdate(monitor.newChild(50), ius,
-							repositoryLocations.toArray(new URI[0]));
-					checkCancelled(monitor);
-					Display.getDefault().asyncExec(new Runnable() {
-						public void run() {
-							provisioningUI.openUpdateWizard(true, operation, null);
-						}
-					});
-				}
+				case UPDATE:
+					operation = resolveUpdate(monitor.newChild(50), ius, repositoryLocations.toArray(new URI[0]));
 					break;
 				default:
 					throw new UnsupportedOperationException(operationType.name());
 				}
+				checkCancelled(monitor);
 			} finally {
 				monitor.done();
 			}
@@ -153,6 +132,14 @@ public class ProvisioningOperation extends AbstractProvisioningOperation {
 		} catch (Exception e) {
 			throw new InvocationTargetException(e);
 		}
+	}
+
+	public ProfileChangeOperation getOperation() {
+		return operation;
+	}
+
+	public IInstallableUnit[] getIus() {
+		return ius;
 	}
 
 	private InstallOperation resolveInstall(IProgressMonitor monitor, final IInstallableUnit[] ius, URI[] repositories)

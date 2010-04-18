@@ -10,15 +10,13 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
-import java.util.Map;
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
+import org.eclipse.epp.internal.mpc.ui.util.Util;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
-import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogPage;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
 import org.eclipse.jface.dialogs.IMessageProvider;
@@ -195,7 +193,7 @@ public class MarketplacePage extends CatalogPage {
 	@Override
 	public void setPageComplete(boolean complete) {
 		if (complete) {
-			complete = getWizard().getSelectionModel().computeCanFinish();
+			complete = getWizard().getSelectionModel().computeProvisioningOperationViable();
 		}
 		computeMessage();
 		super.setPageComplete(complete);
@@ -206,42 +204,14 @@ public class MarketplacePage extends CatalogPage {
 		int messageType = IMessageProvider.NONE;
 
 		if (getWizard() != null) {
-			IStatus finishValidation = getWizard().getSelectionModel().computeFinishValidation();
-			if (finishValidation != null) {
-				message = finishValidation.getMessage();
-				switch (finishValidation.getSeverity()) {
-				case IStatus.OK:
-				case IStatus.INFO:
-					messageType = IMessageProvider.INFORMATION;
-					break;
-				case IStatus.WARNING:
-					messageType = IMessageProvider.WARNING;
-					break;
-				default:
-					messageType = IMessageProvider.ERROR;
-					break;
-				}
+			IStatus viability = getWizard().getSelectionModel().computeProvisioningOperationViability();
+			if (viability != null) {
+				message = viability.getMessage();
+				messageType = Util.computeMessageType(viability);
 			}
 		}
 
 		setMessage(message, messageType);
 	}
 
-	@Override
-	public IWizardPage getNextPage() {
-		// no need for next page if each selected item corresponds to exactly one feature.
-		Map<CatalogItem, Operation> itemToOperation = getWizard().getSelectionModel().getItemToOperation();
-		if (!itemToOperation.isEmpty()) {
-			boolean oneFeaturePerItem = true;
-			for (CatalogItem item : itemToOperation.keySet()) {
-				if (item.getInstallableUnits().size() > 1) {
-					oneFeaturePerItem = false;
-				}
-			}
-			if (oneFeaturePerItem == true) {
-				return null;
-			}
-		}
-		return super.getNextPage();
-	}
 }
