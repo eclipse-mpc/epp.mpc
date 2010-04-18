@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.util;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
@@ -51,4 +53,25 @@ public class Util {
 		return scaledImage;
 	}
 
+	/**
+	 * Compute the message type of the given status.
+	 * 
+	 * @see IMessageProvider
+	 */
+	public static int computeMessageType(IStatus status) {
+		int messageType;
+		switch (status.getSeverity()) {
+		case IStatus.OK:
+		case IStatus.INFO:
+			messageType = IMessageProvider.INFORMATION;
+			break;
+		case IStatus.WARNING:
+			messageType = IMessageProvider.WARNING;
+			break;
+		default:
+			messageType = IMessageProvider.ERROR;
+			break;
+		}
+		return messageType;
+	}
 }

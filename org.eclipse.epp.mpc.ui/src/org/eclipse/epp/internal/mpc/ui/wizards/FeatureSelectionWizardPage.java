@@ -24,9 +24,15 @@ import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.operations.FeatureDescriptor;
 import org.eclipse.epp.internal.mpc.ui.operations.ResolveFeatureNamesOperation;
+import org.eclipse.epp.internal.mpc.ui.util.Util;
 import org.eclipse.epp.internal.mpc.ui.wizards.SelectionModel.CatalogItemEntry;
 import org.eclipse.epp.internal.mpc.ui.wizards.SelectionModel.FeatureEntry;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
+import org.eclipse.equinox.p2.operations.ProfileChangeOperation;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
@@ -39,8 +45,11 @@ import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.statushandlers.StatusManager;
 
 public class FeatureSelectionWizardPage extends WizardPage {
@@ -143,13 +152,15 @@ public class FeatureSelectionWizardPage extends WizardPage {
 
 	private CheckboxTreeViewer viewer;
 
-	private ResolveFeatureNamesOperation operation;
+	private Text detailStatusText;
+
+	private Group detailsControl;
 
 	protected FeatureSelectionWizardPage() {
 		super(FeatureSelectionWizardPage.class.getName());
 		setTitle(Messages.FeatureSelectionWizardPage_confirmSelectedFeatures);
 		setDescription(Messages.FeatureSelectionWizardPage_confirmSelectedFeatures_description);
-		setPageComplete(true);
+		setPageComplete(false);
 	}
 
 	@Override
@@ -158,8 +169,13 @@ public class FeatureSelectionWizardPage extends WizardPage {
 	}
 
 	public void createControl(Composite parent) {
-		viewer = new CheckboxTreeViewer(parent, SWT.MULTI | SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL
+		Composite container = new Composite(parent, SWT.NULL);
+		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(container);
+
+		viewer = new CheckboxTreeViewer(container, SWT.MULTI | SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL
 				| SWT.BORDER);
+		GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).applyTo(viewer.getControl());
+
 		viewer.setUseHashlookup(true);
 		viewer.setComparator(new ViewerComparator() {
 			@Override
@@ -200,11 +216,19 @@ public class FeatureSelectionWizardPage extends WizardPage {
 					((FeatureEntry) event.getElement()).setChecked(event.getChecked());
 				}
 				computeCheckedViewerState();
-				setPageComplete(getWizard().getSelectionModel().computeCanFinish());
+				updateMessage();
+				setPageComplete(computePageComplete());
 			}
 		});
+		detailsControl = new Group(container, SWT.SHADOW_IN);
+		detailsControl.setText("Details");
+		GridDataFactory.fillDefaults().grab(true, false).hint(SWT.DEFAULT, 300).applyTo(detailsControl);
+		GridLayoutFactory.fillDefaults().applyTo(detailsControl);
+		detailStatusText = new Text(detailsControl, SWT.MULTI | SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL);
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(detailStatusText);
 
-		setControl(viewer.getControl());
+		Dialog.applyDialogFont(container);
+		setControl(container);
 	}
 
 	@Override
@@ -218,9 +242,8 @@ public class FeatureSelectionWizardPage extends WizardPage {
 	private void updateFeatures() {
 		setPageComplete(false);
 		viewer.setInput(getWizard().getSelectionModel());
-		operation = new ResolveFeatureNamesOperation(new ArrayList<CatalogItem>(getWizard().getSelectionModel()
-				.getItemToOperation()
-				.keySet())) {
+		ResolveFeatureNamesOperation operation = new ResolveFeatureNamesOperation(new ArrayList<CatalogItem>(
+				getWizard().getSelectionModel().getItemToOperation().keySet())) {
 
 			Display display = getControl().getDisplay();
 
@@ -245,6 +268,52 @@ public class FeatureSelectionWizardPage extends WizardPage {
 		} catch (InterruptedException e) {
 			// canceled
 		}
+		updateProfileChangeOperation();
+	}
+
+	private void updateProfileChangeOperation() {
+		if (getWizard().getProfileChangeOperation() == null) {
+			getWizard().updateProfileChangeOperation();
+		}
+		updateMessage();
+
+		setPageComplete(computePageComplete());
+	}
+
+	void updateMessage() {
+		ProfileChangeOperation profileChangeOperation = getWizard().getProfileChangeOperation();
+		if (profileChangeOperation != null) {
+			IStatus resolutionResult = profileChangeOperation.getResolutionResult();
+			if (!resolutionResult.isOK()) {
+				String message = resolutionResult.getMessage();
+				if (resolutionResult.getSeverity() == IStatus.ERROR) {
+					message = "Cannot complete the provisioning operation.  Please change your selection and try again. See below for details.";
+				} else if (resolutionResult.getSeverity() == IStatus.WARNING) {
+					message = "The provisioning operation may be completed with warnings. See below for details.";
+				}
+				setMessage(message, Util.computeMessageType(resolutionResult));
+
+				if (resolutionResult.getSeverity() == IStatus.ERROR
+						|| resolutionResult.getSeverity() == IStatus.WARNING) {
+					// avoid gratuitous scrolling
+					String originalText = detailStatusText.getText();
+					String newText = profileChangeOperation.getResolutionDetails();
+					if (newText != originalText || (newText != null && !newText.equals(originalText))) {
+						detailStatusText.setText(newText);
+					}
+					((GridData) detailsControl.getLayoutData()).exclude = false;
+				} else {
+					((GridData) detailsControl.getLayoutData()).exclude = true;
+				}
+			} else {
+				setMessage(null, IMessageProvider.NONE);
+				((GridData) detailsControl.getLayoutData()).exclude = true;
+			}
+		} else {
+			setMessage(null, IMessageProvider.NONE);
+			((GridData) detailsControl.getLayoutData()).exclude = true;
+		}
+		((Composite) getControl()).layout(true);
 	}
 
 	private void updateFeatureDescriptors(Set<FeatureDescriptor> featureDescriptors,
@@ -266,7 +335,11 @@ public class FeatureSelectionWizardPage extends WizardPage {
 				StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			}
 		}
-		setPageComplete(getWizard().getSelectionModel().computeCanFinish());
+		setPageComplete(computePageComplete());
+	}
+
+	private boolean computePageComplete() {
+		return getWizard().getSelectionModel().computeProvisioningOperationViable();
 	}
 
 	private void updateSelectionModel(Set<FeatureDescriptor> featureDescriptors) {
