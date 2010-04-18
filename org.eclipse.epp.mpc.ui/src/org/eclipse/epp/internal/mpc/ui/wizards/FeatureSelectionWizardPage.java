@@ -221,7 +221,7 @@ public class FeatureSelectionWizardPage extends WizardPage {
 			}
 		});
 		detailsControl = new Group(container, SWT.SHADOW_IN);
-		detailsControl.setText("Details");
+		detailsControl.setText(Messages.FeatureSelectionWizardPage_details);
 		GridDataFactory.fillDefaults().grab(true, false).hint(SWT.DEFAULT, 300).applyTo(detailsControl);
 		GridLayoutFactory.fillDefaults().applyTo(detailsControl);
 		detailStatusText = new Text(detailsControl, SWT.MULTI | SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL);
@@ -287,9 +287,9 @@ public class FeatureSelectionWizardPage extends WizardPage {
 			if (!resolutionResult.isOK()) {
 				String message = resolutionResult.getMessage();
 				if (resolutionResult.getSeverity() == IStatus.ERROR) {
-					message = "Cannot complete the provisioning operation.  Please change your selection and try again. See below for details.";
+					message = Messages.FeatureSelectionWizardPage_provisioningErrorAdvisory;
 				} else if (resolutionResult.getSeverity() == IStatus.WARNING) {
-					message = "The provisioning operation may be completed with warnings. See below for details.";
+					message = Messages.FeatureSelectionWizardPage_provisioningWarningAdvisory;
 				}
 				setMessage(message, Util.computeMessageType(resolutionResult));
 
