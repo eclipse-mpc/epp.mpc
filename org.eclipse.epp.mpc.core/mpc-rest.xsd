@@ -19,7 +19,7 @@
 				<xs:element ref="featured" maxOccurs="1" minOccurs="0"></xs:element>
 				<xs:element ref="search" maxOccurs="1" minOccurs="0"></xs:element>
 				<xs:element ref="favorites" maxOccurs="1" minOccurs="0"></xs:element>
-				<xs:element ref="active" maxOccurs="1" minOccurs="0"></xs:element>
+				<xs:element ref="popular" maxOccurs="1" minOccurs="0"></xs:element>
 				<xs:element ref="recent" maxOccurs="1" minOccurs="0"></xs:element>
 			</xs:sequence>
 		</xs:complexType>
@@ -199,7 +199,7 @@
 
     <xs:element name="recent" type="node-listing"></xs:element>
     <xs:element name="featured" type="node-listing"></xs:element>
-    <xs:element name="active" type="node-listing"></xs:element>
+    <xs:element name="popular" type="node-listing"></xs:element>
     <xs:element name="favorites" type="node-listing"></xs:element>
     
 </xs:schema>

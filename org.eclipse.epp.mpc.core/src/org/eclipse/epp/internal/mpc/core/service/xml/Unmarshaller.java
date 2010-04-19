@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service.xml;
 
+
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,13 +25,13 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
+
 /**
  * XML unmarshaller
- * 
  * @author David Green
  */
 public class Unmarshaller extends DefaultHandler {
-
+	
 	/**
 	 * Unmarshal an object from the given input source
 	 */
@@ -47,8 +49,9 @@ public class Unmarshaller extends DefaultHandler {
 		xmlReader.parse(input);
 		return unmarshaller.getModel();
 	}
-
-	private final Map<String, UnmarshalContentHandler> elementNameToUnmarshalContentHandler = new HashMap<String, UnmarshalContentHandler>();
+	
+	
+	private Map<String,UnmarshalContentHandler> elementNameToUnmarshalContentHandler = new HashMap<String, UnmarshalContentHandler>();
 	{
 		elementNameToUnmarshalContentHandler.put("marketplace", new MarketplaceContentHandler()); //$NON-NLS-1$
 		elementNameToUnmarshalContentHandler.put("market", new MarketContentHandler()); //$NON-NLS-1$
@@ -60,20 +63,19 @@ public class Unmarshaller extends DefaultHandler {
 		elementNameToUnmarshalContentHandler.put("search", new SearchContentHandler()); //$NON-NLS-1$
 		elementNameToUnmarshalContentHandler.put("recent", new RecentContentHandler()); //$NON-NLS-1$
 		elementNameToUnmarshalContentHandler.put("featured", new FeaturedContentHandler()); //$NON-NLS-1$
-		elementNameToUnmarshalContentHandler.put("active", new ActiveContentHandler()); //$NON-NLS-1$
+		elementNameToUnmarshalContentHandler.put("popular", new PopularContentHandler()); //$NON-NLS-1$
 		elementNameToUnmarshalContentHandler.put("favorites", new FavoritesContentHandler()); //$NON-NLS-1$
 	}
-
+	
 	private UnmarshalContentHandler currentHandler;
-
 	private Object model;
-
+	
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 		computeHandler(localName);
 		currentHandler.startElement(uri, localName, attributes);
 	}
-
+	
 	private void computeHandler(String localName) {
 		if (currentHandler == null) {
 			currentHandler = elementNameToUnmarshalContentHandler.get(localName);
@@ -83,31 +85,30 @@ public class Unmarshaller extends DefaultHandler {
 			currentHandler.setUnmarshaller(this);
 		}
 	}
-
+	
 	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 		currentHandler.endElement(uri, localName);
 	}
-
+	
 	@Override
 	public void characters(char[] ch, int start, int length) throws SAXException {
 		if (currentHandler != null) {
 			currentHandler.characters(ch, start, length);
 		}
 	}
-
+	
 	public Object getModel() {
 		return model;
 	}
-
+	
 	public void setModel(Object model) {
 		this.model = model;
 	}
-
 	protected UnmarshalContentHandler getCurrentHandler() {
 		return currentHandler;
 	}
-
+	
 	protected void setCurrentHandler(UnmarshalContentHandler currentHandler) {
 		this.currentHandler = currentHandler;
 	}

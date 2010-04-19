@@ -14,10 +14,10 @@ package org.eclipse.epp.internal.mpc.core.service;
 /**
  * @author David Green
  */
-public class Active extends NodeListing {
+public class Popular extends NodeListing {
 	
 	
-	public Active() {
+	public Popular() {
 	}
 	
 }
