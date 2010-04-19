@@ -68,8 +68,8 @@ public class MarketplaceContentHandler extends UnmarshalContentHandler {
 			childHandler.setUnmarshaller(getUnmarshaller());
 			getUnmarshaller().setCurrentHandler(childHandler);
 			childHandler.startElement(uri, localName, attributes);
-		} else if (localName.equals("active")) { //$NON-NLS-1$
-			org.eclipse.epp.internal.mpc.core.service.xml.ActiveContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.ActiveContentHandler();
+		} else if (localName.equals("popular")) { //$NON-NLS-1$
+			org.eclipse.epp.internal.mpc.core.service.xml.PopularContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.PopularContentHandler();
 			childHandler.setParentModel(model);
 			childHandler.setParentHandler(this);
 			childHandler.setUnmarshaller(getUnmarshaller());
@@ -108,7 +108,7 @@ public class MarketplaceContentHandler extends UnmarshalContentHandler {
 			// nothing to do
 		} else if (localName.equals("favorites")) { //$NON-NLS-1$
 			// nothing to do
-		} else if (localName.equals("active")) { //$NON-NLS-1$
+		} else if (localName.equals("popular")) { //$NON-NLS-1$
 			// nothing to do
 		} else if (localName.equals("recent")) { //$NON-NLS-1$
 			// nothing to do

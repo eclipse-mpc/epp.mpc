@@ -104,8 +104,8 @@ public class NodeContentHandler extends UnmarshalContentHandler {
 				((org.eclipse.epp.internal.mpc.core.service.Recent)parentModel).getNode().add(model);
 			} else if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Featured) {
 				((org.eclipse.epp.internal.mpc.core.service.Featured)parentModel).getNode().add(model);
-			} else if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Active) {
-				((org.eclipse.epp.internal.mpc.core.service.Active)parentModel).getNode().add(model);
+			} else if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Popular) {
+				((org.eclipse.epp.internal.mpc.core.service.Popular)parentModel).getNode().add(model);
 			} else if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Favorites) {
 				((org.eclipse.epp.internal.mpc.core.service.Favorites)parentModel).getNode().add(model);
 			}

@@ -144,7 +144,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 
 	private InstallOperation resolveInstall(IProgressMonitor monitor, final IInstallableUnit[] ius, URI[] repositories)
 			throws CoreException {
-		InstallOperation operation = provisioningUI.getInstallOperation(Arrays.asList(ius), repositories);
+		InstallOperation operation = provisioningUI.getInstallOperation(Arrays.asList(ius), null);
 		resolveModal(monitor, operation);
 		return operation;
 	}
@@ -158,7 +158,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 
 	private UpdateOperation resolveUpdate(IProgressMonitor monitor, final IInstallableUnit[] ius, URI[] repositories)
 			throws CoreException {
-		UpdateOperation operation = provisioningUI.getUpdateOperation(Arrays.asList(ius), repositories);
+		UpdateOperation operation = provisioningUI.getUpdateOperation(Arrays.asList(ius), null);
 		resolveModal(monitor, operation);
 		return operation;
 	}

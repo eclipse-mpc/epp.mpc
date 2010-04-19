@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.service.Categories;
@@ -76,6 +77,9 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		DefaultMarketplaceService service = new DefaultMarketplaceService(this.catalogDescriptor.getUrl());
 		Map<String, String> requestMetaParameters = new HashMap<String, String>();
 		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_CLIENT, MarketplaceClientCore.BUNDLE_ID);
+		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_OS, Platform.getOS());
+		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_WS, Platform.getWS());
+		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_JAVA_VERSION, System.getProperty("java.version")); //$NON-NLS-1$
 		service.setRequestMetaParameters(requestMetaParameters);
 		return service;
 	}

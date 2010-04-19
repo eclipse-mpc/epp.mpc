@@ -68,9 +68,32 @@ public class DefaultMarketplaceService implements MarketplaceService {
 			+ ".url", "http://marketplace.eclipse.org"); //$NON-NLS-1$//$NON-NLS-2$
 
 	/**
+	 * parameter identifying client
+	 * 
 	 * @see {@link #setRequestMetaParameters(Map)}
 	 */
 	public static final String META_PARAM_CLIENT = "client"; //$NON-NLS-1$
+
+	/**
+	 * parameter identifying windowing system as reported by {@link org.eclipse.core.runtime.Platform#getWS()}
+	 * 
+	 * @see {@link #setRequestMetaParameters(Map)}
+	 */
+	public static final String META_PARAM_WS = "ws"; //$NON-NLS-1$
+
+	/**
+	 * parameter identifying operating system as reported by {@link org.eclipse.core.runtime.Platform#getOS()}
+	 * 
+	 * @see {@link #setRequestMetaParameters(Map)}
+	 */
+	public static final String META_PARAM_OS = "os"; //$NON-NLS-1$
+
+	/**
+	 * parameter identifying Java version
+	 * 
+	 * @see {@link #setRequestMetaParameters(Map)}
+	 */
+	public static final String META_PARAM_JAVA_VERSION = "java.version"; //$NON-NLS-1$
 
 	private URL baseUrl;
 
@@ -228,7 +251,7 @@ public class DefaultMarketplaceService implements MarketplaceService {
 
 	public SearchResult popular(IProgressMonitor monitor) throws CoreException {
 		Marketplace marketplace = processRequest("popular/top/" + API_URI_SUFFIX, monitor); //$NON-NLS-1$
-		return createSearchResult(marketplace.getActive());
+		return createSearchResult(marketplace.getPopular());
 	}
 
 	protected SearchResult createSearchResult(NodeListing nodeList) throws CoreException {

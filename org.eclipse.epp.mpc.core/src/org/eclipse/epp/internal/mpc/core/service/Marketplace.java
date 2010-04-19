@@ -22,7 +22,7 @@ public class Marketplace {
 	protected Featured featured;
 	protected Search search;
 	protected Favorites favorites;
-	protected Active active;
+	protected Popular popular;
 	protected Recent recent;
 	
 	public Marketplace() {
@@ -76,12 +76,12 @@ public class Marketplace {
 		this.favorites = favorites;
 	}
 	
-	public Active getActive() {
-		return active;
+	public Popular getPopular() {
+		return popular;
 	}
 	
-	public void setActive(Active active) {
-		this.active = active;
+	public void setPopular(Popular popular) {
+		this.popular = popular;
 	}
 	
 	public Recent getRecent() {
