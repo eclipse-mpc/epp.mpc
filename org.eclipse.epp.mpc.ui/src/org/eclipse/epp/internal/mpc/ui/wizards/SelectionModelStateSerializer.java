@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
+import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 
 /**
@@ -68,6 +69,15 @@ public class SelectionModelStateSerializer {
 			}
 			if (!operationByNodeId.isEmpty()) {
 				catalog.performQuery(monitor, operationByNodeId.keySet());
+				for (CatalogItem item : catalog.getItems()) {
+					if (item instanceof MarketplaceNodeCatalogItem) {
+						MarketplaceNodeCatalogItem nodeItem = (MarketplaceNodeCatalogItem) item;
+						Operation operation = operationByNodeId.get(nodeItem.getData().getId());
+						if (operation != null && operation != Operation.NONE) {
+							selectionModel.select(nodeItem, operation);
+						}
+					}
+				}
 			}
 		}
 	}

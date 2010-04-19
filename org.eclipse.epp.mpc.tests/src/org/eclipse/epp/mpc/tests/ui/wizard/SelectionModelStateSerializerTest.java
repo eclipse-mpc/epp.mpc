@@ -91,17 +91,17 @@ public class SelectionModelStateSerializerTest {
 		assertNotNull(state);
 		assertFalse(state.trim().length() == 0);
 
-		assertTrue(selectionModel.computeCanFinish());
+		assertTrue(selectionModel.computeProvisioningOperationViable());
 
 		selectionModel.clear();
 
 		assertTrue(selectionModel.getItemToOperation().isEmpty());
-		assertFalse(selectionModel.computeCanFinish());
+		assertFalse(selectionModel.computeProvisioningOperationViable());
 
 		serializer.deserialize(new NullProgressMonitor(), state);
 
-		assertEquals(2, selectionModel.getItemToOperation());
-		assertTrue(selectionModel.computeCanFinish());
+		assertEquals(2, selectionModel.getItemToOperation().size());
+		assertTrue(selectionModel.computeProvisioningOperationViable());
 
 		Map<CatalogItem, Operation> itemToOperation = selectionModel.getItemToOperation();
 		assertEquals(Operation.INSTALL, itemToOperation.get(firstItem));
