@@ -28,7 +28,7 @@ public class MarketplaceCatalogConfiguration extends CatalogConfiguration {
 		setShowTagFilter(false);
 		setShowInstalled(true);
 		setShowInstalledFilter(false);
-		setVerifyUpdateSiteAvailability(false);
+		setVerifyUpdateSiteAvailability(true);
 		setShowCategories(false);
 	}
 
