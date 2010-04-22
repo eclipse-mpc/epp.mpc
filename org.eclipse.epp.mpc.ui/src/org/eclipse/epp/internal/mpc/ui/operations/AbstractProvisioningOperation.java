@@ -101,10 +101,10 @@ public abstract class AbstractProvisioningOperation implements IRunnableWithProg
 		for (final IMetadataRepository repository : repositories) {
 			checkCancelled(monitor);
 			final Set<String> installableUnitIdsThisRepository = getDescriptorIds(repository);
-			IQuery<IInstallableUnit> query = QueryUtil.createMatchQuery( //
-			"id ~= /*.feature.group/ && " + //$NON-NLS-1$
-					"properties['org.eclipse.equinox.p2.type.group'] == true ");//$NON-NLS-1$
+
+			IQuery<IInstallableUnit> query = QueryUtil.createLatestQuery(QueryUtil.createIUGroupQuery());
 			IQueryResult<IInstallableUnit> result = repository.query(query, monitor.newChild(1));
+
 			for (Iterator<IInstallableUnit> iter = result.iterator(); iter.hasNext();) {
 				IInstallableUnit iu = iter.next();
 				String id = iu.getId();

@@ -114,18 +114,23 @@ public class SelectionModel {
 		List<FeatureEntry> children = new ArrayList<FeatureEntry>();
 		for (String iu : itemEntry.getItem().getInstallableUnits()) {
 			FeatureEntry featureEntry = new FeatureEntry(itemEntry, new FeatureDescriptor(iu));
+			featureEntry.setInstalled(computeInstalled(featureEntry));
 			computeInitialChecked(featureEntry);
 			children.add(featureEntry);
 		}
 		itemEntry.children = children;
 	}
 
+	private boolean computeInstalled(FeatureEntry entry) {
+		Set<String> installedFeatures = wizard.getInstalledFeatures();
+		return installedFeatures.contains(entry.featureDescriptor.getId())
+				|| installedFeatures.contains(entry.featureDescriptor.getSimpleId());
+	}
+
 	private void computeInitialChecked(FeatureEntry entry) {
 		Operation operation = entry.parent.operation;
 		if (operation == Operation.CHECK_FOR_UPDATES) {
-			Set<String> installedFeatures = wizard.getInstalledFeatures();
-			if (installedFeatures.contains(entry.featureDescriptor.getId())
-					|| installedFeatures.contains(entry.featureDescriptor.getSimpleId())) {
+			if (entry.isInstalled()) {
 				entry.checked = true;
 			}
 		} else {
@@ -197,6 +202,8 @@ public class SelectionModel {
 
 		private boolean checked;
 
+		private boolean installed;
+
 		private FeatureEntry(CatalogItemEntry parent, FeatureDescriptor featureDescriptor) {
 			super();
 			this.parent = parent;
@@ -222,6 +229,14 @@ public class SelectionModel {
 		public void setChecked(boolean checked) {
 			this.checked = checked;
 			selectionChanged();
+		}
+
+		public boolean isInstalled() {
+			return installed;
+		}
+
+		public void setInstalled(boolean installed) {
+			this.installed = installed;
 		}
 
 		public CatalogItemEntry getParent() {

@@ -100,13 +100,7 @@ public class MarketplaceWizard extends DiscoveryWizard {
 
 	@Override
 	public boolean canFinish() {
-		if (getContainer().getCurrentPage() == featureSelectionWizardPage) {
-			if (profileChangeOperation == null) {
-				updateProfileChangeOperation();
-			}
-		}
-		if (profileChangeOperation == null
-				|| profileChangeOperation.getResolutionResult().getSeverity() == IStatus.ERROR) {
+		if (profileChangeOperation == null || !profileChangeOperation.getResolutionResult().isOK()) {
 			return false;
 		}
 		if (computeMustCheckLicenseAcceptance()) {
@@ -121,11 +115,16 @@ public class MarketplaceWizard extends DiscoveryWizard {
 
 	@Override
 	public IWizardPage getNextPage(IWizardPage page) {
+		return getNextPage(page, true);
+	}
+
+	IWizardPage getNextPage(IWizardPage page, boolean computeChanges) {
 		if (page == featureSelectionWizardPage) {
 			if (profileChangeOperation == null) {
-				updateProfileChangeOperation();
-				if (profileChangeOperation == null
-						|| profileChangeOperation.getResolutionResult().getSeverity() == IStatus.ERROR) {
+				if (computeChanges) {
+					updateProfileChangeOperation();
+				}
+				if (profileChangeOperation == null || !profileChangeOperation.getResolutionResult().isOK()) {
 					// can't compute a change operation, so there must be some kind of error
 					// we show these on the the feature selection wizard page
 					return featureSelectionWizardPage;
@@ -234,8 +233,7 @@ public class MarketplaceWizard extends DiscoveryWizard {
 
 	@Override
 	public boolean performFinish() {
-		if (profileChangeOperation != null
-				&& profileChangeOperation.getResolutionResult().getSeverity() != IStatus.ERROR) {
+		if (profileChangeOperation != null && profileChangeOperation.getResolutionResult().isOK()) {
 			ProvisioningUI.getDefaultUI().schedule(profileChangeOperation.getProvisioningJob(null),
 					StatusManager.SHOW | StatusManager.LOG);
 			return true;

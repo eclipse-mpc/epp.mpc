@@ -173,7 +173,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 			// add repository urls and load meta data
 			List<IMetadataRepository> repositories = addRepositories(monitor.newChild(50));
 			final List<IInstallableUnit> installableUnits = queryInstallableUnits(monitor.newChild(50), repositories);
-			removeOldVersions(installableUnits);
+
 			checkForUnavailable(installableUnits);
 			pruneUnselected(installableUnits);
 
@@ -211,7 +211,9 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 				IInstallableUnit iu = it.next();
 				IInstallableUnit installedIu = iUsById.get(iu.getId());
 				if (installedIu != null) {
-					if (installedIu.getVersion().compareTo(iu.getVersion()) >= 0) {
+					Version installedVersion = installedIu.getVersion();
+					Version installableVersion = iu.getVersion();
+					if (installedVersion.compareTo(installableVersion) >= 0) {
 						it.remove();
 					}
 				}
