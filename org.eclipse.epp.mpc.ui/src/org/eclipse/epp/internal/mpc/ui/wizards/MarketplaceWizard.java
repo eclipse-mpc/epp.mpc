@@ -100,15 +100,15 @@ public class MarketplaceWizard extends DiscoveryWizard {
 
 	@Override
 	public boolean canFinish() {
-		if (profileChangeOperation == null || !profileChangeOperation.getResolutionResult().isOK()) {
-			return false;
-		}
 		if (computeMustCheckLicenseAcceptance()) {
 			if (acceptLicensesPage != null && acceptLicensesPage.isPageComplete()) {
 				return true;
 			}
 			return false;
 		} else {
+			if (profileChangeOperation == null || !profileChangeOperation.getResolutionResult().isOK()) {
+				return false;
+			}
 			return true;
 		}
 	}
@@ -233,7 +233,8 @@ public class MarketplaceWizard extends DiscoveryWizard {
 
 	@Override
 	public boolean performFinish() {
-		if (profileChangeOperation != null && profileChangeOperation.getResolutionResult().isOK()) {
+		if (profileChangeOperation != null
+				&& profileChangeOperation.getResolutionResult().getSeverity() != IStatus.ERROR) {
 			ProvisioningUI.getDefaultUI().schedule(profileChangeOperation.getProvisioningJob(null),
 					StatusManager.SHOW | StatusManager.LOG);
 			return true;

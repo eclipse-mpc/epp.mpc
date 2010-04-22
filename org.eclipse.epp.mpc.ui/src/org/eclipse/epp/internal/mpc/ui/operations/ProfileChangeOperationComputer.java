@@ -118,7 +118,8 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 					operation = resolveUninstall(monitor.newChild(50), ius, repositoryLocations.toArray(new URI[0]));
 					break;
 				case UPDATE:
-					operation = resolveUpdate(monitor.newChild(50), ius, repositoryLocations.toArray(new URI[0]));
+					operation = resolveUpdate(monitor.newChild(50), computeInstalledIus(ius),
+							repositoryLocations.toArray(new URI[0]));
 					break;
 				default:
 					throw new UnsupportedOperationException(operationType.name());
@@ -132,6 +133,17 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 		} catch (Exception e) {
 			throw new InvocationTargetException(e);
 		}
+	}
+
+	private IInstallableUnit[] computeInstalledIus(IInstallableUnit[] ius) {
+		List<IInstallableUnit> installedIus = new ArrayList<IInstallableUnit>(ius.length);
+		Map<String, IInstallableUnit> iUsById = MarketplaceClientUi.computeInstalledIUsById(new NullProgressMonitor());
+
+		for (IInstallableUnit iu : ius) {
+			IInstallableUnit installedIu = iUsById.get(iu.getId());
+			installedIus.add(installedIu);
+		}
+		return installedIus.toArray(new IInstallableUnit[installedIus.size()]);
 	}
 
 	public ProfileChangeOperation getOperation() {

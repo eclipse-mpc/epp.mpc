@@ -317,25 +317,21 @@ public class FeatureSelectionWizardPage extends WizardPage {
 				}
 				setMessage(message, Util.computeMessageType(resolutionResult));
 
-				if (resolutionResult.getSeverity() == IStatus.ERROR
-						|| resolutionResult.getSeverity() == IStatus.WARNING) {
-					// avoid gratuitous scrolling
-					String originalText = detailStatusText.getText();
-					String newText;
-					try {
-						newText = profileChangeOperation.getResolutionDetails();
-					} catch (Exception e) {
-						// sometimes p2 might throw an exception
-						MarketplaceClientUi.error(e);
-						newText = "details are not available";
-					}
-					if (newText != originalText || (newText != null && !newText.equals(originalText))) {
-						detailStatusText.setText(newText);
-					}
-					((GridData) detailsControl.getLayoutData()).exclude = false;
-				} else {
-					((GridData) detailsControl.getLayoutData()).exclude = true;
+				// avoid gratuitous scrolling
+				String originalText = detailStatusText.getText();
+				String newText;
+				try {
+					newText = profileChangeOperation.getResolutionDetails();
+				} catch (Exception e) {
+					// sometimes p2 might throw an exception
+					MarketplaceClientUi.error(e);
+					newText = "details are not available";
 				}
+				if (newText != originalText || (newText != null && !newText.equals(originalText))) {
+					detailStatusText.setText(newText);
+				}
+				((GridData) detailsControl.getLayoutData()).exclude = false;
+
 			} else {
 				setMessage(null, IMessageProvider.NONE);
 				((GridData) detailsControl.getLayoutData()).exclude = true;
