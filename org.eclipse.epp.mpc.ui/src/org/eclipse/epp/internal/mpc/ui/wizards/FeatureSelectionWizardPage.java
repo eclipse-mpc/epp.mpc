@@ -42,6 +42,7 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -93,13 +94,19 @@ public class FeatureSelectionWizardPage extends WizardPage {
 				FeatureEntry entry = (FeatureEntry) element;
 				switch (entry.getParent().getOperation()) {
 				case CHECK_FOR_UPDATES:
-					return MarketplaceClientUiPlugin.getInstance().getImageRegistry().get(
-							MarketplaceClientUiPlugin.IU_ICON_UPDATE);
+					if (entry.isInstalled()) {
+						return MarketplaceClientUiPlugin.getInstance().getImageRegistry().get(
+								MarketplaceClientUiPlugin.IU_ICON_UPDATE);
+					}
+					// fall through
 				case INSTALL:
 					return MarketplaceClientUiPlugin.getInstance().getImageRegistry().get(
 							MarketplaceClientUiPlugin.IU_ICON);
-					// FIXME uninstall icon
 				}
+			} else if (columnIndex == 0 && element instanceof CatalogItemEntry) {
+				return MarketplaceClientUiPlugin.getInstance()
+						.getImageRegistry()
+						.get(MarketplaceClientUiPlugin.IU_ICON);
 			}
 			return null;
 		}
@@ -268,16 +275,33 @@ public class FeatureSelectionWizardPage extends WizardPage {
 		} catch (InterruptedException e) {
 			// canceled
 		}
-		updateProfileChangeOperation();
+		maybeUpdateProfileChangeOperation();
 	}
 
-	private void updateProfileChangeOperation() {
+	private void maybeUpdateProfileChangeOperation() {
 		if (getWizard().getProfileChangeOperation() == null) {
 			getWizard().updateProfileChangeOperation();
 		}
 		updateMessage();
 
 		setPageComplete(computePageComplete());
+	}
+
+	@Override
+	public boolean canFlipToNextPage() {
+		return isPageComplete() && getNextPage(false) != null;
+	}
+
+	public IWizardPage getNextPage(boolean computeChanges) {
+		if (getWizard() == null) {
+			return null;
+		}
+		return getWizard().getNextPage(this, computeChanges);
+	}
+
+	@Override
+	public IWizardPage getNextPage() {
+		return getNextPage(true);
 	}
 
 	void updateMessage() {
@@ -293,18 +317,21 @@ public class FeatureSelectionWizardPage extends WizardPage {
 				}
 				setMessage(message, Util.computeMessageType(resolutionResult));
 
-				if (resolutionResult.getSeverity() == IStatus.ERROR
-						|| resolutionResult.getSeverity() == IStatus.WARNING) {
-					// avoid gratuitous scrolling
-					String originalText = detailStatusText.getText();
-					String newText = profileChangeOperation.getResolutionDetails();
-					if (newText != originalText || (newText != null && !newText.equals(originalText))) {
-						detailStatusText.setText(newText);
-					}
-					((GridData) detailsControl.getLayoutData()).exclude = false;
-				} else {
-					((GridData) detailsControl.getLayoutData()).exclude = true;
+				// avoid gratuitous scrolling
+				String originalText = detailStatusText.getText();
+				String newText;
+				try {
+					newText = profileChangeOperation.getResolutionDetails();
+				} catch (Exception e) {
+					// sometimes p2 might throw an exception
+					MarketplaceClientUi.error(e);
+					newText = "details are not available";
 				}
+				if (newText != originalText || (newText != null && !newText.equals(originalText))) {
+					detailStatusText.setText(newText);
+				}
+				((GridData) detailsControl.getLayoutData()).exclude = false;
+
 			} else {
 				setMessage(null, IMessageProvider.NONE);
 				((GridData) detailsControl.getLayoutData()).exclude = true;
@@ -335,7 +362,10 @@ public class FeatureSelectionWizardPage extends WizardPage {
 				StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			}
 		}
-		setPageComplete(computePageComplete());
+		boolean pageComplete = computePageComplete();
+		if (pageComplete != isPageComplete()) {
+			setPageComplete(pageComplete);
+		}
 	}
 
 	private boolean computePageComplete() {

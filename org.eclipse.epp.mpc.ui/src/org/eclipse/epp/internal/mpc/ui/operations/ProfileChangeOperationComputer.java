@@ -118,7 +118,8 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 					operation = resolveUninstall(monitor.newChild(50), ius, repositoryLocations.toArray(new URI[0]));
 					break;
 				case UPDATE:
-					operation = resolveUpdate(monitor.newChild(50), ius, repositoryLocations.toArray(new URI[0]));
+					operation = resolveUpdate(monitor.newChild(50), computeInstalledIus(ius),
+							repositoryLocations.toArray(new URI[0]));
 					break;
 				default:
 					throw new UnsupportedOperationException(operationType.name());
@@ -132,6 +133,17 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 		} catch (Exception e) {
 			throw new InvocationTargetException(e);
 		}
+	}
+
+	private IInstallableUnit[] computeInstalledIus(IInstallableUnit[] ius) {
+		List<IInstallableUnit> installedIus = new ArrayList<IInstallableUnit>(ius.length);
+		Map<String, IInstallableUnit> iUsById = MarketplaceClientUi.computeInstalledIUsById(new NullProgressMonitor());
+
+		for (IInstallableUnit iu : ius) {
+			IInstallableUnit installedIu = iUsById.get(iu.getId());
+			installedIus.add(installedIu);
+		}
+		return installedIus.toArray(new IInstallableUnit[installedIus.size()]);
 	}
 
 	public ProfileChangeOperation getOperation() {
@@ -173,7 +185,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 			// add repository urls and load meta data
 			List<IMetadataRepository> repositories = addRepositories(monitor.newChild(50));
 			final List<IInstallableUnit> installableUnits = queryInstallableUnits(monitor.newChild(50), repositories);
-			removeOldVersions(installableUnits);
+
 			checkForUnavailable(installableUnits);
 			pruneUnselected(installableUnits);
 
@@ -211,7 +223,9 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 				IInstallableUnit iu = it.next();
 				IInstallableUnit installedIu = iUsById.get(iu.getId());
 				if (installedIu != null) {
-					if (installedIu.getVersion().compareTo(iu.getVersion()) >= 0) {
+					Version installedVersion = installedIu.getVersion();
+					Version installableVersion = iu.getVersion();
+					if (installedVersion.compareTo(installableVersion) >= 0) {
 						it.remove();
 					}
 				}

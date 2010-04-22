@@ -114,32 +114,31 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	@Override
 	public boolean canFinish() {
-		if (getContainer().getCurrentPage() == featureSelectionWizardPage) {
-			if (profileChangeOperation == null) {
-				updateProfileChangeOperation();
-			}
-		}
-		if (profileChangeOperation == null
-				|| profileChangeOperation.getResolutionResult().getSeverity() == IStatus.ERROR) {
-			return false;
-		}
 		if (computeMustCheckLicenseAcceptance()) {
 			if (acceptLicensesPage != null && acceptLicensesPage.isPageComplete()) {
 				return true;
 			}
 			return false;
 		} else {
+			if (profileChangeOperation == null || !profileChangeOperation.getResolutionResult().isOK()) {
+				return false;
+			}
 			return true;
 		}
 	}
 
 	@Override
 	public IWizardPage getNextPage(IWizardPage page) {
+		return getNextPage(page, true);
+	}
+
+	IWizardPage getNextPage(IWizardPage page, boolean computeChanges) {
 		if (page == featureSelectionWizardPage) {
 			if (profileChangeOperation == null) {
-				updateProfileChangeOperation();
-				if (profileChangeOperation == null
-						|| profileChangeOperation.getResolutionResult().getSeverity() == IStatus.ERROR) {
+				if (computeChanges) {
+					updateProfileChangeOperation();
+				}
+				if (profileChangeOperation == null || !profileChangeOperation.getResolutionResult().isOK()) {
 					// can't compute a change operation, so there must be some kind of error
 					// we show these on the the feature selection wizard page
 					return featureSelectionWizardPage;
