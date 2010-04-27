@@ -17,7 +17,6 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.service.Category;
 import org.eclipse.epp.internal.mpc.core.service.Market;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
@@ -29,7 +28,6 @@ import org.eclipse.equinox.internal.p2.discovery.Catalog;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.discovery.model.Tag;
-import org.eclipse.equinox.internal.p2.ui.discovery.DiscoveryUi;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.ControlListItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.PatternFilter;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogConfiguration;
@@ -42,7 +40,6 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.IShellProvider;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -267,14 +264,6 @@ public class MarketplaceViewer extends CatalogViewer {
 		super.doFind(queryText);
 		// bug 305274: scrollbars don't always appear after switching tabs, so we re-do the layout
 		getViewer().getControl().getParent().layout(true, true);
-	}
-
-	private IStatus computeStatus(InvocationTargetException e, String message) {
-		Throwable cause = e.getCause();
-		if (cause.getMessage() != null) {
-			message = NLS.bind("{0}: {1}", message, cause.getMessage());
-		}
-		return new Status(IStatus.ERROR, DiscoveryUi.ID_PLUGIN, message, e);
 	}
 
 	@Override
