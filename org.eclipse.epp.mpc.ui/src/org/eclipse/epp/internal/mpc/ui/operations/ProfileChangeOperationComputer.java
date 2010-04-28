@@ -17,7 +17,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -306,29 +305,6 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 			if (!okayToProceed[0]) {
 				throw new CoreException(new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
 						Messages.ProvisioningOperation_unavailableConnectors, detailedMessage), null));
-			}
-		}
-	}
-
-	/**
-	 * Filters those installable units that have a duplicate in the list with a higher version number. it's possible
-	 * that some repositories will host multiple versions of a particular feature. we assume that the user wants the
-	 * highest version.
-	 */
-	private void removeOldVersions(final List<IInstallableUnit> installableUnits) {
-		Map<String, Version> symbolicNameToVersion = new HashMap<String, Version>();
-		for (IInstallableUnit unit : installableUnits) {
-			Version version = symbolicNameToVersion.get(unit.getId());
-			if (version == null || version.compareTo(unit.getVersion()) == -1) {
-				symbolicNameToVersion.put(unit.getId(), unit.getVersion());
-			}
-		}
-		if (symbolicNameToVersion.size() != installableUnits.size()) {
-			for (IInstallableUnit unit : new ArrayList<IInstallableUnit>(installableUnits)) {
-				Version version = symbolicNameToVersion.get(unit.getId());
-				if (!version.equals(unit.getVersion())) {
-					installableUnits.remove(unit);
-				}
 			}
 		}
 	}
