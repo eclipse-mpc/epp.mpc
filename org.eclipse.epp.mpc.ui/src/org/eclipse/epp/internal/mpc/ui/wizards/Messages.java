@@ -45,6 +45,8 @@ class Messages extends NLS {
 
 	public static String FeatureSelectionWizardPage_details;
 
+	public static String FeatureSelectionWizardPage_detailsUnavailable;
+
 	public static String FeatureSelectionWizardPage_noneAvailable;
 
 	public static String FeatureSelectionWizardPage_oneOrMoreUnavailable;
@@ -67,6 +69,8 @@ class Messages extends NLS {
 
 	public static String ItemButtonController_updatePending;
 
+	public static String MarketplaceBrowserIntegration_cannotOpenMarketplaceWizard;
+
 	public static String MarketplacePage_eclipseMarketplaceSolutions;
 
 	public static String MarketplacePage_installed;
@@ -88,6 +92,8 @@ class Messages extends NLS {
 	public static String MarketplaceViewer_go;
 
 	public static String MarketplaceViewer_unexpectedException;
+
+	public static String MarketplaceWizard_cannotOpenUrl;
 
 	public static String MarketplaceWizard_eclipseSolutionCatalogs;
 

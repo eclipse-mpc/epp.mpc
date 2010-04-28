@@ -104,6 +104,8 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	private String findText;
 
+	private boolean initialStateRestored;
+
 	public MarketplaceViewer(Catalog catalog, IShellProvider shellProvider, IMarketplaceWebBrowser browser,
 			IRunnableContext context, CatalogConfiguration configuration, SelectionModel selectionModel) {
 		super(catalog, shellProvider, context, configuration);
@@ -120,7 +122,9 @@ public class MarketplaceViewer extends CatalogViewer {
 				marketplaceFilter.createControl(parent);
 				marketplaceFilter.addPropertyChangeListener(new IPropertyChangeListener() {
 					public void propertyChange(PropertyChangeEvent event) {
-						doQuery();
+						if (AbstractTagFilter.PROP_SELECTED.equals(event.getProperty())) {
+							doQuery();
+						}
 					}
 				});
 			}
@@ -261,9 +265,15 @@ public class MarketplaceViewer extends CatalogViewer {
 		} else {
 			getViewer().setSorter(null);
 		}
+
 		super.doFind(queryText);
 		// bug 305274: scrollbars don't always appear after switching tabs, so we re-do the layout
 		getViewer().getControl().getParent().layout(true, true);
+	}
+
+	@Override
+	public MarketplaceCatalogConfiguration getConfiguration() {
+		return (MarketplaceCatalogConfiguration) super.getConfiguration();
 	}
 
 	@Override
@@ -336,7 +346,35 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	@Override
 	protected void postDiscovery() {
-		// nothing to do.
+		// nothing to do
+	}
+
+	@Override
+	public void updateCatalog() {
+		if ((getConfiguration().getInitialState() != null || getConfiguration().getInitialOperationByNodeId() != null)
+				&& !initialStateRestored) {
+			initialStateRestored = true;
+			boolean wasError = false;
+			boolean wasCancelled = false;
+			try {
+				context.run(true, true, new IRunnableWithProgress() {
+					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+						new SelectionModelStateSerializer(getCatalog(), getSelectionModel()).deserialize(monitor,
+								getConfiguration().getInitialState(), getConfiguration().getInitialOperationByNodeId());
+					}
+				});
+			} catch (InvocationTargetException e) {
+				IStatus status = computeStatus(e, Messages.MarketplaceViewer_unexpectedException);
+				StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
+				wasError = true;
+			} catch (InterruptedException e) {
+				// user canceled
+				wasCancelled = true;
+			}
+			catalogUpdated(wasCancelled, wasError);
+		} else {
+			super.updateCatalog();
+		}
 	}
 
 	public SelectionModel getSelectionModel() {

@@ -27,6 +27,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
@@ -47,6 +48,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.browser.IWebBrowser;
@@ -261,15 +263,19 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		return (MarketplacePage) super.getCatalogPage();
 	}
 
-	@SuppressWarnings("unchecked")
 	public synchronized Set<String> getInstalledFeatures() {
 		if (installedFeatures == null) {
 			try {
-				getContainer().run(true, false, new IRunnableWithProgress() {
-					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						installedFeatures = MarketplaceClientUi.computeInstalledFeatures(monitor);
-					}
-				});
+				if (Display.getCurrent() != null) {
+					getContainer().run(true, false, new IRunnableWithProgress() {
+						public void run(IProgressMonitor monitor) throws InvocationTargetException,
+								InterruptedException {
+							installedFeatures = MarketplaceClientUi.computeInstalledFeatures(monitor);
+						}
+					});
+				} else {
+					installedFeatures = MarketplaceClientUi.computeInstalledFeatures(new NullProgressMonitor());
+				}
 			} catch (InvocationTargetException e) {
 				MarketplaceClientUi.error(e.getCause());
 				installedFeatures = Collections.emptySet();
@@ -310,7 +316,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 					url += '&';
 				}
 				String state = new SelectionModelStateSerializer(getCatalog(), getSelectionModel()).serialize();
-				url += "mpc=true&mpc.state=" + URLEncoder.encode(state, "UTF-8"); //$NON-NLS-1$//$NON-NLS-2$
+				url += "mpc=true&mpc_state=" + URLEncoder.encode(state, "UTF-8"); //$NON-NLS-1$//$NON-NLS-2$
 				browser.openURL(new URL(url)); // ORDER DEPENDENCY
 				getContainer().getShell().close();
 				if (!hookLocationListener(browser)) { // ORDER DEPENDENCY
@@ -321,7 +327,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 						StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			} catch (MalformedURLException e) {
 				IStatus status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
-						"Cannot open url {0}: {1}", new Object[] { url, e.getMessage() }), e);
+						Messages.MarketplaceWizard_cannotOpenUrl, new Object[] { url, e.getMessage() }), e);
 				StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			} catch (UnsupportedEncodingException e) {
 				throw new IllegalStateException(e); // should never happen
@@ -348,17 +354,18 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 								browserField.setAccessible(true);
 								Browser browser = (Browser) browserField.get(browserViewer);
 								if (browser != null) {
-									if (browserListener == null) {
-										browserListener = new MarketplaceBrowserIntegration(
-												getConfiguration().getCatalogDescriptors(),
-												getConfiguration().getCatalogDescriptor());
+									// only hook the listener once
+									if (browser.getData(MarketplaceBrowserIntegration.class.getName()) == null) {
+										if (browserListener == null) {
+											browserListener = new MarketplaceBrowserIntegration(
+													getConfiguration().getCatalogDescriptors(),
+													getConfiguration().getCatalogDescriptor());
+										}
+										browser.setData(MarketplaceBrowserIntegration.class.getName(), browserListener);
+										// hook in listeners
+										browser.addLocationListener(browserListener);
+										browser.addOpenWindowListener(browserListener);
 									}
-									// in case we're already listening to this one (reusing existing)
-									browser.removeLocationListener(browserListener);
-									browser.removeOpenWindowListener(browserListener);
-									// hook in listeners 
-									browser.addLocationListener(browserListener);
-									browser.addOpenWindowListener(browserListener);
 									return true;
 								}
 							}

@@ -53,10 +53,17 @@ public class SelectionModelStateSerializer {
 		return state.toString();
 	}
 
-	public void deserialize(IProgressMonitor monitor, String state) {
-		if (state != null && state.length() > 0) {
-			Map<String, Operation> operationByNodeId = new HashMap<String, Operation>();
+	/**
+	 * @param monitor
+	 * @param state
+	 *            the state to restore
+	 * @param operationByNodeIdExtras
+	 *            additional operations to include
+	 */
+	public void deserialize(IProgressMonitor monitor, String state, Map<String, Operation> operationByNodeIdExtras) {
 
+		Map<String, Operation> operationByNodeId = new HashMap<String, Operation>();
+		if (state != null && state.length() > 0) {
 			Pattern pattern = Pattern.compile("([^\\s=]+)=(\\S+)"); //$NON-NLS-1$
 			Matcher matcher = pattern.matcher(state);
 			while (matcher.find()) {
@@ -67,18 +74,28 @@ public class SelectionModelStateSerializer {
 
 				operationByNodeId.put(nodeId, operation);
 			}
-			if (!operationByNodeId.isEmpty()) {
-				catalog.performQuery(monitor, operationByNodeId.keySet());
-				for (CatalogItem item : catalog.getItems()) {
-					if (item instanceof MarketplaceNodeCatalogItem) {
-						MarketplaceNodeCatalogItem nodeItem = (MarketplaceNodeCatalogItem) item;
-						Operation operation = operationByNodeId.get(nodeItem.getData().getId());
-						if (operation != null && operation != Operation.NONE) {
-							selectionModel.select(nodeItem, operation);
+		}
+		if (operationByNodeIdExtras != null) {
+			operationByNodeId.putAll(operationByNodeIdExtras);
+		}
+		if (!operationByNodeId.isEmpty()) {
+			catalog.performQuery(monitor, operationByNodeId.keySet());
+			for (CatalogItem item : catalog.getItems()) {
+				if (item instanceof MarketplaceNodeCatalogItem) {
+					MarketplaceNodeCatalogItem nodeItem = (MarketplaceNodeCatalogItem) item;
+					Operation operation = operationByNodeId.get(nodeItem.getData().getId());
+					if (operation != null && operation != Operation.NONE) {
+						if (nodeItem.isInstalled() && operation == Operation.INSTALL) {
+							operation = Operation.CHECK_FOR_UPDATES;
 						}
+						selectionModel.select(nodeItem, operation);
 					}
 				}
 			}
 		}
+	}
+
+	public void deserialize(IProgressMonitor monitor, String state) {
+		deserialize(monitor, state, null);
 	}
 }

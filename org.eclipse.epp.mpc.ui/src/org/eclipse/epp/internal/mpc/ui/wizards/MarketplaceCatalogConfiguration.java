@@ -12,6 +12,7 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogConfiguration;
@@ -23,6 +24,10 @@ public class MarketplaceCatalogConfiguration extends CatalogConfiguration {
 	private List<CatalogDescriptor> catalogDescriptors = new ArrayList<CatalogDescriptor>();
 
 	private CatalogDescriptor catalogDescriptor;
+
+	private String initialState;
+
+	private Map<String, Operation> initialOperationByNodeId;
 
 	public MarketplaceCatalogConfiguration() {
 		setShowTagFilter(false);
@@ -47,4 +52,21 @@ public class MarketplaceCatalogConfiguration extends CatalogConfiguration {
 	public void setCatalogDescriptor(CatalogDescriptor catalogDescriptor) {
 		this.catalogDescriptor = catalogDescriptor;
 	}
+
+	public void setInitialState(String initialState) {
+		this.initialState = initialState;
+	}
+
+	public String getInitialState() {
+		return initialState;
+	}
+
+	public Map<String, Operation> getInitialOperationByNodeId() {
+		return initialOperationByNodeId;
+	}
+
+	public void setInitialOperationByNodeId(Map<String, Operation> initialOperationByNodeId) {
+		this.initialOperationByNodeId = initialOperationByNodeId;
+	}
+
 }

@@ -13,6 +13,7 @@ package org.eclipse.epp.internal.mpc.ui.commands;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -28,13 +29,13 @@ import org.eclipse.epp.internal.mpc.ui.wizards.ComboTagFilter;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceCatalogConfiguration;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceFilter;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceWizard;
+import org.eclipse.epp.internal.mpc.ui.wizards.Operation;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.discovery.DiscoveryCore;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 import org.eclipse.equinox.internal.p2.discovery.model.Tag;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogFilter;
-import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 
 /**
@@ -43,6 +44,12 @@ import org.eclipse.jface.wizard.WizardDialog;
 public class MarketplaceWizardCommand extends AbstractHandler implements IHandler {
 
 	private List<CatalogDescriptor> catalogDescriptors;
+
+	private CatalogDescriptor selectedCatalogDescriptor;
+
+	private String wizardState;
+
+	private Map<String, Operation> operationByNodeId;
 
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		final MarketplaceCatalog catalog = new MarketplaceCatalog();
@@ -56,6 +63,9 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 			configuration.getCatalogDescriptors().addAll(CatalogRegistry.getInstance().getCatalogDescriptors());
 		} else {
 			configuration.getCatalogDescriptors().addAll(catalogDescriptors);
+		}
+		if (selectedCatalogDescriptor != null) {
+			configuration.setCatalogDescriptor(selectedCatalogDescriptor);
 		}
 
 		configuration.getFilters().clear();
@@ -112,21 +122,39 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 
 		configuration.getFilters().add(marketFilter);
 		configuration.getFilters().add(marketCategoryTagFilter);
+		configuration.setInitialState(wizardState);
+		if (operationByNodeId != null && !operationByNodeId.isEmpty()) {
+			configuration.setInitialOperationByNodeId(operationByNodeId);
+		}
 
 		for (CatalogFilter filter : configuration.getFilters()) {
 			((MarketplaceFilter) filter).setCatalog(catalog);
 		}
 
-		DiscoveryWizard wizard = new MarketplaceWizard(catalog, configuration);
+		MarketplaceWizard wizard = new MarketplaceWizard(catalog, configuration);
 
 		wizard.setWindowTitle(Messages.MarketplaceWizardCommand_eclipseMarketplace);
 
 		WizardDialog dialog = new WizardDialog(WorkbenchUtil.getShell(), wizard);
 		dialog.open();
+
 		return null;
 	}
 
 	public void setCatalogDescriptors(List<CatalogDescriptor> catalogDescriptors) {
 		this.catalogDescriptors = catalogDescriptors;
 	}
+
+	public void setSelectedCatalogDescriptor(CatalogDescriptor selectedCatalogDescriptor) {
+		this.selectedCatalogDescriptor = selectedCatalogDescriptor;
+	}
+
+	public void setWizardState(String wizardState) {
+		this.wizardState = wizardState;
+	}
+
+	public void setOperationByNodeId(Map<String, Operation> operationByNodeId) {
+		this.operationByNodeId = operationByNodeId;
+	}
+
 }

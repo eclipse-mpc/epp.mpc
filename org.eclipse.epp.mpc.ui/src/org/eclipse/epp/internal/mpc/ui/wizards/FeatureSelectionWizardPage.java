@@ -325,7 +325,7 @@ public class FeatureSelectionWizardPage extends WizardPage {
 				} catch (Exception e) {
 					// sometimes p2 might throw an exception
 					MarketplaceClientUi.error(e);
-					newText = "details are not available";
+					newText = Messages.FeatureSelectionWizardPage_detailsUnavailable;
 				}
 				if (newText != originalText || (newText != null && !newText.equals(originalText))) {
 					detailStatusText.setText(newText);

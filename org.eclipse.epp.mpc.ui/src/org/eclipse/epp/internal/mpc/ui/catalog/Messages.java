@@ -26,6 +26,8 @@ class Messages extends NLS {
 	public static String MarketplaceCatalog_queryFailed;
 
 	public static String MarketplaceCatalog_queryingMarketplace;
+
+	public static String MarketplaceCatalog_unknownHost;
 	public static String MarketplaceDiscoveryStrategy_catalogCategory;
 
 	public static String MarketplaceDiscoveryStrategy_findingInstalled;

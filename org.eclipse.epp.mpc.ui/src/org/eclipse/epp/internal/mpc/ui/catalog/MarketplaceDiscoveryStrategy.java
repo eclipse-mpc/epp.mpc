@@ -364,6 +364,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 				} else {
 					monitor.worked(totalWork / 2);
 				}
+				result.setMatchCount(result.getNodes().size());
 				handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
 				maybeAddCatalogItem(catalogCategory);
 			}

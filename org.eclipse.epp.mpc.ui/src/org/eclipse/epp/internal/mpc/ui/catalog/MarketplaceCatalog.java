@@ -265,7 +265,7 @@ public class MarketplaceCatalog extends Catalog {
 				while (exception != null) {
 					if (exception instanceof UnknownHostException) {
 						status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
-								"Please check your Internet connection and retry: cannot resolve host",
+								Messages.MarketplaceCatalog_unknownHost,
 								exception.getMessage()), exception);
 						break;
 					}
