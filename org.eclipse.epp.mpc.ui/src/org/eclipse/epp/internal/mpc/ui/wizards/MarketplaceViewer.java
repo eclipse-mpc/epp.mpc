@@ -110,8 +110,8 @@ public class MarketplaceViewer extends CatalogViewer {
 			IRunnableContext context, CatalogConfiguration configuration, SelectionModel selectionModel) {
 		super(catalog, shellProvider, context, configuration);
 		this.browser = browser;
-		setAutomaticFind(false);
 		this.selectionModel = selectionModel;
+		setAutomaticFind(false);
 	}
 
 	@Override
@@ -196,6 +196,7 @@ public class MarketplaceViewer extends CatalogViewer {
 		queryMarket = null;
 		queryCategory = null;
 		queryText = null;
+		findText = getFilterText();
 
 		for (CatalogFilter filter : getConfiguration().getFilters()) {
 			if (filter instanceof AbstractTagFilter) {
