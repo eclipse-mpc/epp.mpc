@@ -2,6 +2,15 @@
 <toc topic="EPP/MPC/User_Guide/User-Guide.html" label="Marketplace Client User Guide">
 	<topic href="EPP/MPC/User_Guide/User-Guide.html" label="Marketplace User Guide">
 		<topic href="EPP/MPC/User_Guide/User-Guide.html" label="Overview"></topic>
+		<topic href="EPP/MPC/User_Guide/User-Guide.html#Getting_Started" label="Getting Started"></topic>
+		<topic href="EPP/MPC/User_Guide/User-Guide.html#Search" label="Search">
+			<topic href="EPP/MPC/User_Guide/User-Guide.html#Browse_For_More_Solutions" label="Browse For More Solutions"></topic>
+		</topic>
+		<topic href="EPP/MPC/User_Guide/User-Guide.html#Installing_and_Updating_Solutions" label="Installing and Updating Solutions">
+			<topic href="EPP/MPC/User_Guide/User-Guide.html#Resolving_Errors" label="Resolving Errors"></topic>
+			<topic href="EPP/MPC/User_Guide/User-Guide.html#Licenses" label="Licenses"></topic>
+			<topic href="EPP/MPC/User_Guide/User-Guide.html#Completing_Installation" label="Completing Installation"></topic>
+		</topic>
 		<topic href="EPP/MPC/User_Guide/User-Guide.html#Updating_This_Document" label="Updating This Document"></topic>
 	</topic>
 </toc>
