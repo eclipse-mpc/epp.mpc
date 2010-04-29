@@ -13,6 +13,7 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -37,6 +38,8 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.IShellProvider;
@@ -372,10 +375,31 @@ public class MarketplaceViewer extends CatalogViewer {
 				// user canceled
 				wasCancelled = true;
 			}
+			for (Entry<CatalogItem, Operation> entry : getSelectionModel().getItemToOperation().entrySet()) {
+				if (entry.getValue() != Operation.NONE) {
+					entry.getKey().setSelected(true);
+				}
+			}
 			catalogUpdated(wasCancelled, wasError);
 		} else {
 			super.updateCatalog();
 		}
+	}
+
+	@Override
+	public List<CatalogItem> getCheckedItems() {
+		List<CatalogItem> items = new ArrayList<CatalogItem>();
+		for (Entry<CatalogItem, Operation> entry : getSelectionModel().getItemToOperation().entrySet()) {
+			if (entry.getValue() != Operation.NONE) {
+				items.add(entry.getKey());
+			}
+		}
+		return items;
+	}
+
+	@Override
+	public IStructuredSelection getSelection() {
+		return new StructuredSelection(getCheckedItems());
 	}
 
 	public SelectionModel getSelectionModel() {
