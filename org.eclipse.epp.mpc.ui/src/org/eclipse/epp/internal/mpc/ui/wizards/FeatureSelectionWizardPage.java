@@ -19,7 +19,6 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.operations.FeatureDescriptor;
@@ -351,17 +350,8 @@ public class FeatureSelectionWizardPage extends WizardPage {
 			computeCheckedViewerState();
 			viewer.expandAll();
 		}
-		if (unresolvedFeatureDescriptors != null && !unresolvedFeatureDescriptors.isEmpty()) {
-			if (featureDescriptors == null || featureDescriptors.isEmpty()) {
-				IStatus status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
-						Messages.FeatureSelectionWizardPage_noneAvailable);
-				StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
-			} else {
-				IStatus status = new Status(IStatus.WARNING, MarketplaceClientUi.BUNDLE_ID,
-						Messages.FeatureSelectionWizardPage_oneOrMoreUnavailable);
-				StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
-			}
-		}
+		// we don't warn on unresolved feature descriptors since it'll come up when we
+		// resolve the provisioning operation.
 		boolean pageComplete = computePageComplete();
 		if (pageComplete != isPageComplete()) {
 			setPageComplete(pageComplete);

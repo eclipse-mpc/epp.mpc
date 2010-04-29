@@ -262,12 +262,17 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 			foundIds.add(unit.getId());
 		}
 
+		Set<String> installFeatureIds = new HashSet<String>();
+		for (FeatureDescriptor descriptor : featureDescriptors) {
+			installFeatureIds.add(descriptor.getId());
+		}
+
 		String message = ""; //$NON-NLS-1$
 		String detailedMessage = ""; //$NON-NLS-1$
 		for (CatalogItem descriptor : items) {
 			StringBuilder unavailableIds = null;
 			for (String id : getFeatureIds(descriptor)) {
-				if (!foundIds.contains(id)) {
+				if (!foundIds.contains(id) && installFeatureIds.contains(id)) {
 					if (unavailableIds == null) {
 						unavailableIds = new StringBuilder();
 					} else {
