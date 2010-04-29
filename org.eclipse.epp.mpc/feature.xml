@@ -3,7 +3,8 @@
       id="org.eclipse.epp.mpc"
       label="%featureName"
       version="1.0.0.qualifier"
-      provider-name="%providerName">
+      provider-name="%providerName"
+      plugin="org.eclipse.epp.mpc.ui">
 
    <description url="http://www.eclipse.org/epp/mpc/">
       The Eclipse Marketplace Client provides access to extension catalogs.
@@ -20,7 +21,7 @@ http://www.eclipse.org/legal/epl-v10.html
    <license url="http://www.eclipse.org/legal/epl-v10.html">
       %license
    </license>
-   
+
    <plugin
          id="org.eclipse.epp.mpc.core"
          download-size="0"
