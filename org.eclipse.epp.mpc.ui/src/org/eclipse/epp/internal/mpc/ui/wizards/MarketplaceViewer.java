@@ -415,6 +415,8 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	/**
 	 * the category for the current query
+	 * 
+	 * @return the market or null if no category has been selected
 	 */
 	Category getQueryCategory() {
 		return queryCategory;
@@ -422,6 +424,8 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	/**
 	 * the market for the current query
+	 * 
+	 * @return the market or null if no market has been selected
 	 */
 	Market getQueryMarket() {
 		return queryMarket;
@@ -429,6 +433,8 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	/**
 	 * the content type for the current query
+	 * 
+	 * @return the content type or null if it's unknown
 	 */
 	ContentType getQueryContentType() {
 		return queryContentType;

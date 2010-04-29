@@ -96,29 +96,31 @@ public class BrowseCatalogItem extends AbstractDiscoveryItem<CatalogDescriptor> 
 			URL url = catalogDescriptor.getUrl();
 			try {
 				ContentType contentType = viewer.getQueryContentType();
-				switch (contentType) {
-				case SEARCH:
-					String queryText = viewer.getQueryText();
-					if (queryText != null && queryText.trim().length() > 0) {
-						// append something like this:
-						// /search/apachesolr_search/mylyn%20wikitext?filters=tid:38%20tid:31
-						String path = "search/apachesolr_search/" + URLEncoder.encode(queryText.trim(), UTF_8); //$NON-NLS-1$
-						String filter = ""; //$NON-NLS-1$
-						if (viewer.getQueryMarket() != null) {
-							filter += TID;
-							filter += viewer.getQueryMarket().getId();
-						}
-						if (viewer.getQueryCategory() != null) {
-							if (filter.length() > 0) {
-								filter += ' ';
+				if (contentType != null) {
+					switch (contentType) {
+					case SEARCH:
+						String queryText = viewer.getQueryText();
+						if (queryText != null && queryText.trim().length() > 0) {
+							// append something like this:
+							// /search/apachesolr_search/mylyn%20wikitext?filters=tid:38%20tid:31
+							String path = "search/apachesolr_search/" + URLEncoder.encode(queryText.trim(), UTF_8); //$NON-NLS-1$
+							String filter = ""; //$NON-NLS-1$
+							if (viewer.getQueryMarket() != null) {
+								filter += TID;
+								filter += viewer.getQueryMarket().getId();
 							}
-							filter += TID;
-							filter += viewer.getQueryCategory().getId();
+							if (viewer.getQueryCategory() != null) {
+								if (filter.length() > 0) {
+									filter += ' ';
+								}
+								filter += TID;
+								filter += viewer.getQueryCategory().getId();
+							}
+							if (filter.length() > 0) {
+								path += "?filters=" + URLEncoder.encode(filter, UTF_8); //$NON-NLS-1$
+							}
+							url = new URL(url, path);
 						}
-						if (filter.length() > 0) {
-							path += "?filters=" + URLEncoder.encode(filter, UTF_8); //$NON-NLS-1$
-						}
-						url = new URL(url, path);
 					}
 				}
 			} catch (UnsupportedEncodingException e) {
