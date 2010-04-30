@@ -19,9 +19,13 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -35,12 +39,15 @@ import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.operations.FeatureDescriptor;
 import org.eclipse.epp.internal.mpc.ui.operations.ProfileChangeOperationComputer;
 import org.eclipse.epp.internal.mpc.ui.operations.ProfileChangeOperationComputer.OperationType;
+import org.eclipse.epp.internal.mpc.ui.wizards.SelectionModel.CatalogItemEntry;
+import org.eclipse.epp.internal.mpc.ui.wizards.SelectionModel.FeatureEntry;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryWizard;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.equinox.p2.operations.ProfileChangeOperation;
+import org.eclipse.equinox.p2.operations.ProvisioningJob;
 import org.eclipse.equinox.p2.operations.UninstallOperation;
 import org.eclipse.equinox.p2.ui.AcceptLicensesWizardPage;
 import org.eclipse.equinox.p2.ui.ProvisioningUI;
@@ -78,6 +85,8 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 	private AcceptLicensesWizardPage acceptLicensesPage;
 
 	private IInstallableUnit[] operationIUs;
+
+	private Set<CatalogItem> operationNewInstallItems;
 
 	public MarketplaceWizard(MarketplaceCatalog catalog, MarketplaceCatalogConfiguration configuration) {
 		super(catalog, configuration);
@@ -251,8 +260,11 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 	public boolean performFinish() {
 		if (profileChangeOperation != null
 				&& profileChangeOperation.getResolutionResult().getSeverity() != IStatus.ERROR) {
-			ProvisioningUI.getDefaultUI().schedule(profileChangeOperation.getProvisioningJob(null),
-					StatusManager.SHOW | StatusManager.LOG);
+			ProvisioningJob provisioningJob = profileChangeOperation.getProvisioningJob(null);
+			if (!operationNewInstallItems.isEmpty()) {
+				provisioningJob.addJobChangeListener(new ProvisioningJobListener(operationNewInstallItems));
+			}
+			ProvisioningUI.getDefaultUI().schedule(provisioningJob, StatusManager.SHOW | StatusManager.LOG);
 			return true;
 		}
 		return false;
@@ -422,6 +434,8 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 				profileChangeOperation = provisioningOperation.getOperation();
 				operationIUs = provisioningOperation.getIus();
+				operationNewInstallItems = computeNewInstallCatalogItems();
+
 			} catch (InvocationTargetException e) {
 				Throwable cause = e.getCause();
 				IStatus status;
@@ -440,5 +454,29 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		if (getContainer().getCurrentPage() == featureSelectionWizardPage) {
 			featureSelectionWizardPage.updateMessage();
 		}
+	}
+
+	private Set<CatalogItem> computeNewInstallCatalogItems() {
+		Set<CatalogItem> items = new HashSet<CatalogItem>();
+		Map<CatalogItem, Collection<String>> iusByCatalogItem = new HashMap<CatalogItem, Collection<String>>();
+		for (CatalogItemEntry entry : getSelectionModel().getCatalogItemEntries()) {
+			if (entry.getOperation() != Operation.INSTALL) {
+				continue;
+			}
+			List<FeatureEntry> features = entry.getChildren();
+			Collection<String> featureIds = new ArrayList<String>(features.size());
+			for (FeatureEntry feature : features) {
+				featureIds.add(feature.getFeatureDescriptor().getId());
+			}
+			iusByCatalogItem.put(entry.getItem(), featureIds);
+		}
+		for (IInstallableUnit unit : operationIUs) {
+			for (Entry<CatalogItem, Collection<String>> entry : iusByCatalogItem.entrySet()) {
+				if (entry.getValue().contains(unit.getId())) {
+					items.add(entry.getKey());
+				}
+			}
+		}
+		return items;
 	}
 }

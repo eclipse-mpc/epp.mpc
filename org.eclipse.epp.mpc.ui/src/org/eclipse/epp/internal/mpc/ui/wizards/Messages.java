@@ -110,6 +110,8 @@ class Messages extends NLS {
 
 	public static String OverviewToolTip_openUrlInBrowser;
 
+	public static String ProvisioningJobListener_notificationTaskName;
+
 	public static String SelectionModel_cannotInstallRemoveConcurrently;
 
 	public static String SelectionModel_count_selectedFor_operation;
