@@ -268,10 +268,12 @@ public class FeatureSelectionWizardPage extends WizardPage {
 		try {
 			getContainer().run(true, true, operation);
 		} catch (InvocationTargetException e) {
+			refresh();
 			IStatus status = MarketplaceClientUi.computeStatus(e,
 					Messages.FeatureSelectionWizardPage_unexpectedException_verifyingFeatures);
 			StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 		} catch (InterruptedException e) {
+			refresh();
 			// canceled
 		}
 		maybeUpdateProfileChangeOperation();
@@ -346,9 +348,7 @@ public class FeatureSelectionWizardPage extends WizardPage {
 			Set<FeatureDescriptor> unresolvedFeatureDescriptors) {
 		if (featureDescriptors != null) {
 			updateSelectionModel(featureDescriptors);
-			viewer.refresh();
-			computeCheckedViewerState();
-			viewer.expandAll();
+			refresh();
 		}
 		// we don't warn on unresolved feature descriptors since it'll come up when we
 		// resolve the provisioning operation.
@@ -356,6 +356,12 @@ public class FeatureSelectionWizardPage extends WizardPage {
 		if (pageComplete != isPageComplete()) {
 			setPageComplete(pageComplete);
 		}
+	}
+
+	private void refresh() {
+		viewer.refresh();
+		computeCheckedViewerState();
+		viewer.expandAll();
 	}
 
 	private boolean computePageComplete() {

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.catalog;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -170,7 +172,17 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 						catalogItem.setDescription(node.getShortdescription());
 					}
 					catalogItem.setProvider(node.getCompanyname());
-					catalogItem.setSiteUrl(node.getUpdateurl());
+					String updateurl = node.getUpdateurl();
+					if (updateurl != null) {
+						try {
+							// trim is important!
+							updateurl = updateurl.trim();
+							new URL(updateurl);
+							catalogItem.setSiteUrl(updateurl);
+						} catch (MalformedURLException e) {
+							// don't use malformed URLs
+						}
+					}
 					if (node.getBody() != null || node.getScreenshot() != null) {
 						final Overview overview = new Overview();
 						overview.setItem(catalogItem);

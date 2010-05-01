@@ -384,6 +384,7 @@ public class MarketplaceViewer extends CatalogViewer {
 		} else {
 			super.updateCatalog();
 		}
+		refresh();
 	}
 
 	@Override

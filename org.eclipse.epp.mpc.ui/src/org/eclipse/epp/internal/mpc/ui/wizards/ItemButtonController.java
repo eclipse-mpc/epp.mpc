@@ -167,12 +167,20 @@ class ItemButtonController {
 					break;
 				}
 				secondaryButtonState = ButtonState.DISABLED;
+				if (!isItemAvailable()) {
+					buttonState = ButtonState.DISABLED;
+				}
 			}
 		}
 	}
 
 	private boolean isItemInstalled() {
 		return ((CatalogItem) item.getData()).isInstalled();
+	}
+
+	private boolean isItemAvailable() {
+		Boolean available = ((CatalogItem) item.getData()).getAvailable();
+		return available != null && available;
 	}
 
 	private void updateAppearance() {

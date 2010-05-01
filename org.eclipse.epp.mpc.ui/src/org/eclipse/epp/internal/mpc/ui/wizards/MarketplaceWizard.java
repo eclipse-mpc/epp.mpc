@@ -131,10 +131,16 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			}
 			return false;
 		} else {
-			if (profileChangeOperation == null || !profileChangeOperation.getResolutionResult().isOK()) {
-				return false;
+			if (profileChangeOperation != null) {
+				IStatus resolutionResult = profileChangeOperation.getResolutionResult();
+				switch (resolutionResult.getSeverity()) {
+				case IStatus.OK:
+				case IStatus.WARNING:
+				case IStatus.INFO:
+					return true;
+				}
 			}
-			return true;
+			return false;
 		}
 	}
 
