@@ -271,17 +271,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 	@Override
 	protected void refresh() {
-		boolean enabled = connector.getAvailable() == null || connector.getAvailable();
+		Color foreground = getForeground();
 
-		nameLabel.setEnabled(connector.isInstalled() || enabled);
-		providerLabel.setEnabled(connector.isInstalled() || enabled);
-		description.setEnabled(connector.isInstalled() || enabled);
-		Color foreground;
-		if (connector.isInstalled() || enabled) {
-			foreground = getForeground();
-		} else {
-			foreground = resources.getColorDisabled();
-		}
 		nameLabel.setForeground(foreground);
 		description.setForeground(foreground);
 		if (installInfoLink != null) {
