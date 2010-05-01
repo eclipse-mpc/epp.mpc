@@ -126,22 +126,20 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 	@Override
 	public boolean canFinish() {
 		if (computeMustCheckLicenseAcceptance()) {
-			if (acceptLicensesPage != null && acceptLicensesPage.isPageComplete()) {
+			if (acceptLicensesPage == null || !acceptLicensesPage.isPageComplete()) {
+				return false;
+			}
+		}
+		if (profileChangeOperation != null) {
+			IStatus resolutionResult = profileChangeOperation.getResolutionResult();
+			switch (resolutionResult.getSeverity()) {
+			case IStatus.OK:
+			case IStatus.WARNING:
+			case IStatus.INFO:
 				return true;
 			}
-			return false;
-		} else {
-			if (profileChangeOperation != null) {
-				IStatus resolutionResult = profileChangeOperation.getResolutionResult();
-				switch (resolutionResult.getSeverity()) {
-				case IStatus.OK:
-				case IStatus.WARNING:
-				case IStatus.INFO:
-					return true;
-				}
-			}
-			return false;
 		}
+		return false;
 	}
 
 	@Override
@@ -266,6 +264,11 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 	public boolean performFinish() {
 		if (profileChangeOperation != null
 				&& profileChangeOperation.getResolutionResult().getSeverity() != IStatus.ERROR) {
+			if (computeMustCheckLicenseAcceptance()) {
+				if (acceptLicensesPage != null && acceptLicensesPage.isPageComplete()) {
+					acceptLicensesPage.performFinish();
+				}
+			}
 			ProvisioningJob provisioningJob = profileChangeOperation.getProvisioningJob(null);
 			if (!operationNewInstallItems.isEmpty()) {
 				provisioningJob.addJobChangeListener(new ProvisioningJobListener(operationNewInstallItems));
