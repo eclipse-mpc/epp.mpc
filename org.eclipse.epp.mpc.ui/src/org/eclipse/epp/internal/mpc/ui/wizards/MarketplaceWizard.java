@@ -152,6 +152,9 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			if (profileChangeOperation == null) {
 				if (computeChanges) {
 					updateProfileChangeOperation();
+					if (profileChangeOperation != null) {
+						getContainer().updateButtons();
+					}
 				}
 				if (profileChangeOperation == null || !profileChangeOperation.getResolutionResult().isOK()) {
 					// can't compute a change operation, so there must be some kind of error
