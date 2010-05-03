@@ -11,7 +11,8 @@
 
 <introContent>
   	<extensionContent id="org.eclipse.epp.mpc.ui" name="Marketplace Client" 
-  		style="css/default.css" path="overview/@">
+  		style="css/default.css" path="overview/@"
+  		alt-style="css/overview.properties">
 		<group style-id="content-group" id="content-group">
        		<link label="Eclipse Marketplace"  
        			url="http://org.eclipse.ui.intro/runAction?class=org.eclipse.epp.internal.mpc.ui.actions.WelcomeIntroAction&amp;pluginId=org.eclipse.epp.mpc.ui&amp;standby=true" 
