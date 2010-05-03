@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
@@ -239,10 +240,29 @@ public class FeatureSelectionWizardPage extends WizardPage {
 
 	@Override
 	public void setVisible(boolean visible) {
-		if (visible) {
-			updateFeatures();
-		}
 		super.setVisible(visible);
+		if (visible) {
+			Display.getCurrent().asyncExec(new Runnable() {
+				public void run() {
+					if (getControl() == null || getControl().isDisposed()
+							|| getWizard().getContainer().getCurrentPage() != FeatureSelectionWizardPage.this) {
+						return;
+					}
+					if (getWizard().wantInitializeInitialSelection()) {
+						try {
+							getWizard().initializeInitialSelection();
+						} catch (CoreException e) {
+							boolean wasCancelled = e.getStatus().getSeverity() == IStatus.CANCEL;
+							if (!wasCancelled) {
+								StatusManager.getManager().handle(e.getStatus(),
+										StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
+							}
+						}
+					}
+					updateFeatures();
+				}
+			});
+		}
 	}
 
 	private void updateFeatures() {

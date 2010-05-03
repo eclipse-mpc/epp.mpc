@@ -12,11 +12,9 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
-import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
-import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogPage;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
 import org.eclipse.jface.dialogs.IMessageProvider;
@@ -50,6 +48,9 @@ public class MarketplacePage extends CatalogPage {
 		this.configuration = configuration;
 		setDescription(Messages.MarketplacePage_selectSolutionsToInstall);
 		setTitle(Messages.MarketplacePage_eclipseMarketplaceSolutions);
+		if (configuration.getCatalogDescriptor() != null) {
+			setTitle(configuration.getCatalogDescriptor().getLabel());
+		}
 	}
 
 	@Override
@@ -150,8 +151,7 @@ public class MarketplacePage extends CatalogPage {
 
 	@Override
 	protected CatalogViewer doCreateViewer(Composite parent) {
-		MarketplaceViewer viewer = new MarketplaceViewer(getCatalog(), this, getWizard(), getContainer(),
-				getWizard().getConfiguration(), getWizard().getSelectionModel());
+		MarketplaceViewer viewer = new MarketplaceViewer(getCatalog(), this, getWizard());
 		viewer.setMinimumHeight(MINIMUM_HEIGHT);
 		viewer.createControl(parent);
 		return viewer;
@@ -175,16 +175,13 @@ public class MarketplacePage extends CatalogPage {
 	public void setVisible(boolean visible) {
 		if (visible) {
 			CatalogDescriptor catalogDescriptor = configuration.getCatalogDescriptor();
+			if (catalogDescriptor != null) {
+				setTitle(catalogDescriptor.getLabel());
+			}
 			if (previousCatalogDescriptor == null || !previousCatalogDescriptor.equals(catalogDescriptor)) {
 				previousCatalogDescriptor = catalogDescriptor;
-				for (AbstractDiscoveryStrategy strategy : getCatalog().getDiscoveryStrategies()) {
-					strategy.dispose();
-				}
-				getCatalog().getDiscoveryStrategies().clear();
-				getCatalog().getDiscoveryStrategies().add(new MarketplaceDiscoveryStrategy(catalogDescriptor));
+				getWizard().initializeCatalog();
 				updated = false;
-
-				setTitle(catalogDescriptor.getLabel());
 			}
 		}
 		super.setVisible(visible);

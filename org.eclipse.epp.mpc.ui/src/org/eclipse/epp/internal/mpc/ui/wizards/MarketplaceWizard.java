@@ -36,12 +36,14 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
+import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.operations.FeatureDescriptor;
 import org.eclipse.epp.internal.mpc.ui.operations.ProfileChangeOperationComputer;
 import org.eclipse.epp.internal.mpc.ui.operations.ProfileChangeOperationComputer.OperationType;
 import org.eclipse.epp.internal.mpc.ui.wizards.SelectionModel.CatalogItemEntry;
 import org.eclipse.epp.internal.mpc.ui.wizards.SelectionModel.FeatureEntry;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
+import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryWizard;
@@ -88,6 +90,8 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	private Set<CatalogItem> operationNewInstallItems;
 
+	private boolean initialSelectionInitialized;
+
 	public MarketplaceWizard(MarketplaceCatalog catalog, MarketplaceCatalogConfiguration configuration) {
 		super(catalog, configuration);
 		setWindowTitle(Messages.MarketplaceWizard_eclipseSolutionCatalogs);
@@ -121,6 +125,38 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	public void setProfileChangeOperation(ProfileChangeOperation profileChangeOperation) {
 		this.profileChangeOperation = profileChangeOperation;
+	}
+
+	void initializeInitialSelection() throws CoreException {
+		if (!wantInitializeInitialSelection()) {
+			throw new IllegalStateException();
+		}
+		initialSelectionInitialized = true;
+		initializeCatalog();
+		try {
+			getContainer().run(true, true, new IRunnableWithProgress() {
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					new SelectionModelStateSerializer(getCatalog(), getSelectionModel()).deserialize(monitor,
+							getConfiguration().getInitialState(), getConfiguration().getInitialOperationByNodeId());
+				}
+			});
+		} catch (InvocationTargetException e) {
+			throw new CoreException(
+					MarketplaceClientUi.computeStatus(e, Messages.MarketplaceViewer_unexpectedException));
+		} catch (InterruptedException e) {
+			// user canceled
+			throw new CoreException(Status.CANCEL_STATUS);
+		}
+		for (Entry<CatalogItem, Operation> entry : getSelectionModel().getItemToOperation().entrySet()) {
+			if (entry.getValue() != Operation.NONE) {
+				entry.getKey().setSelected(true);
+			}
+		}
+	}
+
+	boolean wantInitializeInitialSelection() {
+		return !initialSelectionInitialized
+				&& (getConfiguration().getInitialState() != null || getConfiguration().getInitialOperationByNodeId() != null);
 	}
 
 	@Override
@@ -205,9 +241,16 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		return catalogSelectionPage;
 	}
 
+	FeatureSelectionWizardPage getFeatureSelectionWizardPage() {
+		return featureSelectionWizardPage;
+	}
+
 	@Override
 	public IWizardPage getStartingPage() {
 		if (getConfiguration().getCatalogDescriptor() != null) {
+			if (wantInitializeInitialSelection()) {
+				return getFeatureSelectionWizardPage();
+			}
 			return getCatalogPage();
 		}
 		return super.getStartingPage();
@@ -491,4 +534,16 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		}
 		return items;
 	}
+
+	void initializeCatalog() {
+		for (AbstractDiscoveryStrategy strategy : getCatalog().getDiscoveryStrategies()) {
+			strategy.dispose();
+		}
+		getCatalog().getDiscoveryStrategies().clear();
+		if (getConfiguration().getCatalogDescriptor() != null) {
+			getCatalog().getDiscoveryStrategies().add(
+					new MarketplaceDiscoveryStrategy(getConfiguration().getCatalogDescriptor()));
+		}
+	}
+
 }

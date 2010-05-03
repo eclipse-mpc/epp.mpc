@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.epp.internal.mpc.core.service.Category;
@@ -31,10 +32,8 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.discovery.model.Tag;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.ControlListItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.PatternFilter;
-import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogConfiguration;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogFilter;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
-import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -107,13 +106,13 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	private String findText;
 
-	private boolean initialStateRestored;
+	private final MarketplaceWizard wizard;
 
-	public MarketplaceViewer(Catalog catalog, IShellProvider shellProvider, IMarketplaceWebBrowser browser,
-			IRunnableContext context, CatalogConfiguration configuration, SelectionModel selectionModel) {
-		super(catalog, shellProvider, context, configuration);
-		this.browser = browser;
-		this.selectionModel = selectionModel;
+	public MarketplaceViewer(Catalog catalog, IShellProvider shellProvider, MarketplaceWizard wizard) {
+		super(catalog, shellProvider, wizard.getContainer(), wizard.getConfiguration());
+		this.browser = wizard;
+		this.selectionModel = wizard.getSelectionModel();
+		this.wizard = wizard;
 		setAutomaticFind(false);
 	}
 
@@ -355,36 +354,26 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	@Override
 	public void updateCatalog() {
-		if ((getConfiguration().getInitialState() != null || getConfiguration().getInitialOperationByNodeId() != null)
-				&& !initialStateRestored) {
-			initialStateRestored = true;
-			boolean wasError = false;
-			boolean wasCancelled = false;
+		if (getWizard().wantInitializeInitialSelection()) {
 			try {
-				context.run(true, true, new IRunnableWithProgress() {
-					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						new SelectionModelStateSerializer(getCatalog(), getSelectionModel()).deserialize(monitor,
-								getConfiguration().getInitialState(), getConfiguration().getInitialOperationByNodeId());
-					}
-				});
-			} catch (InvocationTargetException e) {
-				IStatus status = computeStatus(e, Messages.MarketplaceViewer_unexpectedException);
-				StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
-				wasError = true;
-			} catch (InterruptedException e) {
-				// user canceled
-				wasCancelled = true;
-			}
-			for (Entry<CatalogItem, Operation> entry : getSelectionModel().getItemToOperation().entrySet()) {
-				if (entry.getValue() != Operation.NONE) {
-					entry.getKey().setSelected(true);
+				getWizard().initializeInitialSelection();
+				catalogUpdated(false, false);
+			} catch (CoreException e) {
+				boolean wasCancelled = e.getStatus().getSeverity() == IStatus.CANCEL;
+				if (!wasCancelled) {
+					StatusManager.getManager().handle(e.getStatus(),
+							StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 				}
+				catalogUpdated(wasCancelled, !wasCancelled);
 			}
-			catalogUpdated(wasCancelled, wasError);
 		} else {
 			super.updateCatalog();
 		}
 		refresh();
+	}
+
+	private MarketplaceWizard getWizard() {
+		return wizard;
 	}
 
 	@Override
