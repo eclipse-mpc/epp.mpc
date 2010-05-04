@@ -75,6 +75,10 @@ class Messages extends NLS {
 
 	public static String MarketplacePage_installed;
 
+	public static String MarketplacePage_linkShowSelection_Multiple;
+
+	public static String MarketplacePage_linkShowSelection_One;
+
 	public static String MarketplacePage_popular;
 
 	public static String MarketplacePage_recent;
@@ -84,6 +88,8 @@ class Messages extends NLS {
 	public static String MarketplacePage_selectAlternateCatalog;
 
 	public static String MarketplacePage_selectSolutionsToInstall;
+
+	public static String MarketplacePage_showSelection;
 
 	public static String MarketplacePage_switchCatalog_link;
 

@@ -22,9 +22,11 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -45,6 +47,12 @@ public class MarketplacePage extends CatalogPage {
 
 	private boolean switchLinkActivated;
 
+	private Link selectionLink;
+
+	private TabFolder tabFolder;
+
+	private TabItem searchTabItem;
+
 	public MarketplacePage(MarketplaceCatalog catalog, MarketplaceCatalogConfiguration configuration) {
 		super(catalog);
 		this.configuration = configuration;
@@ -59,17 +67,16 @@ public class MarketplacePage extends CatalogPage {
 	public void createControl(final Composite originalParent) {
 		Composite parent = originalParent;
 		boolean needSwitchMarketplaceLink = configuration.getCatalogDescriptors().size() > 1;
-		if (needSwitchMarketplaceLink) {
-			parent = new Composite(parent, SWT.NULL);
-			GridLayoutFactory.fillDefaults().numColumns(1).spacing(0, 5).applyTo(parent);
-		}
 
-		TabFolder tabFolder = new TabFolder(parent, SWT.TOP);
+		parent = new Composite(parent, SWT.NULL);
+		GridLayoutFactory.fillDefaults().numColumns(1).spacing(0, 5).applyTo(parent);
+
+		tabFolder = new TabFolder(parent, SWT.TOP);
 		if (originalParent != parent) {
 			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tabFolder);
 		}
 
-		final TabItem searchTabItem = new TabItem(tabFolder, SWT.NULL);
+		searchTabItem = new TabItem(tabFolder, SWT.NULL);
 		searchTabItem.setText(Messages.MarketplacePage_search);
 		final TabItem recentTabItem = new TabItem(tabFolder, SWT.NULL);
 		recentTabItem.setText(Messages.MarketplacePage_recent);
@@ -107,6 +114,23 @@ public class MarketplacePage extends CatalogPage {
 			}
 		});
 
+		{
+			selectionLink = new Link(parent, SWT.NULL);
+			selectionLink.setToolTipText(Messages.MarketplacePage_showSelection);
+			selectionLink.addSelectionListener(new SelectionListener() {
+				public void widgetSelected(SelectionEvent e) {
+					selectionLinkActivated();
+				}
+
+				public void widgetDefaultSelected(SelectionEvent e) {
+					widgetSelected(e);
+
+				}
+			});
+			GridDataFactory.swtDefaults().align(SWT.CENTER, SWT.CENTER).applyTo(selectionLink);
+			computeSelectionLinkText();
+		}
+
 		if (needSwitchMarketplaceLink) {
 			Link link = new Link(parent, SWT.NULL);
 			link.setText(Messages.MarketplacePage_switchCatalog_link);
@@ -127,6 +151,36 @@ public class MarketplacePage extends CatalogPage {
 
 		setControl(parent == originalParent ? tabFolder : parent);
 		MarketplaceClientUi.setDefaultHelp(getControl());
+	}
+
+	private void computeSelectionLinkText() {
+		if (selectionLink != null) {
+			final String originalText = selectionLink.getText();
+
+			String text = " "; //$NON-NLS-1$
+			int count = getWizard().getSelectionModel().getItemToOperation().size();
+			if (count == 1) {
+				text = Messages.MarketplacePage_linkShowSelection_One;
+			} else if (count > 0) {
+				text = NLS.bind(Messages.MarketplacePage_linkShowSelection_Multiple, Integer.valueOf(count));
+			}
+			if (!(text == originalText || (text != null && text.equals(originalText)))) {
+				boolean exclude = text == null || text.trim().length() == 0;
+				boolean originalExclude = ((GridData) selectionLink.getLayoutData()).exclude;
+
+				selectionLink.setText(text);
+				if (originalExclude != exclude) {
+					selectionLink.setVisible(!exclude);
+					((GridData) selectionLink.getLayoutData()).exclude = exclude;
+					((Composite) getControl()).layout(true, true);
+				}
+			}
+		}
+	}
+
+	protected void selectionLinkActivated() {
+		tabFolder.setSelection(searchTabItem);
+		getViewer().showSelected();
 	}
 
 	protected void switchMarketplaceLinkActivated() {
@@ -195,11 +249,16 @@ public class MarketplacePage extends CatalogPage {
 		if (complete) {
 			complete = getWizard().getSelectionModel().computeProvisioningOperationViable();
 		}
-		computeMessage();
+		computeMessages();
 		super.setPageComplete(complete);
 	}
 
-	private void computeMessage() {
+	private void computeMessages() {
+		computeStatusMessage();
+		computeSelectionLinkText();
+	}
+
+	private void computeStatusMessage() {
 		String message = null;
 		int messageType = IMessageProvider.NONE;
 

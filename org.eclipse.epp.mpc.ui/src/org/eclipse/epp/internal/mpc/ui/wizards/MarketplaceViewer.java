@@ -12,6 +12,7 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -21,6 +22,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.epp.internal.mpc.core.service.Category;
 import org.eclipse.epp.internal.mpc.core.service.Market;
+import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
@@ -56,7 +58,7 @@ import org.eclipse.ui.statushandlers.StatusManager;
 public class MarketplaceViewer extends CatalogViewer {
 
 	enum ContentType {
-		SEARCH, RECENT, POPULAR, INSTALLED
+		SEARCH, RECENT, POPULAR, INSTALLED, SELECTION
 	}
 
 	public static class MarketplaceCatalogContentProvider extends CatalogContentProvider {
@@ -236,6 +238,13 @@ public class MarketplaceViewer extends CatalogViewer {
 					case INSTALLED:
 						result[0] = getCatalog().installed(monitor);
 						break;
+					case SELECTION:
+						Set<String> nodeIds = new HashSet<String>();
+						for (CatalogItem item : getSelectionModel().getItemToOperation().keySet()) {
+							nodeIds.add(((Node) item.getData()).getId());
+						}
+						result[0] = getCatalog().performQuery(monitor, nodeIds);
+						break;
 					case SEARCH:
 					default:
 						if (queryText == null || queryText.length() == 0) {
@@ -274,6 +283,17 @@ public class MarketplaceViewer extends CatalogViewer {
 		getViewer().getControl().getParent().layout(true, true);
 	}
 
+	public void showSelected() {
+		contentType = ContentType.SELECTION;
+		queryMarket = null;
+		queryCategory = null;
+		queryText = null;
+		findText = null;
+		setHeaderVisible(true);
+		doQuery(null, null, findText);
+		contentType = ContentType.SEARCH;
+	}
+
 	@Override
 	public MarketplaceCatalogConfiguration getConfiguration() {
 		return (MarketplaceCatalogConfiguration) super.getConfiguration();
@@ -296,7 +316,7 @@ public class MarketplaceViewer extends CatalogViewer {
 	public void setContentType(ContentType contentType) {
 		if (this.contentType != contentType) {
 			this.contentType = contentType;
-			setHeaderVisible(contentType == ContentType.SEARCH);
+			setHeaderVisible(contentType == ContentType.SEARCH || contentType == ContentType.SELECTION);
 			doQuery();
 		}
 	}
