@@ -34,7 +34,7 @@
 			formatoutput="true"
 			defaultAbsoluteLinkTarget="doc_external"
 			dest="${basedir}"
-			title="Marketplace Client User Guide"
+			title="Eclipse Marketplace User Guide"
 			generateUnifiedToc="true">
 			<path name="EPP/MPC/User_Guide" title="Marketplace User Guide"/>
 			<pageAppendum>
