@@ -162,6 +162,9 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 	@Override
 	public boolean canFinish() {
 		if (computeMustCheckLicenseAcceptance()) {
+			if (acceptLicensesPage == null && getContainer().getCurrentPage() == getFeatureSelectionWizardPage()) {
+				getNextPage(getFeatureSelectionWizardPage(), false);
+			}
 			if (acceptLicensesPage == null || !acceptLicensesPage.isPageComplete()) {
 				return false;
 			}
