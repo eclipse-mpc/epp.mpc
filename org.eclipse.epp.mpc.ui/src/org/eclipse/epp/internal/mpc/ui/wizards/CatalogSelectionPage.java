@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -24,6 +25,7 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 
 /**
  * @author David Green
@@ -90,10 +92,16 @@ public class CatalogSelectionPage extends WizardPage {
 		viewer.setInput(configuration);
 		setControl(container);
 		Dialog.applyDialogFont(container);
+		MarketplaceClientUi.setDefaultHelp(getControl());
 	}
 
 	@Override
 	public IWizardPage getPreviousPage() {
 		return null;
+	}
+
+	@Override
+	public void performHelp() {
+		getControl().notifyListeners(SWT.Help, new Event());
 	}
 }

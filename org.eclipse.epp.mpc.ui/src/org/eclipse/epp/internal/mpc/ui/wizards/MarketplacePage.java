@@ -11,6 +11,7 @@
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
@@ -26,6 +27,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -124,6 +126,7 @@ public class MarketplacePage extends CatalogPage {
 		}
 
 		setControl(parent == originalParent ? tabFolder : parent);
+		MarketplaceClientUi.setDefaultHelp(getControl());
 	}
 
 	protected void switchMarketplaceLinkActivated() {
@@ -211,4 +214,8 @@ public class MarketplacePage extends CatalogPage {
 		setMessage(message, messageType);
 	}
 
+	@Override
+	public void performHelp() {
+		getControl().notifyListeners(SWT.Help, new Event());
+	}
 }

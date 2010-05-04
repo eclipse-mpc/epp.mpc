@@ -49,6 +49,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.statushandlers.StatusManager;
@@ -234,8 +235,9 @@ public class FeatureSelectionWizardPage extends WizardPage {
 		detailStatusText = new Text(detailsControl, SWT.MULTI | SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(detailStatusText);
 
-		Dialog.applyDialogFont(container);
 		setControl(container);
+		Dialog.applyDialogFont(container);
+		MarketplaceClientUi.setDefaultHelp(getControl());
 	}
 
 	@Override
@@ -427,4 +429,8 @@ public class FeatureSelectionWizardPage extends WizardPage {
 		viewer.setGrayedElements(grayCheckedElements.toArray());
 	}
 
+	@Override
+	public void performHelp() {
+		getControl().notifyListeners(SWT.Help, new Event());
+	}
 }

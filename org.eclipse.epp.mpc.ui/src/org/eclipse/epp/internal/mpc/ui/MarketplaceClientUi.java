@@ -34,6 +34,8 @@ import org.eclipse.equinox.p2.query.IQueryResult;
 import org.eclipse.equinox.p2.query.QueryUtil;
 import org.eclipse.equinox.p2.ui.ProvisioningUI;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
@@ -145,6 +147,10 @@ public class MarketplaceClientUi {
 			}
 		}
 		return features;
+	}
+
+	public static void setDefaultHelp(Control control) {
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(control, "org.eclipse.epp.mpc.help.ui.userGuide"); //$NON-NLS-1$
 	}
 
 }
