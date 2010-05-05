@@ -36,6 +36,7 @@ import org.eclipse.equinox.internal.p2.ui.discovery.util.ControlListItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.PatternFilter;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogFilter;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -49,6 +50,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.statushandlers.StatusManager;
 
 /**
@@ -120,6 +122,7 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	@Override
 	protected void doCreateHeaderControls(Composite parent) {
+		final int originalChildCount = parent.getChildren().length;
 		for (CatalogFilter filter : getConfiguration().getFilters()) {
 			if (filter instanceof MarketplaceFilter) {
 				MarketplaceFilter marketplaceFilter = (MarketplaceFilter) filter;
@@ -132,6 +135,11 @@ public class MarketplaceViewer extends CatalogViewer {
 					}
 				});
 			}
+		}
+		Control[] children = parent.getChildren();
+		for (int x = originalChildCount; x < children.length; ++x) {
+			Control child = children[x];
+			GridDataFactory.swtDefaults().hint(135, SWT.DEFAULT).applyTo(child);
 		}
 		Button goButton = new Button(parent, SWT.PUSH);
 		goButton.setText(Messages.MarketplaceViewer_go);
