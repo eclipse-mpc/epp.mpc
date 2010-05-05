@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
+import org.eclipse.epp.internal.mpc.core.service.CachingMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.service.Categories;
 import org.eclipse.epp.internal.mpc.core.service.Category;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
@@ -83,7 +84,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_WS, Platform.getWS());
 		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_JAVA_VERSION, System.getProperty("java.version")); //$NON-NLS-1$
 		service.setRequestMetaParameters(requestMetaParameters);
-		return service;
+		return new CachingMarketplaceService(service);
 	}
 
 	@Override
@@ -191,13 +192,17 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 						catalogItem.setOverview(overview);
 
 						if (node.getScreenshot() != null) {
-							executor.submit(new AbstractResourceRunnable(monitor, source.getResourceProvider(),
-									node.getScreenshot()) {
-								@Override
-								protected void resourceRetrieved() {
-									overview.setScreenshot(node.getScreenshot());
-								}
-							});
+							if (!source.getResourceProvider().containsResource(node.getScreenshot())) {
+								executor.submit(new AbstractResourceRunnable(monitor, source.getResourceProvider(),
+										node.getScreenshot()) {
+									@Override
+									protected void resourceRetrieved() {
+										overview.setScreenshot(node.getScreenshot());
+									}
+								});
+							} else {
+								overview.setScreenshot(node.getScreenshot());
+							}
 						}
 					}
 					if (node.getImage() != null) {
