@@ -103,6 +103,8 @@ class Messages extends NLS {
 
 	public static String MarketplaceWizard_eclipseSolutionCatalogs;
 
+	public static String MarketplaceWizard_errorNotificationJob;
+
 	public static String MarketplaceWizard_problemsPerformingProvisioningOperation;
 	public static String Operation_install;
 

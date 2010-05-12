@@ -437,7 +437,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	public void installErrorReport(IProgressMonitor monitor, IStatus result, Set<CatalogItem> items,
 			IInstallableUnit[] operationIUs, String resolutionDetails) throws CoreException {
-		monitor.beginTask("Sending Marketplace error notification", 100);
+		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_sendingErrorNotification, 100);
 		try {
 			Set<Node> nodes = new HashSet<Node>();
 			for (CatalogItem item : items) {

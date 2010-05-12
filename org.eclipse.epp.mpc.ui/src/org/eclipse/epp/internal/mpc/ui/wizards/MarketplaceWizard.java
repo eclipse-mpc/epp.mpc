@@ -500,7 +500,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 						&& operationType == OperationType.INSTALL) {
 					switch (result.getSeverity()) {
 					case IStatus.ERROR:
-						Job job = new Job("Marketplace Error Notification") {
+						Job job = new Job(Messages.MarketplaceWizard_errorNotificationJob) {
 							IStatus r = result;
 
 							Set<CatalogItem> items = new HashSet<CatalogItem>(itemToOperation.keySet());
