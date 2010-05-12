@@ -15,9 +15,11 @@ import java.lang.ref.SoftReference;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 
 public class CachingMarketplaceService implements MarketplaceService {
 
@@ -179,6 +181,11 @@ public class CachingMarketplaceService implements MarketplaceService {
 			}
 		});
 
+	}
+
+	public void reportInstallError(IProgressMonitor monitor, IStatus result, Set<Node> nodes,
+			Set<String> iuIdsAndVersions, String resolutionDetails) throws CoreException {
+		delegate.reportInstallError(monitor, result, nodes, iuIdsAndVersions, resolutionDetails);
 	}
 
 }

@@ -265,8 +265,7 @@ public class MarketplaceCatalog extends Catalog {
 				while (exception != null) {
 					if (exception instanceof UnknownHostException) {
 						status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
-								Messages.MarketplaceCatalog_unknownHost,
-								exception.getMessage()), exception);
+								Messages.MarketplaceCatalog_unknownHost, exception.getMessage()), exception);
 						break;
 					}
 					Throwable cause = exception.getCause();
@@ -329,6 +328,33 @@ public class MarketplaceCatalog extends Catalog {
 			monitor.done();
 		}
 		return status;
+	}
+
+	/**
+	 * Report an error for an attempted install
+	 * 
+	 * @param result
+	 *            the result of the install operation
+	 * @param items
+	 *            the catalog items to be installed
+	 * @param operationIUs
+	 *            the computed IUs that were part of the provisioning operation
+	 * @param resolutionDetails
+	 *            the detailed error message, or null
+	 */
+	public void installErrorReport(IProgressMonitor monitor, IStatus result, Set<CatalogItem> items,
+			IInstallableUnit[] operationIUs, String resolutionDetails) {
+		for (AbstractDiscoveryStrategy discoveryStrategy : getDiscoveryStrategies()) {
+			if (discoveryStrategy instanceof MarketplaceDiscoveryStrategy) {
+				try {
+					((MarketplaceDiscoveryStrategy) discoveryStrategy).installErrorReport(monitor, result, items,
+							operationIUs, resolutionDetails);
+				} catch (CoreException e) {
+					// log only
+					MarketplaceClientUi.error(e);
+				}
+			}
+		}
 	}
 
 }

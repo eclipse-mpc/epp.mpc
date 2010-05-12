@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
@@ -467,7 +468,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		operationIUs = null;
 		if (getSelectionModel().computeProvisioningOperationViable()) {
 			try {
-				Map<CatalogItem, Operation> itemToOperation = getSelectionModel().getItemToOperation();
+				final Map<CatalogItem, Operation> itemToOperation = getSelectionModel().getItemToOperation();
 				OperationType operationType = null;
 				List<CatalogItem> items = new ArrayList<CatalogItem>();
 				for (Map.Entry<CatalogItem, Operation> entry : itemToOperation.entrySet()) {
@@ -493,6 +494,35 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				profileChangeOperation = provisioningOperation.getOperation();
 				operationIUs = provisioningOperation.getIus();
 				operationNewInstallItems = computeNewInstallCatalogItems();
+
+				final IStatus result = profileChangeOperation.getResolutionResult();
+				if (result != null && operationIUs != null && operationIUs.length > 0
+						&& operationType == OperationType.INSTALL) {
+					switch (result.getSeverity()) {
+					case IStatus.ERROR:
+						Job job = new Job("Marketplace Error Notification") {
+							IStatus r = result;
+
+							Set<CatalogItem> items = new HashSet<CatalogItem>(itemToOperation.keySet());
+
+							IInstallableUnit[] ius = operationIUs;
+
+							String details = profileChangeOperation.getResolutionDetails();
+							{
+								setSystem(false);
+								setUser(false);
+								setPriority(LONG);
+							}
+
+							@Override
+							protected IStatus run(IProgressMonitor monitor) {
+								getCatalog().installErrorReport(monitor, r, items, ius, details);
+								return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
+							}
+						};
+						job.schedule();
+					}
+				}
 
 			} catch (InvocationTargetException e) {
 				Throwable cause = e.getCause();

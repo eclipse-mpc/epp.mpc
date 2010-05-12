@@ -13,4 +13,6 @@ Export-Package: org.eclipse.epp.internal.mpc.core;x-friends:="org.eclipse.epp.mp
  org.eclipse.epp.internal.mpc.core.service;x-friends:="org.eclipse.epp.mpc.ui",
  org.eclipse.epp.internal.mpc.core.service.xml;x-internal:=true,
  org.eclipse.epp.internal.mpc.core.util;x-friends:="org.eclipse.epp.mpc.ui"
-Import-Package: org.apache.commons.httpclient;version="3.1.0"
+Import-Package: org.apache.commons.httpclient;version="3.1.0",
+ org.apache.commons.httpclient.methods;version="3.1.0",
+ org.apache.commons.httpclient.params;version="3.1.0"

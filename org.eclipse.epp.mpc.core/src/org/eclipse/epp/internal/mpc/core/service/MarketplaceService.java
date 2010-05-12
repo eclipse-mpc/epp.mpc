@@ -11,9 +11,11 @@
 package org.eclipse.epp.internal.mpc.core.service;
 
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 
 /**
  * a service that provides access to the marketplace.
@@ -106,4 +108,20 @@ public interface MarketplaceService {
 	 * @return the search result
 	 */
 	public SearchResult popular(IProgressMonitor monitor) throws CoreException;
+
+	/**
+	 * Report an error in resolving an install operation.
+	 * 
+	 * @param monitor
+	 * @param result
+	 *            the status of the install operation
+	 * @param nodes
+	 *            the nodes that were included in the install, or null if unknown.
+	 * @param iuIdsAndVersions
+	 *            the IUs and their versions (comma-delimited), or null if unknown.
+	 * @param resolutionDetails
+	 *            the detailed error message, or null if unknown.
+	 */
+	public void reportInstallError(IProgressMonitor monitor, IStatus result, Set<Node> nodes,
+			Set<String> iuIdsAndVersions, String resolutionDetails) throws CoreException;
 }

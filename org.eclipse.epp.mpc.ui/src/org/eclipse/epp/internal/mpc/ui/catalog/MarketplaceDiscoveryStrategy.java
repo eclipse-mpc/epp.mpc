@@ -14,6 +14,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,6 +23,7 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -431,6 +433,29 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			monitor.done();
 		}
 		return catalogCategory;
+	}
+
+	public void installErrorReport(IProgressMonitor monitor, IStatus result, Set<CatalogItem> items,
+			IInstallableUnit[] operationIUs, String resolutionDetails) throws CoreException {
+		monitor.beginTask("Sending Marketplace error notification", 100);
+		try {
+			Set<Node> nodes = new HashSet<Node>();
+			for (CatalogItem item : items) {
+				Object data = item.getData();
+				if (data instanceof Node) {
+					nodes.add((Node) data);
+				}
+			}
+			Set<String> iuIdsAndVersions = new HashSet<String>();
+			for (IInstallableUnit iu : operationIUs) {
+				String id = iu.getId();
+				String version = iu.getVersion() == null ? null : iu.getVersion().toString();
+				iuIdsAndVersions.add(id + "," + version); //$NON-NLS-1$
+			}
+			marketplaceService.reportInstallError(monitor, result, nodes, iuIdsAndVersions, resolutionDetails);
+		} finally {
+			monitor.done();
+		}
 	}
 
 }

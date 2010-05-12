@@ -24,9 +24,14 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.parsers.SAXParserFactory;
 
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -262,6 +267,47 @@ public class DefaultMarketplaceService implements MarketplaceService {
 		result.setMatchCount(nodeList.getCount());
 		result.setNodes(nodeList.getNode());
 		return result;
+	}
+
+	public void reportInstallError(IProgressMonitor monitor, IStatus result, Set<Node> nodes,
+			Set<String> iuIdsAndVersions, String resolutionDetails) throws CoreException {
+		HttpClient client = new HttpClient();
+		client.getParams().setParameter(HttpMethodParams.USER_AGENT, MarketplaceClientCore.BUNDLE_ID);
+
+		URL location;
+		PostMethod method;
+		try {
+			location = new URL(baseUrl, "install/errorReport"); //$NON-NLS-1$
+			method = new PostMethod(location.toURI().toString());
+		} catch (URISyntaxException e) {
+			throw new IllegalStateException(e);
+		} catch (MalformedURLException e) {
+			throw new IllegalStateException(e);
+		}
+		try {
+			List<NameValuePair> parameters = new ArrayList<NameValuePair>();
+			parameters.add(new NameValuePair("status", Integer.toString(result.getSeverity()))); //$NON-NLS-1$
+			parameters.add(new NameValuePair("statusMessage", result.getMessage())); //$NON-NLS-1$
+			for (Node node : nodes) {
+				parameters.add(new NameValuePair("node", node.getId())); //$NON-NLS-1$
+			}
+			if (iuIdsAndVersions != null && !iuIdsAndVersions.isEmpty()) {
+				for (String iuAndVersion : iuIdsAndVersions) {
+					parameters.add(new NameValuePair("iu", iuAndVersion)); //$NON-NLS-1$	
+				}
+			}
+			parameters.add(new NameValuePair("detailedMessage", resolutionDetails)); //$NON-NLS-1$
+			if (!parameters.isEmpty()) {
+				method.setRequestBody(parameters.toArray(new NameValuePair[parameters.size()]));
+				client.executeMethod(method);
+			}
+		} catch (IOException e) {
+			String message = NLS.bind(Messages.DefaultMarketplaceService_cannotCompleteRequest_reason,
+					location.toString(), e.getMessage());
+			throw new CoreException(createErrorStatus(message, e));
+		} finally {
+			method.releaseConnection();
+		}
 	}
 
 	private void checkConfiguration() {
