@@ -278,17 +278,10 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 					}
 				}
 			}
-			// if no preference was set or we could not find the descriptor then we default to eclipse.org
-			if (getConfiguration().getCatalogDescriptor() == null) {
-				for (CatalogDescriptor descriptor : getConfiguration().getCatalogDescriptors()) {
-					URL url = descriptor.getUrl();
-
-					String host = url.getHost();
-					if (host.endsWith(".eclipse.org")) { //$NON-NLS-1$
-						getConfiguration().setCatalogDescriptor(descriptor);
-						break;
-					}
-				}
+			// if only one catalog is available choose it.
+			if (getConfiguration().getCatalogDescriptor() == null
+					&& getConfiguration().getCatalogDescriptors().size() == 1) {
+				getConfiguration().setCatalogDescriptor(getConfiguration().getCatalogDescriptors().get(0));
 			}
 		}
 	}
