@@ -58,6 +58,7 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 		catalog.setVerifyUpdateSiteAvailability(false);
 
 		MarketplaceCatalogConfiguration configuration = new MarketplaceCatalogConfiguration();
+		configuration.setVerifyUpdateSiteAvailability(false);
 
 		if (catalogDescriptors == null || catalogDescriptors.isEmpty()) {
 			configuration.getCatalogDescriptors().addAll(CatalogRegistry.getInstance().getCatalogDescriptors());

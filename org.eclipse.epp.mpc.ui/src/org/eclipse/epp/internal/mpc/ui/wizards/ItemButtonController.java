@@ -153,7 +153,7 @@ class ItemButtonController {
 					break;
 				}
 				if (buttonState == ButtonState.UPDATE) {
-					if (catalogItem.getUpdateAvailable() == null || !catalogItem.getUpdateAvailable()) {
+					if (catalogItem.getUpdateAvailable() != null && !catalogItem.getUpdateAvailable()) {
 						buttonState = ButtonState.UPDATE_DISABLED;
 					}
 				}
@@ -180,7 +180,7 @@ class ItemButtonController {
 
 	private boolean isItemAvailable() {
 		Boolean available = ((CatalogItem) item.getData()).getAvailable();
-		return available != null && available;
+		return available == null || available;
 	}
 
 	private void updateAppearance() {
