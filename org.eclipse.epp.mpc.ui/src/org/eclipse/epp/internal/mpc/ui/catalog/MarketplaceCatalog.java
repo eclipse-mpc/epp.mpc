@@ -316,7 +316,7 @@ public class MarketplaceCatalog extends Catalog {
 						operation.run(marketplaceStrategy, new SubProgressMonitor(monitor, strategyTicks));
 
 					} catch (CoreException e) {
-						status.add(new Status(IStatus.ERROR, DiscoveryCore.ID_PLUGIN, NLS.bind(
+						status.add(new Status(e.getStatus().getSeverity(), DiscoveryCore.ID_PLUGIN, NLS.bind(
 								Messages.MarketplaceCatalog_failedWithError, discoveryStrategy.getClass()
 										.getSimpleName()), e));
 					}

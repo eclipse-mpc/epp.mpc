@@ -262,13 +262,13 @@ public class MarketplaceViewer extends CatalogViewer {
 						}
 						break;
 					}
-					if (!monitor.isCanceled()) {
+					if (!monitor.isCanceled() && result[0] != null && result[0].getSeverity() != IStatus.CANCEL) {
 						getCatalog().checkForUpdates(monitor);
 					}
 				}
 			});
 
-			if (result[0] != null && !result[0].isOK()) {
+			if (result[0] != null && !result[0].isOK() && result[0].getSeverity() != IStatus.CANCEL) {
 				StatusManager.getManager().handle(result[0],
 						StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			} else {
