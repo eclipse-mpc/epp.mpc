@@ -22,6 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProduct;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -48,6 +49,7 @@ import org.eclipse.equinox.internal.p2.discovery.model.Icon;
 import org.eclipse.equinox.internal.p2.discovery.model.Overview;
 import org.eclipse.equinox.internal.p2.discovery.model.Tag;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
+import org.osgi.framework.Bundle;
 
 /**
  * @author David Green
@@ -85,6 +87,20 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_OS, Platform.getOS());
 		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_WS, Platform.getWS());
 		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_JAVA_VERSION, System.getProperty("java.version")); //$NON-NLS-1$
+		IProduct product = Platform.getProduct();
+		if (product != null) {
+			requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_PRODUCT, product.getId());
+			Bundle productBundle = product.getDefiningBundle();
+			if (productBundle != null) {
+				requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_PRODUCT_VERSION,
+						productBundle.getVersion().toString());
+			}
+		}
+		Bundle runtimeBundle = Platform.getBundle("org.eclipse.core.runtime"); //$NON-NLS-1$
+		if (runtimeBundle != null) {
+			requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_RUNTIME_VERSION, runtimeBundle.getVersion()
+					.toString());
+		}
 		service.setRequestMetaParameters(requestMetaParameters);
 		return new CachingMarketplaceService(service);
 	}

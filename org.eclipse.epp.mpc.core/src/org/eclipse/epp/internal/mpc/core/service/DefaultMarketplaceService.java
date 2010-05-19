@@ -102,6 +102,27 @@ public class DefaultMarketplaceService implements MarketplaceService {
 	 */
 	public static final String META_PARAM_JAVA_VERSION = "java.version"; //$NON-NLS-1$
 
+	/**
+	 * parameter identifying the Eclipse runtime version (the version of the org.eclipse.core.runtime bundle)
+	 * 
+	 * @see {@link #setRequestMetaParameters(Map)}
+	 */
+	public static final String META_PARAM_RUNTIME_VERSION = "runtime.version"; //$NON-NLS-1$
+
+	/**
+	 * parameter identifying the Eclipse product version
+	 * 
+	 * @see {@link #setRequestMetaParameters(Map)}
+	 */
+	public static final String META_PARAM_PRODUCT_VERSION = "product.version"; //$NON-NLS-1$
+
+	/**
+	 * parameter identifying the product id, as provided by <code>Platform.getProduct().getId()</code>
+	 * 
+	 * @see {@link #setRequestMetaParameters(Map)}
+	 */
+	public static final String META_PARAM_PRODUCT = "product"; //$NON-NLS-1$
+
 	private URL baseUrl;
 
 	private Map<String, String> requestMetaParameters;
