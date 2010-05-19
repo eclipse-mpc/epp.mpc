@@ -28,6 +28,7 @@ import org.eclipse.epp.internal.mpc.ui.util.Util;
 import org.eclipse.epp.internal.mpc.ui.wizards.SelectionModel.CatalogItemEntry;
 import org.eclipse.epp.internal.mpc.ui.wizards.SelectionModel.FeatureEntry;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
+import org.eclipse.equinox.p2.core.ProvisionException;
 import org.eclipse.equinox.p2.operations.ProfileChangeOperation;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
@@ -291,9 +292,17 @@ public class FeatureSelectionWizardPage extends WizardPage {
 			getContainer().run(true, true, operation);
 		} catch (InvocationTargetException e) {
 			refresh();
-			IStatus status = MarketplaceClientUi.computeStatus(e,
-					Messages.FeatureSelectionWizardPage_unexpectedException_verifyingFeatures);
-			StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
+			// we only log here since any error will also be displayed when resolving the provisioning operation.
+			int statusFlags = StatusManager.LOG;
+			IStatus status;
+			if (e.getCause() instanceof ProvisionException) {
+				status = ((ProvisionException) e.getCause()).getStatus();
+			} else {
+				status = MarketplaceClientUi.computeStatus(e,
+						Messages.FeatureSelectionWizardPage_unexpectedException_verifyingFeatures);
+				statusFlags |= StatusManager.BLOCK | StatusManager.SHOW;
+			}
+			StatusManager.getManager().handle(status, statusFlags);
 		} catch (InterruptedException e) {
 			refresh();
 			// canceled
