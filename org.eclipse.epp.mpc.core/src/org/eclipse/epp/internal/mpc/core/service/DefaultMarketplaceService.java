@@ -37,7 +37,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.ecf.filetransfer.UserCancelledException;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.service.xml.Unmarshaller;
 import org.eclipse.osgi.util.NLS;
@@ -440,7 +439,7 @@ public class DefaultMarketplaceService implements MarketplaceService {
 				in.close();
 			}
 		} catch (IOException e) {
-			if (e.getCause() instanceof UserCancelledException || e.getCause() instanceof OperationCanceledException) {
+			if (e.getCause() instanceof OperationCanceledException) {
 				throw new CoreException(Status.CANCEL_STATUS);
 			}
 			String message = NLS.bind(Messages.DefaultMarketplaceService_cannotCompleteRequest_reason,
