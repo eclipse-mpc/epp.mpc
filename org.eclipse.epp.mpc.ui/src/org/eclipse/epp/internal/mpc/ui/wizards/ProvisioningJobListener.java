@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.epp.internal.mpc.core.service.Node;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.util.ConcurrentTaskManager;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 
@@ -73,7 +72,7 @@ class ProvisioningJobListener extends JobChangeAdapter {
 										stream.close();
 									}
 								} catch (Throwable e) {
-									MarketplaceClientUi.error(e);
+									//per bug 314028 logging this error is not useful.
 								}
 							}
 						});
