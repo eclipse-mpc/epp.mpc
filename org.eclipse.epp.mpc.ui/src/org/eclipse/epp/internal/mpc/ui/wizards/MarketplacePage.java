@@ -21,6 +21,8 @@ import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
@@ -148,6 +150,30 @@ public class MarketplacePage extends CatalogPage {
 
 			GridDataFactory.swtDefaults().align(SWT.CENTER, SWT.CENTER).applyTo(link);
 		}
+
+		getViewer().addSelectionChangedListener(new ISelectionChangedListener() {
+
+			private int previousSelectionSize = 0;
+
+			public void selectionChanged(SelectionChangedEvent event) {
+				if (!isCurrentPage()) {
+					return;
+				}
+				SelectionModel selectionModel = getWizard().getSelectionModel();
+				int newSelectionSize = selectionModel.getItemToOperation().size();
+				if (previousSelectionSize == 0 && newSelectionSize == 1
+						&& selectionModel.computeProvisioningOperationViable()) {
+					IWizardPage currentPage = getContainer().getCurrentPage();
+					if (currentPage.isPageComplete()) {
+						IWizardPage nextPage = getWizard().getNextPage(MarketplacePage.this);
+						if (nextPage != null) {
+							getContainer().showPage(nextPage);
+						}
+					}
+				}
+				previousSelectionSize = newSelectionSize;
+			}
+		});
 
 		setControl(parent == originalParent ? tabFolder : parent);
 		MarketplaceClientUi.setDefaultHelp(getControl());
