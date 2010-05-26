@@ -151,6 +151,7 @@ public class MarketplacePage extends CatalogPage {
 			GridDataFactory.swtDefaults().align(SWT.CENTER, SWT.CENTER).applyTo(link);
 		}
 
+		// bug 312411: a selection listener so that we can streamline install of single product
 		getViewer().addSelectionChangedListener(new ISelectionChangedListener() {
 
 			private int previousSelectionSize = 0;
@@ -161,13 +162,19 @@ public class MarketplacePage extends CatalogPage {
 				}
 				SelectionModel selectionModel = getWizard().getSelectionModel();
 				int newSelectionSize = selectionModel.getItemToOperation().size();
-				if (previousSelectionSize == 0 && newSelectionSize == 1
-						&& selectionModel.computeProvisioningOperationViable()) {
-					IWizardPage currentPage = getContainer().getCurrentPage();
-					if (currentPage.isPageComplete()) {
-						IWizardPage nextPage = getWizard().getNextPage(MarketplacePage.this);
-						if (nextPage != null) {
-							getContainer().showPage(nextPage);
+
+				// important: we don't do anything if the selection is empty, since CatalogViewer
+				// sets the empty selection whenever the catalog is updated.
+				if (!event.getSelection().isEmpty()) {
+
+					if (previousSelectionSize == 0 && newSelectionSize == 1
+							&& selectionModel.computeProvisioningOperationViable()) {
+						IWizardPage currentPage = getContainer().getCurrentPage();
+						if (currentPage.isPageComplete()) {
+							IWizardPage nextPage = getWizard().getNextPage(MarketplacePage.this);
+							if (nextPage != null) {
+								getContainer().showPage(nextPage);
+							}
 						}
 					}
 				}
