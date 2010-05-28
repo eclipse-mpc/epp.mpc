@@ -413,6 +413,15 @@ public class DefaultMarketplaceService implements MarketplaceService {
 			try {
 				in = org.eclipse.equinox.internal.p2.repository.RepositoryTransport.getInstance().stream(location,
 						monitor);
+			} catch (CoreException e) {
+				if (e.getStatus().getCode() == 1002) {
+					Throwable cause = e.getCause();
+					if (cause != null && cause.getMessage() != null && cause.getMessage().indexOf("503") != -1) { //$NON-NLS-1$
+						throw new ServiceUnavailableException(new Status(IStatus.ERROR,
+								MarketplaceClientCore.BUNDLE_ID, 503, Messages.DefaultMarketplaceService_serviceUnavailable503, e));
+					}
+				}
+				throw e;
 			} catch (NullPointerException e) {
 				// probably a unit test scenario
 				in = location.toURL().openStream();
