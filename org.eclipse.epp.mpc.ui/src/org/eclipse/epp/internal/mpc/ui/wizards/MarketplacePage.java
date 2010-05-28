@@ -270,6 +270,7 @@ public class MarketplacePage extends CatalogPage {
 			}
 			if (previousCatalogDescriptor == null || !previousCatalogDescriptor.equals(catalogDescriptor)) {
 				previousCatalogDescriptor = catalogDescriptor;
+				tabFolder.setSelection(searchTabItem);
 				getWizard().initializeCatalog();
 				updated = false;
 			}
