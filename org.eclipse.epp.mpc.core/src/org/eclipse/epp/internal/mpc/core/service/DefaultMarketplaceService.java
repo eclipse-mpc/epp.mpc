@@ -299,7 +299,7 @@ public class DefaultMarketplaceService implements MarketplaceService {
 		URL location;
 		PostMethod method;
 		try {
-			location = new URL(baseUrl, "install/errorReport"); //$NON-NLS-1$
+			location = new URL(baseUrl, "install/error/report"); //$NON-NLS-1$
 			method = new PostMethod(location.toURI().toString());
 		} catch (URISyntaxException e) {
 			throw new IllegalStateException(e);
@@ -418,7 +418,8 @@ public class DefaultMarketplaceService implements MarketplaceService {
 					Throwable cause = e.getCause();
 					if (cause != null && cause.getMessage() != null && cause.getMessage().indexOf("503") != -1) { //$NON-NLS-1$
 						throw new ServiceUnavailableException(new Status(IStatus.ERROR,
-								MarketplaceClientCore.BUNDLE_ID, 503, Messages.DefaultMarketplaceService_serviceUnavailable503, e));
+								MarketplaceClientCore.BUNDLE_ID, 503,
+								Messages.DefaultMarketplaceService_serviceUnavailable503, e));
 					}
 				}
 				throw e;
