@@ -96,31 +96,36 @@ public class BrowseCatalogItem extends AbstractDiscoveryItem<CatalogDescriptor> 
 			URL url = catalogDescriptor.getUrl();
 			try {
 				ContentType contentType = viewer.getQueryContentType();
-				if (contentType != null) {
-					switch (contentType) {
-					case SEARCH:
-						String queryText = viewer.getQueryText();
-						if (queryText != null && queryText.trim().length() > 0) {
-							// append something like this:
-							// /search/apachesolr_search/mylyn%20wikitext?filters=tid:38%20tid:31
-							String path = "search/apachesolr_search/" + URLEncoder.encode(queryText.trim(), UTF_8); //$NON-NLS-1$
-							String filter = ""; //$NON-NLS-1$
-							if (viewer.getQueryMarket() != null) {
-								filter += TID;
-								filter += viewer.getQueryMarket().getId();
-							}
-							if (viewer.getQueryCategory() != null) {
-								if (filter.length() > 0) {
-									filter += ' ';
-								}
-								filter += TID;
-								filter += viewer.getQueryCategory().getId();
-							}
-							if (filter.length() > 0) {
-								path += "?filters=" + URLEncoder.encode(filter, UTF_8); //$NON-NLS-1$
-							}
-							url = new URL(url, path);
+				if (contentType == ContentType.SEARCH) {
+					String path = null;
+					String queryText = viewer.getQueryText();
+					if (queryText != null && queryText.trim().length() > 0) {
+						// append something like this:
+						// /search/apachesolr_search/mylyn%20wikitext?filters=tid:38%20tid:31
+						path = "search/apachesolr_search/" + URLEncoder.encode(queryText.trim(), UTF_8); //$NON-NLS-1$
+						String filter = ""; //$NON-NLS-1$
+						if (viewer.getQueryMarket() != null) {
+							filter += TID;
+							filter += URLEncoder.encode(viewer.getQueryMarket().getId(), UTF_8);
 						}
+						if (viewer.getQueryCategory() != null) {
+							if (filter.length() > 0) {
+								filter += ' ';
+							}
+							filter += TID;
+							filter += URLEncoder.encode(viewer.getQueryCategory().getId(), UTF_8);
+						}
+						if (filter.length() > 0) {
+							path += "?filters=" + URLEncoder.encode(filter, UTF_8); //$NON-NLS-1$
+						}
+					} else if (viewer.getQueryCategory() != null) {
+						// http://marketplace.eclipse.org/taxonomy/term/8
+						path = "taxonomy/term/" + URLEncoder.encode(viewer.getQueryCategory().getId(), UTF_8); //$NON-NLS-1$
+					} else if (viewer.getQueryMarket() != null) {
+						path = "taxonomy/term/" + URLEncoder.encode(viewer.getQueryMarket().getId(), UTF_8); //$NON-NLS-1$
+					}
+					if (path != null) {
+						url = new URL(url, path);
 					}
 				}
 			} catch (UnsupportedEncodingException e) {
