@@ -18,6 +18,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -90,9 +91,29 @@ public class CatalogSelectionPage extends WizardPage {
 
 		});
 		viewer.setInput(configuration);
+
 		setControl(container);
 		Dialog.applyDialogFont(container);
 		MarketplaceClientUi.setDefaultHelp(getControl());
+	}
+
+	@Override
+	public void setVisible(boolean visible) {
+		if (visible) {
+			if (configuration.getCatalogDescriptor() == null) {
+				for (CatalogDescriptor descriptor : configuration.getCatalogDescriptors()) {
+					if (descriptor.getUrl().getHost().endsWith(".eclipse.org")) { //$NON-NLS-1$
+						configuration.setCatalogDescriptor(descriptor);
+						break;
+					}
+				}
+			}
+			if (configuration.getCatalogDescriptor() != null) {
+				viewer.setSelection(new StructuredSelection(configuration.getCatalogDescriptor()));
+				setPageComplete(true);
+			}
+		}
+		super.setVisible(visible);
 	}
 
 	@Override
