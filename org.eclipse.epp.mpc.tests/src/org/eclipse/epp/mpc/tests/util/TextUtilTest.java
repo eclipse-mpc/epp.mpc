@@ -8,7 +8,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 
-@SuppressWarnings("restriction")
 @RunWith(BlockJUnit4ClassRunner.class)
 public class TextUtilTest {
 

@@ -36,7 +36,6 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 /**
  * @author David Green
  */
-@SuppressWarnings("restriction")
 @RunWith(BlockJUnit4ClassRunner.class)
 public class DefaultMarketplaceServiceTest {
 
@@ -63,6 +62,7 @@ public class DefaultMarketplaceServiceTest {
 		}
 	}
 
+	@SuppressWarnings("null")
 	@Test
 	public void getCategory() throws CoreException {
 		List<Market> markets = marketplaceService.listMarkets(new NullProgressMonitor());
@@ -128,6 +128,7 @@ public class DefaultMarketplaceServiceTest {
 //		assertEquals(market.getUrl(),result.getUrl());
 //	}
 //	
+	@SuppressWarnings("null")
 	@Test
 	public void search() throws CoreException {
 		List<Market> markets = marketplaceService.listMarkets(new NullProgressMonitor());

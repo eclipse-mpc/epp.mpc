@@ -42,7 +42,6 @@ import org.xml.sax.XMLReader;
 /**
  * @author David Green
  */
-@SuppressWarnings("restriction")
 @RunWith(BlockJUnit4ClassRunner.class)
 public class UnmarshallerTest {
 
