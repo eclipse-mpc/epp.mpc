@@ -495,10 +495,21 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 						}
 					}
 				}
+				URI dependenciesRepository = null;
+				if (getConfiguration().getCatalogDescriptor().getDependenciesRepository() != null) {
+					try {
+						dependenciesRepository = getConfiguration().getCatalogDescriptor()
+								.getDependenciesRepository()
+								.toURI();
+					} catch (URISyntaxException e) {
+						throw new InvocationTargetException(e);
+					}
+				}
 				provisioningOperation = new ProfileChangeOperationComputer(
 						operationType,
 						selectedItems,
 						getSelectionModel().getSelectedFeatureDescriptors(),
+						dependenciesRepository,
 						getConfiguration().getCatalogDescriptor().isInstallFromAllRepositories() ? ProfileChangeOperationComputer.ResolutionStrategy.FALLBACK_STRATEGY
 								: ProfileChangeOperationComputer.ResolutionStrategy.SELECTED_REPOSITORIES);
 				getContainer().run(true, true, provisioningOperation);

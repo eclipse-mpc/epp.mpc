@@ -31,6 +31,8 @@ public final class CatalogDescriptor {
 
 	private boolean installFromAllRepositories;
 
+	private URL dependenciesRepository;
+
 	public CatalogDescriptor() {
 	}
 
@@ -121,6 +123,21 @@ public final class CatalogDescriptor {
 		this.installFromAllRepositories = installFromAllRepositories;
 	}
 
+	/**
+	 * An URL that points to a a software repository that can be used to resolve dependencies for solutions installed
+	 * from this catalog. If multiple repositories are needed this URL can point to a composite repository.
+	 */
+	public URL getDependenciesRepository() {
+		return dependenciesRepository;
+	}
+
+	/**
+	 * @see #getDependenciesRepository()
+	 */
+	public void setDependenciesRepository(URL dependenciesRepository) {
+		this.dependenciesRepository = dependenciesRepository;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -129,6 +146,9 @@ public final class CatalogDescriptor {
 		return result;
 	}
 
+	/**
+	 * identity is determined by the {@link #getUrl()}
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -149,6 +169,11 @@ public final class CatalogDescriptor {
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "CatalogDescriptor [url=" + url + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 }

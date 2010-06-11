@@ -81,6 +81,8 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 
 	private final ResolutionStrategy resolutionStrategy;
 
+	private final URI dependenciesRepository;
+
 	/**
 	 * @param operationType
 	 *            the type of operation to perform
@@ -89,9 +91,11 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 	 * @param featureDescriptors
 	 *            the features to install/update/uninstall, which must correspond to features provided by the given
 	 *            items
+	 * @param dependenciesRepository
+	 *            an optional URI to a repository from which dependencies may be installed, may be null
 	 */
 	public ProfileChangeOperationComputer(OperationType operationType, Collection<CatalogItem> items,
-			Set<FeatureDescriptor> featureDescriptors, ResolutionStrategy resolutionStrategy) {
+			Set<FeatureDescriptor> featureDescriptors, URI dependenciesRepository, ResolutionStrategy resolutionStrategy) {
 		super(items);
 		if (featureDescriptors == null || featureDescriptors.isEmpty()) {
 			throw new IllegalArgumentException();
@@ -105,6 +109,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 		this.featureDescriptors = new ArrayList<FeatureDescriptor>(featureDescriptors);
 		this.operationType = operationType;
 		this.resolutionStrategy = resolutionStrategy;
+		this.dependenciesRepository = dependenciesRepository;
 	}
 
 	public void run(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
@@ -210,6 +215,8 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 			operation = operationFactory.create(installableUnits);
 			if (strategy == ResolutionStrategy.SELECTED_REPOSITORIES) {
 				addRepositories(operation, repositories);
+			} else if (dependenciesRepository != null) {
+				addRepositories(operation, new URI[] { dependenciesRepository });
 			}
 			resolveModal(subMonitor.newChild(workPerStrategy), operation);
 			if (operation.getResolutionResult() != null
@@ -230,7 +237,9 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 	}
 
 	private void addSecondaryRepositories(Set<URI> repositoryLocations) {
-
+		if (dependenciesRepository != null) {
+			repositoryLocations.add(dependenciesRepository);
+		}
 	}
 
 	public void resolveModal(IProgressMonitor monitor, ProfileChangeOperation operation) throws CoreException {

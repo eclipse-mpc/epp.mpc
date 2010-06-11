@@ -100,6 +100,15 @@
                </documentation>
             </annotation>
          </attribute>
+         <attribute name="dependenciesRepository" type="string">
+            <annotation>
+               <documentation>
+                  An URL that points to a a software repository that can be used to resolve dependencies for
+                  solutions installed from this catalog.  If multiple repositories are needed this URL can point
+                  to a composite repository.
+               </documentation>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 

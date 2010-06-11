@@ -64,6 +64,12 @@ class CatalogExtensionPointReader {
 						selfContained = selfContained.trim();
 					}
 					descriptor.setInstallFromAllRepositories(!Boolean.valueOf(selfContained));
+					String dependenciesRepository = element.getAttribute("dependenciesRepository"); //$NON-NLS-1$
+					if (dependenciesRepository != null && dependenciesRepository.trim().length() > 0) {
+						URL repository = new URL(dependenciesRepository);
+						repository.toURI(); // we do this later, so let's see the error now.
+						descriptor.setDependenciesRepository(repository);
+					}
 					if (!descriptors.contains(descriptor)) {
 						descriptors.add(descriptor);
 					}
