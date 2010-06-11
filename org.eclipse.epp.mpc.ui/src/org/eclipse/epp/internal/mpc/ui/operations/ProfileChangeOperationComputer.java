@@ -37,7 +37,10 @@ import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.equinox.p2.metadata.Version;
 import org.eclipse.equinox.p2.operations.ProfileChangeOperation;
+import org.eclipse.equinox.p2.operations.ProvisioningSession;
+import org.eclipse.equinox.p2.operations.RepositoryTracker;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepository;
+import org.eclipse.equinox.p2.ui.ProvisioningUI;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
@@ -208,38 +211,44 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 		default:
 			strategies.add(resolutionStrategy);
 		}
+
+		ProvisioningSession session = ProvisioningUI.getDefaultUI().getSession();
+		RepositoryTracker repositoryTracker = ProvisioningUI.getDefaultUI().getRepositoryTracker();
+
+		URI[] knownRepositories = repositoryTracker.getKnownRepositories(session);
+
 		ProfileChangeOperation operation = null;
 		final int workPerStrategy = 1000;
 		SubMonitor subMonitor = SubMonitor.convert(monitor, strategies.size() * workPerStrategy);
+		Set<URI> previousRepositoryLocations = null;
 		for (ResolutionStrategy strategy : strategies) {
-			operation = operationFactory.create(installableUnits);
+			Set<URI> repositoryLocations = new HashSet<URI>(Arrays.asList(repositories));
 			if (strategy == ResolutionStrategy.SELECTED_REPOSITORIES) {
-				addRepositories(operation, repositories);
-			} else if (dependenciesRepository != null) {
-				addRepositories(operation, new URI[] { dependenciesRepository });
+				repositoryLocations.addAll(Arrays.asList(repositories));
+			}
+			if (dependenciesRepository != null) {
+				repositoryLocations.add(dependenciesRepository);
+			}
+			if (strategy == ResolutionStrategy.ALL_REPOSITORIES && !repositoryLocations.isEmpty()) {
+				repositoryLocations.addAll(Arrays.asList(knownRepositories));
+			}
+			if (repositoryLocations.equals(previousRepositoryLocations)) {
+				continue;
+			}
+			operation = operationFactory.create(installableUnits);
+			if (!repositoryLocations.isEmpty()) {
+				URI[] locations = repositoryLocations.toArray(new URI[repositoryLocations.size()]);
+				operation.getProvisioningContext().setMetadataRepositories(locations);
+				operation.getProvisioningContext().setArtifactRepositories(locations);
 			}
 			resolveModal(subMonitor.newChild(workPerStrategy), operation);
 			if (operation.getResolutionResult() != null
 					&& operation.getResolutionResult().getSeverity() != IStatus.ERROR) {
 				break;
 			}
+			previousRepositoryLocations = repositoryLocations;
 		}
 		return operation;
-	}
-
-	private void addRepositories(ProfileChangeOperation operation, URI[] repositories) {
-		// Add repositories to the operation
-		Set<URI> repositoryLocations = new HashSet<URI>(Arrays.asList(repositories));
-		addSecondaryRepositories(repositoryLocations);
-		URI[] locations = repositoryLocations.toArray(new URI[repositoryLocations.size()]);
-		operation.getProvisioningContext().setMetadataRepositories(locations);
-		operation.getProvisioningContext().setArtifactRepositories(locations);
-	}
-
-	private void addSecondaryRepositories(Set<URI> repositoryLocations) {
-		if (dependenciesRepository != null) {
-			repositoryLocations.add(dependenciesRepository);
-		}
 	}
 
 	public void resolveModal(IProgressMonitor monitor, ProfileChangeOperation operation) throws CoreException {
