@@ -15,6 +15,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -47,6 +48,8 @@ public abstract class AbstractProvisioningOperation implements IRunnableWithProg
 
 	protected Set<URI> repositoryLocations;
 
+	protected Set<URI> addedRepositoryLocations;
+
 	protected AbstractProvisioningOperation(Collection<CatalogItem> installableConnectors) {
 		if (installableConnectors == null || installableConnectors.isEmpty()) {
 			throw new IllegalArgumentException();
@@ -61,15 +64,19 @@ public abstract class AbstractProvisioningOperation implements IRunnableWithProg
 		ProvisioningSession session = ProvisioningUI.getDefaultUI().getSession();
 		RepositoryTracker repositoryTracker = ProvisioningUI.getDefaultUI().getRepositoryTracker();
 		repositoryLocations = new HashSet<URI>();
+		if (addedRepositoryLocations == null) {
+			addedRepositoryLocations = new HashSet<URI>();
+		}
+
+		Set<URI> knownRepositories = new HashSet<URI>(Arrays.asList(repositoryTracker.getKnownRepositories(session)));
+
 		monitor.setWorkRemaining(items.size() * 5);
 		for (CatalogItem descriptor : items) {
 			URI uri = new URL(descriptor.getSiteUrl()).toURI();
-			if (repositoryLocations.add(uri)) {
+			if (repositoryLocations.add(uri) && !knownRepositories.contains(uri)) {
 				checkCancelled(monitor);
 				repositoryTracker.addRepository(uri, null, session);
-				//					ProvisioningUtil.addMetaDataRepository(url.toURI(), true);
-				//					ProvisioningUtil.addArtifactRepository(url.toURI(), true);
-				//					ProvisioningUtil.setColocatedRepositoryEnablement(url.toURI(), true);
+				addedRepositoryLocations.add(uri);
 			}
 			monitor.worked(1);
 		}
@@ -146,5 +153,30 @@ public abstract class AbstractProvisioningOperation implements IRunnableWithProg
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}
+	}
+
+	public Set<URI> getAddedRepositoryLocations() {
+		return addedRepositoryLocations;
+	}
+
+	protected void removeAddedRepositoryLocations() {
+		if (addedRepositoryLocations != null) {
+			removeRepositoryLocations(addedRepositoryLocations);
+			addedRepositoryLocations = null;
+		}
+	}
+
+	/**
+	 * remove the given repository locations from the repository tracker.
+	 * 
+	 * @param repositoryLocations
+	 */
+	public static void removeRepositoryLocations(Set<URI> repositoryLocations) {
+		if (repositoryLocations == null || repositoryLocations.isEmpty()) {
+			return;
+		}
+		ProvisioningSession session = ProvisioningUI.getDefaultUI().getSession();
+		RepositoryTracker repositoryTracker = ProvisioningUI.getDefaultUI().getRepositoryTracker();
+		repositoryTracker.removeRepositories(repositoryLocations.toArray(new URI[repositoryLocations.size()]), session);
 	}
 }

@@ -57,11 +57,19 @@ class CatalogExtensionPointReader {
 						}
 						descriptor.setIcon(ImageDescriptor.createFromURL(iconResource));
 					}
+					String selfContained = element.getAttribute("selfContained"); //$NON-NLS-1$
+					if (selfContained == null || selfContained.trim().length() == 0) {
+						selfContained = "true"; //$NON-NLS-1$
+					} else {
+						selfContained = selfContained.trim();
+					}
+					descriptor.setInstallFromAllRepositories(!Boolean.valueOf(selfContained));
 					if (!descriptors.contains(descriptor)) {
 						descriptors.add(descriptor);
 					}
 				} catch (Exception e) {
-					MarketplaceClientUi.error(NLS.bind(Messages.CatalogExtensionPointReader_cannotRegisterCatalog_bundle_reason,
+					MarketplaceClientUi.error(NLS.bind(
+							Messages.CatalogExtensionPointReader_cannotRegisterCatalog_bundle_reason,
 							element.getContributor().getName(), e.getMessage()), e);
 				}
 			}

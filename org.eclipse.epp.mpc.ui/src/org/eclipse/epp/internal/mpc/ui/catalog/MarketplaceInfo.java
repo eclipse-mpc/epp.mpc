@@ -19,6 +19,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -98,8 +100,26 @@ public class MarketplaceInfo {
 	/**
 	 * compute if the given node is installed. The given node must be fully realized, including its
 	 * {@link Node#getIus() ius}.
+	 * 
+	 * @param knownRepositories
 	 */
-	public boolean computeInstalled(Set<String> installedFeatures, Node node) {
+	public boolean computeInstalled(Set<String> installedFeatures, Set<URI> knownRepositories, Node node) {
+		String updateurl = node.getUpdateurl();
+		if (updateurl == null) {
+			// can't be installed if there's no update site
+			return false;
+		}
+		// SECURITY: can't be installed if the repository is not known/trusted
+		try {
+			URI uri = new URL(updateurl).toURI();
+			if (!knownRepositories.contains(uri)) {
+				return false;
+			}
+		} catch (MalformedURLException e) {
+			return false;
+		} catch (URISyntaxException e) {
+			return false;
+		}
 		if (node.getIus() != null && !node.getIus().getIu().isEmpty()) {
 			List<String> ius = new ArrayList<String>(new HashSet<String>(node.getIus().getIu()));
 			return computeInstalled(installedFeatures, ius);
@@ -107,7 +127,7 @@ public class MarketplaceInfo {
 		return false;
 	}
 
-	public boolean computeInstalled(Set<String> installedIus, List<String> ius) {
+	private boolean computeInstalled(Set<String> installedIus, List<String> ius) {
 		int installCount = 0;
 		for (String iu : ius) {
 			if (installedIus.contains(iu) || installedIus.contains(iu + P2_FEATURE_GROUP_SUFFIX)) {
@@ -216,8 +236,9 @@ public class MarketplaceInfo {
 	 */
 	private static final File computeRegistryFile() {
 		// compute the file we'll use for registry persistence, starting with the platform configuration location
-		File dataFile = Platform.getBundle(MarketplaceClientUi.BUNDLE_ID).getBundleContext().getDataFile(
-				PERSISTENT_FILE);
+		File dataFile = Platform.getBundle(MarketplaceClientUi.BUNDLE_ID)
+				.getBundleContext()
+				.getDataFile(PERSISTENT_FILE);
 		if (dataFile != null) {
 			return dataFile;
 		}

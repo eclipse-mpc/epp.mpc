@@ -101,4 +101,10 @@ public class FeatureDescriptor {
 		}
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return "FeatureDescriptor [id=" + id + "]"; //$NON-NLS-1$//$NON-NLS-2$
+	}
+
 }

@@ -54,7 +54,8 @@
             description="%catalog.description"
             icon="icons/marketplace32.png"
             label="%catalog.label"
-            url="http://marketplace.eclipse.org">
+            url="http://marketplace.eclipse.org"
+            selfContained="false">
       </catalog>
    </extension>
    <extension

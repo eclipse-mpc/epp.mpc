@@ -34,13 +34,17 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.layout.TreeColumnLayout;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.ICheckStateListener;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
-import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -57,55 +61,36 @@ import org.eclipse.ui.statushandlers.StatusManager;
 
 public class FeatureSelectionWizardPage extends WizardPage {
 
-	private static class LabelProvider implements ILabelProvider, ITableLabelProvider {
+	private static class LabelProvider extends ColumnLabelProvider implements IStyledLabelProvider {
 
-		public void removeListener(ILabelProviderListener listener) {
-			// nothing to do
-		}
-
-		public boolean isLabelProperty(Object element, String property) {
-			return true;
-		}
-
-		public void dispose() {
-			// nothing to do
-		}
-
-		public void addListener(ILabelProviderListener listener) {
-			// nothing to do
-		}
-
-		public String getColumnText(Object element, int columnIndex) {
+		public StyledString getStyledText(Object element) {
+			StyledString styledString = new StyledString();
+			styledString.append(getText(element));
 			if (element instanceof CatalogItemEntry) {
 				CatalogItemEntry entry = (CatalogItemEntry) element;
-				if (columnIndex == 0) {
-					return entry.getItem().getName();
-				}
-			} else if (element instanceof FeatureEntry) {
-				FeatureEntry entry = (FeatureEntry) element;
-				switch (columnIndex) {
-				case 0:
-					return entry.getFeatureDescriptor().getName();
-				}
+				styledString.append("  " + entry.getItem().getSiteUrl(), StyledString.QUALIFIER_STYLER);
 			}
-			return "" + columnIndex; //$NON-NLS-1$
+			return styledString;
 		}
 
-		public Image getColumnImage(Object element, int columnIndex) {
-			if (columnIndex == 0 && element instanceof FeatureEntry) {
+		@Override
+		public Image getImage(Object element) {
+			if (element instanceof FeatureEntry) {
 				FeatureEntry entry = (FeatureEntry) element;
 				switch (entry.getParent().getOperation()) {
 				case CHECK_FOR_UPDATES:
 					if (entry.isInstalled()) {
-						return MarketplaceClientUiPlugin.getInstance().getImageRegistry().get(
-								MarketplaceClientUiPlugin.IU_ICON_UPDATE);
+						return MarketplaceClientUiPlugin.getInstance()
+								.getImageRegistry()
+								.get(MarketplaceClientUiPlugin.IU_ICON_UPDATE);
 					}
 					// fall through
 				case INSTALL:
-					return MarketplaceClientUiPlugin.getInstance().getImageRegistry().get(
-							MarketplaceClientUiPlugin.IU_ICON);
+					return MarketplaceClientUiPlugin.getInstance()
+							.getImageRegistry()
+							.get(MarketplaceClientUiPlugin.IU_ICON);
 				}
-			} else if (columnIndex == 0 && element instanceof CatalogItemEntry) {
+			} else if (element instanceof CatalogItemEntry) {
 				return MarketplaceClientUiPlugin.getInstance()
 						.getImageRegistry()
 						.get(MarketplaceClientUiPlugin.IU_ICON);
@@ -113,13 +98,18 @@ public class FeatureSelectionWizardPage extends WizardPage {
 			return null;
 		}
 
-		public Image getImage(Object element) {
-			return getColumnImage(element, 0);
+		@Override
+		public String getText(Object element) {
+			if (element instanceof CatalogItemEntry) {
+				CatalogItemEntry entry = (CatalogItemEntry) element;
+				return entry.getItem().getName();
+			} else if (element instanceof FeatureEntry) {
+				FeatureEntry entry = (FeatureEntry) element;
+				return entry.getFeatureDescriptor().getName();
+			}
+			return element.toString();
 		}
 
-		public String getText(Object element) {
-			return getColumnText(element, 0);
-		}
 	}
 
 	private static class ContentProvider implements ITreeContentProvider {
@@ -165,6 +155,8 @@ public class FeatureSelectionWizardPage extends WizardPage {
 
 	private Group detailsControl;
 
+	private TreeViewerColumn column;
+
 	protected FeatureSelectionWizardPage() {
 		super(FeatureSelectionWizardPage.class.getName());
 		setTitle(Messages.FeatureSelectionWizardPage_confirmSelectedFeatures);
@@ -181,9 +173,14 @@ public class FeatureSelectionWizardPage extends WizardPage {
 		Composite container = new Composite(parent, SWT.NULL);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(container);
 
-		viewer = new CheckboxTreeViewer(container, SWT.MULTI | SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL
+		Composite treeContainer = new Composite(container, SWT.NULL);
+		GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).applyTo(treeContainer);
+
+		TreeColumnLayout columnLayout = new TreeColumnLayout();
+		treeContainer.setLayout(columnLayout);
+
+		viewer = new CheckboxTreeViewer(treeContainer, SWT.MULTI | SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL
 				| SWT.BORDER);
-		GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).applyTo(viewer.getControl());
 
 		viewer.setUseHashlookup(true);
 		viewer.setComparator(new ViewerComparator() {
@@ -211,7 +208,6 @@ public class FeatureSelectionWizardPage extends WizardPage {
 				return i;
 			}
 		});
-		viewer.setLabelProvider(new LabelProvider());
 		viewer.setContentProvider(new ContentProvider());
 		viewer.setInput(getWizard().getSelectionModel());
 		viewer.addCheckStateListener(new ICheckStateListener() {
@@ -229,9 +225,14 @@ public class FeatureSelectionWizardPage extends WizardPage {
 				setPageComplete(computePageComplete());
 			}
 		});
+
+		column = new TreeViewerColumn(viewer, SWT.NONE);
+		column.setLabelProvider(new DelegatingStyledCellLabelProvider(new LabelProvider()));
+		columnLayout.setColumnData(column.getColumn(), new ColumnWeightData(100, 100, true));
+
 		detailsControl = new Group(container, SWT.SHADOW_IN);
 		detailsControl.setText(Messages.FeatureSelectionWizardPage_details);
-		GridDataFactory.fillDefaults().grab(true, false).hint(SWT.DEFAULT, 300).applyTo(detailsControl);
+		GridDataFactory.fillDefaults().grab(true, false).hint(SWT.DEFAULT, 300).exclude(true).applyTo(detailsControl);
 		GridLayoutFactory.fillDefaults().applyTo(detailsControl);
 		detailStatusText = new Text(detailsControl, SWT.MULTI | SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(detailStatusText);
@@ -442,4 +443,5 @@ public class FeatureSelectionWizardPage extends WizardPage {
 	public void performHelp() {
 		getControl().notifyListeners(SWT.Help, new Event());
 	}
+
 }

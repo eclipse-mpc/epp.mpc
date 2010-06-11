@@ -91,6 +91,15 @@
                </appinfo>
             </annotation>
          </attribute>
+         <attribute name="selfContained" type="boolean">
+            <annotation>
+               <documentation>
+                  A boolean indicating if the catalog is self-contained.  Self-contained catalogs do not use 
+                  user-registered repository information for resolving dependencies when installing catalog solutions.
+                  If unspecified, the default value is 'true'.
+               </documentation>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 

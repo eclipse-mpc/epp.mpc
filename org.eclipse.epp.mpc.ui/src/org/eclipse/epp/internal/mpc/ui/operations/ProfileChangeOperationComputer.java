@@ -36,10 +36,7 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.equinox.p2.metadata.Version;
-import org.eclipse.equinox.p2.operations.InstallOperation;
 import org.eclipse.equinox.p2.operations.ProfileChangeOperation;
-import org.eclipse.equinox.p2.operations.UninstallOperation;
-import org.eclipse.equinox.p2.operations.UpdateOperation;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepository;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
@@ -54,6 +51,10 @@ import org.eclipse.swt.widgets.Display;
  * @author Steffen Pingel
  */
 public class ProfileChangeOperationComputer extends AbstractProvisioningOperation {
+
+	public enum ResolutionStrategy {
+		ALL_REPOSITORIES, SELECTED_REPOSITORIES, FALLBACK_STRATEGY
+	}
 
 	public enum OperationType {
 		/**
@@ -78,6 +79,8 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 
 	private IInstallableUnit[] ius;
 
+	private final ResolutionStrategy resolutionStrategy;
+
 	/**
 	 * @param operationType
 	 *            the type of operation to perform
@@ -88,36 +91,40 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 	 *            items
 	 */
 	public ProfileChangeOperationComputer(OperationType operationType, Collection<CatalogItem> items,
-			Set<FeatureDescriptor> featureDescriptors) {
+			Set<FeatureDescriptor> featureDescriptors, ResolutionStrategy resolutionStrategy) {
 		super(items);
 		if (featureDescriptors == null || featureDescriptors.isEmpty()) {
 			throw new IllegalArgumentException();
 		}
-		this.featureDescriptors = new ArrayList<FeatureDescriptor>(featureDescriptors);
 		if (operationType == null) {
 			throw new IllegalArgumentException();
 		}
+		if (resolutionStrategy == null) {
+			throw new IllegalArgumentException();
+		}
+		this.featureDescriptors = new ArrayList<FeatureDescriptor>(featureDescriptors);
 		this.operationType = operationType;
+		this.resolutionStrategy = resolutionStrategy;
 	}
 
 	public void run(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
 		try {
 			SubMonitor monitor = SubMonitor.convert(progressMonitor,
-					Messages.ProvisioningOperation_configuringProvisioningOperation, 100);
+					Messages.ProvisioningOperation_configuringProvisioningOperation, 1000);
 			try {
-				ius = computeInstallableUnits(monitor.newChild(50));
+				ius = computeInstallableUnits(monitor.newChild(500));
 
 				checkCancelled(monitor);
 
 				switch (operationType) {
 				case INSTALL:
-					operation = resolveInstall(monitor.newChild(50), ius, repositoryLocations.toArray(new URI[0]));
+					operation = resolveInstall(monitor.newChild(500), ius, repositoryLocations.toArray(new URI[0]));
 					break;
 				case UNINSTALL:
-					operation = resolveUninstall(monitor.newChild(50), ius, repositoryLocations.toArray(new URI[0]));
+					operation = resolveUninstall(monitor.newChild(500), ius, repositoryLocations.toArray(new URI[0]));
 					break;
 				case UPDATE:
-					operation = resolveUpdate(monitor.newChild(50), computeInstalledIus(ius),
+					operation = resolveUpdate(monitor.newChild(500), computeInstalledIus(ius),
 							repositoryLocations.toArray(new URI[0]));
 					break;
 				default:
@@ -153,25 +160,77 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 		return ius;
 	}
 
-	private InstallOperation resolveInstall(IProgressMonitor monitor, final IInstallableUnit[] ius, URI[] repositories)
-			throws CoreException {
-		InstallOperation operation = provisioningUI.getInstallOperation(Arrays.asList(ius), null);
-		resolveModal(monitor, operation);
-		return operation;
+	private interface ProfileChangeOperationFactory {
+		ProfileChangeOperation create(List<IInstallableUnit> ius) throws CoreException;
 	}
 
-	private UninstallOperation resolveUninstall(IProgressMonitor monitor, final IInstallableUnit[] ius,
+	private ProfileChangeOperation resolveInstall(IProgressMonitor monitor, final IInstallableUnit[] ius,
 			URI[] repositories) throws CoreException {
-		UninstallOperation operation = provisioningUI.getUninstallOperation(Arrays.asList(ius), repositories);
-		resolveModal(monitor, operation);
+		return resolve(monitor, new ProfileChangeOperationFactory() {
+			public ProfileChangeOperation create(List<IInstallableUnit> ius) throws CoreException {
+				return provisioningUI.getInstallOperation(ius, null);
+			}
+		}, ius, repositories);
+	}
+
+	private ProfileChangeOperation resolveUninstall(IProgressMonitor monitor, final IInstallableUnit[] ius,
+			URI[] repositories) throws CoreException {
+		return resolve(monitor, new ProfileChangeOperationFactory() {
+			public ProfileChangeOperation create(List<IInstallableUnit> ius) throws CoreException {
+				return provisioningUI.getUninstallOperation(ius, null);
+			}
+		}, ius, repositories);
+	}
+
+	private ProfileChangeOperation resolveUpdate(IProgressMonitor monitor, final IInstallableUnit[] ius,
+			URI[] repositories) throws CoreException {
+		return resolve(monitor, new ProfileChangeOperationFactory() {
+			public ProfileChangeOperation create(List<IInstallableUnit> ius) throws CoreException {
+				return provisioningUI.getUpdateOperation(ius, null);
+			}
+		}, ius, repositories);
+	}
+
+	private ProfileChangeOperation resolve(IProgressMonitor monitor, ProfileChangeOperationFactory operationFactory,
+			IInstallableUnit[] ius, URI[] repositories) throws CoreException {
+		List<IInstallableUnit> installableUnits = Arrays.asList(ius);
+		List<ResolutionStrategy> strategies = new ArrayList<ProfileChangeOperationComputer.ResolutionStrategy>(2);
+		switch (resolutionStrategy) {
+		case FALLBACK_STRATEGY:
+			strategies.add(ResolutionStrategy.SELECTED_REPOSITORIES);
+			strategies.add(ResolutionStrategy.ALL_REPOSITORIES);
+			break;
+		default:
+			strategies.add(resolutionStrategy);
+		}
+		ProfileChangeOperation operation = null;
+		final int workPerStrategy = 1000;
+		SubMonitor subMonitor = SubMonitor.convert(monitor, strategies.size() * workPerStrategy);
+		for (ResolutionStrategy strategy : strategies) {
+			operation = operationFactory.create(installableUnits);
+			if (strategy == ResolutionStrategy.SELECTED_REPOSITORIES) {
+				addRepositories(operation, repositories);
+			}
+			resolveModal(subMonitor.newChild(workPerStrategy), operation);
+			if (operation.getResolutionResult() != null
+					&& operation.getResolutionResult().getSeverity() != IStatus.ERROR) {
+				break;
+			}
+		}
 		return operation;
 	}
 
-	private UpdateOperation resolveUpdate(IProgressMonitor monitor, final IInstallableUnit[] ius, URI[] repositories)
-			throws CoreException {
-		UpdateOperation operation = provisioningUI.getUpdateOperation(Arrays.asList(ius), null);
-		resolveModal(monitor, operation);
-		return operation;
+	private void addRepositories(ProfileChangeOperation operation, URI[] repositories) {
+		// Add repositories to the operation
+		Set<URI> repositoryLocations = new HashSet<URI>(Arrays.asList(repositories));
+		addSecondaryRepositories(repositoryLocations);
+		URI[] locations = repositoryLocations.toArray(new URI[repositoryLocations.size()]);
+		operation.getProvisioningContext().setMetadataRepositories(locations);
+		operation.getProvisioningContext().setArtifactRepositories(locations);
+	}
+
+	private void addSecondaryRepositories(Set<URI> repositoryLocations) {
+
 	}
 
 	public void resolveModal(IProgressMonitor monitor, ProfileChangeOperation operation) throws CoreException {

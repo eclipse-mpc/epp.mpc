@@ -38,6 +38,7 @@ import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
+import org.eclipse.epp.internal.mpc.ui.operations.AbstractProvisioningOperation;
 import org.eclipse.epp.internal.mpc.ui.operations.FeatureDescriptor;
 import org.eclipse.epp.internal.mpc.ui.operations.ProfileChangeOperationComputer;
 import org.eclipse.epp.internal.mpc.ui.operations.ProfileChangeOperationComputer.OperationType;
@@ -67,6 +68,8 @@ import org.eclipse.ui.internal.browser.WorkbenchBrowserSupport;
 import org.eclipse.ui.statushandlers.StatusManager;
 
 /**
+ * A wizard for interacting with a marketplace service.
+ * 
  * @author David Green
  */
 public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile, IMarketplaceWebBrowser {
@@ -92,6 +95,8 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 	private Set<CatalogItem> operationNewInstallItems;
 
 	private boolean initialSelectionInitialized;
+
+	private Set<URI> addedRepositoryLocations;
 
 	public MarketplaceWizard(MarketplaceCatalog catalog, MarketplaceCatalogConfiguration configuration) {
 		super(catalog, configuration);
@@ -262,8 +267,9 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	private void doDefaultCatalogSelection() {
 		if (getConfiguration().getCatalogDescriptor() == null) {
-			String defaultCatalogUrl = MarketplaceClientUiPlugin.getInstance().getPreferenceStore().getString(
-					PREF_DEFAULT_CATALOG);
+			String defaultCatalogUrl = MarketplaceClientUiPlugin.getInstance()
+					.getPreferenceStore()
+					.getString(PREF_DEFAULT_CATALOG);
 			// if a preferences was set, we default to that catalog descriptor
 			if (defaultCatalogUrl != null && defaultCatalogUrl.length() > 0) {
 				for (CatalogDescriptor descriptor : getConfiguration().getCatalogDescriptors()) {
@@ -288,11 +294,14 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	@Override
 	public void dispose() {
+		removeAddedRepositoryLocations();
 		if (getConfiguration().getCatalogDescriptor() != null) {
 			// remember the catalog for next time.
 			try {
-				MarketplaceClientUiPlugin.getInstance().getPreferenceStore().setValue(PREF_DEFAULT_CATALOG,
-						getConfiguration().getCatalogDescriptor().getUrl().toURI().toString());
+				MarketplaceClientUiPlugin.getInstance()
+						.getPreferenceStore()
+						.setValue(PREF_DEFAULT_CATALOG,
+								getConfiguration().getCatalogDescriptor().getUrl().toURI().toString());
 			} catch (URISyntaxException e) {
 				// ignore
 			}
@@ -317,6 +326,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				provisioningJob.addJobChangeListener(new ProvisioningJobListener(operationNewInstallItems));
 			}
 			ProvisioningUI.getDefaultUI().schedule(provisioningJob, StatusManager.SHOW | StatusManager.LOG);
+			addedRepositoryLocations = null;
 			return true;
 		}
 		return false;
@@ -457,14 +467,20 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 	}
 
 	public void updateProfileChangeOperation() {
+		removeAddedRepositoryLocations();
+		addedRepositoryLocations = null;
 		profileChangeOperation = null;
 		operationIUs = null;
 		if (getSelectionModel().computeProvisioningOperationViable()) {
+			ProfileChangeOperationComputer provisioningOperation = null;
 			try {
 				final Map<CatalogItem, Operation> itemToOperation = getSelectionModel().getItemToOperation();
+				final Set<CatalogItem> selectedItems = getSelectionModel().getSelectedCatalogItems();
 				OperationType operationType = null;
-				List<CatalogItem> items = new ArrayList<CatalogItem>();
 				for (Map.Entry<CatalogItem, Operation> entry : itemToOperation.entrySet()) {
+					if (!selectedItems.contains(entry.getKey())) {
+						continue;
+					}
 					OperationType entryOperationType = entry.getValue().getOperationType();
 					if (entryOperationType != null) {
 						if (operationType == null || operationType == OperationType.UPDATE) {
@@ -477,15 +493,19 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 								}
 							}
 						}
-						items.add(entry.getKey());
 					}
 				}
-				ProfileChangeOperationComputer provisioningOperation = new ProfileChangeOperationComputer(
-						operationType, itemToOperation.keySet(), getSelectionModel().getSelectedFeatureDescriptors());
+				provisioningOperation = new ProfileChangeOperationComputer(
+						operationType,
+						selectedItems,
+						getSelectionModel().getSelectedFeatureDescriptors(),
+						getConfiguration().getCatalogDescriptor().isInstallFromAllRepositories() ? ProfileChangeOperationComputer.ResolutionStrategy.FALLBACK_STRATEGY
+								: ProfileChangeOperationComputer.ResolutionStrategy.SELECTED_REPOSITORIES);
 				getContainer().run(true, true, provisioningOperation);
 
 				profileChangeOperation = provisioningOperation.getOperation();
 				operationIUs = provisioningOperation.getIus();
+				addedRepositoryLocations = provisioningOperation.getAddedRepositoryLocations();
 				operationNewInstallItems = computeNewInstallCatalogItems();
 
 				final IStatus result = profileChangeOperation.getResolutionResult();
@@ -530,11 +550,20 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			} catch (InterruptedException e) {
 				// canceled
+			} finally {
+				if (provisioningOperation != null) {
+					addedRepositoryLocations = provisioningOperation.getAddedRepositoryLocations();
+				}
 			}
 		}
 		if (getContainer().getCurrentPage() == featureSelectionWizardPage) {
 			featureSelectionWizardPage.updateMessage();
 		}
+	}
+
+	private void removeAddedRepositoryLocations() {
+		AbstractProvisioningOperation.removeRepositoryLocations(addedRepositoryLocations);
+		addedRepositoryLocations = null;
 	}
 
 	private Set<CatalogItem> computeNewInstallCatalogItems() {

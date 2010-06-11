@@ -29,6 +29,8 @@ public final class CatalogDescriptor {
 
 	private ImageDescriptor icon;
 
+	private boolean installFromAllRepositories;
+
 	public CatalogDescriptor() {
 	}
 
@@ -100,6 +102,25 @@ public final class CatalogDescriptor {
 		this.label = label;
 	}
 
+	/**
+	 * Indicate if install operations are resolved against all repositories registered in the current workspace
+	 * configuration. When false installation resolves only against repositories of the selected catalog items including
+	 * repositories considered as default for the catalog. Currently there is no way to define catalog default
+	 * repositories, however it is expected that this may change in the future. The default value is false.
+	 * 
+	 * @return true if installation occurs from all repositories, otherwise false.
+	 */
+	public boolean isInstallFromAllRepositories() {
+		return installFromAllRepositories;
+	}
+
+	/**
+	 * @see #isInstallFromAllRepositories()
+	 */
+	public void setInstallFromAllRepositories(boolean installFromAllRepositories) {
+		this.installFromAllRepositories = installFromAllRepositories;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -110,18 +131,23 @@ public final class CatalogDescriptor {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		CatalogDescriptor other = (CatalogDescriptor) obj;
 		if (url == null) {
-			if (other.url != null)
+			if (other.url != null) {
 				return false;
-		} else if (!url.equals(other.url))
+			}
+		} else if (!url.equals(other.url)) {
 			return false;
+		}
 		return true;
 	}
 
