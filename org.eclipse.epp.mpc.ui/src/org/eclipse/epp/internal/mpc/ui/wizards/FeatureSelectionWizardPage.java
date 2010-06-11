@@ -68,7 +68,7 @@ public class FeatureSelectionWizardPage extends WizardPage {
 			styledString.append(getText(element));
 			if (element instanceof CatalogItemEntry) {
 				CatalogItemEntry entry = (CatalogItemEntry) element;
-				styledString.append("  " + entry.getItem().getSiteUrl(), StyledString.QUALIFIER_STYLER);
+				styledString.append("  " + entry.getItem().getSiteUrl(), StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
 			}
 			return styledString;
 		}
