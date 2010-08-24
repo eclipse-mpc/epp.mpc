@@ -28,7 +28,9 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTError;
 import org.eclipse.swt.SWTException;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Color;
@@ -85,6 +87,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 	private final IMarketplaceWebBrowser browser;
 
+	private static Boolean browserAvailable;
+
 	public DiscoveryItem(Composite parent, int style, DiscoveryResources resources, IShellProvider shellProvider,
 			IMarketplaceWebBrowser browser, final T connector, MarketplaceViewer viewer) {
 		super(parent, style, resources, connector);
@@ -113,8 +117,11 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		GridLayoutFactory.fillDefaults().applyTo(checkboxContainer);
 
 		iconLabel = new Label(checkboxContainer, SWT.NONE);
-		GridDataFactory.swtDefaults().align(SWT.CENTER, SWT.CENTER).hint(MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT).minSize(
-				MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT).applyTo(iconLabel);
+		GridDataFactory.swtDefaults()
+				.align(SWT.CENTER, SWT.CENTER)
+				.hint(MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT)
+				.minSize(MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT)
+				.applyTo(iconLabel);
 		if (connector.getIcon() != null) {
 			try {
 				Image image = resources.getIconImage(connector.getSource(), connector.getIcon(), 32, false);
@@ -136,8 +143,9 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 			}
 		}
 		if (iconLabel.getImage() == null) {
-			iconLabel.setImage(MarketplaceClientUiPlugin.getInstance().getImageRegistry().get(
-					MarketplaceClientUiPlugin.NO_ICON_PROVIDED));
+			iconLabel.setImage(MarketplaceClientUiPlugin.getInstance()
+					.getImageRegistry()
+					.get(MarketplaceClientUiPlugin.NO_ICON_PROVIDED));
 		}
 
 		nameLabel = new Label(this, SWT.NONE);
@@ -145,7 +153,9 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		nameLabel.setFont(resources.getSmallHeaderFont());
 		nameLabel.setText(connector.getName());
 
-		if (hasTooltip(connector) || connector.isInstalled()) {
+		// bug 323257: don't display if there's no internal browser
+		boolean internalBrowserAvailable = computeBrowserAvailable(this);
+		if (internalBrowserAvailable && (hasTooltip(connector) || connector.isInstalled())) {
 			ToolBar toolBar = new ToolBar(this, SWT.FLAT);
 			GridDataFactory.fillDefaults().align(SWT.END, SWT.CENTER).applyTo(toolBar);
 
@@ -223,14 +233,32 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		}
 	}
 
+	private synchronized boolean computeBrowserAvailable(Composite composite) {
+		if (browserAvailable == null) {
+			// SWT Snippet148: detect if a browser is available by attempting to create one
+			// SWTError is thrown if not available.
+			try {
+				Browser browser = new Browser(composite, SWT.NULL);
+				browser.dispose();
+				browserAvailable = true;
+			} catch (SWTError e) {
+				browserAvailable = false;
+			}
+		}
+		return browserAvailable;
+	}
+
 	private boolean hasInstallMetadata() {
 		return !connector.getInstallableUnits().isEmpty() && connector.getSiteUrl() != null;
 	}
 
 	protected void createProviderLabel(Composite parent) {
 		providerLabel = new Link(parent, SWT.RIGHT);
-		GridDataFactory.fillDefaults().span(1, 1).align(SWT.BEGINNING, SWT.CENTER).grab(true, false).applyTo(
-				providerLabel);
+		GridDataFactory.fillDefaults()
+				.span(1, 1)
+				.align(SWT.BEGINNING, SWT.CENTER)
+				.grab(true, false)
+				.applyTo(providerLabel);
 		// always disabled color to make it less prominent
 		providerLabel.setForeground(resources.getColorDisabled());
 
