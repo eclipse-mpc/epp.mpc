@@ -312,6 +312,10 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			SearchResult result = marketplaceService.search(market, category, queryText, new SubProgressMonitor(
 					monitor, totalWork / 2));
 			handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
+			if (result.getNodes().isEmpty()) {
+				catalogCategory.setMatchCount(0);
+				addCatalogItem(catalogCategory);
+			}
 		} finally {
 			monitor.done();
 		}
