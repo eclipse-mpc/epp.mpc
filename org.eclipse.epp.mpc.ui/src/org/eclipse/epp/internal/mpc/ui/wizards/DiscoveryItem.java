@@ -21,6 +21,7 @@ import org.eclipse.epp.internal.mpc.ui.util.Util;
 import org.eclipse.equinox.internal.p2.discovery.AbstractCatalogSource;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.discovery.model.Overview;
+import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.AbstractDiscoveryItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryResources;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -33,6 +34,8 @@ import org.eclipse.swt.SWTException;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -49,6 +52,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Widget;
+import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 /**
  * @author Steffen Pingel
@@ -165,6 +169,18 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 				infoButton.setToolTipText(Messages.DiscoveryItem_showOverview);
 				hookTooltip(toolBar, infoButton, this, nameLabel, connector.getSource(), connector.getOverview(), null);
 			}
+		} else if (!internalBrowserAvailable && hasOverviewUrl(connector)) {
+			ToolBar toolBar = new ToolBar(this, SWT.FLAT);
+			GridDataFactory.fillDefaults().align(SWT.END, SWT.CENTER).applyTo(toolBar);
+			infoButton = new ToolItem(toolBar, SWT.PUSH);
+			infoButton.setImage(resources.getInfoImage());
+			infoButton.setToolTipText(Messages.DiscoveryItem_showOverview);
+			infoButton.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					WorkbenchUtil.openUrl(connector.getOverview().getUrl().trim(), IWorkbenchBrowserSupport.AS_EXTERNAL);
+				}
+			});
 		} else {
 			Label label = new Label(this, SWT.NULL);
 			label.setText(" "); //$NON-NLS-1$
@@ -231,6 +247,11 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 					.spacing(5, 0)
 					.applyTo(composite);
 		}
+	}
+
+	private boolean hasOverviewUrl(CatalogItem connector) {
+		return connector.getOverview() != null && connector.getOverview().getUrl() != null
+				&& connector.getOverview().getUrl().trim().length() > 0;
 	}
 
 	private synchronized boolean computeBrowserAvailable(Composite composite) {
