@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<cs:cspec xmlns:cs="http://www.eclipse.org/buckminster/CSpec-1.0" name="org.eclipse.epp.mpc.releng" componentType="buckminster" version="1.0.0">
-    <cs:dependencies>
-        <cs:dependency name="org.eclipse.epp.mpc.site" componentType="eclipse.feature"/>
-        <cs:dependency name="org.eclipse.rcp" componentType="eclipse.feature"/>
-        <cs:dependency name="org.eclipse.epp.mpc.tests" componentType="osgi.bundle"/>
-        <cs:dependency name="org.apache.commons.httpclient" componentType="osgi.bundle"/>
-    </cs:dependencies>
-</cs:cspec>
