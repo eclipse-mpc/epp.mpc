@@ -3,18 +3,16 @@
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <parent>
     <groupId>org.eclipse.epp.mpc</groupId>
     <artifactId>mpc-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
   </parent>
-
   <artifactId>org.eclipse.epp.mpc.tests</artifactId>
   <packaging>eclipse-test-plugin</packaging>
-
-  <name>EPP Marketplace Client Tests</name>
-
+  <properties>
+    <test-suite>org.eclipse.epp.mpc.tests.AllTests</test-suite>
+  </properties>
   <build>
     <plugins>
       <plugin>
@@ -22,13 +20,32 @@
         <artifactId>maven-osgi-test-plugin</artifactId>
         <version>${tycho-version}</version>
         <configuration>
-          <excludes>
-            <exclude>**/Test*.class</exclude>
-          </excludes>
           <useUIHarness>true</useUIHarness>
+          <forkedProcessTimeoutInSeconds>3600</forkedProcessTimeoutInSeconds>
+          <product>org.eclipse.sdk.ide</product>
+          <application>org.eclipse.ui.ide.workbench</application>
+          <testSuite>org.eclipse.epp.mpc.tests</testSuite>
+          <testClass>${test-suite}</testClass>
+          <argLine>-Xmx256m -XX:MaxPermSize=128m -Djava.io.tmpdir=${project.build.directory} ${test-args}</argLine>
+          <appArgLine>${test-app-args}</appArgLine> 
+          <dependencies>
+            <dependency>
+              <type>p2-installable-unit</type>
+              <artifactId>org.eclipse.sdk.feature.group</artifactId>
+              <version>${platform-version}</version>
+            </dependency>
+            <dependency>
+              <type>p2-installable-unit</type>
+              <artifactId>org.eclipse.epp.mpc.feature.group</artifactId>
+              <version>0.0.0</version>
+            </dependency>
+          </dependencies>		  
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.sonatype.tycho</groupId>
+        <artifactId>maven-osgi-source-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
-  
 </project>
