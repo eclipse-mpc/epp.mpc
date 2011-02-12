@@ -55,17 +55,12 @@
   </licenses>
 
   <modules>
-    <!-- plugins -->
     <module>org.eclipse.epp.mpc.core</module>
+	<module>org.eclipse.epp.mpc.feature</module>
     <module>org.eclipse.epp.mpc.help.ui</module>
-    <module>org.eclipse.epp.mpc.ui</module>
-    <!-- tests -->
     <module>org.eclipse.epp.mpc.tests</module>
     <module>org.eclipse.epp.mpc.tests.catalog</module>
-    <!-- features -->
-    <module>org.eclipse.epp.mpc.feature</module>
-    <!-- site -->
-    <module>org.eclipse.epp.mpc.site</module>
+    <module>org.eclipse.epp.mpc.ui</module>
   </modules>
 
   <repositories>
@@ -124,6 +119,12 @@
 		</repository>
 	  </repositories>
     </profile>
+    <profile>
+      <id>dist</id>
+	  <modules>
+		<module>org.eclipse.epp.mpc.site</module>
+	  </modules>
+	</profile>
     <profile>
       <id>hudson.eclipse.org</id>
       <activation>
