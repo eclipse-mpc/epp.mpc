@@ -21,6 +21,8 @@ import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -181,7 +183,16 @@ public class MarketplacePage extends CatalogPage {
 				previousSelectionSize = newSelectionSize;
 			}
 		});
+		getViewer().addPropertyChangeListener(new IPropertyChangeListener() {
 
+			public void propertyChange(PropertyChangeEvent event) {
+				if (event.getProperty().equals(MarketplaceViewer.CONTENT_TYPE_PROPERTY)) {
+					if (event.getNewValue() == ContentType.SEARCH) {
+						tabFolder.setSelection(searchTabItem);
+					}
+				}
+			}
+		});
 		setControl(parent == originalParent ? tabFolder : parent);
 		MarketplaceClientUi.setDefaultHelp(getControl());
 	}

@@ -102,32 +102,32 @@ public class DefaultMarketplaceServiceTest {
 		assertEquals(category.getUrl(), result.getUrl());
 	}
 
-//	
-//	@Test
-//	public void testGetMarket() throws CoreException {
-////		Failing due to bug 302670: REST API market response inconsistency
-////		https://bugs.eclipse.org/bugs/show_bug.cgi?id=302670
-//		List<Market> markets = marketplaceService.listMarkets(new NullProgressMonitor());
-//		assertNotNull(markets);
-//		assertFalse(markets.isEmpty());
-//
-//		final String marketName = "Tools";
-//		
-//		Market market = null;
-//		for (Market m: markets) {
-//			if (marketName.equals(m.getName())) {
-//				market = m;
-//			}
-//		}
-//		assertNotNull("Expected market "+marketName,market);
-//		
-//		Market result = marketplaceService.getMarket(market, new NullProgressMonitor());
-//		
-//		assertEquals(market.getId(),result.getId());
-//		assertEquals(market.getName(),result.getName());
-//		assertEquals(market.getUrl(),result.getUrl());
-//	}
-//	
+	//	
+	//	@Test
+	//	public void testGetMarket() throws CoreException {
+	////		Failing due to bug 302670: REST API market response inconsistency
+	////		https://bugs.eclipse.org/bugs/show_bug.cgi?id=302670
+	//		List<Market> markets = marketplaceService.listMarkets(new NullProgressMonitor());
+	//		assertNotNull(markets);
+	//		assertFalse(markets.isEmpty());
+	//
+	//		final String marketName = "Tools";
+	//		
+	//		Market market = null;
+	//		for (Market m: markets) {
+	//			if (marketName.equals(m.getName())) {
+	//				market = m;
+	//			}
+	//		}
+	//		assertNotNull("Expected market "+marketName,market);
+	//		
+	//		Market result = marketplaceService.getMarket(market, new NullProgressMonitor());
+	//		
+	//		assertEquals(market.getId(),result.getId());
+	//		assertEquals(market.getName(),result.getName());
+	//		assertEquals(market.getUrl(),result.getUrl());
+	//	}
+	//
 	@SuppressWarnings("null")
 	@Test
 	public void search() throws CoreException {
@@ -178,8 +178,8 @@ public class DefaultMarketplaceServiceTest {
 
 	@Test
 	public void popular() throws CoreException {
-//	 NOTE: this test is failing until the following bug is fixed
-//			bug 303275: REST API popular returns count of 6 with 10 nodes returned
+		//	 NOTE: this test is failing until the following bug is fixed
+		//			bug 303275: REST API popular returns count of 6 with 10 nodes returned
 		SearchResult result = marketplaceService.popular(new NullProgressMonitor());
 		assertSearchResultSanity(result);
 	}

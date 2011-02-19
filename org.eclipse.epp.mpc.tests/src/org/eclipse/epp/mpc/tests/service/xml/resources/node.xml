@@ -12,12 +12,20 @@
 	    <node id="1065" name="Mylyn WikiText - Lightweight Markup Editing, Tools and Framework" url="http://www.eclipseplugincentral.net/content/mylyn-wikitext-lightweight-markup-editing-tools-and-framework">
 	    <type>resource</type>
 	    <categories>
-<category id='6' name='Editor' url='http://www.eclipseplugincentral.net/taxonomy/term/6'/>
-<category id='17' name='Tools' url='http://www.eclipseplugincentral.net/taxonomy/term/17'/>
-<category id='18' name='UI' url='http://www.eclipseplugincentral.net/taxonomy/term/18'/>
-<category id='25' name='Rich Client Applications' url='http://www.eclipseplugincentral.net/taxonomy/term/25'/>
-<category id='38' name='Mylyn Connectors' url='http://www.eclipseplugincentral.net/category/categories/mylyn-connectors'/>
-</categories>
+			<category id='6' name='Editor' url='http://www.eclipseplugincentral.net/taxonomy/term/6'/>
+			<category id='17' name='Tools' url='http://www.eclipseplugincentral.net/taxonomy/term/17'/>
+			<category id='18' name='UI' url='http://www.eclipseplugincentral.net/taxonomy/term/18'/>
+			<category id='25' name='Rich Client Applications' url='http://www.eclipseplugincentral.net/taxonomy/term/25'/>
+			<category id='38' name='Mylyn Connectors' url='http://www.eclipseplugincentral.net/category/categories/mylyn-connectors'/>
+		</categories>
+		<tags>
+			<tag id='44' name='svn' url='http://marketplace.eclipse.org/category/free-tagging/svn'/>
+			<tag id='45' name='subversion' url='http://marketplace.eclipse.org/category/free-tagging/subversion'/>
+			<tag id='46' name='team provider' url='http://marketplace.eclipse.org/category/free-tagging/team-provider'/>
+			<tag id='88' name='mylyn' url='http://marketplace.eclipse.org/category/free-tagging/mylyn'/>
+			<tag id='370' name='alm' url='http://marketplace.eclipse.org/category/free-tagging/alm'/>
+			<tag id='1074' name='version control' url='http://marketplace.eclipse.org/category/free-tagging/version-control'/>
+		</tags>
 	    <owner>David Green</owner>
 
 	    <favorited>3</favorited>

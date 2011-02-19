@@ -30,6 +30,7 @@ import org.eclipse.epp.internal.mpc.core.service.Marketplace;
 import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.core.service.Recent;
 import org.eclipse.epp.internal.mpc.core.service.Search;
+import org.eclipse.epp.internal.mpc.core.service.Tag;
 import org.eclipse.epp.internal.mpc.core.service.xml.Unmarshaller;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,6 +42,7 @@ import org.xml.sax.XMLReader;
 
 /**
  * @author David Green
+ * @author Benjamin Muskalla
  */
 @RunWith(BlockJUnit4ClassRunner.class)
 public class UnmarshallerTest {
@@ -100,10 +102,10 @@ public class UnmarshallerTest {
 		assertEquals(9, category.getNode().size());
 
 		Node node = category.getNode().get(0);
-//		<node id="641" name="Tasktop Pro">
-//        <url>http://www.eclipseplugincentral.net/content/tasktop-pro</url>
-//        <favorited>3</favorited>        
-//      </node>   
+		//		<node id="641" name="Tasktop Pro">
+		//        <url>http://www.eclipseplugincentral.net/content/tasktop-pro</url>
+		//        <favorited>3</favorited>
+		//      </node>
 		assertEquals("641", node.getId());
 		assertEquals("Tasktop Pro", node.getName());
 		assertEquals("http://www.eclipseplugincentral.net/content/tasktop-pro", node.getUrl());
@@ -176,8 +178,8 @@ public class UnmarshallerTest {
 		assertEquals("Yves YANG", node.getOwner());
 		assertEquals(Integer.valueOf(0), node.getFavorited());
 		assertNotNull(node.getBody());
-//bug 303149		assertTrue(node.getBody().startsWith("<P><STRONG>eUML2 for Java<"));
-//bug 303149		assertTrue(node.getBody().endsWith("</LI></UL>"));
+		//bug 303149		assertTrue(node.getBody().startsWith("<P><STRONG>eUML2 for Java<"));
+		//bug 303149		assertTrue(node.getBody().endsWith("</LI></UL>"));
 		assertTrue(node.getFoundationmember());
 		assertEquals("http://www.soyatec.com/", node.getHomepageurl());
 		assertEquals("http://www.soyatec.com/euml2/images/product_euml2_110x80.png", node.getImage());
@@ -355,6 +357,20 @@ public class UnmarshallerTest {
 			}
 		}
 
+	}
+
+	@Test
+	public void tags() throws Exception {
+		Object model = process("resources/node.xml");
+		Marketplace marketplace = (Marketplace) model;
+		Node node = marketplace.getNode().get(0);
+
+		assertNotNull(node.getTags());
+		assertEquals(5, node.getCategories().getCategory().size());
+		Tag tag = node.getTags().getTags().get(3);
+		assertEquals("mylyn", tag.getName());
+		assertEquals("88", tag.getId());
+		assertEquals("http://marketplace.eclipse.org/category/free-tagging/mylyn", tag.getUrl());
 	}
 
 	private Object process(String resource) throws IOException, SAXException {

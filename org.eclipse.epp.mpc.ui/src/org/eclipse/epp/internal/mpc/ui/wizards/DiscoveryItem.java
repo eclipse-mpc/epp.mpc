@@ -15,6 +15,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import org.eclipse.epp.internal.mpc.core.service.Node;
+import org.eclipse.epp.internal.mpc.core.service.Tag;
+import org.eclipse.epp.internal.mpc.core.service.Tags;
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
@@ -90,6 +92,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 	private Link installInfoLink;
 
 	private final IMarketplaceWebBrowser browser;
+
+	private Link tagsLink;
 
 	private static Boolean browserAvailable;
 
@@ -225,9 +229,9 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 				buttonController = new ItemButtonController(viewer, this, button, secondaryButton);
 
-				GridDataFactory.swtDefaults().align(SWT.END, SWT.CENTER).applyTo(button);
+				GridDataFactory.swtDefaults().align(SWT.END, SWT.TOP).applyTo(button);
 				if (secondaryButton != null) {
-					GridDataFactory.swtDefaults().align(SWT.END, SWT.CENTER).applyTo(secondaryButton);
+					GridDataFactory.swtDefaults().align(SWT.END, SWT.TOP).applyTo(secondaryButton);
 				}
 			} else {
 				installInfoLink = new Link(composite, SWT.NULL);
@@ -241,11 +245,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 				});
 				GridDataFactory.swtDefaults().align(SWT.END, SWT.CENTER).applyTo(installInfoLink);
 			}
-			GridLayoutFactory.fillDefaults()
-					.numColumns(composite.getChildren().length)
-					.margins(0, 0)
-					.spacing(5, 0)
-					.applyTo(composite);
+			createTagsLabel(composite);
+			GridLayoutFactory.fillDefaults().numColumns(2).margins(0, 0).spacing(5, 0).applyTo(composite);
 		}
 	}
 
@@ -285,6 +286,33 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 		providerLabel.setText(NLS.bind(Messages.DiscoveryItem_byProviderLicense, connector.getProvider(),
 				connector.getLicense()));
+	}
+
+	protected void createTagsLabel(Composite parent) {
+		tagsLink = new Link(parent, SWT.NONE);
+		GridDataFactory.fillDefaults().span(1, 1).align(SWT.BEGINNING, SWT.CENTER).grab(true, false).applyTo(tagsLink);
+
+		StringBuffer tagsText = new StringBuffer();
+		Tags tags = ((Node) connector.getData()).getTags();
+		if (tags == null) {
+			return;
+		}
+		for (Tag tag : tags.getTags()) {
+			String tagName = tag.getName();
+			tagsText.append("<a href=\""); //$NON-NLS-1$
+			tagsText.append(tagName);
+			tagsText.append("\">"); //$NON-NLS-1$
+			tagsText.append(tagName.replace("&", "&&")); //$NON-NLS-1$//$NON-NLS-2$
+			tagsText.append("</a>"); //$NON-NLS-1$
+			tagsText.append(" "); //$NON-NLS-1$
+		}
+		tagsLink.setText(tagsText.toString());
+		tagsLink.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				viewer.doQueryForTag(event.text);
+			}
+		});
 	}
 
 	protected boolean hasTooltip(final CatalogItem connector) {

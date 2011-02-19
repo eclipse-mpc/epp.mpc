@@ -13,6 +13,7 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -56,6 +57,7 @@ import org.eclipse.ui.statushandlers.StatusManager;
 /**
  * @author Steffen Pingel
  * @author David Green
+ * @author Benjamin Muskalla
  */
 public class MarketplaceViewer extends CatalogViewer {
 
@@ -96,6 +98,8 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	private ContentType contentType = ContentType.SEARCH;
 
+	public static String CONTENT_TYPE_PROPERTY = "contentType"; //$NON-NLS-1$
+
 	private final SelectionModel selectionModel;
 
 	private String queryText;
@@ -111,6 +115,8 @@ public class MarketplaceViewer extends CatalogViewer {
 	private String findText;
 
 	private final MarketplaceWizard wizard;
+
+	private final List<IPropertyChangeListener> listeners = new LinkedList<IPropertyChangeListener>();
 
 	public MarketplaceViewer(Catalog catalog, IShellProvider shellProvider, MarketplaceWizard wizard) {
 		super(catalog, shellProvider, wizard.getContainer(), wizard.getConfiguration());
@@ -229,6 +235,21 @@ public class MarketplaceViewer extends CatalogViewer {
 		doQuery(queryMarket, queryCategory, queryText);
 	}
 
+	public void doQueryForTag(String tag) {
+		ContentType newContentType = ContentType.SEARCH;
+		ContentType oldContentType = contentType;
+		contentType = newContentType;
+		fireContentTypeChange(oldContentType, newContentType);
+		doQuery(null, null, tag);
+	}
+
+	private void fireContentTypeChange(ContentType oldValue, ContentType newValue) {
+		Object source = this;
+		String property = CONTENT_TYPE_PROPERTY;
+		firePropertyChangeEvent(new PropertyChangeEvent(source, property, oldValue, newValue));
+	}
+
+
 	private void doQuery(final Market market, final Category category, final String queryText) {
 		try {
 			final ContentType queryType = contentType;
@@ -323,9 +344,25 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	public void setContentType(ContentType contentType) {
 		if (this.contentType != contentType) {
+			ContentType oldContentType = this.contentType;
 			this.contentType = contentType;
+			fireContentTypeChange(oldContentType, contentType);
 			setHeaderVisible(contentType == ContentType.SEARCH || contentType == ContentType.SELECTION);
 			doQuery();
+		}
+	}
+
+	public void addPropertyChangeListener(IPropertyChangeListener listener) {
+		listeners.add(listener);
+	}
+
+	public void removePropertyChangeListener(IPropertyChangeListener listener) {
+		listeners.remove(listener);
+	}
+
+	private void firePropertyChangeEvent(PropertyChangeEvent event) {
+		for (IPropertyChangeListener listener : listeners) {
+			listener.propertyChange(event);
 		}
 	}
 
