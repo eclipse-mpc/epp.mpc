@@ -53,6 +53,14 @@
 			</xs:complexContent>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="tag">
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="identifiable">
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="node">
 		<xs:complexType>
 			<xs:complexContent>
@@ -74,6 +82,12 @@
 							minOccurs="0">
 		                    <xs:annotation>
 		                    	<xs:documentation>the categories of this listing.</xs:documentation>
+		                    </xs:annotation>
+						</xs:element>
+						<xs:element ref="tags" maxOccurs="1"
+							minOccurs="0">
+		                    <xs:annotation>
+		                    	<xs:documentation>the tags of this listing.</xs:documentation>
 		                    </xs:annotation>
 						</xs:element>
 						<xs:element name="owner" type="xs:string" maxOccurs="1"
@@ -151,6 +165,13 @@
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element ref="category" maxOccurs="unbounded" minOccurs="0"></xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="tags">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="tag" maxOccurs="unbounded" minOccurs="0"></xs:element>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>

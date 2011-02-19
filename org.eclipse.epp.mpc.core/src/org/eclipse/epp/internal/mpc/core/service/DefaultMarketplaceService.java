@@ -197,18 +197,18 @@ public class DefaultMarketplaceService implements MarketplaceService {
 	}
 
 	public SearchResult search(Market market, Category category, String queryText, IProgressMonitor monitor)
-			throws CoreException {
+	throws CoreException {
 		// per bug 302825 - http://www.eclipseplugincentral.net/api/v2/search/apachesolr_search/e?filters=tid:31%20tid:38
 		SearchResult result = new SearchResult();
 		if (queryText == null || queryText.trim().length() == 0) {
-			// search with no text gives us HTTP 404 
+			// search with no text gives us HTTP 404
 			result.setMatchCount(0);
 			result.setNodes(new ArrayList<Node>());
 		} else {
 			String relativeUrl;
 			try {
 				relativeUrl = API_URI_SUFFIX + "/search/apachesolr_search/" //$NON-NLS-1$
-						+ URLEncoder.encode(queryText.trim(), UTF_8);
+				+ URLEncoder.encode(queryText.trim(), UTF_8);
 				String queryString = ""; //$NON-NLS-1$
 				if (market != null || category != null) {
 					queryString += "filters="; //$NON-NLS-1$
@@ -315,7 +315,7 @@ public class DefaultMarketplaceService implements MarketplaceService {
 			}
 			if (iuIdsAndVersions != null && !iuIdsAndVersions.isEmpty()) {
 				for (String iuAndVersion : iuIdsAndVersions) {
-					parameters.add(new NameValuePair("iu", iuAndVersion)); //$NON-NLS-1$	
+					parameters.add(new NameValuePair("iu", iuAndVersion)); //$NON-NLS-1$
 				}
 			}
 			parameters.add(new NameValuePair("detailedMessage", resolutionDetails)); //$NON-NLS-1$
@@ -352,7 +352,7 @@ public class DefaultMarketplaceService implements MarketplaceService {
 
 	@SuppressWarnings("restriction")
 	private Marketplace processRequest(String baseUri, String relativePath, IProgressMonitor monitor)
-			throws CoreException {
+	throws CoreException {
 		checkConfiguration();
 		if (baseUri == null || relativePath == null) {
 			throw new IllegalArgumentException();
@@ -436,8 +436,8 @@ public class DefaultMarketplaceService implements MarketplaceService {
 				try {
 					xmlReader.parse(new InputSource(reader));
 				} catch (final SAXException e) {
-					MarketplaceClientCore.error(NLS.bind(Messages.DefaultMarketplaceService_parseError,
-							location.toString()), e);
+					MarketplaceClientCore.error(
+							NLS.bind(Messages.DefaultMarketplaceService_parseError, location.toString()), e);
 					throw new IOException(e.getMessage()) {
 						@Override
 						public Throwable getCause() {
