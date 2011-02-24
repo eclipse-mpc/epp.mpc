@@ -231,7 +231,7 @@ public class UnmarshallerTest {
 		assertNull(node.getImage());
 		assertEquals("1.0.1", node.getVersion());
 		assertEquals("Other", node.getLicense());
-		assertEquals("Ilja PreuÃŸ", node.getCompanyname());
+		assertEquals("Ilja Preu\u00C3\u0178", node.getCompanyname());
 		assertEquals("Production/Stable", node.getStatus());
 		assertEquals("3.5", node.getEclipseversion());
 		assertEquals("https://sourceforge.net/projects/e-rat/support", node.getSupporturl());
