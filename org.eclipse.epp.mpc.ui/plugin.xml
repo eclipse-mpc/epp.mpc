@@ -66,5 +66,8 @@
 			<property name="component" value="wizard"/>
 		</mapping>
    </extension>
-
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup class="org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceDropAdapter"/>
+   </extension>
 </plugin>

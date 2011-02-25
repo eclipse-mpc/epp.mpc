@@ -162,7 +162,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	boolean wantInitializeInitialSelection() {
 		return !initialSelectionInitialized
-				&& (getConfiguration().getInitialState() != null || getConfiguration().getInitialOperationByNodeId() != null);
+		&& (getConfiguration().getInitialState() != null || getConfiguration().getInitialOperationByNodeId() != null);
 	}
 
 	@Override
@@ -268,8 +268,8 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 	private void doDefaultCatalogSelection() {
 		if (getConfiguration().getCatalogDescriptor() == null) {
 			String defaultCatalogUrl = MarketplaceClientUiPlugin.getInstance()
-					.getPreferenceStore()
-					.getString(PREF_DEFAULT_CATALOG);
+			.getPreferenceStore()
+			.getString(PREF_DEFAULT_CATALOG);
 			// if a preferences was set, we default to that catalog descriptor
 			if (defaultCatalogUrl != null && defaultCatalogUrl.length() > 0) {
 				for (CatalogDescriptor descriptor : getConfiguration().getCatalogDescriptors()) {
@@ -299,9 +299,9 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			// remember the catalog for next time.
 			try {
 				MarketplaceClientUiPlugin.getInstance()
-						.getPreferenceStore()
-						.setValue(PREF_DEFAULT_CATALOG,
-								getConfiguration().getCatalogDescriptor().getUrl().toURI().toString());
+				.getPreferenceStore()
+				.setValue(PREF_DEFAULT_CATALOG,
+						getConfiguration().getCatalogDescriptor().getUrl().toURI().toString());
 			} catch (URISyntaxException e) {
 				// ignore
 			}
@@ -343,7 +343,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				if (Display.getCurrent() != null) {
 					getContainer().run(true, false, new IRunnableWithProgress() {
 						public void run(IProgressMonitor monitor) throws InvocationTargetException,
-								InterruptedException {
+						InterruptedException {
 							installedFeatures = MarketplaceClientUi.computeInstalledFeatures(monitor);
 						}
 					});
@@ -378,7 +378,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		if (WorkbenchBrowserSupport.getInstance().isInternalWebBrowserAvailable()
 				&& url.toLowerCase().startsWith(catalogUri.toString().toLowerCase())) {
 			int style = IWorkbenchBrowserSupport.AS_EDITOR | IWorkbenchBrowserSupport.LOCATION_BAR
-					| IWorkbenchBrowserSupport.NAVIGATION_BAR;
+			| IWorkbenchBrowserSupport.NAVIGATION_BAR;
 			String browserId = "MPC-" + catalogUri.toString().replaceAll("[^a-zA-Z0-9_-]", "_"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			try {
 				IWebBrowser browser = WorkbenchBrowserSupport.getInstance().createBrowser(style, browserId,
@@ -431,9 +431,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 									// only hook the listener once
 									if (browser.getData(MarketplaceBrowserIntegration.class.getName()) == null) {
 										if (browserListener == null) {
-											browserListener = new MarketplaceBrowserIntegration(
-													getConfiguration().getCatalogDescriptors(),
-													getConfiguration().getCatalogDescriptor());
+											browserListener = new MarketplaceBrowserIntegration();
 										}
 										browser.setData(MarketplaceBrowserIntegration.class.getName(), browserListener);
 										// hook in listeners

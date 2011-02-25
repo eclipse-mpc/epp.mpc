@@ -71,6 +71,8 @@ class Messages extends NLS {
 
 	public static String MarketplaceBrowserIntegration_cannotOpenMarketplaceWizard;
 
+	public static String MarketplaceDropAdapter_0;
+
 	public static String MarketplacePage_eclipseMarketplaceSolutions;
 
 	public static String MarketplacePage_installed;
