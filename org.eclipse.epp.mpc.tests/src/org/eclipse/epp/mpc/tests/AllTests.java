@@ -12,9 +12,11 @@ package org.eclipse.epp.mpc.tests;
 
 import org.eclipse.epp.mpc.tests.service.DefaultMarketplaceServiceTest;
 import org.eclipse.epp.mpc.tests.service.xml.UnmarshallerTest;
+import org.eclipse.epp.mpc.tests.ui.catalog.MarketplaceInfoTest;
 import org.eclipse.epp.mpc.tests.ui.wizard.MarketplaceUrlHandlerTest;
 import org.eclipse.epp.mpc.tests.ui.wizard.SelectionModelStateSerializerTest;
 import org.eclipse.epp.mpc.tests.util.TextUtilTest;
+import org.eclipse.epp.mpc.tests.util.TransportFactoryTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -24,8 +26,15 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({ //
-	UnmarshallerTest.class, DefaultMarketplaceServiceTest.class, TextUtilTest.class,
-		SelectionModelStateSerializerTest.class, MarketplaceUrlHandlerTest.class })
-	public class AllTests {
+	UnmarshallerTest.class, //
+	DefaultMarketplaceServiceTest.class, //
+	TextUtilTest.class, //
+	SelectionModelStateSerializerTest.class, //
+	MarketplaceUrlHandlerTest.class, //
+	TransportFactoryTest.class, //
+		MarketplaceInfoTest.class, //
+
+})
+public class AllTests {
 
 }

@@ -15,7 +15,6 @@ import org.eclipse.osgi.util.NLS;
 class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.epp.internal.mpc.core.service.messages"; //$NON-NLS-1$
 
-	public static String DefaultMarketplaceService_serviceUnavailable503;
 
 	public static String DefaultMarketplaceService_cannotCompleteRequest_reason;
 

@@ -39,6 +39,8 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.service.xml.Unmarshaller;
+import org.eclipse.epp.internal.mpc.core.util.ITransport;
+import org.eclipse.epp.internal.mpc.core.util.TransportFactory;
 import org.eclipse.osgi.util.NLS;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -125,6 +127,8 @@ public class DefaultMarketplaceService implements MarketplaceService {
 	private URL baseUrl;
 
 	private Map<String, String> requestMetaParameters;
+
+	private final ITransport transport = TransportFactory.instance().getTransport();
 
 	public DefaultMarketplaceService(URL baseUrl) {
 		this.baseUrl = baseUrl;
@@ -409,25 +413,7 @@ public class DefaultMarketplaceService implements MarketplaceService {
 			}
 			xmlReader.setContentHandler(unmarshaller);
 
-			InputStream in;
-			try {
-				in = org.eclipse.equinox.internal.p2.repository.RepositoryTransport.getInstance().stream(location,
-						monitor);
-			} catch (CoreException e) {
-				if (e.getStatus().getCode() == 1002) {
-					Throwable cause = e.getCause();
-					if (cause != null && cause.getMessage() != null && cause.getMessage().indexOf("503") != -1) { //$NON-NLS-1$
-						throw new ServiceUnavailableException(new Status(IStatus.ERROR,
-								MarketplaceClientCore.BUNDLE_ID, 503,
-								Messages.DefaultMarketplaceService_serviceUnavailable503, e));
-					}
-				}
-				throw e;
-			} catch (NullPointerException e) {
-				// probably a unit test scenario
-				in = location.toURL().openStream();
-			}
-
+			InputStream in = transport.stream(location, monitor);
 			try {
 				monitor.worked(30);
 

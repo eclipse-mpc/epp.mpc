@@ -21,8 +21,8 @@ import java.util.concurrent.Callable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.epp.internal.mpc.core.util.TransportFactory;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
-import org.eclipse.equinox.internal.p2.repository.RepositoryTransport;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.osgi.util.NLS;
 
@@ -60,7 +60,7 @@ abstract class AbstractResourceRunnable implements IRunnableWithProgress, Callab
 		try {
 			URL imageUrl = new URL(resourceUrl);
 
-			InputStream in = RepositoryTransport.getInstance().stream(imageUrl.toURI(), monitor);
+			InputStream in = TransportFactory.instance().getTransport().stream(imageUrl.toURI(), monitor);
 			try {
 				resourceProvider.putResource(resourceUrl, in);
 			} finally {
