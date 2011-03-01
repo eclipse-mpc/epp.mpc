@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.epp.internal.mpc.core.service.Node;
+import org.eclipse.epp.internal.mpc.core.util.TransportFactory;
 import org.eclipse.epp.internal.mpc.ui.util.ConcurrentTaskManager;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 
@@ -62,8 +63,10 @@ class ProvisioningJobListener extends JobChangeAdapter {
 								}
 								url += "success"; //$NON-NLS-1$
 								try {
-									InputStream stream = org.eclipse.equinox.internal.p2.repository.RepositoryTransport.getInstance()
+									InputStream stream = TransportFactory.instance()
+											.getTransport()
 											.stream(new URI(url), new NullProgressMonitor());
+
 									try {
 										while (stream.read() != -1) {
 											// nothing to do
