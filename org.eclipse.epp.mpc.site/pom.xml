@@ -23,7 +23,7 @@
   <name>EPP Marketplace Client</name>
   <properties>
     <qualifier>${project.unqualifiedVersion}</qualifier>
-    <sign-dir>tools/mylyn/hudson/signing</sign-dir>
+    <sign-dir>tools/mylyn/hudson/mpc/signing</sign-dir>
   </properties>
   <build>
     <plugins>
@@ -83,10 +83,21 @@
 				<ant antfile="pack-and-sign/build.xml">
 				  <property name="localRepository" value="${settings.localRepository}"/>
 				  <property name="projectDir" value="${project.build.directory}"/>
+				  <property name="signDir" value="${sign-dir}"/>
+				  <property name="archiveDir" value="${archive-dir}"/>
+				  <property name="siteDir" value="${site-dir}"/>
+				  
+				  <property name="dist" value="mpc"/>
+				  <property name="filter" value="mpc"/>
 				  <property name="repositoryName" value="${project.name}"/>
 				  <property name="pack200" value="${pack200}"/>
+				  
 				  <property name="skipSign" value="${skip-sign}"/>
-				  <property name="signDir" value="${sign-dir}"/>
+				  <property name="skipPack" value="${skip-pack}"/>
+				  <property name="skipPromote" value="${skip-promote}"/>
+				  
+				  <property name="version" value="${unqualifiedVersion}"/>
+				  <property name="qualifier" value="${buildQualifier}"/>
 				</ant>
 				<echo file="${project.build.directory}/version.properties">
 				  <![CDATA[

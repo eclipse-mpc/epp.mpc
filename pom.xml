@@ -16,8 +16,12 @@
   <properties>
     <tycho-version>0.10.0</tycho-version>
 
+	<archive-dir>${basedir}/target/archive</archive-dir>
+	<site-dir></site-dir>
+
     <skip-source-check>true</skip-source-check>
 	<skip-sign>true</skip-sign>
+	<skip-promote>true</skip-promote>
 	
 	<test-args></test-args>
 	<test-app-args></test-app-args>
@@ -67,7 +71,7 @@
 	<repository>
 	  <id>eclipse-orbit</id>
 	  <layout>p2</layout>
-	  <url>http://download.eclipse.org/tools/orbit/committers/drops/S20110124210048/repository/</url>
+	  <url>http://download.eclipse.org/tools/orbit/downloads/drops/S20110304120314/repository/</url>
 	</repository>
   </repositories>
 
@@ -126,6 +130,43 @@
 	  </modules>
 	</profile>
     <profile>
+      <id>publish</id>
+      <activation>
+		<property>
+          <name>env.PUBLISH</name>
+          <value>true</value>
+		</property>
+      </activation>
+      <properties>
+		<skip-promote>false</skip-promote>
+	  </properties>
+	</profile>
+    <profile>
+      <id>integration</id>
+      <activation>
+		<property>
+          <name>env.TYPE</name>
+          <value>integration</value>
+		</property>
+      </activation>
+      <properties>
+		<skip-sign>false</skip-sign>
+	  </properties>
+	</profile>
+    <profile>
+      <id>release</id>
+      <activation>
+		<property>
+          <name>env.TYPE</name>
+          <value>release</value>
+		</property>
+      </activation>
+      <properties>
+		<mylyn-qualifier-format>'v'yyyyMMdd-HH00</mylyn-qualifier-format>
+		<skip-sign>false</skip-sign>
+	  </properties>
+	</profile>
+    <profile>
       <id>hudson.eclipse.org</id>
       <activation>
 		<property>
@@ -135,6 +176,8 @@
       </activation>
       <properties>
 		<pack200>/shared/common/jdk-1.5.0-22.x86_64/bin</pack200>
+		<archive-dir>/home/data/httpd/download.eclipse.org/mpc/archive</archive-dir>
+		<site-dir>/home/data/httpd/download.eclipse.org/mpc/nightly</site-dir>
 		<test-args>-ea -Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -DhttpnonProxyHosts=*.eclipse.org</test-args>
 		<test-app-args>-eclipse.keyring ${env.WORKSPACE}/keyring -eclipse.password ${env.WORKSPACE}/keyring.password</test-app-args>
       </properties>
