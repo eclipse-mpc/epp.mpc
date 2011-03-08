@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.ui;
 
+import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -161,14 +162,26 @@ public final class CatalogDescriptor {
 			return false;
 		}
 		CatalogDescriptor other = (CatalogDescriptor) obj;
-		if (url == null) {
-			if (other.url != null) {
-				return false;
-			}
-		} else if (!url.equals(other.url)) {
+		if (!urlEquals(url, other.url)) {
 			return false;
 		}
 		return true;
+	}
+
+	private static boolean urlEquals(URL url1, URL url2) {
+		// bug 338399: test URL equality without doing DNS lookups
+		if (url1 == url2) {
+			return true;
+		} else if (url1 == null) {
+			return false;
+		} else if (url2 == null) {
+			return false;
+		}
+		try {
+			return url1.toURI().equals(url2.toURI());
+		} catch (URISyntaxException e) {
+			return false;
+		}
 	}
 
 	@Override
