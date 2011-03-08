@@ -23,7 +23,7 @@
   <name>EPP Marketplace Client</name>
   <properties>
     <qualifier>${project.unqualifiedVersion}</qualifier>
-    <sign-dir>tools/mylyn/hudson/signing</sign-dir>
+    <sign-dir>tools/mylyn/hudson/mpc/signing</sign-dir>
   </properties>
   <build>
     <plugins>

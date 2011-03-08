@@ -142,11 +142,11 @@
 	  </properties>
 	</profile>
     <profile>
-      <id>weekly</id>
+      <id>integration</id>
       <activation>
 		<property>
           <name>env.TYPE</name>
-          <value>weekly</value>
+          <value>integration</value>
 		</property>
       </activation>
       <properties>
@@ -178,7 +178,6 @@
 		<pack200>/shared/common/jdk-1.5.0-22.x86_64/bin</pack200>
 		<archive-dir>/home/data/httpd/download.eclipse.org/mpc/archive</archive-dir>
 		<site-dir>/home/data/httpd/download.eclipse.org/mpc/nightly</site-dir>
-		<site-dir></site-dir>
 		<test-args>-ea -Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -DhttpnonProxyHosts=*.eclipse.org</test-args>
 		<test-app-args>-eclipse.keyring ${env.WORKSPACE}/keyring -eclipse.password ${env.WORKSPACE}/keyring.password</test-app-args>
       </properties>
