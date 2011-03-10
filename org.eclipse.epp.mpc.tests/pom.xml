@@ -21,7 +21,7 @@
         <version>${tycho-version}</version>
         <configuration>
           <useUIHarness>true</useUIHarness>
-          <forkedProcessTimeoutInSeconds>3600</forkedProcessTimeoutInSeconds>
+          <forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
           <product>org.eclipse.sdk.ide</product>
           <application>org.eclipse.ui.ide.workbench</application>
           <testSuite>org.eclipse.epp.mpc.tests</testSuite>
