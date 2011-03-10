@@ -76,8 +76,6 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	private static final String PREF_DEFAULT_CATALOG = CatalogDescriptor.class.getSimpleName();
 
-	private CatalogSelectionPage catalogSelectionPage;
-
 	private Set<String> installedFeatures;
 
 	private final SelectionModel selectionModel;
@@ -235,24 +233,15 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 	@Override
 	public void addPages() {
 		doDefaultCatalogSelection();
-		if (getConfiguration().getCatalogDescriptors().size() > 1) {
-			addPage(getCatalogSelectionPage());
-		}
 		super.addPages();
 		featureSelectionWizardPage = new FeatureSelectionWizardPage();
 		addPage(featureSelectionWizardPage);
 	}
 
-	public CatalogSelectionPage getCatalogSelectionPage() {
-		if (catalogSelectionPage == null) {
-			catalogSelectionPage = new CatalogSelectionPage(getConfiguration());
-		}
-		return catalogSelectionPage;
-	}
-
 	FeatureSelectionWizardPage getFeatureSelectionWizardPage() {
 		return featureSelectionWizardPage;
 	}
+
 
 	@Override
 	public IWizardPage getStartingPage() {
@@ -497,8 +486,8 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				if (getConfiguration().getCatalogDescriptor().getDependenciesRepository() != null) {
 					try {
 						dependenciesRepository = getConfiguration().getCatalogDescriptor()
-								.getDependenciesRepository()
-								.toURI();
+						.getDependenciesRepository()
+						.toURI();
 					} catch (URISyntaxException e) {
 						throw new InvocationTargetException(e);
 					}

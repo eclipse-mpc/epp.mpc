@@ -24,12 +24,15 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -49,8 +52,6 @@ public class MarketplacePage extends CatalogPage {
 
 	private boolean updated;
 
-	private boolean switchLinkActivated;
-
 	private Link selectionLink;
 
 	private TabFolder tabFolder;
@@ -62,6 +63,10 @@ public class MarketplacePage extends CatalogPage {
 		this.configuration = configuration;
 		setDescription(Messages.MarketplacePage_selectSolutionsToInstall);
 		setTitle(Messages.MarketplacePage_eclipseMarketplaceSolutions);
+		updateTitle();
+	}
+
+	private void updateTitle() {
 		if (configuration.getCatalogDescriptor() != null) {
 			setTitle(configuration.getCatalogDescriptor().getLabel());
 		}
@@ -70,7 +75,7 @@ public class MarketplacePage extends CatalogPage {
 	@Override
 	public void createControl(final Composite originalParent) {
 		Composite parent = originalParent;
-		boolean needSwitchMarketplaceLink = configuration.getCatalogDescriptors().size() > 1;
+		boolean needSwitchMarketplaceControl = configuration.getCatalogDescriptors().size() > 1;
 
 		parent = new Composite(parent, SWT.NULL);
 		GridLayoutFactory.fillDefaults().numColumns(1).spacing(0, 5).applyTo(parent);
@@ -135,22 +140,9 @@ public class MarketplacePage extends CatalogPage {
 			computeSelectionLinkText();
 		}
 
-		if (needSwitchMarketplaceLink) {
-			Link link = new Link(parent, SWT.NULL);
-			link.setText(Messages.MarketplacePage_switchCatalog_link);
-			link.setToolTipText(Messages.MarketplacePage_selectAlternateCatalog);
-			link.addSelectionListener(new SelectionListener() {
-				public void widgetSelected(SelectionEvent e) {
-					switchMarketplaceLinkActivated();
-				}
-
-				public void widgetDefaultSelected(SelectionEvent e) {
-					widgetSelected(e);
-
-				}
-			});
-
-			GridDataFactory.swtDefaults().align(SWT.CENTER, SWT.CENTER).applyTo(link);
+		if (needSwitchMarketplaceControl) {
+			Composite switcher = createMarketplaceSwitcher(parent);
+			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(switcher);
 		}
 
 		// bug 312411: a selection listener so that we can streamline install of single product
@@ -197,6 +189,30 @@ public class MarketplacePage extends CatalogPage {
 		MarketplaceClientUi.setDefaultHelp(getControl());
 	}
 
+	private Composite createMarketplaceSwitcher(Composite parent) {
+		Composite composite = new Composite(parent, SWT.NONE);
+		composite.setLayout(new FillLayout());
+
+		CatalogSwitcher switcher = new CatalogSwitcher(composite, SWT.BORDER, configuration);
+		switcher.setLayout(new FillLayout());
+		switcher.addSelectionChangedListener(new ISelectionChangedListener() {
+
+			public void selectionChanged(SelectionChangedEvent event) {
+				CatalogDescriptor descriptor = (CatalogDescriptor) ((IStructuredSelection) event.getSelection()).getFirstElement();
+				configuration.setCatalogDescriptor(descriptor);
+				getWizard().initializeCatalog();
+				getViewer().updateCatalog();
+				updateTitle();
+
+			}
+		});
+		CatalogDescriptor selectedDescriptor = configuration.getCatalogDescriptor();
+		if (selectedDescriptor != null) {
+			switcher.setSelection(new StructuredSelection(selectedDescriptor));
+		}
+		return composite;
+	}
+
 	private void computeSelectionLinkText() {
 		if (selectionLink != null) {
 			final String originalText = selectionLink.getText();
@@ -227,16 +243,8 @@ public class MarketplacePage extends CatalogPage {
 		getViewer().showSelected();
 	}
 
-	protected void switchMarketplaceLinkActivated() {
-		switchLinkActivated = true;
-		getWizard().getContainer().showPage(getWizard().getCatalogSelectionPage());
-	}
-
 	@Override
 	public IWizardPage getPreviousPage() {
-		if (!switchLinkActivated) {
-			return null;
-		}
 		return super.getPreviousPage();
 	}
 
