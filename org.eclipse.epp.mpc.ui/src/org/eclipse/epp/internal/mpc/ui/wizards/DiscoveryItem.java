@@ -126,10 +126,10 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 		iconLabel = new Label(checkboxContainer, SWT.NONE);
 		GridDataFactory.swtDefaults()
-				.align(SWT.CENTER, SWT.CENTER)
-				.hint(MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT)
-				.minSize(MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT)
-				.applyTo(iconLabel);
+		.align(SWT.CENTER, SWT.CENTER)
+		.hint(MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT)
+		.minSize(MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT)
+		.applyTo(iconLabel);
 		if (connector.getIcon() != null) {
 			try {
 				Image image = resources.getIconImage(connector.getSource(), connector.getIcon(), 32, false);
@@ -156,10 +156,18 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 					.get(MarketplaceClientUiPlugin.NO_ICON_PROVIDED));
 		}
 
-		nameLabel = new Label(this, SWT.NONE);
+		Composite nameComposite = new Composite(this, SWT.NONE);
+		GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.CENTER).applyTo(nameComposite);
+
+		nameComposite.setLayout(new GridLayout(2, false));
+
+		nameLabel = new Label(nameComposite, SWT.NONE);
 		GridDataFactory.fillDefaults().grab(true, false).align(SWT.BEGINNING, SWT.CENTER).applyTo(nameLabel);
 		nameLabel.setFont(resources.getSmallHeaderFont());
 		nameLabel.setText(connector.getName());
+
+		ShareSolutionLink shareSolutionLink = new ShareSolutionLink(nameComposite, connector);
+		GridDataFactory.fillDefaults().grab(true, false).align(SWT.END, SWT.CENTER).applyTo(shareSolutionLink);
 
 		// bug 323257: don't display if there's no internal browser
 		boolean internalBrowserAvailable = computeBrowserAvailable(this);
@@ -208,7 +216,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 				}
 			}
 			descriptionText = descriptionText.substring(0, truncationIndex)
-					+ Messages.DiscoveryItem_truncatedTextSuffix;
+			+ Messages.DiscoveryItem_truncatedTextSuffix;
 		}
 		description.setText(descriptionText.replaceAll("(\\r\\n)|\\n|\\r|\\s{2,}", " ")); //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -252,7 +260,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 	private boolean hasOverviewUrl(CatalogItem connector) {
 		return connector.getOverview() != null && connector.getOverview().getUrl() != null
-				&& connector.getOverview().getUrl().trim().length() > 0;
+		&& connector.getOverview().getUrl().trim().length() > 0;
 	}
 
 	private synchronized boolean computeBrowserAvailable(Composite composite) {
@@ -277,10 +285,10 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 	protected void createProviderLabel(Composite parent) {
 		providerLabel = new Link(parent, SWT.RIGHT);
 		GridDataFactory.fillDefaults()
-				.span(1, 1)
-				.align(SWT.BEGINNING, SWT.CENTER)
-				.grab(true, false)
-				.applyTo(providerLabel);
+		.span(1, 1)
+		.align(SWT.BEGINNING, SWT.CENTER)
+		.grab(true, false)
+		.applyTo(providerLabel);
 		// always disabled color to make it less prominent
 		providerLabel.setForeground(resources.getColorDisabled());
 
@@ -317,7 +325,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 	protected boolean hasTooltip(final CatalogItem connector) {
 		return connector.getOverview() != null && connector.getOverview().getSummary() != null
-				&& connector.getOverview().getSummary().length() > 0;
+		&& connector.getOverview().getSummary().length() > 0;
 	}
 
 	protected boolean maybeModifySelection(Operation operation) {

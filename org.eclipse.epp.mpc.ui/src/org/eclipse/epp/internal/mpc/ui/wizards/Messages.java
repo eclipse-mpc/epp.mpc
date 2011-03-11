@@ -131,6 +131,18 @@ class Messages extends NLS {
 	public static String SelectionModel_countSolutionsSelectedForInstallUpdate;
 
 	public static String SelectionModel_oneSolution;
+
+	public static String ShareSolutionLink_EMail;
+
+	public static String ShareSolutionLink_mailSubject;
+
+	public static String ShareSolutionLink_recipient;
+
+	public static String ShareSolutionLink_Share;
+
+	public static String ShareSolutionLink_tweet;
+
+	public static String ShareSolutionLink_Twitter;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
