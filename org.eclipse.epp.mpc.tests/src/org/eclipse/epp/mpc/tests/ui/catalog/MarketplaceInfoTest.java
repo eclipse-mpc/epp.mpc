@@ -15,11 +15,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.epp.internal.mpc.core.service.Ius;
 import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceInfo;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
@@ -50,17 +50,17 @@ public class MarketplaceInfoTest {
 		Node node = new Node();
 		node.setId(item.getId());
 		node.setUrl("http://marketplace.eclipse.org/node/" + node.getId());
+		node.setIus(new Ius());
+		node.getIus().getIu().add("com.example.test.a1");
+		node.getIus().getIu().add("com.example.test.a2");
 		item.setData(node);
-		List<String> installableUnits = new ArrayList<String>();
-		installableUnits.add("com.example.test.a1");
-		installableUnits.add("com.example.test.a2");
-		item.setInstallableUnits(installableUnits);
+		item.setInstallableUnits(node.getIus().getIu());
 	}
 
 	@Test
 	public void addMapCatalogNode() {
 		assertEquals(0, catalogRegistry.getNodeKeyToIU().size());
-		catalogRegistry.map(item.getMarketplaceUrl(), (Node) item.getData());
+		catalogRegistry.map(item.getMarketplaceUrl(), item.getData());
 
 		assertEquals(1, catalogRegistry.getNodeKeyToIU().size());
 		String key = catalogRegistry.getNodeKeyToIU().keySet().iterator().next();
@@ -81,7 +81,7 @@ public class MarketplaceInfoTest {
 	public void computeInstalledCatalogNodeIds() {
 		assertTrue(item.getInstallableUnits().size() > 1);
 		assertEquals(0, catalogRegistry.getNodeKeyToIU().size());
-		catalogRegistry.map(item.getMarketplaceUrl(), (Node) item.getData());
+		catalogRegistry.map(item.getMarketplaceUrl(), item.getData());
 
 		assertEquals(1, catalogRegistry.getNodeKeyToIU().size());
 
@@ -97,7 +97,7 @@ public class MarketplaceInfoTest {
 
 		installedCatalogNodeIds = catalogRegistry.computeInstalledNodes(item.getMarketplaceUrl(), installedIus);
 		assertNotNull(installedCatalogNodeIds);
-		assertEquals(0, installedCatalogNodeIds.size());
+		assertEquals(1, installedCatalogNodeIds.size());
 
 		for (String iu : item.getInstallableUnits()) {
 			installedIus.add(iu);
