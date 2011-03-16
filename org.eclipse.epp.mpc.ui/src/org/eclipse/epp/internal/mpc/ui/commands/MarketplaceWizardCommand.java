@@ -46,12 +46,10 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 import org.eclipse.equinox.internal.p2.discovery.model.Tag;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogFilter;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.statushandlers.StatusManager;
 
 /**
@@ -77,8 +75,7 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 		configuration.setVerifyUpdateSiteAvailability(false);
 
 		if (catalogDescriptors == null || catalogDescriptors.isEmpty()) {
-			IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindow(event);
-			installRemoteCatalogs(window);
+			installRemoteCatalogs();
 			configuration.getCatalogDescriptors().addAll(CatalogRegistry.getInstance().getCatalogDescriptors());
 		} else {
 			configuration.getCatalogDescriptors().addAll(catalogDescriptors);
@@ -176,13 +173,11 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 		this.operationByNodeId = operationByNodeId;
 	}
 
-	private void installRemoteCatalogs(IWorkbenchWindow window) {
+	private void installRemoteCatalogs() {
 		try {
 			final AtomicReference<List<Catalog>> result = new AtomicReference<List<Catalog>>();
 
-			ProgressMonitorDialog dialog = new ProgressMonitorDialog(window.getShell());
-			dialog.run(true, true, new IRunnableWithProgress() {
-
+			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
 						CatalogService catalogService = ServiceLocator.getInstance().getCatalogService();
