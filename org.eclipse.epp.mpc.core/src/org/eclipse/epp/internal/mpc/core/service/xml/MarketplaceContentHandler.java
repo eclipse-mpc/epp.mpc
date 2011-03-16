@@ -33,6 +33,13 @@ public class MarketplaceContentHandler extends UnmarshalContentHandler {
 			childHandler.setUnmarshaller(getUnmarshaller());
 			getUnmarshaller().setCurrentHandler(childHandler);
 			childHandler.startElement(uri, localName, attributes);
+		} else if (localName.equals("catalogs")) { //$NON-NLS-1$
+			org.eclipse.epp.internal.mpc.core.service.xml.CatalogsContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.CatalogsContentHandler();
+			childHandler.setParentModel(model);
+			childHandler.setParentHandler(this);
+			childHandler.setUnmarshaller(getUnmarshaller());
+			getUnmarshaller().setCurrentHandler(childHandler);
+			childHandler.startElement(uri, localName, attributes);
 		} else if (localName.equals("category")) { //$NON-NLS-1$
 			org.eclipse.epp.internal.mpc.core.service.xml.CategoryContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.CategoryContentHandler();
 			childHandler.setParentModel(model);

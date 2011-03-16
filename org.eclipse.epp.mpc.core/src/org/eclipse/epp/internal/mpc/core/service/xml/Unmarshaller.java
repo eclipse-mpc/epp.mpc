@@ -59,6 +59,9 @@ public class Unmarshaller extends DefaultHandler {
 		elementNameToUnmarshalContentHandler.put("category", new CategoryContentHandler()); //$NON-NLS-1$
 		elementNameToUnmarshalContentHandler.put("node", new NodeContentHandler()); //$NON-NLS-1$
 		elementNameToUnmarshalContentHandler.put("categories", new CategoriesContentHandler()); //$NON-NLS-1$
+		elementNameToUnmarshalContentHandler.put("catalogs", new CatalogsContentHandler()); //$NON-NLS-1$
+		elementNameToUnmarshalContentHandler.put("catalog", new CatalogContentHandler()); //$NON-NLS-1$
+		elementNameToUnmarshalContentHandler.put("wizard", new CatalogBrandingContentHandler()); //$NON-NLS-1$
 		elementNameToUnmarshalContentHandler.put("tags", new TagsContentHandler()); //$NON-NLS-1$
 		elementNameToUnmarshalContentHandler.put("tag", new TagContentHandler()); //$NON-NLS-1$
 		elementNameToUnmarshalContentHandler.put("ius", new IusContentHandler()); //$NON-NLS-1$

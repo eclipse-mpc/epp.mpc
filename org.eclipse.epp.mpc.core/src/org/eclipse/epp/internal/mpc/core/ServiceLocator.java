@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core;
 
+import org.eclipse.epp.internal.mpc.core.service.CatalogService;
+import org.eclipse.epp.internal.mpc.core.service.DefaultCatalogService;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.service.MarketplaceService;
 
@@ -24,6 +26,10 @@ public class ServiceLocator {
 
 	public MarketplaceService getMarketplaceService() {
 		return new DefaultMarketplaceService();
+	}
+
+	public CatalogService getCatalogService() {
+		return new DefaultCatalogService();
 	}
 
 	/**
