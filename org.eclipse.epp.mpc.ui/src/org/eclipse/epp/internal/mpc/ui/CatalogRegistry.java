@@ -11,9 +11,12 @@
 package org.eclipse.epp.internal.mpc.ui;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.eclipse.epp.internal.mpc.core.service.CatalogBranding;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 
 /**
@@ -32,6 +35,8 @@ public class CatalogRegistry {
 
 	private final List<CatalogDescriptor> catalogDescriptors = new CopyOnWriteArrayList<CatalogDescriptor>();
 
+	private final Map<CatalogDescriptor, CatalogBranding> catalogBrandings = new HashMap<CatalogDescriptor, CatalogBranding>();
+
 	public CatalogRegistry() {
 		catalogDescriptors.addAll(new CatalogExtensionPointReader().getCatalogDescriptors());
 	}
@@ -41,11 +46,19 @@ public class CatalogRegistry {
 	}
 
 	public void unregister(CatalogDescriptor catalogDescriptor) {
-		catalogDescriptors.add(catalogDescriptor);
+		catalogDescriptors.remove(catalogDescriptor);
 	}
 
 	public List<CatalogDescriptor> getCatalogDescriptors() {
 		return Collections.unmodifiableList(catalogDescriptors);
 	}
 
+	// TODO: remove and integrate into CatalogDescriptor once we are not in API freeze
+	public void addCatalogBranding(CatalogDescriptor descriptor, CatalogBranding branding) {
+		catalogBrandings.put(descriptor, branding);
+	}
+
+	public CatalogBranding getCatalogBranding(CatalogDescriptor descriptor) {
+		return catalogBrandings.get(descriptor);
+	}
 }

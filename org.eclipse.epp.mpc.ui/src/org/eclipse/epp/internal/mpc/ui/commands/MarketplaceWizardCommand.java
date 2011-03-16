@@ -10,19 +10,29 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.commands;
 
+import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.epp.internal.mpc.core.ServiceLocator;
+import org.eclipse.epp.internal.mpc.core.service.Catalog;
+import org.eclipse.epp.internal.mpc.core.service.CatalogService;
 import org.eclipse.epp.internal.mpc.core.service.Category;
 import org.eclipse.epp.internal.mpc.core.service.Market;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
 import org.eclipse.epp.internal.mpc.ui.wizards.ComboTagFilter;
@@ -36,7 +46,13 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 import org.eclipse.equinox.internal.p2.discovery.model.Tag;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogFilter;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.ui.statushandlers.StatusManager;
 
 /**
  * @author David Green
@@ -61,6 +77,8 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 		configuration.setVerifyUpdateSiteAvailability(false);
 
 		if (catalogDescriptors == null || catalogDescriptors.isEmpty()) {
+			IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindow(event);
+			installRemoteCatalogs(window);
 			configuration.getCatalogDescriptors().addAll(CatalogRegistry.getInstance().getCatalogDescriptors());
 		} else {
 			configuration.getCatalogDescriptors().addAll(catalogDescriptors);
@@ -156,6 +174,58 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 
 	public void setOperationByNodeId(Map<String, Operation> operationByNodeId) {
 		this.operationByNodeId = operationByNodeId;
+	}
+
+	private void installRemoteCatalogs(IWorkbenchWindow window) {
+		try {
+			final AtomicReference<List<Catalog>> result = new AtomicReference<List<Catalog>>();
+
+			ProgressMonitorDialog dialog = new ProgressMonitorDialog(window.getShell());
+			dialog.run(true, true, new IRunnableWithProgress() {
+
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					try {
+						CatalogService catalogService = ServiceLocator.getInstance().getCatalogService();
+						final List<Catalog> catalogs = catalogService.listCatalogs(monitor);
+						result.set(catalogs);
+					} catch (CoreException e) {
+						throw new InvocationTargetException(e);
+					}
+				}
+			});
+
+			List<Catalog> catalogs = result.get();
+			for (Catalog catalog : catalogs) {
+				CatalogDescriptor descriptor = new CatalogDescriptor();
+				descriptor.setLabel(catalog.getName());
+				descriptor.setUrl(new URL(catalog.getUrl()));
+				descriptor.setIcon(ImageDescriptor.createFromURL(new URL(catalog.getImageUrl())));
+				descriptor.setDescription(catalog.getDescription());
+				descriptor.setInstallFromAllRepositories(!catalog.isSelfContained());
+				if (catalog.getDependencyRepository() != null) {
+					descriptor.setDependenciesRepository(new URL(catalog.getDependencyRepository()));
+				}
+				registerOrOverrideCatalog(descriptor);
+				CatalogRegistry.getInstance().addCatalogBranding(descriptor, catalog.getBranding());
+			}
+		} catch (InterruptedException ie) {
+			return;
+		} catch (Exception e) {
+			IStatus status = MarketplaceClientUi.computeStatus(new InvocationTargetException(e),
+					Messages.MarketplaceWizardCommand_CannotInstallRemoteLocations);
+			StatusManager.getManager().handle(status, StatusManager.LOG);
+		}
+	}
+
+	private void registerOrOverrideCatalog(CatalogDescriptor descriptor) {
+		CatalogRegistry catalogRegistry = CatalogRegistry.getInstance();
+		List<CatalogDescriptor> descriptors = catalogRegistry.getCatalogDescriptors();
+		for (CatalogDescriptor catalogDescriptor : descriptors) {
+			if (catalogDescriptor.getUrl().toExternalForm().equals(descriptor.getUrl().toExternalForm())) {
+				catalogRegistry.unregister(catalogDescriptor);
+			}
+		}
+		catalogRegistry.register(descriptor);
 	}
 
 }
