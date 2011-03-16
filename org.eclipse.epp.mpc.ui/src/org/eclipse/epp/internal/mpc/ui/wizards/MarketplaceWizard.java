@@ -160,7 +160,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	boolean wantInitializeInitialSelection() {
 		return !initialSelectionInitialized
-		&& (getConfiguration().getInitialState() != null || getConfiguration().getInitialOperationByNodeId() != null);
+				&& (getConfiguration().getInitialState() != null || getConfiguration().getInitialOperationByNodeId() != null);
 	}
 
 	@Override
@@ -257,8 +257,8 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 	private void doDefaultCatalogSelection() {
 		if (getConfiguration().getCatalogDescriptor() == null) {
 			String defaultCatalogUrl = MarketplaceClientUiPlugin.getInstance()
-			.getPreferenceStore()
-			.getString(PREF_DEFAULT_CATALOG);
+					.getPreferenceStore()
+					.getString(PREF_DEFAULT_CATALOG);
 			// if a preferences was set, we default to that catalog descriptor
 			if (defaultCatalogUrl != null && defaultCatalogUrl.length() > 0) {
 				for (CatalogDescriptor descriptor : getConfiguration().getCatalogDescriptors()) {
@@ -273,9 +273,10 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 					}
 				}
 			}
-			// if only one catalog is available choose it.
+			// if no catalog is selected, pick one
 			if (getConfiguration().getCatalogDescriptor() == null
-					&& getConfiguration().getCatalogDescriptors().size() == 1) {
+					&& getConfiguration().getCatalogDescriptors().size() > 0) {
+				// fall back to first catalog
 				getConfiguration().setCatalogDescriptor(getConfiguration().getCatalogDescriptors().get(0));
 			}
 		}
@@ -367,7 +368,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		if (WorkbenchBrowserSupport.getInstance().isInternalWebBrowserAvailable()
 				&& url.toLowerCase().startsWith(catalogUri.toString().toLowerCase())) {
 			int style = IWorkbenchBrowserSupport.AS_EDITOR | IWorkbenchBrowserSupport.LOCATION_BAR
-			| IWorkbenchBrowserSupport.NAVIGATION_BAR;
+					| IWorkbenchBrowserSupport.NAVIGATION_BAR;
 			String browserId = "MPC-" + catalogUri.toString().replaceAll("[^a-zA-Z0-9_-]", "_"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			try {
 				IWebBrowser browser = WorkbenchBrowserSupport.getInstance().createBrowser(style, browserId,
@@ -486,8 +487,8 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				if (getConfiguration().getCatalogDescriptor().getDependenciesRepository() != null) {
 					try {
 						dependenciesRepository = getConfiguration().getCatalogDescriptor()
-						.getDependenciesRepository()
-						.toURI();
+								.getDependenciesRepository()
+								.toURI();
 					} catch (URISyntaxException e) {
 						throw new InvocationTargetException(e);
 					}
