@@ -412,7 +412,7 @@ public class MarketplacePage extends CatalogPage {
 			} else {
 				wizardIconDescriptor = ImageDescriptor.createFromURL(new URL(branding.getWizardIcon()));
 			}
-			getWizard().setDefaultPageImageDescriptor(wizardIconDescriptor);
+			setImageDescriptor(wizardIconDescriptor);
 		} catch (MalformedURLException e) {
 			MarketplaceClientUi.error(e);
 		}
