@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests;
 
+import org.eclipse.epp.mpc.tests.service.CatalogServiceTest;
 import org.eclipse.epp.mpc.tests.service.DefaultMarketplaceServiceTest;
 import org.eclipse.epp.mpc.tests.service.xml.UnmarshallerTest;
 import org.eclipse.epp.mpc.tests.ui.catalog.MarketplaceInfoTest;
@@ -33,6 +34,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	MarketplaceUrlHandlerTest.class, //
 	TransportFactoryTest.class, //
 		MarketplaceInfoTest.class, //
+		CatalogServiceTest.class //
 
 })
 public class AllTests {

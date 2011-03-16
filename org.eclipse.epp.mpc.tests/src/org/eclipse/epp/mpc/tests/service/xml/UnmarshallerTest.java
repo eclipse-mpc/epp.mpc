@@ -11,6 +11,7 @@
 package org.eclipse.epp.mpc.tests.service.xml;
 
 import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -21,6 +22,9 @@ import java.io.InputStream;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.eclipse.epp.internal.mpc.core.service.Catalog;
+import org.eclipse.epp.internal.mpc.core.service.CatalogBranding;
+import org.eclipse.epp.internal.mpc.core.service.Catalogs;
 import org.eclipse.epp.internal.mpc.core.service.Categories;
 import org.eclipse.epp.internal.mpc.core.service.Category;
 import org.eclipse.epp.internal.mpc.core.service.Favorites;
@@ -371,6 +375,48 @@ public class UnmarshallerTest {
 		assertEquals("mylyn", tag.getName());
 		assertEquals("88", tag.getId());
 		assertEquals("http://marketplace.eclipse.org/category/free-tagging/mylyn", tag.getUrl());
+	}
+
+	@Test
+	public void marketplaceCatalogs() throws IOException, SAXException {
+		Object model = process("resources/catalogs.xml");
+		assertNotNull(model);
+		assertTrue(model instanceof Catalogs);
+		Catalogs catalogs = (Catalogs) model;
+
+		assertEquals(2, catalogs.getCatalogs().size());
+
+		//	     <catalog id="35656" title="Marketplace Catalog" url="http://marketplace.eclipse.org" selfContained="1"  dependencyRepository="http://download.eclipse.org/releases/helios">
+		//	        <description>Here is a description</description>
+		//	        <icon>http://marketplace.eclipse.org/sites/default/files/jacket.jpg</icon>
+		//	        <wizard title="Eclipse Marketplace Catalog">
+		//	          <icon>http://marketplace.eclipse.org/sites/default/files/giant-rabbit2.jpg</icon>
+		//	          <searchtab enabled='1'>Search</searchtab>
+		//	          <populartab enabled='1'>Popular</populartab>
+		//	          <recenttab enabled='1'>Recent</recenttab>
+		//	        </wizard>
+		//	      </catalog>
+
+		Catalog catalog = catalogs.getCatalogs().get(0);
+		assertEquals("35656", catalog.getId());
+		assertEquals("Marketplace Catalog", catalog.getName());
+		assertEquals("http://marketplace.eclipse.org", catalog.getUrl());
+		assertEquals("Here is a description", catalog.getDescription());
+		assertTrue(catalog.isSelfContained());
+		assertEquals("http://marketplace.eclipse.org/sites/default/files/jacket.jpg", catalog.getImageUrl());
+		assertEquals("http://download.eclipse.org/releases/helios", catalog.getDependencyRepository());
+
+		CatalogBranding branding = catalog.getBranding();
+		assertNotNull(branding);
+		assertEquals("Eclipse Marketplace Catalog", branding.getWizardTitle());
+		assertEquals("http://marketplace.eclipse.org/sites/default/files/giant-rabbit2.jpg", branding.getWizardIcon());
+		assertEquals("Search", branding.getSearchTabName());
+		assertEquals("Popular", branding.getPopularTabName());
+		assertEquals("Recent", branding.getRecentTabName());
+		assertTrue(branding.hasSearchTab());
+		assertFalse(branding.hasPopularTab());
+		assertTrue(branding.hasRecentTab());
+
 	}
 
 	private Object process(String resource) throws IOException, SAXException {
