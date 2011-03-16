@@ -403,7 +403,7 @@ public class UnmarshallerTest {
 		assertEquals("http://marketplace.eclipse.org", catalog.getUrl());
 		assertEquals("Here is a description", catalog.getDescription());
 		assertTrue(catalog.isSelfContained());
-		assertEquals("http://marketplace.eclipse.org/sites/default/files/jacket.jpg", catalog.getImageUrl());
+		assertEquals("http://marketplace.eclipse.org/sites/default/files/marketplace32.png", catalog.getImageUrl());
 		assertEquals("http://download.eclipse.org/releases/helios", catalog.getDependencyRepository());
 
 		CatalogBranding branding = catalog.getBranding();

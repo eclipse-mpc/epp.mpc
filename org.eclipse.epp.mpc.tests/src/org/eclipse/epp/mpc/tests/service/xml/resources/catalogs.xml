@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
   <marketplace>
     <catalogs>
-     <catalog id="35656" title="Marketplace Catalog" url="http://marketplace.eclipse.org" selfContained="1" dependencyRepository="http://download.eclipse.org/releases/helios">
+	<catalog id="35656" title="Marketplace Catalog" url="http://marketplace.eclipse.org" selfContained="1"	icon="http://marketplace.eclipse.org/sites/default/files/marketplace32.png">
         <description>Here is a description</description>
-        <icon>http://marketplace.eclipse.org/sites/default/files/jacket.jpg</icon>
+        <dependenciesRepository>http://download.eclipse.org/releases/helios</dependenciesRepository>
         <wizard title="Eclipse Marketplace Catalog">
           <icon>http://marketplace.eclipse.org/sites/default/files/giant-rabbit2.jpg</icon>
           <searchtab enabled='1'>Search</searchtab>
