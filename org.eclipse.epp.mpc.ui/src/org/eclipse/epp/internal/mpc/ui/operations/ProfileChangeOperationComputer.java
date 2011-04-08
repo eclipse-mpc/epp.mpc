@@ -380,13 +380,13 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 				public void run() {
 					okayToProceed[0] = MessageDialog.openQuestion(WorkbenchUtil.getShell(),
 							Messages.ProvisioningOperation_proceedQuestion, NLS.bind(
-									Messages.ProvisioningOperation_unavailableConnectors_proceedQuestion,
+									Messages.ProvisioningOperation_unavailableSolutions_proceedQuestion,
 									new Object[] { finalMessage }));
 				}
 			});
 			if (!okayToProceed[0]) {
 				throw new CoreException(new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
-						Messages.ProvisioningOperation_unavailableConnectors, detailedMessage), null));
+						Messages.ProvisioningOperation_unavailableSolutions, detailedMessage), null));
 			}
 		}
 	}
