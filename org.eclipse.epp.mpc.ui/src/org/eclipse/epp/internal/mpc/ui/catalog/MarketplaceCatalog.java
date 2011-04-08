@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.catalog;
 
+import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
@@ -173,12 +174,12 @@ public class MarketplaceCatalog extends Catalog {
 							public void run() {
 								ProvisioningSession session = ProvisioningUI.getDefaultUI().getSession();
 								IMetadataRepositoryManager manager = (IMetadataRepositoryManager) session.getProvisioningAgent()
-										.getService(IMetadataRepositoryManager.SERVICE_NAME);
+								.getService(IMetadataRepositoryManager.SERVICE_NAME);
 								try {
 									IMetadataRepository repository = manager.loadRepository(uri, pm);
 									IQuery<IInstallableUnit> query = QueryUtil.createMatchQuery( //
-									"id ~= /*.feature.group/ && " + //$NON-NLS-1$
-											"properties['org.eclipse.equinox.p2.type.group'] == true ");//$NON-NLS-1$
+											"id ~= /*.feature.group/ && " + //$NON-NLS-1$
+									"properties['org.eclipse.equinox.p2.type.group'] == true ");//$NON-NLS-1$
 									IQueryResult<IInstallableUnit> result = repository.query(query, pm);
 
 									// compute highest version for all available IUs.
@@ -268,6 +269,11 @@ public class MarketplaceCatalog extends Catalog {
 								Messages.MarketplaceCatalog_unknownHost, exception.getMessage()), exception);
 						break;
 					}
+					if (exception instanceof ConnectException) {
+						status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
+								Messages.MarketplaceCatalog_unknownHost, exception.getMessage()), exception);
+						break;
+					}
 					Throwable cause = exception.getCause();
 					if (cause != exception) {
 						exception = cause;
@@ -318,7 +324,7 @@ public class MarketplaceCatalog extends Catalog {
 					} catch (CoreException e) {
 						status.add(new Status(e.getStatus().getSeverity(), DiscoveryCore.ID_PLUGIN, NLS.bind(
 								Messages.MarketplaceCatalog_failedWithError, discoveryStrategy.getClass()
-										.getSimpleName()), e));
+								.getSimpleName()), e));
 					}
 				}
 			}
