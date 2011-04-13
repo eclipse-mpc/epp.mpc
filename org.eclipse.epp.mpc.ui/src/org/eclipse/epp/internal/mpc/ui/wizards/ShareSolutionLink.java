@@ -19,8 +19,12 @@ import org.eclipse.epp.internal.mpc.core.util.TextUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -95,14 +99,24 @@ public class ShareSolutionLink extends Composite {
 	}
 
 	protected void openNewMail() {
+		String subject = NLS.bind(Messages.ShareSolutionLink_mailSubject, new Object[] { catalogItem.getName() });
+		String body = computeMessage();
+		String recipient = Messages.ShareSolutionLink_recipient;
+		String mailToString = "mailto:" + recipient + "?subject=" + subject + "&body=" + body; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		try {
-			String subject = NLS.bind(Messages.ShareSolutionLink_mailSubject, new Object[] { catalogItem.getName() });
-			String body = computeMessage();
-			String recipient = Messages.ShareSolutionLink_recipient;
-			String mailToString = "mailto:" + recipient + "?subject=" + subject + "&body=" + body; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			URI uri = URIUtil.fromString(mailToString);
 			openMail(uri);
 		} catch (Exception e) {
+			boolean copyToClipboard = MessageDialog.openQuestion(WorkbenchUtil.getShell(),
+					Messages.ShareSolutionLink_share, Messages.ShareSolutionLink_failed_to_open_manually_share);
+			if (copyToClipboard) {
+				Clipboard clipboard = new Clipboard(getDisplay());
+				TextTransfer textTransfer = TextTransfer.getInstance();
+				Transfer[] transfers = new Transfer[] { textTransfer };
+				Object[] data = new Object[] { body };
+				clipboard.setContents(data, transfers);
+				clipboard.dispose();
+			}
 			MarketplaceClientUi.error(e);
 		}
 	}

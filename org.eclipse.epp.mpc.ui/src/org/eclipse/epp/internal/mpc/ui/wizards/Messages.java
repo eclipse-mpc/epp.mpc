@@ -136,9 +136,13 @@ class Messages extends NLS {
 
 	public static String ShareSolutionLink_EMail;
 
+	public static String ShareSolutionLink_failed_to_open_manually_share;
+
 	public static String ShareSolutionLink_mailSubject;
 
 	public static String ShareSolutionLink_recipient;
+
+	public static String ShareSolutionLink_share;
 
 	public static String ShareSolutionLink_Share;
 
