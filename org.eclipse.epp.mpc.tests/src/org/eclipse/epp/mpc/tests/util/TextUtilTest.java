@@ -116,4 +116,24 @@ public class TextUtilTest {
 	public void testCleanInformalHtmlMarkup_NaturalParaBetweenTags() {
 		assertEquals("one</li>\n\n<li>two", TextUtil.cleanInformalHtmlMarkup("one</li>\n\n<li>two"));
 	}
+
+	@Test
+	public void testEscapeAmpersand() {
+		assertEquals("one && two", TextUtil.escapeText("one & two"));
+	}
+
+	@Test
+	public void testEscapeAmpersandNull() {
+		assertEquals(null, TextUtil.escapeText(null));
+	}
+
+	@Test
+	public void testEscapeAmpersandEmpty() {
+		assertEquals("", TextUtil.escapeText(""));
+	}
+
+	@Test
+	public void testEscapeAmpersandDouble() {
+		assertEquals("foo &&&&", TextUtil.escapeText("foo &&"));
+	}
 }

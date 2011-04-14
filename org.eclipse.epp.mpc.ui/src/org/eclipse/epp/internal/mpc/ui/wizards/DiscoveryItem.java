@@ -164,7 +164,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		nameLabel = new Label(nameComposite, SWT.NONE);
 		GridDataFactory.fillDefaults().grab(true, false).align(SWT.BEGINNING, SWT.CENTER).applyTo(nameLabel);
 		nameLabel.setFont(resources.getSmallHeaderFont());
-		nameLabel.setText(connector.getName());
+		nameLabel.setText(TextUtil.escapeText(connector.getName()));
 
 		ShareSolutionLink shareSolutionLink = new ShareSolutionLink(nameComposite, connector);
 		GridDataFactory.fillDefaults().grab(true, false).align(SWT.END, SWT.CENTER).applyTo(shareSolutionLink);
@@ -218,7 +218,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 			descriptionText = descriptionText.substring(0, truncationIndex)
 			+ Messages.DiscoveryItem_truncatedTextSuffix;
 		}
-		description.setText(descriptionText.replaceAll("(\\r\\n)|\\n|\\r|\\s{2,}", " ")); //$NON-NLS-1$ //$NON-NLS-2$
+		descriptionText = descriptionText.replaceAll("(\\r\\n)|\\n|\\r|\\s{2,}", " "); //$NON-NLS-1$ //$NON-NLS-2$
+		description.setText(TextUtil.escapeText(descriptionText));
 
 		new Label(this, SWT.NONE).setText(" "); // spacer //$NON-NLS-1$
 

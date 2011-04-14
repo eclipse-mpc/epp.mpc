@@ -67,4 +67,12 @@ public class TextUtil {
 		return text;
 	}
 
+	public static String escapeText(String text) {
+		if (text == null) {
+			return null;
+		}
+		text = text.replace("&", "&&"); //$NON-NLS-1$ //$NON-NLS-2$
+		return text;
+	}
+
 }
