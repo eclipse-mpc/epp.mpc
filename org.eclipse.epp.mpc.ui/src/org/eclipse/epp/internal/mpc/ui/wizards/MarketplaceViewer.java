@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -21,6 +22,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.service.Category;
 import org.eclipse.epp.internal.mpc.core.service.Market;
 import org.eclipse.epp.internal.mpc.core.service.Node;
@@ -34,7 +36,9 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.discovery.model.Tag;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.ControlListItem;
+import org.eclipse.equinox.internal.p2.ui.discovery.util.FilteredViewer;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.PatternFilter;
+import org.eclipse.equinox.internal.p2.ui.discovery.util.TextSearchControl;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogFilter;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -240,7 +244,21 @@ public class MarketplaceViewer extends CatalogViewer {
 		ContentType oldContentType = contentType;
 		contentType = newContentType;
 		fireContentTypeChange(oldContentType, newContentType);
+		setFindText(tag);
 		doQuery(null, null, tag);
+	}
+
+	private void setFindText(String tag) {
+		try {
+			Field filterTextField = FilteredViewer.class.getDeclaredField("filterText"); //$NON-NLS-1$
+			filterTextField.setAccessible(true);
+			TextSearchControl textSearchControl = (TextSearchControl) filterTextField.get(this);
+			textSearchControl.getTextControl().setText(tag);
+		} catch (Exception e) {
+			StatusManager.getManager()
+			.handle(new Status(IStatus.WARNING, MarketplaceClientUi.BUNDLE_ID,
+					Messages.MarketplaceViewer_Could_not_change_find_text, e));
+		}
 	}
 
 	private void fireContentTypeChange(ContentType oldValue, ContentType newValue) {

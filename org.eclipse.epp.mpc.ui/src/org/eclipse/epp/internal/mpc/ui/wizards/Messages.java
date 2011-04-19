@@ -95,6 +95,8 @@ class Messages extends NLS {
 
 	public static String MarketplacePage_switchCatalog_link;
 
+	public static String MarketplaceViewer_Could_not_change_find_text;
+
 	public static String MarketplaceViewer_featured;
 
 	public static String MarketplaceViewer_go;
