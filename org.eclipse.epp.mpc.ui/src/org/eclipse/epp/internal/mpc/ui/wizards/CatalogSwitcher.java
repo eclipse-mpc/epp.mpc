@@ -3,7 +3,9 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -114,9 +116,22 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 
 	private Image getCatalogIcon(final CatalogDescriptor catalogDescriptor) {
 		String key = catalogDescriptor.getUrl().toExternalForm();
-		imageRegistry.put(key, catalogDescriptor.getIcon());
 		Image image = imageRegistry.get(key);
+		if (image == null) {
+			ImageDescriptor catalogIcon = catalogDescriptor.getIcon();
+			if (catalogIcon == null) {
+				return getDefaultCatalogImage();
+			}
+			imageRegistry.put(key, catalogIcon);
+			image = imageRegistry.get(key);
+		}
 		return image;
+	}
+
+	private Image getDefaultCatalogImage() {
+		return MarketplaceClientUiPlugin.getInstance()
+		.getImageRegistry()
+				.get(MarketplaceClientUiPlugin.NO_ICON_PROVIDED_CATALOG);
 	}
 
 	@Override

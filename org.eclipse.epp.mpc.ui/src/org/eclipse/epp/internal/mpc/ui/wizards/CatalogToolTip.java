@@ -10,11 +10,14 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import org.eclipse.epp.internal.mpc.core.util.TextUtil;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.GradientToolTip;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.FontDescriptor;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -58,7 +61,6 @@ public class CatalogToolTip extends GradientToolTip {
 
 	@Override
 	protected Composite createToolTipArea(Event event, Composite parent) {
-		image = catalogDescriptor.getIcon().createImage();
 		GridLayoutFactory.fillDefaults().numColumns(2).margins(5, 5).equalWidth(false).applyTo(parent);
 		createIcon(parent);
 		createLabel(parent);
@@ -70,19 +72,28 @@ public class CatalogToolTip extends GradientToolTip {
 		Label descriptionLabel = new Label(parent, SWT.WRAP);
 		GridDataFactory.fillDefaults().grab(true, false).span(2, 1).hint(100, SWT.DEFAULT).applyTo(descriptionLabel);
 		descriptionLabel.setBackground(null);
-		descriptionLabel.setText(catalogDescriptor.getDescription());
+		String description = catalogDescriptor.getDescription() == null ? "" : TextUtil.escapeText(catalogDescriptor.getDescription()); //$NON-NLS-1$
+		descriptionLabel.setText(description);
 	}
 
 	private void createLabel(Composite parent) {
 		Label nameLabel = new Label(parent, SWT.NULL);
 		FontDescriptor h1FontDescriptor = createFontDescriptor(SWT.BOLD, 1.35f);
-		nameLabel.setFont(h1FontDescriptor.createFont(image.getDevice()));
-		nameLabel.setText(catalogDescriptor.getLabel());
+		nameLabel.setFont(h1FontDescriptor.createFont(parent.getDisplay()));
+		nameLabel.setText(TextUtil.escapeText(catalogDescriptor.getLabel()));
 		nameLabel.setBackground(null);
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(nameLabel);
 	}
 
 	private void createIcon(Composite parent) {
+		ImageDescriptor icon = catalogDescriptor.getIcon();
+		if (icon == null) {
+			image = MarketplaceClientUiPlugin.getInstance()
+			.getImageRegistry()
+			.get(MarketplaceClientUiPlugin.NO_ICON_PROVIDED_CATALOG);
+		} else {
+			image = icon.createImage();
+		}
 		Label iconLabel = new Label(parent, SWT.NULL);
 		iconLabel.setImage(image);
 		iconLabel.setBackground(null);
