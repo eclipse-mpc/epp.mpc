@@ -91,6 +91,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_CLIENT, MarketplaceClientCore.BUNDLE_ID);
 		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_OS, Platform.getOS());
 		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_WS, Platform.getWS());
+		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_NL, Platform.getNL());
 		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_JAVA_VERSION, System.getProperty("java.version")); //$NON-NLS-1$
 		IProduct product = Platform.getProduct();
 		if (product != null) {
@@ -303,7 +304,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	}
 
 	public void performQuery(Market market, Category category, String queryText, IProgressMonitor monitor)
-			throws CoreException {
+	throws CoreException {
 		final int totalWork = 1000000;
 		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_searchingMarketplace, totalWork);
 		try {

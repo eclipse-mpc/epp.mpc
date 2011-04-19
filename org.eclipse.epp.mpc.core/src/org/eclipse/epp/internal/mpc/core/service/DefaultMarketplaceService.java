@@ -77,6 +77,13 @@ public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketpl
 	public static final String META_PARAM_OS = "os"; //$NON-NLS-1$
 
 	/**
+	 * parameter identifying the current local as reported by {@link org.eclipse.core.runtime.Platform#getNL()}
+	 * 
+	 * @see {@link #setRequestMetaParameters(Map)}
+	 */
+	public static final String META_PARAM_NL = "nl"; //$NON-NLS-1$
+
+	/**
 	 * parameter identifying Java version
 	 * 
 	 * @see {@link #setRequestMetaParameters(Map)}
