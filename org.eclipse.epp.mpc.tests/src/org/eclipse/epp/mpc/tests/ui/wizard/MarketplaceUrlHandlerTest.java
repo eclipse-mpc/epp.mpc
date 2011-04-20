@@ -15,8 +15,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.net.URL;
+
+import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceUrlHandler;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceUrlHandler.SolutionInstallationInfo;
+import org.eclipse.epp.mpc.ui.CatalogDescriptor;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -25,6 +30,13 @@ import org.junit.Test;
  * @author Benjamin Muskalla
  */
 public class MarketplaceUrlHandlerTest {
+
+	@Before
+	public void installMockMarketplace() throws Exception {
+		URL url = new URL("http://marketplace.eclipse.org");
+		CatalogDescriptor eclipseMarketplace = new CatalogDescriptor(url, "Eclipse Marketplace");
+		CatalogRegistry.getInstance().register(eclipseMarketplace);
+	}
 
 	@Test
 	public void testGetInstallationInfoNoValidUrl() throws Exception {
