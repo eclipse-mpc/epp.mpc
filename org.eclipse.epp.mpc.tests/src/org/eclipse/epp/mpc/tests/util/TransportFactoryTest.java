@@ -37,5 +37,6 @@ public class TransportFactoryTest {
 		URI uri = new URI("http://www.eclipse.org");
 		InputStream stream = transport.stream(uri, new NullProgressMonitor());
 		assertNotNull(stream);
+		stream.close();
 	}
 }
