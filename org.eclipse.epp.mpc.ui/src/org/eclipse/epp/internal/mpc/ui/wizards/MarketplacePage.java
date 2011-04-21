@@ -154,8 +154,7 @@ public class MarketplacePage extends CatalogPage {
 		}
 
 		if (needSwitchMarketplaceControl) {
-			Composite switcher = createMarketplaceSwitcher(parent);
-			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(switcher);
+			createMarketplaceSwitcher(parent);
 		} else {
 			updateBranding();
 		}
@@ -228,12 +227,11 @@ public class MarketplacePage extends CatalogPage {
 		searchTabItem.setControl(tabContent);
 	}
 
-	private Composite createMarketplaceSwitcher(Composite parent) {
+	private void createMarketplaceSwitcher(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new FillLayout());
 
 		CatalogSwitcher switcher = new CatalogSwitcher(composite, SWT.BORDER, configuration);
-		switcher.setLayout(new FillLayout());
 		switcher.addSelectionChangedListener(new ISelectionChangedListener() {
 
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -248,7 +246,12 @@ public class MarketplacePage extends CatalogPage {
 		if (selectedDescriptor != null) {
 			switcher.setSelection(new StructuredSelection(selectedDescriptor));
 		}
-		return composite;
+		GridDataFactory.fillDefaults()
+		.align(SWT.FILL, SWT.FILL)
+		.grab(true, true)
+		.minSize(1, 50)
+		.hint(500, 50)
+		.applyTo(composite);
 	}
 
 	private void computeSelectionLinkText() {

@@ -34,6 +34,8 @@ import org.eclipse.swt.widgets.Label;
  */
 public class CatalogSwitcher extends Composite implements ISelectionProvider {
 
+	private static final int MIN_SCROLL_HEIGHT = 42;
+
 	private final MarketplaceCatalogConfiguration configuration;
 
 	private final ImageRegistry imageRegistry = new ImageRegistry();
@@ -47,6 +49,7 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 	public CatalogSwitcher(Composite parent, int style, MarketplaceCatalogConfiguration configuration) {
 		super(parent, style);
 		this.configuration = configuration;
+		setLayout(new FillLayout());
 		createContents(this);
 	}
 
@@ -59,10 +62,10 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 		RowLayout layout = new RowLayout(SWT.HORIZONTAL);
 		marketplaceArea.setLayout(layout);
 
-		Color white = getDisplay().getSystemColor(SWT.COLOR_WHITE);
-		setBackground(white);
-		marketplaceArea.setBackground(white);
-		scrollArea.setBackground(white);
+		Color listBackground = getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND);
+		setBackground(listBackground);
+		marketplaceArea.setBackground(listBackground);
+		scrollArea.setBackground(listBackground);
 
 		List<CatalogDescriptor> catalogDescriptors = configuration.getCatalogDescriptors();
 		for (CatalogDescriptor catalogDescriptor : catalogDescriptors) {
@@ -72,20 +75,21 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 		scrollArea.setContent(marketplaceArea);
 		scrollArea.setExpandVertical(true);
 		scrollArea.setExpandHorizontal(true);
-		scrollArea.setMinHeight(40);
+		scrollArea.setMinHeight(MIN_SCROLL_HEIGHT);
 		scrollArea.addControlListener(new ControlAdapter() {
 			@Override
 			public void controlResized(ControlEvent e) {
 				Rectangle r = parent.getClientArea();
-				scrollArea.setMinSize(marketplaceArea.computeSize(r.width, SWT.DEFAULT));
+				int scrollBarWidth = scrollArea.getVerticalBar().getSize().x;
+				scrollArea.setMinSize(marketplaceArea.computeSize(r.width - scrollBarWidth, SWT.DEFAULT));
 			}
 		});
 	}
 
 	private void createMarketplace(Composite composite, final CatalogDescriptor catalogDescriptor) {
 		Composite container = new Composite(composite, SWT.NONE);
-		Color white = getDisplay().getSystemColor(SWT.COLOR_WHITE);
-		container.setBackground(white);
+		Color listBackground = getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND);
+		container.setBackground(listBackground);
 		container.setData(catalogDescriptor);
 		GridLayout layout = new GridLayout(1, false);
 		layout.marginHeight = 5;
@@ -95,7 +99,7 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 		Image image = getCatalogIcon(catalogDescriptor);
 		final Label label = new Label(container, SWT.NONE);
 		label.setImage(image);
-		label.setBackground(white);
+		label.setBackground(listBackground);
 		label.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
