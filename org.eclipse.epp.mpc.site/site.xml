@@ -6,6 +6,9 @@
   <feature url="features/org.eclipse.epp.mpc_0.0.0.qualifier.jar" id="org.eclipse.epp.mpc" version="0.0.0" patch="true">
     <category name="EPP Marketplace Client"/>
   </feature>
+  <feature url="features/org.eclipse.epp.mpc.source_0.0.0.qualifier.jar" id="org.eclipse.epp.mpc.source" version="0.0.0" patch="true">
+    <category name="EPP Marketplace Client"/>
+  </feature>
   <category-def name="EPP Marketplace Client" label="EPP Marketplace Client">
     <description>
       EPP Marketplace Client
