@@ -77,6 +77,8 @@ class Messages extends NLS {
 
 	public static String MarketplaceDropAdapter_0;
 
+	public static String MarketplacePage_discardPendingSolutions;
+
 	public static String MarketplacePage_eclipseMarketplaceSolutions;
 
 	public static String MarketplacePage_installed;
@@ -92,6 +94,8 @@ class Messages extends NLS {
 	public static String MarketplacePage_search;
 
 	public static String MarketplacePage_selectAlternateCatalog;
+
+	public static String MarketplacePage_selectionSolutions;
 
 	public static String MarketplacePage_selectSolutionsToInstall;
 

@@ -25,6 +25,7 @@ import org.eclipse.equinox.internal.p2.ui.discovery.DiscoveryImages;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogPage;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -75,6 +76,8 @@ public class MarketplacePage extends CatalogPage {
 	private TabItem installedTabItem;
 
 	protected boolean disableTabSelection;
+
+	protected CatalogDescriptor lastSelection;
 
 	public MarketplacePage(MarketplaceCatalog catalog, MarketplaceCatalogConfiguration configuration) {
 		super(catalog);
@@ -231,11 +234,24 @@ public class MarketplacePage extends CatalogPage {
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new FillLayout());
 
-		CatalogSwitcher switcher = new CatalogSwitcher(composite, SWT.BORDER, configuration);
+		final CatalogSwitcher switcher = new CatalogSwitcher(composite, SWT.BORDER, configuration);
 		switcher.addSelectionChangedListener(new ISelectionChangedListener() {
 
 			public void selectionChanged(SelectionChangedEvent event) {
 				CatalogDescriptor descriptor = (CatalogDescriptor) ((IStructuredSelection) event.getSelection()).getFirstElement();
+				if (getWizard().getSelectionModel().getSelectedCatalogItems().size() > 0) {
+					boolean discardSelection = MessageDialog.openConfirm(getShell(),
+							Messages.MarketplacePage_selectionSolutions,
+							Messages.MarketplacePage_discardPendingSolutions);
+					if (discardSelection) {
+						getWizard().getSelectionModel().clear();
+						computeSelectionLinkText();
+					} else {
+						switcher.setSelection(new StructuredSelection(lastSelection));
+						return;
+					}
+				}
+				lastSelection = descriptor;
 				configuration.setCatalogDescriptor(descriptor);
 				getWizard().initializeCatalog();
 				getViewer().updateCatalog();
