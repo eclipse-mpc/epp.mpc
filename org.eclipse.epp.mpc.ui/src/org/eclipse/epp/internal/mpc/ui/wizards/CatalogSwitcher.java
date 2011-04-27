@@ -3,6 +3,10 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -13,6 +17,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlAdapter;
@@ -96,10 +101,10 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 		layout.marginWidth = 5;
 		container.setLayout(layout);
 
-		Image image = getCatalogIcon(catalogDescriptor);
 		final Label label = new Label(container, SWT.NONE);
-		label.setImage(image);
 		label.setBackground(listBackground);
+		retrieveCatalogImage(catalogDescriptor, label);
+		label.setImage(getDefaultCatalogImage());
 		label.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
@@ -109,6 +114,30 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 			}
 		});
 		CatalogToolTip.attachCatalogToolTip(label, catalogDescriptor);
+	}
+
+	private void retrieveCatalogImage(final CatalogDescriptor catalogDescriptor, final Label label) {
+		Job job = new Job(Messages.CatalogSwitcher_retrieveMetaData) {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				monitor.beginTask(
+						NLS.bind(Messages.CatalogSwitcher_downloadCatalogImage, catalogDescriptor.getLabel()), 1);
+				final Image image = getCatalogIcon(catalogDescriptor);
+				monitor.worked(1);
+				label.getDisplay().asyncExec(new Runnable() {
+
+					public void run() {
+						label.setImage(image);
+					}
+				});
+				monitor.done();
+				return Status.OK_STATUS;
+			}
+		};
+		job.setSystem(true);
+		job.setPriority(Job.DECORATE);
+		job.schedule();
 	}
 
 	private void fireSelectionChanged() {
@@ -135,7 +164,7 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 	private Image getDefaultCatalogImage() {
 		return MarketplaceClientUiPlugin.getInstance()
 		.getImageRegistry()
-				.get(MarketplaceClientUiPlugin.NO_ICON_PROVIDED_CATALOG);
+		.get(MarketplaceClientUiPlugin.NO_ICON_PROVIDED_CATALOG);
 	}
 
 	@Override

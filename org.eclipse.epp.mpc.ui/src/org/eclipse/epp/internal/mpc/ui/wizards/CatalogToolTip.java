@@ -17,16 +17,13 @@ import org.eclipse.equinox.internal.p2.ui.discovery.util.GradientToolTip;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.FontDescriptor;
-import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 
@@ -39,24 +36,16 @@ public class CatalogToolTip extends GradientToolTip {
 
 	private final CatalogDescriptor catalogDescriptor;
 
-	public static void attachCatalogToolTip(Control control, CatalogDescriptor catalogDescriptor) {
-		new CatalogToolTip(control, catalogDescriptor);
+	private final Label label;
+
+	public static void attachCatalogToolTip(Label label, CatalogDescriptor catalogDescriptor) {
+		new CatalogToolTip(label, catalogDescriptor);
 	}
 
-	private CatalogToolTip(Control control, CatalogDescriptor catalogDescriptor) {
-		super(control);
+	private CatalogToolTip(Label label, CatalogDescriptor catalogDescriptor) {
+		super(label);
+		this.label = label;
 		this.catalogDescriptor = catalogDescriptor;
-		hookDispose(control);
-	}
-
-	private void hookDispose(Control control) {
-		control.addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent arg0) {
-				if (image != null) {
-					image.dispose();
-				}
-			}
-		});
 	}
 
 	@Override
@@ -86,13 +75,10 @@ public class CatalogToolTip extends GradientToolTip {
 	}
 
 	private void createIcon(Composite parent) {
-		ImageDescriptor icon = catalogDescriptor.getIcon();
-		if (icon == null) {
-			image = MarketplaceClientUiPlugin.getInstance()
-			.getImageRegistry()
-			.get(MarketplaceClientUiPlugin.NO_ICON_PROVIDED_CATALOG);
-		} else {
-			image = icon.createImage();
+		image = label.getImage();
+		if (image == null) {
+			ImageRegistry registry = MarketplaceClientUiPlugin.getInstance().getImageRegistry();
+			image = registry.get(MarketplaceClientUiPlugin.NO_ICON_PROVIDED_CATALOG);
 		}
 		Label iconLabel = new Label(parent, SWT.NULL);
 		iconLabel.setImage(image);

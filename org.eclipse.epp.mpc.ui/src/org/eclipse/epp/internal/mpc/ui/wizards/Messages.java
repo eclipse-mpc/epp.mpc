@@ -27,6 +27,10 @@ class Messages extends NLS {
 
 	public static String CatalogSelectionPage_solutionMarketplaceCatalog;
 
+	public static String CatalogSwitcher_downloadCatalogImage;
+
+	public static String CatalogSwitcher_retrieveMetaData;
+
 	public static String DiscoveryItem_byProviderLicense;
 
 	public static String DiscoveryItem_cannotRenderImage_reason;
