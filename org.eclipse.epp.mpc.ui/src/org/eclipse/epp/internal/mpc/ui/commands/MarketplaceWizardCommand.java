@@ -26,6 +26,7 @@ import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.ServiceLocator;
 import org.eclipse.epp.internal.mpc.core.service.Catalog;
 import org.eclipse.epp.internal.mpc.core.service.CatalogService;
@@ -81,7 +82,22 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 			configuration.getCatalogDescriptors().addAll(catalogDescriptors);
 		}
 		if (selectedCatalogDescriptor != null) {
-			configuration.setCatalogDescriptor(selectedCatalogDescriptor);
+			if (selectedCatalogDescriptor.getLabel().equals("org.eclipse.epp.mpc.descriptorHint")) { //$NON-NLS-1$
+				CatalogDescriptor resolvedDescriptor = CatalogRegistry.getInstance().findCatalogDescriptor(
+						selectedCatalogDescriptor.getUrl().toExternalForm());
+				if (resolvedDescriptor == null) {
+					IStatus status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
+							Messages.MarketplaceWizardCommand_CouldNotFindMarketplaceForSolution, new ExecutionException(
+									selectedCatalogDescriptor.getUrl().toExternalForm()));
+					StatusManager.getManager().handle(status,
+							StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
+					return null;
+				} else {
+					configuration.setCatalogDescriptor(resolvedDescriptor);
+				}
+			} else {
+				configuration.setCatalogDescriptor(selectedCatalogDescriptor);
+			}
 		}
 
 		configuration.getFilters().clear();

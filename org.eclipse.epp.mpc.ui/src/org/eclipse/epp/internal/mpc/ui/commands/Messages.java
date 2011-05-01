@@ -21,6 +21,8 @@ class Messages extends NLS {
 
 	public static String MarketplaceWizardCommand_CannotInstallRemoteLocations;
 
+	public static String MarketplaceWizardCommand_CouldNotFindMarketplaceForSolution;
+
 	public static String MarketplaceWizardCommand_eclipseMarketplace;
 	static {
 		// initialize resource bundle

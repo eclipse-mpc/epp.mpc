@@ -16,7 +16,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.commands.ExecutionEvent;
@@ -29,6 +28,8 @@ import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.ui.statushandlers.StatusManager;
 
 public class MarketplaceUrlHandler {
+
+	public static final String DESCRIPTOR_HINT = "org.eclipse.epp.mpc.descriptorHint"; //$NON-NLS-1$
 
 	public static class SolutionInstallationInfo {
 		private String installId;
@@ -86,33 +87,26 @@ public class MarketplaceUrlHandler {
 			}
 		}
 		if (installId != null) {
-			CatalogDescriptor descriptor = findCatalogDescriptor(url);
+			CatalogDescriptor descriptor = CatalogRegistry.getInstance().findCatalogDescriptor(url);
+			SolutionInstallationInfo info = new SolutionInstallationInfo();
+			info.installId = installId;
+			info.state = state;
 			if (descriptor != null) {
-				SolutionInstallationInfo info = new SolutionInstallationInfo();
-				info.installId = installId;
-				info.state = state;
 				info.catalogDescriptor = descriptor;
-				return info;
+			} else {
+				try {
+					info.catalogDescriptor = new CatalogDescriptor(new URL(url), DESCRIPTOR_HINT);
+				} catch (MalformedURLException e) {
+					return null;
+				}
 			}
+			return info;
 		}
 		return null;
 	}
 
 	public static boolean isPotentialSolution(String url) {
 		return url != null && url.contains(MPC_INSTALL);
-	}
-
-	private static CatalogDescriptor findCatalogDescriptor(String url) {
-		if (url == null || url.length() == 0) {
-			return null;
-		}
-		List<CatalogDescriptor> catalogDescriptors = CatalogRegistry.getInstance().getCatalogDescriptors();
-		for (CatalogDescriptor catalogDescriptor : catalogDescriptors) {
-			if (url.startsWith(catalogDescriptor.getUrl().toExternalForm())) {
-				return catalogDescriptor;
-			}
-		}
-		return null;
 	}
 
 	public static void triggerInstall(SolutionInstallationInfo info) {

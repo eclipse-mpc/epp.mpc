@@ -61,4 +61,16 @@ public class CatalogRegistry {
 	public CatalogBranding getCatalogBranding(CatalogDescriptor descriptor) {
 		return catalogBrandings.get(descriptor);
 	}
+
+	public CatalogDescriptor findCatalogDescriptor(String url) {
+		if (url == null || url.length() == 0) {
+			return null;
+		}
+		for (CatalogDescriptor catalogDescriptor : catalogDescriptors) {
+			if (url.startsWith(catalogDescriptor.getUrl().toExternalForm())) {
+				return catalogDescriptor;
+			}
+		}
+		return null;
+	}
 }
