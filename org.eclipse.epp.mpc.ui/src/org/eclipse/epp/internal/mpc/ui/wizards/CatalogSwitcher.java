@@ -39,7 +39,9 @@ import org.eclipse.swt.widgets.Label;
  */
 public class CatalogSwitcher extends Composite implements ISelectionProvider {
 
-	private static final int MIN_SCROLL_HEIGHT = 42;
+	private static final int ITEM_MARGIN = 5;
+
+	private static final int MIN_SCROLL_HEIGHT = 32 + (2 * ITEM_MARGIN);
 
 	private final MarketplaceCatalogConfiguration configuration;
 
@@ -97,8 +99,8 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 		container.setBackground(listBackground);
 		container.setData(catalogDescriptor);
 		GridLayout layout = new GridLayout(1, false);
-		layout.marginHeight = 5;
-		layout.marginWidth = 5;
+		layout.marginHeight = ITEM_MARGIN;
+		layout.marginWidth = ITEM_MARGIN;
 		container.setLayout(layout);
 
 		final Label label = new Label(container, SWT.NONE);
@@ -163,8 +165,8 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 
 	private Image getDefaultCatalogImage() {
 		return MarketplaceClientUiPlugin.getInstance()
-		.getImageRegistry()
-		.get(MarketplaceClientUiPlugin.NO_ICON_PROVIDED_CATALOG);
+				.getImageRegistry()
+				.get(MarketplaceClientUiPlugin.NO_ICON_PROVIDED_CATALOG);
 	}
 
 	@Override
@@ -207,4 +209,7 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 		}
 	}
 
+	public int getPreferredHeight() {
+		return MIN_SCROLL_HEIGHT + (2 * getBorderWidth()) + 6;
+	}
 }

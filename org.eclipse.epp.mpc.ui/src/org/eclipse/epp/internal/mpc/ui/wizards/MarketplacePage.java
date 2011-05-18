@@ -265,8 +265,8 @@ public class MarketplacePage extends CatalogPage {
 		GridDataFactory.fillDefaults()
 		.align(SWT.FILL, SWT.FILL)
 		.grab(true, true)
-		.minSize(1, 50)
-		.hint(500, 50)
+		.minSize(1, switcher.getPreferredHeight())
+		.hint(500, switcher.getPreferredHeight())
 		.applyTo(composite);
 	}
 
