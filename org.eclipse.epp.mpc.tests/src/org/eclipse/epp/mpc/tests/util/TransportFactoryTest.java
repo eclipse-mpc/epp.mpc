@@ -34,7 +34,7 @@ public class TransportFactoryTest {
 	@Test
 	public void testStream() throws Exception {
 		ITransport transport = TransportFactory.instance().getTransport();
-		URI uri = new URI("http://www.eclipse.org");
+		URI uri = new URI("http://www.eclipse.org/index.php");
 		InputStream stream = transport.stream(uri, new NullProgressMonitor());
 		assertNotNull(stream);
 		stream.close();
