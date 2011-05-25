@@ -56,6 +56,8 @@ public final class CatalogDescriptor {
 		this.label = catalogDescriptor.label;
 		this.description = catalogDescriptor.description;
 		this.icon = catalogDescriptor.icon;
+		this.dependenciesRepository = catalogDescriptor.dependenciesRepository;
+		this.installFromAllRepositories = catalogDescriptor.installFromAllRepositories;
 	}
 
 	/**
