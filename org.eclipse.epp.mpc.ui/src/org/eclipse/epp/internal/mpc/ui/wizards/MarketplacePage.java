@@ -158,9 +158,8 @@ public class MarketplacePage extends CatalogPage {
 
 		if (needSwitchMarketplaceControl) {
 			createMarketplaceSwitcher(parent);
-		} else {
-			updateBranding();
 		}
+		updateBranding();
 
 		// bug 312411: a selection listener so that we can streamline install of single product
 		getViewer().addSelectionChangedListener(new ISelectionChangedListener() {
