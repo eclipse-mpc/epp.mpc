@@ -120,7 +120,7 @@
 		<repository>
 		  <id>e4</id>
 		  <layout>p2</layout>
-		  <url>http://download.eclipse.org/e4/sdk/drops/S-4.1M5-201101282000/repository/</url>
+		  <url>http://download.eclipse.org/e4/sdk/drops/R-4.1-201106201631/repository</url>
 		</repository>
 	  </repositories>
     </profile>
