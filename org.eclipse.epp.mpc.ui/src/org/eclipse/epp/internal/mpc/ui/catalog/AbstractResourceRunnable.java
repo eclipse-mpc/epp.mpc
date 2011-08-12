@@ -21,6 +21,7 @@ import java.util.concurrent.Callable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.epp.internal.mpc.core.util.TransportFactory;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -73,7 +74,11 @@ abstract class AbstractResourceRunnable implements IRunnableWithProgress, Callab
 		} catch (FileNotFoundException e) {
 			//MarketplaceClientUi.error(NLS.bind(Messages.AbstractResourceRunnable_resourceNotFound, resourceUrl), e);
 		} catch (IOException e) {
-			MarketplaceClientUi.error(e);
+			if (e.getCause() instanceof OperationCanceledException) {
+				// canceled, nothing we want to do here
+			} else {
+				MarketplaceClientUi.error(e);
+			}
 		} catch (CoreException e) {
 			MarketplaceClientUi.error(e);
 		}
