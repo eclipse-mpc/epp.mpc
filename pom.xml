@@ -16,7 +16,7 @@
   <properties>
     <tycho-version>0.10.0</tycho-version>
 
-	<archive-dir>${basedir}/target/archive</archive-dir>
+	<archive-dir>${basedir}/target/drops</archive-dir>
 	<site-dir></site-dir>
 
 	<skip-source-check>true</skip-source-check>
@@ -177,7 +177,7 @@
       </activation>
       <properties>
 		<pack200>/shared/common/jdk-1.5.0-22.x86_64/bin</pack200>
-		<archive-dir>/home/data/httpd/download.eclipse.org/mpc/archive</archive-dir>
+		<archive-dir>/home/data/httpd/download.eclipse.org/mpc/drops</archive-dir>
 		<site-dir>/home/data/httpd/download.eclipse.org/mpc/nightly</site-dir>
 		<test-args>-ea -Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -DhttpnonProxyHosts=*.eclipse.org</test-args>
 		<test-app-args>-eclipse.keyring ${env.WORKSPACE}/keyring -eclipse.password ${env.WORKSPACE}/keyring.password</test-app-args>
