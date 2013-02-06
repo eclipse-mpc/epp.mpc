@@ -7,6 +7,7 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
+ *  Yatta Solutions - bug 314936
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.catalog;
 
@@ -106,6 +107,12 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		if (runtimeBundle != null) {
 			requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_RUNTIME_VERSION, runtimeBundle.getVersion()
 					.toString());
+		}
+		// also send the platform version to distinguish between 3.x and 4.x platforms using the same runtime
+		Bundle platformBundle = Platform.getBundle("org.eclipse.platform"); //$NON-NLS-1$
+		if (platformBundle != null) {
+			requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_PLATFORM_VERSION,
+					platformBundle.getVersion().toString());
 		}
 		service.setRequestMetaParameters(requestMetaParameters);
 		return new CachingMarketplaceService(service);
@@ -304,7 +311,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	}
 
 	public void performQuery(Market market, Category category, String queryText, IProgressMonitor monitor)
-	throws CoreException {
+			throws CoreException {
 		final int totalWork = 1000000;
 		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_searchingMarketplace, totalWork);
 		try {

@@ -102,6 +102,15 @@ public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketpl
 	public static final String META_PARAM_RUNTIME_VERSION = "runtime.version"; //$NON-NLS-1$
 
 	/**
+	 * parameter identifying the Eclipse platform version (the version of the org.eclipse.platform bundle) This
+	 * parameter is optional and only sent if the platform bundle is present. It is used to identify the actual running
+	 * platform's version (esp. where different platforms share the same runtime, like the parallel 3.x/4.x versions)
+	 * 
+	 * @see {@link #setRequestMetaParameters(Map)}
+	 */
+	public static final String META_PARAM_PLATFORM_VERSION = "platform.version"; //$NON-NLS-1$
+
+	/**
 	 * parameter identifying the Eclipse product version
 	 * 
 	 * @see {@link #setRequestMetaParameters(Map)}
