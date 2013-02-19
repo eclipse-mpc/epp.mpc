@@ -14,7 +14,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <tycho-version>0.10.0</tycho-version>
+    <tycho-version>0.16.0</tycho-version>
 
 	<archive-dir>${basedir}/target/drops</archive-dir>
 	<site-dir></site-dir>
@@ -72,7 +72,7 @@
 	<repository>
 	  <id>eclipse-orbit</id>
 	  <layout>p2</layout>
-	  <url>http://download.eclipse.org/tools/orbit/downloads/drops/S20110304120314/repository/</url>
+	  <url>http://download.eclipse.org/tools/orbit/downloads/drops/R20110523182458/repository/</url>
 	</repository>
   </repositories>
 
@@ -121,6 +121,32 @@
 		  <id>e4</id>
 		  <layout>p2</layout>
 		  <url>http://download.eclipse.org/e4/sdk/drops/R-4.1-201106201631/repository</url>
+		</repository>
+	  </repositories>
+    </profile>
+    <profile>
+      <id>juno</id>
+      <properties>
+        <platform-version>[4.2.0,4.3.0)</platform-version>
+      </properties>
+	  <repositories>
+		<repository>
+		  <id>juno</id>
+		  <layout>p2</layout>
+		  <url>http://download.eclipse.org/releases/juno/</url>
+		</repository>
+	  </repositories>
+    </profile>
+    <profile>
+      <id>kepler</id>
+      <properties>
+        <platform-version>[4.3.0,4.4.0)</platform-version>
+      </properties>
+	  <repositories>
+		<repository>
+		  <id>kepler</id>
+		  <layout>p2</layout>
+		  <url>http://download.eclipse.org/releases/staging/</url>
 		</repository>
 	  </repositories>
     </profile>
@@ -188,13 +214,13 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.sonatype.tycho</groupId>
+        <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-maven-plugin</artifactId>
         <version>${tycho-version}</version>
         <extensions>true</extensions>
       </plugin>
       <plugin>
-        <groupId>org.sonatype.tycho</groupId>
+        <groupId>org.eclipse.tycho</groupId>
         <artifactId>target-platform-configuration</artifactId>
         <version>${tycho-version}</version>
         <configuration>
@@ -232,8 +258,8 @@
     <pluginManagement>
       <plugins>
         <plugin>
-          <groupId>org.sonatype.tycho</groupId>
-          <artifactId>maven-osgi-compiler-plugin</artifactId>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-compiler-plugin</artifactId>
           <version>${tycho-version}</version>
           <configuration>
             <encoding>UTF-8</encoding>
@@ -243,8 +269,8 @@
           <!-- TODO remove workaround when
              https://issues.sonatype.org/browse/TYCHO-473
              is fixed -->
-          <groupId>org.sonatype.tycho</groupId>
-          <artifactId>maven-osgi-source-plugin</artifactId>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-source-plugin</artifactId>
           <version>${tycho-version}</version>
           <executions>
             <execution>
@@ -257,8 +283,8 @@
           </executions>
         </plugin>
         <plugin>
-          <groupId>org.sonatype.tycho</groupId>
-          <artifactId>maven-osgi-packaging-plugin</artifactId>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-packaging-plugin</artifactId>
           <version>${tycho-version}</version>
           <configuration>
             <format>'I'yyyyMMdd-HHmm</format>
