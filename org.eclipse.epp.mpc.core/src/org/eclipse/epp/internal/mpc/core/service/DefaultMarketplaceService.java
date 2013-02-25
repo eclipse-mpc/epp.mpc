@@ -7,6 +7,7 @@
  *
  * Contributors:
  *      The Eclipse Foundation - initial API and implementation
+ *      Yatta Solutions - bug 397004
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service;
 
@@ -33,6 +34,7 @@ import org.eclipse.osgi.util.NLS;
 
 /**
  * @author David Green
+ * @author Carsten Reckord
  */
 public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketplace> implements MarketplaceService {
 
@@ -51,6 +53,8 @@ public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketpl
 //	/api/p/search/apachesolr_search/[query]?page=[]&filters=[] - Returns search result from the Solr Search DB.
 //
 //	Once we've locked down the provisional API it will likely be named api/1.
+
+	public static final String API_SEARCH_URI = API_URI_SUFFIX + "/search/apachesolr_search/"; //$NON-NLS-1$
 
 	public static final String DEFAULT_SERVICE_LOCATION = System.getProperty(MarketplaceService.class.getName()
 			+ ".url", "http://marketplace.eclipse.org"); //$NON-NLS-1$//$NON-NLS-2$
@@ -174,37 +178,14 @@ public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketpl
 	}
 
 	public SearchResult search(Market market, Category category, String queryText, IProgressMonitor monitor)
-	throws CoreException {
-		// per bug 302825 - http://www.eclipseplugincentral.net/api/v2/search/apachesolr_search/e?filters=tid:31%20tid:38
+			throws CoreException {
 		SearchResult result = new SearchResult();
 		if (queryText == null || queryText.trim().length() == 0) {
 			// search with no text gives us HTTP 404
 			result.setMatchCount(0);
 			result.setNodes(new ArrayList<Node>());
 		} else {
-			String relativeUrl;
-			try {
-				relativeUrl = API_URI_SUFFIX + "/search/apachesolr_search/" //$NON-NLS-1$
-				+ URLEncoder.encode(queryText.trim(), UTF_8);
-				String queryString = ""; //$NON-NLS-1$
-				if (market != null || category != null) {
-					queryString += "filters="; //$NON-NLS-1$
-					if (market != null) {
-						queryString += "tid:" + URLEncoder.encode(market.getId(), UTF_8); //$NON-NLS-1$
-						if (category != null) {
-							queryString += "%20"; //$NON-NLS-1$
-						}
-					}
-					if (category != null) {
-						queryString += "tid:" + URLEncoder.encode(category.getId(), UTF_8); //$NON-NLS-1$
-					}
-				}
-				if (queryString.length() > 0) {
-					relativeUrl += '?' + queryString;
-				}
-			} catch (UnsupportedEncodingException e) {
-				throw new IllegalStateException();
-			}
+			String relativeUrl = computeRelativeSearchUrl(market, category, queryText);
 			Marketplace marketplace = processRequest(relativeUrl, monitor);
 			Search search = marketplace.getSearch();
 			if (search == null) {
@@ -214,6 +195,47 @@ public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketpl
 			result.setNodes(search.getNode());
 		}
 		return result;
+	}
+
+	/**
+	 * Creates the query URL for the Marketplace REST API. The format for the returned relative URL is
+	 * <code>search/apachesolr_search/[query]?filters=[filters]</code> where [query] is the URL encoded query string and
+	 * [filters] are the category and market IDs (in that order). If both market and category are null, the filters are
+	 * omitted completely.
+	 * 
+	 * @param market
+	 *            the market to search or null
+	 * @param category
+	 *            the category to search or null
+	 * @param queryText
+	 *            the search query
+	 * @return the relative search url, e.g.
+	 *         <code>api/p/search/apachesolr_search/WikiText?filters=tid:38%20tid:31</code>
+	 */
+	protected String computeRelativeSearchUrl(Market market, Category category, String queryText) {
+		String relativeUrl;
+		try {
+			relativeUrl = API_SEARCH_URI + URLEncoder.encode(queryText.trim(), UTF_8);
+			String queryString = ""; //$NON-NLS-1$
+			if (market != null || category != null) {
+				queryString += "filters="; //$NON-NLS-1$
+				if (category != null) {
+					queryString += "tid:" + URLEncoder.encode(category.getId(), UTF_8); //$NON-NLS-1$
+					if (market != null) {
+						queryString += "%20"; //$NON-NLS-1$
+					}
+				}
+				if (market != null) {
+					queryString += "tid:" + URLEncoder.encode(market.getId(), UTF_8); //$NON-NLS-1$
+				}
+			}
+			if (queryString.length() > 0) {
+				relativeUrl += '?' + queryString;
+			}
+		} catch (UnsupportedEncodingException e) {
+			throw new IllegalStateException();
+		}
+		return relativeUrl;
 	}
 
 	public SearchResult featured(IProgressMonitor monitor) throws CoreException {

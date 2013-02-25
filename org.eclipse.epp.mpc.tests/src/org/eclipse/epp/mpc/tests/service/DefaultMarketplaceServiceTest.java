@@ -7,6 +7,7 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
+ *  Yatta Solutions - bug 397004
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.service;
 
@@ -35,6 +36,7 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 
 /**
  * @author David Green
+ * @author Carsten Reckord
  */
 @RunWith(BlockJUnit4ClassRunner.class)
 public class DefaultMarketplaceServiceTest {
@@ -102,7 +104,7 @@ public class DefaultMarketplaceServiceTest {
 		assertEquals(category.getUrl(), result.getUrl());
 	}
 
-	//	
+	//
 	//	@Test
 	//	public void testGetMarket() throws CoreException {
 	////		Failing due to bug 302670: REST API market response inconsistency
@@ -112,7 +114,7 @@ public class DefaultMarketplaceServiceTest {
 	//		assertFalse(markets.isEmpty());
 	//
 	//		final String marketName = "Tools";
-	//		
+	//
 	//		Market market = null;
 	//		for (Market m: markets) {
 	//			if (marketName.equals(m.getName())) {
@@ -120,14 +122,51 @@ public class DefaultMarketplaceServiceTest {
 	//			}
 	//		}
 	//		assertNotNull("Expected market "+marketName,market);
-	//		
+	//
 	//		Market result = marketplaceService.getMarket(market, new NullProgressMonitor());
-	//		
+	//
 	//		assertEquals(market.getId(),result.getId());
 	//		assertEquals(market.getName(),result.getName());
 	//		assertEquals(market.getUrl(),result.getUrl());
 	//	}
 	//
+
+	/**
+	 * bug 302825 - Make sure that search URLs have the following form:<br/>
+	 * <code>http://marketplace.eclipse.org/api/p/search/apachesolr_search/WikiText?filters=tid:38%20tid:31</code>
+	 * <p>
+	 * bug 397004 - If both market and category are provided, make sure category is listed first
+	 */
+	@Test
+	public void computeRelativeSearchUrl() {
+		class SearchUrlTestService extends DefaultMarketplaceService {
+			@Override
+			protected String computeRelativeSearchUrl(Market market, Category category, String queryText) {
+				return super.computeRelativeSearchUrl(market, category, queryText);
+			}
+		}
+		SearchUrlTestService service = new SearchUrlTestService();
+
+		Market market = new Market();
+		market.setId("31");
+		Category category = new Category();
+		category.setId("38");
+		String query = "some query";
+
+		String searchUrl = service.computeRelativeSearchUrl(null, null, query);
+		assertEquals(DefaultMarketplaceService.API_SEARCH_URI + "some+query", searchUrl);
+
+		searchUrl = service.computeRelativeSearchUrl(market, null, query);
+		assertEquals(DefaultMarketplaceService.API_SEARCH_URI + "some+query?filters=tid:31", searchUrl);
+
+		searchUrl = service.computeRelativeSearchUrl(null, category, query);
+		assertEquals(DefaultMarketplaceService.API_SEARCH_URI + "some+query?filters=tid:38", searchUrl);
+
+		// bug 400127 - make sure category comes first
+		searchUrl = service.computeRelativeSearchUrl(market, category, query);
+		assertEquals(DefaultMarketplaceService.API_SEARCH_URI + "some+query?filters=tid:38%20tid:31", searchUrl);
+	}
+
 	@SuppressWarnings("null")
 	@Test
 	public void search() throws CoreException {
