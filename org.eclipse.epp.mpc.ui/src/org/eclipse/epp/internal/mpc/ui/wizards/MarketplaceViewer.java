@@ -6,8 +6,8 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- * 	The Eclipse Foundation - initial API and implementation
- *    Yatta Solutions - error handling (bug 374105)
+ * 	  The Eclipse Foundation - initial API and implementation
+ *    Yatta Solutions - error handling (bug 374105), header layout (bug 341014)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
@@ -38,11 +38,14 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.discovery.model.Tag;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.ControlListItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.FilteredViewer;
+import org.eclipse.equinox.internal.p2.ui.discovery.util.GradientCanvas;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.PatternFilter;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.TextSearchControl;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogFilter;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
+import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CategoryItem;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -57,12 +60,14 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.statushandlers.StatusManager;
 
 /**
  * @author Steffen Pingel
  * @author David Green
  * @author Benjamin Muskalla
+ * @author Carsten Reckord
  */
 public class MarketplaceViewer extends CatalogViewer {
 
@@ -211,6 +216,10 @@ public class MarketplaceViewer extends CatalogViewer {
 			} else {
 				throw new IllegalStateException();
 			}
+			CategoryItem<?> categoryItem = (CategoryItem<?>) super.doCreateViewerItem(parent, element);
+			setSeparatorVisible(categoryItem, false);
+			fixLayout(categoryItem);
+			return categoryItem;
 		}
 		return super.doCreateViewerItem(parent, element);
 	}
@@ -522,5 +531,43 @@ public class MarketplaceViewer extends CatalogViewer {
 	@Override
 	protected Set<String> getInstalledFeatures(IProgressMonitor monitor) {
 		return MarketplaceClientUi.computeInstalledFeatures(monitor);
+	}
+
+	protected static void fixLayout(CategoryItem<?> categoryItem) {
+		//FIXME remove once the layout has been fixed upstream
+
+		CatalogCategory category = categoryItem.getData();
+		boolean hasDescription = category.getDescription() != null;
+		int valignTitle = hasDescription ? SWT.BEGINNING : SWT.CENTER;
+		int totalRows = hasDescription ? 2 : 1;
+
+		final Control[] children = categoryItem.getChildren();
+		Composite categoryHeaderContainer = (Composite) children[0];
+		GridLayoutFactory.fillDefaults()
+		.numColumns(3)
+		.margins(5, hasDescription ? 5 : 10)
+		.equalWidth(false)
+		.applyTo(categoryHeaderContainer);
+
+		final Control[] headerChildren = categoryHeaderContainer.getChildren();
+		final Control iconLabel = headerChildren[0];
+		final Control nameLabel = headerChildren[1];
+		final Control tooltip = headerChildren[2];
+
+		GridDataFactory.swtDefaults().align(SWT.CENTER, valignTitle).span(1, totalRows).applyTo(iconLabel);
+		GridDataFactory.fillDefaults().grab(true, false).align(SWT.BEGINNING, valignTitle).applyTo(nameLabel);
+
+		if (tooltip instanceof Label) {
+			GridDataFactory.fillDefaults().align(SWT.END, valignTitle).applyTo(tooltip);
+		}
+	}
+
+	protected static void setSeparatorVisible(CategoryItem<?> categoryItem, boolean visible) {
+		//FIXME introduce API in CategoryItem and then get rid of this
+		final Control childControl = categoryItem.getChildren()[0];
+		if (childControl instanceof GradientCanvas) {
+			GradientCanvas canvas = (GradientCanvas) childControl;
+			canvas.setSeparatorVisible(visible);
+		}
 	}
 }

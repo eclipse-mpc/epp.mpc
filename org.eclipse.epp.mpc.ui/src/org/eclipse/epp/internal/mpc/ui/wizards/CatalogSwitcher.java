@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2010 The Eclipse Foundation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * 	The Eclipse Foundation - initial API and implementation
+ *  Yatta Solutions - bug 341014
+ *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.util.LinkedList;
@@ -9,6 +20,10 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
+import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
+import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CategoryItem;
+import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryResources;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.viewers.ISelection;
@@ -36,6 +51,7 @@ import org.eclipse.swt.widgets.Label;
 
 /**
  * @author Benjamin Muskalla
+ * @author Carsten Reckord
  */
 public class CatalogSwitcher extends Composite implements ISelectionProvider {
 
@@ -56,17 +72,19 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 	public CatalogSwitcher(Composite parent, int style, MarketplaceCatalogConfiguration configuration) {
 		super(parent, style);
 		this.configuration = configuration;
-		setLayout(new FillLayout());
+		GridLayoutFactory.fillDefaults().numColumns(1).margins(0, 0).spacing(0, 0).applyTo(this);
 		createContents(this);
 	}
 
 	private void createContents(final Composite parent) {
+		createHeader(parent);
 		final ScrolledComposite scrollArea = new ScrolledComposite(parent, SWT.V_SCROLL);
 		scrollArea.setLayout(new FillLayout());
 
 		marketplaceArea = new Composite(scrollArea, SWT.NONE);
 
 		RowLayout layout = new RowLayout(SWT.HORIZONTAL);
+		layout.marginLeft = layout.marginRight = layout.marginTop = layout.marginBottom = layout.marginHeight = layout.marginWidth = 0;
 		marketplaceArea.setLayout(layout);
 
 		Color listBackground = getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND);
@@ -91,6 +109,15 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 				scrollArea.setMinSize(marketplaceArea.computeSize(r.width - scrollBarWidth, SWT.DEFAULT));
 			}
 		});
+	}
+
+	private void createHeader(Composite parent) {
+		CatalogCategory fakeCategory = new CatalogCategory();
+		fakeCategory.setName(Messages.CatalogSwitcher_Header);
+		CategoryItem<CatalogCategory> header = new CategoryItem<CatalogCategory>(parent, SWT.NONE,
+				new DiscoveryResources(parent.getDisplay()), fakeCategory);
+		MarketplaceViewer.setSeparatorVisible(header, false);
+		MarketplaceViewer.fixLayout(header);
 	}
 
 	private void createMarketplace(Composite composite, final CatalogDescriptor catalogDescriptor) {
