@@ -7,12 +7,15 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
+ *    Yatta Solutions - category filtering (bug 314936)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.commands;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +39,7 @@ import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
+import org.eclipse.epp.internal.mpc.ui.wizards.AbstractTagFilter;
 import org.eclipse.epp.internal.mpc.ui.wizards.ComboTagFilter;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceCatalogConfiguration;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceFilter;
@@ -49,12 +53,15 @@ import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogFilter;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.statushandlers.StatusManager;
 
 /**
  * @author David Green
+ * @author Carsten Reckord
  */
 public class MarketplaceWizardCommand extends AbstractHandler implements IHandler {
 
@@ -127,30 +134,23 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 		final ComboTagFilter marketCategoryTagFilter = new ComboTagFilter() {
 			@Override
 			public void catalogUpdated(boolean wasCancelled) {
-				Set<Tag> newChoices = new HashSet<Tag>();
-				List<Tag> choices = new ArrayList<Tag>();
-				for (CatalogCategory category : catalog.getCategories()) {
-					if (category instanceof MarketplaceCategory) {
-						MarketplaceCategory marketplaceCategory = (MarketplaceCategory) category;
-						for (Market market : marketplaceCategory.getMarkets()) {
-							for (Category marketCategory : market.getCategory()) {
-								Tag categoryTag = new Tag(Category.class, marketCategory.getId(),
-										marketCategory.getName());
-								categoryTag.setData(marketCategory);
-								if (newChoices.add(categoryTag)) {
-									choices.add(categoryTag);
-								}
-							}
-						}
-					}
-				}
-				setChoices(choices);
+				updateCategoryChoices(this, marketFilter);
 			}
 		};
 		marketCategoryTagFilter.setSelectAllOnNoSelection(true);
 		marketCategoryTagFilter.setNoSelectionLabel(Messages.MarketplaceWizardCommand_allCategories);
 		marketCategoryTagFilter.setTagClassification(Category.class);
 		marketCategoryTagFilter.setChoices(new ArrayList<Tag>());
+
+		final IPropertyChangeListener marketListener = new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				final String property = event.getProperty();
+				if (AbstractTagFilter.PROP_SELECTED.equals(property)) {
+					updateCategoryChoices(marketCategoryTagFilter, marketFilter);
+				}
+			}
+		};
+		marketFilter.addPropertyChangeListener(marketListener);
 
 		configuration.getFilters().add(marketFilter);
 		configuration.getFilters().add(marketCategoryTagFilter);
@@ -171,6 +171,40 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 		dialog.open();
 
 		return null;
+	}
+
+	private void updateCategoryChoices(final ComboTagFilter marketCategoryTagFilter, final ComboTagFilter marketFilter) {
+		Set<Tag> newChoices = new HashSet<Tag>();
+		List<Tag> choices = new ArrayList<Tag>();
+
+		Set<Market> selectedMarkets = new HashSet<Market>();
+		for (Tag marketTag : marketFilter.getSelected()) {
+			selectedMarkets.add((Market) marketTag.getData());
+		}
+
+		final MarketplaceCatalog catalog = (MarketplaceCatalog) marketCategoryTagFilter.getCatalog();
+		for (CatalogCategory category : catalog.getCategories()) {
+			if (category instanceof MarketplaceCategory) {
+				MarketplaceCategory marketplaceCategory = (MarketplaceCategory) category;
+				for (Market market : marketplaceCategory.getMarkets()) {
+					if (selectedMarkets.isEmpty() || selectedMarkets.contains(market)) {
+						for (Category marketCategory : market.getCategory()) {
+							Tag categoryTag = new Tag(Category.class, marketCategory.getId(), marketCategory.getName());
+							categoryTag.setData(marketCategory);
+							if (newChoices.add(categoryTag)) {
+								choices.add(categoryTag);
+							}
+						}
+					}
+				}
+			}
+		}
+		Collections.sort(choices, new Comparator<Tag>() {
+			public int compare(Tag o1, Tag o2) {
+				return o1.getLabel().compareTo(o2.getLabel());
+			}
+		});
+		marketCategoryTagFilter.setChoices(choices);
 	}
 
 	public void setCatalogDescriptors(List<CatalogDescriptor> catalogDescriptors) {
