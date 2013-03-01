@@ -7,7 +7,7 @@
  *
  * Contributors:
  *      The Eclipse Foundation - initial API and implementation
- *      Yatta Solutions - bug 397004
+ *      Yatta Solutions - bug 397004, bug 385936
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service;
 
@@ -25,11 +25,11 @@ import java.util.Set;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
+import org.eclipse.epp.internal.mpc.core.util.HttpUtil;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -301,14 +301,14 @@ public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketpl
 
 	public void reportInstallError(IProgressMonitor monitor, IStatus result, Set<Node> nodes,
 			Set<String> iuIdsAndVersions, String resolutionDetails) throws CoreException {
-		HttpClient client = new HttpClient();
-		client.getParams().setParameter(HttpMethodParams.USER_AGENT, MarketplaceClientCore.BUNDLE_ID);
-
+		HttpClient client;
 		URL location;
 		PostMethod method;
 		try {
 			location = new URL(baseUrl, "install/error/report"); //$NON-NLS-1$
-			method = new PostMethod(location.toURI().toString());
+			String target = location.toURI().toString();
+			client = HttpUtil.createHttpClient(target);
+			method = new PostMethod(target);
 		} catch (URISyntaxException e) {
 			throw new IllegalStateException(e);
 		} catch (MalformedURLException e) {

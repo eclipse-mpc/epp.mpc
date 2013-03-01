@@ -24,7 +24,7 @@ public class MarketplaceClientCore {
 	public static final String BUNDLE_ID = "org.eclipse.epp.mpc.core"; //$NON-NLS-1$
 
 	public static ILog getLog() {
-		return Platform.getLog(Platform.getBundle(BUNDLE_ID));
+		return Platform.getLog(MarketplaceClientCorePlugin.getBundle());
 	}
 
 	public static void error(String message, Throwable exception) {

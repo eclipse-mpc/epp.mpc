@@ -18,6 +18,8 @@ class Messages extends NLS {
 	public static String P2TransportFactory_AuthenticationFailed;
 
 	public static String DefaultMarketplaceService_serviceUnavailable503;
+
+	public static String ProxyHelper_replacingAuthenticator;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
