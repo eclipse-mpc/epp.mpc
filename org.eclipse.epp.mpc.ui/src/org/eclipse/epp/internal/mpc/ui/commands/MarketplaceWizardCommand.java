@@ -6,8 +6,9 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- * 	The Eclipse Foundation - initial API and implementation
- *    Yatta Solutions - category filtering (bug 314936), error handling (bug 374105)
+ * 	  The Eclipse Foundation - initial API and implementation
+ *    Yatta Solutions - category filtering (bug 314936), error handling (bug 374105),
+ *                      multiselect hints (bug 337774)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.commands;
 
@@ -44,6 +45,7 @@ import org.eclipse.epp.internal.mpc.ui.wizards.ComboTagFilter;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceCatalogConfiguration;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceFilter;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceWizard;
+import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceWizardDialog;
 import org.eclipse.epp.internal.mpc.ui.wizards.Operation;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.discovery.DiscoveryCore;
@@ -185,7 +187,7 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 
 		wizard.setWindowTitle(Messages.MarketplaceWizardCommand_eclipseMarketplace);
 
-		WizardDialog dialog = new WizardDialog(WorkbenchUtil.getShell(), wizard);
+		WizardDialog dialog = new MarketplaceWizardDialog(WorkbenchUtil.getShell(), wizard);
 		dialog.open();
 
 		return null;
