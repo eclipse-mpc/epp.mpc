@@ -7,7 +7,7 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
- *    Yatta Solutions - category filtering (bug 314936)
+ *    Yatta Solutions - category filtering (bug 314936), error handling (bug 374105)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.commands;
 
@@ -83,8 +83,26 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 		configuration.setVerifyUpdateSiteAvailability(false);
 
 		if (catalogDescriptors == null || catalogDescriptors.isEmpty()) {
-			installRemoteCatalogs();
+			final IStatus remoteCatalogStatus = installRemoteCatalogs();
 			configuration.getCatalogDescriptors().addAll(CatalogRegistry.getInstance().getCatalogDescriptors());
+			if (configuration.getCatalogDescriptors().isEmpty()) {
+				// doesn't make much sense to continue without catalogs.
+				// nothing will work and no way to recover later
+				IStatus cause;
+				if (!remoteCatalogStatus.isOK()) {
+					cause = remoteCatalogStatus;
+				} else {
+					cause = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
+							Messages.MarketplaceWizardCommand_noRemoteCatalogs);
+				}
+				IStatus exitStatus = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, cause.getCode(),
+						Messages.MarketplaceWizardCommand_cannotOpenMarketplace, new CoreException(cause));
+				StatusManager.getManager().handle(exitStatus,
+						StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
+				return null;
+			} else if (!remoteCatalogStatus.isOK()) {
+				StatusManager.getManager().handle(remoteCatalogStatus, StatusManager.LOG);
+			}
 		} else {
 			configuration.getCatalogDescriptors().addAll(catalogDescriptors);
 		}
@@ -223,7 +241,7 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 		this.operationByNodeId = operationByNodeId;
 	}
 
-	private void installRemoteCatalogs() {
+	public IStatus installRemoteCatalogs() {
 		try {
 			final AtomicReference<List<Catalog>> result = new AtomicReference<List<Catalog>>();
 
@@ -254,12 +272,13 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 				CatalogRegistry.getInstance().addCatalogBranding(descriptor, catalog.getBranding());
 			}
 		} catch (InterruptedException ie) {
-			return;
+			return Status.CANCEL_STATUS;
 		} catch (Exception e) {
-			IStatus status = MarketplaceClientUi.computeStatus(new InvocationTargetException(e),
+			IStatus status = MarketplaceClientUi.computeStatus(e,
 					Messages.MarketplaceWizardCommand_CannotInstallRemoteLocations);
-			StatusManager.getManager().handle(status, StatusManager.LOG);
+			return status;
 		}
+		return Status.OK_STATUS;
 	}
 
 	private void registerOrOverrideCatalog(CatalogDescriptor descriptor) {

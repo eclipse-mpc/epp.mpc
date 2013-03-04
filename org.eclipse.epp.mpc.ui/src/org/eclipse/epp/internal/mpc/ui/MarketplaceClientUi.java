@@ -7,10 +7,14 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
+ *    Yatta Solutions - error handling (bug 374105)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.ConnectException;
+import java.net.NoRouteToHostException;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -26,6 +30,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
 import org.eclipse.equinox.p2.engine.IProfile;
 import org.eclipse.equinox.p2.engine.IProfileRegistry;
@@ -39,6 +44,11 @@ import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
+/**
+ * @author Steffen Pingel
+ * @author David Green
+ * @author Carsten Reckord
+ */
 public class MarketplaceClientUi {
 
 	private static final String DOT_FEATURE_DOT_GROUP = ".feature.group"; //$NON-NLS-1$
@@ -60,13 +70,18 @@ public class MarketplaceClientUi {
 		error(null, exception);
 	}
 
-	public static IStatus computeStatus(InvocationTargetException e, String message) {
-		Throwable cause = e.getCause();
-		IStatus statusCause;
-		if (cause instanceof CoreException) {
-			statusCause = ((CoreException) cause).getStatus();
-		} else {
-			statusCause = new Status(IStatus.ERROR, BUNDLE_ID, cause.getMessage(), cause);
+	public static IStatus computeStatus(Exception e, String message) {
+		Throwable cause = e;
+		if (e instanceof InvocationTargetException) {
+			cause = e.getCause();
+		}
+		IStatus statusCause = computeWellknownProblemStatus(e);
+		if (statusCause == null) {
+			if (cause instanceof CoreException) {
+				statusCause = ((CoreException) cause).getStatus();
+			} else {
+				statusCause = new Status(IStatus.ERROR, BUNDLE_ID, cause.getMessage(), cause);
+			}
 		}
 		if (statusCause.getMessage() != null) {
 			message = NLS.bind(Messages.MarketplaceClientUi_message_message2, message, statusCause.getMessage());
@@ -74,6 +89,48 @@ public class MarketplaceClientUi {
 		IStatus status = new MultiStatus(BUNDLE_ID, 0, new IStatus[] { statusCause }, message, cause);
 		return status;
 	}
+
+	public static IStatus computeWellknownProblemStatus(Throwable exception) {
+		IStatus status = null;
+		while (exception != null) {
+			// name resolution didn't work - possibly offline...
+			if (exception instanceof UnknownHostException) {
+				status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
+						Messages.MarketplaceClientUi_unknownHost, exception.getMessage()), exception);
+				break;
+			}
+			// could be a previously resolved name, but now unreachable because we're offline...
+			if (exception instanceof NoRouteToHostException) {
+				status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
+						Messages.MarketplaceClientUi_unknownHost, exception.getMessage()), exception);
+				break;
+			}
+			// some oddly configured networks throw timeouts instead of DNS or routing errors
+			if (exception instanceof ConnectException) {
+				status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
+						Messages.MarketplaceClientUi_unknownHost, exception.getMessage()), exception);
+				break;
+			}
+			if (exception instanceof CoreException) {
+				IStatus exceptionStatus = ((CoreException) exception).getStatus();
+				if (MarketplaceClientCore.BUNDLE_ID.equals(exceptionStatus.getPlugin())
+						&& exceptionStatus.getCode() == 503) {
+					//received service unavailable error from P2 transport
+					status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, exceptionStatus.getMessage(),
+							exception);
+					break;
+				}
+			}
+			Throwable cause = exception.getCause();
+			if (cause != exception) {
+				exception = cause;
+			} else {
+				break;
+			}
+		}
+		return status;
+	}
+
 
 	public static BundleContext getBundleContext() {
 		return MarketplaceClientUiPlugin.getInstance().getBundle().getBundleContext();

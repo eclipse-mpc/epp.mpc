@@ -7,13 +7,12 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
+ *    Yatta Solutions - error handling (bug 374105)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.catalog;
 
-import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -174,12 +173,12 @@ public class MarketplaceCatalog extends Catalog {
 							public void run() {
 								ProvisioningSession session = ProvisioningUI.getDefaultUI().getSession();
 								IMetadataRepositoryManager manager = (IMetadataRepositoryManager) session.getProvisioningAgent()
-								.getService(IMetadataRepositoryManager.SERVICE_NAME);
+										.getService(IMetadataRepositoryManager.SERVICE_NAME);
 								try {
 									IMetadataRepository repository = manager.loadRepository(uri, pm);
 									IQuery<IInstallableUnit> query = QueryUtil.createMatchQuery( //
 											"id ~= /*.feature.group/ && " + //$NON-NLS-1$
-									"properties['org.eclipse.equinox.p2.type.group'] == true ");//$NON-NLS-1$
+											"properties['org.eclipse.equinox.p2.type.group'] == true ");//$NON-NLS-1$
 									IQueryResult<IInstallableUnit> result = repository.query(query, pm);
 
 									// compute highest version for all available IUs.
@@ -253,6 +252,10 @@ public class MarketplaceCatalog extends Catalog {
 	@Override
 	public IStatus performDiscovery(IProgressMonitor monitor) {
 		IStatus status = super.performDiscovery(monitor);
+		return computeStatus(status);
+	}
+
+	private IStatus computeStatus(IStatus status) {
 		if (status.getSeverity() == IStatus.ERROR) {
 			// unwrap a multistatus with one child see bug 309612
 			if (status.isMultiStatus()) {
@@ -263,23 +266,9 @@ public class MarketplaceCatalog extends Catalog {
 			}
 			if (!status.isMultiStatus()) {
 				Throwable exception = status.getException();
-				while (exception != null) {
-					if (exception instanceof UnknownHostException) {
-						status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
-								Messages.MarketplaceCatalog_unknownHost, exception.getMessage()), exception);
-						break;
-					}
-					if (exception instanceof ConnectException) {
-						status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
-								Messages.MarketplaceCatalog_unknownHost, exception.getMessage()), exception);
-						break;
-					}
-					Throwable cause = exception.getCause();
-					if (cause != exception) {
-						exception = cause;
-					} else {
-						break;
-					}
+				IStatus newStatus = MarketplaceClientUi.computeWellknownProblemStatus(exception);
+				if (newStatus != null) {
+					return newStatus;
 				}
 			}
 		}
@@ -322,9 +311,13 @@ public class MarketplaceCatalog extends Catalog {
 						operation.run(marketplaceStrategy, new SubProgressMonitor(monitor, strategyTicks));
 
 					} catch (CoreException e) {
-						status.add(new Status(e.getStatus().getSeverity(), DiscoveryCore.ID_PLUGIN, NLS.bind(
-								Messages.MarketplaceCatalog_failedWithError, discoveryStrategy.getClass()
-								.getSimpleName()), e));
+						IStatus error = MarketplaceClientUi.computeWellknownProblemStatus(e);
+						if (error == null) {
+							error = new Status(e.getStatus().getSeverity(), DiscoveryCore.ID_PLUGIN, NLS.bind(
+									Messages.MarketplaceCatalog_failedWithError, discoveryStrategy.getClass()
+									.getSimpleName()), e);
+						}
+						status.add(error);
 					}
 				}
 			}
@@ -333,7 +326,7 @@ public class MarketplaceCatalog extends Catalog {
 		} finally {
 			monitor.done();
 		}
-		return status;
+		return computeStatus(status);
 	}
 
 	/**

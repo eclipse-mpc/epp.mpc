@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
+ *     Yatta Solutions - error handling (bug 374105)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.commands;
 
@@ -21,9 +22,13 @@ class Messages extends NLS {
 
 	public static String MarketplaceWizardCommand_CannotInstallRemoteLocations;
 
+	public static String MarketplaceWizardCommand_cannotOpenMarketplace;
+
 	public static String MarketplaceWizardCommand_CouldNotFindMarketplaceForSolution;
 
 	public static String MarketplaceWizardCommand_eclipseMarketplace;
+
+	public static String MarketplaceWizardCommand_noRemoteCatalogs;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

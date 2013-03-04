@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
+ *     Yatta Solutions - error handling (bug 374105)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui;
 
@@ -25,6 +26,8 @@ class Messages extends NLS {
 	public static String MarketplaceClientUi_message_message2;
 
 	public static String MarketplaceClientUi_unexpectedException_reason;
+
+	public static String MarketplaceClientUi_unknownHost;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

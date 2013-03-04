@@ -11,7 +11,6 @@
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -128,7 +127,7 @@ public class MarketplaceUrlHandler {
 		try {
 			command.execute(new ExecutionEvent());
 		} catch (ExecutionException e) {
-			IStatus status = MarketplaceClientUi.computeStatus(new InvocationTargetException(e),
+			IStatus status = MarketplaceClientUi.computeStatus(e,
 					Messages.MarketplaceBrowserIntegration_cannotOpenMarketplaceWizard);
 			StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 		}

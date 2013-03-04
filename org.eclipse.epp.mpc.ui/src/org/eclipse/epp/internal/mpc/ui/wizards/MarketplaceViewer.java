@@ -7,6 +7,7 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
+ *    Yatta Solutions - error handling (bug 374105)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
@@ -453,6 +454,11 @@ public class MarketplaceViewer extends CatalogViewer {
 			super.updateCatalog();
 		}
 		refresh();
+	}
+
+	@Override
+	protected IStatus computeStatus(InvocationTargetException e, String message) {
+		return MarketplaceClientUi.computeStatus(e, message);
 	}
 
 	private MarketplaceWizard getWizard() {
