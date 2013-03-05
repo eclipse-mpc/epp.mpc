@@ -42,7 +42,7 @@ public class RemoteMarketplaceService<T> {
 
 	protected URL baseUrl;
 
-	protected static final String API_URI_SUFFIX = "api/p"; //$NON-NLS-1$
+	public static final String API_URI_SUFFIX = "api/p"; //$NON-NLS-1$
 
 	protected static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
 

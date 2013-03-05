@@ -24,10 +24,12 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.service.Category;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.service.Market;
 import org.eclipse.epp.internal.mpc.core.service.Node;
+import org.eclipse.epp.internal.mpc.core.service.RemoteMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.service.SearchResult;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +49,8 @@ public class DefaultMarketplaceServiceTest {
 	public void setUp() throws Exception {
 		marketplaceService = new DefaultMarketplaceService();
 		Map<String, String> requestMetaParameters = new HashMap<String, String>();
-		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_CLIENT, "org.eclipse.epp.mpc.tests");
+		// bug 397004 - this is the only valid id for REST API calls
+		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_CLIENT, MarketplaceClientCore.BUNDLE_ID);
 		marketplaceService.setRequestMetaParameters(requestMetaParameters);
 	}
 
@@ -135,17 +138,11 @@ public class DefaultMarketplaceServiceTest {
 	 * bug 302825 - Make sure that search URLs have the following form:<br/>
 	 * <code>http://marketplace.eclipse.org/api/p/search/apachesolr_search/WikiText?filters=tid:38%20tid:31</code>
 	 * <p>
-	 * bug 397004 - If both market and category are provided, make sure category is listed first
+	 * bug 397004 - If both market and category are provided, make sure market is listed first
 	 */
 	@Test
 	public void computeRelativeSearchUrl() {
-		class SearchUrlTestService extends DefaultMarketplaceService {
-			@Override
-			protected String computeRelativeSearchUrl(Market market, Category category, String queryText) {
-				return super.computeRelativeSearchUrl(market, category, queryText);
-			}
-		}
-		SearchUrlTestService service = new SearchUrlTestService();
+		DefaultMarketplaceService service = new DefaultMarketplaceService();
 
 		Market market = new Market();
 		market.setId("31");
@@ -153,18 +150,37 @@ public class DefaultMarketplaceServiceTest {
 		category.setId("38");
 		String query = "some query";
 
-		String searchUrl = service.computeRelativeSearchUrl(null, null, query);
-		assertEquals(DefaultMarketplaceService.API_SEARCH_URI + "some+query", searchUrl);
+		String apiSearchPrefix = RemoteMarketplaceService.API_URI_SUFFIX + '/' + DefaultMarketplaceService.API_SEARCH_URI;
 
-		searchUrl = service.computeRelativeSearchUrl(market, null, query);
-		assertEquals(DefaultMarketplaceService.API_SEARCH_URI + "some+query?filters=tid:31", searchUrl);
+		String searchUrl = service.computeRelativeSearchUrl(null, null, query, true);
+		assertEquals(apiSearchPrefix + "some+query", searchUrl);
 
-		searchUrl = service.computeRelativeSearchUrl(null, category, query);
-		assertEquals(DefaultMarketplaceService.API_SEARCH_URI + "some+query?filters=tid:38", searchUrl);
+		searchUrl = service.computeRelativeSearchUrl(market, null, query, true);
+		assertEquals(apiSearchPrefix + "some+query?filters=tid:31", searchUrl);
 
-		// bug 400127 - make sure category comes first
-		searchUrl = service.computeRelativeSearchUrl(market, category, query);
+		searchUrl = service.computeRelativeSearchUrl(null, category, query, true);
+		assertEquals(apiSearchPrefix + "some+query?filters=tid:38", searchUrl);
+
+		// bug 397004 - make sure market comes first for api
+		searchUrl = service.computeRelativeSearchUrl(market, category, query, true);
+		assertEquals(apiSearchPrefix + "some+query?filters=tid:31%20tid:38", searchUrl);
+		// bug 397004 - make sure category comes first for browser
+		searchUrl = service.computeRelativeSearchUrl(market, category, query, false);
 		assertEquals(DefaultMarketplaceService.API_SEARCH_URI + "some+query?filters=tid:38%20tid:31", searchUrl);
+
+		searchUrl = service.computeRelativeSearchUrl(market, null, null, true);
+		assertEquals(DefaultMarketplaceService.API_TAXONOMY_URI + "31/" + RemoteMarketplaceService.API_URI_SUFFIX,
+				searchUrl);
+
+		searchUrl = service.computeRelativeSearchUrl(null, category, null, false);
+		assertEquals(DefaultMarketplaceService.API_TAXONOMY_URI + "38", searchUrl);
+
+		// taxonomy uri is category-first for both API and browser
+		searchUrl = service.computeRelativeSearchUrl(market, category, null, true);
+		assertEquals(DefaultMarketplaceService.API_TAXONOMY_URI + "38,31/" + RemoteMarketplaceService.API_URI_SUFFIX,
+				searchUrl);
+		searchUrl = service.computeRelativeSearchUrl(market, category, null, false);
+		assertEquals(DefaultMarketplaceService.API_TAXONOMY_URI + "38,31", searchUrl);
 	}
 
 	@SuppressWarnings("null")

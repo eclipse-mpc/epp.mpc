@@ -54,7 +54,9 @@ public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketpl
 //
 //	Once we've locked down the provisional API it will likely be named api/1.
 
-	public static final String API_SEARCH_URI = API_URI_SUFFIX + "/search/apachesolr_search/"; //$NON-NLS-1$
+	public static final String API_TAXONOMY_URI = "taxonomy/term/"; //$NON-NLS-1$
+
+	public static final String API_SEARCH_URI = "search/apachesolr_search/"; //$NON-NLS-1$
 
 	public static final String DEFAULT_SERVICE_LOCATION = System.getProperty(MarketplaceService.class.getName()
 			+ ".url", "http://marketplace.eclipse.org"); //$NON-NLS-1$//$NON-NLS-2$
@@ -189,12 +191,12 @@ public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketpl
 	public SearchResult search(Market market, Category category, String queryText, IProgressMonitor monitor)
 			throws CoreException {
 		SearchResult result = new SearchResult();
-		if (queryText == null || queryText.trim().length() == 0) {
-			// search with no text gives us HTTP 404
+		String relativeUrl = computeRelativeSearchUrl(market, category, queryText, true);
+		if (relativeUrl == null) {
+			// empty search
 			result.setMatchCount(0);
 			result.setNodes(new ArrayList<Node>());
 		} else {
-			String relativeUrl = computeRelativeSearchUrl(market, category, queryText);
 			Marketplace marketplace = processRequest(relativeUrl, monitor);
 			Search search = marketplace.getSearch();
 			if (search == null) {
@@ -207,10 +209,18 @@ public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketpl
 	}
 
 	/**
-	 * Creates the query URL for the Marketplace REST API. The format for the returned relative URL is
+	 * Creates the query URL for the Marketplace REST API.
+	 * <p>
+	 * If the query string is non-empty, the format for the returned relative URL is
 	 * <code>search/apachesolr_search/[query]?filters=[filters]</code> where [query] is the URL encoded query string and
-	 * [filters] are the category and market IDs (in that order). If both market and category are null, the filters are
-	 * omitted completely.
+	 * [filters] are the category and market IDs (category first for browser urls, market first for API urls). If both
+	 * market and category are null, the filters are omitted completely.
+	 * <p>
+	 * If the query is empty and either market or category are not null, the format for the relative URL is
+	 * <code>taxonomy/term/[filters]</code> where [filters] is the comma-separated list of category and market, in that
+	 * order.
+	 * <p>
+	 * If the query is empty and both category and market are null, the result is null
 	 * 
 	 * @param market
 	 *            the market to search or null
@@ -218,31 +228,55 @@ public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketpl
 	 *            the category to search or null
 	 * @param queryText
 	 *            the search query
+	 * @param api
+	 *            true to create REST API url, false for browser url
 	 * @return the relative search url, e.g.
-	 *         <code>api/p/search/apachesolr_search/WikiText?filters=tid:38%20tid:31</code>
+	 *         <code>api/p/search/apachesolr_search/WikiText?filters=tid:38%20tid:31</code> or
+	 *         <code>taxonomy/term/38,31/api/p</code>
 	 */
-	protected String computeRelativeSearchUrl(Market market, Category category, String queryText) {
+	public String computeRelativeSearchUrl(Market market, Category category, String queryText, boolean api) {
 		String relativeUrl;
 		try {
-			relativeUrl = API_SEARCH_URI + URLEncoder.encode(queryText.trim(), UTF_8);
-			String queryString = ""; //$NON-NLS-1$
-			if (market != null || category != null) {
-				queryString += "filters="; //$NON-NLS-1$
+			if (queryText != null && queryText.trim().length() > 0) {
+				relativeUrl = (api ? API_URI_SUFFIX + '/' : "") + API_SEARCH_URI + URLEncoder.encode(queryText.trim(), UTF_8); //$NON-NLS-1$
+				String queryString = ""; //$NON-NLS-1$
+				if (market != null || category != null) {
+					queryString += "filters="; //$NON-NLS-1$
+					Identifiable first = api ? market : category;
+					Identifiable second = api ? category : market;
+					if (first != null) {
+						queryString += "tid:" + URLEncoder.encode(first.getId(), UTF_8); //$NON-NLS-1$
+						if (second != null) {
+							queryString += "%20"; //$NON-NLS-1$
+						}
+					}
+					if (second != null) {
+						queryString += "tid:" + URLEncoder.encode(second.getId(), UTF_8); //$NON-NLS-1$
+					}
+				}
+				if (queryString.length() > 0) {
+					relativeUrl += '?' + queryString;
+				}
+			} else if (market != null || category != null) {
+				// http://marketplace.eclipse.org/taxonomy/term/38,31
+				relativeUrl = API_TAXONOMY_URI;
 				if (category != null) {
-					queryString += "tid:" + URLEncoder.encode(category.getId(), UTF_8); //$NON-NLS-1$
+					relativeUrl += URLEncoder.encode(category.getId(), UTF_8);
 					if (market != null) {
-						queryString += "%20"; //$NON-NLS-1$
+						relativeUrl += ',';
 					}
 				}
 				if (market != null) {
-					queryString += "tid:" + URLEncoder.encode(market.getId(), UTF_8); //$NON-NLS-1$
+					relativeUrl += URLEncoder.encode(market.getId(), UTF_8);
 				}
-			}
-			if (queryString.length() > 0) {
-				relativeUrl += '?' + queryString;
+				if (api) {
+					relativeUrl += '/' + API_URI_SUFFIX;
+				}
+			} else {
+				relativeUrl = null;
 			}
 		} catch (UnsupportedEncodingException e) {
-			throw new IllegalStateException();
+			throw new IllegalArgumentException(e);
 		}
 		return relativeUrl;
 	}

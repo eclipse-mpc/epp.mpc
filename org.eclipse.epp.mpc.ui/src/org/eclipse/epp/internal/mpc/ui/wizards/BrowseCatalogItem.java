@@ -7,17 +7,19 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
+ *  Yatta Solutions - bug 397004
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLEncoder;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.epp.internal.mpc.core.service.Category;
+import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
+import org.eclipse.epp.internal.mpc.core.service.Market;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
@@ -37,6 +39,7 @@ import org.eclipse.ui.statushandlers.StatusManager;
 
 /**
  * @author David Green
+ * @author Carsten Reckord
  */
 @SuppressWarnings("unused")
 public class BrowseCatalogItem extends AbstractDiscoveryItem<CatalogDescriptor> {
@@ -97,38 +100,16 @@ public class BrowseCatalogItem extends AbstractDiscoveryItem<CatalogDescriptor> 
 			try {
 				ContentType contentType = viewer.getQueryContentType();
 				if (contentType == ContentType.SEARCH) {
-					String path = null;
 					String queryText = viewer.getQueryText();
-					if (queryText != null && queryText.trim().length() > 0) {
-						// append something like this:
-						// /search/apachesolr_search/mylyn%20wikitext?filters=tid:38%20tid:31
-						path = "search/apachesolr_search/" + URLEncoder.encode(queryText.trim(), UTF_8); //$NON-NLS-1$
-						String filter = ""; //$NON-NLS-1$
-						if (viewer.getQueryMarket() != null) {
-							filter += TID;
-							filter += URLEncoder.encode(viewer.getQueryMarket().getId(), UTF_8);
-						}
-						if (viewer.getQueryCategory() != null) {
-							if (filter.length() > 0) {
-								filter += ' ';
-							}
-							filter += TID;
-							filter += URLEncoder.encode(viewer.getQueryCategory().getId(), UTF_8);
-						}
-						if (filter.length() > 0) {
-							path += "?filters=" + URLEncoder.encode(filter, UTF_8); //$NON-NLS-1$
-						}
-					} else if (viewer.getQueryCategory() != null) {
-						// http://marketplace.eclipse.org/taxonomy/term/8
-						path = "taxonomy/term/" + URLEncoder.encode(viewer.getQueryCategory().getId(), UTF_8); //$NON-NLS-1$
-					} else if (viewer.getQueryMarket() != null) {
-						path = "taxonomy/term/" + URLEncoder.encode(viewer.getQueryMarket().getId(), UTF_8); //$NON-NLS-1$
-					}
+					Category queryCategory = viewer.getQueryCategory();
+					Market queryMarket = viewer.getQueryMarket();
+					String path = new DefaultMarketplaceService(url).computeRelativeSearchUrl(queryMarket,
+							queryCategory, queryText, false);
 					if (path != null) {
 						url = new URL(url, path);
 					}
 				}
-			} catch (UnsupportedEncodingException e) {
+			} catch (IllegalArgumentException e) {
 				// should never happen
 				MarketplaceClientUi.error(e);
 			} catch (MalformedURLException e) {
