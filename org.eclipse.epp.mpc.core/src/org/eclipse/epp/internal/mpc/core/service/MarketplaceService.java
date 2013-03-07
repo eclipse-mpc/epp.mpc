@@ -110,6 +110,13 @@ public interface MarketplaceService {
 	public SearchResult popular(IProgressMonitor monitor) throws CoreException;
 
 	/**
+	 * Get the news configuration for the marketplace
+	 * 
+	 * @return the news configuration
+	 */
+	public News news(IProgressMonitor monitor) throws CoreException;
+
+	/**
 	 * Report an error in resolving an install operation.
 	 * 
 	 * @param monitor

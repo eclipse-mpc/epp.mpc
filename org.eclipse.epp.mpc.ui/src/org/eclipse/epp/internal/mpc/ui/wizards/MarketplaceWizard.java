@@ -7,6 +7,7 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
+ *  Yatta Solutions - news (bug 401721)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
@@ -32,8 +33,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.epp.internal.mpc.core.service.News;
+import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
@@ -71,10 +75,17 @@ import org.eclipse.ui.statushandlers.StatusManager;
  * A wizard for interacting with a marketplace service.
  * 
  * @author David Green
+ * @author Carsten Reckord
  */
 public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile, IMarketplaceWebBrowser {
 
 	private static final String PREF_DEFAULT_CATALOG = CatalogDescriptor.class.getSimpleName();
+
+	private static final String DEBUG_NEWS_FLAG = MarketplaceClientUi.BUNDLE_ID + "/news/debug"; //$NON-NLS-1$
+
+	private static final String DEBUG_NEWS_TITLE = MarketplaceClientUi.BUNDLE_ID + "/news/title"; //$NON-NLS-1$
+
+	private static final String DEBUG_NEWS_URL = MarketplaceClientUi.BUNDLE_ID + "/news/url"; //$NON-NLS-1$
 
 	private Set<String> installedFeatures;
 
@@ -164,7 +175,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	boolean wantInitializeInitialSelection() {
 		return !initialSelectionInitialized
-		&& (getConfiguration().getInitialState() != null || getConfiguration().getInitialOperationByNodeId() != null);
+				&& (getConfiguration().getInitialState() != null || getConfiguration().getInitialOperationByNodeId() != null);
 	}
 
 	@Override
@@ -261,8 +272,8 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 	private void doDefaultCatalogSelection() {
 		if (getConfiguration().getCatalogDescriptor() == null) {
 			String defaultCatalogUrl = MarketplaceClientUiPlugin.getInstance()
-			.getPreferenceStore()
-			.getString(PREF_DEFAULT_CATALOG);
+					.getPreferenceStore()
+					.getString(PREF_DEFAULT_CATALOG);
 			// if a preferences was set, we default to that catalog descriptor
 			if (defaultCatalogUrl != null && defaultCatalogUrl.length() > 0) {
 				for (CatalogDescriptor descriptor : getConfiguration().getCatalogDescriptors()) {
@@ -372,7 +383,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		if (WorkbenchBrowserSupport.getInstance().isInternalWebBrowserAvailable()
 				&& url.toLowerCase().startsWith(catalogUri.toString().toLowerCase())) {
 			int style = IWorkbenchBrowserSupport.AS_EDITOR | IWorkbenchBrowserSupport.LOCATION_BAR
-			| IWorkbenchBrowserSupport.NAVIGATION_BAR;
+					| IWorkbenchBrowserSupport.NAVIGATION_BAR;
 			String browserId = "MPC-" + catalogUri.toString().replaceAll("[^a-zA-Z0-9_-]", "_"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			try {
 				IWebBrowser browser = WorkbenchBrowserSupport.getInstance().createBrowser(style, browserId,
@@ -491,8 +502,8 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				if (getConfiguration().getCatalogDescriptor().getDependenciesRepository() != null) {
 					try {
 						dependenciesRepository = getConfiguration().getCatalogDescriptor()
-						.getDependenciesRepository()
-						.toURI();
+								.getDependenciesRepository()
+								.toURI();
 					} catch (URISyntaxException e) {
 						throw new InvocationTargetException(e);
 					}
@@ -602,6 +613,56 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			getCatalog().getDiscoveryStrategies().add(
 					new MarketplaceDiscoveryStrategy(getConfiguration().getCatalogDescriptor()));
 		}
+	}
+
+	protected void updateNews() {
+		CatalogDescriptor catalogDescriptor = getConfiguration().getCatalogDescriptor();
+		News news = null;
+		if (Boolean.parseBoolean(Platform.getDebugOption(DEBUG_NEWS_FLAG))) {
+			// use debug override values
+			String debugNewsUrl = Platform.getDebugOption(DEBUG_NEWS_URL);
+			if (debugNewsUrl != null && debugNewsUrl.length() > 0) {
+				news = new News();
+				news.setUrl(debugNewsUrl);
+				String debugNewsTitle = Platform.getDebugOption(DEBUG_NEWS_TITLE);
+				if (debugNewsTitle == null || debugNewsTitle.length() == 0) {
+					news.setShortTitle("Debug News"); //$NON-NLS-1$
+				} else {
+					news.setShortTitle(debugNewsTitle);
+				}
+				news.setTimestamp(System.currentTimeMillis());
+			}
+		}
+		if (news == null) {
+			// try requesting news from marketplace
+			try {
+				final News[] result = new News[1];
+				getContainer().run(true, true, new IRunnableWithProgress() {
+
+					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+						IStatus status = getCatalog().performNewsDiscovery(monitor);
+						if (!status.isOK() && status.getSeverity() != IStatus.CANCEL) {
+							// don't bother user with missing news
+							StatusManager.getManager().handle(status, StatusManager.LOG);
+						}
+						result[0] = getCatalog().getNews();
+					}
+				});
+				if (result[0] != null) {
+					news = result[0];
+				}
+			} catch (InvocationTargetException e) {
+				final IStatus status = MarketplaceClientUi.computeStatus(e, Messages.MarketplaceViewer_unexpectedException);
+				StatusManager.getManager().handle(status, StatusManager.LOG);
+			} catch (InterruptedException e) {
+				// cancelled by user
+			}
+		}
+		if (news == null) {
+			// use news from catalog
+			news = CatalogRegistry.getInstance().getCatalogNews(catalogDescriptor);
+		}
+		CatalogRegistry.getInstance().addCatalogNews(catalogDescriptor, news);
 	}
 
 }

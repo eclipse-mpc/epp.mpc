@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -47,6 +48,7 @@ public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketpl
 //	/recent/api/p - Returns a server-defined number of recent updates
 //	/favorites/top/api/p - Returns a server-defined number of top favorites
 //	/popular/top/api/p - Returns a server-defined number of most active results
+//	/news/api/p - Returns the news configuration details (news location/title...).
 //
 //	There is one exception to adding /api/p at the end and that is for search results.
 //
@@ -54,9 +56,25 @@ public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketpl
 //
 //	Once we've locked down the provisional API it will likely be named api/1.
 
-	public static final String API_TAXONOMY_URI = "taxonomy/term/"; //$NON-NLS-1$
+	public static final String API_FAVORITES_URI = "favorites/top"; //$NON-NLS-1$
+
+	public static final String API_FEATURED_URI = "featured"; //$NON-NLS-1$
+
+	public static final String API_NEWS_URI = "news"; //$NON-NLS-1$
+
+	public static final String API_NODE_CONTENT_URI = "content"; //$NON-NLS-1$
+
+	public static final String API_NODE_URI = "node"; //$NON-NLS-1$
+
+	public static final String API_POPULAR_URI = "popular/top"; //$NON-NLS-1$
+
+	public static final String API_RECENT_URI = "recent"; //$NON-NLS-1$
 
 	public static final String API_SEARCH_URI = "search/apachesolr_search/"; //$NON-NLS-1$
+
+	public static final String API_SEARCH_URI_FULL = API_URI_SUFFIX + '/' + API_SEARCH_URI;
+
+	public static final String API_TAXONOMY_URI = "taxonomy/term/"; //$NON-NLS-1$
 
 	public static final String DEFAULT_SERVICE_LOCATION = System.getProperty(MarketplaceService.class.getName()
 			+ ".url", "http://marketplace.eclipse.org"); //$NON-NLS-1$//$NON-NLS-2$
@@ -176,7 +194,7 @@ public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketpl
 				// should never happen
 				throw new IllegalStateException(e);
 			}
-			marketplace = processRequest("node/" + encodedId + '/' + API_URI_SUFFIX, monitor); //$NON-NLS-1$
+			marketplace = processRequest(API_NODE_URI + '/' + encodedId + '/' + API_URI_SUFFIX, monitor);
 		} else {
 			marketplace = processRequest(node.getUrl(), API_URI_SUFFIX, monitor);
 		}
@@ -238,7 +256,7 @@ public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketpl
 		String relativeUrl;
 		try {
 			if (queryText != null && queryText.trim().length() > 0) {
-				relativeUrl = (api ? API_URI_SUFFIX + '/' : "") + API_SEARCH_URI + URLEncoder.encode(queryText.trim(), UTF_8); //$NON-NLS-1$
+				relativeUrl = (api ? API_SEARCH_URI_FULL : API_SEARCH_URI) + URLEncoder.encode(queryText.trim(), UTF_8);
 				String queryString = ""; //$NON-NLS-1$
 				if (market != null || category != null) {
 					queryString += "filters="; //$NON-NLS-1$
@@ -300,7 +318,7 @@ public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketpl
 		} catch (UnsupportedEncodingException e) {
 			throw new IllegalStateException();
 		}
-		String uri = "featured/"; //$NON-NLS-1$
+		String uri = API_FEATURED_URI + '/';
 		if (nodePart.length() > 0) {
 			uri += nodePart + '/';
 		}
@@ -309,17 +327,17 @@ public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketpl
 	}
 
 	public SearchResult recent(IProgressMonitor monitor) throws CoreException {
-		Marketplace marketplace = processRequest("recent/" + API_URI_SUFFIX, monitor); //$NON-NLS-1$
+		Marketplace marketplace = processRequest(API_RECENT_URI + '/' + API_URI_SUFFIX, monitor);
 		return createSearchResult(marketplace.getRecent());
 	}
 
 	public SearchResult favorites(IProgressMonitor monitor) throws CoreException {
-		Marketplace marketplace = processRequest("favorites/top/" + API_URI_SUFFIX, monitor); //$NON-NLS-1$
+		Marketplace marketplace = processRequest(API_FAVORITES_URI + '/' + API_URI_SUFFIX, monitor);
 		return createSearchResult(marketplace.getFavorites());
 	}
 
 	public SearchResult popular(IProgressMonitor monitor) throws CoreException {
-		Marketplace marketplace = processRequest("popular/top/" + API_URI_SUFFIX, monitor); //$NON-NLS-1$
+		Marketplace marketplace = processRequest(API_POPULAR_URI + '/' + API_URI_SUFFIX, monitor);
 		return createSearchResult(marketplace.getPopular());
 	}
 
@@ -331,6 +349,20 @@ public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketpl
 		result.setMatchCount(nodeList.getCount());
 		result.setNodes(nodeList.getNode());
 		return result;
+	}
+
+	public News news(IProgressMonitor monitor) throws CoreException {
+		try {
+			Marketplace marketplace = processRequest(API_NEWS_URI + '/' + API_URI_SUFFIX, monitor);
+			return marketplace.getNews();
+		} catch (CoreException ex) {
+			final Throwable cause = ex.getCause();
+			if (cause instanceof FileNotFoundException) {
+				// optional news API not supported
+				return null;
+			}
+			throw ex;
+		}
 	}
 
 	public void reportInstallError(IProgressMonitor monitor, IStatus result, Set<Node> nodes,

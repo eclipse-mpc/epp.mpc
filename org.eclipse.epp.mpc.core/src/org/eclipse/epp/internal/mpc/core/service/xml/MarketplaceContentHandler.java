@@ -11,11 +11,13 @@
 package org.eclipse.epp.internal.mpc.core.service.xml;
 
 import org.eclipse.epp.internal.mpc.core.service.Marketplace;
+import org.eclipse.epp.internal.mpc.core.service.News;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 /**
  * @author David Green
+ * @author Carsten Reckord
  */
 public class MarketplaceContentHandler extends UnmarshalContentHandler {
 
@@ -89,6 +91,13 @@ public class MarketplaceContentHandler extends UnmarshalContentHandler {
 			childHandler.setUnmarshaller(getUnmarshaller());
 			getUnmarshaller().setCurrentHandler(childHandler);
 			childHandler.startElement(uri, localName, attributes);
+		} else if (localName.equals("news")) { //$NON-NLS-1$
+			org.eclipse.epp.internal.mpc.core.service.xml.NewsContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.NewsContentHandler();
+			childHandler.setParentModel(model);
+			childHandler.setParentHandler(this);
+			childHandler.setUnmarshaller(getUnmarshaller());
+			getUnmarshaller().setCurrentHandler(childHandler);
+			childHandler.startElement(uri, localName, attributes);
 		}
 	}
 
@@ -119,6 +128,10 @@ public class MarketplaceContentHandler extends UnmarshalContentHandler {
 			// nothing to do
 		} else if (localName.equals("recent")) { //$NON-NLS-1$
 			// nothing to do
+		} else if (localName.equals("news")) { //$NON-NLS-1$
+			News news = (News) getUnmarshaller().getModel();
+			getUnmarshaller().setModel(null);
+			model.setNews(news);
 		}
 		return false;
 	}

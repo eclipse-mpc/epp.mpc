@@ -129,7 +129,7 @@ public class CachingMarketplaceService implements MarketplaceService {
 
 	private String computeSearchKey(String prefix, Market market, Category category, String queryText) {
 		return prefix
-				+ ":" + (market == null ? "" : market.getId()) + ":" + (category == null ? "" : category.getId()) + ":" + (queryText == null ? "" : queryText.trim()); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$ //$NON-NLS-6$ 
+				+ ":" + (market == null ? "" : market.getId()) + ":" + (category == null ? "" : category.getId()) + ":" + (queryText == null ? "" : queryText.trim()); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$ //$NON-NLS-6$
 	}
 
 	public SearchResult featured(IProgressMonitor monitor) throws CoreException {
@@ -181,6 +181,10 @@ public class CachingMarketplaceService implements MarketplaceService {
 			}
 		});
 
+	}
+
+	public News news(IProgressMonitor monitor) throws CoreException {
+		return delegate.news(monitor);
 	}
 
 	public void reportInstallError(IProgressMonitor monitor, IStatus result, Set<Node> nodes,

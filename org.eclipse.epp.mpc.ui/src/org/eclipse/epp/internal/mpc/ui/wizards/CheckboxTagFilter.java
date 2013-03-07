@@ -47,6 +47,7 @@ public class CheckboxTagFilter extends AbstractTagFilter {
 			}
 			for (final Tag choice : getChoices()) {
 				final Button checkbox = new Button(buttonContainer, SWT.CHECK);
+				checkbox.setData(choice);
 				checkbox.setSelection(getSelected().contains(choice));
 				checkbox.setText(choice.getLabel());
 				checkbox.addSelectionListener(new SelectionListener() {
@@ -73,5 +74,19 @@ public class CheckboxTagFilter extends AbstractTagFilter {
 	protected void choicesChanged(List<Tag> choices, List<Tag> previousChoices) {
 		rebuildChoicesUi();
 		super.choicesChanged(choices, previousChoices);
+	}
+
+	@Override
+	protected void updateUi() {
+		for (Control control : buttonContainer.getChildren()) {
+			final Object data = control.getData();
+			if (data instanceof Tag) {
+				if (control instanceof Button) {
+					Button checkbox = (Button) control;
+					checkbox.setSelection(getSelected().contains(data));
+				}
+			}
+		}
+		super.updateUi();
 	}
 }

@@ -115,4 +115,20 @@ public abstract class UnmarshalContentHandler {
 		}
 	}
 
+	protected Long toLong(String string) {
+		if (string == null) {
+			return null;
+		}
+		string = string.trim();
+		if (string.length() == 0) {
+			return null;
+		}
+		try {
+			return Long.parseLong(string);
+		} catch (NumberFormatException e) {
+			// fail soft
+			return null;
+		}
+	}
+
 }

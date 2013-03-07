@@ -26,6 +26,8 @@ public class Catalog extends Identifiable {
 
 	private String dependencyRepository;
 
+	private News news;
+
 	public Catalog() {
 	}
 
@@ -69,4 +71,11 @@ public class Catalog extends Identifiable {
 		this.dependencyRepository = dependencyRepository;
 	}
 
+	public News getNews() {
+		return news;
+	}
+
+	public void setNews(News news) {
+		this.news = news;
+	}
 }

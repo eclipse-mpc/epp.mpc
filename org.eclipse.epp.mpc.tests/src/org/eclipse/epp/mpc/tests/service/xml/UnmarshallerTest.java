@@ -31,6 +31,7 @@ import org.eclipse.epp.internal.mpc.core.service.Favorites;
 import org.eclipse.epp.internal.mpc.core.service.Featured;
 import org.eclipse.epp.internal.mpc.core.service.Market;
 import org.eclipse.epp.internal.mpc.core.service.Marketplace;
+import org.eclipse.epp.internal.mpc.core.service.News;
 import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.core.service.Recent;
 import org.eclipse.epp.internal.mpc.core.service.Search;
@@ -47,6 +48,7 @@ import org.xml.sax.XMLReader;
 /**
  * @author David Green
  * @author Benjamin Muskalla
+ * @author Carsten Reckord
  */
 @RunWith(BlockJUnit4ClassRunner.class)
 public class UnmarshallerTest {
@@ -384,7 +386,7 @@ public class UnmarshallerTest {
 		assertTrue(model instanceof Catalogs);
 		Catalogs catalogs = (Catalogs) model;
 
-		assertEquals(2, catalogs.getCatalogs().size());
+		assertEquals(3, catalogs.getCatalogs().size());
 
 		//	     <catalog id="35656" title="Marketplace Catalog" url="http://marketplace.eclipse.org" selfContained="1"  dependencyRepository="http://download.eclipse.org/releases/helios">
 		//	        <description>Here is a description</description>
@@ -417,6 +419,27 @@ public class UnmarshallerTest {
 		assertFalse(branding.hasPopularTab());
 		assertTrue(branding.hasRecentTab());
 
+		News news = catalog.getNews();
+		assertNotNull(news);
+		assertEquals("http://marketplace.eclipse.org/news", news.getUrl());
+		assertEquals("News", news.getShortTitle());
+		assertEquals(Long.valueOf(1363181064000l), news.getTimestamp());
+		assertNull(catalogs.getCatalogs().get(1).getNews());
+		assertNull(catalogs.getCatalogs().get(2).getNews());
+	}
+
+	@Test
+	public void news() throws IOException, SAXException {
+		Object model = process("resources/news.xml");
+		assertNotNull(model);
+		assertTrue(model instanceof Marketplace);
+
+		Marketplace marketplace = (Marketplace) model;
+		News news = marketplace.getNews();
+		assertNotNull(news);
+		assertEquals("http://marketplace.eclipse.org/news", news.getUrl());
+		assertEquals("News", news.getShortTitle());
+		assertEquals(Long.valueOf(1363181064000l), news.getTimestamp());
 	}
 
 	private Object process(String resource) throws IOException, SAXException {

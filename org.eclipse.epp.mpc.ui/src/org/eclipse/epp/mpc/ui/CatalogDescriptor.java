@@ -62,7 +62,7 @@ public final class CatalogDescriptor {
 
 	/**
 	 * The URL of the catalog. The URL identifies the catalog location, which provides an API described by <a
-	 * href="http://FIXME">Marketplace REST</a>
+	 * href="http://wiki.eclipse.org/Marketplace/REST">Marketplace REST</a>
 	 */
 	public URL getUrl() {
 		return url;

@@ -272,6 +272,9 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 				}
 				registerOrOverrideCatalog(descriptor);
 				CatalogRegistry.getInstance().addCatalogBranding(descriptor, catalog.getBranding());
+				if (catalog.getNews() != null) {
+					CatalogRegistry.getInstance().addCatalogNews(descriptor, catalog.getNews());
+				}
 			}
 		} catch (InterruptedException ie) {
 			return Status.CANCEL_STATUS;

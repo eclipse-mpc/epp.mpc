@@ -7,7 +7,7 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
- *    Yatta Solutions - error handling (bug 374105)
+ *  Yatta Solutions - error handling (bug 374105), news (bug 401721)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.catalog;
 
@@ -27,9 +27,11 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.service.Category;
 import org.eclipse.epp.internal.mpc.core.service.Market;
+import org.eclipse.epp.internal.mpc.core.service.News;
 import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.util.ConcurrentTaskManager;
@@ -54,10 +56,13 @@ import org.eclipse.osgi.util.NLS;
 
 /**
  * @author David Green
+ * @author Carsten Reckord
  */
 public class MarketplaceCatalog extends Catalog {
 
 	private final Map<String, Boolean> updateAvailableByNodeId = new HashMap<String, Boolean>();
+
+	private News news;
 
 	private interface DiscoveryOperation {
 		public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException;
@@ -117,6 +122,23 @@ public class MarketplaceCatalog extends Catalog {
 		return performDiscovery(new DiscoveryOperation() {
 			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
 				strategy.performQuery(monitor, nodeIds);
+			}
+		}, monitor);
+	}
+
+	/**
+	 * Query for a set of nodes. Use this method infrequently since it may have to make multiple server round-trips.
+	 * 
+	 * @param monitor
+	 *            the progress monitor
+	 * @param nodeIds
+	 *            the nodes to retrieve
+	 * @return
+	 */
+	public IStatus performNodeQuery(IProgressMonitor monitor, final Set<Node> nodes) {
+		return performDiscovery(new DiscoveryOperation() {
+			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
+				strategy.performNodeQuery(monitor, nodes);
 			}
 		}, monitor);
 	}
@@ -329,6 +351,47 @@ public class MarketplaceCatalog extends Catalog {
 		return computeStatus(status);
 	}
 
+	public IStatus performNewsDiscovery(IProgressMonitor monitor) {
+		if (getDiscoveryStrategies().isEmpty()) {
+			throw new IllegalStateException();
+		}
+
+		News news = null;
+
+		MultiStatus status = new MultiStatus(MarketplaceClientUi.BUNDLE_ID, 0, Messages.MarketplaceCatalog_queryFailed,
+				null);
+		final int totalTicks = 100000;
+		final SubMonitor progress = SubMonitor.convert(monitor, "Checking news", totalTicks);
+		try {
+			int strategyTicks = totalTicks / getDiscoveryStrategies().size();
+			for (AbstractDiscoveryStrategy discoveryStrategy : getDiscoveryStrategies()) {
+				if (monitor.isCanceled()) {
+					status.add(Status.CANCEL_STATUS);
+					break;
+				}
+				if (discoveryStrategy instanceof MarketplaceDiscoveryStrategy) {
+					try {
+						MarketplaceDiscoveryStrategy marketplaceStrategy = (MarketplaceDiscoveryStrategy) discoveryStrategy;
+						news = marketplaceStrategy.performNewsDiscovery(progress.newChild(strategyTicks));
+						if (news != null) {
+							break;
+						}
+					} catch (CoreException e) {
+						status.add(new Status(e.getStatus().getSeverity(), DiscoveryCore.ID_PLUGIN, NLS.bind(
+								Messages.MarketplaceCatalog_failedWithError, discoveryStrategy.getClass()
+								.getSimpleName()), e));
+					}
+				}
+			}
+		} finally {
+			monitor.done();
+		}
+		if (status.isOK()) {
+			setNews(news);
+		}
+		return status;
+	}
+
 	/**
 	 * Report an error for an attempted install
 	 * 
@@ -356,4 +419,11 @@ public class MarketplaceCatalog extends Catalog {
 		}
 	}
 
+	public News getNews() {
+		return news;
+	}
+
+	public void setNews(News news) {
+		this.news = news;
+	}
 }

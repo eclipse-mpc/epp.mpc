@@ -7,10 +7,10 @@
  *
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
+ *     Yatta Solutions - error handling (bug 374105), news (bug 401721)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
-import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceUrlHandler.SolutionInstallationInfo;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.browser.OpenWindowListener;
@@ -21,11 +21,10 @@ import org.eclipse.swt.browser.WindowEvent;
  * marketplace wizard.
  * 
  * @author dgreen
+ * @author Carsten Reckord
  */
-public class MarketplaceBrowserIntegration implements LocationListener, OpenWindowListener {
-
-
-	private static final String MPC_INSTALL_URI = "/mpc/install?"; //$NON-NLS-1$
+public class MarketplaceBrowserIntegration extends MarketplaceUrlHandler implements LocationListener,
+OpenWindowListener {
 
 	public void open(WindowEvent event) {
 		// if the user shift-clicks the button this can happen
@@ -35,18 +34,15 @@ public class MarketplaceBrowserIntegration implements LocationListener, OpenWind
 		if (!event.doit) {
 			return;
 		}
-		if (isPotenialLocation(event)) {
-			SolutionInstallationInfo info = MarketplaceUrlHandler.createSolutionInstallInfo(event.location);
-			if (info != null) {
-				event.doit = false;
-				MarketplaceUrlHandler.triggerInstall(info);
-			}
+		if (handleUri(event.location)) {
+			event.doit = false;
 		}
 	}
 
-	private boolean isPotenialLocation(LocationEvent event) {
-		String url = event.location;
-		return url.contains(MPC_INSTALL_URI) && MarketplaceUrlHandler.isPotentialSolution(url);
+	@Override
+	protected boolean handleInstallRequest(SolutionInstallationInfo installInfo, String url) {
+		MarketplaceUrlHandler.triggerInstall(installInfo);
+		return true;
 	}
 
 	public void changed(LocationEvent event) {

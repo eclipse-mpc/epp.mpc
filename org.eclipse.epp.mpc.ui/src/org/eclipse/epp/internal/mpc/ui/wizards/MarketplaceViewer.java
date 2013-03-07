@@ -7,13 +7,15 @@
  *
  * Contributors:
  * 	  The Eclipse Foundation - initial API and implementation
- *    Yatta Solutions - error handling (bug 374105), header layout (bug 341014)
+ *    Yatta Solutions - error handling (bug 374105), header layout (bug 341014),
+ *                      news (bug 401721)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,6 +27,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.service.Category;
+import org.eclipse.epp.internal.mpc.core.service.Identifiable;
 import org.eclipse.epp.internal.mpc.core.service.Market;
 import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
@@ -224,6 +227,65 @@ public class MarketplaceViewer extends CatalogViewer {
 		return super.doCreateViewerItem(parent, element);
 	}
 
+	public void show(Set<Node> nodes) {
+		ContentType newContentType = ContentType.SEARCH;
+		ContentType oldContentType = contentType;
+		contentType = newContentType;
+		fireContentTypeChange(oldContentType, newContentType);
+
+		doQuery(null, null, null, nodes);
+	}
+
+	public void search(Market market, Category category, String query) {
+		ContentType newContentType = ContentType.SEARCH;
+		ContentType oldContentType = contentType;
+		contentType = newContentType;
+		fireContentTypeChange(oldContentType, newContentType);
+
+		setFilters(market, category, query);
+		queryMarket = market;
+		queryCategory = category;
+		queryText = query;
+
+		doQuery(market, category, query, null);
+	}
+
+	private void setFilters(Market market, Category category, String query) {
+		setFindText(query);
+		for (CatalogFilter filter : getConfiguration().getFilters()) {
+			if (filter instanceof AbstractTagFilter) {
+				AbstractTagFilter tagFilter = (AbstractTagFilter) filter;
+				if (tagFilter.getTagClassification() == Category.class) {
+					List<Tag> choices = tagFilter.getChoices();
+					Tag tag = choices.isEmpty() ? null : choices.get(0);
+					if (tag != null) {
+						Identifiable data = null;
+						if (tag.getTagClassifier() == Market.class) {
+							data = market;
+						} else if (tag.getTagClassifier() == Category.class) {
+							data = category;
+						} else {
+							continue;
+						}
+						tag = null;
+						if (data != null) {
+							for (Tag choice : choices) {
+								final Object choiceData = choice.getData();
+								if (data == choiceData || data.equalsId(choiceData)) {
+									tag = choice;
+									break;
+								}
+							}
+						}
+						tagFilter.setSelected(tag == null ? null : Collections.singleton(tag));
+						//we expect a query to happen next, so don't fire a property change resulting in an additional query
+						tagFilter.updateUi();
+					}
+				}
+			}
+		}
+	}
+
 	private void doQuery() {
 		queryMarket = null;
 		queryCategory = null;
@@ -246,7 +308,7 @@ public class MarketplaceViewer extends CatalogViewer {
 			}
 		}
 		queryText = findText;
-		doQuery(queryMarket, queryCategory, queryText);
+		doQuery(queryMarket, queryCategory, queryText, null);
 	}
 
 	public void doQueryForTag(String tag) {
@@ -255,7 +317,7 @@ public class MarketplaceViewer extends CatalogViewer {
 		contentType = newContentType;
 		fireContentTypeChange(oldContentType, newContentType);
 		setFindText(tag);
-		doQuery(null, null, tag);
+		doQuery(null, null, tag, null);
 	}
 
 	private void setFindText(String tag) {
@@ -277,8 +339,7 @@ public class MarketplaceViewer extends CatalogViewer {
 		firePropertyChangeEvent(new PropertyChangeEvent(source, property, oldValue, newValue));
 	}
 
-
-	private void doQuery(final Market market, final Category category, final String queryText) {
+	private void doQuery(final Market market, final Category category, final String queryText, final Set<Node> nodes) {
 		try {
 			final ContentType queryType = contentType;
 			queryContentType = queryType;
@@ -304,10 +365,12 @@ public class MarketplaceViewer extends CatalogViewer {
 						break;
 					case SEARCH:
 					default:
-						if (queryText == null || queryText.length() == 0) {
-							result[0] = getCatalog().featured(monitor, market, category);
-						} else {
+						if (nodes != null && !nodes.isEmpty()) {
+							result[0] = getCatalog().performNodeQuery(monitor, nodes);
+						} else if (queryText != null && queryText.length() > 0) {
 							result[0] = getCatalog().performQuery(market, category, queryText, monitor);
+						} else {
+							result[0] = getCatalog().featured(monitor, market, category);
 						}
 						break;
 					}
@@ -347,7 +410,7 @@ public class MarketplaceViewer extends CatalogViewer {
 		queryText = null;
 		findText = null;
 		setHeaderVisible(true);
-		doQuery(null, null, findText);
+		doQuery(null, null, findText, null);
 		contentType = ContentType.SEARCH;
 	}
 

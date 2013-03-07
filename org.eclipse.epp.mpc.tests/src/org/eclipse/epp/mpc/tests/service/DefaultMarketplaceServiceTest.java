@@ -150,7 +150,7 @@ public class DefaultMarketplaceServiceTest {
 		category.setId("38");
 		String query = "some query";
 
-		String apiSearchPrefix = RemoteMarketplaceService.API_URI_SUFFIX + '/' + DefaultMarketplaceService.API_SEARCH_URI;
+		String apiSearchPrefix = DefaultMarketplaceService.API_SEARCH_URI_FULL;
 
 		String searchUrl = service.computeRelativeSearchUrl(null, null, query, true);
 		assertEquals(apiSearchPrefix + "some+query", searchUrl);
@@ -258,5 +258,10 @@ public class DefaultMarketplaceServiceTest {
 			assertTrue(ids.add(node.getId()));
 			assertNotNull(node.getName());
 		}
+	}
+
+	@Test
+	public void news() throws CoreException {
+		//TODO test once API is live on the server
 	}
 }

@@ -11,11 +11,13 @@
 package org.eclipse.epp.internal.mpc.core.service.xml;
 
 import org.eclipse.epp.internal.mpc.core.service.Catalog;
+import org.eclipse.epp.internal.mpc.core.service.News;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 /**
  * @author Benjamin Muskalla
+ * @author Carsten Reckord
  */
 public class CatalogContentHandler extends UnmarshalContentHandler {
 
@@ -39,6 +41,13 @@ public class CatalogContentHandler extends UnmarshalContentHandler {
 			capturingContent = true;
 		} else if (localName.equals("wizard")) { //$NON-NLS-1$
 			org.eclipse.epp.internal.mpc.core.service.xml.CatalogBrandingContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.CatalogBrandingContentHandler();
+			childHandler.setParentModel(model);
+			childHandler.setParentHandler(this);
+			childHandler.setUnmarshaller(getUnmarshaller());
+			getUnmarshaller().setCurrentHandler(childHandler);
+			childHandler.startElement(uri, localName, attributes);
+		} else if (localName.equals("news")) { //$NON-NLS-1$
+			org.eclipse.epp.internal.mpc.core.service.xml.NewsContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.NewsContentHandler();
 			childHandler.setParentModel(model);
 			childHandler.setParentHandler(this);
 			childHandler.setUnmarshaller(getUnmarshaller());
@@ -72,6 +81,10 @@ public class CatalogContentHandler extends UnmarshalContentHandler {
 				content = null;
 			}
 			capturingContent = false;
+		} else if (localName.equals("news")) { //$NON-NLS-1$
+			News news = (News) getUnmarshaller().getModel();
+			getUnmarshaller().setModel(null);
+			model.setNews(news);
 		}
 		return false;
 	}

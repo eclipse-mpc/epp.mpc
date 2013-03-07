@@ -79,6 +79,8 @@ class Messages extends NLS {
 
 	public static String MarketplaceDropAdapter_0;
 
+	public static String MarketplacePage_DefaultNewsTitle;
+
 	public static String MarketplacePage_discardPendingSolutions;
 
 	public static String MarketplacePage_eclipseMarketplaceSolutions;
@@ -120,11 +122,20 @@ class Messages extends NLS {
 	public static String MarketplaceWizard_errorNotificationJob;
 
 	public static String MarketplaceWizard_problemsPerformingProvisioningOperation;
+
 	public static String MarketplaceWizardDialog_Confirm;
 
 	public static String MarketplaceWizardDialog_Install_More;
 
 	public static String MarketplaceWizardDialog_Install_Now;
+
+	public static String NewsViewer_Copy_Link_Address;
+
+	public static String NewsViewer_Loading;
+
+	public static String NewsViewer_No_embeddable_browser;
+
+	public static String NewsViewer_No_news;
 
 	public static String Operation_install;
 

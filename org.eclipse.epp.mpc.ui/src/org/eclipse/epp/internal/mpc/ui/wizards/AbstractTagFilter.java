@@ -99,6 +99,9 @@ public abstract class AbstractTagFilter extends MarketplaceFilter {
 		firePropertyChange(PROP_SELECTED, null, getSelected());
 	}
 
+	protected void updateUi() {
+	}
+
 	@Override
 	public void catalogUpdated(boolean wasCancelled) {
 		// nothing to do.

@@ -94,4 +94,14 @@ public class ComboTagFilter extends AbstractTagFilter {
 		this.noSelectionLabel = noSelectionLabel;
 	}
 
+	@Override
+	protected void updateUi() {
+		int index = -1;
+		if (!getSelected().isEmpty()) {
+			Tag selected = getSelected().iterator().next();
+			index = getChoices().indexOf(selected);
+		}
+		combo.select(index + 1);//offset+1 for "All Markets" entry
+		super.updateUi();
+	}
 }

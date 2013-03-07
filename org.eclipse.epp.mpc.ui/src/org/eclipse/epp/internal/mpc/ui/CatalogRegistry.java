@@ -17,10 +17,12 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.epp.internal.mpc.core.service.CatalogBranding;
+import org.eclipse.epp.internal.mpc.core.service.News;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 
 /**
  * @author David Green
+ * @author Carsten Reckord
  */
 public class CatalogRegistry {
 
@@ -37,6 +39,8 @@ public class CatalogRegistry {
 
 	private final Map<CatalogDescriptor, CatalogBranding> catalogBrandings = new HashMap<CatalogDescriptor, CatalogBranding>();
 
+	private final Map<CatalogDescriptor, News> catalogNews = new HashMap<CatalogDescriptor, News>();
+
 	public CatalogRegistry() {
 		catalogDescriptors.addAll(new CatalogExtensionPointReader().getCatalogDescriptors());
 	}
@@ -47,6 +51,8 @@ public class CatalogRegistry {
 
 	public void unregister(CatalogDescriptor catalogDescriptor) {
 		catalogDescriptors.remove(catalogDescriptor);
+		catalogBrandings.remove(catalogDescriptor);
+		catalogNews.remove(catalogDescriptor);
 	}
 
 	public List<CatalogDescriptor> getCatalogDescriptors() {
@@ -60,6 +66,15 @@ public class CatalogRegistry {
 
 	public CatalogBranding getCatalogBranding(CatalogDescriptor descriptor) {
 		return catalogBrandings.get(descriptor);
+	}
+
+	// manage the predefined news configuration here, since that isn't supposed to become API
+	public void addCatalogNews(CatalogDescriptor descriptor, News news) {
+		catalogNews.put(descriptor, news);
+	}
+
+	public News getCatalogNews(CatalogDescriptor descriptor) {
+		return catalogNews.get(descriptor);
 	}
 
 	public CatalogDescriptor findCatalogDescriptor(String url) {

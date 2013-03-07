@@ -4,6 +4,7 @@
 	<catalog id="35656" title="Marketplace Catalog" url="http://marketplace.eclipse.org" selfContained="1"	icon="http://marketplace.eclipse.org/sites/default/files/marketplace32.png">
         <description>Here is a description</description>
         <dependenciesRepository>http://download.eclipse.org/releases/helios</dependenciesRepository>
+        <news shorttitle="News" timestamp="1363181064000">http://marketplace.eclipse.org/news</news>
         <wizard title="Eclipse Marketplace Catalog">
           <icon>http://marketplace.eclipse.org/sites/default/files/giant-rabbit2.jpg</icon>
           <searchtab enabled='1'>Search</searchtab>
@@ -12,6 +13,17 @@
         </wizard>
       </catalog>
       <catalog id="111" title="Test Catalog" url="http://test.marketplace.org" selfContained="0">
+        <description>Here is a description</description>
+        <icon>http://marketplace.eclipse.org/sites/default/files/jacket.jpg</icon>
+        <news/>
+        <wizard title="Eclipse Marketplace Catalog">
+          <icon>http://marketplace.eclipse.org/sites/default/files/giant-rabbit2.jpg</icon>
+          <searchtab enabled='1'>Search</searchtab>
+          <populartab enabled='1'>Popular</populartab>
+          <recenttab enabled='1'>Recent</recenttab>
+        </wizard>
+      </catalog>
+      <catalog id="222" title="Test Catalog 2" url="http://test2.marketplace.org" selfContained="0">
         <description>Here is a description</description>
         <icon>http://marketplace.eclipse.org/sites/default/files/jacket.jpg</icon>
         <wizard title="Eclipse Marketplace Catalog">

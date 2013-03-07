@@ -39,6 +39,7 @@ import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.service.Ius;
 import org.eclipse.epp.internal.mpc.core.service.Market;
 import org.eclipse.epp.internal.mpc.core.service.MarketplaceService;
+import org.eclipse.epp.internal.mpc.core.service.News;
 import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.core.service.SearchResult;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
@@ -403,6 +404,16 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	}
 
 	public void performQuery(IProgressMonitor monitor, Set<String> nodeIds) throws CoreException {
+		Set<Node> nodes = new HashSet<Node>();
+		for (String nodeId : nodeIds) {
+			Node node = new Node();
+			node.setId(nodeId);
+			nodes.add(node);
+		}
+		performNodeQuery(monitor, nodes);
+	}
+
+	public void performNodeQuery(IProgressMonitor monitor, Set<Node> nodes) throws CoreException {
 		final int totalWork = 1000000;
 		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_searchingMarketplace, totalWork);
 		try {
@@ -411,11 +422,9 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			SearchResult result = new SearchResult();
 			result.setNodes(new ArrayList<Node>());
 			if (!monitor.isCanceled()) {
-				if (!nodeIds.isEmpty()) {
-					int unitWork = totalWork / (2 * nodeIds.size());
-					for (String nodeId : nodeIds) {
-						Node node = new Node();
-						node.setId(nodeId);
+				if (!nodes.isEmpty()) {
+					int unitWork = totalWork / (2 * nodes.size());
+					for (Node node : nodes) {
 						node = marketplaceService.getNode(node, monitor);
 						result.getNodes().add(node);
 						monitor.worked(unitWork);
@@ -473,6 +482,10 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			monitor.done();
 		}
 		return catalogCategory;
+	}
+
+	public News performNewsDiscovery(IProgressMonitor monitor) throws CoreException {
+		return marketplaceService.news(monitor);
 	}
 
 	public void installErrorReport(IProgressMonitor monitor, IStatus result, Set<CatalogItem> items,

@@ -71,6 +71,7 @@ public class Unmarshaller extends DefaultHandler {
 		elementNameToUnmarshalContentHandler.put("featured", new FeaturedContentHandler()); //$NON-NLS-1$
 		elementNameToUnmarshalContentHandler.put("popular", new PopularContentHandler()); //$NON-NLS-1$
 		elementNameToUnmarshalContentHandler.put("favorites", new FavoritesContentHandler()); //$NON-NLS-1$
+		elementNameToUnmarshalContentHandler.put("news", new NewsContentHandler()); //$NON-NLS-1$
 	}
 
 	private UnmarshalContentHandler currentHandler;
