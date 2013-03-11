@@ -7,7 +7,7 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
- *  Yatta Solutions - bug 314936
+ *  Yatta Solutions - bug 314936, bug 398200
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.catalog;
 
@@ -365,7 +365,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		try {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
 			catalogCategory.setContents(Contents.POPULAR);
-			SearchResult result = marketplaceService.favorites(new SubProgressMonitor(monitor, totalWork / 2));
+			SearchResult result = marketplaceService.popular(new SubProgressMonitor(monitor, totalWork / 2));
 			handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
 			maybeAddCatalogItem(catalogCategory);
 		} finally {
