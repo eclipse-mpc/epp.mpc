@@ -34,6 +34,10 @@ public class NodeContentHandler extends UnmarshalContentHandler {
 			model.setUrl(attributes.getValue(NS_URI, "url")); //$NON-NLS-1$
 		} else if (localName.equals("favorited")) { //$NON-NLS-1$
 			capturingContent = true;
+		} else if (localName.equals("installstotal")) { //$NON-NLS-1$
+			capturingContent = true;
+		} else if (localName.equals("installsrecent")) { //$NON-NLS-1$
+			capturingContent = true;
 		} else if (localName.equals("type")) { //$NON-NLS-1$
 			capturingContent = true;
 		} else if (localName.equals("categories")) { //$NON-NLS-1$
@@ -127,6 +131,18 @@ public class NodeContentHandler extends UnmarshalContentHandler {
 		} else if (localName.equals("favorited")) { //$NON-NLS-1$
 			if (content != null) {
 				model.setFavorited(toInteger(content.toString()));
+				content = null;
+			}
+			capturingContent = false;
+		} else if (localName.equals("installstotal")) { //$NON-NLS-1$
+			if (content != null) {
+				model.setInstallsTotal(toInteger(content.toString()));
+				content = null;
+			}
+			capturingContent = false;
+		} else if (localName.equals("installsrecent")) { //$NON-NLS-1$
+			if (content != null) {
+				model.setInstallsRecent(toInteger(content.toString()));
 				content = null;
 			}
 			capturingContent = false;

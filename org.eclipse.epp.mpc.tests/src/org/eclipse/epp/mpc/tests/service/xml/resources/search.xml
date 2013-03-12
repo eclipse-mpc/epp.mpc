@@ -7,7 +7,9 @@
       </categories>
       <owner>ipreuss</owner>
 
-      <favorited>0</favorited>
+      <favorited>136</favorited>
+      <installstotal>299995</installstotal>
+      <installsrecent>34540</installsrecent>
       <body><![CDATA[Allows the execution of JUnit tests for several projects at once.]]></body>
       <created>1249479291</created>
       <changed>1259779290</changed>

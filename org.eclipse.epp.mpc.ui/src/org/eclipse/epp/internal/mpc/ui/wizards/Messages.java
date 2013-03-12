@@ -37,13 +37,31 @@ class Messages extends NLS {
 
 	public static String DiscoveryItem_cannotRenderImage_reason;
 
+	public static String DiscoveryItem_Compact_Number;
+
+	public static String DiscoveryItem_Favorited_Times;
+
 	public static String DiscoveryItem_installInstructions;
 
 	public static String DiscoveryItem_installInstructionsTooltip;
 
+	public static String DiscoveryItem_Installs;
+
+	public static String DiscoveryItem_More_Info;
+
+	public static String DiscoveryItem_Promotion_Display;
+
+	public static String DiscoveryItem_Promotion_Marker;
+
+	public static String DiscoveryItem_Share;
+
 	public static String DiscoveryItem_showOverview;
 
 	public static String DiscoveryItem_truncatedTextSuffix;
+
+	public static String DiscoveryItem_Unknown_Favorites;
+
+	public static String DiscoveryItem_Unknown_Installs;
 
 	public static String FeatureSelectionWizardPage_confirmSelectedFeatures;
 
@@ -150,6 +168,12 @@ class Messages extends NLS {
 	public static String OverviewToolTip_openUrlInBrowser;
 
 	public static String ProvisioningJobListener_notificationTaskName;
+
+	public static String RatingTooltip_Continue;
+
+	public static String RatingTooltip_Dont_show_again;
+
+	public static String RatingTooltip_Note;
 
 	public static String SelectionModel_cannotInstallRemoveConcurrently;
 

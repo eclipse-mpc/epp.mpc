@@ -52,6 +52,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 /**
@@ -88,6 +89,8 @@ class OverviewToolTip extends ToolTip {
 
 	@Override
 	protected Composite createToolTipContentArea(Event event, final Composite parent) {
+		Shell shell = parent.getShell();
+		setData(Shell.class.getName(), shell);
 		GridLayoutFactory.fillDefaults().applyTo(parent);
 
 		Color backgroundColor = parent.getDisplay().getSystemColor(SWT.COLOR_WHITE);
@@ -117,7 +120,7 @@ class OverviewToolTip extends ToolTip {
 
 		GridDataFactory.fillDefaults().grab(true, true).hint(
 				image == null ? containerWidthHintWithoutImage : containerWidthHintWithImage, SWT.DEFAULT).applyTo(
-				container);
+						container);
 
 		GridLayoutFactory.fillDefaults().numColumns((leftImage != null) ? 3 : 2).margins(5, 5).spacing(3, 0).applyTo(
 				container);
@@ -128,9 +131,9 @@ class OverviewToolTip extends ToolTip {
 			imageLabel.setBackground(backgroundColor);
 			int imageWidthHint = leftImage.getBounds().width + 5;
 			GridDataFactory.fillDefaults()
-					.align(SWT.BEGINNING, SWT.BEGINNING)
-					.hint(imageWidthHint, SWT.DEFAULT)
-					.applyTo(imageLabel);
+			.align(SWT.BEGINNING, SWT.BEGINNING)
+			.hint(imageWidthHint, SWT.DEFAULT)
+			.applyTo(imageLabel);
 		}
 
 		String summary = overview.getSummary();
@@ -253,6 +256,11 @@ class OverviewToolTip extends ToolTip {
 		return container;
 	}
 
+	@Override
+	protected void afterHideToolTip(Event event) {
+		setData(Shell.class.getName(), null);
+	}
+
 	private Image computeImage(AbstractCatalogSource discoverySource, String imagePath) {
 		URL resource = discoverySource.getResource(imagePath);
 		if (resource != null) {
@@ -286,5 +294,4 @@ class OverviewToolTip extends ToolTip {
 		relativeY += bounds.height + 3;
 		show(new Point(relativeX, relativeY));
 	}
-
 }

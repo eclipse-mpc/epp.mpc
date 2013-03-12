@@ -17,6 +17,8 @@ package org.eclipse.epp.internal.mpc.core.service;
 public class Node extends Identifiable {
 
 	protected Integer favorited;
+	protected Integer installsTotal;
+	protected Integer installsRecent;
 	protected String type;
 	protected Categories categories;
 	protected Tags tags;
@@ -51,6 +53,28 @@ public class Node extends Identifiable {
 
 	public void setFavorited(Integer favorited) {
 		this.favorited = favorited;
+	}
+
+	/**
+	 * The number of times this node has been installed.
+	 */
+	public Integer getInstallsTotal() {
+		return installsTotal;
+	}
+
+	public void setInstallsTotal(Integer installsTotal) {
+		this.installsTotal = installsTotal;
+	}
+
+	/**
+	 * The number of times this node has been installed recently (last 30 days).
+	 */
+	public Integer getInstallsRecent() {
+		return installsRecent;
+	}
+
+	public void setInstallsRecent(Integer installsRecent) {
+		this.installsRecent = installsRecent;
 	}
 
 	/**

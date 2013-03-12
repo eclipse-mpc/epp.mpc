@@ -229,7 +229,6 @@ public class UnmarshallerTest {
 		assertEquals("Testing", category.getName());
 		assertEquals("http://www.eclipseplugincentral.net/taxonomy/term/16", category.getUrl());
 		assertEquals("ipreuss", node.getOwner());
-		assertEquals(Integer.valueOf(0), node.getFavorited());
 		assertNotNull(node.getBody());
 		assertEquals("Allows the execution of JUnit tests for several projects at once.", node.getBody());
 		assertTrue(!node.getFoundationmember());
@@ -243,10 +242,18 @@ public class UnmarshallerTest {
 		assertEquals("https://sourceforge.net/projects/e-rat/support", node.getSupporturl());
 		assertEquals("http://e-rat.sf.net/updatesite", node.getUpdateurl());
 
+		assertEquals(Integer.valueOf(136), node.getFavorited());
+		assertEquals(Integer.valueOf(299995), node.getInstallsTotal());
+		assertEquals(Integer.valueOf(34540), node.getInstallsRecent());
+
 		Node lastNode = search.getNode().get(search.getNode().size() - 1);
 
 		assertEquals("1011", lastNode.getId());
 		assertEquals("JUnit Flux", lastNode.getName());
+
+		assertEquals(Integer.valueOf(0), node.getFavorited());
+		assertNull(node.getInstallsTotal());
+		assertNull(node.getInstallsRecent());
 	}
 
 	@Test

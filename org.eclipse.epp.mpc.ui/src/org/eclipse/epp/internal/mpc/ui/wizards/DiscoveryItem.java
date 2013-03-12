@@ -13,6 +13,9 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.text.MessageFormat;
 
 import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.core.service.Tag;
@@ -28,21 +31,31 @@ import org.eclipse.equinox.internal.p2.ui.discovery.wizards.AbstractDiscoveryIte
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryResources;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.layout.RowLayoutFactory;
 import org.eclipse.jface.window.IShellProvider;
+import org.eclipse.jface.window.ToolTip;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.SWTException;
+import org.eclipse.swt.accessibility.AccessibleAdapter;
+import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -51,7 +64,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
@@ -63,15 +76,83 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 @SuppressWarnings("unused")
 public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<T> implements PropertyChangeListener {
 
-	private static final int MAX_IMAGE_HEIGHT = 40;
+	/**
+	 * conditional login url for the eclipse marketplace
+	 */
+	//private static final String MARKETPLACE_LOGIN_URL = "https://marketplace.eclipse.org/login/sso?redirect={0}"; //$NON-NLS-1$
+	//FIXME that url redirects to the frontpage currently, so use this one instead,
+	//which has the downside of always showing the login page...
+	private static final String MARKETPLACE_LOGIN_URL = "https://dev.eclipse.org/site_login/?takemeback={0}"; //$NON-NLS-1$
 
-	private static final int MAX_IMAGE_WIDTH = 55;
+	/**
+	 * Eclipse marketplace, which supports the login scheme in {@link #MARKETPLACE_LOGIN_URL}
+	 */
+	private static final String ECLIPSE_MARKETPLACE_URL = "http://marketplace.eclipse.org/"; //$NON-NLS-1$
+
+	private static final String INFO_HREF = "info"; //$NON-NLS-1$
+
+	private static final int DESCRIPTION_MARGIN_LEFT = 8;
+
+	private static final int DESCRIPTION_MARGIN_TOP = 8;
+
+	private static final int TAGS_MARGIN_TOP = 2;
+
+	private static final int BUTTONBAR_MARGIN_TOP = 8;
+
+	private static final int SEPARATOR_MARGIN_TOP = 8;
+
+	private static abstract class LinkListener implements MouseListener, SelectionListener {
+
+		private boolean active = false;
+
+		public void widgetSelected(SelectionEvent e) {
+			StyledText link = (StyledText) e.getSource();
+			if (link.getSelectionCount() != 0) {
+				active = false;
+			}
+		}
+
+		public void widgetDefaultSelected(SelectionEvent e) {
+		}
+
+		public void mouseDoubleClick(MouseEvent e) {
+		}
+
+		public void mouseDown(MouseEvent e) {
+			StyledText link = (StyledText) e.getSource();
+			active = (e.button == 1) && link.getSelectionCount() == 0;
+		}
+
+		public void mouseUp(MouseEvent e) {
+			if (!active) {
+				return;
+			}
+			active = false;
+			if (e.button != 1) {
+				return;
+			}
+			StyledText link = (StyledText) e.getSource();
+			int offset = link.getOffsetAtLocation(new Point(e.x, e.y));
+			if (offset >= 0 && offset < link.getCharCount()) {
+				StyleRange style = link.getStyleRangeAtOffset(offset);
+				if (style != null && style.data != null) {
+					selected((String) style.data);
+				}
+			}
+		}
+
+		protected abstract void selected(String href);
+	}
+
+	private static final int MAX_IMAGE_HEIGHT = 86;
+
+	private static final int MAX_IMAGE_WIDTH = 75;
 
 	private Composite checkboxContainer;
 
 	private final CatalogItem connector;
 
-	private Label description;
+	private StyledText description;
 
 	private Label iconLabel;
 
@@ -79,7 +160,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 	private Label nameLabel;
 
-	private Link providerLabel;
+	private Control providerLabel;
 
 	private final IShellProvider shellProvider;
 
@@ -89,11 +170,11 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 	private ItemButtonController buttonController;
 
-	private Link installInfoLink;
+	private Button installInfoButton;
 
 	private final IMarketplaceWebBrowser browser;
 
-	private Link tagsLink;
+	private StyledText tagsLink;
 
 	private static Boolean browserAvailable;
 
@@ -114,21 +195,317 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 	}
 
 	private void createContent() {
-		GridLayout layout = new GridLayout(3, false);
-		layout.marginLeft = 7;
-		layout.marginTop = 2;
-		layout.marginBottom = 2;
-		setLayout(layout);
+		GridLayoutFactory.swtDefaults()
+		.numColumns(4)
+		.equalWidth(false)
+		.extendedMargins(0, 0, 2, 0)
+		.spacing(0, 0)
+		.applyTo(this);
 
-		checkboxContainer = new Composite(this, SWT.INHERIT_NONE);
-		GridDataFactory.swtDefaults().align(SWT.CENTER, SWT.BEGINNING).span(1, 2).applyTo(checkboxContainer);
-		GridLayoutFactory.fillDefaults().applyTo(checkboxContainer);
+		new Label(this, SWT.NONE).setText(" "); // spacer //$NON-NLS-1$
 
+		createNameLabel(this);
+		createIconControl(this);
+
+		createDescription(this);
+
+		createProviderLabel(this);
+		createTagsLabel(this);
+
+		//new Label(this, SWT.NONE).setText(" "); // spacer //$NON-NLS-1$
+
+		createSocialButtons(this);
+		createInstallInfo(this);
+
+		createInstallButtons(this);
+
+		Label separator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
+		GridDataFactory.fillDefaults()
+		.indent(0, SEPARATOR_MARGIN_TOP)
+		.grab(true, false)
+		.span(4, 1)
+		.align(SWT.FILL, SWT.TOP)
+		.applyTo(separator);
+	}
+
+	private void createDescription(Composite parent) {
+		description = createStyledTextLabel(parent);
+		GridDataFactory.fillDefaults()
+		.grab(true, false)
+		.indent(DESCRIPTION_MARGIN_LEFT, DESCRIPTION_MARGIN_TOP)
+		.span(3, 1)
+		.hint(100, SWT.DEFAULT)
+		.applyTo(description);
+		String descriptionText = connector.getDescription();
+		int maxDescriptionLength = 162;
+		if (descriptionText == null) {
+			descriptionText = ""; //$NON-NLS-1$
+		} else {
+			descriptionText = TextUtil.stripHtmlMarkup(descriptionText).trim();
+		}
+		if (descriptionText.length() > maxDescriptionLength) {
+			int truncationIndex = maxDescriptionLength;
+			for (int x = truncationIndex; x > 0; --x) {
+				if (Character.isWhitespace(descriptionText.charAt(x))) {
+					truncationIndex = x;
+					break;
+				}
+			}
+			descriptionText = descriptionText.substring(0, truncationIndex)
+					+ Messages.DiscoveryItem_truncatedTextSuffix;
+		}
+		descriptionText = descriptionText.replaceAll("(\\r\\n)|\\n|\\r|\\s{2,}", " "); //$NON-NLS-1$ //$NON-NLS-2$
+		description.setText(descriptionText + "  "); //$NON-NLS-1$
+		if (descriptionText.startsWith(Messages.DiscoveryItem_Promotion_Marker)) {
+			description.replaceTextRange(0, Messages.DiscoveryItem_Promotion_Marker.length(),
+					Messages.DiscoveryItem_Promotion_Display + "  - "); //$NON-NLS-1$
+			StyleRange style = new StyleRange(0, Messages.DiscoveryItem_Promotion_Display.length(), null, null,
+					SWT.ITALIC | SWT.BOLD);
+			description.setStyleRange(style);
+		}
+
+		createInfoLink(description);
+	}
+
+	/**
+	 * Create a StyledText that acts much like a Label, i.e. isn't editable and doesn't get focus
+	 */
+	private StyledText createStyledTextLabel(Composite parent) {
+		StyledText styledText = new StyledText(parent, SWT.READ_ONLY | SWT.WRAP | SWT.MULTI);
+		styledText.setEditable(false);
+		styledText.setCursor(getDisplay().getSystemCursor(SWT.CURSOR_ARROW));
+		styledText.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusGained(FocusEvent e) {
+				((StyledText) e.widget).getParent().setFocus();
+			}
+		});
+		return styledText;
+	}
+
+	private void createNameLabel(Composite parent) {
+		nameLabel = new Label(parent, SWT.NONE);
+		GridDataFactory.fillDefaults()
+		.indent(DESCRIPTION_MARGIN_LEFT, 0)
+		.span(3, 1)
+		.grab(true, false)
+		.align(SWT.BEGINNING, SWT.CENTER)
+		.applyTo(nameLabel);
+		nameLabel.setFont(resources.getSmallHeaderFont());
+		nameLabel.setText(TextUtil.escapeText(connector.getName()));
+	}
+
+	private void createInstallButtons(Composite parent) {
+		Composite composite = new Composite(parent, SWT.NONE); // prevent the button from changing the layout of the title
+		GridDataFactory.fillDefaults().indent(0, BUTTONBAR_MARGIN_TOP).align(SWT.END, SWT.FILL).applyTo(composite);
+
+		int numColumns = 1;
+		if (hasInstallMetadata()) {
+			Button button = new Button(composite, SWT.PUSH);
+			Point prefSize = button.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+			GridDataFactory.swtDefaults().align(SWT.END, SWT.FILL)
+			.minSize(56, SWT.DEFAULT)
+			//sometimes minSize hint doesn't seem to work...
+			.hint(Math.max(56, prefSize.x), SWT.DEFAULT)
+			.grab(false, true)
+			.applyTo(button);
+
+			Button secondaryButton = null;
+			if (connector.isInstalled()) {
+				secondaryButton = new Button(composite, SWT.PUSH);
+				numColumns = 2;
+				prefSize = button.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+				GridDataFactory.swtDefaults().align(SWT.END, SWT.FILL)
+				.minSize(56, SWT.DEFAULT)
+				//sometimes minSize hint doesn't seem to work...
+				.hint(Math.max(56, prefSize.x), SWT.DEFAULT)
+				.grab(false, true)
+				.applyTo(secondaryButton);
+			}
+
+			buttonController = new ItemButtonController(viewer, this, button, secondaryButton);
+		} else {
+			installInfoButton = new Button(composite, SWT.PUSH | SWT.BOLD);
+			installInfoButton.setText(Messages.DiscoveryItem_installInstructions);
+			installInfoButton.setToolTipText(Messages.DiscoveryItem_installInstructionsTooltip);
+
+			installInfoButton.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					browser.openUrl(((Node) connector.getData()).getUrl());
+				}
+			});
+			Point prefSize = installInfoButton.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+			GridDataFactory.swtDefaults().align(SWT.END, SWT.FILL)
+			.minSize(56, SWT.DEFAULT)
+			//sometimes minSize hint doesn't seem to work...
+			.hint(Math.max(56, prefSize.x), SWT.DEFAULT)
+			.grab(false, true)
+			.applyTo(installInfoButton);
+		}
+		GridLayoutFactory.fillDefaults()
+		.numColumns(numColumns)
+		.margins(0, 0)
+		.extendedMargins(0, 5, 0, 0)
+		.spacing(5, 0)
+		.applyTo(composite);
+	}
+
+	private void createInstallInfo(Composite parent) {
+		Composite composite = new Composite(parent, SWT.NULL); // prevent the button from changing the layout of the title
+		GridDataFactory.fillDefaults()
+		.indent(DESCRIPTION_MARGIN_LEFT, BUTTONBAR_MARGIN_TOP)
+		.grab(true, false)
+		.align(SWT.BEGINNING, SWT.CENTER)
+		.applyTo(composite);
+		RowLayoutFactory.fillDefaults().type(SWT.HORIZONTAL).pack(true).applyTo(composite);
+
+		StyledText installInfo = new StyledText(composite, SWT.READ_ONLY | SWT.SINGLE);
+
+		Integer installsTotal = null;
+		Integer installsRecent = null;
+		if (connector.getData() instanceof Node) {
+			Node node = (Node) connector.getData();
+			installsTotal = node.getInstallsTotal();
+			installsRecent = node.getInstallsRecent();
+		}
+
+		String totalText = installsTotal == null ? Messages.DiscoveryItem_Unknown_Installs
+				: MessageFormat.format(
+						Messages.DiscoveryItem_Compact_Number,
+						installsTotal.intValue(), installsTotal * 0.001, installsTotal * 0.000001);
+		String recentText = installsRecent == null ? Messages.DiscoveryItem_Unknown_Installs : MessageFormat.format(
+				"{0, number}", //$NON-NLS-1$
+				installsRecent.intValue());
+		String installInfoText = NLS.bind(Messages.DiscoveryItem_Installs, totalText, recentText);
+		int formatTotalsStart = installInfoText.indexOf(totalText);
+		if (formatTotalsStart == -1) {
+			installInfo.append(installInfoText);
+		} else {
+			if (formatTotalsStart > 0) {
+				installInfo.append(installInfoText.substring(0, formatTotalsStart));
+			}
+			appendStyled(installInfo, totalText, new StyleRange(0, 0, null, null, SWT.BOLD));
+			installInfo.append(installInfoText.substring(formatTotalsStart + totalText.length()));
+		}
+	}
+
+	private void createSocialButtons(Composite parent) {
+		final Button ratingsButton = new Button(parent, SWT.PUSH);
+		Integer favorited = null;
+		if (connector.getData() instanceof Node) {
+			Node node = (Node) connector.getData();
+			favorited = node.getFavorited();
+		}
+		if (favorited == null) {
+			ratingsButton.setText(Messages.DiscoveryItem_Unknown_Favorites);
+			ratingsButton.setEnabled(false);
+		} else {
+			ratingsButton.setText(favorited.toString());
+		}
+		ratingsButton.setImage(MarketplaceClientUiPlugin.getInstance()
+				.getImageRegistry()
+				.get(MarketplaceClientUiPlugin.ITEM_ICON_STAR));
+		final String ratingDescription = NLS.bind(Messages.DiscoveryItem_Favorited_Times, ratingsButton.getText());
+		ratingsButton.setToolTipText(ratingDescription);
+		ratingsButton.getAccessible().addAccessibleListener(new AccessibleAdapter() {
+			@Override
+			public void getName(AccessibleEvent e) {
+				e.result = ratingDescription;
+			}
+		});
+		final RatingTooltip ratingTooltip = RatingTooltip.shouldShowRatingTooltip() ? new RatingTooltip(ratingsButton,
+				new Runnable() {
+			public void run() {
+				openSolutionFavorite();
+			}
+		}) : null;
+		hookTooltip(ratingTooltip, ratingsButton, ratingsButton);
+		ratingsButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (ratingTooltip != null && RatingTooltip.shouldShowRatingTooltip()) {
+					ratingTooltip.show();
+				} else {
+					openSolutionFavorite();
+				}
+			}
+		});
+
+		GridDataFactory.fillDefaults()
+		.indent(0, BUTTONBAR_MARGIN_TOP)
+		.hint(MAX_IMAGE_WIDTH, SWT.DEFAULT)
+		.align(SWT.CENTER, SWT.FILL)
+		.applyTo(ratingsButton);
+
+		ShareSolutionLink shareSolutionLink = new ShareSolutionLink(parent, connector);
+		Control shareControl = shareSolutionLink.getControl();
+		GridDataFactory.fillDefaults()
+		.indent(DESCRIPTION_MARGIN_LEFT, BUTTONBAR_MARGIN_TOP)
+		.align(SWT.BEGINNING, SWT.FILL)
+		.applyTo(shareControl);
+	}
+
+	protected void openSolutionFavorite() {
+		String url = connector.getOverview().getUrl().trim();
+		if (url.startsWith(ECLIPSE_MARKETPLACE_URL)) {
+			//massage url to redirect via login page
+
+			//FIXME change once fixme on MARKETPLACE_LOGIN_URL is resolved
+			//String returnPath = url.substring(ECLIPSE_MARKETPLACE_URL.length());
+			String returnPath = url;
+
+			try {
+				returnPath = URLEncoder.encode(returnPath, "UTF-8"); //$NON-NLS-1$
+			} catch (UnsupportedEncodingException e1) {
+				// should be unreachable
+				throw new IllegalStateException();
+			}
+			url = NLS.bind(MARKETPLACE_LOGIN_URL, returnPath);
+		}
+		WorkbenchUtil.openUrl(url, IWorkbenchBrowserSupport.AS_EXTERNAL);
+	}
+
+	private void createInfoLink(StyledText description) {
+		// bug 323257: don't display if there's no internal browser
+		boolean internalBrowserAvailable = computeBrowserAvailable(description);
+		if (internalBrowserAvailable && (hasTooltip(connector) || connector.isInstalled())) {
+			if (hasTooltip(connector)) {
+				String descriptionLink = Messages.DiscoveryItem_More_Info;
+				StyleRange linkRange = appendLink(description, descriptionLink, SWT.BOLD);
+				linkRange.data = INFO_HREF;
+				hookTooltip(description.getParent(), description, description, description, connector.getSource(),
+						connector.getOverview(), null);
+			}
+		} else if (!internalBrowserAvailable && hasOverviewUrl(connector)) {
+			String descriptionLink = Messages.DiscoveryItem_More_Info;
+			StyleRange linkRange = appendLink(description, descriptionLink, SWT.BOLD);
+			linkRange.data = INFO_HREF;
+			hookLinkListener(description, new LinkListener() {
+				@Override
+				protected void selected(String href) {
+					if (INFO_HREF.equals(href)) {
+						WorkbenchUtil.openUrl(connector.getOverview().getUrl().trim(),
+								IWorkbenchBrowserSupport.AS_EXTERNAL);
+					}
+				}
+			});
+		}
+	}
+
+	private void createIconControl(Composite parent) {
+		checkboxContainer = new Composite(parent, SWT.INHERIT_NONE);
+		GridDataFactory.swtDefaults()
+		.indent(0, DESCRIPTION_MARGIN_TOP)
+		.align(SWT.CENTER, SWT.BEGINNING)
+		.span(1, 3)
+		.applyTo(checkboxContainer);
+		GridLayoutFactory.fillDefaults().margins(0, 0).applyTo(checkboxContainer);
 		iconLabel = new Label(checkboxContainer, SWT.NONE);
 		GridDataFactory.swtDefaults()
-		.align(SWT.CENTER, SWT.CENTER)
-		.hint(MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT)
-		.minSize(MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT)
+		.align(SWT.CENTER, SWT.TOP)
+		.hint(MAX_IMAGE_WIDTH, SWT.DEFAULT)
+		.minSize(MAX_IMAGE_WIDTH, SWT.DEFAULT)
 		.applyTo(iconLabel);
 		if (connector.getIcon() != null) {
 			try {
@@ -155,113 +532,29 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 					.getImageRegistry()
 					.get(MarketplaceClientUiPlugin.NO_ICON_PROVIDED));
 		}
+	}
 
-		Composite nameComposite = new Composite(this, SWT.NONE);
-		GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.CENTER).applyTo(nameComposite);
+	private StyleRange appendLink(StyledText styledText, String text, int style) {
+		StyleRange range = new StyleRange(0, 0, styledText.getForeground(), null, style);
+		range.underline = true;
+		range.underlineStyle = SWT.UNDERLINE_LINK;
 
-		nameComposite.setLayout(new GridLayout(2, false));
+		appendStyled(styledText, text, range);
 
-		nameLabel = new Label(nameComposite, SWT.NONE);
-		GridDataFactory.fillDefaults().grab(true, false).align(SWT.BEGINNING, SWT.CENTER).applyTo(nameLabel);
-		nameLabel.setFont(resources.getSmallHeaderFont());
-		nameLabel.setText(TextUtil.escapeText(connector.getName()));
+		return range;
+	}
 
-		ShareSolutionLink shareSolutionLink = new ShareSolutionLink(nameComposite, connector);
-		GridDataFactory.fillDefaults().grab(true, false).align(SWT.END, SWT.CENTER).applyTo(shareSolutionLink);
+	private void appendStyled(StyledText styledText, String text, StyleRange style) {
+		style.start = styledText.getCharCount();
+		style.length = text.length();
 
-		// bug 323257: don't display if there's no internal browser
-		boolean internalBrowserAvailable = computeBrowserAvailable(this);
-		if (internalBrowserAvailable && (hasTooltip(connector) || connector.isInstalled())) {
-			ToolBar toolBar = new ToolBar(this, SWT.FLAT);
-			GridDataFactory.fillDefaults().align(SWT.END, SWT.CENTER).applyTo(toolBar);
-
-			if (hasTooltip(connector)) {
-				infoButton = new ToolItem(toolBar, SWT.PUSH);
-				infoButton.setImage(resources.getInfoImage());
-				infoButton.setToolTipText(Messages.DiscoveryItem_showOverview);
-				hookTooltip(toolBar, infoButton, this, nameLabel, connector.getSource(), connector.getOverview(), null);
-			}
-		} else if (!internalBrowserAvailable && hasOverviewUrl(connector)) {
-			ToolBar toolBar = new ToolBar(this, SWT.FLAT);
-			GridDataFactory.fillDefaults().align(SWT.END, SWT.CENTER).applyTo(toolBar);
-			infoButton = new ToolItem(toolBar, SWT.PUSH);
-			infoButton.setImage(resources.getInfoImage());
-			infoButton.setToolTipText(Messages.DiscoveryItem_showOverview);
-			infoButton.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					WorkbenchUtil.openUrl(connector.getOverview().getUrl().trim(), IWorkbenchBrowserSupport.AS_EXTERNAL);
-				}
-			});
-		} else {
-			Label label = new Label(this, SWT.NULL);
-			label.setText(" "); //$NON-NLS-1$
-		}
-
-		description = new Label(this, SWT.NULL | SWT.WRAP);
-		GridDataFactory.fillDefaults().grab(true, false).span(2, 1).hint(100, SWT.DEFAULT).applyTo(description);
-		String descriptionText = connector.getDescription();
-		int maxDescriptionLength = 162;
-		if (descriptionText == null) {
-			descriptionText = ""; //$NON-NLS-1$
-		} else {
-			descriptionText = TextUtil.stripHtmlMarkup(descriptionText).trim();
-		}
-		if (descriptionText.length() > maxDescriptionLength) {
-			int truncationIndex = maxDescriptionLength;
-			for (int x = truncationIndex; x > 0; --x) {
-				if (Character.isWhitespace(descriptionText.charAt(x))) {
-					truncationIndex = x;
-					break;
-				}
-			}
-			descriptionText = descriptionText.substring(0, truncationIndex)
-			+ Messages.DiscoveryItem_truncatedTextSuffix;
-		}
-		descriptionText = descriptionText.replaceAll("(\\r\\n)|\\n|\\r|\\s{2,}", " "); //$NON-NLS-1$ //$NON-NLS-2$
-		description.setText(TextUtil.escapeText(descriptionText));
-
-		new Label(this, SWT.NONE).setText(" "); // spacer //$NON-NLS-1$
-
-		Composite composite = new Composite(this, SWT.NULL); // prevent the button from changing the layout of the title
-		{
-			GridDataFactory.fillDefaults().span(2, 1).grab(true, false).applyTo(composite);
-
-			createProviderLabel(composite);
-
-			if (hasInstallMetadata()) {
-				Button button = new Button(composite, SWT.INHERIT_NONE);
-				Button secondaryButton = null;
-				if (connector.isInstalled()) {
-					secondaryButton = new Button(composite, SWT.INHERIT_NONE);
-				}
-
-				buttonController = new ItemButtonController(viewer, this, button, secondaryButton);
-
-				GridDataFactory.swtDefaults().align(SWT.END, SWT.TOP).applyTo(button);
-				if (secondaryButton != null) {
-					GridDataFactory.swtDefaults().align(SWT.END, SWT.TOP).applyTo(secondaryButton);
-				}
-			} else {
-				installInfoLink = new Link(composite, SWT.NULL);
-				installInfoLink.setText(Messages.DiscoveryItem_installInstructions);
-				installInfoLink.setToolTipText(Messages.DiscoveryItem_installInstructionsTooltip);
-				installInfoLink.setBackground(null);
-				installInfoLink.addListener(SWT.Selection, new Listener() {
-					public void handleEvent(Event event) {
-						browser.openUrl(((Node) connector.getData()).getUrl());
-					}
-				});
-				GridDataFactory.swtDefaults().align(SWT.END, SWT.CENTER).applyTo(installInfoLink);
-			}
-			createTagsLabel(composite);
-			GridLayoutFactory.fillDefaults().numColumns(2).margins(0, 0).spacing(5, 0).applyTo(composite);
-		}
+		styledText.append(text);
+		styledText.setStyleRange(style);
 	}
 
 	private boolean hasOverviewUrl(CatalogItem connector) {
 		return connector.getOverview() != null && connector.getOverview().getUrl() != null
-		&& connector.getOverview().getUrl().trim().length() > 0;
+				&& connector.getOverview().getUrl().trim().length() > 0;
 	}
 
 	private synchronized boolean computeBrowserAvailable(Composite composite) {
@@ -284,9 +577,10 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 	}
 
 	protected void createProviderLabel(Composite parent) {
-		providerLabel = new Link(parent, SWT.RIGHT);
+		Link providerLabel = new Link(parent, SWT.NONE);
 		GridDataFactory.fillDefaults()
-		.span(1, 1)
+		.indent(DESCRIPTION_MARGIN_LEFT, DESCRIPTION_MARGIN_TOP)
+		.span(3, 1)
 		.align(SWT.BEGINNING, SWT.CENTER)
 		.grab(true, false)
 		.applyTo(providerLabel);
@@ -298,35 +592,40 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 	}
 
 	protected void createTagsLabel(Composite parent) {
-		tagsLink = new Link(parent, SWT.NONE);
-		GridDataFactory.fillDefaults().span(1, 1).align(SWT.BEGINNING, SWT.CENTER).grab(true, false).applyTo(tagsLink);
+		tagsLink = createStyledTextLabel(parent);
+		tagsLink.setEditable(false);
+		GridDataFactory.fillDefaults()
+		.indent(DESCRIPTION_MARGIN_LEFT, TAGS_MARGIN_TOP)
+		.span(3, 1)
+		.align(SWT.BEGINNING, SWT.CENTER)
+		.grab(true, false)
+		.applyTo(tagsLink);
 
-		StringBuffer tagsText = new StringBuffer();
 		Tags tags = ((Node) connector.getData()).getTags();
 		if (tags == null) {
 			return;
 		}
 		for (Tag tag : tags.getTags()) {
 			String tagName = tag.getName();
-			tagsText.append("<a href=\""); //$NON-NLS-1$
-			tagsText.append(tagName);
-			tagsText.append("\">"); //$NON-NLS-1$
-			tagsText.append(tagName.replace("&", "&&")); //$NON-NLS-1$//$NON-NLS-2$
-			tagsText.append("</a>"); //$NON-NLS-1$
-			tagsText.append(" "); //$NON-NLS-1$
+			appendLink(tagsLink, tagName, SWT.NORMAL).data = tagName;
+			tagsLink.append(" "); //$NON-NLS-1$
 		}
-		tagsLink.setText(tagsText.toString());
-		tagsLink.addSelectionListener(new SelectionAdapter() {
+		hookLinkListener(tagsLink, new LinkListener() {
 			@Override
-			public void widgetSelected(SelectionEvent event) {
-				viewer.doQueryForTag(event.text);
+			protected void selected(String href) {
+				viewer.doQueryForTag(href);
 			}
 		});
 	}
 
-	protected boolean hasTooltip(final CatalogItem connector) {
+	private void hookLinkListener(StyledText link, LinkListener listener) {
+		link.addSelectionListener(listener);
+		link.addMouseListener(listener);
+	}
+
+	protected boolean hasTooltip(CatalogItem connector) {
 		return connector.getOverview() != null && connector.getOverview().getSummary() != null
-		&& connector.getOverview().getSummary().length() > 0;
+				&& connector.getOverview().getSummary().length() > 0;
 	}
 
 	protected boolean maybeModifySelection(Operation operation) {
@@ -361,8 +660,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 		nameLabel.setForeground(foreground);
 		description.setForeground(foreground);
-		if (installInfoLink != null) {
-			installInfoLink.setForeground(foreground);
+		if (installInfoButton != null) {
+			installInfoButton.setForeground(foreground);
 		}
 		if (buttonController != null) {
 			buttonController.refresh();
@@ -387,31 +686,44 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 	protected void hookTooltip(final Control parent, final Widget tipActivator, final Control exitControl,
 			final Control titleControl, AbstractCatalogSource source, Overview overview, Image image) {
 		final OverviewToolTip toolTip = new OverviewToolTip(parent, browser, source, overview, image);
+		hookTooltip(toolTip, tipActivator, exitControl);
+
+		if (image != null) {
+			Listener listener = new Listener() {
+				public void handleEvent(Event event) {
+					toolTip.show(titleControl);
+				}
+			};
+			tipActivator.addListener(SWT.MouseHover, listener);
+		}
+
+		if (tipActivator instanceof StyledText) {
+			StyledText link = (StyledText) tipActivator;
+
+			hookLinkListener(link, new LinkListener() {
+				@Override
+				protected void selected(String href) {
+					toolTip.show(titleControl);
+				}
+			});
+		} else {
+			Listener selectionListener = new Listener() {
+				public void handleEvent(Event event) {
+					toolTip.show(titleControl);
+				}
+			};
+			tipActivator.addListener(SWT.Selection, selectionListener);
+		}
+	}
+
+	private void hookTooltip(final ToolTip toolTip, Widget tipActivator, final Control exitControl) {
 		Listener listener = new Listener() {
 			public void handleEvent(Event event) {
-				switch (event.type) {
-				case SWT.MouseHover:
-					toolTip.show(titleControl);
-					break;
-				case SWT.Dispose:
-				case SWT.MouseWheel:
-					toolTip.hide();
-					break;
-				}
-
+				toolTip.hide();
 			}
 		};
 		tipActivator.addListener(SWT.Dispose, listener);
 		tipActivator.addListener(SWT.MouseWheel, listener);
-		if (image != null) {
-			tipActivator.addListener(SWT.MouseHover, listener);
-		}
-		Listener selectionListener = new Listener() {
-			public void handleEvent(Event event) {
-				toolTip.show(titleControl);
-			}
-		};
-		tipActivator.addListener(SWT.Selection, selectionListener);
 		Listener exitListener = new Listener() {
 			public void handleEvent(Event event) {
 				switch (event.type) {
@@ -426,8 +738,18 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 					Point displayLocation = exitControl.getParent().toDisplay(containerBounds.x, containerBounds.y);
 					containerBounds.x = displayLocation.x;
 					containerBounds.y = displayLocation.y;
-					if (containerBounds.contains(Display.getCurrent().getCursorLocation())) {
+					//be a bit relaxed about this - there's a small gap between control and tooltip
+					containerBounds.height += 3;
+					Point cursorLocation = Display.getCurrent().getCursorLocation();
+					if (containerBounds.contains(cursorLocation)) {
 						break;
+					}
+					Shell tipShell = (Shell) toolTip.getData(Shell.class.getName());
+					if (tipShell != null) {
+						Rectangle tipBounds = tipShell.getBounds();
+						if (tipBounds.contains(cursorLocation)) {
+							break;
+						}
 					}
 					toolTip.hide();
 					break;

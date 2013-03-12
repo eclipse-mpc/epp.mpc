@@ -17,11 +17,14 @@ import java.net.URI;
 import org.eclipse.core.runtime.URIUtil;
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.accessibility.AccessibleAdapter;
+import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
@@ -29,11 +32,9 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
@@ -41,28 +42,37 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 /**
  * @author Benjamin Muskalla
  */
-public class ShareSolutionLink extends Composite {
+public class ShareSolutionLink {
 
 	private final CatalogItem catalogItem;
 
+	private final Control control;
+
 	public ShareSolutionLink(Composite parent, CatalogItem item) {
-		super(parent, SWT.NONE);
 		this.catalogItem = item;
-		setLayout(new GridLayout());
 
-		Control shareControl = createShareLink(this);
-		Menu popupMenu = createMenu(shareControl);
-		attachMenu(shareControl, popupMenu);
+		control = createShareLink(parent);
+		Menu popupMenu = createMenu(control);
+		attachMenu(control, popupMenu);
+	}
 
+	public Control getControl() {
+		return control;
 	}
 
 	private static Control createShareLink(Composite parent) {
-		Link link = new Link(parent, SWT.NONE);
-		link.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
-		link.setText("<a>" + //$NON-NLS-1$
-				Messages.ShareSolutionLink_Share + "</a>"); //$NON-NLS-1$
-
-		return link;
+		final Button share = new Button(parent, SWT.PUSH);
+		//share.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		share.setImage(MarketplaceClientUiPlugin.getInstance()
+				.getImageRegistry()
+				.get(MarketplaceClientUiPlugin.ITEM_ICON_SHARE));
+		share.getAccessible().addAccessibleListener(new AccessibleAdapter() {
+			@Override
+			public void getName(AccessibleEvent e) {
+				e.result = Messages.ShareSolutionLink_Share;
+			}
+		});
+		return share;
 	}
 
 	private Menu createMenu(final Control control) {
@@ -110,7 +120,7 @@ public class ShareSolutionLink extends Composite {
 			boolean copyToClipboard = MessageDialog.openQuestion(WorkbenchUtil.getShell(),
 					Messages.ShareSolutionLink_share, Messages.ShareSolutionLink_failed_to_open_manually_share);
 			if (copyToClipboard) {
-				Clipboard clipboard = new Clipboard(getDisplay());
+				Clipboard clipboard = new Clipboard(control.getDisplay());
 				TextTransfer textTransfer = TextTransfer.getInstance();
 				Transfer[] transfers = new Transfer[] { textTransfer };
 				Object[] data = new Object[] { body };
@@ -126,7 +136,7 @@ public class ShareSolutionLink extends Composite {
 		String description = catalogItem.getDescription() == null ? "" : catalogItem.getDescription(); //$NON-NLS-1$
 		description = TextUtil.stripHtmlMarkup(catalogItem.getDescription()).trim();
 		return catalogItem.getName()
-		+ "\n" + catalogItem.getOverview().getUrl() + "\n\n" + description; //$NON-NLS-1$ //$NON-NLS-2$
+				+ "\n" + catalogItem.getOverview().getUrl() + "\n\n" + description; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private void openMail(URI uri) throws Exception {
