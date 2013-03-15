@@ -211,9 +211,19 @@ public class MarketplacePage extends CatalogPage {
 			return;
 		}
 		if (tab == newsTabItem) {
-			newsViewer.showNews(getNews());
-			updateBranding();
-			tabFolder.setSelection(newsTabItem);
+			final News news = getNews();
+			boolean wasUpdated = newsViewer.isUpdated(news);
+			newsViewer.showNews(news);
+			if (wasUpdated) {
+				updateBranding();
+				tabFolder.setSelection(newsTabItem);
+				// required for Mac to not switch back to first tab
+//				getControl().getDisplay().asyncExec(new Runnable() {
+//					public void run() {
+//						tabFolder.setSelection(newsTabItem);
+//					}
+//				});
+			}
 			return;
 		}
 		for (ContentType contentType : ContentType.values()) {

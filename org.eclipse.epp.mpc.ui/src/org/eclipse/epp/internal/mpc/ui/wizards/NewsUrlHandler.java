@@ -26,11 +26,13 @@ import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
+import org.eclipse.swt.browser.ProgressEvent;
+import org.eclipse.swt.browser.ProgressListener;
 
 /**
  * @author Carsten Reckord
  */
-public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationListener {
+public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationListener, ProgressListener {
 
 	private final Set<String> documentLinks = new HashSet<String>();
 
@@ -41,24 +43,36 @@ public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationLis
 	}
 
 	public void changed(LocationEvent event) {
-		// Links should open in external browser.
-		// Since explicit HREF targets interfere with that,
-		// we'll just remove them.
-		Object[] links = (Object[]) viewer.getBrowser().evaluate( //
-				"var links = document.links;" + //$NON-NLS-1$
-				"var hrefs = Array();" + //$NON-NLS-1$
-				"for (var i=0; i<links.length; i++) {" + //$NON-NLS-1$
-				"   links[i].target='_self';" + //$NON-NLS-1$
-				"   hrefs[i]=links[i].href;" + //$NON-NLS-1$
-				"};" + //$NON-NLS-1$
-				"return hrefs"); //$NON-NLS-1$
+		updatePageLinks();
+	}
 
-		// Remember document links for navigation handling since we
-		// don't want to deal with URLs from dynamic loading events
-		documentLinks.clear();
-		for (Object link : links) {
-			documentLinks.add(link.toString());
-		}
+	private void updatePageLinks() {
+		viewer.getControl().getDisplay().asyncExec(new Runnable() {
+
+			public void run() {
+				// Links should open in external browser.
+				// Since explicit HREF targets interfere with that,
+				// we'll just remove them.
+				Object[] links = (Object[]) viewer.getBrowser().evaluate( //
+						"var links = document.links;" + //$NON-NLS-1$
+								"var hrefs = Array();" + //$NON-NLS-1$
+								"for (var i=0; i<links.length; i++) {" + //$NON-NLS-1$
+								"   links[i].target='_self';" + //$NON-NLS-1$
+								"   hrefs[i]=links[i].href;" + //$NON-NLS-1$
+								"};" + //$NON-NLS-1$
+								"return hrefs"); //$NON-NLS-1$
+
+				// Remember document links for navigation handling since we
+				// don't want to deal with URLs from dynamic loading events
+				if (links != null) {
+					documentLinks.clear();
+					for (Object link : links) {
+						documentLinks.add(link.toString());
+					}
+				}
+			}
+
+		});
 	}
 
 	public void changing(LocationEvent event) {
@@ -83,7 +97,7 @@ public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationLis
 				"about:blank".equals(newLocation) || "about:blank".equals(currentLocation)) { //$NON-NLS-1$//$NON-NLS-2$
 			return false;
 		}
-		if (!documentLinks.contains(newLocation)) {
+		if (!documentLinks.isEmpty() && !documentLinks.contains(newLocation)) {
 			return false;
 		}
 		return !isSameLocation(currentLocation, newLocation);
@@ -173,5 +187,13 @@ public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationLis
 		//TODO no new wizard
 		triggerInstall(installInfo);
 		return true;
+	}
+
+	public void completed(ProgressEvent event) {
+		updatePageLinks();
+	}
+
+	public void changed(ProgressEvent event) {
+		// ignore
 	}
 }
