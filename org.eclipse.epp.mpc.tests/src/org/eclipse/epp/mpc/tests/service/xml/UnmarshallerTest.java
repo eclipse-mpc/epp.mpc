@@ -251,9 +251,9 @@ public class UnmarshallerTest {
 		assertEquals("1011", lastNode.getId());
 		assertEquals("JUnit Flux", lastNode.getName());
 
-		assertEquals(Integer.valueOf(0), node.getFavorited());
-		assertNull(node.getInstallsTotal());
-		assertNull(node.getInstallsRecent());
+		assertEquals(Integer.valueOf(0), lastNode.getFavorited());
+		assertNull(lastNode.getInstallsTotal());
+		assertNull(lastNode.getInstallsRecent());
 	}
 
 	@Test
