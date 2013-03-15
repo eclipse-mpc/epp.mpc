@@ -66,7 +66,6 @@
     <module>org.eclipse.epp.mpc.tests</module>
     <module>org.eclipse.epp.mpc.tests.catalog</module>
     <module>org.eclipse.epp.mpc.ui</module>
-    <module>org.eclipse.epp.mpc.site</module>
   </modules>
 
   <repositories>
