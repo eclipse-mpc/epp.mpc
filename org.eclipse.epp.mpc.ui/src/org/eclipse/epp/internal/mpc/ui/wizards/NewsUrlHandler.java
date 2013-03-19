@@ -10,24 +10,34 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.service.Category;
 import org.eclipse.epp.internal.mpc.core.service.Market;
 import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
+import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.browser.ProgressEvent;
 import org.eclipse.swt.browser.ProgressListener;
+import org.eclipse.swt.widgets.Display;
 
 /**
  * @author Carsten Reckord
@@ -55,12 +65,12 @@ public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationLis
 				// we'll just remove them.
 				Object[] links = (Object[]) viewer.getBrowser().evaluate( //
 						"var links = document.links;" + //$NON-NLS-1$
-								"var hrefs = Array();" + //$NON-NLS-1$
-								"for (var i=0; i<links.length; i++) {" + //$NON-NLS-1$
-								"   links[i].target='_self';" + //$NON-NLS-1$
-								"   hrefs[i]=links[i].href;" + //$NON-NLS-1$
-								"};" + //$NON-NLS-1$
-								"return hrefs"); //$NON-NLS-1$
+						"var hrefs = Array();" + //$NON-NLS-1$
+						"for (var i=0; i<links.length; i++) {" + //$NON-NLS-1$
+						"   links[i].target='_self';" + //$NON-NLS-1$
+						"   hrefs[i]=links[i].href;" + //$NON-NLS-1$
+						"};" + //$NON-NLS-1$
+						"return hrefs"); //$NON-NLS-1$
 
 				// Remember document links for navigation handling since we
 				// don't want to deal with URLs from dynamic loading events
@@ -183,10 +193,62 @@ public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationLis
 	}
 
 	@Override
-	protected boolean handleInstallRequest(SolutionInstallationInfo installInfo, String url) {
-		//TODO no new wizard
-		triggerInstall(installInfo);
-		return true;
+	protected boolean handleInstallRequest(final SolutionInstallationInfo installInfo, String url) {
+		final String installId = installInfo.getInstallId();
+		if (installId == null) {
+			return false;
+		}
+		final MarketplaceWizard wizard = viewer.getWizard();
+		try {
+			wizard.getContainer().run(true, true, new IRunnableWithProgress() {
+
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					Map<String, Operation> nodeIdToOperation = new HashMap<String, Operation>();
+					try {
+						nodeIdToOperation.put(URLDecoder.decode(installId, UTF_8), Operation.INSTALL);
+					} catch (UnsupportedEncodingException e) {
+						//should be unreachable
+						throw new IllegalStateException();
+					}
+
+					final SelectionModel selectionModel = viewer.getWizard().getSelectionModel();
+					SelectionModelStateSerializer stateSerializer = new SelectionModelStateSerializer(
+							wizard.getCatalog(), selectionModel);
+					stateSerializer.deserialize(monitor, installId, nodeIdToOperation);
+
+					if (selectionModel.getItemToOperation().size() > 0) {
+						Display display = wizard.getShell().getDisplay();
+						if (!display.isDisposed()) {
+							display.asyncExec(new Runnable() {
+
+								public void run() {
+									MarketplacePage catalogPage = wizard.getCatalogPage();
+									IWizardPage currentPage = wizard.getContainer().getCurrentPage();
+									if (catalogPage == currentPage) {
+										catalogPage.getViewer().setSelection(
+												new StructuredSelection(selectionModel.getSelectedCatalogItems()
+														.toArray()));
+										catalogPage.show(installInfo.getCatalogDescriptor(), ContentType.SELECTION);
+										IWizardPage nextPage = wizard.getNextPage(catalogPage);
+										if (nextPage != null && catalogPage.isPageComplete()) {
+											wizard.getContainer().showPage(nextPage);
+										}
+									}
+								}
+							});
+						}
+					}
+				}
+			});
+			return true;
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	public void completed(ProgressEvent event) {

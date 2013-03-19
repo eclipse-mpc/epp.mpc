@@ -74,7 +74,7 @@ import org.eclipse.ui.statushandlers.StatusManager;
  */
 public class MarketplaceViewer extends CatalogViewer {
 
-	enum ContentType {
+	public enum ContentType {
 		SEARCH, RECENT, POPULAR, INSTALLED, SELECTION
 	}
 

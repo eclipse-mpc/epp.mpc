@@ -71,7 +71,7 @@ public abstract class MarketplaceUrlHandler {
 		}
 	}
 
-	private static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
+	protected static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
 
 	private static final String PARAM_SPLIT_REGEX = "&"; //$NON-NLS-1$
 
