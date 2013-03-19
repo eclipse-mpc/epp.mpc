@@ -297,16 +297,14 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 	private void createInstallButtons(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE); // prevent the button from changing the layout of the title
-		GridDataFactory.fillDefaults().indent(0, BUTTONBAR_MARGIN_TOP).align(SWT.END, SWT.FILL).applyTo(composite);
+		GridDataFactory.fillDefaults().indent(0, BUTTONBAR_MARGIN_TOP).align(SWT.TRAIL, SWT.FILL).applyTo(composite);
 
 		int numColumns = 1;
 		if (hasInstallMetadata()) {
 			Button button = new Button(composite, SWT.PUSH);
 			Point prefSize = button.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-			GridDataFactory.swtDefaults().align(SWT.END, SWT.FILL)
+			GridDataFactory.swtDefaults().align(SWT.TRAIL, SWT.FILL)
 			.minSize(56, SWT.DEFAULT)
-			//sometimes minSize hint doesn't seem to work...
-			.hint(Math.max(56, prefSize.x), SWT.DEFAULT)
 			.grab(false, true)
 			.applyTo(button);
 
@@ -315,10 +313,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 				secondaryButton = new Button(composite, SWT.PUSH);
 				numColumns = 2;
 				prefSize = button.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-				GridDataFactory.swtDefaults().align(SWT.END, SWT.FILL)
+				GridDataFactory.swtDefaults().align(SWT.TRAIL, SWT.FILL)
 				.minSize(56, SWT.DEFAULT)
-				//sometimes minSize hint doesn't seem to work...
-				.hint(Math.max(56, prefSize.x), SWT.DEFAULT)
 				.grab(false, true)
 				.applyTo(secondaryButton);
 			}
@@ -336,10 +332,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 				}
 			});
 			Point prefSize = installInfoButton.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-			GridDataFactory.swtDefaults().align(SWT.END, SWT.FILL)
+			GridDataFactory.swtDefaults().align(SWT.TRAIL, SWT.FILL)
 			.minSize(56, SWT.DEFAULT)
-			//sometimes minSize hint doesn't seem to work...
-			.hint(Math.max(56, prefSize.x), SWT.DEFAULT)
 			.grab(false, true)
 			.applyTo(installInfoButton);
 		}
