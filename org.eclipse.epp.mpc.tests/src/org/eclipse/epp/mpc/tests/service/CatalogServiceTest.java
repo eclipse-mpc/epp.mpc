@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.ServiceLocator;
 import org.eclipse.epp.internal.mpc.core.service.Catalog;
 import org.eclipse.epp.internal.mpc.core.service.CatalogService;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,9 +45,12 @@ public class CatalogServiceTest {
 
 	private CatalogService catalogService;
 
+	private ServiceLocator serviceLocator;
+
 	@Before
 	public void setUp() throws Exception {
-		catalogService = ServiceLocator.getInstance().getCatalogService();
+		serviceLocator = ServiceLocator.getInstance();
+		catalogService = serviceLocator.getCatalogService();
 	}
 
 	@Test
@@ -74,5 +78,10 @@ public class CatalogServiceTest {
 		List<Catalog> catalogs = catalogService.listCatalogs(null);
 		assertEquals(1, catalogs.size());
 		assertEquals("mock", catalogs.get(0).getId());
+	}
+
+	@After
+	public void tearDown() {
+		ServiceLocator.setInstance(serviceLocator);
 	}
 }
