@@ -212,8 +212,6 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		createProviderLabel(this);
 		createTagsLabel(this);
 
-		//new Label(this, SWT.NONE).setText(" "); // spacer //$NON-NLS-1$
-
 		createSocialButtons(this);
 		createInstallInfo(this);
 

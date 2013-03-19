@@ -218,11 +218,11 @@ public class MarketplacePage extends CatalogPage {
 				updateBranding();
 				tabFolder.setSelection(newsTabItem);
 				// required for Mac to not switch back to first tab
-//				getControl().getDisplay().asyncExec(new Runnable() {
-//					public void run() {
-//						tabFolder.setSelection(newsTabItem);
-//					}
-//				});
+				getControl().getDisplay().asyncExec(new Runnable() {
+					public void run() {
+						tabFolder.setSelection(newsTabItem);
+					}
+				});
 			}
 			return;
 		}
@@ -357,7 +357,7 @@ public class MarketplacePage extends CatalogPage {
 		marketplaceSwitcher = switcher;
 		GridDataFactory.fillDefaults()
 		.align(SWT.FILL, SWT.FILL)
-				.grab(true, false)
+		.grab(true, false)
 		.minSize(1, SWT.DEFAULT)
 		.hint(500, SWT.DEFAULT)
 		.applyTo(composite);
