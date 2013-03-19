@@ -170,7 +170,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 	private ItemButtonController buttonController;
 
-	private Button installInfoButton;
+	private StyledText installInfoLink;
 
 	private final IMarketplaceWebBrowser browser;
 
@@ -303,7 +303,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		if (hasInstallMetadata()) {
 			Button button = new Button(composite, SWT.PUSH);
 			Point prefSize = button.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-			GridDataFactory.swtDefaults().align(SWT.TRAIL, SWT.FILL)
+			GridDataFactory.swtDefaults().align(SWT.TRAIL, SWT.CENTER)
 			.minSize(56, SWT.DEFAULT)
 			.grab(false, true)
 			.applyTo(button);
@@ -313,7 +313,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 				secondaryButton = new Button(composite, SWT.PUSH);
 				numColumns = 2;
 				prefSize = button.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-				GridDataFactory.swtDefaults().align(SWT.TRAIL, SWT.FILL)
+				GridDataFactory.swtDefaults().align(SWT.TRAIL, SWT.CENTER)
 				.minSize(56, SWT.DEFAULT)
 				.grab(false, true)
 				.applyTo(secondaryButton);
@@ -321,21 +321,17 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 			buttonController = new ItemButtonController(viewer, this, button, secondaryButton);
 		} else {
-			installInfoButton = new Button(composite, SWT.PUSH | SWT.BOLD);
-			installInfoButton.setText(Messages.DiscoveryItem_installInstructions);
-			installInfoButton.setToolTipText(Messages.DiscoveryItem_installInstructionsTooltip);
-
-			installInfoButton.addSelectionListener(new SelectionAdapter() {
+			installInfoLink = createStyledTextLabel(composite);
+			installInfoLink.setToolTipText(Messages.DiscoveryItem_installInstructionsTooltip);
+			StyleRange link = appendLink(installInfoLink, Messages.DiscoveryItem_installInstructions, SWT.BOLD);
+			link.data = Messages.DiscoveryItem_installInstructions;
+			hookLinkListener(installInfoLink, new LinkListener() {
 				@Override
-				public void widgetSelected(SelectionEvent e) {
+				protected void selected(String href) {
 					browser.openUrl(((Node) connector.getData()).getUrl());
 				}
 			});
-			Point prefSize = installInfoButton.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-			GridDataFactory.swtDefaults().align(SWT.TRAIL, SWT.FILL)
-			.minSize(56, SWT.DEFAULT)
-			.grab(false, true)
-			.applyTo(installInfoButton);
+			GridDataFactory.swtDefaults().align(SWT.TRAIL, SWT.CENTER).grab(false, true).applyTo(installInfoLink);
 		}
 		GridLayoutFactory.fillDefaults()
 		.numColumns(numColumns)
@@ -654,8 +650,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 		nameLabel.setForeground(foreground);
 		description.setForeground(foreground);
-		if (installInfoButton != null) {
-			installInfoButton.setForeground(foreground);
+		if (installInfoLink != null) {
+			installInfoLink.setForeground(foreground);
 		}
 		if (buttonController != null) {
 			buttonController.refresh();
