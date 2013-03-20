@@ -302,7 +302,6 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		int numColumns = 1;
 		if (hasInstallMetadata()) {
 			Button button = new Button(composite, SWT.PUSH);
-			Point prefSize = button.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
 			GridDataFactory.swtDefaults().align(SWT.TRAIL, SWT.CENTER)
 			.minSize(56, SWT.DEFAULT)
 			.grab(false, true)
@@ -312,7 +311,6 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 			if (connector.isInstalled()) {
 				secondaryButton = new Button(composite, SWT.PUSH);
 				numColumns = 2;
-				prefSize = button.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
 				GridDataFactory.swtDefaults().align(SWT.TRAIL, SWT.CENTER)
 				.minSize(56, SWT.DEFAULT)
 				.grab(false, true)
@@ -515,7 +513,6 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 				if (bounds.width < 0.8 * MAX_IMAGE_WIDTH || bounds.width > MAX_IMAGE_WIDTH
 						|| bounds.height > MAX_IMAGE_HEIGHT) {
 					final Image scaledImage = Util.scaleImage(image, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT);
-					System.out.println("Scaled from " + bounds + " to " + scaledImage.getBounds());
 					image = scaledImage;
 					iconLabel.addDisposeListener(new DisposeListener() {
 						public void widgetDisposed(DisposeEvent e) {
