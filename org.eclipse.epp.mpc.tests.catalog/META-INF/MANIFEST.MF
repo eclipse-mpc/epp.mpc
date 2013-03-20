@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Marketplace Client
+Bundle-Name: Marketplace Client Test Catalog
 Bundle-SymbolicName: org.eclipse.epp.mpc.tests.catalog;singleton:=true
 Bundle-Version: 1.2.0.qualifier
 Bundle-Vendor: Eclipse Packaging Project
