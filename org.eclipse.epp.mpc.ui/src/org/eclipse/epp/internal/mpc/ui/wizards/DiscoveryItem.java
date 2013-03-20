@@ -146,6 +146,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 	private static final int MAX_IMAGE_HEIGHT = 86;
 
+	private static final int MIN_IMAGE_HEIGHT = 64;
+
 	private static final int MAX_IMAGE_WIDTH = 75;
 
 	private Composite checkboxContainer;
@@ -222,7 +224,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		.indent(0, SEPARATOR_MARGIN_TOP)
 		.grab(true, false)
 		.span(4, 1)
-		.align(SWT.FILL, SWT.TOP)
+		.align(SWT.FILL, SWT.BEGINNING)
 		.applyTo(separator);
 	}
 
@@ -385,15 +387,24 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 			Node node = (Node) connector.getData();
 			favorited = node.getFavorited();
 		}
+		ratingsButton.setImage(MarketplaceClientUiPlugin.getInstance()
+				.getImageRegistry()
+				.get(MarketplaceClientUiPlugin.ITEM_ICON_STAR));
+		//Make width more or less fixed
+		int width = SWT.DEFAULT;
+		{
+			ratingsButton.setText("999"); //$NON-NLS-1$
+			Point pSize = ratingsButton.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+			width = pSize.x;
+		}
 		if (favorited == null) {
 			ratingsButton.setText(Messages.DiscoveryItem_Unknown_Favorites);
 			ratingsButton.setEnabled(false);
 		} else {
 			ratingsButton.setText(favorited.toString());
+			Point pSize = ratingsButton.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+			width = Math.max(width, pSize.x);
 		}
-		ratingsButton.setImage(MarketplaceClientUiPlugin.getInstance()
-				.getImageRegistry()
-				.get(MarketplaceClientUiPlugin.ITEM_ICON_STAR));
 		final String ratingDescription = NLS.bind(Messages.DiscoveryItem_Favorited_Times, ratingsButton.getText());
 		ratingsButton.setToolTipText(ratingDescription);
 		ratingsButton.getAccessible().addAccessibleListener(new AccessibleAdapter() {
@@ -422,7 +433,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 		GridDataFactory.fillDefaults()
 		.indent(0, BUTTONBAR_MARGIN_TOP)
-		.hint(MAX_IMAGE_WIDTH, SWT.DEFAULT)
+				.hint(Math.min(width, MAX_IMAGE_WIDTH), SWT.DEFAULT)
 		.align(SWT.CENTER, SWT.FILL)
 		.applyTo(ratingsButton);
 
@@ -482,25 +493,29 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 	}
 
 	private void createIconControl(Composite parent) {
-		checkboxContainer = new Composite(parent, SWT.INHERIT_NONE);
+		checkboxContainer = new Composite(parent, SWT.NONE);
 		GridDataFactory.swtDefaults()
 		.indent(0, DESCRIPTION_MARGIN_TOP)
 		.align(SWT.CENTER, SWT.BEGINNING)
+		.hint(MAX_IMAGE_WIDTH, SWT.DEFAULT)
+		.grab(false, true)
+		.minSize(MAX_IMAGE_WIDTH, MIN_IMAGE_HEIGHT)
 		.span(1, 3)
 		.applyTo(checkboxContainer);
 		GridLayoutFactory.fillDefaults().margins(0, 0).applyTo(checkboxContainer);
+
 		iconLabel = new Label(checkboxContainer, SWT.NONE);
 		GridDataFactory.swtDefaults()
-		.align(SWT.CENTER, SWT.TOP)
-		.hint(MAX_IMAGE_WIDTH, SWT.DEFAULT)
-		.minSize(MAX_IMAGE_WIDTH, SWT.DEFAULT)
+		.align(SWT.CENTER, SWT.BEGINNING).grab(true, true)
 		.applyTo(iconLabel);
 		if (connector.getIcon() != null) {
 			try {
 				Image image = resources.getIconImage(connector.getSource(), connector.getIcon(), 32, false);
 				Rectangle bounds = image.getBounds();
-				if (bounds.width > MAX_IMAGE_WIDTH || bounds.height > MAX_IMAGE_HEIGHT) {
+				if (bounds.width < 0.8 * MAX_IMAGE_WIDTH || bounds.width > MAX_IMAGE_WIDTH
+						|| bounds.height > MAX_IMAGE_HEIGHT) {
 					final Image scaledImage = Util.scaleImage(image, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT);
+					System.out.println("Scaled from " + bounds + " to " + scaledImage.getBounds());
 					image = scaledImage;
 					iconLabel.addDisposeListener(new DisposeListener() {
 						public void widgetDisposed(DisposeEvent e) {
@@ -585,7 +600,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		GridDataFactory.fillDefaults()
 		.indent(DESCRIPTION_MARGIN_LEFT, TAGS_MARGIN_TOP)
 		.span(3, 1)
-		.align(SWT.BEGINNING, SWT.CENTER)
+		.align(SWT.BEGINNING, SWT.BEGINNING)
 		.grab(true, false)
 		.applyTo(tagsLink);
 
