@@ -121,6 +121,9 @@ public class CachingMarketplaceService implements MarketplaceService {
 			if (result != null) {
 				synchronized (cache) {
 					cache.put(key, new SoftReference<Object>(result));
+					for (Node node : result.getNodes()) {
+						cache.put(computeNodeKey(node), new SoftReference<Object>(node));
+					}
 				}
 			}
 		}
