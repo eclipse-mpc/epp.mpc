@@ -28,6 +28,8 @@ class Messages extends NLS {
 	public static String MarketplaceClientUi_unexpectedException_reason;
 
 	public static String MarketplaceClientUi_unknownHost;
+
+	public static String MarketplaceClientUi_connectionProblem;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

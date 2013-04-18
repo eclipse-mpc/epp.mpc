@@ -14,6 +14,8 @@ package org.eclipse.epp.internal.mpc.ui;
 import java.lang.reflect.InvocationTargetException;
 import java.net.ConnectException;
 import java.net.NoRouteToHostException;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -108,7 +110,20 @@ public class MarketplaceClientUi {
 			// some oddly configured networks throw timeouts instead of DNS or routing errors
 			if (exception instanceof ConnectException) {
 				status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
-						Messages.MarketplaceClientUi_unknownHost, exception.getMessage()), exception);
+						Messages.MarketplaceClientUi_connectionProblem, exception.getMessage()), exception);
+				break;
+			}
+			// no specific details on this one, but could still point to network issues
+			if (exception instanceof SocketException) {
+				//the original exception's message is likely more informative than the cause in this case
+				status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
+						Messages.MarketplaceClientUi_connectionProblem, exception.getMessage()), exception);
+				break;
+			}
+			if (exception instanceof SocketTimeoutException) {
+				//the original exception's message is likely more informative than the cause in this case
+				status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
+						Messages.MarketplaceClientUi_connectionProblem, exception.getMessage()), exception);
 				break;
 			}
 			if (exception instanceof CoreException) {
