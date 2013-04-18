@@ -431,7 +431,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 		GridDataFactory.fillDefaults()
 		.indent(0, BUTTONBAR_MARGIN_TOP)
-				.hint(Math.min(width, MAX_IMAGE_WIDTH), SWT.DEFAULT)
+		.hint(Math.min(width, MAX_IMAGE_WIDTH), SWT.DEFAULT)
 		.align(SWT.CENTER, SWT.FILL)
 		.applyTo(ratingsButton);
 
@@ -717,6 +717,9 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 	}
 
 	private void hookTooltip(final ToolTip toolTip, Widget tipActivator, final Control exitControl) {
+		if (toolTip == null) {
+			return;
+		}
 		Listener listener = new Listener() {
 			public void handleEvent(Event event) {
 				toolTip.hide();
