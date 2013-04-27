@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2010 Tasktop Technologies and others.
+ * Copyright (c) 2009, 2013 Tasktop Technologies and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     Tasktop Technologies - initial API and implementation
+ *     JBoss (Pascal Rapicault) - Bug 406907 - Add p2 remediation page to MPC install flow
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.operations;
 
@@ -38,6 +39,7 @@ import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.equinox.p2.metadata.Version;
 import org.eclipse.equinox.p2.operations.ProfileChangeOperation;
 import org.eclipse.equinox.p2.operations.ProvisioningSession;
+import org.eclipse.equinox.p2.operations.RemediationOperation;
 import org.eclipse.equinox.p2.operations.RepositoryTracker;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepository;
 import org.eclipse.equinox.p2.ui.ProvisioningUI;
@@ -86,6 +88,10 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 
 	private final URI dependenciesRepository;
 
+	private final boolean withRemediation;
+
+	private String errorMessage;
+
 	/**
 	 * @param operationType
 	 *            the type of operation to perform
@@ -98,7 +104,8 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 	 *            an optional URI to a repository from which dependencies may be installed, may be null
 	 */
 	public ProfileChangeOperationComputer(OperationType operationType, Collection<CatalogItem> items,
-			Set<FeatureDescriptor> featureDescriptors, URI dependenciesRepository, ResolutionStrategy resolutionStrategy) {
+			Set<FeatureDescriptor> featureDescriptors, URI dependenciesRepository,
+			ResolutionStrategy resolutionStrategy, boolean withRemediation) {
 		super(items);
 		if (featureDescriptors == null || featureDescriptors.isEmpty()) {
 			throw new IllegalArgumentException();
@@ -113,12 +120,13 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 		this.operationType = operationType;
 		this.resolutionStrategy = resolutionStrategy;
 		this.dependenciesRepository = dependenciesRepository;
+		this.withRemediation = withRemediation;
 	}
 
 	public void run(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
 		try {
 			SubMonitor monitor = SubMonitor.convert(progressMonitor,
-					Messages.ProvisioningOperation_configuringProvisioningOperation, 1000);
+					Messages.ProvisioningOperation_configuringProvisioningOperation, 1500);
 			try {
 				ius = computeInstallableUnits(monitor.newChild(500));
 
@@ -138,6 +146,15 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 				default:
 					throw new UnsupportedOperationException(operationType.name());
 				}
+				if (withRemediation && operation != null && operation.getResolutionResult().getSeverity() == IStatus.ERROR) {
+					RemediationOperation remediationOperation = new RemediationOperation(ProvisioningUI.getDefaultUI()
+							.getSession(), operation.getProfileChangeRequest());
+					remediationOperation.resolveModal(monitor.newChild(500));
+					if (remediationOperation.getResolutionResult() == Status.OK_STATUS) {
+						errorMessage = operation.getResolutionDetails();
+						operation = remediationOperation;
+					}
+				}
 				checkCancelled(monitor);
 			} finally {
 				monitor.done();
@@ -147,6 +164,10 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 		} catch (Exception e) {
 			throw new InvocationTargetException(e);
 		}
+	}
+
+	public String getErrorMessage() {
+		return errorMessage;
 	}
 
 	private IInstallableUnit[] computeInstalledIus(IInstallableUnit[] ius) {
@@ -219,7 +240,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 
 		ProfileChangeOperation operation = null;
 		final int workPerStrategy = 1000;
-		SubMonitor subMonitor = SubMonitor.convert(monitor, strategies.size() * workPerStrategy);
+		SubMonitor subMonitor = SubMonitor.convert(monitor, strategies.size() * workPerStrategy + workPerStrategy);
 		Set<URI> previousRepositoryLocations = null;
 		for (ResolutionStrategy strategy : strategies) {
 			Set<URI> repositoryLocations = new HashSet<URI>(Arrays.asList(repositories));

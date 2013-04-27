@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2013 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
+ *     JBoss (Pascal Rapicault) - Bug 406907 - Add p2 remediation page to MPC install flow
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
@@ -20,6 +21,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.operations.FeatureDescriptor;
@@ -28,8 +30,10 @@ import org.eclipse.epp.internal.mpc.ui.util.Util;
 import org.eclipse.epp.internal.mpc.ui.wizards.SelectionModel.CatalogItemEntry;
 import org.eclipse.epp.internal.mpc.ui.wizards.SelectionModel.FeatureEntry;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
+import org.eclipse.equinox.internal.p2.ui.dialogs.RemediationGroup;
 import org.eclipse.equinox.p2.core.ProvisionException;
 import org.eclipse.equinox.p2.operations.ProfileChangeOperation;
+import org.eclipse.equinox.p2.operations.RemediationOperation;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -50,6 +54,7 @@ import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -157,6 +162,14 @@ public class FeatureSelectionWizardPage extends WizardPage {
 
 	private TreeViewerColumn column;
 
+	private Composite container;
+
+	private RemediationGroup remediationGroup;
+
+	private Composite defaultComposite;
+
+	private StackLayout switchResultLayout;
+
 	protected FeatureSelectionWizardPage() {
 		super(FeatureSelectionWizardPage.class.getName());
 		setTitle(Messages.FeatureSelectionWizardPage_confirmSelectedFeatures);
@@ -170,10 +183,15 @@ public class FeatureSelectionWizardPage extends WizardPage {
 	}
 
 	public void createControl(Composite parent) {
-		Composite container = new Composite(parent, SWT.NULL);
-		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(container);
+		container = new Composite(parent, SWT.NONE);
+		switchResultLayout = new StackLayout();
+		container.setLayout(switchResultLayout);
+		GridData data = new GridData(GridData.FILL_BOTH);
+		container.setLayoutData(data);
+		defaultComposite = new Composite(container, SWT.NONE);
+		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(defaultComposite);
 
-		Composite treeContainer = new Composite(container, SWT.NULL);
+		Composite treeContainer = new Composite(defaultComposite, SWT.NULL);
 		GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).applyTo(treeContainer);
 
 		TreeColumnLayout columnLayout = new TreeColumnLayout();
@@ -230,7 +248,7 @@ public class FeatureSelectionWizardPage extends WizardPage {
 		column.setLabelProvider(new DelegatingStyledCellLabelProvider(new LabelProvider()));
 		columnLayout.setColumnData(column.getColumn(), new ColumnWeightData(100, 100, true));
 
-		detailsControl = new Group(container, SWT.SHADOW_IN);
+		detailsControl = new Group(defaultComposite, SWT.SHADOW_IN);
 		detailsControl.setText(Messages.FeatureSelectionWizardPage_details);
 		GridDataFactory.fillDefaults().grab(true, false).hint(SWT.DEFAULT, 300).exclude(true).applyTo(detailsControl);
 		GridLayoutFactory.fillDefaults().applyTo(detailsControl);
@@ -240,6 +258,11 @@ public class FeatureSelectionWizardPage extends WizardPage {
 		setControl(container);
 		Dialog.applyDialogFont(container);
 		MarketplaceClientUi.setDefaultHelp(getControl());
+		switchResultLayout.topControl = defaultComposite;
+	}
+
+	public RemediationGroup getRemediationGroup() {
+		return remediationGroup;
 	}
 
 	@Override
@@ -338,42 +361,56 @@ public class FeatureSelectionWizardPage extends WizardPage {
 	}
 
 	void updateMessage() {
+		switchResultLayout.topControl = defaultComposite;
 		ProfileChangeOperation profileChangeOperation = getWizard().getProfileChangeOperation();
 		if (profileChangeOperation != null) {
-			IStatus resolutionResult = profileChangeOperation.getResolutionResult();
-			if (!resolutionResult.isOK()) {
-				String message = resolutionResult.getMessage();
-				if (resolutionResult.getSeverity() == IStatus.ERROR) {
-					message = Messages.FeatureSelectionWizardPage_provisioningErrorAdvisory;
-				} else if (resolutionResult.getSeverity() == IStatus.WARNING) {
-					message = Messages.FeatureSelectionWizardPage_provisioningWarningAdvisory;
+			if (profileChangeOperation instanceof RemediationOperation
+					&& ((RemediationOperation) profileChangeOperation).getResolutionResult() == Status.OK_STATUS) {
+				if (remediationGroup == null) {
+					remediationGroup = new RemediationGroup(this);
+					remediationGroup.createRemediationControl(container);
 				}
-				setMessage(message, Util.computeMessageType(resolutionResult));
-
-				// avoid gratuitous scrolling
-				String originalText = detailStatusText.getText();
-				String newText;
-				try {
-					newText = profileChangeOperation.getResolutionDetails();
-				} catch (Exception e) {
-					// sometimes p2 might throw an exception
-					MarketplaceClientUi.error(e);
-					newText = Messages.FeatureSelectionWizardPage_detailsUnavailable;
-				}
-				if (newText != originalText || (newText != null && !newText.equals(originalText))) {
-					detailStatusText.setText(newText);
-				}
-				((GridData) detailsControl.getLayoutData()).exclude = false;
-
+				setMessage(remediationGroup.getMessage(), IStatus.WARNING);
+				remediationGroup.getDetailsGroup().setDetailText(getWizard().getErrorMessage());
+				remediationGroup.update((RemediationOperation) profileChangeOperation);
+				switchResultLayout.topControl = remediationGroup.getComposite();
 			} else {
-				setMessage(null, IMessageProvider.NONE);
-				((GridData) detailsControl.getLayoutData()).exclude = true;
+				IStatus resolutionResult = profileChangeOperation.getResolutionResult();
+				if (!resolutionResult.isOK()) {
+					String message = resolutionResult.getMessage();
+					if (resolutionResult.getSeverity() == IStatus.ERROR) {
+						message = Messages.FeatureSelectionWizardPage_provisioningErrorAdvisory;
+					} else if (resolutionResult.getSeverity() == IStatus.WARNING) {
+						message = Messages.FeatureSelectionWizardPage_provisioningWarningAdvisory;
+					}
+					setMessage(message, Util.computeMessageType(resolutionResult));
+
+					// avoid gratuitous scrolling
+					String originalText = detailStatusText.getText();
+					String newText;
+					try {
+						newText = profileChangeOperation.getResolutionDetails();
+					} catch (Exception e) {
+						// sometimes p2 might throw an exception
+						MarketplaceClientUi.error(e);
+						newText = Messages.FeatureSelectionWizardPage_detailsUnavailable;
+					}
+					if (newText != originalText || (newText != null && !newText.equals(originalText))) {
+						detailStatusText.setText(newText);
+					}
+					((GridData) detailsControl.getLayoutData()).exclude = false;
+				} else {
+					setMessage(null, IMessageProvider.NONE);
+					((GridData) detailsControl.getLayoutData()).exclude = true;
+				}
 			}
 		} else {
 			setMessage(null, IMessageProvider.NONE);
 			((GridData) detailsControl.getLayoutData()).exclude = true;
 		}
+
 		((Composite) getControl()).layout(true);
+		defaultComposite.layout(true);
 	}
 
 	private void updateFeatureDescriptors(Set<FeatureDescriptor> featureDescriptors,
@@ -443,5 +480,4 @@ public class FeatureSelectionWizardPage extends WizardPage {
 	public void performHelp() {
 		getControl().notifyListeners(SWT.Help, new Event());
 	}
-
 }

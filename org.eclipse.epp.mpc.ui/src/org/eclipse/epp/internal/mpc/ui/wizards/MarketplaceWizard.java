@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2013 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
  *  Yatta Solutions - news (bug 401721)
+ *  JBoss (Pascal Rapicault) - Bug 406907 - Add p2 remediation page to MPC install flow
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
@@ -51,11 +52,13 @@ import org.eclipse.epp.internal.mpc.ui.wizards.SelectionModel.FeatureEntry;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
+import org.eclipse.equinox.internal.p2.ui.ProvUI;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryWizard;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.equinox.p2.operations.ProfileChangeOperation;
 import org.eclipse.equinox.p2.operations.ProvisioningJob;
+import org.eclipse.equinox.p2.operations.RemediationOperation;
 import org.eclipse.equinox.p2.operations.UninstallOperation;
 import org.eclipse.equinox.p2.ui.AcceptLicensesWizardPage;
 import org.eclipse.equinox.p2.ui.ProvisioningUI;
@@ -107,10 +110,22 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	private Set<URI> addedRepositoryLocations;
 
+	public boolean withRemediation;
+
+	private String errorMessage;
+
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
 	public MarketplaceWizard(MarketplaceCatalog catalog, MarketplaceCatalogConfiguration configuration) {
 		super(catalog, configuration);
 		setWindowTitle(Messages.MarketplaceWizard_eclipseSolutionCatalogs);
 		createSelectionModel();
+		withRemediation = true;
+		if (Boolean.TRUE.toString().equalsIgnoreCase(System.getProperty("marketplace.remediation.disable"))) { //$NON-NLS-1$
+			withRemediation = false;
+		}
 	}
 
 	private void createSelectionModel() {
@@ -207,6 +222,23 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	IWizardPage getNextPage(IWizardPage page, boolean computeChanges) {
 		if (page == featureSelectionWizardPage) {
+			if (computeChanges && profileChangeOperation != null
+					&& profileChangeOperation instanceof RemediationOperation) {
+
+				try {
+					getContainer().run(true, false, new IRunnableWithProgress() {
+						public void run(IProgressMonitor monitor) {
+							((RemediationOperation) profileChangeOperation).setCurrentRemedy(featureSelectionWizardPage.getRemediationGroup()
+									.getCurrentRemedy());
+							profileChangeOperation.resolveModal(monitor);
+						}
+					});
+				} catch (InterruptedException e) {
+					// Nothing to report if thread was interrupted
+				} catch (InvocationTargetException e) {
+					ProvUI.handleException(e.getCause(), null, StatusManager.SHOW | StatusManager.LOG);
+				}
+			}
 			if (profileChangeOperation == null) {
 				if (computeChanges) {
 					updateProfileChangeOperation();
@@ -232,7 +264,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				} else {
 					acceptLicensesPage.update(operationIUs, profileChangeOperation);
 				}
-				if (acceptLicensesPage.hasLicensesToAccept()) {
+				if (acceptLicensesPage.hasLicensesToAccept() || profileChangeOperation instanceof RemediationOperation) {
 					return acceptLicensesPage;
 				}
 			}
@@ -514,13 +546,15 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 						getSelectionModel().getSelectedFeatureDescriptors(),
 						dependenciesRepository,
 						getConfiguration().getCatalogDescriptor().isInstallFromAllRepositories() ? ProfileChangeOperationComputer.ResolutionStrategy.FALLBACK_STRATEGY
-								: ProfileChangeOperationComputer.ResolutionStrategy.SELECTED_REPOSITORIES);
+								: ProfileChangeOperationComputer.ResolutionStrategy.SELECTED_REPOSITORIES,
+								withRemediation);
 				getContainer().run(true, true, provisioningOperation);
 
 				profileChangeOperation = provisioningOperation.getOperation();
 				operationIUs = provisioningOperation.getIus();
 				addedRepositoryLocations = provisioningOperation.getAddedRepositoryLocations();
 				operationNewInstallItems = computeNewInstallCatalogItems();
+				errorMessage = provisioningOperation.getErrorMessage();
 
 				final IStatus result = profileChangeOperation.getResolutionResult();
 				if (result != null && operationIUs != null && operationIUs.length > 0
