@@ -10,9 +10,14 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.util;
 
-import org.apache.commons.httpclient.HostConfiguration;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.impl.client.AbstractHttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.CoreProtocolPNames;
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 
@@ -22,8 +27,8 @@ import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 public class HttpUtil {
 
 	public static HttpClient createHttpClient(String baseUri) {
-		HttpClient client = new HttpClient();
-		client.getParams().setParameter(HttpMethodParams.USER_AGENT, MarketplaceClientCore.BUNDLE_ID);
+		HttpClient client = new DefaultHttpClient();
+		client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, MarketplaceClientCore.BUNDLE_ID);
 
 		if (baseUri != null) {
 			configureProxy(client, baseUri);
@@ -34,13 +39,15 @@ public class HttpUtil {
 
 	public static void configureProxy(HttpClient client, String url) {
 		final IProxyData proxyData = ProxyHelper.getProxyData(url);
-		if (proxyData != null) {
-			HostConfiguration hostConfiguration = client.getHostConfiguration();
-			if (hostConfiguration == null) {
-				hostConfiguration = new HostConfiguration();
-				client.setHostConfiguration(hostConfiguration);
+		if (proxyData != null && !IProxyData.SOCKS_PROXY_TYPE.equals(proxyData.getType())) {
+			HttpHost proxy = new HttpHost(proxyData.getHost(), proxyData.getPort(), proxyData.getType().toLowerCase());
+			client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+
+			if (proxyData.isRequiresAuthentication()) {
+				((AbstractHttpClient) client).getCredentialsProvider().setCredentials(
+						new AuthScope(proxyData.getHost(), proxyData.getPort()),
+						new UsernamePasswordCredentials(proxyData.getUserId(), proxyData.getPassword()));
 			}
-			hostConfiguration.setProxy(proxyData.getHost(), proxyData.getPort());
 		}
 	}
 }

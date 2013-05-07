@@ -23,9 +23,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.message.BasicNameValuePair;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -369,12 +371,12 @@ public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketpl
 			Set<String> iuIdsAndVersions, String resolutionDetails) throws CoreException {
 		HttpClient client;
 		URL location;
-		PostMethod method;
+		HttpPost method;
 		try {
 			location = new URL(baseUrl, "install/error/report"); //$NON-NLS-1$
 			String target = location.toURI().toString();
 			client = HttpUtil.createHttpClient(target);
-			method = new PostMethod(target);
+			method = new HttpPost(target);
 		} catch (URISyntaxException e) {
 			throw new IllegalStateException(e);
 		} catch (MalformedURLException e) {
@@ -382,27 +384,28 @@ public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketpl
 		}
 		try {
 			List<NameValuePair> parameters = new ArrayList<NameValuePair>();
-			parameters.add(new NameValuePair("status", Integer.toString(result.getSeverity()))); //$NON-NLS-1$
-			parameters.add(new NameValuePair("statusMessage", result.getMessage())); //$NON-NLS-1$
+			parameters.add(new BasicNameValuePair("status", Integer.toString(result.getSeverity()))); //$NON-NLS-1$
+			parameters.add(new BasicNameValuePair("statusMessage", result.getMessage())); //$NON-NLS-1$
 			for (Node node : nodes) {
-				parameters.add(new NameValuePair("node", node.getId())); //$NON-NLS-1$
+				parameters.add(new BasicNameValuePair("node", node.getId())); //$NON-NLS-1$
 			}
 			if (iuIdsAndVersions != null && !iuIdsAndVersions.isEmpty()) {
 				for (String iuAndVersion : iuIdsAndVersions) {
-					parameters.add(new NameValuePair("iu", iuAndVersion)); //$NON-NLS-1$
+					parameters.add(new BasicNameValuePair("iu", iuAndVersion)); //$NON-NLS-1$
 				}
 			}
-			parameters.add(new NameValuePair("detailedMessage", resolutionDetails)); //$NON-NLS-1$
+			parameters.add(new BasicNameValuePair("detailedMessage", resolutionDetails)); //$NON-NLS-1$
 			if (!parameters.isEmpty()) {
-				method.setRequestBody(parameters.toArray(new NameValuePair[parameters.size()]));
-				client.executeMethod(method);
+				UrlEncodedFormEntity entity = new UrlEncodedFormEntity(parameters, "UTF-8"); //$NON-NLS-1$
+				method.setEntity(entity);
+				client.execute(method);
 			}
 		} catch (IOException e) {
 			String message = NLS.bind(Messages.DefaultMarketplaceService_cannotCompleteRequest_reason,
 					location.toString(), e.getMessage());
 			throw new CoreException(createErrorStatus(message, e));
 		} finally {
-			method.releaseConnection();
+			client.getConnectionManager().shutdown();
 		}
 	}
 
