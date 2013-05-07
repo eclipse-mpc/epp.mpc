@@ -115,6 +115,14 @@ public abstract class UnmarshalContentHandler {
 		}
 	}
 
+	protected Integer toNatural(String string) {
+		Integer intValue = toInteger(string);
+		if (intValue != null && intValue.intValue() < 0) {
+			intValue = null;
+		}
+		return intValue;
+	}
+
 	protected Long toLong(String string) {
 		if (string == null) {
 			return null;

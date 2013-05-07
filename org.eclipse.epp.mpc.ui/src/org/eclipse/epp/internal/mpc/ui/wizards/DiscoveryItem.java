@@ -180,6 +180,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 	private static Boolean browserAvailable;
 
+	private ShareSolutionLink shareSolutionLink;
+
 	public DiscoveryItem(Composite parent, int style, DiscoveryResources resources, IShellProvider shellProvider,
 			IMarketplaceWebBrowser browser, final T connector, MarketplaceViewer viewer) {
 		super(parent, style, resources, connector);
@@ -348,8 +350,6 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		.applyTo(composite);
 		RowLayoutFactory.fillDefaults().type(SWT.HORIZONTAL).pack(true).applyTo(composite);
 
-		StyledText installInfo = new StyledText(composite, SWT.READ_ONLY | SWT.SINGLE);
-
 		Integer installsTotal = null;
 		Integer installsRecent = null;
 		if (connector.getData() instanceof Node) {
@@ -358,33 +358,56 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 			installsRecent = node.getInstallsRecent();
 		}
 
-		String totalText = installsTotal == null ? Messages.DiscoveryItem_Unknown_Installs
-				: MessageFormat.format(
-						Messages.DiscoveryItem_Compact_Number,
-						installsTotal.intValue(), installsTotal * 0.001, installsTotal * 0.000001);
-		String recentText = installsRecent == null ? Messages.DiscoveryItem_Unknown_Installs : MessageFormat.format(
-				"{0, number}", //$NON-NLS-1$
-				installsRecent.intValue());
-		String installInfoText = NLS.bind(Messages.DiscoveryItem_Installs, totalText, recentText);
-		int formatTotalsStart = installInfoText.indexOf(totalText);
-		if (formatTotalsStart == -1) {
-			installInfo.append(installInfoText);
-		} else {
-			if (formatTotalsStart > 0) {
-				installInfo.append(installInfoText.substring(0, formatTotalsStart));
+		if (installsTotal != null || installsRecent != null) {
+			StyledText installInfo = new StyledText(composite, SWT.READ_ONLY | SWT.SINGLE);
+			String totalText = installsTotal == null ? Messages.DiscoveryItem_Unknown_Installs : MessageFormat.format(
+					Messages.DiscoveryItem_Compact_Number, installsTotal.intValue(), installsTotal * 0.001,
+					installsTotal * 0.000001);
+			String recentText = installsRecent == null ? Messages.DiscoveryItem_Unknown_Installs
+					: MessageFormat.format("{0, number}", //$NON-NLS-1$
+							installsRecent.intValue());
+			String installInfoText = NLS.bind(Messages.DiscoveryItem_Installs, totalText, recentText);
+			int formatTotalsStart = installInfoText.indexOf(totalText);
+			if (formatTotalsStart == -1) {
+				installInfo.append(installInfoText);
+			} else {
+				if (formatTotalsStart > 0) {
+					installInfo.append(installInfoText.substring(0, formatTotalsStart));
+				}
+				appendStyled(installInfo, totalText, new StyleRange(0, 0, null, null, SWT.BOLD));
+				installInfo.append(installInfoText.substring(formatTotalsStart + totalText.length()));
 			}
-			appendStyled(installInfo, totalText, new StyleRange(0, 0, null, null, SWT.BOLD));
-			installInfo.append(installInfoText.substring(formatTotalsStart + totalText.length()));
+		} else {
+			shareSolutionLink.setShowText(true);
 		}
 	}
 
 	private void createSocialButtons(Composite parent) {
-		final Button ratingsButton = new Button(parent, SWT.PUSH);
 		Integer favorited = null;
 		if (connector.getData() instanceof Node) {
 			Node node = (Node) connector.getData();
 			favorited = node.getFavorited();
 		}
+		if (favorited == null) {
+			Label spacer = new Label(this, SWT.NONE);
+			spacer.setText(" ");//$NON-NLS-1$
+
+			GridDataFactory.fillDefaults().indent(0, BUTTONBAR_MARGIN_TOP).align(SWT.CENTER, SWT.FILL).applyTo(spacer);
+
+		} else {
+			createRatingsButton(parent, favorited);
+		}
+
+		shareSolutionLink = new ShareSolutionLink(parent, connector);
+		Control shareControl = shareSolutionLink.getControl();
+		GridDataFactory.fillDefaults()
+		.indent(DESCRIPTION_MARGIN_LEFT, BUTTONBAR_MARGIN_TOP)
+		.align(SWT.BEGINNING, SWT.FILL)
+		.applyTo(shareControl);
+	}
+
+	private void createRatingsButton(Composite parent, Integer favoritedCount) {
+		final Button ratingsButton = new Button(parent, SWT.PUSH);
 		ratingsButton.setImage(MarketplaceClientUiPlugin.getInstance()
 				.getImageRegistry()
 				.get(MarketplaceClientUiPlugin.ITEM_ICON_STAR));
@@ -395,14 +418,10 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 			Point pSize = ratingsButton.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
 			width = pSize.x;
 		}
-		if (favorited == null) {
-			ratingsButton.setText(Messages.DiscoveryItem_Unknown_Favorites);
-			ratingsButton.setEnabled(false);
-		} else {
-			ratingsButton.setText(favorited.toString());
-			Point pSize = ratingsButton.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-			width = Math.max(width, pSize.x);
-		}
+		ratingsButton.setText(favoritedCount.toString());
+		Point pSize = ratingsButton.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+		width = Math.max(width, pSize.x);
+
 		final String ratingDescription = NLS.bind(Messages.DiscoveryItem_Favorited_Times, ratingsButton.getText());
 		ratingsButton.setToolTipText(ratingDescription);
 		ratingsButton.getAccessible().addAccessibleListener(new AccessibleAdapter() {
@@ -434,13 +453,6 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		.hint(Math.min(width, MAX_IMAGE_WIDTH), SWT.DEFAULT)
 		.align(SWT.CENTER, SWT.FILL)
 		.applyTo(ratingsButton);
-
-		ShareSolutionLink shareSolutionLink = new ShareSolutionLink(parent, connector);
-		Control shareControl = shareSolutionLink.getControl();
-		GridDataFactory.fillDefaults()
-		.indent(DESCRIPTION_MARGIN_LEFT, BUTTONBAR_MARGIN_TOP)
-		.align(SWT.BEGINNING, SWT.FILL)
-		.applyTo(shareControl);
 	}
 
 	protected void openSolutionFavorite() {

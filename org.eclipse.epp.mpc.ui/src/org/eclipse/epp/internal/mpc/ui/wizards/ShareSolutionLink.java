@@ -46,7 +46,7 @@ public class ShareSolutionLink {
 
 	private final CatalogItem catalogItem;
 
-	private final Control control;
+	private final Button control;
 
 	public ShareSolutionLink(Composite parent, CatalogItem item) {
 		this.catalogItem = item;
@@ -60,9 +60,8 @@ public class ShareSolutionLink {
 		return control;
 	}
 
-	private static Control createShareLink(Composite parent) {
+	private static Button createShareLink(Composite parent) {
 		final Button share = new Button(parent, SWT.PUSH);
-		//share.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		share.setImage(MarketplaceClientUiPlugin.getInstance()
 				.getImageRegistry()
 				.get(MarketplaceClientUiPlugin.ITEM_ICON_SHARE));
@@ -197,4 +196,11 @@ public class ShareSolutionLink {
 		});
 	}
 
+	public void setShowText(boolean showText) {
+		if (showText) {
+			control.setText(Messages.DiscoveryItem_Share);
+		} else {
+			control.setText(""); //$NON-NLS-1$
+		}
+	}
 }

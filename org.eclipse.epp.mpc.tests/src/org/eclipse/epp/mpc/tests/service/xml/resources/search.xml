@@ -194,7 +194,7 @@ There is the Release Candidate 1 for 1.0-M3 ready for download and testing.]]></
       </categories>
 
       <owner>ktitorenko</owner>
-      <favorited>0</favorited>
+      <favorited>-1</favorited>
       <body><![CDATA[JUnit Flux is an Eclipse plugin that will execute JUnit tests automatically, when you save your Java class or test itself, provided that class under test and unit test lie in the same package and unit test name follows naming convention of prefixing or suffixing with test (&quot;.*&quot;+name+&quot;.*Test.*&quot; or &quot;.*Test.*&quot;+name+&quot;.*&quot;).
 
 These conventions allow JUnit Flux to find relevant unit tests very quickly, thus providing you immediate feedback on your code change. JUnit Flux will react on multiple file changes as well, like those resulting from automatic refactorings. ]]></body>

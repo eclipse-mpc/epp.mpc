@@ -130,19 +130,19 @@ public class NodeContentHandler extends UnmarshalContentHandler {
 			return true;
 		} else if (localName.equals("favorited")) { //$NON-NLS-1$
 			if (content != null) {
-				model.setFavorited(toInteger(content.toString()));
+				model.setFavorited(toNatural(content.toString()));
 				content = null;
 			}
 			capturingContent = false;
 		} else if (localName.equals("installstotal")) { //$NON-NLS-1$
 			if (content != null) {
-				model.setInstallsTotal(toInteger(content.toString()));
+				model.setInstallsTotal(toNatural(content.toString()));
 				content = null;
 			}
 			capturingContent = false;
 		} else if (localName.equals("installsrecent")) { //$NON-NLS-1$
 			if (content != null) {
-				model.setInstallsRecent(toInteger(content.toString()));
+				model.setInstallsRecent(toNatural(content.toString()));
 				content = null;
 			}
 			capturingContent = false;
