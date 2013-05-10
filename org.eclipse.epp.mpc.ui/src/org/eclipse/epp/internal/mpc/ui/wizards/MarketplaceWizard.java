@@ -220,9 +220,13 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		return getNextPage(page, true);
 	}
 
-	IWizardPage getNextPage(IWizardPage page, boolean computeChanges) {
+	IWizardPage getNextPage(IWizardPage page, boolean nextpressed) {
+		if(page ==getCatalogPage() && nextpressed){
+			profileChangeOperation = null;
+			featureSelectionWizardPage.updateMessage();
+		}
 		if (page == featureSelectionWizardPage) {
-			if (computeChanges && profileChangeOperation != null
+			if (nextpressed && profileChangeOperation != null
 					&& profileChangeOperation instanceof RemediationOperation) {
 
 				try {
@@ -240,7 +244,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				}
 			}
 			if (profileChangeOperation == null) {
-				if (computeChanges) {
+				if (nextpressed) {
 					updateProfileChangeOperation();
 					if (profileChangeOperation != null) {
 						getContainer().updateButtons();
@@ -255,6 +259,14 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 					// by returning the same page the finish button will be enabled, allowing the user to finish.
 					return featureSelectionWizardPage;
 				}
+				if (profileChangeOperation instanceof RemediationOperation) {
+					return featureSelectionWizardPage;
+				}
+			}
+			if (nextpressed && profileChangeOperation instanceof RemediationOperation
+					&& !featureSelectionWizardPage.isInRemediationMode()) {
+				featureSelectionWizardPage.flipToRemediationComposite();
+				return featureSelectionWizardPage;
 			}
 			if (computeMustCheckLicenseAcceptance()) {
 				if (acceptLicensesPage == null) {

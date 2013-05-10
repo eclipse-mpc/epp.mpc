@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
+ *     JBoss (Pascal Rapicault) - Bug 406907 - Add p2 remediation page to MPC install flow
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
@@ -41,6 +42,16 @@ public class MarketplaceWizardDialog extends WizardDialog {
 			break;
 		}
 		return button;
+	}
+
+	@Override
+	protected void backPressed() {
+		IWizardPage fromPage = getCurrentPage();
+		super.backPressed();
+		if (fromPage instanceof FeatureSelectionWizardPage
+				&& ((FeatureSelectionWizardPage) fromPage).isInRemediationMode()) {
+			((FeatureSelectionWizardPage) fromPage).flipToDefaultComposite();
+		}
 	}
 
 	@Override
