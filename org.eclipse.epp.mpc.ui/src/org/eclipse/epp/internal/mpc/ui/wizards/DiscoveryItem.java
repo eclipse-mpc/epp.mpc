@@ -21,6 +21,7 @@ import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.core.service.Tag;
 import org.eclipse.epp.internal.mpc.core.service.Tags;
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
 import org.eclipse.equinox.internal.p2.discovery.AbstractCatalogSource;
@@ -378,7 +379,9 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 				installInfo.append(installInfoText.substring(formatTotalsStart + totalText.length()));
 			}
 		} else {
-			shareSolutionLink.setShowText(true);
+			if (shareSolutionLink != null) {
+				shareSolutionLink.setShowText(true);
+			}
 		}
 	}
 
@@ -388,7 +391,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 			Node node = (Node) connector.getData();
 			favorited = node.getFavorited();
 		}
-		if (favorited == null) {
+		if (favorited == null || getCatalogItemUrl() == null) {
 			Label spacer = new Label(this, SWT.NONE);
 			spacer.setText(" ");//$NON-NLS-1$
 
@@ -398,12 +401,18 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 			createRatingsButton(parent, favorited);
 		}
 
-		shareSolutionLink = new ShareSolutionLink(parent, connector);
-		Control shareControl = shareSolutionLink.getControl();
-		GridDataFactory.fillDefaults()
-		.indent(DESCRIPTION_MARGIN_LEFT, BUTTONBAR_MARGIN_TOP)
-		.align(SWT.BEGINNING, SWT.FILL)
-		.applyTo(shareControl);
+		if (getCatalogItemUrl() != null) {
+			shareSolutionLink = new ShareSolutionLink(parent, connector);
+			Control shareControl = shareSolutionLink.getControl();
+			GridDataFactory.fillDefaults()
+					.indent(DESCRIPTION_MARGIN_LEFT, BUTTONBAR_MARGIN_TOP)
+					.align(SWT.BEGINNING, SWT.FILL)
+					.applyTo(shareControl);
+		} else {
+			Label spacer = new Label(this, SWT.NONE);
+			spacer.setText(" ");//$NON-NLS-1$
+			GridDataFactory.fillDefaults().indent(0, BUTTONBAR_MARGIN_TOP).align(SWT.CENTER, SWT.FILL).applyTo(spacer);
+		}
 	}
 
 	private void createRatingsButton(Composite parent, Integer favoritedCount) {
@@ -456,7 +465,13 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 	}
 
 	protected void openSolutionFavorite() {
-		String url = connector.getOverview().getUrl().trim();
+		String url = getCatalogItemUrl();
+		if (url == null) {
+			MarketplaceClientUi.error(
+					NLS.bind(Messages.DiscoveryItem_missingNodeUrl, connector.getId(), connector.getName()),
+					new IllegalStateException());
+			return;
+		}
 		if (url.startsWith(ECLIPSE_MARKETPLACE_URL)) {
 			//massage url to redirect via login page
 
@@ -473,6 +488,15 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 			url = NLS.bind(MARKETPLACE_LOGIN_URL, returnPath);
 		}
 		WorkbenchUtil.openUrl(url, IWorkbenchBrowserSupport.AS_EXTERNAL);
+	}
+
+	private String getCatalogItemUrl() {
+		Object data = connector.getData();
+		if (data instanceof Node) {
+			Node node = (Node) data;
+			return node.getUrl();
+		}
+		return null;
 	}
 
 	private void createInfoLink(StyledText description) {

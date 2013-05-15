@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.net.URI;
 
 import org.eclipse.core.runtime.URIUtil;
+import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
@@ -89,8 +90,8 @@ public class ShareSolutionLink {
 		twitterItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				String tweet = NLS.bind(Messages.ShareSolutionLink_tweet, new Object[] {
-						catalogItem.getName(), catalogItem.getOverview().getUrl() });
+				String tweet = NLS.bind(Messages.ShareSolutionLink_tweet, new Object[] { catalogItem.getName(),
+						getUrl() });
 				WorkbenchUtil.openUrl("http://twitter.com/?status=" + tweet, IWorkbenchBrowserSupport.AS_EXTERNAL); //$NON-NLS-1$
 			}
 		});
@@ -134,8 +135,11 @@ public class ShareSolutionLink {
 		// NOTE: put URL before description since some mail clients have troubles with descriptions, especially if they're long.
 		String description = catalogItem.getDescription() == null ? "" : catalogItem.getDescription(); //$NON-NLS-1$
 		description = TextUtil.stripHtmlMarkup(catalogItem.getDescription()).trim();
-		return catalogItem.getName()
-				+ "\n" + catalogItem.getOverview().getUrl() + "\n\n" + description; //$NON-NLS-1$ //$NON-NLS-2$
+		return catalogItem.getName() + "\n" + getUrl() + "\n\n" + description; //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	private String getUrl() {
+		return ((Node) catalogItem.getData()).getUrl();
 	}
 
 	private void openMail(URI uri) throws Exception {

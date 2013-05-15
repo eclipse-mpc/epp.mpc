@@ -47,6 +47,8 @@ class Messages extends NLS {
 
 	public static String DiscoveryItem_Installs;
 
+	public static String DiscoveryItem_missingNodeUrl;
+
 	public static String DiscoveryItem_More_Info;
 
 	public static String DiscoveryItem_Promotion_Display;
