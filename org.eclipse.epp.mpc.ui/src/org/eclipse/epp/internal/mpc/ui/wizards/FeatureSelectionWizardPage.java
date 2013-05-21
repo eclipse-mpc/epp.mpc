@@ -174,7 +174,6 @@ public class FeatureSelectionWizardPage extends WizardPage {
 		super(FeatureSelectionWizardPage.class.getName());
 		setTitle(Messages.FeatureSelectionWizardPage_confirmSelectedFeatures);
 		setDescription(Messages.FeatureSelectionWizardPage_confirmSelectedFeatures_description);
-		setPageComplete(false);
 	}
 
 	@Override
@@ -258,7 +257,7 @@ public class FeatureSelectionWizardPage extends WizardPage {
 		setControl(container);
 		Dialog.applyDialogFont(container);
 		MarketplaceClientUi.setDefaultHelp(getControl());
-		switchResultLayout.topControl = defaultComposite;
+		flipToDefaultComposite();
 	}
 
 	public RemediationGroup getRemediationGroup() {
@@ -293,7 +292,6 @@ public class FeatureSelectionWizardPage extends WizardPage {
 	}
 
 	private void updateFeatures() {
-		setPageComplete(false);
 		viewer.setInput(getWizard().getSelectionModel());
 		ResolveFeatureNamesOperation operation = new ResolveFeatureNamesOperation(new ArrayList<CatalogItem>(
 				getWizard().getSelectionModel().getItemToOperation().keySet())) {
@@ -331,7 +329,7 @@ public class FeatureSelectionWizardPage extends WizardPage {
 			refresh();
 			// canceled
 		}
-		maybeUpdateProfileChangeOperation();
+		//maybeUpdateProfileChangeOperation();
 	}
 
 	private void maybeUpdateProfileChangeOperation() {
@@ -361,7 +359,6 @@ public class FeatureSelectionWizardPage extends WizardPage {
 	}
 
 	void updateMessage() {
-		switchResultLayout.topControl = defaultComposite;
 		ProfileChangeOperation profileChangeOperation = getWizard().getProfileChangeOperation();
 		if (profileChangeOperation != null) {
 			if (profileChangeOperation instanceof RemediationOperation
@@ -373,7 +370,7 @@ public class FeatureSelectionWizardPage extends WizardPage {
 				setMessage(remediationGroup.getMessage(), IStatus.WARNING);
 				remediationGroup.getDetailsGroup().setDetailText(getWizard().getErrorMessage());
 				remediationGroup.update((RemediationOperation) profileChangeOperation);
-				switchResultLayout.topControl = remediationGroup.getComposite();
+				flipToRemediationComposite();
 			} else {
 				IStatus resolutionResult = profileChangeOperation.getResolutionResult();
 				if (!resolutionResult.isOK()) {
@@ -411,6 +408,14 @@ public class FeatureSelectionWizardPage extends WizardPage {
 
 		((Composite) getControl()).layout(true);
 		defaultComposite.layout(true);
+	}
+
+	@Override
+	public IWizardPage getPreviousPage() {
+		if (switchResultLayout.topControl != defaultComposite) {
+			return this;
+		}
+		return super.getPreviousPage();
 	}
 
 	private void updateFeatureDescriptors(Set<FeatureDescriptor> featureDescriptors,
@@ -479,5 +484,19 @@ public class FeatureSelectionWizardPage extends WizardPage {
 	@Override
 	public void performHelp() {
 		getControl().notifyListeners(SWT.Help, new Event());
+	}
+
+	public void flipToRemediationComposite() {
+		switchResultLayout.topControl = remediationGroup.getComposite();
+		container.layout();
+	}
+
+	public void flipToDefaultComposite() {
+		switchResultLayout.topControl = defaultComposite;
+		container.layout();
+	}
+
+	public boolean isInRemediationMode() {
+		return switchResultLayout.topControl != defaultComposite;
 	}
 }

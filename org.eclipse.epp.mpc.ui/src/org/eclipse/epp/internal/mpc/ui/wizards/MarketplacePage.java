@@ -8,6 +8,7 @@
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
  *  Yatta Solutions - news (bug 401721)
+ *  JBoss (Pascal Rapicault) - Bug 406907 - Add p2 remediation page to MPC install flow 
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
@@ -44,6 +45,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -185,7 +187,8 @@ public class MarketplacePage extends CatalogPage {
 						IWizardPage currentPage = getContainer().getCurrentPage();
 						if (currentPage.isPageComplete()) {
 							IWizardPage nextPage = getWizard().getNextPage(MarketplacePage.this);
-							if (nextPage != null) {
+							if (nextPage != null && nextPage instanceof WizardPage) {
+								((WizardPage) nextPage).setPageComplete(true);
 								getContainer().showPage(nextPage);
 							}
 						}
