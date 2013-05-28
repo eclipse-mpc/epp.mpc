@@ -377,6 +377,11 @@ public class MarketplaceViewer extends CatalogViewer {
 					if (!monitor.isCanceled() && result[0] != null && result[0].getSeverity() != IStatus.CANCEL) {
 						getCatalog().checkForUpdates(monitor);
 					}
+					MarketplaceViewer.this.getControl().getDisplay().syncExec(new Runnable() {
+						public void run() {
+							updateViewer(queryText);
+						}
+					});
 				}
 			});
 
@@ -392,6 +397,9 @@ public class MarketplaceViewer extends CatalogViewer {
 		} catch (InterruptedException e) {
 			// cancelled by user so nothing to do here.
 		}
+	}
+
+	private void updateViewer(final String queryText) {
 		if (contentType == ContentType.INSTALLED) {
 			getViewer().setSorter(new MarketplaceViewerSorter());
 		} else {
