@@ -110,7 +110,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	private Set<URI> addedRepositoryLocations;
 
-	public boolean withRemediation;
+	private boolean withRemediation;
 
 	private String errorMessage;
 
@@ -122,9 +122,10 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		super(catalog, configuration);
 		setWindowTitle(Messages.MarketplaceWizard_eclipseSolutionCatalogs);
 		createSelectionModel();
-		withRemediation = true;
-		if (Boolean.TRUE.toString().equalsIgnoreCase(System.getProperty("marketplace.remediation.disable"))) { //$NON-NLS-1$
-			withRemediation = false;
+		withRemediation = false;
+		String withRemediationOverride = System.getProperty("marketplace.remediation.enabled"); //$NON-NLS-1$
+		if (withRemediationOverride != null) {
+			withRemediation = Boolean.parseBoolean(withRemediationOverride);
 		}
 	}
 
