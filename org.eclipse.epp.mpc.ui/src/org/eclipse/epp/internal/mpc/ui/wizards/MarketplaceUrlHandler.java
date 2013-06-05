@@ -155,7 +155,7 @@ public abstract class MarketplaceUrlHandler {
 	}
 
 	public boolean handleUri(String uri) {
-		if (uri.contains(MPC_INSTALL_URI) && isPotentialSolution(uri)) {
+		if (isPotentialSolution(uri)) {
 			SolutionInstallationInfo installInfo = createSolutionInstallInfo(uri);
 			if (installInfo != null) {
 				return handleInstallRequest(installInfo, uri);
