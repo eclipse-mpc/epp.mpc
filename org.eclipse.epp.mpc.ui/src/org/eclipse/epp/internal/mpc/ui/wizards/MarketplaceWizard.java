@@ -122,7 +122,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		super(catalog, configuration);
 		setWindowTitle(Messages.MarketplaceWizard_eclipseSolutionCatalogs);
 		createSelectionModel();
-		withRemediation = false;
+		withRemediation = true;
 		String withRemediationOverride = System.getProperty("marketplace.remediation.enabled"); //$NON-NLS-1$
 		if (withRemediationOverride != null) {
 			withRemediation = Boolean.parseBoolean(withRemediationOverride);
