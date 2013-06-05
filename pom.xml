@@ -92,9 +92,6 @@
     </profile>
     <profile>
       <id>indigo</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
       <properties>
         <platform-version>[3.7.0,3.8.0)</platform-version>
       </properties>
@@ -139,6 +136,9 @@
     </profile>
     <profile>
       <id>kepler</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
       <properties>
         <platform-version>[4.3.0,4.4.0)</platform-version>
       </properties>
