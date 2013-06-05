@@ -13,8 +13,6 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.text.MessageFormat;
 
 import org.eclipse.epp.internal.mpc.core.service.Node;
@@ -80,10 +78,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 	/**
 	 * conditional login url for the eclipse marketplace
 	 */
-	//private static final String MARKETPLACE_LOGIN_URL = "https://marketplace.eclipse.org/login/sso?redirect={0}"; //$NON-NLS-1$
-	//FIXME that url redirects to the frontpage currently, so use this one instead,
-	//which has the downside of always showing the login page...
-	private static final String MARKETPLACE_LOGIN_URL = "https://dev.eclipse.org/site_login/?takemeback={0}"; //$NON-NLS-1$
+	private static final String MARKETPLACE_LOGIN_URL = "https://marketplace.eclipse.org/login/sso?redirect=node/{0}"; //$NON-NLS-1$
 
 	/**
 	 * Eclipse marketplace, which supports the login scheme in {@link #MARKETPLACE_LOGIN_URL}
@@ -405,9 +400,9 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 			shareSolutionLink = new ShareSolutionLink(parent, connector);
 			Control shareControl = shareSolutionLink.getControl();
 			GridDataFactory.fillDefaults()
-					.indent(DESCRIPTION_MARGIN_LEFT, BUTTONBAR_MARGIN_TOP)
-					.align(SWT.BEGINNING, SWT.FILL)
-					.applyTo(shareControl);
+			.indent(DESCRIPTION_MARGIN_LEFT, BUTTONBAR_MARGIN_TOP)
+			.align(SWT.BEGINNING, SWT.FILL)
+			.applyTo(shareControl);
 		} else {
 			Label spacer = new Label(this, SWT.NONE);
 			spacer.setText(" ");//$NON-NLS-1$
@@ -475,17 +470,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		if (url.startsWith(ECLIPSE_MARKETPLACE_URL)) {
 			//massage url to redirect via login page
 
-			//FIXME change once fixme on MARKETPLACE_LOGIN_URL is resolved
-			//String returnPath = url.substring(ECLIPSE_MARKETPLACE_URL.length());
-			String returnPath = url;
-
-			try {
-				returnPath = URLEncoder.encode(returnPath, "UTF-8"); //$NON-NLS-1$
-			} catch (UnsupportedEncodingException e1) {
-				// should be unreachable
-				throw new IllegalStateException();
-			}
-			url = NLS.bind(MARKETPLACE_LOGIN_URL, returnPath);
+			url = NLS.bind(MARKETPLACE_LOGIN_URL, connector.getId());
 		}
 		WorkbenchUtil.openUrl(url, IWorkbenchBrowserSupport.AS_EXTERNAL);
 	}
