@@ -19,6 +19,8 @@
 	<archive-dir>${basedir}/target/drops</archive-dir>
 	<site-dir></site-dir>
 
+	<qualifier-format>'I'yyyyMMdd-HHmm</qualifier-format>
+
 	<skip-source-check>true</skip-source-check>
 	<skip-sign>true</skip-sign>
 	<skip-promote>true</skip-promote>
@@ -189,7 +191,7 @@
 		</property>
       </activation>
       <properties>
-		<mylyn-qualifier-format>'v'yyyyMMdd-HH00</mylyn-qualifier-format>
+		<qualifier-format>'v'yyyyMMdd-HH00</qualifier-format>
 		<skip-sign>false</skip-sign>
 	  </properties>
 	</profile>
@@ -287,7 +289,7 @@
           <artifactId>tycho-packaging-plugin</artifactId>
           <version>${tycho-version}</version>
           <configuration>
-            <format>'I'yyyyMMdd-HHmm</format>
+            <format>${qualifier-format}</format>
             <archiveSite>true</archiveSite>
           </configuration>
         </plugin>
