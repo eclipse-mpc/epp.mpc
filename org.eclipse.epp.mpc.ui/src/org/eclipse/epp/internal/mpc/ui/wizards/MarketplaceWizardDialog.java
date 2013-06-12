@@ -79,10 +79,23 @@ public class MarketplaceWizardDialog extends WizardDialog {
 		super.updateButtons();
 		IWizardPage currentPage = getCurrentPage();
 		if (currentPage != null) {
+			boolean buttonsChanged = false;
 			String nextButtonLabel = getNextButtonLabel(currentPage);
-			nextButton.setText(nextButtonLabel);
+			if (!nextButtonLabel.equals(nextButton.getText())) {
+				nextButton.setText(nextButtonLabel);
+				setButtonLayoutData(nextButton);
+				buttonsChanged = true;
+			}
 			String backButtonLabel = getBackButtonLabel(currentPage);
-			backButton.setText(backButtonLabel);
+			if (!backButtonLabel.equals(backButton.getText())) {
+				backButton.setText(backButtonLabel);
+				setButtonLayoutData(backButton);
+				buttonsChanged = true;
+			}
+			if (buttonsChanged) {
+				Composite buttonBar = backButton.getParent();
+				buttonBar.layout(true);
+			}
 		}
 	}
 
