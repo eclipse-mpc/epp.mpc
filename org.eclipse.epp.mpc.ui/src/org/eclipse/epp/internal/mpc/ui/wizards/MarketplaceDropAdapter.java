@@ -42,7 +42,7 @@ public class MarketplaceDropAdapter implements IStartup {
 			@Override
 			public IStatus runInUIThread(IProgressMonitor monitor) {
 				IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench()
-				.getWorkbenchWindows();
+						.getWorkbenchWindows();
 				for (IWorkbenchWindow window : workbenchWindows) {
 					Shell shell = window.getShell();
 					installDropTarget(shell);
@@ -79,9 +79,13 @@ public class MarketplaceDropAdapter implements IStartup {
 					event.detail = DND.DROP_NONE;
 					return;
 				}
-				String url = getUrlFromEvent(event);
+				final String url = getUrlFromEvent(event);
 				if (MarketplaceUrlHandler.isPotentialSolution(url)) {
-					proceedInstallation(url);
+					Display.getCurrent().asyncExec(new Runnable() {
+						public void run() {
+							proceedInstallation(url);
+						}
+					});
 				}
 			}
 
