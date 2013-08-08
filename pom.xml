@@ -14,7 +14,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <tycho-version>0.16.0</tycho-version>
+    <tycho-version>0.17.0</tycho-version>
 
 	<archive-dir>${basedir}/target/drops</archive-dir>
 	<site-dir></site-dir>
@@ -74,68 +74,11 @@
 	<repository>
 	  <id>eclipse-orbit</id>
 	  <layout>p2</layout>
-	  <url>http://download.eclipse.org/tools/orbit/downloads/drops/R20110523182458/repository/</url>
+	  <url>http://download.eclipse.org/tools/orbit/downloads/drops/R20130517111416/repository/</url>
 	</repository>
   </repositories>
 
   <profiles>
-    <profile>
-      <id>helios</id>
-      <properties>
-        <platform-version>[3.6.0,3.7.0)</platform-version>
-      </properties>
-	  <repositories>
-		<repository>
-		  <id>helios</id>
-		  <layout>p2</layout>
-		  <url>http://download.eclipse.org/releases/helios/</url>
-		</repository>
-	  </repositories>
-    </profile>
-    <profile>
-      <id>indigo</id>
-      <properties>
-        <platform-version>[3.7.0,3.8.0)</platform-version>
-      </properties>
-	  <repositories>
-		<repository>
-		  <id>indigo</id>
-		  <layout>p2</layout>
-		  <url>http://download.eclipse.org/releases/indigo/</url>
-		</repository>
-	  </repositories>
-    </profile>
-    <profile>
-      <id>e4</id>
-      <properties>
-        <platform-version>[4.1.0,4.2.0)</platform-version>
-      </properties>
-	  <repositories>
-		<repository>
-		  <id>indigo</id>
-		  <layout>p2</layout>
-		  <url>http://download.eclipse.org/releases/indigo/</url>
-		</repository>
-		<repository>
-		  <id>e4</id>
-		  <layout>p2</layout>
-		  <url>http://download.eclipse.org/e4/sdk/drops/R-4.1-201106201631/repository</url>
-		</repository>
-	  </repositories>
-    </profile>
-    <profile>
-      <id>juno</id>
-      <properties>
-        <platform-version>[4.2.0,4.3.0)</platform-version>
-      </properties>
-	  <repositories>
-		<repository>
-		  <id>juno</id>
-		  <layout>p2</layout>
-		  <url>http://download.eclipse.org/releases/juno/</url>
-		</repository>
-	  </repositories>
-    </profile>
     <profile>
       <id>kepler</id>
       <activation>
@@ -147,6 +90,19 @@
 	  <repositories>
 		<repository>
 		  <id>kepler</id>
+		  <layout>p2</layout>
+		  <url>http://download.eclipse.org/releases/kepler/</url>
+		</repository>
+	  </repositories>
+    </profile>
+    <profile>
+      <id>staging</id>
+      <properties>
+        <platform-version>[4.3.0,4.4.0)</platform-version>
+      </properties>
+	  <repositories>
+		<repository>
+		  <id>staging</id>
 		  <layout>p2</layout>
 		  <url>http://download.eclipse.org/releases/staging/</url>
 		</repository>
