@@ -28,8 +28,8 @@ class ItemButtonController {
 		UNINSTALL(Messages.ItemButtonController_uninstall, Operation.NONE, false), //
 		INSTALL_PENDING(Messages.ItemButtonController_installPending, Operation.INSTALL, false), //
 		UNINSTALL_PENDING(Messages.ItemButtonController_uninstallPending, Operation.UNINSTALL, false), //
-		DISABLED(Messages.ItemButtonController_install, Operation.NONE, true), // 
-		UPDATE_DISABLED(Messages.ItemButtonController_update, Operation.NONE, true), // 
+		DISABLED(Messages.ItemButtonController_install, Operation.NONE, true), //
+		UPDATE_DISABLED(Messages.ItemButtonController_update, Operation.NONE, true), //
 		UPDATE(Messages.ItemButtonController_update, Operation.NONE, false), //
 		UPDATE_PENDING(Messages.ItemButtonController_updatePending, Operation.CHECK_FOR_UPDATES, false);
 
@@ -130,6 +130,8 @@ class ItemButtonController {
 	}
 
 	private void updateButtonState() {
+		buttonState = ButtonState.DISABLED;
+		secondaryButtonState = ButtonState.DISABLED;
 		MarketplaceNodeCatalogItem catalogItem = (MarketplaceNodeCatalogItem) item.getData();
 		if (catalogItem.getInstallableUnits().isEmpty()) {
 			buttonState = ButtonState.DISABLED;
