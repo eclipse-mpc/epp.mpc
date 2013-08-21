@@ -101,7 +101,7 @@
     <profile>
       <id>staging</id>
       <properties>
-        <platform-version>[4.3.0,4.4.0)</platform-version>
+        <platform-version>[4.4.0,4.5.0)</platform-version>
       </properties>
 	  <repositories>
 		<repository>
