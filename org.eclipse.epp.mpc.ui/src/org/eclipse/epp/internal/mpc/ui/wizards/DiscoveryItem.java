@@ -282,7 +282,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 	}
 
 	private void createNameLabel(Composite parent) {
-		nameLabel = new Label(parent, SWT.NONE);
+		nameLabel = new Label(parent, SWT.WRAP);
 		GridDataFactory.fillDefaults()
 		.indent(DESCRIPTION_MARGIN_LEFT, 0)
 		.span(3, 1)
