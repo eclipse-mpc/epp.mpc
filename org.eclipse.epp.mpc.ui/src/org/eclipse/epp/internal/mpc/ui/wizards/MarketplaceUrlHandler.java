@@ -47,9 +47,9 @@ public abstract class MarketplaceUrlHandler {
 
 	public static final String SITE_SEARCH_URI = "/search/site"; //$NON-NLS-1$
 
-	private static final Pattern CONTENT_URL_PATTERN = Pattern.compile("/content/([^/#?]+)"); //$NON-NLS-1$
+	private static final Pattern CONTENT_URL_PATTERN = Pattern.compile("(?:^|/)content/([^/#?]+)"); //$NON-NLS-1$
 
-	private static final Pattern NODE_URL_PATTERN = Pattern.compile("/node/([^/#?]+)"); //$NON-NLS-1$
+	private static final Pattern NODE_URL_PATTERN = Pattern.compile("(?:^|/)node/([^/#?]+)"); //$NON-NLS-1$
 
 	public static class SolutionInstallationInfo {
 		private String installId;
@@ -176,6 +176,9 @@ public abstract class MarketplaceUrlHandler {
 			if (!baseUri.endsWith("/")) { //$NON-NLS-1$
 				baseUri += '/';
 			}
+			if (!uri.startsWith(baseUri)) {
+				return false;
+			}
 		} catch (URISyntaxException e) {
 			// should be unreachable
 			throw new IllegalStateException(e);
@@ -197,7 +200,7 @@ public abstract class MarketplaceUrlHandler {
 		} else if (relativeUri.startsWith(DefaultMarketplaceService.API_SEARCH_URI)
 				|| relativeUri.startsWith(DefaultMarketplaceService.API_SEARCH_URI_FULL)) {
 			return handleSolrSearch(descriptor, relativeUri);
-		} else if (relativeUri.startsWith(SITE_SEARCH_URI)) {
+		} else if (relativeUri.startsWith(SITE_SEARCH_URI.substring(1))) {
 			return handleSiteSearch(descriptor, relativeUri);
 		} else {
 			return handleUnknownPath(descriptor, relativeUri);
@@ -315,13 +318,17 @@ public abstract class MarketplaceUrlHandler {
 		Node node = new Node();
 		node.setUrl(url);
 		if (title != null) {
+			String base = descriptor.getUrl().toExternalForm();
+			if (!base.endsWith("/")) { //$NON-NLS-1$
+				base += "/"; //$NON-NLS-1$
+			}
 			int titleEnd = matcher.end();
 			if (titleEnd > -1) {
 				//clean the url of other query parameters
-				node.setUrl(url.substring(0, titleEnd));
+				node.setUrl(base + url.substring(0, titleEnd));
 			} else {
 				//unknown format, leave as-is
-				node.setUrl(url);
+				node.setUrl(base + url);
 			}
 		}
 		return handleNode(descriptor, url, node);
@@ -332,7 +339,7 @@ public abstract class MarketplaceUrlHandler {
 	}
 
 	private boolean handleFeatured(CatalogDescriptor descriptor, String url) {
-		Matcher matcher = Pattern.compile("/featured/(\\d+)(?:,(\\d+))?").matcher(url); //$NON-NLS-1$
+		Matcher matcher = Pattern.compile("(?:^|/)featured/(\\d+)(?:,(\\d+))?").matcher(url); //$NON-NLS-1$
 		String cat = null;
 		String market = null;
 		if (matcher.find()) {

@@ -35,6 +35,9 @@ class Messages extends NLS {
 	public static String DefaultMarketplaceService_unexpectedResponse;
 
 	public static String DefaultMarketplaceService_unexpectedResponseContent;
+
+
+	public static String DefaultMarketplaceService_UnsupportedSearchString;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

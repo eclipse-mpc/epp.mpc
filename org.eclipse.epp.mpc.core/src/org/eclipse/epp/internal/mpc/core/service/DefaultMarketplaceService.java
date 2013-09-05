@@ -217,7 +217,17 @@ public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketpl
 			result.setMatchCount(0);
 			result.setNodes(new ArrayList<Node>());
 		} else {
-			Marketplace marketplace = processRequest(relativeUrl, monitor);
+			Marketplace marketplace;
+			try {
+				marketplace = processRequest(relativeUrl, monitor);
+			} catch (CoreException ex) {
+				Throwable cause = ex.getCause();
+				if (cause instanceof FileNotFoundException) {
+					throw new CoreException(createErrorStatus(
+							Messages.DefaultMarketplaceService_UnsupportedSearchString + queryText, cause));
+				}
+				throw ex;
+			}
 			Search search = marketplace.getSearch();
 			if (search == null) {
 				throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_unexpectedResponse, null));

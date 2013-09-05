@@ -22,7 +22,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
+import org.eclipse.epp.internal.mpc.core.service.MarketplaceService;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.wizards.InstallProfile;
@@ -52,10 +54,10 @@ public class SelectionModelStateSerializerTest {
 				"Eclipse.org Marketplace");
 		discoveryStrategy = new MarketplaceDiscoveryStrategy(catalogDescriptor) {
 			@Override
-			public org.eclipse.epp.internal.mpc.core.service.MarketplaceService createMarketplaceService() {
+			public MarketplaceService createMarketplaceService() {
 				DefaultMarketplaceService marketplaceService = new DefaultMarketplaceService(catalogDescriptor.getUrl());
 				Map<String, String> requestMetaParameters = new HashMap<String, String>();
-				requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_CLIENT, "org.eclipse.epp.mpc.tests");
+				requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_CLIENT, MarketplaceClientCore.BUNDLE_ID);
 				marketplaceService.setRequestMetaParameters(requestMetaParameters);
 				return marketplaceService;
 			}

@@ -16,6 +16,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +31,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.service.CachingMarketplaceService;
@@ -45,6 +47,7 @@ import org.eclipse.epp.internal.mpc.core.service.SearchResult;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory.Contents;
 import org.eclipse.epp.internal.mpc.ui.util.ConcurrentTaskManager;
+import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceUrlHandler;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
@@ -314,20 +317,54 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	public void performQuery(Market market, Category category, String queryText, IProgressMonitor monitor)
 			throws CoreException {
 		final int totalWork = 1000000;
-		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_searchingMarketplace, totalWork);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_searchingMarketplace,
+				totalWork);
 		try {
-			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
+			SearchResult result;
+			MarketplaceCategory catalogCategory = findMarketplaceCategory(progress.newChild(1));
 			catalogCategory.setContents(Contents.QUERY);
-			SearchResult result = marketplaceService.search(market, category, queryText, new SubProgressMonitor(
-					monitor, totalWork / 2));
-			handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
+
+			try {
+				//check if the query matches a node url and just retrieve that node
+				result = performNodeQuery(queryText, progress.newChild(totalWork / 2));
+			} catch (CoreException ex) {
+				// node not found, continue with regular query
+				result = null;
+			}
+
+			if (result == null) {
+				//regular query
+				progress.setWorkRemaining(totalWork);
+				result = marketplaceService.search(market, category, queryText, progress.newChild(totalWork / 2));
+			}
+
+			handleSearchResult(catalogCategory, result, progress.newChild(totalWork / 2));
 			if (result.getNodes().isEmpty()) {
 				catalogCategory.setMatchCount(0);
 				addCatalogItem(catalogCategory);
 			}
 		} finally {
-			monitor.done();
+			progress.done();
 		}
+	}
+
+	private SearchResult performNodeQuery(String nodeUrl, IProgressMonitor progress) throws CoreException {
+		final Node[] queryNode = new Node[1];
+		MarketplaceUrlHandler urlHandler = new MarketplaceUrlHandler() {
+			@Override
+			protected boolean handleNode(CatalogDescriptor descriptor, String url, Node node) {
+				queryNode[0] = node;
+				return true;
+			}
+		};
+		if (urlHandler.handleUri(nodeUrl) && queryNode[0] != null) {
+			Node node = marketplaceService.getNode(queryNode[0], progress);
+			SearchResult result = new SearchResult();
+			result.setMatchCount(1);
+			result.setNodes(Collections.singletonList(node));
+			return result;
+		}
+		return null;
 	}
 
 	public void recent(IProgressMonitor monitor) throws CoreException {
