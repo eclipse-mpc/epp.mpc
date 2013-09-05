@@ -23,6 +23,7 @@ import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceUrlHandler;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceUrlHandler.SolutionInstallationInfo;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -33,11 +34,18 @@ import org.junit.Test;
  */
 public class MarketplaceUrlHandlerTest {
 
+	private CatalogDescriptor eclipseMarketplace;
+
 	@Before
 	public void installMockMarketplace() throws Exception {
 		URL url = new URL("http://marketplace.eclipse.org");
-		CatalogDescriptor eclipseMarketplace = new CatalogDescriptor(url, "Eclipse Marketplace");
+		eclipseMarketplace = new CatalogDescriptor(url, "Eclipse Marketplace");
 		CatalogRegistry.getInstance().register(eclipseMarketplace);
+	}
+
+	@After
+	public void uninstallMockMarketplace() throws Exception {
+		CatalogRegistry.getInstance().unregister(eclipseMarketplace);
 	}
 
 	@Test
@@ -106,4 +114,21 @@ public class MarketplaceUrlHandlerTest {
 		assertEquals(nodeId, testNode[0].getId());
 	}
 
+	@Test
+	public void testHttpsVariants() {
+		MarketplaceUrlHandler handler = new MarketplaceUrlHandler() {
+			@Override
+			protected boolean handleFeatured(CatalogDescriptor descriptor, String url, String category, String market) {
+				assertEquals(eclipseMarketplace, descriptor);
+				assertEquals("featured", url);
+				return true;
+			}
+		};
+
+		String url = "http://marketplace.eclipse.org/featured";
+		assertTrue(handler.handleUri(url));
+
+		url = "https://marketplace.eclipse.org/featured";
+		assertTrue(handler.handleUri(url));
+	}
 }

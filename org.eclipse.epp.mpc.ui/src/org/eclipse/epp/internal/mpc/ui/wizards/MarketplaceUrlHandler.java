@@ -176,14 +176,17 @@ public abstract class MarketplaceUrlHandler {
 			if (!baseUri.endsWith("/")) { //$NON-NLS-1$
 				baseUri += '/';
 			}
-			if (!uri.startsWith(baseUri)) {
-				return false;
-			}
 		} catch (URISyntaxException e) {
 			// should be unreachable
 			throw new IllegalStateException(e);
 		}
 
+		if (!uri.startsWith(baseUri)) {
+			uri = resolve(uri, baseUri, descriptor);
+			if (!uri.startsWith(baseUri)) {
+				return false;
+			}
+		}
 		String relativeUri = uri.substring(baseUri.length());
 		if (relativeUri.startsWith(DefaultMarketplaceService.API_FAVORITES_URI)) {
 			return handleFavorites(descriptor, relativeUri);
@@ -205,6 +208,15 @@ public abstract class MarketplaceUrlHandler {
 		} else {
 			return handleUnknownPath(descriptor, relativeUri);
 		}
+	}
+
+	protected String resolve(String url, String baseUri, CatalogDescriptor descriptor) {
+		if (url.startsWith("https:") && baseUri.startsWith("http:")) { //$NON-NLS-1$ //$NON-NLS-2$
+			url = "http:" + url.substring("https:".length()); //$NON-NLS-1$ //$NON-NLS-2$
+		} else if (url.startsWith("http:") && baseUri.startsWith("https:")) { //$NON-NLS-1$ //$NON-NLS-2$
+			url = "https:" + url.substring("http:".length()); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		return url;
 	}
 
 	protected boolean handleUnknownPath(CatalogDescriptor descriptor, String url) {
@@ -360,6 +372,13 @@ public abstract class MarketplaceUrlHandler {
 	}
 
 	protected CatalogDescriptor handleUnknownCatalog(String url) {
+		if (url.startsWith("https:")) { //$NON-NLS-1$
+			url = "http:" + url.substring("https:".length()); //$NON-NLS-1$ //$NON-NLS-2$
+			return CatalogRegistry.getInstance().findCatalogDescriptor(url);
+		} else if (url.startsWith("http:")) { //$NON-NLS-1$
+			url = "https:" + url.substring("http:".length()); //$NON-NLS-1$ //$NON-NLS-2$
+			return CatalogRegistry.getInstance().findCatalogDescriptor(url);
+		}
 		return null;
 	}
 
