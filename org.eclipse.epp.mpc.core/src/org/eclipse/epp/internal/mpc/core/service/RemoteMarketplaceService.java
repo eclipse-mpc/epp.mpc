@@ -92,30 +92,7 @@ public class RemoteMarketplaceService<T> {
 			uri += '/';
 		}
 		uri += relativePath;
-
-		if (requestMetaParameters != null) {
-			try {
-				boolean hasQueryString = uri.indexOf('?') != -1;
-				for (Map.Entry<String, String> param : requestMetaParameters.entrySet()) {
-					if (param.getKey() == null) {
-						continue;
-					}
-					if (hasQueryString) {
-						uri += '&';
-					} else {
-						hasQueryString = true;
-						uri += '?';
-					}
-					uri += URLEncoder.encode(param.getKey(), UTF_8);
-					uri += '=';
-					if (param.getValue() != null) {
-						uri += URLEncoder.encode(param.getValue(), UTF_8);
-					}
-				}
-			} catch (UnsupportedEncodingException e) {
-				throw new IllegalStateException(e);
-			}
-		}
+		uri = addMetaParameters(uri);
 
 		URI location;
 		try {
@@ -180,6 +157,33 @@ public class RemoteMarketplaceService<T> {
 				throw new CoreException(createErrorStatus(message, null));
 			}
 		}
+	}
+
+	public String addMetaParameters(String uri) {
+		if (requestMetaParameters != null) {
+			try {
+				boolean hasQueryString = uri.indexOf('?') != -1;
+				for (Map.Entry<String, String> param : requestMetaParameters.entrySet()) {
+					if (param.getKey() == null) {
+						continue;
+					}
+					if (hasQueryString) {
+						uri += '&';
+					} else {
+						hasQueryString = true;
+						uri += '?';
+					}
+					uri += URLEncoder.encode(param.getKey(), UTF_8);
+					uri += '=';
+					if (param.getValue() != null) {
+						uri += URLEncoder.encode(param.getValue(), UTF_8);
+					}
+				}
+			} catch (UnsupportedEncodingException e) {
+				throw new IllegalStateException(e);
+			}
+		}
+		return uri;
 	}
 
 	/**

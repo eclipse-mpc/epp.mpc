@@ -385,6 +385,7 @@ public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketpl
 		try {
 			location = new URL(baseUrl, "install/error/report"); //$NON-NLS-1$
 			String target = location.toURI().toString();
+			target = addMetaParameters(target);
 			client = HttpUtil.createHttpClient(target);
 			method = new HttpPost(target);
 		} catch (URISyntaxException e) {

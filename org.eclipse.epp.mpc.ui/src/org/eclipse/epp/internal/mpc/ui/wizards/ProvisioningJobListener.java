@@ -22,7 +22,10 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.epp.internal.mpc.core.ServiceLocator;
+import org.eclipse.epp.internal.mpc.core.service.MarketplaceService;
 import org.eclipse.epp.internal.mpc.core.service.Node;
+import org.eclipse.epp.internal.mpc.core.service.RemoteMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.util.TransportFactory;
 import org.eclipse.epp.internal.mpc.ui.util.ConcurrentTaskManager;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
@@ -62,6 +65,12 @@ class ProvisioningJobListener extends JobChangeAdapter {
 									url += "/"; //$NON-NLS-1$
 								}
 								url += "success"; //$NON-NLS-1$
+								MarketplaceService marketplaceService = ServiceLocator.getInstance()
+										.getMarketplaceService();
+								if (marketplaceService instanceof RemoteMarketplaceService<?>) {
+									RemoteMarketplaceService<?> remoteService = (RemoteMarketplaceService<?>) marketplaceService;
+									url = remoteService.addMetaParameters(url);
+								}
 								try {
 									InputStream stream = TransportFactory.instance()
 											.getTransport()
