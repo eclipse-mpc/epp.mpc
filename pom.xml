@@ -77,7 +77,7 @@
 	<repository>
 	  <id>eclipse-orbit</id>
 	  <layout>p2</layout>
-	  <url>http://download.eclipse.org/tools/orbit/downloads/drops/R20130517111416/repository/</url>
+	  <url>http://download.eclipse.org/tools/orbit/downloads/drops/R20130827064939/repository/</url>
 	</repository>
   </repositories>
 
@@ -95,6 +95,22 @@
 		  <id>kepler</id>
 		  <layout>p2</layout>
 		  <url>http://download.eclipse.org/releases/kepler/</url>
+		</repository>
+	  </repositories>
+    </profile>
+    <profile>
+      <id>maintenance</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <platform-version>[4.3.0,4.4.0)</platform-version>
+      </properties>
+	  <repositories>
+		<repository>
+		  <id>maintenance</id>
+		  <layout>p2</layout>
+		  <url>http://download.eclipse.org/releases/maintenance/</url>
 		</repository>
 	  </repositories>
     </profile>
