@@ -290,7 +290,21 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		.align(SWT.BEGINNING, SWT.CENTER)
 		.applyTo(nameLabel);
 		nameLabel.setFont(resources.getSmallHeaderFont());
-		nameLabel.setText(TextUtil.escapeText(connector.getName()));
+		nameLabel.setText(TextUtil.escapeText(getDisplayName()));
+	}
+
+	private String getDisplayName() {
+		String name = connector.getName();
+		String version = getVersion();
+		return version == null || version.length() == 0 ? name : NLS.bind(Messages.DiscoveryItem_Name_and_Version, name, version);
+	}
+
+	private String getVersion() {
+		Object data = connector.getData();
+		if (data instanceof Node) {
+			return ((Node) data).getVersion();
+		}
+		return null;
 	}
 
 	private void createInstallButtons(Composite parent) {

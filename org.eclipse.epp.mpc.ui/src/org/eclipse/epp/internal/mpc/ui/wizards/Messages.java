@@ -51,6 +51,8 @@ class Messages extends NLS {
 
 	public static String DiscoveryItem_More_Info;
 
+	public static String DiscoveryItem_Name_and_Version;
+
 	public static String DiscoveryItem_Promotion_Display;
 
 	public static String DiscoveryItem_Promotion_Marker;
