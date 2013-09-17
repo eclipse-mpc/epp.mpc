@@ -365,7 +365,7 @@ public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketpl
 
 	public News news(IProgressMonitor monitor) throws CoreException {
 		try {
-			Marketplace marketplace = processRequest(API_NEWS_URI + '/' + API_URI_SUFFIX, monitor);
+			Marketplace marketplace = processRequest(API_NEWS_URI + '/' + API_URI_SUFFIX, false, monitor);
 			return marketplace.getNews();
 		} catch (CoreException ex) {
 			final Throwable cause = ex.getCause();

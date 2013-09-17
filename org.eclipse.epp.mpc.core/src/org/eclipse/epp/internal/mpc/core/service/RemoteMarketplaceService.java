@@ -69,6 +69,11 @@ public class RemoteMarketplaceService<T> {
 	}
 
 	protected T processRequest(String relativeUrl, IProgressMonitor monitor) throws CoreException {
+		return processRequest(relativeUrl, true, monitor);
+	}
+
+	protected T processRequest(String relativeUrl, boolean withMetaParams, IProgressMonitor monitor)
+			throws CoreException {
 		URI baseUri;
 		try {
 			baseUri = baseUrl.toURI();
@@ -77,11 +82,16 @@ public class RemoteMarketplaceService<T> {
 			throw new IllegalStateException(e);
 		}
 
-		return processRequest(baseUri.toString(), relativeUrl, monitor);
+		return processRequest(baseUri.toString(), relativeUrl, withMetaParams, monitor);
+	}
+
+	protected T processRequest(String baseUri, String relativePath, IProgressMonitor monitor) throws CoreException {
+		return processRequest(baseUri, relativePath, true, monitor);
 	}
 
 	@SuppressWarnings({ "unchecked" })
-	protected T processRequest(String baseUri, String relativePath, IProgressMonitor monitor) throws CoreException {
+	protected T processRequest(String baseUri, String relativePath, boolean withMetaParams, IProgressMonitor monitor)
+			throws CoreException {
 		checkConfiguration();
 		if (baseUri == null || relativePath == null) {
 			throw new IllegalArgumentException();
@@ -92,7 +102,10 @@ public class RemoteMarketplaceService<T> {
 			uri += '/';
 		}
 		uri += relativePath;
-		uri = addMetaParameters(uri);
+
+		if (withMetaParams) {
+			uri = addMetaParameters(uri);
+		}
 
 		URI location;
 		try {
