@@ -92,6 +92,12 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	public MarketplaceService createMarketplaceService() {
 		DefaultMarketplaceService service = new DefaultMarketplaceService(this.catalogDescriptor.getUrl());
+		Map<String, String> requestMetaParameters = computeDefaultRequestMetaParameters();
+		service.setRequestMetaParameters(requestMetaParameters);
+		return new CachingMarketplaceService(service);
+	}
+
+	public static Map<String, String> computeDefaultRequestMetaParameters() {
 		Map<String, String> requestMetaParameters = new HashMap<String, String>();
 		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_CLIENT, MarketplaceClientCore.BUNDLE_ID);
 		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_OS, Platform.getOS());
@@ -118,8 +124,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_PLATFORM_VERSION,
 					platformBundle.getVersion().toString());
 		}
-		service.setRequestMetaParameters(requestMetaParameters);
-		return new CachingMarketplaceService(service);
+		return requestMetaParameters;
 	}
 
 	@Override

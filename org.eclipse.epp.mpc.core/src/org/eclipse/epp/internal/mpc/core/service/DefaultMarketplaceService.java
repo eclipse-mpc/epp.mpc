@@ -385,7 +385,6 @@ public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketpl
 		try {
 			location = new URL(baseUrl, "install/error/report"); //$NON-NLS-1$
 			String target = location.toURI().toString();
-			target = addMetaParameters(target);
 			client = HttpUtil.createHttpClient(target);
 			method = new HttpPost(target);
 		} catch (URISyntaxException e) {
@@ -395,6 +394,14 @@ public class DefaultMarketplaceService extends RemoteMarketplaceService<Marketpl
 		}
 		try {
 			List<NameValuePair> parameters = new ArrayList<NameValuePair>();
+
+			Map<String, String> requestMetaParameters = getRequestMetaParameters();
+			for (Map.Entry<String, String> metaParam : requestMetaParameters.entrySet()) {
+				if (metaParam.getKey() != null) {
+					parameters.add(new BasicNameValuePair(metaParam.getKey(), metaParam.getValue()));
+				}
+			}
+
 			parameters.add(new BasicNameValuePair("status", Integer.toString(result.getSeverity()))); //$NON-NLS-1$
 			parameters.add(new BasicNameValuePair("statusMessage", result.getMessage())); //$NON-NLS-1$
 			for (Node node : nodes) {
