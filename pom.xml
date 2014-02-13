@@ -83,9 +83,6 @@
   <profiles>
     <profile>
       <id>kepler</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
       <properties>
         <platform-version>[4.3.0,4.4.0)</platform-version>
       </properties>
@@ -99,9 +96,6 @@
     </profile>
     <profile>
       <id>maintenance</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
       <properties>
         <platform-version>[4.3.0,4.4.0)</platform-version>
       </properties>
@@ -110,6 +104,22 @@
 		  <id>maintenance</id>
 		  <layout>p2</layout>
 		  <url>http://download.eclipse.org/releases/maintenance/</url>
+		</repository>
+	  </repositories>
+    </profile>
+    <profile>
+      <id>luna</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <platform-version>[4.4.0,4.5.0)</platform-version>
+      </properties>
+	  <repositories>
+		<repository>
+		  <id>luna</id>
+		  <layout>p2</layout>
+		  <url>http://download.eclipse.org/releases/luna/</url>
 		</repository>
 	  </repositories>
     </profile>
