@@ -19,6 +19,8 @@ class Messages extends NLS {
 
 	public static String AbstractResourceRunnable_resourceNotFound;
 
+	public static String MarketplaceCatalog_Checking_News;
+
 	public static String MarketplaceCatalog_checkingForUpdates;
 
 	public static String MarketplaceCatalog_failedWithError;

@@ -361,7 +361,7 @@ public class MarketplaceCatalog extends Catalog {
 		MultiStatus status = new MultiStatus(MarketplaceClientUi.BUNDLE_ID, 0, Messages.MarketplaceCatalog_queryFailed,
 				null);
 		final int totalTicks = 100000;
-		final SubMonitor progress = SubMonitor.convert(monitor, "Checking news", totalTicks);
+		final SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceCatalog_Checking_News, totalTicks);
 		try {
 			int strategyTicks = totalTicks / getDiscoveryStrategies().size();
 			for (AbstractDiscoveryStrategy discoveryStrategy : getDiscoveryStrategies()) {
