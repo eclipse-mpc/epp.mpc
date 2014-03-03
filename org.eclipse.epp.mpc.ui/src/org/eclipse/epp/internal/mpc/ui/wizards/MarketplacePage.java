@@ -615,4 +615,12 @@ public class MarketplacePage extends CatalogPage {
 			getViewer().search(searchMarket, searchCategory, searchString);
 		}
 	}
+
+	@Override
+	public void dispose() {
+		if (marketplaceSwitcher != null) {
+			marketplaceSwitcher.dispose();
+		}
+		super.dispose();
+	}
 }
