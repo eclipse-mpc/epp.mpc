@@ -529,7 +529,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		.applyTo(iconLabel);
 		if (connector.getIcon() != null) {
 			try {
-				Image image = resources.getIconImage(connector.getSource(), connector.getIcon(), 32, false);
+				Image image = resources.getIconImage(connector.getSource(), connector.getIcon(), 64, true);
 				Rectangle bounds = image.getBounds();
 				if (bounds.width < 0.8 * MAX_IMAGE_WIDTH || bounds.width > MAX_IMAGE_WIDTH
 						|| bounds.height > MAX_IMAGE_HEIGHT) {
