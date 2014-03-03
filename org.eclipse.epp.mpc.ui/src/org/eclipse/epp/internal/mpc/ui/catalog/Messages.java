@@ -37,6 +37,8 @@ class Messages extends NLS {
 
 	public static String MarketplaceDiscoveryStrategy_loadingResources;
 
+	public static String MarketplaceDiscoveryStrategy_Name_and_Version;
+
 	public static String MarketplaceDiscoveryStrategy_searchingMarketplace;
 
 	public static String MarketplaceDiscoveryStrategy_sendingErrorNotification;

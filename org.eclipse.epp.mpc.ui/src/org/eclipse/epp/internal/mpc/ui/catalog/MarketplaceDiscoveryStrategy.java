@@ -59,6 +59,7 @@ import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.equinox.p2.operations.ProvisioningSession;
 import org.eclipse.equinox.p2.operations.RepositoryTracker;
 import org.eclipse.equinox.p2.ui.ProvisioningUI;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 
 /**
@@ -174,12 +175,11 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 				Set<URI> knownRepositories = new HashSet<URI>(
 						Arrays.asList(repositoryTracker.getKnownRepositories(session)));
-
 				for (final Node node : result.getNodes()) {
 					final MarketplaceNodeCatalogItem catalogItem = new MarketplaceNodeCatalogItem();
 					catalogItem.setMarketplaceUrl(catalogDescriptor.getUrl());
 					catalogItem.setId(node.getId());
-					catalogItem.setName(node.getName());
+					catalogItem.setName(getCatalogItemName(node));
 					catalogItem.setCategoryId(catalogCategory.getId());
 					Categories categories = node.getCategories();
 					if (categories != null) {
@@ -290,6 +290,13 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 				}
 			}
 		}
+	}
+
+	private String getCatalogItemName(Node node) {
+		String name = node.getName();
+		String version = node.getVersion();
+		return version == null || version.length() == 0 ? name : NLS.bind(
+				Messages.MarketplaceDiscoveryStrategy_Name_and_Version, name, version);
 	}
 
 	public void maybeAddCatalogItem(MarketplaceCategory catalogCategory) {
