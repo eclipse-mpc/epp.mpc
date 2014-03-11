@@ -178,6 +178,19 @@
 		<test-args>-ea -Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -DhttpnonProxyHosts=*.eclipse.org</test-args>
 		<test-app-args>-eclipse.keyring ${env.WORKSPACE}/keyring -eclipse.password ${env.WORKSPACE}/keyring.password</test-app-args>
       </properties>
+	  <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.eclipse.tycho</groupId>
+              <artifactId>tycho-packaging-plugin</artifactId>
+              <configuration>
+                <jgit.dirtyWorkingTree>error</jgit.dirtyWorkingTree>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
     </profile>
   </profiles>
 
@@ -275,16 +288,29 @@
           <version>${tycho-version}</version>
           <configuration>
             <format>${qualifier-format}</format>
+            <timestampProvider>jgit</timestampProvider>
+            <!-- Changed to "error" in the "hudson.eclipse.org" profile. -->
+            <jgit.dirtyWorkingTree>warning</jgit.dirtyWorkingTree>
             <archiveSite>true</archiveSite>
-			<sourceReferences>
+            <sourceReferences>
               <generate>true</generate>
-			</sourceReferences>
+            </sourceReferences>
+            <archive>
+              <!-- Workaround to Bug 411443: Avoids extremely long filenames in META-INF/maven. -->
+              <!-- See https://bugs.eclipse.org/bugs/show_bug.cgi?id=411443 -->
+              <addMavenDescriptor>false</addMavenDescriptor>
+            </archive>
           </configuration>
           <dependencies>
             <dependency>
               <groupId>org.eclipse.tycho.extras</groupId>
               <artifactId>tycho-sourceref-jgit</artifactId>
               <version>${tycho-extras-version}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.eclipse.tycho.extras</groupId>
+              <artifactId>tycho-buildtimestamp-jgit</artifactId>
+              <version>${tycho-version}</version>
             </dependency>
           </dependencies>
         </plugin>
