@@ -28,41 +28,22 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.4</version>
-        <configuration>
-          <descriptors>
-            <descriptor>assembly.xml</descriptor>
-          </descriptors>
-        </configuration>
-        <executions>
-          <execution>
-            <id>make-assembly</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <artifactId>maven-resources-plugin</artifactId>
         <executions>
           <execution>
             <id>copy-resources</id>
-            <phase>validate</phase>
+            <phase>process-resources</phase>
             <goals>
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${basedir}/target/site</outputDirectory>
+              <outputDirectory>${project.build.directory}/repository</outputDirectory>
               <resources>
                 <resource>
-                  <directory>.</directory>
+                  <directory>${basedir}</directory>
                   <includes>
                     <include>index.html</include>
-					<include>web/*</include>
+                    <include>web/*</include>
                   </includes>
                 </resource>
               </resources>
