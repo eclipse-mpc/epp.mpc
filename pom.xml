@@ -90,6 +90,7 @@
     <module>org.eclipse.epp.mpc.core</module>
     <module>org.eclipse.epp.mpc.feature</module>
     <module>org.eclipse.epp.mpc.help.ui</module>
+    <module>org.eclipse.epp.mpc.site</module>
     <module>org.eclipse.epp.mpc.tests</module>
     <module>org.eclipse.epp.mpc.tests.catalog</module>
     <module>org.eclipse.epp.mpc.ui</module>
@@ -120,12 +121,6 @@
         <target-platform>staging</target-platform>
       </properties>
     </profile>
-    <profile>
-      <id>dist</id>
-	  <modules>
-		<module>org.eclipse.epp.mpc.site</module>
-	  </modules>
-	</profile>
     <profile>
       <id>publish</id>
       <activation>
