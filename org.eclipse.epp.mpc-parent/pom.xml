@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+   <modelVersion>4.0.0</modelVersion>
+
+   <prerequisites>
+      <maven>3.0.5</maven>
+   </prerequisites>
+
+   <groupId>org.eclipse.epp.mpc</groupId>
+   <artifactId>org.eclipse.epp.mpc-parent</artifactId>
+   <version>1.3.0-SNAPSHOT</version>
+   <packaging>pom</packaging>
+
+   <properties>
+      <mpc-version>1.3.0-SNAPSHOT</mpc-version>
+      <target-platform>luna</target-platform>
+      <java-version>1.5</java-version>
+
+      <tycho-version>0.20.0</tycho-version>
+      <tycho-extras-version>0.20.0</tycho-extras-version>
+
+      <archive-dir>${basedir}/target/drops</archive-dir>
+      <site-dir></site-dir>
+
+      <qualifier-format>'I'yyyyMMdd-HHmm</qualifier-format>
+
+      <skip-source-check>true</skip-source-check>
+      <skip-sign>true</skip-sign>
+      <skip-promote>true</skip-promote>
+
+      <test-args></test-args>
+      <test-app-args></test-app-args>
+
+      <tycho.scmUrl>scm:git:https://git.eclipse.org/gitroot/mpc/org.eclipse.epp.mpc.git</tycho.scmUrl>
+   </properties>
+
+   <organization>
+      <name>Eclipse Foundation</name>
+      <url>http://www.eclipse.org/</url>
+   </organization>
+
+   <mailingLists>
+      <mailingList>
+         <name>Marketplace Client Mailing List</name>
+         <post>mpc-dev@eclipse.org</post>
+         <subscribe>https://dev.eclipse.org/mailman/listinfo/mpc-dev</subscribe>
+         <unsubscribe>https://dev.eclipse.org/mailman/listinfo/mpc-dev</unsubscribe>
+         <archive>http://dev.eclipse.org/mhonarc/lists/mpc-dev</archive>
+      </mailingList>
+   </mailingLists>
+
+   <issueManagement>
+      <system>Bugzilla</system>
+      <url>https://bugs.eclipse.org/bugs/buglist.cgi?query_format=advanced;product=MPC;classification=Technology</url>
+   </issueManagement>
+
+   <ciManagement>
+      <system>Hudson</system>
+      <url>https://hudson.eclipse.org/mpc</url>
+   </ciManagement>
+
+   <scm>
+      <url>https://git.eclipse.org/c/mpc/org.eclipse.epp.mpc.git/</url>
+      <connection>${tycho.scmUrl}</connection>
+      <developerConnection>ssh://git.eclipse.org/gitroot/mpc/org.eclipse.epp.mpc.git</developerConnection>
+   </scm>
+
+   <licenses>
+      <license>
+         <name>Eclipse Public License v1.0</name>
+         <url>http://www.eclipse.org/legal/epl-v10.html</url>
+         <comments>
+             All rights reserved.
+      
+             This program and the accompanying materials are made
+             available under the terms of the Eclipse Public License v1.0
+             which accompanies this distribution, and is available at
+             http://www.eclipse.org/legal/epl-v10.htm
+         </comments>
+      </license>
+   </licenses>
+
+   <profiles>
+      <profile>
+         <id>kepler</id>
+         <properties>
+            <target-platform>kepler</target-platform>
+         </properties>
+      </profile>
+      <profile>
+         <id>maintenance</id>
+         <properties>
+            <target-platform>maintenance</target-platform>
+         </properties>
+      </profile>
+      <profile>
+         <id>luna</id>
+         <activation>
+            <activeByDefault>true</activeByDefault>
+         </activation>
+      </profile>
+      <profile>
+         <id>staging</id>
+         <properties>
+            <target-platform>staging</target-platform>
+         </properties>
+      </profile>
+      <profile>
+         <id>publish</id>
+         <activation>
+            <property>
+               <name>env.PUBLISH</name>
+               <value>true</value>
+            </property>
+         </activation>
+         <properties>
+            <skip-promote>false</skip-promote>
+         </properties>
+      </profile>
+      <profile>
+         <id>integration</id>
+         <activation>
+            <property>
+               <name>env.TYPE</name>
+               <value>integration</value>
+            </property>
+         </activation>
+         <properties>
+            <skip-sign>false</skip-sign>
+         </properties>
+      </profile>
+      <profile>
+         <id>release</id>
+         <activation>
+            <property>
+               <name>env.TYPE</name>
+               <value>release</value>
+            </property>
+         </activation>
+         <properties>
+            <qualifier-format>'v'yyyyMMdd-HH00</qualifier-format>
+            <skip-sign>false</skip-sign>
+         </properties>
+      </profile>
+      <profile>
+         <id>hudson.eclipse.org</id>
+         <activation>
+            <property>
+               <name>user.name</name>
+               <value>hudsonbuild</value>
+            </property>
+         </activation>
+         <properties>
+            <pack200>/shared/common/jdk-1.5.0-22.x86_64/bin</pack200>
+            <archive-dir>/home/data/httpd/download.eclipse.org/mpc/drops</archive-dir>
+            <site-dir>/home/data/httpd/download.eclipse.org/mpc/nightly</site-dir>
+            <test-args>-ea -Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -DhttpnonProxyHosts=*.eclipse.org</test-args>
+            <test-app-args>-eclipse.keyring ${env.WORKSPACE}/keyring -eclipse.password ${env.WORKSPACE}/keyring.password</test-app-args>
+         </properties>
+         <build>
+            <pluginManagement>
+               <plugins>
+                  <plugin>
+                     <groupId>org.eclipse.tycho</groupId>
+                     <artifactId>tycho-packaging-plugin</artifactId>
+                     <configuration>
+                        <jgit.dirtyWorkingTree>error</jgit.dirtyWorkingTree>
+                     </configuration>
+                  </plugin>
+               </plugins>
+            </pluginManagement>
+         </build>
+      </profile>
+   </profiles>
+
+   <build>
+      <plugins>
+         <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>tycho-maven-plugin</artifactId>
+            <extensions>true</extensions>
+         </plugin>
+         <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>target-platform-configuration</artifactId>
+         </plugin>
+      </plugins>
+
+      <pluginManagement>
+         <plugins>
+            <plugin>
+               <groupId>org.eclipse.tycho</groupId>
+               <artifactId>tycho-maven-plugin</artifactId>
+               <version>${tycho-version}</version>
+            </plugin>
+
+            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-compiler-plugin</artifactId>
+               <version>3.1</version>
+               <configuration>
+                  <source>${java-version}</source>
+                  <target>${java-version}</target>
+               </configuration>
+            </plugin>
+            <plugin>
+               <groupId>org.eclipse.tycho</groupId>
+               <artifactId>tycho-compiler-plugin</artifactId>
+               <version>${tycho-version}</version>
+               <configuration>
+                  <encoding>UTF-8</encoding>
+               </configuration>
+            </plugin>
+
+            <plugin>
+               <groupId>org.eclipse.tycho</groupId>
+               <artifactId>target-platform-configuration</artifactId>
+               <version>${tycho-version}</version>
+               <configuration>
+                  <resolver>p2</resolver>
+                  <executionEnvironmentDefault>J2SE-${java-version}</executionEnvironmentDefault>
+                  <includePackedArtifacts>true</includePackedArtifacts>
+                  <ignoreTychoRepositories>true</ignoreTychoRepositories>
+                  <target>
+                     <artifact>
+                        <groupId>org.eclipse.epp.mpc</groupId>
+                        <artifactId>org.eclipse.epp.mpc-target</artifactId>
+                        <version>${mpc-version}</version>
+                        <classifier>${target-platform}</classifier>
+                     </artifact>
+                  </target>
+                  <environments>
+                     <environment>
+                        <os>win32</os>
+                        <ws>win32</ws>
+                        <arch>x86</arch>
+                     </environment>
+                     <environment>
+                        <os>win32</os>
+                        <ws>win32</ws>
+                        <arch>x86_64</arch>
+                     </environment>
+                     <environment>
+                        <os>linux</os>
+                        <ws>gtk</ws>
+                        <arch>x86</arch>
+                     </environment>
+                     <environment>
+                        <os>linux</os>
+                        <ws>gtk</ws>
+                        <arch>x86_64</arch>
+                     </environment>
+                     <environment>
+                        <os>macosx</os>
+                        <ws>cocoa</ws>
+                        <arch>x86_64</arch>
+                     </environment>
+                  </environments>
+               </configuration>
+            </plugin>
+
+            <plugin>
+               <groupId>org.eclipse.tycho</groupId>
+               <artifactId>tycho-packaging-plugin</artifactId>
+               <version>${tycho-version}</version>
+               <configuration>
+                  <format>${qualifier-format}</format>
+                  <timestampProvider>jgit</timestampProvider>
+                  <!-- Changed back to "error" in the "hudson.eclipse.org" profile. -->
+                  <jgit.dirtyWorkingTree>warning</jgit.dirtyWorkingTree>
+                  <archiveSite>true</archiveSite>
+                  <sourceReferences>
+                     <generate>true</generate>
+                  </sourceReferences>
+                  <archive>
+                     <!-- Workaround to Bug 411443: Avoids extremely long filenames in META-INF/maven. -->
+                     <!-- See https://bugs.eclipse.org/bugs/show_bug.cgi?id=411443 -->
+                     <addMavenDescriptor>false</addMavenDescriptor>
+                  </archive>
+               </configuration>
+               <dependencies>
+                  <!-- Required by sourceReferences/generate configuration. -->
+                  <dependency>
+                     <groupId>org.eclipse.tycho.extras</groupId>
+                     <artifactId>tycho-sourceref-jgit</artifactId>
+                     <version>${tycho-extras-version}</version>
+                  </dependency>
+                  <!-- Required by timestampProvider configuration. -->
+                  <dependency>
+                     <groupId>org.eclipse.tycho.extras</groupId>
+                     <artifactId>tycho-buildtimestamp-jgit</artifactId>
+                     <version>${tycho-version}</version>
+                  </dependency>
+               </dependencies>
+            </plugin>
+            <plugin>
+               <groupId>org.eclipse.tycho</groupId>
+               <artifactId>tycho-p2-plugin</artifactId>
+               <version>${tycho-version}</version>
+            </plugin>
+            <plugin>
+               <groupId>org.eclipse.tycho</groupId>
+               <artifactId>tycho-p2-repository-plugin</artifactId>
+               <version>${tycho-version}</version>
+            </plugin>
+            <plugin>
+               <groupId>org.eclipse.tycho</groupId>
+               <artifactId>tycho-p2-publisher-plugin</artifactId>
+               <version>${tycho-version}</version>
+            </plugin>
+
+            <plugin>
+               <groupId>org.eclipse.tycho</groupId>
+               <artifactId>tycho-surefire-plugin</artifactId>
+               <version>${tycho-version}</version>
+               <configuration>
+                  <argLine>${tycho.test.jvmArgs}</argLine>
+               </configuration>
+            </plugin>
+
+            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-resources-plugin</artifactId>
+               <version>2.6</version>
+               <configuration>
+                  <encoding>ISO-8859-1</encoding>
+               </configuration>
+            </plugin>
+
+            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-antrun-plugin</artifactId>
+               <version>1.7</version>
+            </plugin>
+
+            <plugin>
+               <groupId>org.codehaus.mojo</groupId>
+               <artifactId>findbugs-maven-plugin</artifactId>
+               <version>2.5.3</version>
+               <configuration>
+                  <findbugsXmlOutput>true</findbugsXmlOutput>
+                  <failOnError>false</failOnError>
+                  <skip>${skip-source-check}</skip>
+               </configuration>
+               <executions>
+                  <execution>
+                     <goals>
+                        <goal>check</goal>
+                     </goals>
+                  </execution>
+               </executions>
+            </plugin>
+
+            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-pmd-plugin</artifactId>
+               <version>3.1</version>
+               <configuration>
+                  <sourceEncoding>utf-8</sourceEncoding>
+                  <minimumTokens>100</minimumTokens>
+                  <targetJdk>${java-version}</targetJdk>
+                  <format>xml</format>
+                  <failOnViolation>false</failOnViolation>
+                  <skip>${skip-source-check}</skip>
+               </configuration>
+               <executions>
+                  <execution>
+                     <goals>
+                        <goal>cpd-check</goal>
+                     </goals>
+                  </execution>
+               </executions>
+            </plugin>
+         </plugins>
+      </pluginManagement>
+   </build>
+</project>

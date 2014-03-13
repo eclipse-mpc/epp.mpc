@@ -15,8 +15,9 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.eclipse.epp.mpc</groupId>
-    <artifactId>org.eclipse.epp.mpc-parent</artifactId>
+    <artifactId>org.eclipse.epp.mpc-bundle</artifactId>
     <version>1.3.0-SNAPSHOT</version>
+    <relativePath>../org.eclipse.epp.mpc-parent/bundle</relativePath>
   </parent>
   <artifactId>org.eclipse.epp.mpc.tests.catalog</artifactId>
   <packaging>eclipse-plugin</packaging>

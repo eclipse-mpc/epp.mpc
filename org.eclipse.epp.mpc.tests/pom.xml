@@ -5,20 +5,21 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.eclipse.epp.mpc</groupId>
-    <artifactId>org.eclipse.epp.mpc-parent</artifactId>
+    <artifactId>org.eclipse.epp.mpc-bundle</artifactId>
     <version>1.3.0-SNAPSHOT</version>
+    <relativePath>../org.eclipse.epp.mpc-parent/bundle</relativePath>
   </parent>
   <artifactId>org.eclipse.epp.mpc.tests</artifactId>
   <packaging>eclipse-test-plugin</packaging>
   <properties>
     <test-suite>org.eclipse.epp.mpc.tests.AllTests</test-suite>
   </properties>
+
   <build>
     <plugins>
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-surefire-plugin</artifactId>
-        <version>${tycho-version}</version>
         <configuration>
           <useUIHarness>true</useUIHarness>
           <forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
@@ -41,14 +42,6 @@
             </dependency>
           </dependencies>		  
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-source-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>findbugs-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

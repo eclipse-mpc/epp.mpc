@@ -17,6 +17,7 @@
     <groupId>org.eclipse.epp.mpc</groupId>
     <artifactId>org.eclipse.epp.mpc-parent</artifactId>
     <version>1.3.0-SNAPSHOT</version>
+    <relativePath>../org.eclipse.epp.mpc-parent</relativePath>
   </parent>
   <artifactId>org.eclipse.epp.mpc.site</artifactId>
   <packaging>eclipse-repository</packaging>
