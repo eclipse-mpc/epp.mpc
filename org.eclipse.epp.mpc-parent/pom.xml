@@ -23,10 +23,15 @@
       <archive-dir>${basedir}/target/drops</archive-dir>
       <site-dir></site-dir>
 
-      <qualifier-format>'I'yyyyMMdd-HHmm</qualifier-format>
+      <qualifier-format>'v'yyyyMMdd-HHmm</qualifier-format>
 
       <skip-source-check>true</skip-source-check>
       <skip-sign>true</skip-sign>
+      
+      <!-- FIXME skip-pack is currently not supported, because 
+           1) tycho-pack200b-plugin:pack doesn't support it and doing it with profiles is a mess
+           2) pack has moved to the release profile so it won't happen in regular dev/ci builds anyway -->
+      <skip-pack>true</skip-pack>
       <skip-promote>true</skip-promote>
 
       <test-args></test-args>
@@ -82,6 +87,7 @@
    </licenses>
 
    <profiles>
+      <!-- target platform profiles -->
       <profile>
          <id>kepler</id>
          <properties>
@@ -106,6 +112,8 @@
             <target-platform>staging</target-platform>
          </properties>
       </profile>
+
+      <!-- build type profiles -->
       <profile>
          <id>publish</id>
          <activation>
@@ -119,29 +127,25 @@
          </properties>
       </profile>
       <profile>
-         <id>integration</id>
-         <activation>
-            <property>
-               <name>env.TYPE</name>
-               <value>integration</value>
-            </property>
-         </activation>
-         <properties>
-            <skip-sign>false</skip-sign>
-         </properties>
-      </profile>
-      <profile>
          <id>release</id>
-         <activation>
-            <property>
-               <name>env.TYPE</name>
-               <value>release</value>
-            </property>
-         </activation>
          <properties>
-            <qualifier-format>'v'yyyyMMdd-HH00</qualifier-format>
             <skip-sign>false</skip-sign>
+            <skip-pack>false</skip-pack>
+            <skip-source-check>false</skip-source-check>
          </properties>
+         <build>
+            <pluginManagement>
+               <plugins>
+                  <plugin>
+                     <groupId>org.eclipse.tycho</groupId>
+                     <artifactId>tycho-packaging-plugin</artifactId>
+                     <configuration>
+                        <jgit.dirtyWorkingTree>error</jgit.dirtyWorkingTree>
+                     </configuration>
+                  </plugin>
+               </plugins>
+            </pluginManagement>
+         </build>
       </profile>
       <profile>
          <id>hudson.eclipse.org</id>
@@ -158,19 +162,6 @@
             <test-args>-ea -Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -DhttpnonProxyHosts=*.eclipse.org</test-args>
             <test-app-args>-eclipse.keyring ${env.WORKSPACE}/keyring -eclipse.password ${env.WORKSPACE}/keyring.password</test-app-args>
          </properties>
-         <build>
-            <pluginManagement>
-               <plugins>
-                  <plugin>
-                     <groupId>org.eclipse.tycho</groupId>
-                     <artifactId>tycho-packaging-plugin</artifactId>
-                     <configuration>
-                        <jgit.dirtyWorkingTree>error</jgit.dirtyWorkingTree>
-                     </configuration>
-                  </plugin>
-               </plugins>
-            </pluginManagement>
-         </build>
       </profile>
    </profiles>
 
@@ -267,7 +258,7 @@
                <configuration>
                   <format>${qualifier-format}</format>
                   <timestampProvider>jgit</timestampProvider>
-                  <!-- Changed back to "error" in the "hudson.eclipse.org" profile. -->
+                  <!-- Changed back to "error" in the "release" profile. -->
                   <jgit.dirtyWorkingTree>warning</jgit.dirtyWorkingTree>
                   <archiveSite>true</archiveSite>
                   <sourceReferences>
@@ -375,4 +366,15 @@
          </plugins>
       </pluginManagement>
    </build>
+   
+   <pluginRepositories>
+      <pluginRepository>
+         <id>eclipse-maven-releases</id>
+         <url>https://repo.eclipse.org/content/repositories/releases/</url>
+         <snapshots>
+            <enabled>false</enabled>
+         </snapshots>
+      </pluginRepository>
+   </pluginRepositories>
+
 </project>
