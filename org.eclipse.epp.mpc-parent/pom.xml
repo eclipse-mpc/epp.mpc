@@ -143,11 +143,9 @@
             </property>
          </activation>
          <properties>
-            <pack200>/shared/common/jdk-1.5.0-22.x86_64/bin</pack200>
             <archive-dir>/home/data/httpd/download.eclipse.org/mpc/drops</archive-dir>
             <site-dir>/home/data/httpd/download.eclipse.org/mpc/nightly</site-dir>
             <test-args>-ea -Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -DhttpnonProxyHosts=*.eclipse.org</test-args>
-            <test-app-args>-eclipse.keyring ${env.WORKSPACE}/keyring -eclipse.password ${env.WORKSPACE}/keyring.password</test-app-args>
          </properties>
       </profile>
    </profiles>
@@ -297,6 +295,24 @@
                </configuration>
             </plugin>
 
+            <!-- Eclipse Tycho extras -->
+            <plugin>
+               <groupId>org.eclipse.tycho.extras</groupId>
+               <artifactId>tycho-pack200a-plugin</artifactId>
+               <version>${tycho-version}</version>
+            </plugin>
+            <plugin>
+               <groupId>org.eclipse.tycho.extras</groupId>
+               <artifactId>tycho-pack200b-plugin</artifactId>
+               <version>${tycho-version}</version>
+            </plugin>
+            <!-- Eclipse Common Build Infrastructure plugins -->
+            <plugin>
+               <groupId>org.eclipse.cbi.maven.plugins</groupId>
+               <artifactId>eclipse-jarsigner-plugin</artifactId>
+               <version>1.0.5</version>
+            </plugin>
+
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-resources-plugin</artifactId>
@@ -304,12 +320,6 @@
                <configuration>
                   <encoding>ISO-8859-1</encoding>
                </configuration>
-            </plugin>
-
-            <plugin>
-               <groupId>org.apache.maven.plugins</groupId>
-               <artifactId>maven-antrun-plugin</artifactId>
-               <version>1.7</version>
             </plugin>
 
             <plugin>

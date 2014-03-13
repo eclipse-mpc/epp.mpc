@@ -22,10 +22,7 @@
   <artifactId>org.eclipse.epp.mpc.site</artifactId>
   <packaging>eclipse-repository</packaging>
   <name>EPP Marketplace Client</name>
-  <properties>
-    <qualifier>${project.unqualifiedVersion}</qualifier>
-    <sign-dir>tools/mylyn/hudson/mpc/signing</sign-dir>
-  </properties>
+
   <build>
     <plugins>
       <plugin>
@@ -52,49 +49,6 @@
           </execution>
         </executions>
       </plugin>
-	  <plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-antrun-plugin</artifactId>
-		<version>1.7</version>
-		<executions>
-		  <execution>
-			<id>pack-and-sign</id>
-			<phase>install</phase>
-			<configuration>
-			  <target>
-				<ant antfile="pack-and-sign/build.xml">
-				  <property name="localRepository" value="${settings.localRepository}"/>
-				  <property name="projectDir" value="${project.build.directory}"/>
-				  <property name="signDir" value="${sign-dir}"/>
-				  <property name="archiveDir" value="${archive-dir}"/>
-				  <property name="siteDir" value="${site-dir}"/>
-				  
-				  <property name="dist" value="mpc"/>
-				  <property name="filter" value="mpc"/>
-				  <property name="repositoryName" value="${project.name}"/>
-				  <property name="pack200" value="${pack200}"/>
-				  
-				  <property name="skipSign" value="${skip-sign}"/>
-				  <property name="skipPack" value="${skip-pack}"/>
-				  <property name="skipPromote" value="${skip-promote}"/>
-				  
-				  <property name="version" value="${unqualifiedVersion}"/>
-				  <property name="qualifier" value="${buildQualifier}"/>
-				</ant>
-				<echo file="${project.build.directory}/version.properties">
-				  <![CDATA[
-${unqualifiedVersion}
-${buildQualifier}
-]]>
-				</echo>
-			  </target>
-			</configuration>
-			<goals>
-			  <goal>run</goal>
-			</goals>
-		  </execution>
-		</executions>
-	  </plugin>
     </plugins>
   </build>
 </project>
