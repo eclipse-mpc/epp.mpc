@@ -15,7 +15,6 @@
 
 	<condition property="sign.skip" value="true"><equals arg1="${skipSign}" arg2="true"/></condition>
 	<condition property="pack.skip" value="true"><equals arg1="${skipPack}" arg2="true"/></condition>
-  	<condition property="promote.skip" value="true"><equals arg1="${skipPromote}" arg2="true"/></condition>
 
   	<!-- sign -->
 
@@ -67,10 +66,6 @@
 		<include name="**/*"/>
 	  </fileset>
 	</zip>
-  	
-  	<!-- promote -->
-
-	<antcall target="promote"/>
 
   </target>
 
@@ -80,19 +75,6 @@
 	  <arg value="${projectDir}/site"/>
 	  <arg value="${signDir}"/>
 	  <arg value="${filter}"/>
-	</exec>
-  </target>
-
-  <target name="promote" unless="promote.skip">	
-	<chmod perm="755" file="${scriptdir}/promote.sh"/>
-  	<chmod perm="755" file="${scriptdir}/update-composite.sh"/>
-	<exec executable="${scriptdir}/promote.sh" dir="${scriptdir}" failonerror="true">
-	  <arg value="${dist}"/>
-	  <arg value="${version}"/>
-	  <arg value="${qualifier}"/>
-	  <arg value="${projectDir}"/>	
-	  <arg value="${archiveDir}"/>
-	  <arg value="${siteDir}"/>
 	</exec>
   </target>
 

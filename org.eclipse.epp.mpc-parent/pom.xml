@@ -32,7 +32,6 @@
            1) tycho-pack200b-plugin:pack doesn't support it and doing it with profiles is a mess
            2) pack has moved to the release profile so it won't happen in regular dev/ci builds anyway -->
       <skip-pack>true</skip-pack>
-      <skip-promote>true</skip-promote>
 
       <test-args></test-args>
       <test-app-args></test-app-args>
@@ -114,18 +113,6 @@
       </profile>
 
       <!-- build type profiles -->
-      <profile>
-         <id>publish</id>
-         <activation>
-            <property>
-               <name>env.PUBLISH</name>
-               <value>true</value>
-            </property>
-         </activation>
-         <properties>
-            <skip-promote>false</skip-promote>
-         </properties>
-      </profile>
       <profile>
          <id>release</id>
          <properties>
