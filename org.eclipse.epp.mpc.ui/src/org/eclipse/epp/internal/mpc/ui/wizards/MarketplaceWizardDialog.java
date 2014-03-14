@@ -40,6 +40,12 @@ public class MarketplaceWizardDialog extends WizardDialog {
 	}
 
 	@Override
+	protected void configureShell(Shell newShell) {
+		super.configureShell(newShell);
+		new MarketplaceDropAdapter().installDropTarget(newShell);
+	}
+
+	@Override
 	protected Button createButton(Composite parent, int id, String label, boolean defaultButton) {
 		Button button = super.createButton(parent, id, label, defaultButton);
 		switch (id) {
