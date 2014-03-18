@@ -12,10 +12,8 @@
 package org.eclipse.epp.internal.mpc.ui.catalog;
 
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -56,9 +54,6 @@ import org.eclipse.equinox.internal.p2.discovery.model.Icon;
 import org.eclipse.equinox.internal.p2.discovery.model.Overview;
 import org.eclipse.equinox.internal.p2.discovery.model.Tag;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
-import org.eclipse.equinox.p2.operations.ProvisioningSession;
-import org.eclipse.equinox.p2.operations.RepositoryTracker;
-import org.eclipse.equinox.p2.ui.ProvisioningUI;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 
@@ -170,11 +165,6 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			ConcurrentTaskManager executor = new ConcurrentTaskManager(result.getNodes().size(),
 					Messages.MarketplaceDiscoveryStrategy_loadingResources);
 			try {
-				ProvisioningSession session = ProvisioningUI.getDefaultUI().getSession();
-				RepositoryTracker repositoryTracker = ProvisioningUI.getDefaultUI().getRepositoryTracker();
-
-				Set<URI> knownRepositories = new HashSet<URI>(
-						Arrays.asList(repositoryTracker.getKnownRepositories(session)));
 				for (final Node node : result.getNodes()) {
 					final MarketplaceNodeCatalogItem catalogItem = new MarketplaceNodeCatalogItem();
 					catalogItem.setMarketplaceUrl(catalogDescriptor.getUrl());
@@ -268,8 +258,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 					}
 					items.add(catalogItem);
 					marketplaceInfo.map(catalogItem.getMarketplaceUrl(), node);
-					catalogItem.setInstalled(marketplaceInfo.computeInstalled(computeInstalledFeatures(monitor),
-							knownRepositories, node));
+					catalogItem.setInstalled(marketplaceInfo.computeInstalled(computeInstalledFeatures(monitor), node));
 
 				}
 				try {

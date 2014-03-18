@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui.catalog;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
+import java.net.URI;
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,7 +30,7 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 
 /**
  * Test {@link MarketplaceInfo}
- * 
+ *
  * @author David Green
  */
 @RunWith(BlockJUnit4ClassRunner.class)
@@ -109,5 +109,56 @@ public class MarketplaceInfoTest {
 
 		assertEquals(item.getId(), installedCatalogNodeIds.iterator().next().getId());
 
+	}
+
+	@Test
+	public void computeInstalled() {
+		assertTrue(item.getInstallableUnits().size() > 1);
+		assertEquals(0, catalogRegistry.getNodeKeyToIU().size());
+		catalogRegistry.map(item.getMarketplaceUrl(), item.getData());
+
+		assertEquals(1, catalogRegistry.getNodeKeyToIU().size());
+
+		Set<String> installedIus = new HashSet<String>();
+		installedIus.add("com.foo.bar");
+
+		boolean isInstalled = catalogRegistry.computeInstalled(installedIus, item.getData());
+		assertFalse(isInstalled);
+
+		installedIus.addAll(item.getInstallableUnits());
+		isInstalled = catalogRegistry.computeInstalled(installedIus, item.getData());
+		assertTrue(isInstalled);
+
+		installedIus.clear();
+		installedIus.add(item.getInstallableUnits().get(0));
+		isInstalled = catalogRegistry.computeInstalled(installedIus, item.getData());
+		assertTrue(isInstalled);
+	}
+
+	@Test
+	@SuppressWarnings("deprecation")
+	public void computeInstalledLegacy() throws Exception {
+		Node node = item.getData();
+
+		assertTrue(item.getInstallableUnits().size() > 1);
+		assertEquals(0, catalogRegistry.getNodeKeyToIU().size());
+		catalogRegistry.map(item.getMarketplaceUrl(), node);
+		assertEquals(1, catalogRegistry.getNodeKeyToIU().size());
+
+		URI updateUri = new URI("http://update.example.org");
+		node.setUpdateurl(updateUri.toString());
+		Set<String> installedIus = new HashSet<String>();
+		installedIus.addAll(item.getInstallableUnits());
+
+		boolean isInstalled = catalogRegistry.computeInstalled(installedIus, Collections.singleton(new URI(
+				"http://other.example.org")), node);
+		assertFalse(isInstalled);
+
+		isInstalled = catalogRegistry.computeInstalled(installedIus, Collections.singleton(updateUri), node);
+		assertTrue(isInstalled);
+
+		node.setUpdateurl(null);
+		isInstalled = catalogRegistry.computeInstalled(installedIus, Collections.singleton(updateUri), node);
+		assertFalse(isInstalled);
 	}
 }

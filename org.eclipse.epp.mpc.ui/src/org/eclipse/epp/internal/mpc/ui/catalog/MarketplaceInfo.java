@@ -98,28 +98,46 @@ public class MarketplaceInfo {
 	}
 
 	/**
-	 * compute if the given node is installed. The given node must be fully realized, including its
-	 * {@link Node#getIus() ius}.
+	 * Compute if the given node is installed. The given node must be fully realized, including its
+	 * {@link INode#getIus() ius}.
+	 * <p>
+	 * <i>NOTE: This method is kept for backwards compatibility only.</i><br />
+	 * It checks if the node has an update url and if that url is contained in the list of known repositories. Otherwise
+	 * it assumes that the node is <b>not</b> installed, regardless of installed features. Please use
+	 * {@link #computeInstalled(Set, INode)} instead to get a reliable answer.
 	 * 
 	 * @param knownRepositories
+	 * @deprecated use {@link #computeInstalled(Set, INode)} instead
 	 */
+	@Deprecated
 	public boolean computeInstalled(Set<String> installedFeatures, Set<URI> knownRepositories, Node node) {
 		String updateurl = node.getUpdateurl();
 		if (updateurl == null) {
 			// can't be installed if there's no update site
 			return false;
 		}
-		// SECURITY: can't be installed if the repository is not known/trusted
-		try {
-			URI uri = new URL(updateurl).toURI();
-			if (!knownRepositories.contains(uri)) {
+		boolean installed = computeInstalled(installedFeatures, node);
+		if (installed && knownRepositories != null) {
+			// SECURITY: can't be installed if the repository is not known/trusted
+			try {
+				URI uri = new URL(node.getUpdateurl()).toURI();
+				if (!knownRepositories.contains(uri)) {
+					return false;
+				}
+			} catch (MalformedURLException e) {
+				return false;
+			} catch (URISyntaxException e) {
 				return false;
 			}
-		} catch (MalformedURLException e) {
-			return false;
-		} catch (URISyntaxException e) {
-			return false;
 		}
+		return installed;
+	}
+
+	/**
+	 * Compute if the given node is installed. The given node must be fully realized, including its
+	 * {@link Node#getIus() ius}.
+	 */
+	public boolean computeInstalled(Set<String> installedFeatures, Node node) {
 		if (node.getIus() != null && !node.getIus().getIu().isEmpty()) {
 			List<String> ius = new ArrayList<String>(new HashSet<String>(node.getIus().getIu()));
 			return computeInstalled(installedFeatures, ius);
