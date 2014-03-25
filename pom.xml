@@ -66,7 +66,6 @@
   <modules>
     <module>org.eclipse.epp.mpc.core</module>
     <module>org.eclipse.epp.mpc.feature</module>
-    <module>org.eclipse.epp.mpc.source.feature</module>
     <module>org.eclipse.epp.mpc.help.ui</module>
     <module>org.eclipse.epp.mpc.tests</module>
     <module>org.eclipse.epp.mpc.tests.catalog</module>
@@ -277,6 +276,11 @@
               <version>${tycho-extras-version}</version>
             </dependency>
           </dependencies>
+        </plugin>
+        <plugin>
+          <groupId>org.eclipse.tycho.extras</groupId>
+          <artifactId>tycho-source-feature-plugin</artifactId>
+          <version>${tycho-version}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
