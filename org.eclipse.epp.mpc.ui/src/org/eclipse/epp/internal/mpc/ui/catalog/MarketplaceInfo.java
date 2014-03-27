@@ -37,7 +37,7 @@ import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 /**
  * A means of knowing about how nodes map to IUs and visa versa. Can handle nodes from multiple marketplaces, and does a
  * best-effort job at persisting information across sessions.
- * 
+ *
  * @author David Green
  */
 public class MarketplaceInfo {
@@ -71,7 +71,7 @@ public class MarketplaceInfo {
 
 	/**
 	 * Calculate the known catalog nodes that are installed
-	 * 
+	 *
 	 * @param repositoryUrl
 	 *            the catalog url for which installed nodes should be computed
 	 * @param installedIus
@@ -105,7 +105,7 @@ public class MarketplaceInfo {
 	 * It checks if the node has an update url and if that url is contained in the list of known repositories. Otherwise
 	 * it assumes that the node is <b>not</b> installed, regardless of installed features. Please use
 	 * {@link #computeInstalled(Set, INode)} instead to get a reliable answer.
-	 * 
+	 *
 	 * @param knownRepositories
 	 * @deprecated use {@link #computeInstalled(Set, INode)} instead
 	 */
@@ -113,12 +113,12 @@ public class MarketplaceInfo {
 	public boolean computeInstalled(Set<String> installedFeatures, Set<URI> knownRepositories, Node node) {
 		String updateurl = node.getUpdateurl();
 		if (updateurl == null) {
-			// can't be installed if there's no update site
+			// don't consider installed if there's no update site
 			return false;
 		}
 		boolean installed = computeInstalled(installedFeatures, node);
 		if (installed && knownRepositories != null) {
-			// SECURITY: can't be installed if the repository is not known/trusted
+			// don't consider installed if the repository is not known/trusted
 			try {
 				URI uri = new URL(node.getUpdateurl()).toURI();
 				if (!knownRepositories.contains(uri)) {
@@ -249,7 +249,7 @@ public class MarketplaceInfo {
 
 	/**
 	 * compute the registry file
-	 * 
+	 *
 	 * @return the registry file, or null if there's no persistent registry.
 	 */
 	private static final File computeRegistryFile() {
