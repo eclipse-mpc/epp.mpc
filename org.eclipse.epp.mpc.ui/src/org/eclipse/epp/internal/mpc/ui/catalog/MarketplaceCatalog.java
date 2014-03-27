@@ -287,7 +287,24 @@ public class MarketplaceCatalog extends Catalog {
 
 	@Override
 	public IStatus performDiscovery(IProgressMonitor monitor) {
-		IStatus status = super.performDiscovery(monitor);
+		SubMonitor progress = SubMonitor.convert(monitor, 200000);
+		IStatus status = super.performDiscovery(progress.newChild(100000));
+
+		//check for updates
+		if (status.getSeverity() < IStatus.ERROR) {
+			IStatus updateStatus = checkForUpdates(progress.newChild(100000));
+			if (!updateStatus.isOK()) {
+				if (status.isOK()) {
+					status = updateStatus;
+				} else {
+					MultiStatus multiStatus = new MultiStatus(MarketplaceClientUi.BUNDLE_ID, 0,
+							Messages.MarketplaceCatalog_Discovery_Error, null);
+					multiStatus.add(status);
+					multiStatus.add(updateStatus);
+					status = multiStatus;
+				}
+			}
+		}
 		return computeStatus(status);
 	}
 
