@@ -7,13 +7,16 @@
  *
  * Contributors:
  *     Tasktop Technologies - initial API and implementation
+ *     Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service;
+
+import org.eclipse.epp.mpc.core.model.ITags;
 
 /**
  * @author Benjamin Muskalla
  */
-public class Tags {
+public class Tags implements ITags {
 
 	protected java.util.List<Tag> tags = new java.util.ArrayList<Tag>();
 

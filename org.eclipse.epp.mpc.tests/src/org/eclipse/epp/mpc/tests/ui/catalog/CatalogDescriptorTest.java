@@ -7,11 +7,11 @@
  *
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
+ *     Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui.catalog;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.net.URL;
 
@@ -70,6 +70,6 @@ public class CatalogDescriptorTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testCopyCtorNull() {
-		new CatalogDescriptor(null);
+		new CatalogDescriptor((CatalogDescriptor) null);
 	}
 }

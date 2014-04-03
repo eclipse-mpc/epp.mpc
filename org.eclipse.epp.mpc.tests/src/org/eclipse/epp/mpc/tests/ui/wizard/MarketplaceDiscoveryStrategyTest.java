@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
+ *     Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui.wizard;
 
@@ -17,15 +18,16 @@ import java.net.URL;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.epp.internal.mpc.core.service.Category;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
-import org.eclipse.epp.internal.mpc.core.service.Market;
-import org.eclipse.epp.internal.mpc.core.service.MarketplaceService;
 import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.core.service.SearchResult;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
+import org.eclipse.epp.mpc.core.model.ICategory;
+import org.eclipse.epp.mpc.core.model.IMarket;
+import org.eclipse.epp.mpc.core.model.INode;
+import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.junit.After;
 import org.junit.Assert;
@@ -53,10 +55,10 @@ public class MarketplaceDiscoveryStrategyTest {
 		catalog = new MarketplaceCatalog();
 	}
 
-	private void setupCatalog(final MarketplaceService marketplaceService) {
+	private void setupCatalog(final IMarketplaceService marketplaceService) {
 		discoveryStrategy = new MarketplaceDiscoveryStrategy(catalogDescriptor) {
 			@Override
-			public MarketplaceService createMarketplaceService() {
+			public IMarketplaceService createMarketplaceService() {
 				return marketplaceService;
 			}
 		};
@@ -72,16 +74,16 @@ public class MarketplaceDiscoveryStrategyTest {
 
 	@Test
 	public void testSearchByNodeUrl() throws Exception {
-		final Node[] testNode = new Node[1];
-		final MarketplaceService marketplaceService = new DefaultMarketplaceService(catalogUrl) {
+		final INode[] testNode = new INode[1];
+		final IMarketplaceService marketplaceService = new DefaultMarketplaceService(catalogUrl) {
 			@Override
-			public Node getNode(Node node, IProgressMonitor monitor) throws CoreException {
+			public Node getNode(INode node, IProgressMonitor monitor) throws CoreException {
 				testNode[0] = node;
-				return node;
+				return (Node) node;
 			}
 
 			@Override
-			public SearchResult search(Market market, Category category, String queryText, IProgressMonitor monitor)
+			public SearchResult search(IMarket market, ICategory category, String queryText, IProgressMonitor monitor)
 					throws CoreException {
 				Assert.fail("Unexpected invocation");
 				return null;//dead code

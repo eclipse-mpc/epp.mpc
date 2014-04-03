@@ -7,10 +7,12 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
+ * 	Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
+import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -18,7 +20,7 @@ import org.eclipse.swt.widgets.Button;
 
 /**
  * A controller that controls the multi-state install/uninstall button
- * 
+ *
  * @author David Green
  */
 @SuppressWarnings("rawtypes")
@@ -31,7 +33,7 @@ class ItemButtonController {
 		DISABLED(Messages.ItemButtonController_install, Operation.NONE, true), //
 		UPDATE_DISABLED(Messages.ItemButtonController_update, Operation.NONE, true), //
 		UPDATE(Messages.ItemButtonController_update, Operation.NONE, false), //
-		UPDATE_PENDING(Messages.ItemButtonController_updatePending, Operation.CHECK_FOR_UPDATES, false);
+		UPDATE_PENDING(Messages.ItemButtonController_updatePending, Operation.UPDATE, false);
 
 		final String label;
 
@@ -137,11 +139,11 @@ class ItemButtonController {
 			buttonState = ButtonState.DISABLED;
 			secondaryButtonState = ButtonState.DISABLED;
 		} else {
-			Operation operation = item.getOperation();
+			Operation operation = item.getSelectedOperation();
 			boolean installed = isItemInstalled();
 			if (installed) {
 				switch (operation) {
-				case CHECK_FOR_UPDATES:
+				case UPDATE:
 					buttonState = ButtonState.UPDATE_PENDING;
 					secondaryButtonState = ButtonState.UNINSTALL;
 					break;

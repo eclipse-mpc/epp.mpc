@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     Tasktop Technologies - initial API and implementation
+ *     Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 
 package org.eclipse.epp.internal.mpc.ui.wizards;
@@ -15,13 +16,14 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.MessageFormat;
 
-import org.eclipse.epp.internal.mpc.core.service.Node;
-import org.eclipse.epp.internal.mpc.core.service.Tag;
-import org.eclipse.epp.internal.mpc.core.service.Tags;
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
+import org.eclipse.epp.mpc.core.model.INode;
+import org.eclipse.epp.mpc.core.model.ITag;
+import org.eclipse.epp.mpc.core.model.ITags;
+import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.AbstractCatalogSource;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.discovery.model.Overview;
@@ -324,7 +326,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 			hookLinkListener(installInfoLink, new LinkListener() {
 				@Override
 				protected void selected(String href) {
-					browser.openUrl(((Node) connector.getData()).getUrl());
+					browser.openUrl(((INode) connector.getData()).getUrl());
 				}
 			});
 			GridDataFactory.swtDefaults().align(SWT.TRAIL, SWT.CENTER).grab(false, true).applyTo(installInfoLink);
@@ -348,8 +350,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 		Integer installsTotal = null;
 		Integer installsRecent = null;
-		if (connector.getData() instanceof Node) {
-			Node node = (Node) connector.getData();
+		if (connector.getData() instanceof INode) {
+			INode node = (INode) connector.getData();
 			installsTotal = node.getInstallsTotal();
 			installsRecent = node.getInstallsRecent();
 		}
@@ -382,8 +384,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 	private void createSocialButtons(Composite parent) {
 		Integer favorited = null;
-		if (connector.getData() instanceof Node) {
-			Node node = (Node) connector.getData();
+		if (connector.getData() instanceof INode) {
+			INode node = (INode) connector.getData();
 			favorited = node.getFavorited();
 		}
 		if (favorited == null || getCatalogItemUrl() == null) {
@@ -477,8 +479,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 	private String getCatalogItemUrl() {
 		Object data = connector.getData();
-		if (data instanceof Node) {
-			Node node = (Node) data;
+		if (data instanceof INode) {
+			INode node = (INode) data;
 			return node.getUrl();
 		}
 		return null;
@@ -622,11 +624,11 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		.grab(true, false)
 		.applyTo(tagsLink);
 
-		Tags tags = ((Node) connector.getData()).getTags();
+		ITags tags = ((INode) connector.getData()).getTags();
 		if (tags == null) {
 			return;
 		}
-		for (Tag tag : tags.getTags()) {
+		for (ITag tag : tags.getTags()) {
 			String tagName = tag.getName();
 			appendLink(tagsLink, tagName, SWT.NORMAL).data = tagName;
 			tagsLink.append(" "); //$NON-NLS-1$
@@ -649,6 +651,14 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 				&& connector.getOverview().getSummary().length() > 0;
 	}
 
+	/**
+	 * @deprecated use {@link #maybeModifySelection(Operation)}
+	 */
+	@Deprecated
+	protected boolean maybeModifySelection(org.eclipse.epp.internal.mpc.ui.wizards.Operation operation) {
+		return maybeModifySelection(operation.getOperation());
+	}
+
 	protected boolean maybeModifySelection(Operation operation) {
 		viewer.modifySelection(connector, operation);
 		return true;
@@ -659,8 +669,16 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		return getData().isSelected();
 	}
 
-	public Operation getOperation() {
-		return viewer.getSelectionModel().getOperation(getData());
+	/**
+	 * @deprecated use {@link #getSelectedOperation()} instead
+	 */
+	@Deprecated
+	public org.eclipse.epp.internal.mpc.ui.wizards.Operation getOperation() {
+		return org.eclipse.epp.internal.mpc.ui.wizards.Operation.map(getSelectedOperation());
+	}
+
+	public Operation getSelectedOperation() {
+		return viewer.getSelectionModel().getSelectedOperation(getData());
 	}
 
 	public void propertyChange(PropertyChangeEvent evt) {

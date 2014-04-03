@@ -7,11 +7,11 @@
  *
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
+ *     Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
-import java.io.InputStream;
-import java.net.URI;
+import java.net.URL;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -22,17 +22,16 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
-import org.eclipse.epp.internal.mpc.core.service.Node;
-import org.eclipse.epp.internal.mpc.core.service.RemoteMarketplaceService;
-import org.eclipse.epp.internal.mpc.core.util.TransportFactory;
-import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
+import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
 import org.eclipse.epp.internal.mpc.ui.util.ConcurrentTaskManager;
+import org.eclipse.epp.mpc.core.model.INode;
+import org.eclipse.epp.mpc.core.service.IMarketplaceService;
+import org.eclipse.epp.mpc.core.service.ServiceHelper;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 
 /**
  * A job listener that produces notifications of a successful install.
- * 
+ *
  * @author David Green
  */
 class ProvisioningJobListener extends JobChangeAdapter {
@@ -53,41 +52,27 @@ class ProvisioningJobListener extends JobChangeAdapter {
 				}
 
 				@Override
-				protected IStatus run(IProgressMonitor monitor) {
+				protected IStatus run(final IProgressMonitor monitor) {
 					ConcurrentTaskManager taskManager = new ConcurrentTaskManager(installItems.size(),
 							Messages.ProvisioningJobListener_notificationTaskName);
-					for (final CatalogItem item : installItems) {
-						taskManager.submit(new Runnable() {
-							public void run() {
-								Node node = (Node) item.getData();
-								String url = node.getUrl();
-								if (!url.endsWith("/")) { //$NON-NLS-1$
-									url += "/"; //$NON-NLS-1$
-								}
-								url += "success"; //$NON-NLS-1$
+					for (CatalogItem item : installItems) {
+						if (item instanceof MarketplaceNodeCatalogItem) {
+							final MarketplaceNodeCatalogItem nodeItem = (MarketplaceNodeCatalogItem) item;
 
-								//FIXME workaround to access request metadata
-								//move success reporting to MarketplaceService API once we are not in API freeze to make this hack unnecessary - see bug 417068
-								RemoteMarketplaceService<?> marketplaceService = new DefaultMarketplaceService();
-								marketplaceService.setRequestMetaParameters(MarketplaceDiscoveryStrategy.computeDefaultRequestMetaParameters());
-								url = marketplaceService.addMetaParameters(url);
-								try {
-									InputStream stream = TransportFactory.instance()
-											.getTransport()
-											.stream(new URI(url), new NullProgressMonitor());
-
-									try {
-										while (stream.read() != -1) {
-											// nothing to do
+							taskManager.submit(new Runnable() {
+								public void run() {
+									INode node = nodeItem.getData();
+									URL marketplaceUrl = nodeItem.getMarketplaceUrl();
+									IMarketplaceService marketplaceService = ServiceHelper.getMarketplaceServiceLocator().getMarketplaceService(marketplaceUrl.toString());
+									marketplaceService.reportInstallSuccess(node, new NullProgressMonitor() {
+										@Override
+										public boolean isCanceled() {
+											return monitor.isCanceled();
 										}
-									} finally {
-										stream.close();
-									}
-								} catch (Throwable e) {
-									//per bug 314028 logging this error is not useful.
+									});
 								}
-							}
-						});
+							});
+						}
 					}
 					try {
 						taskManager.waitUntilFinished(monitor);

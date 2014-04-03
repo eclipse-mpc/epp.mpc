@@ -35,15 +35,25 @@ class Messages extends NLS {
 
 	public static String MarketplaceDiscoveryStrategy_findingInstalled;
 
+	public static String MarketplaceDiscoveryStrategy_invalidFilter;
+
 	public static String MarketplaceDiscoveryStrategy_loadingMarketplace;
 
 	public static String MarketplaceDiscoveryStrategy_loadingResources;
 
 	public static String MarketplaceDiscoveryStrategy_Name_and_Version;
 
+	public static String MarketplaceDiscoveryStrategy_noNameMatch;
+
+	public static String MarketplaceDiscoveryStrategy_noUrlMatch;
+
 	public static String MarketplaceDiscoveryStrategy_searchingMarketplace;
 
 	public static String MarketplaceDiscoveryStrategy_sendingErrorNotification;
+
+	public static String MarketplaceDiscoveryStrategy_unidentifiableItem;
+
+	public static String MarketplaceDiscoveryStrategy_unknownFilter;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

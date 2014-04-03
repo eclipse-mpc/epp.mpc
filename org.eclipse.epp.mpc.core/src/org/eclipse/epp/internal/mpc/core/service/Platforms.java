@@ -7,14 +7,17 @@
  * 
  * Contributors:
  *      The Eclipse Foundation  - initial API and implementation
+ *      Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service;
+
+import org.eclipse.epp.mpc.core.model.IPlatforms;
 
 
 /**
  * @author David Green
  */
-public class Platforms {
+public class Platforms implements IPlatforms {
 	
 	protected java.util.List<String> platform = new java.util.ArrayList<String>();
 	

@@ -7,6 +7,7 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
+ * 	Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui;
 
@@ -16,8 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.eclipse.epp.internal.mpc.core.service.CatalogBranding;
-import org.eclipse.epp.internal.mpc.core.service.News;
+import org.eclipse.epp.mpc.core.model.ICatalogBranding;
+import org.eclipse.epp.mpc.core.model.INews;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 
 /**
@@ -37,9 +38,7 @@ public class CatalogRegistry {
 
 	private final List<CatalogDescriptor> catalogDescriptors = new CopyOnWriteArrayList<CatalogDescriptor>();
 
-	private final Map<CatalogDescriptor, CatalogBranding> catalogBrandings = new HashMap<CatalogDescriptor, CatalogBranding>();
-
-	private final Map<CatalogDescriptor, News> catalogNews = new HashMap<CatalogDescriptor, News>();
+	private final Map<CatalogDescriptor, INews> catalogNews = new HashMap<CatalogDescriptor, INews>();
 
 	public CatalogRegistry() {
 		catalogDescriptors.addAll(new CatalogExtensionPointReader().getCatalogDescriptors());
@@ -51,7 +50,6 @@ public class CatalogRegistry {
 
 	public void unregister(CatalogDescriptor catalogDescriptor) {
 		catalogDescriptors.remove(catalogDescriptor);
-		catalogBrandings.remove(catalogDescriptor);
 		catalogNews.remove(catalogDescriptor);
 	}
 
@@ -59,21 +57,31 @@ public class CatalogRegistry {
 		return Collections.unmodifiableList(catalogDescriptors);
 	}
 
-	// TODO: remove and integrate into CatalogDescriptor once we are not in API freeze
-	public void addCatalogBranding(CatalogDescriptor descriptor, CatalogBranding branding) {
-		catalogBrandings.put(descriptor, branding);
+	/**
+	 * @deprecated use {@link CatalogDescriptor#setCatalogBranding(ICatalogBranding)
+	 *             descriptor.setCatalogBranding(branding)}
+	 */
+	@Deprecated
+	public void addCatalogBranding(CatalogDescriptor descriptor, ICatalogBranding branding) {
+		if (descriptor != null) {
+			descriptor.setCatalogBranding(branding);
+		}
 	}
 
-	public CatalogBranding getCatalogBranding(CatalogDescriptor descriptor) {
-		return catalogBrandings.get(descriptor);
+	/**
+	 * @deprecated use {@link CatalogDescriptor#getCatalogBranding() descriptor.getCatalogBranding()}
+	 */
+	@Deprecated
+	public ICatalogBranding getCatalogBranding(CatalogDescriptor descriptor) {
+		return descriptor == null ? null : descriptor.getCatalogBranding();
 	}
 
 	// manage the predefined news configuration here, since that isn't supposed to become API
-	public void addCatalogNews(CatalogDescriptor descriptor, News news) {
+	public void addCatalogNews(CatalogDescriptor descriptor, INews news) {
 		catalogNews.put(descriptor, news);
 	}
 
-	public News getCatalogNews(CatalogDescriptor descriptor) {
+	public INews getCatalogNews(CatalogDescriptor descriptor) {
 		return catalogNews.get(descriptor);
 	}
 

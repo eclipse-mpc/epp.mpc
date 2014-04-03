@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
- *     Yatta Solutions - error handling (bug 374105), news (bug 401721)
+ *     Yatta Solutions - error handling (bug 374105), news (bug 401721), public API (bug 432803)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
@@ -19,7 +19,7 @@ import org.eclipse.swt.browser.WindowEvent;
 /**
  * Browser integration for the marketplace that intercepts calls to install buttons and causes them to open the
  * marketplace wizard.
- * 
+ *
  * @author dgreen
  * @author Carsten Reckord
  */
@@ -41,7 +41,7 @@ OpenWindowListener {
 
 	@Override
 	protected boolean handleInstallRequest(SolutionInstallationInfo installInfo, String url) {
-		MarketplaceUrlHandler.triggerInstall(installInfo);
+		org.eclipse.epp.mpc.ui.MarketplaceUrlHandler.triggerInstall(installInfo);
 		return true;
 	}
 

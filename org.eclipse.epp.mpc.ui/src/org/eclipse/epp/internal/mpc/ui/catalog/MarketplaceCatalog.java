@@ -7,7 +7,7 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
- *  Yatta Solutions - error handling (bug 374105), news (bug 401721)
+ * 	Yatta Solutions - error handling (bug 374105), news (bug 401721), public API (bug 432803)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.catalog;
 
@@ -28,12 +28,12 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.epp.internal.mpc.core.service.Category;
-import org.eclipse.epp.internal.mpc.core.service.Market;
-import org.eclipse.epp.internal.mpc.core.service.News;
-import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.util.ConcurrentTaskManager;
+import org.eclipse.epp.mpc.core.model.ICategory;
+import org.eclipse.epp.mpc.core.model.IMarket;
+import org.eclipse.epp.mpc.core.model.INews;
+import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.equinox.internal.p2.discovery.Catalog;
 import org.eclipse.equinox.internal.p2.discovery.DiscoveryCore;
@@ -61,13 +61,13 @@ public class MarketplaceCatalog extends Catalog {
 
 	private final Map<String, Boolean> updateAvailableByNodeId = new HashMap<String, Boolean>();
 
-	private News news;
+	private INews news;
 
 	private interface DiscoveryOperation {
 		public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException;
 	}
 
-	public IStatus performQuery(final Market market, final Category category, final String queryText,
+	public IStatus performQuery(final IMarket market, final ICategory category, final String queryText,
 			IProgressMonitor monitor) {
 		return performDiscovery(new DiscoveryOperation() {
 			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
@@ -92,7 +92,7 @@ public class MarketplaceCatalog extends Catalog {
 		}, monitor);
 	}
 
-	public IStatus featured(IProgressMonitor monitor, final Market market, final Category category) {
+	public IStatus featured(IProgressMonitor monitor, final IMarket market, final ICategory category) {
 		return performDiscovery(new DiscoveryOperation() {
 			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
 				strategy.featured(monitor, market, category);
@@ -134,7 +134,7 @@ public class MarketplaceCatalog extends Catalog {
 	 *            the nodes to retrieve
 	 * @return
 	 */
-	public IStatus performNodeQuery(IProgressMonitor monitor, final Set<Node> nodes) {
+	public IStatus performNodeQuery(IProgressMonitor monitor, final Set<? extends INode> nodes) {
 		return performDiscovery(new DiscoveryOperation() {
 			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
 				strategy.performNodeQuery(monitor, nodes);
@@ -182,7 +182,7 @@ public class MarketplaceCatalog extends Catalog {
 		Map<URI, List<MarketplaceNodeCatalogItem>> installedCatalogItemsByUpdateUri = new HashMap<URI, List<MarketplaceNodeCatalogItem>>();
 
 		for (MarketplaceNodeCatalogItem catalogItem : updateCheckNeeded) {
-			Node node = catalogItem.getData();
+			INode node = catalogItem.getData();
 			try {
 				String updateurl = node.getUpdateurl();
 				if (updateurl == null) {
@@ -387,7 +387,7 @@ public class MarketplaceCatalog extends Catalog {
 			throw new IllegalStateException();
 		}
 
-		News news = null;
+		INews news = null;
 
 		MultiStatus status = new MultiStatus(MarketplaceClientUi.BUNDLE_ID, 0, Messages.MarketplaceCatalog_queryFailed,
 				null);
@@ -450,11 +450,11 @@ public class MarketplaceCatalog extends Catalog {
 		}
 	}
 
-	public News getNews() {
+	public INews getNews() {
 		return news;
 	}
 
-	public void setNews(News news) {
+	public void setNews(INews news) {
 		this.news = news;
 	}
 }

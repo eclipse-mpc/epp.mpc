@@ -7,14 +7,17 @@
  * 
  * Contributors:
  *      The Eclipse Foundation  - initial API and implementation
+ *      Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service;
+
+import org.eclipse.epp.mpc.core.model.IIus;
 
 
 /**
  * @author David Green
  */
-public class Ius {
+public class Ius implements IIus {
 	
 	protected java.util.List<String> iu = new java.util.ArrayList<String>();
 	

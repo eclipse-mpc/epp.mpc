@@ -7,14 +7,11 @@
  *
  * Contributors:
  *     The Eclipse Foundation  - initial API and implementation
+ *     Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.service.xml;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,21 +19,22 @@ import java.io.InputStream;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.eclipse.epp.internal.mpc.core.service.Catalog;
-import org.eclipse.epp.internal.mpc.core.service.CatalogBranding;
-import org.eclipse.epp.internal.mpc.core.service.Catalogs;
-import org.eclipse.epp.internal.mpc.core.service.Categories;
-import org.eclipse.epp.internal.mpc.core.service.Category;
 import org.eclipse.epp.internal.mpc.core.service.Favorites;
 import org.eclipse.epp.internal.mpc.core.service.Featured;
-import org.eclipse.epp.internal.mpc.core.service.Market;
 import org.eclipse.epp.internal.mpc.core.service.Marketplace;
 import org.eclipse.epp.internal.mpc.core.service.News;
-import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.core.service.Recent;
 import org.eclipse.epp.internal.mpc.core.service.Search;
-import org.eclipse.epp.internal.mpc.core.service.Tag;
 import org.eclipse.epp.internal.mpc.core.service.xml.Unmarshaller;
+import org.eclipse.epp.mpc.core.model.ICatalog;
+import org.eclipse.epp.mpc.core.model.ICatalogBranding;
+import org.eclipse.epp.mpc.core.model.ICatalogs;
+import org.eclipse.epp.mpc.core.model.ICategories;
+import org.eclipse.epp.mpc.core.model.ICategory;
+import org.eclipse.epp.mpc.core.model.IMarket;
+import org.eclipse.epp.mpc.core.model.INews;
+import org.eclipse.epp.mpc.core.model.INode;
+import org.eclipse.epp.mpc.core.model.ITag;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -77,14 +75,14 @@ public class UnmarshallerTest {
 
 		assertEquals(4, marketplace.getMarket().size());
 
-		Market market = marketplace.getMarket().get(0);
+		IMarket market = marketplace.getMarket().get(0);
 
 		assertEquals("31", market.getId());
 		assertEquals("Tools", market.getName());
 		assertEquals("http://www.eclipseplugincentral.net/category/markets/tools", market.getUrl());
 
 		assertEquals(36, market.getCategory().size());
-		Category category = market.getCategory().get(10);
+		ICategory category = market.getCategory().get(10);
 		assertEquals("24", category.getId());
 		assertEquals("IDE", category.getName());
 		assertEquals("http://www.eclipseplugincentral.net/taxonomy/term/24%2C31", category.getUrl());
@@ -100,14 +98,14 @@ public class UnmarshallerTest {
 
 		assertEquals(1, marketplace.getCategory().size());
 
-		Category category = marketplace.getCategory().get(0);
+		ICategory category = marketplace.getCategory().get(0);
 		assertEquals("38,31", category.getId());
 		assertEquals("Mylyn Connectors", category.getName());
 		assertEquals("http://www.eclipseplugincentral.net/taxonomy/term/38%2C31", category.getUrl());
 
 		assertEquals(9, category.getNode().size());
 
-		Node node = category.getNode().get(0);
+		INode node = category.getNode().get(0);
 		//		<node id="641" name="Tasktop Pro">
 		//        <url>http://www.eclipseplugincentral.net/content/tasktop-pro</url>
 		//        <favorited>3</favorited>
@@ -127,7 +125,7 @@ public class UnmarshallerTest {
 
 		assertEquals(1, marketplace.getNode().size());
 
-		Node node = marketplace.getNode().get(0);
+		INode node = marketplace.getNode().get(0);
 		assertEquals("1065", node.getId());
 		assertEquals("Mylyn WikiText - Lightweight Markup Editing, Tools and Framework", node.getName());
 		assertEquals(
@@ -140,7 +138,7 @@ public class UnmarshallerTest {
 
 		assertNotNull(node.getCategories());
 		assertEquals(5, node.getCategories().getCategory().size());
-		Category category = node.getCategories().getCategory().get(1);
+		ICategory category = node.getCategories().getCategory().get(1);
 		// <category name='Tools'>/taxonomy/term/17</category>
 		assertEquals("Tools", category.getName());
 		// FIXME category id.
@@ -169,15 +167,15 @@ public class UnmarshallerTest {
 		assertEquals(Integer.valueOf(6), featured.getCount());
 
 		assertEquals(6, featured.getNode().size());
-		Node node = featured.getNode().get(0);
+		INode node = featured.getNode().get(0);
 		assertEquals("248", node.getId());
 		assertEquals("eUML2 free edition", node.getName());
 		assertEquals("http://www.eclipseplugincentral.net/content/euml2-free-edition", node.getUrl());
 		assertEquals("resource", node.getType());
-		Categories categories = node.getCategories();
+		ICategories categories = node.getCategories();
 		assertNotNull(categories);
 		assertEquals(1, categories.getCategory().size());
-		Category category = categories.getCategory().get(0);
+		ICategory category = categories.getCategory().get(0);
 		assertEquals("19", category.getId());
 		assertEquals("UML", category.getName());
 		assertEquals("http://www.eclipseplugincentral.net/taxonomy/term/19", category.getUrl());
@@ -215,16 +213,16 @@ public class UnmarshallerTest {
 				search.getUrl());
 		assertEquals(Integer.valueOf(62), search.getCount());
 		assertEquals(7, search.getNode().size());
-		Node node = search.getNode().get(0);
+		INode node = search.getNode().get(0);
 
 		assertEquals("983", node.getId());
 		assertEquals("Run All Tests", node.getName());
 		assertEquals("http://www.eclipseplugincentral.net/content/run-all-tests", node.getUrl());
 		assertEquals("resource", node.getType());
-		Categories categories = node.getCategories();
+		ICategories categories = node.getCategories();
 		assertNotNull(categories);
 		assertEquals(1, categories.getCategory().size());
-		Category category = categories.getCategory().get(0);
+		ICategory category = categories.getCategory().get(0);
 		assertEquals("16", category.getId());
 		assertEquals("Testing", category.getName());
 		assertEquals("http://www.eclipseplugincentral.net/taxonomy/term/16", category.getUrl());
@@ -246,7 +244,7 @@ public class UnmarshallerTest {
 		assertEquals(Integer.valueOf(299995), node.getInstallsTotal());
 		assertEquals(Integer.valueOf(34540), node.getInstallsRecent());
 
-		Node lastNode = search.getNode().get(search.getNode().size() - 1);
+		INode lastNode = search.getNode().get(search.getNode().size() - 1);
 
 		assertEquals("1011", lastNode.getId());
 		assertEquals("JUnit Flux", lastNode.getName());
@@ -271,16 +269,16 @@ public class UnmarshallerTest {
 
 		assertEquals(6, favorites.getNode().size());
 
-		Node node = favorites.getNode().get(0);
+		INode node = favorites.getNode().get(0);
 
 		assertEquals("206", node.getId());
 		assertEquals("Mylyn", node.getName());
 		assertEquals("http://www.eclipseplugincentral.net/content/mylyn", node.getUrl());
 		assertEquals("resource", node.getType());
-		Categories categories = node.getCategories();
+		ICategories categories = node.getCategories();
 		assertNotNull(categories);
 		assertEquals(1, categories.getCategory().size());
-		Category category = categories.getCategory().get(0);
+		ICategory category = categories.getCategory().get(0);
 		assertEquals("18", category.getId());
 		assertEquals("UI", category.getName());
 		assertEquals("http://www.eclipseplugincentral.net/taxonomy/term/18", category.getUrl());
@@ -317,17 +315,17 @@ public class UnmarshallerTest {
 
 		assertEquals(6, recent.getNode().size());
 
-		Node node = recent.getNode().get(0);
+		INode node = recent.getNode().get(0);
 
 		assertEquals("1091", node.getId());
 		assertEquals("API Demonstration Listing", node.getName());
 		assertEquals("http://www.eclipseplugincentral.net/content/api-demonstration-listing", node.getUrl());
 
 		assertEquals("resource", node.getType());
-		Categories categories = node.getCategories();
+		ICategories categories = node.getCategories();
 		assertNotNull(categories);
 		assertEquals(6, categories.getCategory().size());
-		Category category = categories.getCategory().get(0);
+		ICategory category = categories.getCategory().get(0);
 		assertEquals("3", category.getId());
 		assertEquals("Database", category.getName());
 		assertEquals("http://www.eclipseplugincentral.net/taxonomy/term/3", category.getUrl());
@@ -376,11 +374,11 @@ public class UnmarshallerTest {
 	public void tags() throws Exception {
 		Object model = process("resources/node.xml");
 		Marketplace marketplace = (Marketplace) model;
-		Node node = marketplace.getNode().get(0);
+		INode node = marketplace.getNode().get(0);
 
 		assertNotNull(node.getTags());
 		assertEquals(5, node.getCategories().getCategory().size());
-		Tag tag = node.getTags().getTags().get(3);
+		ITag tag = node.getTags().getTags().get(3);
 		assertEquals("mylyn", tag.getName());
 		assertEquals("88", tag.getId());
 		assertEquals("http://marketplace.eclipse.org/category/free-tagging/mylyn", tag.getUrl());
@@ -390,8 +388,8 @@ public class UnmarshallerTest {
 	public void marketplaceCatalogs() throws IOException, SAXException {
 		Object model = process("resources/catalogs.xml");
 		assertNotNull(model);
-		assertTrue(model instanceof Catalogs);
-		Catalogs catalogs = (Catalogs) model;
+		assertTrue(model instanceof ICatalogs);
+		ICatalogs catalogs = (ICatalogs) model;
 
 		assertEquals(3, catalogs.getCatalogs().size());
 
@@ -406,7 +404,7 @@ public class UnmarshallerTest {
 		//	        </wizard>
 		//	      </catalog>
 
-		Catalog catalog = catalogs.getCatalogs().get(0);
+		ICatalog catalog = catalogs.getCatalogs().get(0);
 		assertEquals("35656", catalog.getId());
 		assertEquals("Marketplace Catalog", catalog.getName());
 		assertEquals("http://marketplace.eclipse.org", catalog.getUrl());
@@ -415,7 +413,7 @@ public class UnmarshallerTest {
 		assertEquals("http://marketplace.eclipse.org/sites/default/files/marketplace32.png", catalog.getImageUrl());
 		assertEquals("http://download.eclipse.org/releases/helios", catalog.getDependencyRepository());
 
-		CatalogBranding branding = catalog.getBranding();
+		ICatalogBranding branding = catalog.getBranding();
 		assertNotNull(branding);
 		assertEquals("Eclipse Marketplace Catalog", branding.getWizardTitle());
 		assertEquals("http://marketplace.eclipse.org/sites/default/files/giant-rabbit2.jpg", branding.getWizardIcon());
@@ -426,7 +424,7 @@ public class UnmarshallerTest {
 		assertFalse(branding.hasPopularTab());
 		assertTrue(branding.hasRecentTab());
 
-		News news = catalog.getNews();
+		INews news = catalog.getNews();
 		assertNotNull(news);
 		assertEquals("http://marketplace.eclipse.org/news", news.getUrl());
 		assertEquals("News", news.getShortTitle());

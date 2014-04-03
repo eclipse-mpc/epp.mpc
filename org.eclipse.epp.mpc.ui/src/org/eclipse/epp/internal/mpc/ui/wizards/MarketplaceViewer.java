@@ -8,7 +8,7 @@
  * Contributors:
  * 	  The Eclipse Foundation - initial API and implementation
  *    Yatta Solutions - error handling (bug 374105), header layout (bug 341014),
- *                      news (bug 401721)
+ *                      news (bug 401721), public API (bug 432803)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
@@ -26,15 +26,18 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.epp.internal.mpc.core.service.Category;
 import org.eclipse.epp.internal.mpc.core.service.Identifiable;
-import org.eclipse.epp.internal.mpc.core.service.Market;
-import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory.Contents;
+import org.eclipse.epp.mpc.core.model.ICategory;
+import org.eclipse.epp.mpc.core.model.IIdentifiable;
+import org.eclipse.epp.mpc.core.model.IMarket;
+import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
+import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.Catalog;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
@@ -58,6 +61,8 @@ import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
@@ -65,6 +70,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.statushandlers.StatusManager;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 /**
  * @author Steffen Pingel
@@ -117,9 +124,9 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	private String queryText;
 
-	private Market queryMarket;
+	private IMarket queryMarket;
 
-	private Category queryCategory;
+	private ICategory queryCategory;
 
 	private ContentType queryContentType;
 
@@ -130,6 +137,8 @@ public class MarketplaceViewer extends CatalogViewer {
 	private final MarketplaceWizard wizard;
 
 	private final List<IPropertyChangeListener> listeners = new LinkedList<IPropertyChangeListener>();
+
+	private IDiscoveryItemFactory discoveryItemFactory;
 
 	public MarketplaceViewer(Catalog catalog, IShellProvider shellProvider, MarketplaceWizard wizard) {
 		super(catalog, shellProvider, wizard.getContainer(), wizard.getConfiguration());
@@ -184,6 +193,7 @@ public class MarketplaceViewer extends CatalogViewer {
 				((MarketplaceFilter) filter).catalogUpdated(wasCancelled);
 			}
 		}
+		setFilters(queryMarket, queryCategory, queryText);
 	}
 
 	@Override
@@ -197,7 +207,6 @@ public class MarketplaceViewer extends CatalogViewer {
 		doQuery();
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	protected ControlListItem<?> doCreateViewerItem(Composite parent, Object element) {
 		if (element instanceof CatalogItem) {
@@ -207,8 +216,7 @@ public class MarketplaceViewer extends CatalogViewer {
 				return new BrowseCatalogItem(parent, getResources(), shellProvider, browser,
 						(MarketplaceCategory) catalogItem.getCategory(), catalogDescriptor, this);
 			} else {
-				DiscoveryItem discoveryItem = new DiscoveryItem(parent, SWT.NONE, getResources(), shellProvider,
-						browser, catalogItem, this);
+				DiscoveryItem<CatalogItem> discoveryItem = createDiscoveryItem(parent, catalogItem);
 				discoveryItem.setSelected(getCheckedItems().contains(catalogItem));
 				return discoveryItem;
 			}
@@ -227,7 +235,16 @@ public class MarketplaceViewer extends CatalogViewer {
 		return super.doCreateViewerItem(parent, element);
 	}
 
-	public void show(Set<Node> nodes) {
+	private DiscoveryItem<CatalogItem> createDiscoveryItem(Composite parent, CatalogItem catalogItem) {
+		if (discoveryItemFactory != null) {
+			return discoveryItemFactory.createDiscoveryItem(catalogItem, this, parent, getResources(), shellProvider,
+					browser);
+		}
+		return new DiscoveryItem<CatalogItem>(parent, SWT.NONE, getResources(), shellProvider, browser, catalogItem,
+				this);
+	}
+
+	public void show(Set<? extends INode> nodes) {
 		ContentType newContentType = ContentType.SEARCH;
 		ContentType oldContentType = contentType;
 		contentType = newContentType;
@@ -236,7 +253,7 @@ public class MarketplaceViewer extends CatalogViewer {
 		doQuery(null, null, null, nodes);
 	}
 
-	public void search(Market market, Category category, String query) {
+	public void search(IMarket market, ICategory category, String query) {
 		ContentType newContentType = ContentType.SEARCH;
 		ContentType oldContentType = contentType;
 		contentType = newContentType;
@@ -250,19 +267,19 @@ public class MarketplaceViewer extends CatalogViewer {
 		doQuery(market, category, query, null);
 	}
 
-	private void setFilters(Market market, Category category, String query) {
-		setFindText(query);
+	private void setFilters(IMarket market, ICategory category, String query) {
+		setFindText(query == null ? "" : query); //$NON-NLS-1$
 		for (CatalogFilter filter : getConfiguration().getFilters()) {
 			if (filter instanceof AbstractTagFilter) {
 				AbstractTagFilter tagFilter = (AbstractTagFilter) filter;
-				if (tagFilter.getTagClassification() == Category.class) {
+				if (tagFilter.getTagClassification() == ICategory.class) {
 					List<Tag> choices = tagFilter.getChoices();
 					Tag tag = choices.isEmpty() ? null : choices.get(0);
 					if (tag != null) {
-						Identifiable data = null;
-						if (tag.getTagClassifier() == Market.class) {
+						IIdentifiable data = null;
+						if (tag.getTagClassifier() == IMarket.class) {
 							data = market;
-						} else if (tag.getTagClassifier() == Category.class) {
+						} else if (tag.getTagClassifier() == ICategory.class) {
 							data = category;
 						} else {
 							continue;
@@ -271,13 +288,13 @@ public class MarketplaceViewer extends CatalogViewer {
 						if (data != null) {
 							for (Tag choice : choices) {
 								final Object choiceData = choice.getData();
-								if (data == choiceData || data.equalsId(choiceData)) {
+								if (choiceData == data || matches(data, choiceData)) {
 									tag = choice;
 									break;
 								}
 							}
 						}
-						tagFilter.setSelected(tag == null ? null : Collections.singleton(tag));
+						tagFilter.setSelected(tag == null ? Collections.<Tag> emptySet() : Collections.singleton(tag));
 						//we expect a query to happen next, so don't fire a property change resulting in an additional query
 						tagFilter.updateUi();
 					}
@@ -286,7 +303,16 @@ public class MarketplaceViewer extends CatalogViewer {
 		}
 	}
 
+	private static boolean matches(IIdentifiable data, final Object tagData) {
+		return tagData instanceof IIdentifiable && Identifiable.matches((IIdentifiable) tagData, data);
+	}
+
 	private void doQuery() {
+		initQueryFromFilters();
+		doQuery(queryMarket, queryCategory, queryText, null);
+	}
+
+	private void initQueryFromFilters() {
 		queryMarket = null;
 		queryCategory = null;
 		queryText = null;
@@ -295,20 +321,19 @@ public class MarketplaceViewer extends CatalogViewer {
 		for (CatalogFilter filter : getConfiguration().getFilters()) {
 			if (filter instanceof AbstractTagFilter) {
 				AbstractTagFilter tagFilter = (AbstractTagFilter) filter;
-				if (tagFilter.getTagClassification() == Category.class) {
+				if (tagFilter.getTagClassification() == ICategory.class) {
 					Tag tag = tagFilter.getSelected().isEmpty() ? null : tagFilter.getSelected().iterator().next();
 					if (tag != null) {
-						if (tag.getTagClassifier() == Market.class) {
-							queryMarket = (Market) tag.getData();
-						} else if (tag.getTagClassifier() == Category.class) {
-							queryCategory = (Category) tag.getData();
+						if (tag.getTagClassifier() == IMarket.class) {
+							queryMarket = (IMarket) tag.getData();
+						} else if (tag.getTagClassifier() == ICategory.class) {
+							queryCategory = (ICategory) tag.getData();
 						}
 					}
 				}
 			}
 		}
 		queryText = findText;
-		doQuery(queryMarket, queryCategory, queryText, null);
 	}
 
 	public void doQueryForTag(String tag) {
@@ -339,7 +364,8 @@ public class MarketplaceViewer extends CatalogViewer {
 		firePropertyChangeEvent(new PropertyChangeEvent(source, property, oldValue, newValue));
 	}
 
-	private void doQuery(final Market market, final Category category, final String queryText, final Set<Node> nodes) {
+	private void doQuery(final IMarket market, final ICategory category, final String queryText,
+			final Set<? extends INode> nodes) {
 		try {
 			final ContentType queryType = contentType;
 			queryContentType = queryType;
@@ -358,8 +384,8 @@ public class MarketplaceViewer extends CatalogViewer {
 						break;
 					case SELECTION:
 						Set<String> nodeIds = new HashSet<String>();
-						for (CatalogItem item : getSelectionModel().getItemToOperation().keySet()) {
-							nodeIds.add(((Node) item.getData()).getId());
+						for (CatalogItem item : getSelectionModel().getItemToSelectedOperation().keySet()) {
+							nodeIds.add(((INode) item.getData()).getId());
 						}
 						result[0] = getCatalog().performQuery(monitor, nodeIds);
 						break;
@@ -489,8 +515,27 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	@Override
 	protected StructuredViewer doCreateViewer(Composite container) {
+		ServiceReference<IDiscoveryItemFactory> serviceReference = null;
+		final BundleContext bundleContext = MarketplaceClientUiPlugin.getInstance().getBundle().getBundleContext();
+		try {
+			serviceReference = bundleContext.getServiceReference(IDiscoveryItemFactory.class);
+			if (serviceReference != null) {
+				discoveryItemFactory = bundleContext.getService(serviceReference);
+			}
+		} catch (Exception ex) {
+			//fall back
+			MarketplaceClientUi.error(ex);
+		}
 		StructuredViewer viewer = super.doCreateViewer(container);
 		viewer.setSorter(null);
+		if (serviceReference != null) {
+			final ServiceReference<IDiscoveryItemFactory> ref = serviceReference;
+			viewer.getControl().addDisposeListener(new DisposeListener() {
+				public void widgetDisposed(DisposeEvent e) {
+					bundleContext.ungetService(ref);
+				}
+			});
+		}
 		return viewer;
 	}
 
@@ -500,6 +545,14 @@ public class MarketplaceViewer extends CatalogViewer {
 	@Override
 	protected void modifySelection(CatalogItem connector, boolean selected) {
 		throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * @deprecated use {@link #modifySelection(CatalogItem, Operation)} instead
+	 */
+	@Deprecated
+	protected void modifySelection(CatalogItem connector, org.eclipse.epp.internal.mpc.ui.wizards.Operation operation) {
+		modifySelection(connector, operation == null ? null : operation.getOperation());
 	}
 
 	protected void modifySelection(CatalogItem connector, Operation operation) {
@@ -548,7 +601,7 @@ public class MarketplaceViewer extends CatalogViewer {
 	@Override
 	public List<CatalogItem> getCheckedItems() {
 		List<CatalogItem> items = new ArrayList<CatalogItem>();
-		for (Entry<CatalogItem, Operation> entry : getSelectionModel().getItemToOperation().entrySet()) {
+		for (Entry<CatalogItem, Operation> entry : getSelectionModel().getItemToSelectedOperation().entrySet()) {
 			if (entry.getValue() != Operation.NONE) {
 				items.add(entry.getKey());
 			}
@@ -568,31 +621,31 @@ public class MarketplaceViewer extends CatalogViewer {
 	/**
 	 * the text for the current query
 	 */
-	String getQueryText() {
+	public String getQueryText() {
 		return queryText;
 	}
 
 	/**
 	 * the category for the current query
-	 * 
+	 *
 	 * @return the market or null if no category has been selected
 	 */
-	Category getQueryCategory() {
+	public ICategory getQueryCategory() {
 		return queryCategory;
 	}
 
 	/**
 	 * the market for the current query
-	 * 
+	 *
 	 * @return the market or null if no market has been selected
 	 */
-	Market getQueryMarket() {
+	public IMarket getQueryMarket() {
 		return queryMarket;
 	}
 
 	/**
 	 * the content type for the current query
-	 * 
+	 *
 	 * @return the content type or null if it's unknown
 	 */
 	ContentType getQueryContentType() {

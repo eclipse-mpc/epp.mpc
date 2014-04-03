@@ -7,13 +7,14 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
+ * 	Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.catalog;
 
 import java.io.IOException;
 import java.net.URL;
 
-import org.eclipse.epp.internal.mpc.core.service.MarketplaceService;
+import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.equinox.internal.p2.discovery.AbstractCatalogSource;
 
 /**
@@ -21,11 +22,11 @@ import org.eclipse.equinox.internal.p2.discovery.AbstractCatalogSource;
  */
 public class MarketplaceCatalogSource extends AbstractCatalogSource {
 
-	private final MarketplaceService marketplaceService;
+	private final IMarketplaceService marketplaceService;
 
 	private ResourceProvider resourceProvider;
 
-	public MarketplaceCatalogSource(MarketplaceService marketplaceService) {
+	public MarketplaceCatalogSource(IMarketplaceService marketplaceService) {
 		this.marketplaceService = marketplaceService;
 		try {
 			resourceProvider = new ResourceProvider();
@@ -48,7 +49,7 @@ public class MarketplaceCatalogSource extends AbstractCatalogSource {
 		return resourceProvider;
 	}
 
-	public MarketplaceService getMarketplaceService() {
+	public IMarketplaceService getMarketplaceService() {
 		return marketplaceService;
 	}
 

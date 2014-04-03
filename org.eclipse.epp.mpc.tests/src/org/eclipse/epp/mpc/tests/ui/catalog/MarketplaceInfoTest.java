@@ -7,6 +7,7 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
+ * 	Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui.catalog;
 
@@ -23,6 +24,7 @@ import org.eclipse.epp.internal.mpc.core.service.Ius;
 import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceInfo;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
+import org.eclipse.epp.mpc.core.model.INode;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -88,7 +90,7 @@ public class MarketplaceInfoTest {
 		Set<String> installedIus = new HashSet<String>();
 		installedIus.add("com.foo.bar");
 
-		Set<Node> installedCatalogNodeIds = catalogRegistry.computeInstalledNodes(item.getMarketplaceUrl(),
+		Set<? extends INode> installedCatalogNodeIds = catalogRegistry.computeInstalledNodes(item.getMarketplaceUrl(),
 				installedIus);
 		assertNotNull(installedCatalogNodeIds);
 		assertEquals(0, installedCatalogNodeIds.size());
@@ -138,7 +140,7 @@ public class MarketplaceInfoTest {
 	@Test
 	@SuppressWarnings("deprecation")
 	public void computeInstalledLegacy() throws Exception {
-		Node node = item.getData();
+		Node node = (Node) item.getData();
 
 		assertTrue(item.getInstallableUnits().size() > 1);
 		assertEquals(0, catalogRegistry.getNodeKeyToIU().size());

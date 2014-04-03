@@ -7,15 +7,23 @@
  *
  * Contributors:
  *     Tasktop Technologies - initial API and implementation
+ *     Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service;
+
+import org.eclipse.epp.mpc.core.model.ITag;
 
 /**
  * @author Benjamin Muskalla
  */
-public class Tag extends Identifiable {
+public class Tag extends Identifiable implements ITag {
 
 	public Tag() {
+	}
+
+	@Override
+	protected boolean equalsType(Object obj) {
+		return obj instanceof ITag;
 	}
 
 }

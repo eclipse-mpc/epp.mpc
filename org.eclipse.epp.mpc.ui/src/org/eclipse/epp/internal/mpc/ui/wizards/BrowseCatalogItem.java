@@ -7,7 +7,7 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
- *  Yatta Solutions - bug 397004
+ *  Yatta Solutions - bug 397004, bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
@@ -17,12 +17,12 @@ import java.net.URL;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.epp.internal.mpc.core.service.Category;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
-import org.eclipse.epp.internal.mpc.core.service.Market;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
+import org.eclipse.epp.mpc.core.model.ICategory;
+import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.AbstractDiscoveryItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryResources;
@@ -101,8 +101,8 @@ public class BrowseCatalogItem extends AbstractDiscoveryItem<CatalogDescriptor> 
 				ContentType contentType = viewer.getQueryContentType();
 				if (contentType == ContentType.SEARCH) {
 					String queryText = viewer.getQueryText();
-					Category queryCategory = viewer.getQueryCategory();
-					Market queryMarket = viewer.getQueryMarket();
+					ICategory queryCategory = viewer.getQueryCategory();
+					IMarket queryMarket = viewer.getQueryMarket();
 					String path = new DefaultMarketplaceService(url).computeRelativeSearchUrl(queryMarket,
 							queryCategory, queryText, false);
 					if (path != null) {

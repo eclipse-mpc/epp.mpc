@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
+ *     Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui.catalog;
 
@@ -31,6 +32,8 @@ import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
+import org.eclipse.epp.mpc.core.model.IIus;
+import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.junit.Before;
@@ -38,20 +41,20 @@ import org.junit.Test;
 
 public class MarketplaceCatalogTest {
 
-	protected Set<Node> installedNodes;
+	protected Set<INode> installedNodes;
 
-	protected Set<Node> updateAvailable;
+	protected Set<INode> updateAvailable;
 
-	protected Set<Node> checkedForUpdate;
+	protected Set<INode> checkedForUpdate;
 	protected List<Node> discoveryNodes;
 
 	private MarketplaceCatalog catalog;
 
 	@Before
 	public void setUp() throws Exception {
-		installedNodes = new HashSet<Node>();
-		updateAvailable = new HashSet<Node>();
-		checkedForUpdate = new HashSet<Node>();
+		installedNodes = new HashSet<INode>();
+		updateAvailable = new HashSet<INode>();
+		checkedForUpdate = new HashSet<INode>();
 		discoveryNodes = new ArrayList<Node>();
 
 		setupNodes();
@@ -107,8 +110,8 @@ public class MarketplaceCatalogTest {
 			@Override
 			protected Set<String> computeInstalledFeatures(IProgressMonitor monitor) {
 				Set<String> installedIuIds = new HashSet<String>();
-				for (Node node : installedNodes) {
-					Ius ius = node.getIus();
+				for (INode node : installedNodes) {
+					IIus ius = node.getIus();
 					if (ius != null) {
 						for (String iu : ius.getIu()) {
 							installedIuIds.add(iu + ".feature.group");

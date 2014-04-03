@@ -7,12 +7,15 @@
  *
  * Contributors:
  *      The Eclipse Foundation - initial API and implementation
+ *      Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service;
 
 /**
  * @author David Green
+ * @deprecated unused, will be removed in a future version
  */
+@Deprecated
 @SuppressWarnings("serial")
 public class NotFoundException extends Exception {
 

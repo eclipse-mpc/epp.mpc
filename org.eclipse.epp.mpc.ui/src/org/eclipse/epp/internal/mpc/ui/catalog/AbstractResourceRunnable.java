@@ -29,7 +29,7 @@ import org.eclipse.osgi.util.NLS;
 
 /**
  * A runnable that downloads a resource from an URL
- * 
+ *
  * @author David Green
  */
 abstract class AbstractResourceRunnable implements IRunnableWithProgress, Callable<Object> {
@@ -61,7 +61,7 @@ abstract class AbstractResourceRunnable implements IRunnableWithProgress, Callab
 		try {
 			URL imageUrl = new URL(resourceUrl);
 
-			InputStream in = TransportFactory.instance().getTransport().stream(imageUrl.toURI(), monitor);
+			InputStream in = TransportFactory.createTransport().stream(imageUrl.toURI(), monitor);
 			try {
 				resourceProvider.putResource(resourceUrl, in);
 			} finally {

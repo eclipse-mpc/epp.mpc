@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
+ *     Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
@@ -24,13 +25,14 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.operations.FeatureDescriptor;
+import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.osgi.util.NLS;
 
 /**
  * A model of selected items in the catalog. Provides feature-level selection fidelity, and stores the selected
  * operation.
- * 
+ *
  * @author David Green
  */
 public class SelectionModel {
@@ -47,7 +49,21 @@ public class SelectionModel {
 
 	/**
 	 * Select the given item with the given operation.
-	 * 
+	 *
+	 * @param item
+	 *            the item to select
+	 * @param operation
+	 *            the operation to perform. Providing {@link Operation#NONE} removes the selection
+	 * @deprecated use {@link #select(CatalogItem, Operation)} instead
+	 */
+	@Deprecated
+	public void select(CatalogItem item, org.eclipse.epp.internal.mpc.ui.wizards.Operation operation) {
+		select(item, operation == null ? null : operation.getOperation());
+	}
+
+	/**
+	 * Select the given item with the given operation.
+	 *
 	 * @param item
 	 *            the item to select
 	 * @param operation
@@ -106,6 +122,15 @@ public class SelectionModel {
 		return entries;
 	}
 
+	/**
+	 * @deprecated use {@link #createItemEntry(CatalogItem, Operation)} instead
+	 */
+	@Deprecated
+	public CatalogItemEntry createItemEntry(CatalogItem item,
+			org.eclipse.epp.internal.mpc.ui.wizards.Operation operation) {
+		return createItemEntry(item, operation == null ? null : operation.getOperation());
+	}
+
 	public CatalogItemEntry createItemEntry(CatalogItem item, Operation operation) {
 		CatalogItemEntry itemEntry = new CatalogItemEntry(item, operation);
 		computeChildren(itemEntry);
@@ -131,7 +156,7 @@ public class SelectionModel {
 
 	private void computeInitialChecked(FeatureEntry entry) {
 		Operation operation = entry.parent.operation;
-		if (operation == Operation.CHECK_FOR_UPDATES) {
+		if (operation == Operation.UPDATE) {
 			if (entry.isInstalled()) {
 				entry.checked = true;
 			}
@@ -156,7 +181,15 @@ public class SelectionModel {
 			return item;
 		}
 
-		public Operation getOperation() {
+		/**
+		 * @deprecated use {@link #getSelectedOperation()}
+		 */
+		@Deprecated
+		public org.eclipse.epp.internal.mpc.ui.wizards.Operation getOperation() {
+			return org.eclipse.epp.internal.mpc.ui.wizards.Operation.map(operation);
+		}
+
+		public Operation getSelectedOperation() {
 			return operation;
 		}
 
@@ -285,7 +318,20 @@ public class SelectionModel {
 
 	}
 
-	public Map<CatalogItem, Operation> getItemToOperation() {
+	/**
+	 * @deprecated use {@link #getItemToSelectedOperation()} instead
+	 */
+	@Deprecated
+	public Map<CatalogItem, org.eclipse.epp.internal.mpc.ui.wizards.Operation> getItemToOperation() {
+		Map<CatalogItem, org.eclipse.epp.internal.mpc.ui.wizards.Operation> itemToOperation = new HashMap<CatalogItem, org.eclipse.epp.internal.mpc.ui.wizards.Operation>();
+		Set<Entry<CatalogItem, Operation>> entrySet = this.itemToOperation.entrySet();
+		for (Entry<CatalogItem, Operation> entry : entrySet) {
+			itemToOperation.put(entry.getKey(), org.eclipse.epp.internal.mpc.ui.wizards.Operation.map(entry.getValue()));
+		}
+		return itemToOperation;
+	}
+
+	public Map<CatalogItem, Operation> getItemToSelectedOperation() {
 		return Collections.unmodifiableMap(itemToOperation);
 	}
 
@@ -321,7 +367,16 @@ public class SelectionModel {
 		return Collections.unmodifiableSet(items);
 	}
 
-	public Operation getOperation(CatalogItem item) {
+	/**
+	 * @deprecated use {@link #getSelectedOperation(CatalogItem)} instead
+	 */
+	@Deprecated
+	public org.eclipse.epp.internal.mpc.ui.wizards.Operation getOperation(CatalogItem item) {
+		Operation operation = getSelectedOperation(item);
+		return org.eclipse.epp.internal.mpc.ui.wizards.Operation.map(operation);
+	}
+
+	public Operation getSelectedOperation(CatalogItem item) {
 		Operation operation = itemToOperation.get(item);
 		return operation == null ? Operation.NONE : operation;
 	}
@@ -345,7 +400,7 @@ public class SelectionModel {
 
 	/**
 	 * Determine what message related to finishing the wizard should correspond to the current selection.
-	 * 
+	 *
 	 * @return the message, or null if there should be no message.
 	 */
 	public IStatus computeProvisioningOperationViability() {
@@ -364,7 +419,7 @@ public class SelectionModel {
 									Messages.SelectionModel_countSolutions, entry.getValue().size()), entry.getKey()
 									.getLabel()));
 		} else if (operationToItem.size() == 2 && operationToItem.containsKey(Operation.INSTALL)
-				&& operationToItem.containsKey(Operation.CHECK_FOR_UPDATES)) {
+				&& operationToItem.containsKey(Operation.UPDATE)) {
 			int count = 0;
 			for (List<CatalogItem> items : operationToItem.values()) {
 				count += items.size();
@@ -372,7 +427,7 @@ public class SelectionModel {
 			return new Status(IStatus.INFO, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
 					Messages.SelectionModel_countSolutionsSelectedForInstallUpdate, count));
 		} else if (operationToItem.size() > 1) {
-			if (!(operationToItem.size() == 2 && operationToItem.containsKey(Operation.INSTALL) && operationToItem.containsKey(Operation.CHECK_FOR_UPDATES))) {
+			if (!(operationToItem.size() == 2 && operationToItem.containsKey(Operation.INSTALL) && operationToItem.containsKey(Operation.UPDATE))) {
 				return new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
 						Messages.SelectionModel_cannotInstallRemoveConcurrently);
 			}
@@ -381,7 +436,7 @@ public class SelectionModel {
 	}
 
 	private Map<Operation, List<CatalogItem>> computeOperationToItem() {
-		Map<CatalogItem, Operation> itemToOperation = getItemToOperation();
+		Map<CatalogItem, Operation> itemToOperation = getItemToSelectedOperation();
 		Map<Operation, List<CatalogItem>> catalogItemByOperation = new HashMap<Operation, List<CatalogItem>>();
 		for (Map.Entry<CatalogItem, Operation> entry : itemToOperation.entrySet()) {
 			if (entry.getValue() == Operation.NONE) {

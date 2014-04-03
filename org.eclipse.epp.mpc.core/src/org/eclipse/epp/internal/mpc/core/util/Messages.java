@@ -20,6 +20,8 @@ class Messages extends NLS {
 	public static String DefaultMarketplaceService_serviceUnavailable503;
 
 	public static String ProxyHelper_replacingAuthenticator;
+
+	public static String ServiceUtil_ignoringIncompatibleServiceProperty;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

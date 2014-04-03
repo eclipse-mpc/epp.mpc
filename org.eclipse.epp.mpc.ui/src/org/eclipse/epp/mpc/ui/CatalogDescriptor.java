@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2014 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,18 +7,24 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
+ * 	Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.mpc.ui;
 
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
+import org.eclipse.epp.mpc.core.model.ICatalog;
+import org.eclipse.epp.mpc.core.model.ICatalogBranding;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 /**
  * A descriptor for identifying a solutions catalog, ie: a location that implements the Eclipse Marketplace API.
- * 
+ *
  * @author David Green
+ * @see org.eclipse.epp.mpc.core.model.ICatalog
  * @see MarketplaceClient#addCatalogDescriptor(CatalogDescriptor)
  */
 public final class CatalogDescriptor {
@@ -29,6 +35,8 @@ public final class CatalogDescriptor {
 	private String description;
 
 	private ImageDescriptor icon;
+
+	private ICatalogBranding catalogBranding;
 
 	private boolean installFromAllRepositories;
 
@@ -60,6 +68,21 @@ public final class CatalogDescriptor {
 		this.installFromAllRepositories = catalogDescriptor.installFromAllRepositories;
 	}
 
+	public CatalogDescriptor(ICatalog catalog) throws MalformedURLException {
+		setLabel(catalog.getName());
+		setUrl(new URL(catalog.getUrl()));
+		setIcon(ImageDescriptor.createFromURL(new URL(catalog.getImageUrl())));
+		setDescription(catalog.getDescription());
+		setInstallFromAllRepositories(!catalog.isSelfContained());
+		if (catalog.getDependencyRepository() != null) {
+			setDependenciesRepository(new URL(catalog.getDependencyRepository()));
+		}
+		setCatalogBranding(catalog.getBranding());
+		if (catalog.getNews() != null) {
+			CatalogRegistry.getInstance().addCatalogNews(this, catalog.getNews());
+		}
+	}
+
 	/**
 	 * The URL of the catalog. The URL identifies the catalog location, which provides an API described by <a
 	 * href="http://wiki.eclipse.org/Marketplace/REST">Marketplace REST</a>
@@ -74,7 +97,7 @@ public final class CatalogDescriptor {
 
 	/**
 	 * A description of the catalog, presented to the user. Should be brief (ie: one or two sentences).
-	 * 
+	 *
 	 * @return the description or null if there is no description
 	 */
 	public String getDescription() {
@@ -112,7 +135,7 @@ public final class CatalogDescriptor {
 	 * configuration. When false installation resolves only against repositories of the selected catalog items including
 	 * repositories considered as default for the catalog. Currently there is no way to define catalog default
 	 * repositories, however it is expected that this may change in the future. The default value is false.
-	 * 
+	 *
 	 * @return true if installation occurs from all repositories, otherwise false.
 	 */
 	public boolean isInstallFromAllRepositories() {
@@ -139,6 +162,20 @@ public final class CatalogDescriptor {
 	 */
 	public void setDependenciesRepository(URL dependenciesRepository) {
 		this.dependenciesRepository = dependenciesRepository;
+	}
+
+	/**
+	 * Branding information controlling wizard title and icon and available tabs.
+	 */
+	public ICatalogBranding getCatalogBranding() {
+		return catalogBranding;
+	}
+
+	/**
+	 * @see #getCatalogBranding()
+	 */
+	public void setCatalogBranding(ICatalogBranding catalogBranding) {
+		this.catalogBranding = catalogBranding;
 	}
 
 	@Override
@@ -190,5 +227,4 @@ public final class CatalogDescriptor {
 	public String toString() {
 		return "CatalogDescriptor [url=" + url + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
-
 }

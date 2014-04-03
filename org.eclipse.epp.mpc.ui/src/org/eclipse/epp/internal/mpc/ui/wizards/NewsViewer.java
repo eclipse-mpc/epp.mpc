@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Yatta Solutions - initial API and implementation
+ *     Yatta Solutions - initial API and implementation, public API (bug 432803)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.epp.internal.mpc.core.service.News;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.mpc.core.model.INews;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -157,7 +158,7 @@ public class NewsViewer {
 		}
 	}
 
-	public void showNews(News news) {
+	public void showNews(INews news) {
 		final String url = news.getUrl();
 		if (url != null && url.length() > 0) {
 			showUrl(url);
@@ -200,7 +201,7 @@ public class NewsViewer {
 		}
 	}
 
-	public boolean isUpdated(News news) {
+	public boolean isUpdated(INews news) {
 		String url = news.getUrl();
 		if (url == null || url.length() == 0) {
 			return false;
@@ -214,7 +215,7 @@ public class NewsViewer {
 		return true;
 	}
 
-	private String computeNewsStamp(News news) {
+	private String computeNewsStamp(INews news) {
 		return NLS.bind("[{0}]{1}", news.getTimestamp(), news.getUrl()); //$NON-NLS-1$
 	}
 

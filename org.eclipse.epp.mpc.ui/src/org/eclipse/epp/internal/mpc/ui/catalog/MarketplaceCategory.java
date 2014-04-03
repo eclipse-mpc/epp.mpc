@@ -7,13 +7,14 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
+ * 	Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.catalog;
 
 import java.util.List;
 
-import org.eclipse.epp.internal.mpc.core.service.Market;
-import org.eclipse.epp.internal.mpc.core.service.SearchResult;
+import org.eclipse.epp.mpc.core.model.IMarket;
+import org.eclipse.epp.mpc.core.model.ISearchResult;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 
 /**
@@ -25,17 +26,17 @@ public class MarketplaceCategory extends CatalogCategory {
 		FEATURED, POPULAR, INSTALLED, RECENT, QUERY
 	}
 
-	private List<Market> markets;
+	private List<? extends IMarket> markets;
 
 	private Contents contents;
 
 	private int matchCount;
 
-	public void setMarkets(List<Market> markets) {
+	public void setMarkets(List<? extends IMarket> markets) {
 		this.markets = markets;
 	}
 
-	public List<Market> getMarkets() {
+	public List<? extends IMarket> getMarkets() {
 		return markets;
 	}
 
@@ -54,7 +55,7 @@ public class MarketplaceCategory extends CatalogCategory {
 	/**
 	 * Indicate how many solutions matched the query, which may not be the same as the number of nodes returned.
 	 * 
-	 * @see SearchResult#getMatchCount()
+	 * @see ISearchResult#getMatchCount()
 	 */
 	public int getMatchCount() {
 		return matchCount;

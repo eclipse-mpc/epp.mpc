@@ -7,14 +7,11 @@
  *
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
+ *     Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -22,21 +19,20 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Map;
 
-import javax.xml.parsers.SAXParserFactory;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
-import org.eclipse.epp.internal.mpc.core.service.xml.Unmarshaller;
-import org.eclipse.epp.internal.mpc.core.util.ITransport;
+import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
 import org.eclipse.epp.internal.mpc.core.util.TransportFactory;
+import org.eclipse.epp.mpc.core.service.IMarketplaceService;
+import org.eclipse.epp.mpc.core.service.IMarketplaceUnmarshaller;
+import org.eclipse.epp.mpc.core.service.ITransport;
+import org.eclipse.epp.mpc.core.service.ServiceHelper;
+import org.eclipse.epp.mpc.core.service.UnmarshalException;
 import org.eclipse.osgi.util.NLS;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
 
 public class RemoteMarketplaceService<T> {
 
@@ -46,9 +42,21 @@ public class RemoteMarketplaceService<T> {
 
 	protected static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
 
-	private final ITransport transport = TransportFactory.instance().getTransport();
+	protected final ITransport transport;
+
+	protected final IMarketplaceUnmarshaller unmarshaller;
 
 	private Map<String, String> requestMetaParameters;
+
+	public RemoteMarketplaceService() {
+		this.transport = TransportFactory.createTransport();
+		IMarketplaceUnmarshaller unmarshaller = ServiceHelper.getMarketplaceUnmarshaller();
+		if (unmarshaller == null) {
+			//no unmarshaller registered, create a default instance
+			unmarshaller = new MarketplaceUnmarshaller();
+		}
+		this.unmarshaller = unmarshaller;
+	}
 
 	protected IStatus createErrorStatus(String message, Throwable t) {
 		return new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID, 0, message, t);
@@ -115,38 +123,23 @@ public class RemoteMarketplaceService<T> {
 			throw new CoreException(createErrorStatus(message, e));
 		}
 
-		final Unmarshaller unmarshaller = new Unmarshaller();
 		monitor.beginTask(NLS.bind(Messages.DefaultMarketplaceService_retrievingDataFrom, baseUri), 100);
 		try {
-			SAXParserFactory parserFactory = SAXParserFactory.newInstance();
-			parserFactory.setNamespaceAware(true);
-			final XMLReader xmlReader;
-			try {
-				xmlReader = parserFactory.newSAXParser().getXMLReader();
-			} catch (Exception e1) {
-				throw new IllegalStateException(e1);
-			}
-			xmlReader.setContentHandler(unmarshaller);
-
 			InputStream in = transport.stream(location, monitor);
 			try {
 				monitor.worked(30);
 
-				// FIXME how can the charset be determined?
-				Reader reader = new InputStreamReader(new BufferedInputStream(in), UTF_8);
-				try {
-					xmlReader.parse(new InputSource(reader));
-				} catch (final SAXException e) {
-					MarketplaceClientCore.error(
-							NLS.bind(Messages.DefaultMarketplaceService_parseError, location.toString()), e);
-					throw new IOException(e.getMessage());
-				}
+				return (T) unmarshaller.unmarshal(in, Object.class, monitor);//FIXME having T.class available here would be great...
+			} catch (UnmarshalException e) {
+				MarketplaceClientCore.error(
+						NLS.bind(Messages.DefaultMarketplaceService_parseError, location.toString()), e);
+				throw e;
 			} finally {
 				if (in != null) {
 					in.close();
 				}
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			if (e.getCause() instanceof OperationCanceledException) {
 				throw new CoreException(Status.CANCEL_STATUS);
 			}
@@ -155,20 +148,6 @@ public class RemoteMarketplaceService<T> {
 			throw new CoreException(createErrorStatus(message, e));
 		} finally {
 			monitor.done();
-		}
-
-		Object model = unmarshaller.getModel();
-		if (model == null) {
-			// if we reach here this should never happen
-			throw new IllegalStateException();
-		} else {
-			try {
-				return (T) model;
-			} catch (Exception e) {
-				String message = NLS.bind(Messages.DefaultMarketplaceService_unexpectedResponseContent,
-						model.getClass().getSimpleName());
-				throw new CoreException(createErrorStatus(message, null));
-			}
 		}
 	}
 
@@ -210,12 +189,30 @@ public class RemoteMarketplaceService<T> {
 
 	/**
 	 * The meta-parameters to be included in API requests
-	 * 
+	 *
 	 * @param requestMetaParameters
 	 *            the parameters or null if there should be none
 	 */
 	public void setRequestMetaParameters(Map<String, String> requestMetaParameters) {
 		this.requestMetaParameters = requestMetaParameters;
+	}
+
+	protected static String urlEncode(String urlPart) {
+		try {
+			return URLEncoder.encode(urlPart, UTF_8);
+		} catch (UnsupportedEncodingException e) {
+			// should never happen
+			throw new IllegalStateException(e);
+		}
+	}
+
+	public void activate(Map<?, ?> properties) {
+		if (properties != null) {
+			URL url = ServiceUtil.getUrl(properties, IMarketplaceService.BASE_URL, null);
+			if (url != null) {
+				setBaseUrl(url);
+			}
+		}
 	}
 
 }

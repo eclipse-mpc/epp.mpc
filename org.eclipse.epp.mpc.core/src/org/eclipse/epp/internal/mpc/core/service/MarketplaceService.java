@@ -7,6 +7,7 @@
  *
  * Contributors:
  *      The Eclipse Foundation - initial API and implementation
+ *      Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service;
 
@@ -21,7 +22,9 @@ import org.eclipse.core.runtime.IStatus;
  * a service that provides access to the marketplace.
  * 
  * @author David Green
+ * @deprecated use {@link org.eclipse.epp.mpc.core.service.IMarketplaceService}
  */
+@Deprecated
 public interface MarketplaceService {
 
 	/**

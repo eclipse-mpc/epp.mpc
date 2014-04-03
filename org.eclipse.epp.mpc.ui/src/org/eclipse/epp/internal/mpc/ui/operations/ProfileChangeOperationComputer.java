@@ -4,10 +4,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Tasktop Technologies - initial API and implementation
  *     JBoss (Pascal Rapicault) - Bug 406907 - Add p2 remediation page to MPC install flow
+ *     Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.operations;
 
@@ -51,7 +52,7 @@ import org.eclipse.swt.widgets.Display;
  * A job that configures a p2 provisioning operation for installing/updating/removing one or more {@link CatalogItem
  * connectors}. The bulk of the installation work is done by p2; this class just sets up the p2 repository meta-data and
  * selects the appropriate features to install.
- * 
+ *
  * @author David Green
  * @author Steffen Pingel
  */
@@ -73,7 +74,26 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 		/**
 		 * uninstall features
 		 */
-		UNINSTALL
+		UNINSTALL;
+
+		public static OperationType map(org.eclipse.epp.mpc.ui.Operation operation) {
+			if (operation == null) {
+				return null;
+			}
+			switch (operation) {
+			case INSTALL:
+				return INSTALL;
+			case UNINSTALL:
+				return UNINSTALL;
+			case UPDATE:
+				return UPDATE;
+			case NONE:
+				return null;
+			default:
+				throw new IllegalArgumentException(NLS.bind(Messages.ProfileChangeOperationComputer_unknownOperation,
+						operation));
+			}
+		}
 	}
 
 	private final OperationType operationType;
@@ -308,7 +328,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 
 	/**
 	 * Remove ius from the given list where the current profile already contains a newer version of that iu.
-	 * 
+	 *
 	 * @param installableUnits
 	 * @throws CoreException
 	 */

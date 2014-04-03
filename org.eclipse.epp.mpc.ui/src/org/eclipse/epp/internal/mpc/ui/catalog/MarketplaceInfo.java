@@ -7,6 +7,7 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
+ * 	Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.catalog;
 
@@ -33,6 +34,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
+import org.eclipse.epp.mpc.core.model.INode;
 
 /**
  * A means of knowing about how nodes map to IUs and visa versa. Can handle nodes from multiple marketplaces, and does a
@@ -78,8 +80,8 @@ public class MarketplaceInfo {
 	 *            all of the currently installed IUs
 	 * @return a set of node ids, or an empty set if there are no known installed nodes
 	 */
-	public synchronized Set<Node> computeInstalledNodes(URL repositoryUrl, Set<String> installedIus) {
-		Set<Node> nodes = new HashSet<Node>();
+	public synchronized Set<INode> computeInstalledNodes(URL repositoryUrl, Set<String> installedIus) {
+		Set<INode> nodes = new HashSet<INode>();
 
 		String keyPrefix = computeUrlKey(repositoryUrl) + '#';
 		for (Map.Entry<String, List<String>> entry : nodeKeyToIU.entrySet()) {
@@ -110,7 +112,7 @@ public class MarketplaceInfo {
 	 * @deprecated use {@link #computeInstalled(Set, INode)} instead
 	 */
 	@Deprecated
-	public boolean computeInstalled(Set<String> installedFeatures, Set<URI> knownRepositories, Node node) {
+	public boolean computeInstalled(Set<String> installedFeatures, Set<URI> knownRepositories, INode node) {
 		String updateurl = node.getUpdateurl();
 		if (updateurl == null) {
 			// don't consider installed if there's no update site
@@ -137,7 +139,7 @@ public class MarketplaceInfo {
 	 * Compute if the given node is installed. The given node must be fully realized, including its
 	 * {@link Node#getIus() ius}.
 	 */
-	public boolean computeInstalled(Set<String> installedFeatures, Node node) {
+	public boolean computeInstalled(Set<String> installedFeatures, INode node) {
 		if (node.getIus() != null && !node.getIus().getIu().isEmpty()) {
 			List<String> ius = new ArrayList<String>(new HashSet<String>(node.getIus().getIu()));
 			return computeInstalled(installedFeatures, ius);
@@ -156,7 +158,7 @@ public class MarketplaceInfo {
 		return installCount > 0;
 	}
 
-	public synchronized void map(URL marketUrl, Node node) {
+	public synchronized void map(URL marketUrl, INode node) {
 		String itemKey = computeItemKey(marketUrl, node);
 		if (node.getIus() != null && !node.getIus().getIu().isEmpty()) {
 			List<String> ius = new ArrayList<String>(new HashSet<String>(node.getIus().getIu()));
@@ -189,7 +191,7 @@ public class MarketplaceInfo {
 		}
 	}
 
-	private String computeItemKey(URL marketUrl, Node item) {
+	private String computeItemKey(URL marketUrl, INode item) {
 		return computeUrlKey(marketUrl) + '#' + item.getId();
 	}
 

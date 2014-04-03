@@ -7,12 +7,11 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
+ *     Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.service;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -20,14 +19,22 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.epp.internal.mpc.core.MarketplaceClientCorePlugin;
 import org.eclipse.epp.internal.mpc.core.ServiceLocator;
 import org.eclipse.epp.internal.mpc.core.service.Catalog;
 import org.eclipse.epp.internal.mpc.core.service.CatalogService;
+import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
+import org.eclipse.epp.mpc.core.model.ICatalog;
+import org.eclipse.epp.mpc.core.service.ICatalogService;
+import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 
 /**
  * @author Benjamin Muskalla
@@ -43,23 +50,29 @@ public class CatalogServiceTest {
 		}
 	}
 
-	private CatalogService catalogService;
+	private ICatalogService catalogService;
 
-	private ServiceLocator serviceLocator;
+	private IMarketplaceServiceLocator serviceLocator;
+
+	private ServiceReference<IMarketplaceServiceLocator> serviceLocatorReference;
+
+	private BundleContext bundleContext;
 
 	@Before
 	public void setUp() throws Exception {
-		serviceLocator = ServiceLocator.getInstance();
+		bundleContext = MarketplaceClientCorePlugin.getBundle().getBundleContext();
+		serviceLocatorReference = bundleContext.getServiceReference(IMarketplaceServiceLocator.class);
+		serviceLocator = bundleContext.getService(serviceLocatorReference);
 		catalogService = serviceLocator.getCatalogService();
 	}
 
 	@Test
 	public void listCatalogs() throws CoreException {
-		List<Catalog> catalogs = catalogService.listCatalogs(new NullProgressMonitor());
+		List<? extends ICatalog> catalogs = catalogService.listCatalogs(new NullProgressMonitor());
 		assertNotNull(catalogs);
 		assertFalse(catalogs.isEmpty());
 
-		for (Catalog catalog : catalogs) {
+		for (ICatalog catalog : catalogs) {
 			assertNotNull(catalog.getId());
 			assertNotNull(catalog.getUrl());
 			assertNotNull(catalog.getName());
@@ -68,20 +81,31 @@ public class CatalogServiceTest {
 
 	@Test
 	public void testSampleCatalog() throws Exception {
-		ServiceLocator.setInstance(new ServiceLocator() {
-			@Override
-			public CatalogService getCatalogService() {
-				return new MockCatalogService();
-			}
-		});
-		catalogService = ServiceLocator.getInstance().getCatalogService();
-		List<Catalog> catalogs = catalogService.listCatalogs(null);
-		assertEquals(1, catalogs.size());
-		assertEquals("mock", catalogs.get(0).getId());
+		//		ServiceLocator oldInstance = ServiceLocator.getInstance();
+		//		ServiceLocator.setInstance(new ServiceLocator() {
+		//			@Override
+		//			public ICatalogService getCatalogService() {
+		//				return new MockCatalogService();
+		//			}
+		//		});
+		ServiceRegistration<ICatalogService> registration = bundleContext.registerService(ICatalogService.class,
+				new MockCatalogService(), ServiceUtil.serviceRanking(Integer.MAX_VALUE, null));
+		try {
+			catalogService = ServiceLocator.getInstance().getCatalogService();
+			List<? extends ICatalog> catalogs = catalogService.listCatalogs(null);
+			assertEquals(1, catalogs.size());
+			assertEquals("mock", catalogs.get(0).getId());
+		} finally {
+			//			ServiceLocator.setInstance(oldInstance);
+			registration.unregister();
+		}
 	}
 
 	@After
 	public void tearDown() {
-		ServiceLocator.setInstance(serviceLocator);
+		serviceLocator = null;
+		bundleContext.ungetService(serviceLocatorReference);
+		serviceLocatorReference = null;
+		bundleContext = null;
 	}
 }

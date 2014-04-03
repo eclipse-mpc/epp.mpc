@@ -7,14 +7,17 @@
  * 
  * Contributors:
  *      The Eclipse Foundation  - initial API and implementation
+ *      Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service;
+
+import org.eclipse.epp.mpc.core.model.ICategories;
 
 
 /**
  * @author David Green
  */
-public class Categories {
+public class Categories implements ICategories {
 	
 	protected java.util.List<Category> category = new java.util.ArrayList<Category>();
 	

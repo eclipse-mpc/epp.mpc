@@ -7,13 +7,16 @@
  *
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
+ *     Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service;
+
+import org.eclipse.epp.mpc.core.model.INews;
 
 /**
  * @author Carsten Reckord
  */
-public class News {
+public class News implements INews {
 
 	private String url;
 

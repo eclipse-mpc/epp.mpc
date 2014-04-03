@@ -7,29 +7,26 @@
  *
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
+ *     Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui.wizard;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.net.URL;
 
-import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
-import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceUrlHandler;
-import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceUrlHandler.SolutionInstallationInfo;
+import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
+import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler;
+import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler.SolutionInstallationInfo;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
  * Test {@link MarketplaceUrlHandler}
- * 
+ *
  * @author Benjamin Muskalla
  */
 public class MarketplaceUrlHandlerTest {
@@ -91,10 +88,10 @@ public class MarketplaceUrlHandlerTest {
 
 	@Test
 	public void testNodeUrls() throws Exception {
-		final Node[] testNode = new Node[1];
+		final INode[] testNode = new INode[1];
 		MarketplaceUrlHandler handler = new MarketplaceUrlHandler() {
 			@Override
-			protected boolean handleNode(CatalogDescriptor descriptor, String url, Node node) {
+			protected boolean handleNode(CatalogDescriptor descriptor, String url, INode node) {
 				testNode[0] = node;
 				return true;
 			}

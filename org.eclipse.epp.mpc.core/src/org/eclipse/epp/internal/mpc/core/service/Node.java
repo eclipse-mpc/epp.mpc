@@ -4,17 +4,20 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *      The Eclipse Foundation  - initial API and implementation
+ *      Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service;
+
+import org.eclipse.epp.mpc.core.model.INode;
 
 /**
  * @author David Green
  * @author Benjamin Muskalla
  */
-public class Node extends Identifiable {
+public class Node extends Identifiable implements INode {
 
 	protected Integer favorited;
 	protected Integer installsTotal;
@@ -264,4 +267,8 @@ public class Node extends Identifiable {
 		this.platforms = platforms;
 	}
 
+	@Override
+	protected boolean equalsType(Object obj) {
+		return obj instanceof INode;
+	}
 }

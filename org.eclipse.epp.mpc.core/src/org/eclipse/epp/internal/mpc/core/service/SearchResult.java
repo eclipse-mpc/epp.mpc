@@ -7,15 +7,18 @@
  *
  * Contributors:
  *      The Eclipse Foundation - initial API and implementation
+ *      Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service;
 
 import java.util.List;
 
+import org.eclipse.epp.mpc.core.model.ISearchResult;
+
 /**
  * @author David Green
  */
-public class SearchResult {
+public class SearchResult implements ISearchResult {
 
 	private Integer matchCount;
 

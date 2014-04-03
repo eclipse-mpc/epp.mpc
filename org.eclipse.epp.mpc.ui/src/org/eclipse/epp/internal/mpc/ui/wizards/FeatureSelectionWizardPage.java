@@ -8,6 +8,7 @@
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
  *     JBoss (Pascal Rapicault) - Bug 406907 - Add p2 remediation page to MPC install flow
+ *     Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
@@ -82,8 +83,8 @@ public class FeatureSelectionWizardPage extends WizardPage {
 		public Image getImage(Object element) {
 			if (element instanceof FeatureEntry) {
 				FeatureEntry entry = (FeatureEntry) element;
-				switch (entry.getParent().getOperation()) {
-				case CHECK_FOR_UPDATES:
+				switch (entry.getParent().getSelectedOperation()) {
+				case UPDATE:
 					if (entry.isInstalled()) {
 						return MarketplaceClientUiPlugin.getInstance()
 								.getImageRegistry()
@@ -294,7 +295,7 @@ public class FeatureSelectionWizardPage extends WizardPage {
 	private void updateFeatures() {
 		viewer.setInput(getWizard().getSelectionModel());
 		ResolveFeatureNamesOperation operation = new ResolveFeatureNamesOperation(new ArrayList<CatalogItem>(
-				getWizard().getSelectionModel().getItemToOperation().keySet())) {
+				getWizard().getSelectionModel().getItemToSelectedOperation().keySet())) {
 
 			Display display = getControl().getDisplay();
 

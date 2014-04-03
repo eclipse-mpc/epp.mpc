@@ -97,6 +97,10 @@ class Messages extends NLS {
 
 	public static String MarketplaceBrowserIntegration_cannotOpenMarketplaceWizard;
 
+	public static String MarketplaceCatalogConfiguration_invalidStateObject;
+
+	public static String MarketplaceClientService_noProvisioningOperation;
+
 	public static String MarketplaceDropAdapter_0;
 
 	public static String MarketplacePage_DefaultNewsTitle;
@@ -160,6 +164,8 @@ class Messages extends NLS {
 	public static String Operation_install;
 
 	public static String Operation_uninstall;
+
+	public static String Operation_unknownOperation;
 
 	public static String Operation_update;
 

@@ -4,17 +4,20 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *      The Eclipse Foundation  - initial API and implementation
+ *      Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service;
+
+import org.eclipse.epp.mpc.core.model.ICatalogBranding;
 
 
 /**
  * @author Benjamin Muskalla
  */
-public class CatalogBranding extends Identifiable {
+public class CatalogBranding extends Identifiable implements ICatalogBranding {
 
 	private String wizardIcon;
 
@@ -96,4 +99,8 @@ public class CatalogBranding extends Identifiable {
 		this.wizardTitle = wizardTitle;
 	}
 
+	@Override
+	protected boolean equalsType(Object obj) {
+		return obj instanceof ICatalogBranding;
+	}
 }

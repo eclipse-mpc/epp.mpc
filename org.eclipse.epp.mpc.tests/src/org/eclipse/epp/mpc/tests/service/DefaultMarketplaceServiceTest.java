@@ -7,14 +7,12 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
+ *     Yatta Solutions - bug 432803: public API
  *  Yatta Solutions - bug 397004
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,9 +26,11 @@ import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.service.Category;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.service.Market;
-import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.core.service.RemoteMarketplaceService;
-import org.eclipse.epp.internal.mpc.core.service.SearchResult;
+import org.eclipse.epp.mpc.core.model.ICategory;
+import org.eclipse.epp.mpc.core.model.IMarket;
+import org.eclipse.epp.mpc.core.model.INode;
+import org.eclipse.epp.mpc.core.model.ISearchResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,28 +56,27 @@ public class DefaultMarketplaceServiceTest {
 
 	@Test
 	public void listMarkets() throws CoreException {
-		List<Market> markets = marketplaceService.listMarkets(new NullProgressMonitor());
+		List<? extends IMarket> markets = marketplaceService.listMarkets(new NullProgressMonitor());
 		assertNotNull(markets);
 		assertFalse(markets.isEmpty());
 
-		for (Market market : markets) {
+		for (IMarket market : markets) {
 			assertNotNull(market.getId());
 			assertNotNull(market.getUrl());
 			assertNotNull(market.getName());
 		}
 	}
 
-	@SuppressWarnings("null")
 	@Test
 	public void getCategory() throws CoreException {
-		List<Market> markets = marketplaceService.listMarkets(new NullProgressMonitor());
+		List<? extends IMarket> markets = marketplaceService.listMarkets(new NullProgressMonitor());
 		assertNotNull(markets);
 		assertFalse(markets.isEmpty());
 
 		final String marketName = "Tools";
 
-		Market market = null;
-		for (Market m : markets) {
+		IMarket market = null;
+		for (IMarket m : markets) {
 			if (marketName.equals(m.getName())) {
 				market = m;
 				break;
@@ -89,8 +88,8 @@ public class DefaultMarketplaceServiceTest {
 
 		final String categoryName = "Mylyn Connectors";
 
-		Category category = null;
-		for (Category c : market.getCategory()) {
+		ICategory category = null;
+		for (ICategory c : market.getCategory()) {
 			if (categoryName.equals(c.getName())) {
 				category = c;
 				break;
@@ -98,7 +97,7 @@ public class DefaultMarketplaceServiceTest {
 		}
 		assertNotNull("Expected category " + categoryName, category);
 
-		Category result = marketplaceService.getCategory(category, new NullProgressMonitor());
+		ICategory result = marketplaceService.getCategory(category, new NullProgressMonitor());
 		assertNotNull(result);
 
 		// FIXME: pending bug 302671
@@ -183,22 +182,21 @@ public class DefaultMarketplaceServiceTest {
 		assertEquals(DefaultMarketplaceService.API_TAXONOMY_URI + "38,31", searchUrl);
 	}
 
-	@SuppressWarnings("null")
 	@Test
 	public void search() throws CoreException {
-		List<Market> markets = marketplaceService.listMarkets(new NullProgressMonitor());
+		List<? extends IMarket> markets = marketplaceService.listMarkets(new NullProgressMonitor());
 		assertTrue(!markets.isEmpty());
 
-		Market toolsMarket = null;
-		for (Market market : markets) {
+		IMarket toolsMarket = null;
+		for (IMarket market : markets) {
 			if ("Tools".equals(market.getName())) {
 				toolsMarket = market;
 				break;
 			}
 		}
 		assertNotNull(toolsMarket);
-		Category mylynCategory = null;
-		for (Category category : toolsMarket.getCategory()) {
+		ICategory mylynCategory = null;
+		for (ICategory category : toolsMarket.getCategory()) {
 			if ("Mylyn Connectors".equals(category.getName())) {
 				mylynCategory = category;
 				break;
@@ -206,14 +204,14 @@ public class DefaultMarketplaceServiceTest {
 		}
 		assertNotNull(mylynCategory);
 
-		SearchResult result = marketplaceService.search(toolsMarket, mylynCategory, "WikiText",
+		ISearchResult result = marketplaceService.search(toolsMarket, mylynCategory, "WikiText",
 				new NullProgressMonitor());
 		assertNotNull(result);
 		assertNotNull(result.getNodes());
 		assertEquals(Integer.valueOf(1), result.getMatchCount());
 		assertEquals(1, result.getNodes().size());
 
-		Node node = result.getNodes().get(0);
+		INode node = result.getNodes().get(0);
 
 		assertTrue(node.getName().startsWith("Mylyn WikiText"));
 		assertEquals("1065", node.getId());
@@ -221,13 +219,13 @@ public class DefaultMarketplaceServiceTest {
 
 	@Test
 	public void featured() throws CoreException {
-		SearchResult result = marketplaceService.featured(new NullProgressMonitor());
+		ISearchResult result = marketplaceService.featured(new NullProgressMonitor());
 		assertSearchResultSanity(result);
 	}
 
 	@Test
 	public void favorites() throws CoreException {
-		SearchResult result = marketplaceService.favorites(new NullProgressMonitor());
+		ISearchResult result = marketplaceService.favorites(new NullProgressMonitor());
 		assertSearchResultSanity(result);
 	}
 
@@ -235,17 +233,17 @@ public class DefaultMarketplaceServiceTest {
 	public void popular() throws CoreException {
 		//	 NOTE: this test is failing until the following bug is fixed
 		//			bug 303275: REST API popular returns count of 6 with 10 nodes returned
-		SearchResult result = marketplaceService.popular(new NullProgressMonitor());
+		ISearchResult result = marketplaceService.popular(new NullProgressMonitor());
 		assertSearchResultSanity(result);
 	}
 
 	@Test
 	public void recent() throws CoreException {
-		SearchResult result = marketplaceService.recent(new NullProgressMonitor());
+		ISearchResult result = marketplaceService.recent(new NullProgressMonitor());
 		assertSearchResultSanity(result);
 	}
 
-	protected void assertSearchResultSanity(SearchResult result) {
+	protected void assertSearchResultSanity(ISearchResult result) {
 		assertNotNull(result);
 		assertNotNull(result.getNodes());
 		assertNotNull(result.getMatchCount());
@@ -253,7 +251,7 @@ public class DefaultMarketplaceServiceTest {
 		assertTrue(result.getNodes().size() > 0);
 
 		Set<String> ids = new HashSet<String>();
-		for (Node node : result.getNodes()) {
+		for (INode node : result.getNodes()) {
 			assertNotNull(node.getId());
 			assertTrue(ids.add(node.getId()));
 			assertNotNull(node.getName());

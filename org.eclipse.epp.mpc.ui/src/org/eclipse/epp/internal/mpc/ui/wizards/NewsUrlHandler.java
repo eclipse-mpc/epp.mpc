@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Yatta Solutions - initial API and implementation
+ *     Yatta Solutions - initial API and implementation, public API (bug 432803)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
@@ -24,13 +24,14 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.epp.internal.mpc.core.service.Category;
-import org.eclipse.epp.internal.mpc.core.service.Market;
-import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
+import org.eclipse.epp.mpc.core.model.ICategory;
+import org.eclipse.epp.mpc.core.model.IMarket;
+import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
+import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -146,8 +147,8 @@ public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationLis
 
 		String filterParam = params.get("filter"); //$NON-NLS-1$
 		String[] filters = filterParam.split(" "); //$NON-NLS-1$
-		Category searchCategory = null;
-		Market searchMarket = null;
+		ICategory searchCategory = null;
+		IMarket searchMarket = null;
 		for (String filter : filters) {
 			if (filter.startsWith("tid:")) { //$NON-NLS-1$
 				String id = filter.substring("tid:".length()); //$NON-NLS-1$
@@ -155,13 +156,13 @@ public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationLis
 				for (CatalogCategory catalogCategory : catalogCategories) {
 					if (catalogCategory instanceof MarketplaceCategory) {
 						MarketplaceCategory marketplaceCategory = (MarketplaceCategory) catalogCategory;
-						List<Market> markets = marketplaceCategory.getMarkets();
-						for (Market market : markets) {
+						List<? extends IMarket> markets = marketplaceCategory.getMarkets();
+						for (IMarket market : markets) {
 							if (id.equals(market.getId())) {
 								searchMarket = market;
 							} else {
-								final List<Category> categories = market.getCategory();
-								for (Category category : categories) {
+								final List<? extends ICategory> categories = market.getCategory();
+								for (ICategory category : categories) {
 									if (id.equals(category.getId())) {
 										searchCategory = category;
 									}
@@ -190,7 +191,7 @@ public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationLis
 	}
 
 	@Override
-	protected boolean handleNode(CatalogDescriptor descriptor, String url, Node node) {
+	protected boolean handleNode(CatalogDescriptor descriptor, String url, INode node) {
 		viewer.getWizard().getCatalogPage().show(descriptor, Collections.singleton(node));
 		return true;
 	}
@@ -217,9 +218,9 @@ public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationLis
 					final SelectionModel selectionModel = viewer.getWizard().getSelectionModel();
 					SelectionModelStateSerializer stateSerializer = new SelectionModelStateSerializer(
 							wizard.getCatalog(), selectionModel);
-					stateSerializer.deserialize(monitor, installId, nodeIdToOperation);
+					stateSerializer.deserialize(installId, nodeIdToOperation, monitor);
 
-					if (selectionModel.getItemToOperation().size() > 0) {
+					if (selectionModel.getItemToSelectedOperation().size() > 0) {
 						Display display = wizard.getShell().getDisplay();
 						if (!display.isDisposed()) {
 							display.asyncExec(new Runnable() {

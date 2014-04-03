@@ -7,8 +7,8 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
- *  Yatta Solutions - news (bug 401721)
- *  JBoss (Pascal Rapicault) - Bug 406907 - Add p2 remediation page to MPC install flow 
+ *  Yatta Solutions - news (bug 401721), public API (bug 432803)
+ *  JBoss (Pascal Rapicault) - Bug 406907 - Add p2 remediation page to MPC install flow
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
@@ -19,16 +19,18 @@ import java.util.Set;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.service.CatalogBranding;
-import org.eclipse.epp.internal.mpc.core.service.Category;
-import org.eclipse.epp.internal.mpc.core.service.Market;
-import org.eclipse.epp.internal.mpc.core.service.News;
-import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
+import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceWizard.WizardState;
+import org.eclipse.epp.mpc.core.model.ICatalogBranding;
+import org.eclipse.epp.mpc.core.model.ICategory;
+import org.eclipse.epp.mpc.core.model.IMarket;
+import org.eclipse.epp.mpc.core.model.INews;
+import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.ui.discovery.DiscoveryImages;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogPage;
@@ -176,7 +178,7 @@ public class MarketplacePage extends CatalogPage {
 					return;
 				}
 				SelectionModel selectionModel = getWizard().getSelectionModel();
-				int newSelectionSize = selectionModel.getItemToOperation().size();
+				int newSelectionSize = selectionModel.getItemToSelectedOperation().size();
 
 				// important: we don't do anything if the selection is empty, since CatalogViewer
 				// sets the empty selection whenever the catalog is updated.
@@ -214,7 +216,7 @@ public class MarketplacePage extends CatalogPage {
 			return;
 		}
 		if (tab == newsTabItem) {
-			final News news = getNews();
+			final INews news = getNews();
 			boolean wasUpdated = newsViewer.isUpdated(news);
 			newsViewer.showNews(news);
 			if (wasUpdated) {
@@ -228,6 +230,14 @@ public class MarketplacePage extends CatalogPage {
 				});
 			}
 			return;
+		}
+		ContentType currentContentType = getViewer().getContentType();
+		if (currentContentType != null) {
+			TabItem tabItem = getTabItem(currentContentType);
+			if (tabItem == tab) {
+				setActiveTab(currentContentType);
+				return;
+			}
 		}
 		for (ContentType contentType : ContentType.values()) {
 			if (getTabItem(contentType) == tab) {
@@ -292,7 +302,7 @@ public class MarketplacePage extends CatalogPage {
 		newsTabItem = new TabItem(tabFolder, SWT.NULL | SWT.BOLD);
 		newsTabItem.setText(Messages.MarketplacePage_DefaultNewsTitle);
 
-		News news = getNews();
+		INews news = getNews();
 		if (news == null) {
 			newsTabItem.dispose();
 			return;
@@ -318,7 +328,7 @@ public class MarketplacePage extends CatalogPage {
 	}
 
 	private void updateNewsStatus() {
-		News news = getNews();
+		INews news = getNews();
 
 		Image tabImage = null;
 		if (news != null && newsViewer.isUpdated(news)) {
@@ -330,9 +340,9 @@ public class MarketplacePage extends CatalogPage {
 		newsTabItem.getParent().layout();
 	}
 
-	private News getNews() {
+	private INews getNews() {
 		CatalogDescriptor descriptor = configuration.getCatalogDescriptor();
-		News news = CatalogRegistry.getInstance().getCatalogNews(descriptor);
+		INews news = CatalogRegistry.getInstance().getCatalogNews(descriptor);
 		return news;
 	}
 
@@ -371,7 +381,7 @@ public class MarketplacePage extends CatalogPage {
 			final String originalText = selectionLink.getText();
 
 			String text = " "; //$NON-NLS-1$
-			int count = getWizard().getSelectionModel().getItemToOperation().size();
+			int count = getWizard().getSelectionModel().getItemToSelectedOperation().size();
 			if (count == 1) {
 				text = Messages.MarketplacePage_linkShowSelection_One;
 			} else if (count > 0) {
@@ -491,11 +501,16 @@ public class MarketplacePage extends CatalogPage {
 		disableTabSelection = true;
 		updateTitle();
 		CatalogDescriptor descriptor = configuration.getCatalogDescriptor();
-		CatalogBranding branding = CatalogRegistry.getInstance().getCatalogBranding(descriptor);
+		ICatalogBranding branding = descriptor == null ? null : descriptor.getCatalogBranding();
 		if (branding == null) {
 			branding = getDefaultBranding();
 		}
 
+		TabItem selectedTabItem = null;
+		int selectionIndex = tabFolder.getSelectionIndex();
+		if (selectionIndex != -1) {
+			selectedTabItem = tabFolder.getItem(selectionIndex);
+		}
 		newsTabItem.dispose();
 		searchTabItem.dispose();
 		recentTabItem.dispose();
@@ -504,26 +519,53 @@ public class MarketplacePage extends CatalogPage {
 
 		boolean hasSearchTab = branding.hasSearchTab();
 		if (hasSearchTab) {
+			boolean isSelected = (selectedTabItem == searchTabItem);
 			createSearchTab();
 			searchTabItem.setText(branding.getSearchTabName());
+			if (isSelected) {
+				selectedTabItem = searchTabItem;
+			}
 		}
 		boolean hasRecentTab = branding.hasRecentTab();
 		if (hasRecentTab) {
+			boolean isSelected = (selectedTabItem == recentTabItem);
 			createRecentTab();
 			recentTabItem.setText(branding.getRecentTabName());
+			if (isSelected) {
+				selectedTabItem = recentTabItem;
+			}
 		}
 
 		boolean hasPopularTab = branding.hasPopularTab();
 		if (hasPopularTab) {
+			boolean isSelected = (selectedTabItem == popularTabItem);
 			createPopularTab();
 			popularTabItem.setText(branding.getPopularTabName());
+			if (isSelected) {
+				selectedTabItem = popularTabItem;
+			}
 		}
 
-		createInstalledTab();
+		{
+			boolean isSelected = (selectedTabItem == installedTabItem);
+			createInstalledTab();
+			if (isSelected) {
+				selectedTabItem = installedTabItem;
+			}
+		}
 
-		createNewsTab();
+		{
+			boolean isSelected = (selectedTabItem == newsTabItem);
+			createNewsTab();
+			if (isSelected) {
+				selectedTabItem = newsTabItem;
+			}
+		}
+		if (selectedTabItem == null || selectedTabItem.isDisposed()) {
+			selectedTabItem = tabFolder.getItem(0);
+		}
 
-		tabFolder.setSelection(searchTabItem);
+		tabFolder.setSelection(selectedTabItem);
 
 		try {
 			ImageDescriptor wizardIconDescriptor;
@@ -539,7 +581,7 @@ public class MarketplacePage extends CatalogPage {
 		disableTabSelection = false;
 	}
 
-	private CatalogBranding getDefaultBranding() {
+	private ICatalogBranding getDefaultBranding() {
 		CatalogBranding branding = new CatalogBranding();
 		branding.setHasSearchTab(true);
 		branding.setHasPopularTab(true);
@@ -583,6 +625,16 @@ public class MarketplacePage extends CatalogPage {
 		updateBranding();
 	}
 
+	public void showNews(CatalogDescriptor catalogDescriptor) {
+		IStatus proceed = Status.OK_STATUS;
+		if (catalogDescriptor != null) {
+			proceed = showMarketplace(catalogDescriptor);
+		}
+		if (proceed.isOK()) {
+			setActiveTab(newsTabItem);
+		}
+	}
+
 	public void show(CatalogDescriptor catalogDescriptor, MarketplaceViewer.ContentType content) {
 		IStatus proceed = Status.OK_STATUS;
 		if (catalogDescriptor != null) {
@@ -593,7 +645,7 @@ public class MarketplacePage extends CatalogPage {
 		}
 	}
 
-	public void show(CatalogDescriptor catalogDescriptor, final Set<Node> nodes) {
+	public void show(CatalogDescriptor catalogDescriptor, final Set<? extends INode> nodes) {
 		IStatus proceed = Status.OK_STATUS;
 		if (catalogDescriptor != null) {
 			proceed = showMarketplace(catalogDescriptor);
@@ -604,7 +656,7 @@ public class MarketplacePage extends CatalogPage {
 		}
 	}
 
-	public void search(CatalogDescriptor catalogDescriptor, final Market searchMarket, final Category searchCategory,
+	public void search(CatalogDescriptor catalogDescriptor, final IMarket searchMarket, final ICategory searchCategory,
 			final String searchString) {
 		IStatus proceed = Status.OK_STATUS;
 		if (catalogDescriptor != null) {
@@ -613,6 +665,22 @@ public class MarketplacePage extends CatalogPage {
 		if (proceed.isOK()) {
 			setActiveTab(searchTabItem);
 			getViewer().search(searchMarket, searchCategory, searchString);
+		}
+	}
+
+	protected void initialize(WizardState initialState) {
+		ContentType contentType = initialState.getContentType();
+		if (contentType != null && contentType != ContentType.SEARCH) {
+			show(configuration.getCatalogDescriptor(), contentType);
+		} else if (initialState.getContent() != null && !initialState.getContent().isEmpty()) {
+			show(configuration.getCatalogDescriptor(), initialState.getContent());
+		} else {
+			IMarket market = initialState.getFilterMarket();
+			ICategory category = initialState.getFilterCategory();
+			String query = initialState.getFilterQuery();
+			if (market != null || category != null || query != null) {
+				search(configuration.getCatalogDescriptor(), market, category, query);
+			}
 		}
 	}
 

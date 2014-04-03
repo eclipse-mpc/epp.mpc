@@ -7,16 +7,14 @@
  *
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
+ *     Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.util;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.net.URI;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-
-public interface ITransport {
-	public InputStream stream(URI location, IProgressMonitor monitor) throws FileNotFoundException, CoreException;
+/**
+ * @deprecated moved to {@link org.eclipse.epp.mpc.core.service.ITransport}
+ */
+@Deprecated
+public interface ITransport extends org.eclipse.epp.mpc.core.service.ITransport {
 }

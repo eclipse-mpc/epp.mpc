@@ -7,11 +7,11 @@
  *
  * Contributors:
  *     Yatta Solutions - initial API and implementation
+ *     Yatta Solutions - bug 432803: public API
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.ConnectException;
@@ -25,12 +25,12 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.ServiceLocator;
-import org.eclipse.epp.internal.mpc.core.service.CatalogService;
 import org.eclipse.epp.internal.mpc.core.service.DefaultCatalogService;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.commands.MarketplaceWizardCommand;
+import org.eclipse.epp.mpc.core.service.ICatalogService;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.osgi.util.NLS;
 import org.junit.Test;
@@ -96,7 +96,7 @@ public class MarketplaceClientUiTest {
 		try {
 			ServiceLocator.setInstance(new ServiceLocator() {
 				@Override
-				public CatalogService getCatalogService() {
+				public ICatalogService getCatalogService() {
 					return catalogService;
 				}
 			});

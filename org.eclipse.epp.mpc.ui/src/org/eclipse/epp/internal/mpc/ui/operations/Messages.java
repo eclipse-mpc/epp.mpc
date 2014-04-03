@@ -15,6 +15,8 @@ import org.eclipse.osgi.util.NLS;
 class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.epp.internal.mpc.ui.operations.messages"; //$NON-NLS-1$
 
+	public static String ProfileChangeOperationComputer_unknownOperation;
+
 	public static String ProvisioningOperation_commaSeparator;
 
 	public static String ProvisioningOperation_configuringProvisioningOperation;

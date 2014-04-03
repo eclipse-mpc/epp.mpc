@@ -7,7 +7,7 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
- *  Yatta Solutions - bug 314936, bug 398200
+ *  Yatta Solutions - bug 314936, bug 398200, public API (bug 432803)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.catalog;
 
@@ -15,38 +15,39 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProduct;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
-import org.eclipse.epp.internal.mpc.core.service.CachingMarketplaceService;
-import org.eclipse.epp.internal.mpc.core.service.Categories;
-import org.eclipse.epp.internal.mpc.core.service.Category;
-import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
-import org.eclipse.epp.internal.mpc.core.service.Ius;
-import org.eclipse.epp.internal.mpc.core.service.Market;
-import org.eclipse.epp.internal.mpc.core.service.MarketplaceService;
-import org.eclipse.epp.internal.mpc.core.service.News;
+import org.eclipse.epp.internal.mpc.core.ServiceLocator;
+import org.eclipse.epp.internal.mpc.core.service.Identifiable;
 import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.core.service.SearchResult;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory.Contents;
 import org.eclipse.epp.internal.mpc.ui.util.ConcurrentTaskManager;
-import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceUrlHandler;
+import org.eclipse.epp.mpc.core.model.ICategories;
+import org.eclipse.epp.mpc.core.model.ICategory;
+import org.eclipse.epp.mpc.core.model.IIdentifiable;
+import org.eclipse.epp.mpc.core.model.IIus;
+import org.eclipse.epp.mpc.core.model.IMarket;
+import org.eclipse.epp.mpc.core.model.INews;
+import org.eclipse.epp.mpc.core.model.INode;
+import org.eclipse.epp.mpc.core.model.ISearchResult;
+import org.eclipse.epp.mpc.core.service.IMarketplaceService;
+import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
+import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
@@ -55,7 +56,6 @@ import org.eclipse.equinox.internal.p2.discovery.model.Overview;
 import org.eclipse.equinox.internal.p2.discovery.model.Tag;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.Bundle;
 
 /**
  * @author David Green
@@ -68,7 +68,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	protected final CatalogDescriptor catalogDescriptor;
 
-	private final MarketplaceService marketplaceService;
+	private final IMarketplaceService marketplaceService;
 
 	private MarketplaceCatalogSource source;
 
@@ -81,46 +81,30 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			throw new IllegalArgumentException();
 		}
 		this.catalogDescriptor = catalogDescriptor;
-		marketplaceService = createMarketplaceService();
+		marketplaceService = createMarketplaceService();//use deprecated method in case someone has overridden it
 		source = new MarketplaceCatalogSource(marketplaceService);
 		marketplaceInfo = MarketplaceInfo.getInstance();
 	}
 
-	public MarketplaceService createMarketplaceService() {
-		DefaultMarketplaceService service = new DefaultMarketplaceService(this.catalogDescriptor.getUrl());
-		Map<String, String> requestMetaParameters = computeDefaultRequestMetaParameters();
-		service.setRequestMetaParameters(requestMetaParameters);
-		return new CachingMarketplaceService(service);
+	/**
+	 * @deprecated get a marketplace service from the registered {@link IMarketplaceServiceLocator} OSGi service instead
+	 */
+	@Deprecated
+	public IMarketplaceService createMarketplaceService() {
+		return acquireMarketplaceService();
 	}
 
+	protected IMarketplaceService acquireMarketplaceService() {
+		String baseUrl = this.catalogDescriptor.getUrl().toExternalForm();
+		return ServiceLocator.getCompatibilityLocator().getMarketplaceService(baseUrl);
+	}
+
+	/**
+	 * @deprecated moved to {@link ServiceLocator#computeDefaultRequestMetaParameters()}
+	 */
+	@Deprecated
 	public static Map<String, String> computeDefaultRequestMetaParameters() {
-		Map<String, String> requestMetaParameters = new HashMap<String, String>();
-		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_CLIENT, MarketplaceClientCore.BUNDLE_ID);
-		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_OS, Platform.getOS());
-		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_WS, Platform.getWS());
-		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_NL, Platform.getNL());
-		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_JAVA_VERSION, System.getProperty("java.version")); //$NON-NLS-1$
-		IProduct product = Platform.getProduct();
-		if (product != null) {
-			requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_PRODUCT, product.getId());
-			Bundle productBundle = product.getDefiningBundle();
-			if (productBundle != null) {
-				requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_PRODUCT_VERSION,
-						productBundle.getVersion().toString());
-			}
-		}
-		Bundle runtimeBundle = Platform.getBundle("org.eclipse.core.runtime"); //$NON-NLS-1$
-		if (runtimeBundle != null) {
-			requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_RUNTIME_VERSION, runtimeBundle.getVersion()
-					.toString());
-		}
-		// also send the platform version to distinguish between 3.x and 4.x platforms using the same runtime
-		Bundle platformBundle = Platform.getBundle("org.eclipse.platform"); //$NON-NLS-1$
-		if (platformBundle != null) {
-			requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_PLATFORM_VERSION,
-					platformBundle.getVersion().toString());
-		}
-		return requestMetaParameters;
+		return ServiceLocator.computeDefaultRequestMetaParameters();
 	}
 
 	@Override
@@ -149,7 +133,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 			catalogCategory.setContents(Contents.FEATURED);
 
-			SearchResult featured = marketplaceService.featured(new SubProgressMonitor(monitor, workSegment));
+			ISearchResult featured = marketplaceService.featured(new SubProgressMonitor(monitor, workSegment));
 			handleSearchResult(catalogCategory, featured, new SubProgressMonitor(monitor, workSegment));
 			maybeAddCatalogItem(catalogCategory);
 		} finally {
@@ -157,7 +141,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		}
 	}
 
-	protected void handleSearchResult(MarketplaceCategory catalogCategory, SearchResult result,
+	protected void handleSearchResult(MarketplaceCategory catalogCategory, ISearchResult result,
 			final IProgressMonitor monitor) {
 		if (!result.getNodes().isEmpty()) {
 			int totalWork = 10000000;
@@ -165,22 +149,22 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			ConcurrentTaskManager executor = new ConcurrentTaskManager(result.getNodes().size(),
 					Messages.MarketplaceDiscoveryStrategy_loadingResources);
 			try {
-				for (final Node node : result.getNodes()) {
+				for (final INode node : result.getNodes()) {
 					final MarketplaceNodeCatalogItem catalogItem = new MarketplaceNodeCatalogItem();
 					catalogItem.setMarketplaceUrl(catalogDescriptor.getUrl());
 					catalogItem.setId(node.getId());
 					catalogItem.setName(getCatalogItemName(node));
 					catalogItem.setCategoryId(catalogCategory.getId());
-					Categories categories = node.getCategories();
+					ICategories categories = node.getCategories();
 					if (categories != null) {
-						for (Category category : categories.getCategory()) {
-							catalogItem.addTag(new Tag(Category.class, category.getId(), category.getName()));
+						for (ICategory category : categories.getCategory()) {
+							catalogItem.addTag(new Tag(ICategory.class, category.getId(), category.getName()));
 						}
 					}
 					catalogItem.setData(node);
 					catalogItem.setSource(source);
 					catalogItem.setLicense(node.getLicense());
-					Ius ius = node.getIus();
+					IIus ius = node.getIus();
 					if (ius != null) {
 						List<String> discoveryIus = new ArrayList<String>(ius.getIu());
 						for (int x = 0; x < discoveryIus.size(); ++x) {
@@ -281,7 +265,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		}
 	}
 
-	private String getCatalogItemName(Node node) {
+	private String getCatalogItemName(INode node) {
 		String name = node.getName();
 		String version = node.getVersion();
 		return version == null || version.length() == 0 ? name : NLS.bind(
@@ -306,7 +290,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		items.add(catalogItem);
 	}
 
-	private void createIcon(CatalogItem catalogItem, final Node node) {
+	private void createIcon(CatalogItem catalogItem, final INode node) {
 		Icon icon = new Icon();
 		// don't know the size
 		icon.setImage32(node.getImage());
@@ -315,13 +299,13 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		catalogItem.setIcon(icon);
 	}
 
-	public void performQuery(Market market, Category category, String queryText, IProgressMonitor monitor)
+	public void performQuery(IMarket market, ICategory category, String queryText, IProgressMonitor monitor)
 			throws CoreException {
 		final int totalWork = 1000000;
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_searchingMarketplace,
 				totalWork);
 		try {
-			SearchResult result;
+			ISearchResult result;
 			MarketplaceCategory catalogCategory = findMarketplaceCategory(progress.newChild(1));
 			catalogCategory.setContents(Contents.QUERY);
 
@@ -335,8 +319,22 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 			if (result == null) {
 				//regular query
+
+				//resolve market and category if necessary
+				IMarket resolvedMarket;
+				ICategory resolvedCategory;
+				try {
+					resolvedMarket = resolve(market, catalogCategory.getMarkets());
+					resolvedCategory = resolveCategory(category, catalogCategory.getMarkets());
+				} catch (IllegalArgumentException ex) {
+					throw new CoreException(MarketplaceClientUi.computeStatus(ex, Messages.MarketplaceDiscoveryStrategy_invalidFilter));
+				} catch (NoSuchElementException ex) {
+					throw new CoreException(MarketplaceClientUi.computeStatus(ex, Messages.MarketplaceDiscoveryStrategy_unknownFilter));
+				}
+
 				progress.setWorkRemaining(totalWork);
-				result = marketplaceService.search(market, category, queryText, progress.newChild(totalWork / 2));
+				result = marketplaceService.search(resolvedMarket, resolvedCategory, queryText,
+						progress.newChild(totalWork / 2));
 			}
 
 			handleSearchResult(catalogCategory, result, progress.newChild(totalWork / 2));
@@ -349,20 +347,68 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		}
 	}
 
-	private SearchResult performNodeQuery(String nodeUrl, IProgressMonitor progress) throws CoreException {
-		final Node[] queryNode = new Node[1];
+	private ICategory resolveCategory(ICategory category, List<? extends IMarket> markets)
+			throws IllegalArgumentException, NoSuchElementException {
+		if (category != null && category.getId() == null) {
+			//need to resolve
+			if (category.getUrl() == null && category.getName() == null) {
+				throw new IllegalArgumentException(NLS.bind(Messages.MarketplaceDiscoveryStrategy_unidentifiableItem,
+						category));
+			}
+			for (IMarket market : markets) {
+				List<? extends ICategory> categories = market.getCategory();
+				ICategory resolved = resolve(category, categories);
+				if (resolved != null) {
+					return resolved;
+				}
+			}
+			if (category.getUrl() != null) {
+				throw new NoSuchElementException(NLS.bind(Messages.MarketplaceDiscoveryStrategy_noUrlMatch,
+						category.getUrl()));
+			} else {
+				throw new NoSuchElementException(NLS.bind(Messages.MarketplaceDiscoveryStrategy_noNameMatch,
+						category.getName()));
+			}
+		}
+		return category;
+	}
+
+	private <T extends IIdentifiable> T resolve(T id, List<? extends T> candidates) throws IllegalArgumentException,
+	NoSuchElementException {
+		if (id != null && id.getId() == null) {
+			//need to resolve
+			if (id.getUrl() == null && id.getName() == null) {
+				throw new IllegalArgumentException(NLS.bind(
+						Messages.MarketplaceDiscoveryStrategy_unidentifiableItem, id));
+			}
+			for (T candidate : candidates) {
+				if (Identifiable.matches(candidate, id)) {
+					return candidate;
+				}
+			}
+			if (id.getUrl() != null) {
+				throw new NoSuchElementException(NLS.bind(Messages.MarketplaceDiscoveryStrategy_noUrlMatch, id.getUrl()));
+			} else {
+				throw new NoSuchElementException(NLS.bind(Messages.MarketplaceDiscoveryStrategy_noNameMatch, id.getName()));
+			}
+		}
+		return id;
+	}
+
+	private ISearchResult performNodeQuery(String nodeUrl, IProgressMonitor progress) throws CoreException {
+		final INode[] queryNode = new INode[1];
 		MarketplaceUrlHandler urlHandler = new MarketplaceUrlHandler() {
 			@Override
-			protected boolean handleNode(CatalogDescriptor descriptor, String url, Node node) {
+			protected boolean handleNode(CatalogDescriptor descriptor, String url, INode node) {
 				queryNode[0] = node;
 				return true;
 			}
 		};
 		if (urlHandler.handleUri(nodeUrl) && queryNode[0] != null) {
-			Node node = marketplaceService.getNode(queryNode[0], progress);
+			INode node = marketplaceService.getNode(queryNode[0], progress);
 			SearchResult result = new SearchResult();
 			result.setMatchCount(1);
-			result.setNodes(Collections.singletonList(node));
+			result.setNodes(Collections.singletonList((Node) node));
 			return result;
 		}
 		return null;
@@ -374,7 +420,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		try {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
 			catalogCategory.setContents(Contents.RECENT);
-			SearchResult result = marketplaceService.recent(new SubProgressMonitor(monitor, totalWork / 2));
+			ISearchResult result = marketplaceService.recent(new SubProgressMonitor(monitor, totalWork / 2));
 			handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
 			maybeAddCatalogItem(catalogCategory);
 		} finally {
@@ -382,14 +428,14 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		}
 	}
 
-	public void featured(IProgressMonitor monitor, final Market market, final Category category) throws CoreException {
+	public void featured(IProgressMonitor monitor, final IMarket market, final ICategory category) throws CoreException {
 		final int totalWork = 1000000;
 		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_searchingMarketplace, totalWork);
 		try {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
 			catalogCategory.setContents(Contents.FEATURED);
-			SearchResult result = marketplaceService.featured(new SubProgressMonitor(monitor, totalWork / 2), market,
-					category);
+			ISearchResult result = marketplaceService.featured(market, category,
+					new SubProgressMonitor(monitor, totalWork / 2));
 			handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
 			maybeAddCatalogItem(catalogCategory);
 		} finally {
@@ -398,13 +444,12 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	}
 
 	public void popular(IProgressMonitor monitor) throws CoreException {
-		// FIXME: do we want popular or favorites?
 		final int totalWork = 1000000;
 		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_searchingMarketplace, totalWork);
 		try {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
 			catalogCategory.setContents(Contents.POPULAR);
-			SearchResult result = marketplaceService.popular(new SubProgressMonitor(monitor, totalWork / 2));
+			ISearchResult result = marketplaceService.popular(new SubProgressMonitor(monitor, totalWork / 2));
 			handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
 			maybeAddCatalogItem(catalogCategory);
 		} finally {
@@ -422,13 +467,13 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			result.setNodes(new ArrayList<Node>());
 			Set<String> installedFeatures = computeInstalledFeatures(monitor);
 			if (!monitor.isCanceled()) {
-				Set<Node> catalogNodes = marketplaceInfo.computeInstalledNodes(catalogDescriptor.getUrl(),
+				Set<INode> catalogNodes = marketplaceInfo.computeInstalledNodes(catalogDescriptor.getUrl(),
 						installedFeatures);
 				if (!catalogNodes.isEmpty()) {
 					int unitWork = totalWork / (2 * catalogNodes.size());
-					for (Node node : catalogNodes) {
+					for (INode node : catalogNodes) {
 						node = marketplaceService.getNode(node, monitor);
-						result.getNodes().add(node);
+						result.getNodes().add((Node) node);
 						monitor.worked(unitWork);
 					}
 				} else {
@@ -442,7 +487,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	}
 
 	public void performQuery(IProgressMonitor monitor, Set<String> nodeIds) throws CoreException {
-		Set<Node> nodes = new HashSet<Node>();
+		Set<INode> nodes = new HashSet<INode>();
 		for (String nodeId : nodeIds) {
 			Node node = new Node();
 			node.setId(nodeId);
@@ -451,7 +496,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		performNodeQuery(monitor, nodes);
 	}
 
-	public void performNodeQuery(IProgressMonitor monitor, Set<Node> nodes) throws CoreException {
+	public void performNodeQuery(IProgressMonitor monitor, Set<? extends INode> nodes) throws CoreException {
 		final int totalWork = 1000000;
 		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_searchingMarketplace, totalWork);
 		try {
@@ -462,9 +507,9 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			if (!monitor.isCanceled()) {
 				if (!nodes.isEmpty()) {
 					int unitWork = totalWork / (2 * nodes.size());
-					for (Node node : nodes) {
+					for (INode node : nodes) {
 						node = marketplaceService.getNode(node, monitor);
-						result.getNodes().add(node);
+						result.getNodes().add((Node) node);
 						monitor.worked(unitWork);
 					}
 				} else {
@@ -502,7 +547,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			}
 
 			if (catalogCategory == null) {
-				List<Market> markets = marketplaceService.listMarkets(new SubProgressMonitor(monitor, 10000));
+				List<? extends IMarket> markets = marketplaceService.listMarkets(new SubProgressMonitor(monitor, 10000));
 
 				// marketplace has markets and categories, however a node and/or category can appear in multiple
 				// markets.  This doesn't match well with discovery's concept of a category.  Discovery requires all
@@ -522,7 +567,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		return catalogCategory;
 	}
 
-	public News performNewsDiscovery(IProgressMonitor monitor) throws CoreException {
+	public INews performNewsDiscovery(IProgressMonitor monitor) throws CoreException {
 		return marketplaceService.news(monitor);
 	}
 
@@ -533,7 +578,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			Set<Node> nodes = new HashSet<Node>();
 			for (CatalogItem item : items) {
 				Object data = item.getData();
-				if (data instanceof Node) {
+				if (data instanceof INode) {
 					nodes.add((Node) data);
 				}
 			}
@@ -543,7 +588,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 				String version = iu.getVersion() == null ? null : iu.getVersion().toString();
 				iuIdsAndVersions.add(id + "," + version); //$NON-NLS-1$
 			}
-			marketplaceService.reportInstallError(monitor, result, nodes, iuIdsAndVersions, resolutionDetails);
+			marketplaceService.reportInstallError(result, nodes, iuIdsAndVersions, resolutionDetails, monitor);
 		} finally {
 			monitor.done();
 		}
