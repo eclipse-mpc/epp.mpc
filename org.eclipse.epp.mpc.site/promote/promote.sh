@@ -18,8 +18,8 @@ fi
 echo Promoting $VERSION.$QUALIFIER
 
 mkdir -p $DST/
-unzip -d $DST/ $SRC/site-packed.zip 
-cp $SRC/site-archive.zip $DST/$DIST-$VERSION.$QUALIFIER.zip
+unzip -d $DST/ $SRC
+cp $SRC $DST/$DIST-$VERSION.$QUALIFIER.zip
 
 chmod g+w -R $DST
 
