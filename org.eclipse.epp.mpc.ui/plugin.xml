@@ -35,6 +35,7 @@
             locationURI="menu:help?after=additions">
          <command
                commandId="org.eclipse.epp.mpc.ui.command.showMarketplaceWizard"
+               icon="icons/marketplace16.png"
                label="%command.label"
                style="push"
                tooltip="%command.tooltip">
