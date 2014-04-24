@@ -80,6 +80,7 @@ import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.internal.browser.WorkbenchBrowserSupport;
@@ -525,7 +526,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				final String originalUrl = url;
 				url = appendWizardState(url);
 				browser.openURL(new URL(url)); // ORDER DEPENDENCY
-				getContainer().getShell().close();
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().setActive();
 				if (!hookLocationListener(browser)) { // ORDER DEPENDENCY
 					browser.openURL(new URL(originalUrl));
 				}
