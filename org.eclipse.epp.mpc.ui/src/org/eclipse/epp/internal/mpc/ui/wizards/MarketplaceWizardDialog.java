@@ -14,6 +14,7 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.accessibility.Accessible;
 import org.eclipse.swt.accessibility.AccessibleAdapter;
 import org.eclipse.swt.accessibility.AccessibleEvent;
@@ -27,7 +28,15 @@ public class MarketplaceWizardDialog extends WizardDialog {
 	private Button nextButton;
 
 	public MarketplaceWizardDialog(Shell parentShell, MarketplaceWizard newWizard) {
-		super(parentShell, newWizard);
+		//bug 424729 - make the wizard dialog modal
+		//don't pass on parentShell, so we get a new top-level shell with its own taskbar entry
+		//TODO is there some way to still get centering on the parentShell?
+		super(null, newWizard);
+		int shellStyle = getShellStyle();
+		int allModal = SWT.APPLICATION_MODAL | SWT.PRIMARY_MODAL | SWT.SYSTEM_MODAL;
+		shellStyle &= ~allModal;
+		shellStyle |= SWT.MODELESS;
+		setShellStyle(shellStyle);
 	}
 
 	@Override
