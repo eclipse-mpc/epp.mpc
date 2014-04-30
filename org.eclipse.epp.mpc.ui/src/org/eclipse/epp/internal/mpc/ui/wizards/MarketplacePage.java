@@ -114,17 +114,14 @@ public class MarketplacePage extends CatalogPage {
 	}
 
 	@Override
-	public void createControl(final Composite originalParent) {
-		Composite parent = originalParent;
+	public void createControl(final Composite parent) {
 		boolean needSwitchMarketplaceControl = configuration.getCatalogDescriptors().size() > 1;
 
-		parent = new Composite(parent, SWT.NULL);
-		GridLayoutFactory.fillDefaults().numColumns(1).spacing(0, 5).applyTo(parent);
+		Composite pageContent = new Composite(parent, SWT.NULL);
+		GridLayoutFactory.fillDefaults().numColumns(1).spacing(0, 5).applyTo(pageContent);
 
-		tabFolder = new TabFolder(parent, SWT.TOP);
-		if (originalParent != parent) {
-			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tabFolder);
-		}
+		tabFolder = new TabFolder(pageContent, SWT.TOP);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tabFolder);
 
 		super.createControl(tabFolder);
 
@@ -147,7 +144,7 @@ public class MarketplacePage extends CatalogPage {
 		});
 
 		{
-			selectionLink = new Link(parent, SWT.NULL);
+			selectionLink = new Link(pageContent, SWT.NULL);
 			selectionLink.setToolTipText(Messages.MarketplacePage_showSelection);
 			selectionLink.addSelectionListener(new SelectionListener() {
 				public void widgetSelected(SelectionEvent e) {
@@ -164,7 +161,7 @@ public class MarketplacePage extends CatalogPage {
 		}
 
 		if (needSwitchMarketplaceControl) {
-			createMarketplaceSwitcher(parent);
+			createMarketplaceSwitcher(pageContent);
 		}
 		updateBranding();
 
@@ -207,7 +204,7 @@ public class MarketplacePage extends CatalogPage {
 				}
 			}
 		});
-		setControl(parent == originalParent ? tabFolder : parent);
+		setControl(pageContent);
 		MarketplaceClientUi.setDefaultHelp(tabContent);
 	}
 

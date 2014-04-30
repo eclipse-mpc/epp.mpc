@@ -240,7 +240,7 @@ public class MarketplaceViewer extends CatalogViewer {
 			return discoveryItemFactory.createDiscoveryItem(catalogItem, this, parent, getResources(), shellProvider,
 					browser);
 		}
-		return new DiscoveryItem<CatalogItem>(parent, SWT.NONE, getResources(), shellProvider, browser, catalogItem,
+		return new DiscoveryItem<CatalogItem>(parent, SWT.NONE, getResources(), browser, catalogItem,
 				this);
 	}
 

@@ -226,7 +226,6 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 						}
 					}
 					if (node.getImage() != null) {
-						// FIXME: icon sizing
 						if (!source.getResourceProvider().containsResource(node.getImage())) {
 							executor.submit(new AbstractResourceRunnable(monitor, source.getResourceProvider(),
 									node.getImage()) {

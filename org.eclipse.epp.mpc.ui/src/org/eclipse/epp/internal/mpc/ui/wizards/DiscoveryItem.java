@@ -66,7 +66,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
@@ -74,7 +73,6 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
  * @author Steffen Pingel
  * @author David Green
  */
-@SuppressWarnings("unused")
 public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<T> implements PropertyChangeListener {
 
 	/**
@@ -156,15 +154,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 	private Label iconLabel;
 
-	private ToolItem infoButton;
-
 	private Label nameLabel;
-
-	private Control providerLabel;
-
-	private final IShellProvider shellProvider;
-
-	private ToolItem updateButton;
 
 	private final MarketplaceViewer viewer;
 
@@ -180,10 +170,22 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 	private ShareSolutionLink shareSolutionLink;
 
+	/**
+	 * @param shellProvider
+	 *            - not used
+	 * @deprecated use
+	 *             {@link #DiscoveryItem(Composite, int, DiscoveryResources, IMarketplaceWebBrowser, CatalogItem, MarketplaceViewer)}
+	 *             instead
+	 */
+	@Deprecated
 	public DiscoveryItem(Composite parent, int style, DiscoveryResources resources, IShellProvider shellProvider,
 			IMarketplaceWebBrowser browser, final T connector, MarketplaceViewer viewer) {
+		this(parent, style, resources, browser, connector, viewer);
+	}
+
+	public DiscoveryItem(Composite parent, int style, DiscoveryResources resources, IMarketplaceWebBrowser browser,
+			final T connector, MarketplaceViewer viewer) {
 		super(parent, style, resources, connector);
-		this.shellProvider = shellProvider;
 		this.browser = browser;
 		this.connector = connector;
 		this.viewer = viewer;
