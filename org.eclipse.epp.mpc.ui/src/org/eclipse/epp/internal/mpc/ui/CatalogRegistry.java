@@ -38,7 +38,7 @@ public class CatalogRegistry {
 
 	private final List<CatalogDescriptor> catalogDescriptors = new CopyOnWriteArrayList<CatalogDescriptor>();
 
-	private final Map<CatalogDescriptor, INews> catalogNews = new HashMap<CatalogDescriptor, INews>();
+	private final Map<String, INews> catalogNews = new HashMap<String, INews>();
 
 	public CatalogRegistry() {
 		catalogDescriptors.addAll(new CatalogExtensionPointReader().getCatalogDescriptors());
@@ -50,7 +50,7 @@ public class CatalogRegistry {
 
 	public void unregister(CatalogDescriptor catalogDescriptor) {
 		catalogDescriptors.remove(catalogDescriptor);
-		catalogNews.remove(catalogDescriptor);
+		removeCatalogNews(catalogDescriptor);
 	}
 
 	public List<CatalogDescriptor> getCatalogDescriptors() {
@@ -78,11 +78,15 @@ public class CatalogRegistry {
 
 	// manage the predefined news configuration here, since that isn't supposed to become API
 	public void addCatalogNews(CatalogDescriptor descriptor, INews news) {
-		catalogNews.put(descriptor, news);
+		catalogNews.put(descriptor.getUrl().toExternalForm(), news);
+	}
+
+	private void removeCatalogNews(CatalogDescriptor descriptor) {
+		catalogNews.remove(descriptor.getUrl().toExternalForm());
 	}
 
 	public INews getCatalogNews(CatalogDescriptor descriptor) {
-		return catalogNews.get(descriptor);
+		return catalogNews.get(descriptor.getUrl().toExternalForm());
 	}
 
 	public CatalogDescriptor findCatalogDescriptor(String url) {
