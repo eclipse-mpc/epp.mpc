@@ -95,6 +95,8 @@ public class MarketplacePage extends CatalogPage {
 
 	private CatalogSwitcher marketplaceSwitcher;
 
+	private ICatalogBranding currentBranding = getDefaultBranding();
+
 	protected boolean disableTabSelection;
 
 	protected CatalogDescriptor lastSelection;
@@ -115,6 +117,7 @@ public class MarketplacePage extends CatalogPage {
 
 	@Override
 	public void createControl(final Composite parent) {
+		currentBranding = getDefaultBranding();
 		boolean needSwitchMarketplaceControl = configuration.getCatalogDescriptors().size() > 1;
 
 		Composite pageContent = new Composite(parent, SWT.NULL);
@@ -126,11 +129,11 @@ public class MarketplacePage extends CatalogPage {
 		super.createControl(tabFolder);
 
 		tabContent = getControl();
-		createSearchTab();
-		createRecentTab();
-		createPopularTab();
-		createInstalledTab();
-		createNewsTab();
+		searchTabItem = createCatalogTab(-1, currentBranding.getSearchTabName());
+		recentTabItem = createCatalogTab(-1, currentBranding.getRecentTabName());
+		popularTabItem = createCatalogTab(-1, currentBranding.getPopularTabName());
+		installedTabItem = createCatalogTab(-1, Messages.MarketplacePage_installed);
+		updateNewsTab();
 		tabFolder.setSelection(searchTabItem);
 
 		tabFolder.addSelectionListener(new SelectionListener() {
@@ -218,13 +221,16 @@ public class MarketplacePage extends CatalogPage {
 			newsViewer.showNews(news);
 			if (wasUpdated) {
 				updateBranding();
-				tabFolder.setSelection(newsTabItem);
-				// required for Mac to not switch back to first tab
-				getControl().getDisplay().asyncExec(new Runnable() {
-					public void run() {
-						tabFolder.setSelection(newsTabItem);
-					}
-				});
+				TabItem currentTabItem = getSelectedTabItem();
+				if (currentTabItem != newsTabItem) {
+					tabFolder.setSelection(newsTabItem);
+					// required for Mac to not switch back to first tab
+					getControl().getDisplay().asyncExec(new Runnable() {
+						public void run() {
+							tabFolder.setSelection(newsTabItem);
+						}
+					});
+				}
 			}
 			return;
 		}
@@ -250,8 +256,20 @@ public class MarketplacePage extends CatalogPage {
 			return;
 		}
 		final TabItem tabItem = getTabItem(contentType);
-		tabFolder.setSelection(tabItem);
+		TabItem currentTabItem = getSelectedTabItem();
+		if (currentTabItem != tabItem) {
+			tabFolder.setSelection(tabItem);
+		}
 		getViewer().setContentType(contentType);
+	}
+
+	private TabItem getSelectedTabItem() {
+		int currentTabIndex = tabFolder.getSelectionIndex();
+		TabItem currentTabItem = null;
+		if (currentTabIndex != -1) {
+			currentTabItem = tabFolder.getItem(currentTabIndex);
+		}
+		return currentTabItem;
 	}
 
 	private TabItem getTabItem(ContentType content) {
@@ -271,40 +289,46 @@ public class MarketplacePage extends CatalogPage {
 		}
 	}
 
-	private void createInstalledTab() {
-		installedTabItem = new TabItem(tabFolder, SWT.NULL);
-		installedTabItem.setText(Messages.MarketplacePage_installed);
-		installedTabItem.setControl(tabContent);
+	private TabItem createCatalogTab(int index, String label) {
+		Control tabControl = tabContent;
+		return createTab(index, label, tabControl);
 	}
 
-	private void createPopularTab() {
-		popularTabItem = new TabItem(tabFolder, SWT.NULL);
-		popularTabItem.setText(Messages.MarketplacePage_popular);
-		popularTabItem.setControl(tabContent);
-	}
-
-	private void createRecentTab() {
-		recentTabItem = new TabItem(tabFolder, SWT.NULL);
-		recentTabItem.setText(Messages.MarketplacePage_recent);
-		recentTabItem.setControl(tabContent);
-	}
-
-	private void createSearchTab() {
-		searchTabItem = new TabItem(tabFolder, SWT.NULL);
-		searchTabItem.setText(Messages.MarketplacePage_search);
-		searchTabItem.setControl(tabContent);
+	private TabItem createTab(int index, String label, Control tabControl) {
+		TabItem tabItem;
+		if (index == -1) {
+			tabItem = new TabItem(tabFolder, SWT.NULL);
+		} else {
+			tabItem = new TabItem(tabFolder, SWT.NULL, index);
+		}
+		tabItem.setText(label);
+		tabItem.setControl(tabControl);
+		return tabItem;
 	}
 
 	private void createNewsTab() {
 		newsTabItem = new TabItem(tabFolder, SWT.NULL | SWT.BOLD);
 		newsTabItem.setText(Messages.MarketplacePage_DefaultNewsTitle);
 
+		if (newsViewer == null) {
+			createNewsViewer(tabFolder);
+		}
+		newsTabItem.setControl(newsViewer.getControl());
+	}
+
+	private void updateNewsTab() {
+		if (newsTabItem == null) {
+			createNewsTab();
+		}
 		INews news = getNews();
 		if (news == null) {
-			newsTabItem.dispose();
+			if (!newsTabItem.isDisposed()) {
+				newsTabItem.dispose();
+			}
 			return;
+		} else if (newsTabItem.isDisposed()) {
+			createNewsTab();
 		}
-
 		if (news.getShortTitle() != null && news.getShortTitle().length() > 0) {
 			String title = news.getShortTitle();
 			String tooltip = title;
@@ -315,11 +339,6 @@ public class MarketplacePage extends CatalogPage {
 			newsTabItem.setText(title);
 			newsTabItem.setToolTipText(tooltip);
 		}
-
-		if (newsViewer == null) {
-			createNewsViewer(tabFolder);
-		}
-		newsTabItem.setControl(newsViewer.getControl());
 
 		updateNewsStatus();
 	}
@@ -498,71 +517,40 @@ public class MarketplacePage extends CatalogPage {
 		disableTabSelection = true;
 		updateTitle();
 		CatalogDescriptor descriptor = configuration.getCatalogDescriptor();
+		ICatalogBranding oldBranding = currentBranding;
 		ICatalogBranding branding = descriptor == null ? null : descriptor.getCatalogBranding();
 		if (branding == null) {
 			branding = getDefaultBranding();
 		}
+		currentBranding = branding;
 
-		TabItem selectedTabItem = null;
-		int selectionIndex = tabFolder.getSelectionIndex();
-		if (selectionIndex != -1) {
-			selectedTabItem = tabFolder.getItem(selectionIndex);
-		}
-		newsTabItem.dispose();
-		searchTabItem.dispose();
-		recentTabItem.dispose();
-		popularTabItem.dispose();
-		installedTabItem.dispose();
+		TabItem selectedTabItem = getSelectedTabItem();
 
-		boolean hasSearchTab = branding.hasSearchTab();
-		if (hasSearchTab) {
-			boolean isSelected = (selectedTabItem == searchTabItem);
-			createSearchTab();
-			searchTabItem.setText(branding.getSearchTabName());
-			if (isSelected) {
-				selectedTabItem = searchTabItem;
-			}
+		int tabIndex = 0;
+		boolean hasTab = branding.hasSearchTab();
+		searchTabItem = updateTab(searchTabItem, branding.getSearchTabName(), hasTab, oldBranding.hasSearchTab(),
+				tabIndex);
+		if (hasTab) {
+			tabIndex++;
 		}
-		boolean hasRecentTab = branding.hasRecentTab();
-		if (hasRecentTab) {
-			boolean isSelected = (selectedTabItem == recentTabItem);
-			createRecentTab();
-			recentTabItem.setText(branding.getRecentTabName());
-			if (isSelected) {
-				selectedTabItem = recentTabItem;
-			}
+		hasTab = branding.hasRecentTab();
+		recentTabItem = updateTab(recentTabItem, branding.getRecentTabName(), hasTab, oldBranding.hasRecentTab(),
+				tabIndex);
+		if (hasTab) {
+			tabIndex++;
+		}
+		hasTab = branding.hasPopularTab();
+		popularTabItem = updateTab(popularTabItem, branding.getPopularTabName(), hasTab, oldBranding.hasPopularTab(),
+				tabIndex);
+		if (hasTab) {
+			tabIndex++;
 		}
 
-		boolean hasPopularTab = branding.hasPopularTab();
-		if (hasPopularTab) {
-			boolean isSelected = (selectedTabItem == popularTabItem);
-			createPopularTab();
-			popularTabItem.setText(branding.getPopularTabName());
-			if (isSelected) {
-				selectedTabItem = popularTabItem;
-			}
-		}
+		updateNewsTab();
 
-		{
-			boolean isSelected = (selectedTabItem == installedTabItem);
-			createInstalledTab();
-			if (isSelected) {
-				selectedTabItem = installedTabItem;
-			}
-		}
-
-		{
-			boolean isSelected = (selectedTabItem == newsTabItem);
-			createNewsTab();
-			if (isSelected) {
-				selectedTabItem = newsTabItem;
-			}
-		}
 		if (selectedTabItem == null || selectedTabItem.isDisposed()) {
-			selectedTabItem = tabFolder.getItem(0);
+			tabFolder.setSelection(0);
 		}
-
-		tabFolder.setSelection(selectedTabItem);
 
 		try {
 			ImageDescriptor wizardIconDescriptor;
@@ -576,6 +564,19 @@ public class MarketplacePage extends CatalogPage {
 			MarketplaceClientUi.error(e);
 		}
 		disableTabSelection = false;
+	}
+
+	private TabItem updateTab(TabItem tabItem, String tabLabel, boolean hasTab, boolean hadTab, int tabIndex) {
+		if (hasTab) {
+			if (!hadTab) {
+				tabItem = createCatalogTab(tabIndex, tabLabel);
+			} else {
+				tabItem.setText(tabLabel);
+			}
+		} else if (tabItem != null && !tabItem.isDisposed()) {
+			tabItem.dispose();
+		}
+		return tabItem;
 	}
 
 	private ICatalogBranding getDefaultBranding() {
