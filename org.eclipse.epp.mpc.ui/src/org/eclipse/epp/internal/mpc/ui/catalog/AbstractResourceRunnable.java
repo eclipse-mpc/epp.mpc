@@ -77,10 +77,10 @@ abstract class AbstractResourceRunnable implements IRunnableWithProgress, Callab
 			if (e.getCause() instanceof OperationCanceledException) {
 				// canceled, nothing we want to do here
 			} else {
-				MarketplaceClientUi.error(e);
+				MarketplaceClientUi.error(Messages.AbstractResourceRunnable_downloadError + resourceUrl, e);
 			}
 		} catch (CoreException e) {
-			MarketplaceClientUi.error(e);
+			MarketplaceClientUi.error(Messages.AbstractResourceRunnable_downloadError + resourceUrl, e);
 		}
 		if (resourceProvider.containsResource(resourceUrl)) {
 			resourceRetrieved();

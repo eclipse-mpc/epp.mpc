@@ -17,6 +17,8 @@ class Messages extends NLS {
 
 	public static String AbstractResourceRunnable_badUri;
 
+	public static String AbstractResourceRunnable_downloadError;
+
 	public static String AbstractResourceRunnable_resourceNotFound;
 
 	public static String MarketplaceCatalog_Checking_News;

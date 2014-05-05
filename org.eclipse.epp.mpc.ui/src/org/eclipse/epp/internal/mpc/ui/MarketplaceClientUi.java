@@ -62,7 +62,11 @@ public class MarketplaceClientUi {
 
 	public static void error(String message, Throwable exception) {
 		if (message == null) {
-			message = NLS.bind(Messages.MarketplaceClientUi_unexpectedException_reason, exception.getMessage());
+			String exceptionMessage = exception.getMessage();
+			if (exceptionMessage == null) {
+				exceptionMessage = exception.getClass().getSimpleName();
+			}
+			message = NLS.bind(Messages.MarketplaceClientUi_unexpectedException_reason, exceptionMessage);
 		}
 		getLog().log(new Status(IStatus.ERROR, BUNDLE_ID, IStatus.ERROR, message, exception));
 	}
