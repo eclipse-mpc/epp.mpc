@@ -12,10 +12,12 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.service.CatalogBranding;
@@ -39,6 +41,7 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -617,10 +620,21 @@ public class MarketplacePage extends CatalogPage {
 	}
 
 	private void updateCatalog() {
-		getWizard().initializeCatalog();
-		getWizard().updateNews();
-		getViewer().updateCatalog();
-		updateBranding();
+		try {
+			getContainer().run(false, true, new IRunnableWithProgress() {
+
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					getWizard().initializeCatalog();
+					getWizard().updateNews();
+					getViewer().updateCatalog();
+					updateBranding();
+				}
+			});
+		} catch (InvocationTargetException e) {
+			MarketplaceClientUi.error(e.getCause());
+		} catch (InterruptedException e) {
+			//cancelled, ignore this
+		}
 	}
 
 	public void showNews(CatalogDescriptor catalogDescriptor) {
