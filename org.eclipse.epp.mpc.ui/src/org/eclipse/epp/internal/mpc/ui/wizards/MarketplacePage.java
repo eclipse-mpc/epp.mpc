@@ -57,7 +57,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -399,23 +398,16 @@ public class MarketplacePage extends CatalogPage {
 		if (selectionLink != null) {
 			final String originalText = selectionLink.getText();
 
-			String text = " "; //$NON-NLS-1$
+			String text = ""; //$NON-NLS-1$
 			int count = getWizard().getSelectionModel().getItemToSelectedOperation().size();
 			if (count == 1) {
 				text = Messages.MarketplacePage_linkShowSelection_One;
 			} else if (count > 0) {
 				text = NLS.bind(Messages.MarketplacePage_linkShowSelection_Multiple, Integer.valueOf(count));
 			}
-			if (!(text == originalText || (text != null && text.equals(originalText)))) {
-				boolean exclude = text == null || text.trim().length() == 0;
-				boolean originalExclude = ((GridData) selectionLink.getLayoutData()).exclude;
-
+			if (!text.equals(originalText)) {
 				selectionLink.setText(text);
-				if (originalExclude != exclude) {
-					selectionLink.setVisible(!exclude);
-					((GridData) selectionLink.getLayoutData()).exclude = exclude;
-					((Composite) getControl()).layout(true, true);
-				}
+				selectionLink.getParent().layout(true, false);
 			}
 		}
 	}
