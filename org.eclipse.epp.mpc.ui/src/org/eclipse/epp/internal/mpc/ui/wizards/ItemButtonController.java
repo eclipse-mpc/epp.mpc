@@ -188,15 +188,30 @@ class ItemButtonController {
 	}
 
 	private void updateAppearance() {
-		button.setText(buttonState.label);
-		button.setEnabled(!buttonState.disabled);
+		boolean relayout = false;
+		if (!buttonState.label.equals(button.getText())) {
+			button.setText(buttonState.label);
+			relayout = true;
+		}
+		if ((!buttonState.disabled) != button.isEnabled()) {
+			button.setEnabled(!buttonState.disabled);
+			relayout = true;
+		}
 		if (secondaryButton != null) {
-			secondaryButton.setText(secondaryButtonState.label);
-			secondaryButton.setEnabled(!secondaryButtonState.disabled);
+			if (!secondaryButtonState.label.equals(secondaryButton.getText())) {
+				secondaryButton.setText(secondaryButtonState.label);
+				relayout = true;
+			}
+			if ((!secondaryButtonState.disabled) != button.isEnabled()) {
+				secondaryButton.setEnabled(!secondaryButtonState.disabled);
+				relayout = true;
+			}
 		}
 		// button image? Due to platform limitations we can't set the button color
 
-		item.layout(true, true);
+		if (relayout) {
+			item.layout(true, false);
+		}
 	}
 
 	public void refresh() {

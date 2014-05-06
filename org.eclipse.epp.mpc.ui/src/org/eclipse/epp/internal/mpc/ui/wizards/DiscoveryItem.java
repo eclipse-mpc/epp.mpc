@@ -688,7 +688,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 			getDisplay().asyncExec(new Runnable() {
 				public void run() {
 					if (!isDisposed()) {
-						refresh();
+						refresh(true);
 					}
 				}
 			});
@@ -697,6 +697,10 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 	@Override
 	protected void refresh() {
+		refresh(false);
+	}
+
+	protected void refresh(boolean updateState) {
 		Color foreground = getForeground();
 
 		nameLabel.setForeground(foreground);
@@ -704,7 +708,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		if (installInfoLink != null) {
 			installInfoLink.setForeground(foreground);
 		}
-		if (buttonController != null) {
+		if (updateState && buttonController != null) {
 			buttonController.refresh();
 		}
 	}
