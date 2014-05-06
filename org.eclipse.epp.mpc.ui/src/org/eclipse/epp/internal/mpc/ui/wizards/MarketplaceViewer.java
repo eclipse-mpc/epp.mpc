@@ -140,6 +140,8 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	private IDiscoveryItemFactory discoveryItemFactory;
 
+	private boolean inUpdate;
+
 	public MarketplaceViewer(Catalog catalog, IShellProvider shellProvider, MarketplaceWizard wizard) {
 		super(catalog, shellProvider, wizard.getContainer(), wizard.getConfiguration());
 		this.browser = wizard;
@@ -185,15 +187,20 @@ public class MarketplaceViewer extends CatalogViewer {
 	}
 
 	@Override
-	protected void catalogUpdated(boolean wasCancelled, boolean wasError) {
-		super.catalogUpdated(wasCancelled, wasError);
+	protected void catalogUpdated(final boolean wasCancelled, final boolean wasError) {
+		runUpdate(new Runnable() {
 
-		for (CatalogFilter filter : getConfiguration().getFilters()) {
-			if (filter instanceof MarketplaceFilter) {
-				((MarketplaceFilter) filter).catalogUpdated(wasCancelled);
+			public void run() {
+				MarketplaceViewer.super.catalogUpdated(wasCancelled, wasError);
+
+				for (CatalogFilter filter : getConfiguration().getFilters()) {
+					if (filter instanceof MarketplaceFilter) {
+						((MarketplaceFilter) filter).catalogUpdated(wasCancelled);
+					}
+				}
+				setFilters(queryMarket, queryCategory, queryText);
 			}
-		}
-		setFilters(queryMarket, queryCategory, queryText);
+		});
 	}
 
 	@Override
@@ -426,15 +433,35 @@ public class MarketplaceViewer extends CatalogViewer {
 	}
 
 	private void updateViewer(final String queryText) {
-		if (contentType == ContentType.INSTALLED) {
-			getViewer().setSorter(new MarketplaceViewerSorter());
-		} else {
-			getViewer().setSorter(null);
-		}
+		runUpdate(new Runnable() {
 
-		super.doFind(queryText);
-		// bug 305274: scrollbars don't always appear after switching tabs, so we re-do the layout
-		getViewer().getControl().getParent().layout(true, true);
+			public void run() {
+				if (contentType == ContentType.INSTALLED) {
+					getViewer().setSorter(new MarketplaceViewerSorter());
+				} else {
+					getViewer().setSorter(null);
+				}
+
+				MarketplaceViewer.super.doFind(queryText);
+				// bug 305274: scrollbars don't always appear after switching tabs, so we re-do the layout
+				getViewer().getControl().getParent().layout(true, true);
+			}
+		});
+	}
+
+	private void runUpdate(Runnable r) {
+		if (inUpdate) {
+			r.run();
+			return;
+		}
+		inUpdate = true;
+		getViewer().getControl().setRedraw(false);
+		try {
+			r.run();
+		} finally {
+			inUpdate = false;
+			getViewer().getControl().setRedraw(true);
+		}
 	}
 
 	public void showSelected() {
@@ -443,8 +470,13 @@ public class MarketplaceViewer extends CatalogViewer {
 		queryCategory = null;
 		queryText = null;
 		findText = null;
-		setHeaderVisible(true);
-		doQuery(null, null, findText, null);
+		runUpdate(new Runnable() {
+
+			public void run() {
+				setHeaderVisible(true);
+				doQuery(null, null, findText, null);
+			}
+		});
 		contentType = ContentType.SEARCH;
 	}
 
@@ -467,13 +499,18 @@ public class MarketplaceViewer extends CatalogViewer {
 		return new MarketplacePatternFilter();
 	}
 
-	public void setContentType(ContentType contentType) {
+	public void setContentType(final ContentType contentType) {
 		if (this.contentType != contentType) {
 			ContentType oldContentType = this.contentType;
 			this.contentType = contentType;
 			fireContentTypeChange(oldContentType, contentType);
-			setHeaderVisible(contentType == ContentType.SEARCH || contentType == ContentType.SELECTION);
-			doQuery();
+			runUpdate(new Runnable() {
+
+				public void run() {
+					setHeaderVisible(contentType == ContentType.SEARCH || contentType == ContentType.SELECTION);
+					doQuery();
+				}
+			});
 		}
 	}
 
@@ -492,18 +529,23 @@ public class MarketplaceViewer extends CatalogViewer {
 	}
 
 	@Override
-	public void setHeaderVisible(boolean visible) {
+	public void setHeaderVisible(final boolean visible) {
 		if (visible != isHeaderVisible()) {
-			if (!visible) {
-				filters = getViewer().getFilters();
-				getViewer().resetFilters();
-			} else {
-				if (filters != null) {
-					getViewer().setFilters(filters);
-					filters = null;
+			runUpdate(new Runnable() {
+
+				public void run() {
+					if (!visible) {
+						filters = getViewer().getFilters();
+						getViewer().resetFilters();
+					} else {
+						if (filters != null) {
+							getViewer().setFilters(filters);
+							filters = null;
+						}
+					}
+					MarketplaceViewer.super.setHeaderVisible(visible);
 				}
-			}
-			super.setHeaderVisible(visible);
+			});
 		}
 	}
 
@@ -655,6 +697,16 @@ public class MarketplaceViewer extends CatalogViewer {
 	@Override
 	protected Set<String> getInstalledFeatures(IProgressMonitor monitor) {
 		return MarketplaceClientUi.computeInstalledFeatures(monitor);
+	}
+
+	@Override
+	public void refresh() {
+		runUpdate(new Runnable() {
+
+			public void run() {
+				MarketplaceViewer.super.refresh();
+			}
+		});
 	}
 
 	protected static void fixLayout(CategoryItem<?> categoryItem) {
