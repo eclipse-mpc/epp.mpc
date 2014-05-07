@@ -193,19 +193,13 @@ class ItemButtonController {
 			button.setText(buttonState.label);
 			relayout = true;
 		}
-		if ((!buttonState.disabled) != button.isEnabled()) {
-			button.setEnabled(!buttonState.disabled);
-			relayout = true;
-		}
+		button.setEnabled(!buttonState.disabled);
 		if (secondaryButton != null) {
 			if (!secondaryButtonState.label.equals(secondaryButton.getText())) {
 				secondaryButton.setText(secondaryButtonState.label);
 				relayout = true;
 			}
-			if ((!secondaryButtonState.disabled) != button.isEnabled()) {
-				secondaryButton.setEnabled(!secondaryButtonState.disabled);
-				relayout = true;
-			}
+			secondaryButton.setEnabled(!secondaryButtonState.disabled);
 		}
 		// button image? Due to platform limitations we can't set the button color
 
