@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
- *     Yatta Solutions - public API (bug 432803), drag&drop (bug 433333, 433330)
+ *     Yatta Solutions - public API (bug 432803), drag&drop (bug 433333)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
@@ -61,10 +61,7 @@ public class MarketplaceDropAdapter implements IStartup {
 
 	private final URLTransfer urlTransfer = URLTransfer.getInstance();
 
-	private final LinuxCompatibilityURLTransfer compatibilityTransfer = LinuxCompatibilityURLTransfer.getInstance();
-
-	private final Transfer[] transferAgents = compatibilityTransfer == null ? new Transfer[] { urlTransfer }
-			: new Transfer[] { urlTransfer, compatibilityTransfer };
+	private final Transfer[] transferAgents = new Transfer[] { urlTransfer };
 
 	public void earlyStartup() {
 		UIJob registerJob = new UIJob(Display.getDefault(), Messages.MarketplaceDropAdapter_0) {
@@ -97,8 +94,7 @@ public class MarketplaceDropAdapter implements IStartup {
 		DropTarget target = findDropTarget(shell);
 		if (target != null) {
 			//target exists, get it and check proper registration
-			registerWithExistingTarget(target, urlTransfer);
-			registerWithExistingTarget(target, compatibilityTransfer);
+			registerWithExistingTarget(target);
 		} else {
 			target = new DropTarget(shell, DROP_OPERATIONS);
 			target.setTransfer(transferAgents);
@@ -120,8 +116,7 @@ public class MarketplaceDropAdapter implements IStartup {
 	private void hookRecursive(Control child, DropTargetListener dropListener) {
 		DropTarget childTarget = findDropTarget(child);
 		if (childTarget != null) {
-			registerWithExistingTarget(childTarget, urlTransfer);
-			registerWithExistingTarget(childTarget, compatibilityTransfer);
+			registerWithExistingTarget(childTarget);
 			registerDropListener(childTarget, dropListener);
 		}
 		if (child instanceof Composite) {
@@ -133,15 +128,12 @@ public class MarketplaceDropAdapter implements IStartup {
 		}
 	}
 
-	private void registerWithExistingTarget(DropTarget target, Transfer transfer) {
-		if (transfer == null) {
-			return;
-		}
+	private void registerWithExistingTarget(DropTarget target) {
 		Transfer[] transfers = target.getTransfer();
 		boolean exists = false;
 		if (transfers != null) {
-			for (Transfer existingTransfer : transfers) {
-				if (transfer.getClass().isInstance(existingTransfer)) {
+			for (Transfer transfer : transfers) {
+				if (transfer instanceof URLTransfer) {
 					exists = true;
 					break;
 				}
@@ -149,7 +141,7 @@ public class MarketplaceDropAdapter implements IStartup {
 			if (!exists) {
 				Transfer[] newTransfers = new Transfer[transfers.length + 1];
 				System.arraycopy(transfers, 0, newTransfers, 0, transfers.length);
-				newTransfers[transfers.length] = transfer;
+				newTransfers[transfers.length] = urlTransfer;
 				target.setTransfer(newTransfers);
 			}
 		}
@@ -173,8 +165,6 @@ public class MarketplaceDropAdapter implements IStartup {
 	private class MarketplaceDropTargetListener extends DropTargetAdapter {
 
 		private final URLTransfer urlTransfer = URLTransfer.getInstance();
-
-		private final LinuxCompatibilityURLTransfer compatibilityTransfer = LinuxCompatibilityURLTransfer.getInstance();
 
 		@Override
 		public void dragEnter(DropTargetEvent e) {
@@ -216,7 +206,7 @@ public class MarketplaceDropAdapter implements IStartup {
 		}
 
 		private boolean dropTargetIsValid(DropTargetEvent e) {
-			if (isSupportedType(e)) {
+			if (urlTransfer.isSupportedType(e.currentDataType)) {
 				if (Util.isWindows()) {
 					//FIXME find a way to check the URL early on other platforms, too...
 					if (e.data == null && !extractEventData(e)) {
@@ -230,20 +220,10 @@ public class MarketplaceDropAdapter implements IStartup {
 			return false;
 		}
 
-		private boolean isSupportedType(DropTargetEvent e) {
-			return urlTransfer.isSupportedType(e.currentDataType)
-					|| (compatibilityTransfer != null && compatibilityTransfer.isSupportedType(e.currentDataType));
-		}
-
 		private boolean extractEventData(DropTargetEvent e) {
 			TransferData transferData = e.currentDataType;
 			if (transferData != null) {
-				Object data = null;
-				if (urlTransfer.isSupportedType(transferData)) {
-					data = urlTransfer.nativeToJava(transferData);
-				} else if (compatibilityTransfer != null && compatibilityTransfer.isSupportedType(transferData)) {
-					data = compatibilityTransfer.nativeToJava(transferData);
-				}
+				Object data = urlTransfer.nativeToJava(transferData);
 				if (data != null) {
 					e.data = data;
 					return true;
