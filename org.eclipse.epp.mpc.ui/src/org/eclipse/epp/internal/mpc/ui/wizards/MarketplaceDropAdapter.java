@@ -59,6 +59,10 @@ public class MarketplaceDropAdapter implements IStartup {
 
 	private final WorkbenchListener workbenchListener = new WorkbenchListener();
 
+	private final URLTransfer urlTransfer = URLTransfer.getInstance();
+
+	private final Transfer[] transferAgents = new Transfer[] { urlTransfer };
+
 	public void earlyStartup() {
 		UIJob registerJob = new UIJob(Display.getDefault(), Messages.MarketplaceDropAdapter_0) {
 			{
@@ -93,7 +97,7 @@ public class MarketplaceDropAdapter implements IStartup {
 			registerWithExistingTarget(target);
 		} else {
 			target = new DropTarget(shell, DROP_OPERATIONS);
-			target.setTransfer(new Transfer[] { URLTransfer.getInstance() });
+			target.setTransfer(transferAgents);
 		}
 		registerDropListener(target, dropListener);
 
@@ -137,7 +141,7 @@ public class MarketplaceDropAdapter implements IStartup {
 			if (!exists) {
 				Transfer[] newTransfers = new Transfer[transfers.length + 1];
 				System.arraycopy(transfers, 0, newTransfers, 0, transfers.length);
-				newTransfers[transfers.length] = URLTransfer.getInstance();
+				newTransfers[transfers.length] = urlTransfer;
 				target.setTransfer(newTransfers);
 			}
 		}
