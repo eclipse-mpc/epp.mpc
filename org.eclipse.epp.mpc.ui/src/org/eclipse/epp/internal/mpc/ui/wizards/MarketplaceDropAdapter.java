@@ -184,6 +184,11 @@ public class MarketplaceDropAdapter implements IStartup {
 		}
 
 		@Override
+		public void dropAccept(DropTargetEvent e) {
+			updateDragDetails(e);
+		}
+
+		@Override
 		public void dragOperationChanged(DropTargetEvent e) {
 			updateDragDetails(e);
 		}
@@ -213,7 +218,9 @@ public class MarketplaceDropAdapter implements IStartup {
 						return false;
 					}
 					final String url = getUrlFromEvent(e);
-					return MarketplaceUrlHandler.isPotentialSolution(url);
+					if (!MarketplaceUrlHandler.isPotentialSolution(url)) {
+						return false;
+					}
 				}
 				return true;
 			}
@@ -234,6 +241,10 @@ public class MarketplaceDropAdapter implements IStartup {
 
 		@Override
 		public void drop(DropTargetEvent event) {
+			if (!urlTransfer.isSupportedType(event.currentDataType)) {
+				//ignore
+				return;
+			}
 			if (event.data == null || !dropTargetIsValid(event)) {
 				event.detail = DND.DROP_NONE;
 				return;
