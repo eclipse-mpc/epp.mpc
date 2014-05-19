@@ -15,6 +15,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.mpc.core.model.ICatalog;
 import org.eclipse.epp.mpc.core.model.ICatalogBranding;
@@ -71,12 +72,12 @@ public final class CatalogDescriptor {
 
 	public CatalogDescriptor(ICatalog catalog) throws MalformedURLException {
 		setLabel(catalog.getName());
-		setUrl(new URL(catalog.getUrl()));
-		setIcon(ImageDescriptor.createFromURL(new URL(catalog.getImageUrl())));
+		setUrl(URLUtil.toURL(catalog.getUrl()));
+		setIcon(ImageDescriptor.createFromURL(URLUtil.toURL(catalog.getImageUrl())));
 		setDescription(catalog.getDescription());
 		setInstallFromAllRepositories(!catalog.isSelfContained());
 		if (catalog.getDependencyRepository() != null) {
-			setDependenciesRepository(new URL(catalog.getDependencyRepository()));
+			setDependenciesRepository(URLUtil.toURL(catalog.getDependencyRepository()));
 		}
 		setCatalogBranding(catalog.getBranding());
 		if (catalog.getNews() != null) {

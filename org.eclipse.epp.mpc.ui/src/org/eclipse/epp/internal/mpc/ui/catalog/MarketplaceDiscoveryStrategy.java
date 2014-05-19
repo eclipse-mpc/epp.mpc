@@ -12,7 +12,6 @@
 package org.eclipse.epp.internal.mpc.ui.catalog;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -33,6 +32,7 @@ import org.eclipse.epp.internal.mpc.core.ServiceLocator;
 import org.eclipse.epp.internal.mpc.core.service.Identifiable;
 import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.core.service.SearchResult;
+import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory.Contents;
 import org.eclipse.epp.internal.mpc.ui.util.ConcurrentTaskManager;
@@ -198,7 +198,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 						try {
 							// trim is important!
 							updateurl = updateurl.trim();
-							new URL(updateurl);
+							URLUtil.toURL(updateurl);
 							catalogItem.setSiteUrl(updateurl);
 						} catch (MalformedURLException e) {
 							// don't use malformed URLs

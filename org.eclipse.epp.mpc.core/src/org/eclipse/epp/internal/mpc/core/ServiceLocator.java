@@ -22,6 +22,7 @@ import org.eclipse.epp.internal.mpc.core.service.CachingMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.service.DefaultCatalogService;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
+import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.mpc.core.service.ICatalogService;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
@@ -105,7 +106,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		IMarketplaceService service;
 		URL base;
 		try {
-			base = new URL(baseUrl);
+			base = URLUtil.toURL(baseUrl);
 		} catch (MalformedURLException e) {
 			throw new IllegalArgumentException(e);
 		}
@@ -184,7 +185,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 
 	/**
 	 * for testing purposes
-	 * 
+	 *
 	 * @deprecated don't call this outside of tests
 	 */
 	@Deprecated

@@ -10,21 +10,19 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.operations;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.p2.core.ProvisionException;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
@@ -58,7 +56,7 @@ public abstract class AbstractProvisioningOperation implements IRunnableWithProg
 		this.provisioningUI = ProvisioningUI.getDefaultUI();
 	}
 
-	protected List<IMetadataRepository> addRepositories(SubMonitor monitor) throws MalformedURLException,
+	protected List<IMetadataRepository> addRepositories(SubMonitor monitor) throws
 			URISyntaxException, ProvisionException {
 		// tell p2 that it's okay to use these repositories
 		ProvisioningSession session = ProvisioningUI.getDefaultUI().getSession();
@@ -72,7 +70,7 @@ public abstract class AbstractProvisioningOperation implements IRunnableWithProg
 
 		monitor.setWorkRemaining(items.size() * 5);
 		for (CatalogItem descriptor : items) {
-			URI uri = new URL(descriptor.getSiteUrl()).toURI();
+			URI uri = URLUtil.toURI(descriptor.getSiteUrl());
 			if (repositoryLocations.add(uri) && !knownRepositories.contains(uri)) {
 				checkCancelled(monitor);
 				repositoryTracker.addRepository(uri, null, session);
@@ -112,8 +110,7 @@ public abstract class AbstractProvisioningOperation implements IRunnableWithProg
 			IQuery<IInstallableUnit> query = QueryUtil.createLatestQuery(QueryUtil.createIUGroupQuery());
 			IQueryResult<IInstallableUnit> result = repository.query(query, monitor.newChild(1));
 
-			for (Iterator<IInstallableUnit> iter = result.iterator(); iter.hasNext();) {
-				IInstallableUnit iu = iter.next();
+			for (IInstallableUnit iu : result) {
 				String id = iu.getId();
 				if (installableUnitIdsThisRepository.contains(id)) {
 					installableUnits.add(iu);
@@ -127,12 +124,8 @@ public abstract class AbstractProvisioningOperation implements IRunnableWithProg
 		final Set<String> installableUnitIdsThisRepository = new HashSet<String>();
 		// determine all installable units for this repository
 		for (CatalogItem descriptor : items) {
-			try {
-				if (repository.getLocation().equals(new URL(descriptor.getSiteUrl()).toURI())) {
-					installableUnitIdsThisRepository.addAll(getFeatureIds(descriptor));
-				}
-			} catch (MalformedURLException e) {
-				// will never happen, ignore
+			if (repository.getLocation().equals(URLUtil.toURI(descriptor.getSiteUrl()))) {
+				installableUnitIdsThisRepository.addAll(getFeatureIds(descriptor));
 			}
 		}
 		return installableUnitIdsThisRepository;

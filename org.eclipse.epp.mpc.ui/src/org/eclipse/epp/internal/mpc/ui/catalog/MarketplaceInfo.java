@@ -20,7 +20,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -33,6 +32,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.epp.internal.mpc.core.service.Node;
+import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.mpc.core.model.INode;
 
@@ -122,12 +122,10 @@ public class MarketplaceInfo {
 		if (installed && knownRepositories != null) {
 			// don't consider installed if the repository is not known/trusted
 			try {
-				URI uri = new URL(node.getUpdateurl()).toURI();
+				URI uri = URLUtil.toURI(node.getUpdateurl());
 				if (!knownRepositories.contains(uri)) {
 					return false;
 				}
-			} catch (MalformedURLException e) {
-				return false;
 			} catch (URISyntaxException e) {
 				return false;
 			}

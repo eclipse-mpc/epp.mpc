@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.epp.internal.mpc.core.util.TransportFactory;
+import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.osgi.util.NLS;
@@ -59,7 +60,7 @@ abstract class AbstractResourceRunnable implements IRunnableWithProgress, Callab
 
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		try {
-			URL imageUrl = new URL(resourceUrl);
+			URL imageUrl = URLUtil.toURL(resourceUrl);
 
 			InputStream in = TransportFactory.createTransport().stream(imageUrl.toURI(), monitor);
 			try {

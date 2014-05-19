@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.service.Node;
+import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.commands.MarketplaceWizardCommand;
@@ -122,7 +123,7 @@ public abstract class MarketplaceUrlHandler {
 			CatalogDescriptor descriptor = CatalogRegistry.getInstance().findCatalogDescriptor(url);
 			if (descriptor == null) {
 				try {
-					descriptor = new CatalogDescriptor(new URL(url), DESCRIPTOR_HINT);
+					descriptor = new CatalogDescriptor(URLUtil.toURL(url), DESCRIPTOR_HINT);
 				} catch (MalformedURLException e) {
 					return null;
 				}

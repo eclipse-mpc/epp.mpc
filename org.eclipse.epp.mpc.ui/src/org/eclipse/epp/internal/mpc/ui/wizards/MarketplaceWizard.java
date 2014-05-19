@@ -525,7 +525,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 						catalogDescriptor.getLabel(), catalogDescriptor.getDescription());
 				final String originalUrl = url;
 				url = appendWizardState(url);
-				browser.openURL(new URL(url)); // ORDER DEPENDENCY
+				browser.openURL(new URL(url)); // ORDER DEPENDENCY //don't encode/validate URL - browser can be quite lenient
 				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().setActive();
 				if (!hookLocationListener(browser)) { // ORDER DEPENDENCY
 					browser.openURL(new URL(originalUrl));

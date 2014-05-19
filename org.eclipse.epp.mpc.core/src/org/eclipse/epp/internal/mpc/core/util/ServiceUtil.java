@@ -60,7 +60,7 @@ public class ServiceUtil {
 			Object value = properties.get(key);
 			if (value instanceof String) {
 				try {
-					return new URL((String) value);
+					return URLUtil.toURL((String) value);
 				} catch (MalformedURLException e) {
 					MarketplaceClientCore.error(e);
 				}
@@ -83,7 +83,7 @@ public class ServiceUtil {
 	 */
 	public static URL parseUrl(String url) {
 		try {
-			return new URL(url);
+			return URLUtil.toURL(url);
 		} catch (MalformedURLException e) {
 			MarketplaceClientCore.error(e);
 			return null;

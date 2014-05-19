@@ -13,7 +13,6 @@
 package org.eclipse.epp.internal.mpc.ui.operations;
 
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -314,10 +313,6 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 			return installableUnits.toArray(new IInstallableUnit[installableUnits.size()]);
 
 		} catch (URISyntaxException e) {
-			// should never happen, since we already validated URLs.
-			throw new CoreException(new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
-					Messages.ProvisioningOperation_unexpectedErrorUrl, e));
-		} catch (MalformedURLException e) {
 			// should never happen, since we already validated URLs.
 			throw new CoreException(new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
 					Messages.ProvisioningOperation_unexpectedErrorUrl, e));

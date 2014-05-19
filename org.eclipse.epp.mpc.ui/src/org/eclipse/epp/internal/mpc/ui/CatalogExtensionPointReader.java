@@ -17,6 +17,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.util.NLS;
@@ -42,7 +43,7 @@ class CatalogExtensionPointReader {
 					if (urlText == null || urlText.trim().length() == 0) {
 						throw new Exception(Messages.CatalogExtensionPointReader_urlRequired);
 					}
-					URL url = new URL(urlText);
+					URL url = URLUtil.toURL(urlText);
 					String label = element.getAttribute("label"); //$NON-NLS-1$
 					if (label == null || label.trim().length() == 0) {
 						throw new Exception(Messages.CatalogExtensionPointReader_labelRequired);

@@ -14,13 +14,13 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.service.CatalogBranding;
+import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
@@ -552,7 +552,7 @@ public class MarketplacePage extends CatalogPage {
 			if (branding.getWizardIcon() == null) {
 				wizardIconDescriptor = DiscoveryImages.BANNER_DISOVERY;
 			} else {
-				wizardIconDescriptor = ImageDescriptor.createFromURL(new URL(branding.getWizardIcon()));
+				wizardIconDescriptor = ImageDescriptor.createFromURL(URLUtil.toURL(branding.getWizardIcon()));
 			}
 			setImageDescriptor(wizardIconDescriptor);
 		} catch (MalformedURLException e) {
