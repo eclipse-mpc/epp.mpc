@@ -15,7 +15,7 @@ if [ -e $DST ]; then
  exit 1
 fi
 
-echo Promoting $VERSION.$QUALIFIER
+echo Promoting $VERSION.$QUALIFIER to $DST
 
 mkdir -p $DST/
 unzip -d $DST/ $SRC
