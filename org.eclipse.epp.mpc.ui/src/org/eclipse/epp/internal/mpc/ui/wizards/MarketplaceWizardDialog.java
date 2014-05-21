@@ -18,9 +18,14 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.accessibility.Accessible;
 import org.eclipse.swt.accessibility.AccessibleAdapter;
 import org.eclipse.swt.accessibility.AccessibleEvent;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchListener;
+import org.eclipse.ui.PlatformUI;
 
 public class MarketplaceWizardDialog extends WizardDialog {
 	private Button backButton;
@@ -43,6 +48,31 @@ public class MarketplaceWizardDialog extends WizardDialog {
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		new MarketplaceDropAdapter().installDropTarget(newShell);
+		final IWorkbenchListener workbenchListener = new IWorkbenchListener() {
+
+			public boolean preShutdown(IWorkbench workbench, boolean forced) {
+				Shell wizardShell = MarketplaceWizardDialog.this.getShell();
+				if (wizardShell != null && !wizardShell.isDisposed()) {
+					if (forced) {
+						wizardShell.close();
+					} else {
+						boolean closed = MarketplaceWizardDialog.this.close();
+						return closed;
+					}
+				}
+				return true;
+			}
+
+			public void postShutdown(IWorkbench workbench) {
+			}
+		};
+		PlatformUI.getWorkbench().addWorkbenchListener(workbenchListener);
+		newShell.addDisposeListener(new DisposeListener() {
+
+			public void widgetDisposed(DisposeEvent e) {
+				PlatformUI.getWorkbench().removeWorkbenchListener(workbenchListener);
+			}
+		});
 	}
 
 	@Override
