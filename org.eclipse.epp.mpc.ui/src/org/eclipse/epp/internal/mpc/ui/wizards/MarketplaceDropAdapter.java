@@ -59,8 +59,6 @@ public class MarketplaceDropAdapter implements IStartup {
 
 	private final WorkbenchListener workbenchListener = new WorkbenchListener();
 
-	private URLTransfer urlTransfer;
-
 	private Transfer[] transferAgents;
 
 	public void earlyStartup() {
@@ -72,8 +70,6 @@ public class MarketplaceDropAdapter implements IStartup {
 
 			@Override
 			public IStatus runInUIThread(IProgressMonitor monitor) {
-				urlTransfer = URLTransfer.getInstance();
-				transferAgents = new Transfer[] { urlTransfer };
 				IWorkbench workbench = PlatformUI.getWorkbench();
 				workbench.addWindowListener(workbenchListener);
 				IWorkbenchWindow[] workbenchWindows = workbench
@@ -99,6 +95,9 @@ public class MarketplaceDropAdapter implements IStartup {
 			registerWithExistingTarget(target);
 		} else {
 			target = new DropTarget(shell, DROP_OPERATIONS);
+			if (transferAgents == null) {
+				transferAgents = new Transfer[] { URLTransfer.getInstance() };
+			}
 			target.setTransfer(transferAgents);
 		}
 		registerDropListener(target, dropListener);
@@ -143,7 +142,7 @@ public class MarketplaceDropAdapter implements IStartup {
 			if (!exists) {
 				Transfer[] newTransfers = new Transfer[transfers.length + 1];
 				System.arraycopy(transfers, 0, newTransfers, 0, transfers.length);
-				newTransfers[transfers.length] = urlTransfer;
+				newTransfers[transfers.length] = URLTransfer.getInstance();
 				target.setTransfer(newTransfers);
 			}
 		}
@@ -211,7 +210,7 @@ public class MarketplaceDropAdapter implements IStartup {
 		}
 
 		private boolean dropTargetIsValid(DropTargetEvent e) {
-			if (urlTransfer.isSupportedType(e.currentDataType)) {
+			if (URLTransfer.getInstance().isSupportedType(e.currentDataType)) {
 				if (Util.isWindows()) {
 					//FIXME find a way to check the URL early on other platforms, too...
 					if (e.data == null && !extractEventData(e)) {
@@ -230,7 +229,7 @@ public class MarketplaceDropAdapter implements IStartup {
 		private boolean extractEventData(DropTargetEvent e) {
 			TransferData transferData = e.currentDataType;
 			if (transferData != null) {
-				Object data = urlTransfer.nativeToJava(transferData);
+				Object data = URLTransfer.getInstance().nativeToJava(transferData);
 				if (data != null) {
 					e.data = data;
 					return true;
@@ -241,7 +240,7 @@ public class MarketplaceDropAdapter implements IStartup {
 
 		@Override
 		public void drop(DropTargetEvent event) {
-			if (!urlTransfer.isSupportedType(event.currentDataType)) {
+			if (!URLTransfer.getInstance().isSupportedType(event.currentDataType)) {
 				//ignore
 				return;
 			}
