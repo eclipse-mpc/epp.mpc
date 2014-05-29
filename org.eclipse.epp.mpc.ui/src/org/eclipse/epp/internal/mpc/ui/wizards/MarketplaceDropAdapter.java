@@ -59,9 +59,9 @@ public class MarketplaceDropAdapter implements IStartup {
 
 	private final WorkbenchListener workbenchListener = new WorkbenchListener();
 
-	private final URLTransfer urlTransfer = URLTransfer.getInstance();
+	private URLTransfer urlTransfer;
 
-	private final Transfer[] transferAgents = new Transfer[] { urlTransfer };
+	private Transfer[] transferAgents;
 
 	public void earlyStartup() {
 		UIJob registerJob = new UIJob(Display.getDefault(), Messages.MarketplaceDropAdapter_0) {
@@ -72,6 +72,8 @@ public class MarketplaceDropAdapter implements IStartup {
 
 			@Override
 			public IStatus runInUIThread(IProgressMonitor monitor) {
+				urlTransfer = URLTransfer.getInstance();
+				transferAgents = new Transfer[] { urlTransfer };
 				IWorkbench workbench = PlatformUI.getWorkbench();
 				workbench.addWindowListener(workbenchListener);
 				IWorkbenchWindow[] workbenchWindows = workbench
@@ -163,8 +165,6 @@ public class MarketplaceDropAdapter implements IStartup {
 	}
 
 	private class MarketplaceDropTargetListener extends DropTargetAdapter {
-
-		private final URLTransfer urlTransfer = URLTransfer.getInstance();
 
 		@Override
 		public void dragEnter(DropTargetEvent e) {
