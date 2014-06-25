@@ -293,7 +293,7 @@ class OverviewToolTip extends ToolTip {
 		int relativeY = titleAbsLocation.y - containerAbsLocation.y;
 
 		if (org.eclipse.jface.util.Util.isGtk()) {
-			//GTK sends MOUSE_EXIT on entering the tooltip shell, closing it (bug xxx)
+			//GTK sends MOUSE_EXIT on entering the tooltip shell, closing it (bug 423908)
 			//Workaround: open tooltip under cursor
 			GC gc = new GC(titleControl);
 			try {

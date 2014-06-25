@@ -213,7 +213,8 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 						if (node.getScreenshot() != null) {
 							if (!source.getResourceProvider().containsResource(node.getScreenshot())) {
-								executor.submit(new AbstractResourceRunnable(monitor, source.getResourceProvider(),
+								executor.submit(new AbstractResourceRunnable(monitor, catalogItem,
+										source.getResourceProvider(),
 										node.getScreenshot()) {
 									@Override
 									protected void resourceRetrieved() {
@@ -227,7 +228,8 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 					}
 					if (node.getImage() != null) {
 						if (!source.getResourceProvider().containsResource(node.getImage())) {
-							executor.submit(new AbstractResourceRunnable(monitor, source.getResourceProvider(),
+							executor.submit(new AbstractResourceRunnable(monitor, catalogItem,
+									source.getResourceProvider(),
 									node.getImage()) {
 								@Override
 								protected void resourceRetrieved() {

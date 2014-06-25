@@ -28,7 +28,7 @@ import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 
 /**
  * A utility for managing tasks performed in an executor service. Use as follows:
- * 
+ *
  * <pre>
  * <code>
  * ConcurrentTaskManager executor = new ConcurrentTaskManager(anticipatedNumberOfTasks,"Checking for updates");
@@ -42,7 +42,7 @@ import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
  *   }
  * </code>
  * </pre>
- * 
+ *
  * @author dgreen
  */
 public class ConcurrentTaskManager {
@@ -84,18 +84,14 @@ public class ConcurrentTaskManager {
 				final int workUnit = 1;
 				while (!futures.isEmpty()) {
 					Future<?> future = futures.remove(0);
-					final int maxTimeouts = 15;
-					for (int timeoutCount = 0;; ++timeoutCount) {
+					final int maxRetries = 15;
+					for (int retryCount = 0;; ++retryCount) {
 						try {
 							future.get(1L, TimeUnit.SECONDS);
 							break;
 						} catch (TimeoutException e) {
 							if (monitor.isCanceled()) {
 								return;
-							}
-							if (timeoutCount > maxTimeouts) {
-								future.cancel(true);
-								break;
 							}
 						} catch (InterruptedException e) {
 							throw new CoreException(new Status(IStatus.CANCEL, MarketplaceClientUi.BUNDLE_ID,
@@ -106,6 +102,10 @@ public class ConcurrentTaskManager {
 							if (monitor.isCanceled()) {
 								break;
 							}
+						}
+						if (retryCount > maxRetries) {
+							future.cancel(true);
+							break;
 						}
 					}
 					monitor.worked(workUnit);
