@@ -32,7 +32,7 @@ public abstract class AbstractTagFilter extends MarketplaceFilter {
 
 	private List<Tag> choices;
 
-	private Set<Tag> selected = new HashSet<Tag>();
+	private final Set<Tag> selected = new HashSet<Tag>();
 
 	private boolean selectAllOnNoSelection;
 
@@ -84,7 +84,10 @@ public abstract class AbstractTagFilter extends MarketplaceFilter {
 	}
 
 	public void setSelected(Set<Tag> selected) {
-		this.selected = selected;
+		this.selected.clear();
+		if (selected != null) {
+			this.selected.addAll(selected);
+		}
 	}
 
 	public boolean isSelectAllOnNoSelection() {
