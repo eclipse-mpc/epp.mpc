@@ -59,12 +59,13 @@ public class URLUtil {
 
 	public static URL toURL(String s) throws MalformedURLException {
 		try {
+			//try going through URI for proper encoding
 			URI uri = toURI(s);
 			return uri.toURL();
 		} catch (URISyntaxException e) {
 			throw new MalformedURLException(e.getMessage());
-		} catch (IllegalArgumentException e) {
-			//relative url or empty string? let URL constructor deal with it
+		} catch (RuntimeException e) {
+			//fall back to direct URL construction
 			return new URL(s);
 		}
 	}

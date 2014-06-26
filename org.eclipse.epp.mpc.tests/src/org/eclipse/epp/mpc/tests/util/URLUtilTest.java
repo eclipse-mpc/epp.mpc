@@ -61,4 +61,9 @@ public class URLUtilTest {
 		URLUtil.toURL("sites/default/files/logo.png");
 	}
 
+	@Test(expected = MalformedURLException.class)
+	public void testNullUrl() throws MalformedURLException, URISyntaxException {
+		URLUtil.toURL(null);
+	}
+
 }
