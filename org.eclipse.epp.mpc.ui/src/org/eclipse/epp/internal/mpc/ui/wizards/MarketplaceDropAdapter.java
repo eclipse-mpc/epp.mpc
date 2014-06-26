@@ -15,9 +15,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler;
 import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler.SolutionInstallationInfo;
 import org.eclipse.jface.util.Util;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
@@ -295,8 +298,11 @@ public class MarketplaceDropAdapter implements IStartup {
 		}
 
 		private void pageChanged(IWorkbenchPage page) {
-			Shell shell = page.getWorkbenchWindow().getShell();
-			runUpdate(shell);
+			if (page == null) {
+				return;
+			}
+			IWorkbenchWindow workbenchWindow = page.getWorkbenchWindow();
+			windowChanged(workbenchWindow);
 		}
 
 		public void windowActivated(IWorkbenchWindow window) {
@@ -304,6 +310,9 @@ public class MarketplaceDropAdapter implements IStartup {
 		}
 
 		private void windowChanged(IWorkbenchWindow window) {
+			if (window == null) {
+				return;
+			}
 			Shell shell = window.getShell();
 			runUpdate(shell);
 		}
@@ -357,19 +366,36 @@ public class MarketplaceDropAdapter implements IStartup {
 		}
 
 		private void partUpdate(IWorkbenchPartReference partRef) {
-			final Shell shell = partRef.getPage().getWorkbenchWindow().getShell();
-			runUpdate(shell);
+			IWorkbenchPage page = partRef.getPage();
+			pageChanged(page);
 		}
 
 		private void runUpdate(final Shell shell) {
-			shell.getDisplay().asyncExec(new Runnable() {
+			if (shell == null || shell.isDisposed()) {
+				return;
+			}
+			Display display = shell.getDisplay();
+			if (display == null || display.isDisposed()) {
+				return;
+			}
+			try {
+				display.asyncExec(new Runnable() {
 
-				public void run() {
-					if (!shell.isDisposed()) {
-						installDropTarget(shell);
+					public void run() {
+						if (!shell.isDisposed()) {
+							installDropTarget(shell);
+						}
 					}
+				});
+			} catch (SWTException ex) {
+				if (ex.code == SWT.ERROR_DEVICE_DISPOSED) {
+					//ignore
+					return;
 				}
-			});
+				MarketplaceClientUi.error(ex);
+			} catch (RuntimeException ex) {
+				MarketplaceClientUi.error(ex);
+			}
 		}
 	}
 }
