@@ -51,4 +51,14 @@ public class URLUtilTest {
 		assertEquals("http://marketplace.eclipse.org/sites/default%20files/logo%202.png", url.toString());
 	}
 
+	@Test(expected = MalformedURLException.class)
+	public void testEmptyUrl() throws MalformedURLException, URISyntaxException {
+		URLUtil.toURL("");
+	}
+
+	@Test(expected = MalformedURLException.class)
+	public void testRelativeUrl() throws MalformedURLException, URISyntaxException {
+		URLUtil.toURL("sites/default/files/logo.png");
+	}
+
 }

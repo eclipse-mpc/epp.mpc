@@ -63,6 +63,9 @@ public class URLUtil {
 			return uri.toURL();
 		} catch (URISyntaxException e) {
 			throw new MalformedURLException(e.getMessage());
+		} catch (IllegalArgumentException e) {
+			//relative url or empty string? let URL constructor deal with it
+			return new URL(s);
 		}
 	}
 
