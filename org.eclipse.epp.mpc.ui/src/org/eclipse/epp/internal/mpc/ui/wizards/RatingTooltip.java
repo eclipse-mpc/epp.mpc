@@ -52,6 +52,7 @@ class RatingTooltip extends ToolTip {
 	protected Composite createToolTipContentArea(Event event, Composite parent) {
 		Shell shell = parent.getShell();
 		setData(Shell.class.getName(), shell);
+		DiscoveryItem.setWidgetId(shell, DiscoveryItem.WIDGET_ID_RATING);
 		Color backgroundColor = parent.getDisplay().getSystemColor(SWT.COLOR_WHITE);
 		final Composite container = new Composite(parent, SWT.NULL);
 		container.setBackground(backgroundColor);

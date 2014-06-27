@@ -47,6 +47,7 @@ public class MarketplaceWizardDialog extends WizardDialog {
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
+		newShell.setData(this);//make jface dialog accessible for swtbot
 		new MarketplaceDropAdapter().installDropTarget(newShell);
 		final IWorkbenchListener workbenchListener = new IWorkbenchListener() {
 
@@ -115,7 +116,7 @@ public class MarketplaceWizardDialog extends WizardDialog {
 	}
 
 	@Override
-	protected MarketplaceWizard getWizard() {
+	public MarketplaceWizard getWizard() {
 		return (MarketplaceWizard) super.getWizard();
 	}
 

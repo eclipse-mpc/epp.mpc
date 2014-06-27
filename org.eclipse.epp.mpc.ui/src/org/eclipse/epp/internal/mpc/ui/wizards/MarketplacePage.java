@@ -71,6 +71,18 @@ import org.eclipse.swt.widgets.TabItem;
  */
 public class MarketplacePage extends CatalogPage {
 
+	public static final String WIDGET_ID_TAB_SEARCH = "tab:search"; //$NON-NLS-1$
+
+	public static final String WIDGET_ID_TAB_RECENT = "tab:recent"; //$NON-NLS-1$
+
+	public static final String WIDGET_ID_TAB_POPULAR = "tab:popular"; //$NON-NLS-1$
+
+	public static final String WIDGET_ID_TAB_INSTALLED = "tab:installed"; //$NON-NLS-1$
+
+	public static final String WIDGET_ID_TAB_NEWS = "tab:news"; //$NON-NLS-1$
+
+	public static final String WIDGET_ID_KEY = MarketplacePage.class.getName() + "::part"; //$NON-NLS-1$
+
 	private final MarketplaceCatalogConfiguration configuration;
 
 	private CatalogDescriptor previousCatalogDescriptor;
@@ -131,10 +143,10 @@ public class MarketplacePage extends CatalogPage {
 		super.createControl(tabFolder);
 
 		tabContent = getControl();
-		searchTabItem = createCatalogTab(-1, currentBranding.getSearchTabName());
-		recentTabItem = createCatalogTab(-1, currentBranding.getRecentTabName());
-		popularTabItem = createCatalogTab(-1, currentBranding.getPopularTabName());
-		installedTabItem = createCatalogTab(-1, Messages.MarketplacePage_installed);
+		searchTabItem = createCatalogTab(-1, WIDGET_ID_TAB_SEARCH, currentBranding.getSearchTabName());
+		recentTabItem = createCatalogTab(-1, WIDGET_ID_TAB_RECENT, currentBranding.getRecentTabName());
+		popularTabItem = createCatalogTab(-1, WIDGET_ID_TAB_POPULAR, currentBranding.getPopularTabName());
+		installedTabItem = createCatalogTab(-1, WIDGET_ID_TAB_INSTALLED, Messages.MarketplacePage_installed);
 		updateNewsTab();
 		tabFolder.setSelection(searchTabItem);
 
@@ -149,7 +161,7 @@ public class MarketplacePage extends CatalogPage {
 		});
 
 		{
-			selectionLink = new Link(pageContent, SWT.NULL);
+			selectionLink = new Link(pageContent, SWT.NULL);//TODO id
 			selectionLink.setToolTipText(Messages.MarketplacePage_showSelection);
 			selectionLink.addSelectionListener(new SelectionListener() {
 				public void widgetSelected(SelectionEvent e) {
@@ -291,18 +303,19 @@ public class MarketplacePage extends CatalogPage {
 		}
 	}
 
-	private TabItem createCatalogTab(int index, String label) {
+	private TabItem createCatalogTab(int index, String widgetId, String label) {
 		Control tabControl = tabContent;
-		return createTab(index, label, tabControl);
+		return createTab(index, widgetId, label, tabControl);
 	}
 
-	private TabItem createTab(int index, String label, Control tabControl) {
+	private TabItem createTab(int index, String widgetId, String label, Control tabControl) {
 		TabItem tabItem;
 		if (index == -1) {
 			tabItem = new TabItem(tabFolder, SWT.NULL);
 		} else {
 			tabItem = new TabItem(tabFolder, SWT.NULL, index);
 		}
+		tabItem.setData(WIDGET_ID_KEY, widgetId);
 		tabItem.setText(label);
 		tabItem.setControl(tabControl);
 		return tabItem;
@@ -311,6 +324,7 @@ public class MarketplacePage extends CatalogPage {
 	private void createNewsTab() {
 		newsTabItem = new TabItem(tabFolder, SWT.NULL | SWT.BOLD);
 		newsTabItem.setText(Messages.MarketplacePage_DefaultNewsTitle);
+		newsTabItem.setData(WIDGET_ID_KEY, WIDGET_ID_TAB_NEWS);
 
 		if (newsViewer == null) {
 			createNewsViewer(tabFolder);
@@ -523,19 +537,22 @@ public class MarketplacePage extends CatalogPage {
 
 		int tabIndex = 0;
 		boolean hasTab = branding.hasSearchTab();
-		searchTabItem = updateTab(searchTabItem, branding.getSearchTabName(), hasTab, oldBranding.hasSearchTab(),
+		searchTabItem = updateTab(searchTabItem, WIDGET_ID_TAB_SEARCH, branding.getSearchTabName(), hasTab,
+				oldBranding.hasSearchTab(),
 				tabIndex);
 		if (hasTab) {
 			tabIndex++;
 		}
 		hasTab = branding.hasRecentTab();
-		recentTabItem = updateTab(recentTabItem, branding.getRecentTabName(), hasTab, oldBranding.hasRecentTab(),
+		recentTabItem = updateTab(recentTabItem, WIDGET_ID_TAB_RECENT, branding.getRecentTabName(), hasTab,
+				oldBranding.hasRecentTab(),
 				tabIndex);
 		if (hasTab) {
 			tabIndex++;
 		}
 		hasTab = branding.hasPopularTab();
-		popularTabItem = updateTab(popularTabItem, branding.getPopularTabName(), hasTab, oldBranding.hasPopularTab(),
+		popularTabItem = updateTab(popularTabItem, WIDGET_ID_TAB_POPULAR, branding.getPopularTabName(), hasTab,
+				oldBranding.hasPopularTab(),
 				tabIndex);
 		if (hasTab) {
 			tabIndex++;
@@ -561,10 +578,11 @@ public class MarketplacePage extends CatalogPage {
 		disableTabSelection = false;
 	}
 
-	private TabItem updateTab(TabItem tabItem, String tabLabel, boolean hasTab, boolean hadTab, int tabIndex) {
+	private TabItem updateTab(TabItem tabItem, String widgetId, String tabLabel, boolean hasTab, boolean hadTab,
+			int tabIndex) {
 		if (hasTab) {
 			if (!hadTab) {
-				tabItem = createCatalogTab(tabIndex, tabLabel);
+				tabItem = createCatalogTab(tabIndex, widgetId, tabLabel);
 			} else {
 				tabItem.setText(tabLabel);
 			}

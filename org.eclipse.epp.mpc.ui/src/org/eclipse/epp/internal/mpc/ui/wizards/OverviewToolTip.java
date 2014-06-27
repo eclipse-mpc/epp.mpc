@@ -92,6 +92,7 @@ class OverviewToolTip extends ToolTip {
 	protected Composite createToolTipContentArea(Event event, final Composite parent) {
 		Shell shell = parent.getShell();
 		setData(Shell.class.getName(), shell);
+		DiscoveryItem.setWidgetId(shell, DiscoveryItem.WIDGET_ID_OVERVIEW);
 		GridLayoutFactory.fillDefaults().applyTo(parent);
 
 		Color backgroundColor = parent.getDisplay().getSystemColor(SWT.COLOR_WHITE);
@@ -222,6 +223,7 @@ class OverviewToolTip extends ToolTip {
 		}
 		if (hasLearnMoreLink) {
 			Link link = new Link(summaryContainer, SWT.NULL);
+			DiscoveryItem.setWidgetId(link, DiscoveryItem.WIDGET_ID_LEARNMORE);
 			GridDataFactory.fillDefaults().grab(false, false).align(SWT.BEGINNING, SWT.CENTER).applyTo(link);
 			link.setText(Messages.OverviewToolTip_learnMoreLink);
 			link.setBackground(backgroundColor);

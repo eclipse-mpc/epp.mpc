@@ -146,6 +146,28 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 	private static final int MAX_IMAGE_WIDTH = 75;
 
+	public static final String WIDGET_ID_KEY = DiscoveryItem.class.getName() + "::part"; //$NON-NLS-1$
+
+	public static final String WIDGET_ID_NAME = "name"; //$NON-NLS-1$
+
+	public static final String WIDGET_ID_DESCRIPTION = "description"; //$NON-NLS-1$
+
+	public static final String WIDGET_ID_ICON = "description"; //$NON-NLS-1$
+
+	public static final String WIDGET_ID_PROVIDER = "provider"; //$NON-NLS-1$
+
+	public static final String WIDGET_ID_INSTALLS = "installs"; //$NON-NLS-1$
+
+	public static final String WIDGET_ID_TAGS = "tags"; //$NON-NLS-1$
+
+	public static final String WIDGET_ID_RATING = "rating"; //$NON-NLS-1$
+
+	public static final String WIDGET_ID_SHARE = "share"; //$NON-NLS-1$
+
+	public static final String WIDGET_ID_LEARNMORE = "learn more"; //$NON-NLS-1$
+
+	public static final String WIDGET_ID_OVERVIEW = "overview"; //$NON-NLS-1$
+
 	private Composite checkboxContainer;
 
 	private final CatalogItem connector;
@@ -230,8 +252,13 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		.applyTo(separator);
 	}
 
+	static void setWidgetId(Widget widget, String id) {
+		widget.setData(WIDGET_ID_KEY, id);
+	}
+
 	private void createDescription(Composite parent) {
 		description = createStyledTextLabel(parent);
+		setWidgetId(description, WIDGET_ID_DESCRIPTION);
 		GridDataFactory.fillDefaults()
 		.grab(true, false)
 		.indent(DESCRIPTION_MARGIN_LEFT, DESCRIPTION_MARGIN_TOP)
@@ -287,6 +314,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 	private void createNameLabel(Composite parent) {
 		nameLabel = new Label(parent, SWT.WRAP);
+		setWidgetId(nameLabel, WIDGET_ID_NAME);
+
 		GridDataFactory.fillDefaults()
 		.indent(DESCRIPTION_MARGIN_LEFT, 0)
 		.span(3, 1)
@@ -322,6 +351,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 			buttonController = new ItemButtonController(viewer, this, button, secondaryButton);
 		} else {
 			installInfoLink = createStyledTextLabel(composite);
+			setWidgetId(installInfoLink, WIDGET_ID_LEARNMORE);
 			installInfoLink.setToolTipText(Messages.DiscoveryItem_installInstructionsTooltip);
 			StyleRange link = appendLink(installInfoLink, Messages.DiscoveryItem_installInstructions, SWT.BOLD);
 			link.data = Messages.DiscoveryItem_installInstructions;
@@ -360,6 +390,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 		if (installsTotal != null || installsRecent != null) {
 			StyledText installInfo = new StyledText(composite, SWT.READ_ONLY | SWT.SINGLE);
+			setWidgetId(installInfo, WIDGET_ID_INSTALLS);
+
 			String totalText = installsTotal == null ? Messages.DiscoveryItem_Unknown_Installs : MessageFormat.format(
 					Messages.DiscoveryItem_Compact_Number, installsTotal.intValue(), installsTotal * 0.001,
 					installsTotal * 0.000001);
@@ -419,6 +451,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		ratingsButton.setImage(MarketplaceClientUiPlugin.getInstance()
 				.getImageRegistry()
 				.get(MarketplaceClientUiPlugin.ITEM_ICON_STAR));
+		setWidgetId(ratingsButton, WIDGET_ID_RATING);
+
 		//Make width more or less fixed
 		int width = SWT.DEFAULT;
 		{
@@ -528,6 +562,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		GridLayoutFactory.fillDefaults().margins(0, 0).applyTo(checkboxContainer);
 
 		iconLabel = new Label(checkboxContainer, SWT.NONE);
+		setWidgetId(iconLabel, WIDGET_ID_ICON);
 		GridDataFactory.swtDefaults()
 		.align(SWT.CENTER, SWT.BEGINNING).grab(true, true)
 		.applyTo(iconLabel);
@@ -603,6 +638,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 	protected void createProviderLabel(Composite parent) {
 		Link providerLabel = new Link(parent, SWT.NONE);
+		setWidgetId(providerLabel, WIDGET_ID_PROVIDER);
+
 		GridDataFactory.fillDefaults()
 		.indent(DESCRIPTION_MARGIN_LEFT, DESCRIPTION_MARGIN_TOP)
 		.span(3, 1)
@@ -618,6 +655,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 	protected void createTagsLabel(Composite parent) {
 		tagsLink = createStyledTextLabel(parent);
+		setWidgetId(tagsLink, WIDGET_ID_TAGS);
+
 		tagsLink.setEditable(false);
 		GridDataFactory.fillDefaults()
 		.indent(DESCRIPTION_MARGIN_LEFT, TAGS_MARGIN_TOP)
