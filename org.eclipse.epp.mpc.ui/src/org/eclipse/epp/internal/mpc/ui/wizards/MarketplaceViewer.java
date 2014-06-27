@@ -344,12 +344,8 @@ public class MarketplaceViewer extends CatalogViewer {
 	}
 
 	public void doQueryForTag(String tag) {
-		ContentType newContentType = ContentType.SEARCH;
-		ContentType oldContentType = contentType;
-		contentType = newContentType;
-		fireContentTypeChange(oldContentType, newContentType);
 		setFindText(tag);
-		doQuery(null, null, tag, null);
+		doSetContentType(ContentType.SEARCH);
 	}
 
 	private void setFindText(String tag) {
@@ -501,17 +497,21 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	public void setContentType(final ContentType contentType) {
 		if (this.contentType != contentType) {
-			ContentType oldContentType = this.contentType;
-			this.contentType = contentType;
-			fireContentTypeChange(oldContentType, contentType);
-			runUpdate(new Runnable() {
-
-				public void run() {
-					setHeaderVisible(contentType == ContentType.SEARCH || contentType == ContentType.SELECTION);
-					doQuery();
-				}
-			});
+			doSetContentType(contentType);
 		}
+	}
+
+	private void doSetContentType(final ContentType contentType) {
+		ContentType oldContentType = this.contentType;
+		this.contentType = contentType;
+		fireContentTypeChange(oldContentType, contentType);
+		runUpdate(new Runnable() {
+
+			public void run() {
+				setHeaderVisible(contentType == ContentType.SEARCH || contentType == ContentType.SELECTION);
+				doQuery();
+			}
+		});
 	}
 
 	public void addPropertyChangeListener(IPropertyChangeListener listener) {
