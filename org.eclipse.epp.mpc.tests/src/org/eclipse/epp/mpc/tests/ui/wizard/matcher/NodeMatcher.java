@@ -20,12 +20,13 @@ import org.eclipse.swtbot.swt.finder.matchers.AbstractMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
+import org.hamcrest.core.IsAnything;
 
 public class NodeMatcher<T extends Widget> extends AbstractMatcher<T> {
 
-	private final Matcher<INode> matcher;
+	private final Matcher<? super INode> matcher;
 
-	NodeMatcher(Matcher<INode> matcher) {
+	NodeMatcher(Matcher<? super INode> matcher) {
 		this.matcher = matcher;
 	}
 
@@ -49,6 +50,11 @@ public class NodeMatcher<T extends Widget> extends AbstractMatcher<T> {
 	public void describeTo(Description description) {
 		description.appendText("with node matching "); //$NON-NLS-1$
 		matcher.describeTo(description);
+	}
+
+	@Factory
+	public static <T extends Widget> NodeMatcher<T> any() {
+		return new NodeMatcher<T>(IsAnything.anything("Any node"));
 	}
 
 	@Factory
