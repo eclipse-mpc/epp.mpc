@@ -150,101 +150,105 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 					Messages.MarketplaceDiscoveryStrategy_loadingResources);
 			try {
 				for (final INode node : result.getNodes()) {
-					final MarketplaceNodeCatalogItem catalogItem = new MarketplaceNodeCatalogItem();
-					catalogItem.setMarketplaceUrl(catalogDescriptor.getUrl());
-					catalogItem.setId(node.getId());
-					catalogItem.setName(getCatalogItemName(node));
-					catalogItem.setCategoryId(catalogCategory.getId());
-					ICategories categories = node.getCategories();
-					if (categories != null) {
-						for (ICategory category : categories.getCategory()) {
-							catalogItem.addTag(new Tag(ICategory.class, category.getId(), category.getName()));
-						}
-					}
-					catalogItem.setData(node);
-					catalogItem.setSource(source);
-					catalogItem.setLicense(node.getLicense());
-					IIus ius = node.getIus();
-					if (ius != null) {
-						List<String> discoveryIus = new ArrayList<String>(ius.getIu());
-						for (int x = 0; x < discoveryIus.size(); ++x) {
-							String iu = discoveryIus.get(x);
-							if (!iu.endsWith(DOT_FEATURE_DOT_GROUP)) {
-								discoveryIus.set(x, iu + DOT_FEATURE_DOT_GROUP);
+					try {
+						final MarketplaceNodeCatalogItem catalogItem = new MarketplaceNodeCatalogItem();
+						catalogItem.setMarketplaceUrl(catalogDescriptor.getUrl());
+						catalogItem.setId(node.getId());
+						catalogItem.setName(getCatalogItemName(node));
+						catalogItem.setCategoryId(catalogCategory.getId());
+						ICategories categories = node.getCategories();
+						if (categories != null) {
+							for (ICategory category : categories.getCategory()) {
+								catalogItem.addTag(new Tag(ICategory.class, category.getId(), category.getName()));
 							}
 						}
-						catalogItem.setInstallableUnits(discoveryIus);
-					}
-					if (node.getShortdescription() == null && node.getBody() != null) {
-						// bug 306653 <!--break--> marks the end of the short description.
-						String descriptionText = node.getBody();
-						Matcher matcher = BREAK_PATTERN.matcher(node.getBody());
-						if (matcher.find()) {
-							int start = matcher.start();
-							if (start > 0) {
-								String shortDescriptionText = descriptionText.substring(0, start).trim();
-								if (shortDescriptionText.length() > 0) {
-									descriptionText = shortDescriptionText;
+						catalogItem.setData(node);
+						catalogItem.setSource(source);
+						catalogItem.setLicense(node.getLicense());
+						IIus ius = node.getIus();
+						if (ius != null) {
+							List<String> discoveryIus = new ArrayList<String>(ius.getIu());
+							for (int x = 0; x < discoveryIus.size(); ++x) {
+								String iu = discoveryIus.get(x);
+								if (!iu.endsWith(DOT_FEATURE_DOT_GROUP)) {
+									discoveryIus.set(x, iu + DOT_FEATURE_DOT_GROUP);
+								}
+							}
+							catalogItem.setInstallableUnits(discoveryIus);
+						}
+						if (node.getShortdescription() == null && node.getBody() != null) {
+							// bug 306653 <!--break--> marks the end of the short description.
+							String descriptionText = node.getBody();
+							Matcher matcher = BREAK_PATTERN.matcher(node.getBody());
+							if (matcher.find()) {
+								int start = matcher.start();
+								if (start > 0) {
+									String shortDescriptionText = descriptionText.substring(0, start).trim();
+									if (shortDescriptionText.length() > 0) {
+										descriptionText = shortDescriptionText;
+									}
+								}
+							}
+							catalogItem.setDescription(descriptionText);
+						} else {
+							catalogItem.setDescription(node.getShortdescription());
+						}
+						catalogItem.setProvider(node.getCompanyname());
+						String updateurl = node.getUpdateurl();
+						if (updateurl != null) {
+							try {
+								// trim is important!
+								updateurl = updateurl.trim();
+								URLUtil.toURL(updateurl);
+								catalogItem.setSiteUrl(updateurl);
+							} catch (MalformedURLException e) {
+								// don't use malformed URLs
+							}
+						}
+						if (node.getBody() != null || node.getScreenshot() != null) {
+							final Overview overview = new Overview();
+							overview.setItem(catalogItem);
+							overview.setSummary(node.getBody());
+							overview.setUrl(node.getUrl());
+							catalogItem.setOverview(overview);
+
+							if (node.getScreenshot() != null) {
+								if (!source.getResourceProvider().containsResource(node.getScreenshot())) {
+									executor.submit(new AbstractResourceRunnable(monitor, catalogItem,
+											source.getResourceProvider(), node.getScreenshot()) {
+										@Override
+										protected void resourceRetrieved() {
+											overview.setScreenshot(node.getScreenshot());
+										}
+									});
+								} else {
+									overview.setScreenshot(node.getScreenshot());
 								}
 							}
 						}
-						catalogItem.setDescription(descriptionText);
-					} else {
-						catalogItem.setDescription(node.getShortdescription());
-					}
-					catalogItem.setProvider(node.getCompanyname());
-					String updateurl = node.getUpdateurl();
-					if (updateurl != null) {
-						try {
-							// trim is important!
-							updateurl = updateurl.trim();
-							URLUtil.toURL(updateurl);
-							catalogItem.setSiteUrl(updateurl);
-						} catch (MalformedURLException e) {
-							// don't use malformed URLs
-						}
-					}
-					if (node.getBody() != null || node.getScreenshot() != null) {
-						final Overview overview = new Overview();
-						overview.setItem(catalogItem);
-						overview.setSummary(node.getBody());
-						overview.setUrl(node.getUrl());
-						catalogItem.setOverview(overview);
-
-						if (node.getScreenshot() != null) {
-							if (!source.getResourceProvider().containsResource(node.getScreenshot())) {
+						if (node.getImage() != null) {
+							if (!source.getResourceProvider().containsResource(node.getImage())) {
 								executor.submit(new AbstractResourceRunnable(monitor, catalogItem,
-										source.getResourceProvider(),
-										node.getScreenshot()) {
+										source.getResourceProvider(), node.getImage()) {
 									@Override
 									protected void resourceRetrieved() {
-										overview.setScreenshot(node.getScreenshot());
+										createIcon(catalogItem, node);
 									}
+
 								});
 							} else {
-								overview.setScreenshot(node.getScreenshot());
+								createIcon(catalogItem, node);
 							}
 						}
+						items.add(catalogItem);
+						marketplaceInfo.map(catalogItem.getMarketplaceUrl(), node);
+						catalogItem.setInstalled(marketplaceInfo.computeInstalled(computeInstalledFeatures(monitor),
+								node));
+					} catch (RuntimeException ex) {
+						MarketplaceClientUi.error(
+								NLS.bind(Messages.MarketplaceDiscoveryStrategy_ParseError,
+										node == null ? "null" : node.getId()), ex); //$NON-NLS-1$
 					}
-					if (node.getImage() != null) {
-						if (!source.getResourceProvider().containsResource(node.getImage())) {
-							executor.submit(new AbstractResourceRunnable(monitor, catalogItem,
-									source.getResourceProvider(),
-									node.getImage()) {
-								@Override
-								protected void resourceRetrieved() {
-									createIcon(catalogItem, node);
-								}
-
-							});
-						} else {
-							createIcon(catalogItem, node);
-						}
-					}
-					items.add(catalogItem);
-					marketplaceInfo.map(catalogItem.getMarketplaceUrl(), node);
-					catalogItem.setInstalled(marketplaceInfo.computeInstalled(computeInstalledFeatures(monitor), node));
-
 				}
 				try {
 					executor.waitUntilFinished(new SubProgressMonitor(monitor, totalWork - 10));

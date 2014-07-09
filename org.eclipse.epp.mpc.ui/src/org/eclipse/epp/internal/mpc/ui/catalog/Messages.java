@@ -49,6 +49,8 @@ class Messages extends NLS {
 
 	public static String MarketplaceDiscoveryStrategy_noUrlMatch;
 
+	public static String MarketplaceDiscoveryStrategy_ParseError;
+
 	public static String MarketplaceDiscoveryStrategy_searchingMarketplace;
 
 	public static String MarketplaceDiscoveryStrategy_sendingErrorNotification;
