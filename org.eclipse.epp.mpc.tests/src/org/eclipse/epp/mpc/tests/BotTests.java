@@ -21,7 +21,7 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({ //
-MarketplaceClientServiceTest.class/*, MarketplaceWizardTest.class*/
+MarketplaceClientServiceTest.class, MarketplaceWizardTest.class
 })
 public class BotTests {
 
