@@ -77,7 +77,11 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 	@Test
 	public void testShowSelected() {
 		selectToInstall(3);
-		bot.link("<a>3 solutions selected</a>").click();
+		SWTBotLink link = bot.link("<a>3 solutions selected</a>");
+		link.click();
+		//wait for the action to be processed
+		//FIXME why does link.click return before the click action is completed?
+		bot.sleep(1000);
 		waitForWizardProgress();
 		List<Widget> items = bot.getFinder().findControls(NodeMatcher.any());
 		assertEquals(3, items.size());

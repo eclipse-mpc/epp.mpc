@@ -340,10 +340,18 @@ public abstract class AbstractMarketplaceWizardBotTest {
 	}
 
 	protected void tryWaitForBrowser(SWTBotBrowser browser) {
-		try {
-			browser.waitForPageLoaded();
-		} catch (TimeoutException ex) {
-			//ignore
+		for (int i = 0; i < 3; i++) {
+			try {
+				browser.waitForPageLoaded();
+			} catch (TimeoutException ex) {
+				//ignore
+			}
+			String url = browser.getUrl();
+			if (url != null && !"".equals(url) && !"about:blank".equals(url)) {
+				return;
+			} else {
+				bot.sleep(1000);
+			}
 		}
 	}
 
