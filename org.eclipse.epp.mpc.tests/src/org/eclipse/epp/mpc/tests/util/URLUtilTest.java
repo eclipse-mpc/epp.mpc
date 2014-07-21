@@ -22,7 +22,7 @@ import org.junit.Test;
 public class URLUtilTest {
 
 	@Test
-	public void testSimpleUrl() throws MalformedURLException, URISyntaxException {
+	public void testSimpleUrl() throws MalformedURLException {
 		URL url = URLUtil.toURL("http://marketplace.eclipse.org/sites/default/files/logo.png");
 		assertEquals("http://marketplace.eclipse.org/sites/default/files/logo.png", url.toString());
 	}
@@ -34,35 +34,35 @@ public class URLUtilTest {
 	}
 
 	@Test
-	public void testUrlWithSpaceInQuery() throws MalformedURLException, URISyntaxException {
+	public void testUrlWithSpaceInQuery() throws MalformedURLException {
 		URL url = URLUtil.toURL("http://marketplace.eclipse.org/sites/default/files/logo.png?foo=bar baz");
 		assertEquals("http://marketplace.eclipse.org/sites/default/files/logo.png?foo=bar+baz", url.toString());
 	}
 
 	@Test
-	public void testEscapedUrl() throws MalformedURLException, URISyntaxException {
+	public void testEscapedUrl() throws MalformedURLException {
 		URL url = URLUtil.toURL("http://marketplace.eclipse.org/sites/default%20files/logo%202.png");
 		assertEquals("http://marketplace.eclipse.org/sites/default%20files/logo%202.png", url.toString());
 	}
 
 	@Test
-	public void testPartiallyEscapedUrl() throws MalformedURLException, URISyntaxException {
+	public void testPartiallyEscapedUrl() throws MalformedURLException {
 		URL url = URLUtil.toURL("http://marketplace.eclipse.org/sites/default%20files/logo 2.png");
 		assertEquals("http://marketplace.eclipse.org/sites/default%20files/logo%202.png", url.toString());
 	}
 
 	@Test(expected = MalformedURLException.class)
-	public void testEmptyUrl() throws MalformedURLException, URISyntaxException {
+	public void testEmptyUrl() throws MalformedURLException {
 		URLUtil.toURL("");
 	}
 
 	@Test(expected = MalformedURLException.class)
-	public void testRelativeUrl() throws MalformedURLException, URISyntaxException {
+	public void testRelativeUrl() throws MalformedURLException {
 		URLUtil.toURL("sites/default/files/logo.png");
 	}
 
 	@Test(expected = MalformedURLException.class)
-	public void testNullUrl() throws MalformedURLException, URISyntaxException {
+	public void testNullUrl() throws MalformedURLException {
 		URLUtil.toURL(null);
 	}
 

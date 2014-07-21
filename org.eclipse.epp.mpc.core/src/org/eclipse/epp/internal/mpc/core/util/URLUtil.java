@@ -50,7 +50,7 @@ public class URLUtil {
 
 	private static String decode(String path) {
 		try {
-			return path == null ? null : URLDecoder.decode(path, "UTF-8");
+			return path == null ? null : URLDecoder.decode(path, "UTF-8"); //$NON-NLS-1$
 		} catch (UnsupportedEncodingException e) {
 			//should not be possible
 			return path;
