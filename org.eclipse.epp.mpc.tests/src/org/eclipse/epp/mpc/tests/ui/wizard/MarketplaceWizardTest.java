@@ -15,9 +15,6 @@ import static org.junit.Assert.*;
 
 import java.util.List;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.ui.wizards.DiscoveryItem;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplacePage;
 import org.eclipse.epp.mpc.tests.ui.wizard.matcher.NodeMatcher;
@@ -29,48 +26,10 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotLink;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.junit.Ignore;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.internal.AssumptionViolatedException;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
 
 
 public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
-
-	@Rule
-	public TestWatcher eclipseLogger = new TestWatcher() {
-		private long start;
-
-		@Override
-		protected void starting(Description description) {
-			MarketplaceClientCore.getLog().log(
-					new Status(IStatus.INFO, "org.eclipse.epp.mpc.tests", "Test " + description.getDisplayName()
-							+ " starting"));
-			start = System.currentTimeMillis();
-		}
-
-		@Override
-		protected void succeeded(Description description) {
-			MarketplaceClientCore.getLog().log(
-					new Status(IStatus.INFO, "org.eclipse.epp.mpc.tests", "Test " + description.getDisplayName()
-							+ " ended. Took " + (System.currentTimeMillis() - start) + "ms"));
-		}
-
-		@Override
-		protected void failed(Throwable e, Description description) {
-			MarketplaceClientCore.getLog().log(
-					new Status(IStatus.INFO, "org.eclipse.epp.mpc.tests", "Test " + description.getDisplayName()
-							+ " failed after " + (System.currentTimeMillis() - start) + "ms", e));
-		}
-
-		@Override
-		protected void skipped(AssumptionViolatedException e, Description description) {
-			MarketplaceClientCore.getLog().log(
-					new Status(IStatus.INFO, "org.eclipse.epp.mpc.tests", "Test " + description.getDisplayName()
-							+ " skipped"));
-		}
-	};
 
 	@Test
 	public void testSelectMarket() {
