@@ -29,19 +29,27 @@
           <testSuite>org.eclipse.epp.mpc.tests</testSuite>
           <testClass>${test-suite}</testClass>
           <argLine>-Xmx256m -XX:MaxPermSize=128m -Djava.io.tmpdir=${project.build.directory} ${test-args}</argLine>
-          <appArgLine>${test-app-args}</appArgLine> 
-          <dependencies>
-            <dependency>
-              <type>p2-installable-unit</type>
-              <artifactId>org.eclipse.sdk.feature.group</artifactId>
-              <version>${platform-version}</version>
-            </dependency>
-            <dependency>
-              <type>p2-installable-unit</type>
-              <artifactId>org.eclipse.epp.mpc.feature.group</artifactId>
-              <version>0.0.0</version>
-            </dependency>
-          </dependencies>		  
+          <appArgLine>${test-app-args}</appArgLine>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>target-platform-configuration</artifactId>
+        <configuration>
+          <dependency-resolution>
+            <extraRequirements>
+              <requirement>
+                <type>eclipse-feature</type>
+                <id>org.eclipse.sdk</id>
+                <versionRange>0.0.0</versionRange>
+              </requirement>
+              <requirement>
+                <type>eclipse-feature</type>
+                <id>org.eclipse.epp.mpc</id>
+                <versionRange>0.0.0</versionRange>
+              </requirement>
+            </extraRequirements>
+          </dependency-resolution>
         </configuration>
       </plugin>
     </plugins>
