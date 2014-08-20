@@ -21,6 +21,7 @@ import org.eclipse.epp.mpc.tests.ui.wizard.matcher.NodeMatcher;
 import org.eclipse.epp.mpc.tests.ui.wizard.widgets.SWTBotClickableStyledText;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.widgets.Widget;
+import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotBrowser;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotLink;
@@ -80,11 +81,16 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 		SWTBotLink link = bot.link("<a>3 solutions selected</a>");
 		link.click();
 		//wait for the action to be processed
-		//FIXME why does link.click return before the click action is completed?
-		bot.sleep(1000);
-		waitForWizardProgress();
-		List<Widget> items = bot.getFinder().findControls(NodeMatcher.any());
-		assertEquals(3, items.size());
+		bot.waitUntil(new DefaultCondition() {
+			public boolean test() throws Exception {
+				List<Widget> items = this.bot.getFinder().findControls(NodeMatcher.any());
+				return items.size() == 3;
+			}
+
+			public String getFailureMessage() {
+				return "Not getting expected selection";
+			}
+		}, 10000);
 	}
 
 	//TODO conditional on embedded browser availability
