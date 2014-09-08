@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -49,6 +50,8 @@ import org.eclipse.swtbot.swt.finder.junit.ScreenshotCaptureListener;
 import org.eclipse.swtbot.swt.finder.results.ArrayResult;
 import org.eclipse.swtbot.swt.finder.results.Result;
 import org.eclipse.swtbot.swt.finder.results.VoidResult;
+import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferenceConstants;
+import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.waits.ICondition;
 import org.eclipse.swtbot.swt.finder.waits.WaitForObjectCondition;
@@ -85,7 +88,10 @@ public abstract class AbstractMarketplaceWizardBotTest {
 	public TestRule screenshotOnFailureRule = new TestRule() {
 
 		public Statement apply(final Statement base, final Description description) {
-
+			String targetDir = System.getProperty(SWTBotPreferenceConstants.KEY_SCREENSHOTS_DIR);
+			if (targetDir == null && new File("target").isDirectory()) {
+				SWTBotPreferences.SCREENSHOTS_DIR = "target/screenshots";
+			}
 			return new Statement() {
 
 				private final ScreenshotCaptureListener capturer = new ScreenshotCaptureListener();
