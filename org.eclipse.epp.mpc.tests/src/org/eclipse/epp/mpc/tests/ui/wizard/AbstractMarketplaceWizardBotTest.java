@@ -43,6 +43,7 @@ import org.eclipse.swtbot.eclipse.finder.matchers.WidgetMatcherFactory;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEditor;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
+import org.eclipse.swtbot.swt.finder.junit.ScreenshotCaptureListener;
 import org.eclipse.swtbot.swt.finder.results.ArrayResult;
 import org.eclipse.swtbot.swt.finder.results.Result;
 import org.eclipse.swtbot.swt.finder.results.VoidResult;
@@ -60,8 +61,12 @@ import org.eclipse.swtbot.swt.finder.widgets.TimeoutException;
 import org.eclipse.ui.IEditorReference;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runner.notification.Failure;
+import org.junit.runners.model.Statement;
 
 public abstract class AbstractMarketplaceWizardBotTest {
 
@@ -73,13 +78,38 @@ public abstract class AbstractMarketplaceWizardBotTest {
 		super();
 	}
 
+	@Rule
+	public TestRule screenshotOnFailureRule = new TestRule() {
+
+		public Statement apply(final Statement base, final Description description) {
+
+			return new Statement() {
+
+				private final ScreenshotCaptureListener capturer = new ScreenshotCaptureListener();
+
+				@Override
+				public void evaluate() throws Throwable {
+					try {
+						base.evaluate();
+					} catch (Throwable t) {
+						capturer.testFailure(new Failure(description, t));
+						throw t;
+					} finally {
+						tearDownBot();
+					}
+				}
+
+			};
+		}
+	};
+
 	@Before
 	public void setUp() {
 		launchMarketplaceWizard();
 		initWizardBot();
 	}
 
-	@After
+	//@After
 	public void tearDownBot() {
 		if (bot != null) {
 			closeWizard();
