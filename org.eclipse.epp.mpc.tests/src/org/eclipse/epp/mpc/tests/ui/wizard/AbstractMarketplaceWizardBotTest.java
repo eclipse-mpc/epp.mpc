@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui.wizard;
 
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellIsActive;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.*;
@@ -35,6 +36,7 @@ import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogFilter;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Widget;
@@ -53,6 +55,7 @@ import org.eclipse.swtbot.swt.finder.waits.WaitForObjectCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotBrowser;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCombo;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotLabel;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotStyledText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
@@ -164,7 +167,17 @@ public abstract class AbstractMarketplaceWizardBotTest {
 						problem = "MPC wizard has open child dialog:";
 					}
 					problem+="\n    Shell(\""+botShell.getText()+"\")";
-
+					try {
+						SWTBot childBot = botShell.bot();
+						Matcher<Label> matcher = widgetOfType(Label.class);
+						List<? extends Label> widgets = childBot.widgets(matcher);
+						for (Label label : widgets) {
+							String labelText = new SWTBotLabel(label, matcher).getText();
+							problem += "\n    > " + labelText;
+						}
+					} catch (Exception ex) {
+						problem += "\n    > Error describing shell contents: " + ex;
+					}
 					//kill message dialog
 					botShell.close();
 				}
