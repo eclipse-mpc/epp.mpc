@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.epp.internal.mpc.ui.commands.MarketplaceWizardCommand;
@@ -52,6 +53,7 @@ import org.eclipse.swtbot.swt.finder.results.Result;
 import org.eclipse.swtbot.swt.finder.results.VoidResult;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferenceConstants;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
+import org.eclipse.swtbot.swt.finder.utils.SWTUtils;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.waits.ICondition;
 import org.eclipse.swtbot.swt.finder.waits.WaitForObjectCondition;
@@ -75,6 +77,8 @@ import org.junit.runner.notification.Failure;
 import org.junit.runners.model.Statement;
 
 public abstract class AbstractMarketplaceWizardBotTest {
+
+	private static final Logger logger = Logger.getLogger(AbstractMarketplaceWizardBotTest.class);
 
 	protected SWTBot bot;
 
@@ -167,15 +171,16 @@ public abstract class AbstractMarketplaceWizardBotTest {
 				List<Shell> subShells = subShellResult.getAllMatches();
 				for (Shell shell : subShells) {
 					SWTBotShell botShell = new SWTBotShell(shell);
-
 					//children are unexpected, so let's cry foul...
 					if (problem == null) {
 						problem = "MPC wizard has open child dialog:";
 					}
 					problem+="\n    Shell(\""+botShell.getText()+"\")";
+
 					try {
 						SWTBot childBot = botShell.bot();
-						Matcher<Label> matcher = widgetOfType(Label.class);
+						@SuppressWarnings("unchecked")
+						Matcher<Label> matcher = allOf(widgetOfType(Label.class));
 						List<? extends Label> widgets = childBot.widgets(matcher);
 						for (Label label : widgets) {
 							String labelText = new SWTBotLabel(label, matcher).getText();
@@ -183,6 +188,18 @@ public abstract class AbstractMarketplaceWizardBotTest {
 						}
 					} catch (Exception ex) {
 						problem += "\n    > Error describing shell contents: " + ex;
+					}
+					logger.info(problem);
+					if (botShell.isVisible()) {
+						try {
+							//try to bring to front
+							botShell.activate();
+						} catch (Throwable ex) {
+						}
+						//make a screenshot
+						String fileName = "dialog_"+System.currentTimeMillis()+"." + SWTBotPreferences.SCREENSHOT_FORMAT.toLowerCase();
+						logger.info("Capturing screenshot of open shell in " + fileName);
+						SWTUtils.captureScreenshot(fileName);
 					}
 					//kill message dialog
 					botShell.close();
