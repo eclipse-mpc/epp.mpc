@@ -84,6 +84,8 @@ public abstract class AbstractMarketplaceWizardBotTest {
 
 	private static final Logger logger = Logger.getLogger(AbstractMarketplaceWizardBotTest.class);
 
+	private static boolean dumpThreadsOnTearDownError = true;
+
 	protected SWTBot bot;
 
 	protected SWTBotShell wizardShell;
@@ -126,6 +128,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 		initWizardBot();
 	}
 
+	//tear-down is done in test rule above, since we need to do this after the rule has been applied
 	//@After
 	public void tearDownBot() {
 		if (bot != null) {
@@ -221,15 +224,19 @@ public abstract class AbstractMarketplaceWizardBotTest {
 	}
 
 	private void dumpThreads() {
+		if (!dumpThreadsOnTearDownError) {
+			return;
+		}
+
 		try {
 			ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
 			Method dumpMethod = ThreadMXBean.class.getMethod("dumpAllThreads", Boolean.TYPE, Boolean.TYPE);
 			ThreadInfo[] threadInfos = (ThreadInfo[]) dumpMethod.invoke(threadMXBean, true, true);
 			for (ThreadInfo threadInfo : threadInfos) {
-				logger.info(threadInfo);
-				System.out.println(threadInfo);
+				logger.debug(threadInfo);
 			}
 		} catch (NoSuchMethodException e) {
+			dumpThreadsOnTearDownError = false;
 			logger.warn("Method ThreadMXBean.dumpAllThreads(boolean, boolean) does not exist. Try running on Java 6 or later.");
 		} catch (Throwable t) {
 			logger.warn("Error dumping threads: " + t, t);
@@ -247,7 +254,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 			String fileName = "dialog_" + System.currentTimeMillis() + "."
 					+ SWTBotPreferences.SCREENSHOT_FORMAT.toLowerCase();
 			logger.info("Capturing screenshot of open shell in " + fileName);
-			SWTUtils.captureScreenshot(fileName);
+			SWTUtils.captureScreenshot(SWTBotPreferences.SCREENSHOTS_DIR + "/" + fileName);
 		}
 	}
 
