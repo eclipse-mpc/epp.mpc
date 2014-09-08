@@ -17,6 +17,10 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -170,37 +174,24 @@ public abstract class AbstractMarketplaceWizardBotTest {
 				bot.waitUntil(subShellResult, 100, 60);
 				List<Shell> subShells = subShellResult.getAllMatches();
 				for (Shell shell : subShells) {
+					if (shell == mpcShell.widget) {
+						continue;
+					}
+
 					SWTBotShell botShell = new SWTBotShell(shell);
 					//children are unexpected, so let's cry foul...
 					if (problem == null) {
 						problem = "MPC wizard has open child dialog:";
 					}
-					problem+="\n    Shell(\""+botShell.getText()+"\")";
-
-					try {
-						SWTBot childBot = botShell.bot();
-						@SuppressWarnings("unchecked")
-						Matcher<Label> matcher = allOf(widgetOfType(Label.class));
-						List<? extends Label> widgets = childBot.widgets(matcher);
-						for (Label label : widgets) {
-							String labelText = new SWTBotLabel(label, matcher).getText();
-							problem += "\n    > " + labelText;
-						}
-					} catch (Exception ex) {
-						problem += "\n    > Error describing shell contents: " + ex;
-					}
+					problem += "\n" + describeShell(botShell);
 					logger.info(problem);
-					if (botShell.isVisible()) {
-						try {
-							//try to bring to front
-							botShell.activate();
-						} catch (Throwable ex) {
-						}
-						//make a screenshot
-						String fileName = "dialog_"+System.currentTimeMillis()+"." + SWTBotPreferences.SCREENSHOT_FORMAT.toLowerCase();
-						logger.info("Capturing screenshot of open shell in " + fileName);
-						SWTUtils.captureScreenshot(fileName);
-					}
+
+					captureShellScreenshot(botShell);
+
+					//also dump threads, since this is often caused by the wizard not being cancellable due to a still running operation:
+					//"Wizard can not be closed due to an active operation"
+					dumpThreads();
+
 					//kill message dialog
 					botShell.close();
 				}
@@ -227,6 +218,57 @@ public abstract class AbstractMarketplaceWizardBotTest {
 				fail(problem);
 			}
 		}
+	}
+
+	private void dumpThreads() {
+		try {
+			ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+			Method dumpMethod = ThreadMXBean.class.getMethod("dumpAllThreads", Boolean.TYPE, Boolean.TYPE);
+			ThreadInfo[] threadInfos = (ThreadInfo[]) dumpMethod.invoke(threadMXBean, true, true);
+			for (ThreadInfo threadInfo : threadInfos) {
+				logger.info(threadInfo);
+				System.out.println(threadInfo);
+			}
+		} catch (NoSuchMethodException e) {
+			logger.warn("Method ThreadMXBean.dumpAllThreads(boolean, boolean) does not exist. Try running on Java 6 or later.");
+		} catch (Throwable t) {
+			logger.warn("Error dumping threads: " + t, t);
+		}
+	}
+
+	private void captureShellScreenshot(SWTBotShell botShell) {
+		if (botShell.isVisible()) {
+			try {
+				//try to bring to front
+				botShell.activate();
+			} catch (Throwable ex) {
+			}
+			//make a screenshot
+			String fileName = "dialog_" + System.currentTimeMillis() + "."
+					+ SWTBotPreferences.SCREENSHOT_FORMAT.toLowerCase();
+			logger.info("Capturing screenshot of open shell in " + fileName);
+			SWTUtils.captureScreenshot(fileName);
+		}
+	}
+
+	private String describeShell(SWTBotShell botShell) {
+		StringBuilder description = new StringBuilder("    Shell(\"").append(botShell.getText()).append("\")");
+
+		try {
+			SWTBot childBot = botShell.bot();
+			@SuppressWarnings("unchecked")
+			Matcher<Label> matcher = allOf(widgetOfType(Label.class));
+			List<? extends Label> widgets = childBot.widgets(matcher);
+			for (Label label : widgets) {
+				if (label != null) {//TODO why can this be null?
+					String labelText = new SWTBotLabel(label, matcher).getText();
+					description.append("\n    > ").append(labelText);
+				}
+			}
+		} catch (Exception ex) {
+			description.append("\n    > Error describing shell contents: ").append(ex);
+		}
+		return description.toString();
 	}
 
 	protected SWTBot itemBot(NodeMatcher<? extends Widget> matcher) {
