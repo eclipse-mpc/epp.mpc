@@ -150,16 +150,23 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+				if (label.isDisposed()) {
+					return Status.OK_STATUS;
+				}
 				monitor.beginTask(
 						NLS.bind(Messages.CatalogSwitcher_downloadCatalogImage, catalogDescriptor.getLabel()), 1);
 				final Image image = getCatalogIcon(catalogDescriptor);
 				monitor.worked(1);
-				label.getDisplay().asyncExec(new Runnable() {
+				if (!label.isDisposed()) { // recheck - getCatalogIcon can take a bit if it needs to download the image...
+					label.getDisplay().asyncExec(new Runnable() {
 
-					public void run() {
-						label.setImage(image);
-					}
-				});
+						public void run() {
+							if (!label.isDisposed() && !image.isDisposed()) {
+								label.setImage(image);
+							}
+						}
+					});
+				}
 				monitor.done();
 				return Status.OK_STATUS;
 			}
