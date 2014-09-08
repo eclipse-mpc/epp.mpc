@@ -286,8 +286,8 @@ public class NewsViewer {
 			if (current > 0) {
 				progress.worked(current);
 			}
-			int completeSince = 0;
-			while (!monitor.isCanceled() && !done && completeSince < 4) {
+			long lastUpdate = System.currentTimeMillis();
+			while (!monitor.isCanceled() && !done) {
 				int newCurrent, newTotal, newRemaining, worked;
 				synchronized (this) {
 					wait(200);
@@ -297,10 +297,18 @@ public class NewsViewer {
 
 					int oldRemaining = lastTotal - lastCurrent;
 					newRemaining = newTotal - newCurrent;
-					if (newRemaining == 0 && oldRemaining == 0) {
+
+					long now = System.currentTimeMillis();
+					long timeSinceLastUpdate = now - lastUpdate;
+
+					if (newCurrent != lastCurrent || newTotal != lastTotal) {
+						lastUpdate = now;
+					} else if ((newRemaining == 0 && oldRemaining == 0 && timeSinceLastUpdate >= 900)
+							|| timeSinceLastUpdate > 10000) {
 						//FIXME hack because completed event is not always coming
-						completeSince++;
+						break;
 					}
+
 					worked = oldRemaining - newRemaining;
 					if (worked <= 0) {
 						worked = 1;
