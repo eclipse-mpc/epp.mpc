@@ -134,6 +134,7 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 		assertFalse(wizardShell.isActive());//but no longer the active shell
 	}
 
+	@Ignore("Temporarily disabled due to build server problems - bug 443493")
 	@Test
 	public void testNews() {
 		bot.tabItemWithId(MarketplacePage.WIDGET_ID_KEY, MarketplacePage.WIDGET_ID_TAB_NEWS).activate();
