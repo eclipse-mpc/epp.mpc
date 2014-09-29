@@ -157,7 +157,7 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 						NLS.bind(Messages.CatalogSwitcher_downloadCatalogImage, catalogDescriptor.getLabel()), 1);
 				final Image image = getCatalogIcon(catalogDescriptor);
 				monitor.worked(1);
-				if (!label.isDisposed()) { // recheck - getCatalogIcon can take a bit if it needs to download the image...
+				if (image != null && !label.isDisposed()) { // recheck - getCatalogIcon can take a bit if it needs to download the image...
 					label.getDisplay().asyncExec(new Runnable() {
 
 						public void run() {
@@ -193,6 +193,9 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 			}
 			imageRegistry.put(key, catalogIcon);
 			image = imageRegistry.get(key);
+			if (image == null) {
+				return getDefaultCatalogImage();
+			}
 		}
 		return image;
 	}
