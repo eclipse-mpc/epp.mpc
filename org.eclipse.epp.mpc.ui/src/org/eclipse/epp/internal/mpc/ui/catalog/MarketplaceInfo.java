@@ -223,7 +223,7 @@ public class MarketplaceInfo {
 	 * @nooverride This method is not intended to be re-implemented or extended by clients.
 	 */
 	public MarketplaceInfo load() {
-		File registryFile = computeRegistryFile();
+		File registryFile = computeRegistryFile(false);
 		synchronized (MarketplaceInfo.class) {
 			if (registryFile != null && registryFile.isFile() && registryFile.length() > 0) {
 				try {
@@ -250,7 +250,7 @@ public class MarketplaceInfo {
 	}
 
 	public void save() {
-		File registryFile = computeRegistryFile();
+		File registryFile = computeRegistryFile(true);
 		if (registryFile != null) {
 			synchronized (MarketplaceInfo.class) {
 				save(registryFile);
@@ -286,11 +286,9 @@ public class MarketplaceInfo {
 	 * @noreference This method is not intended to be referenced by clients.
 	 * @nooverride This method is not intended to be re-implemented or extended by clients.
 	 */
-	protected File computeRegistryFile() {
+	protected File computeRegistryFile(boolean save) {
 		// compute the file we'll use for registry persistence, starting with the platform configuration location
-		File dataFile = Platform.getBundle(MarketplaceClientUi.BUNDLE_ID)
-				.getBundleContext()
-				.getDataFile(PERSISTENT_FILE);
+		File dataFile = computeBundleRegistryFile();
 		if (dataFile != null) {
 			return dataFile;
 		}
@@ -299,18 +297,82 @@ public class MarketplaceInfo {
 		String userHome = System.getProperty("user.home"); //$NON-NLS-1$
 		File userHomeFile = new File(userHome);
 		if (userHomeFile.exists()) {
-			File mpcConfigLocation = new File(userHomeFile, ".eclipse_mpc"); //$NON-NLS-1$
-			if (!mpcConfigLocation.exists()) {
-				if (!mpcConfigLocation.mkdir()) {
-					return null;
-				}
-			}
-			return computeConfigFile(mpcConfigLocation);
+			File configFile = computeUserHomeRegistryFile(userHomeFile);
+
+			configFile = handleLegacyRegistryFile(userHomeFile, configFile, save);
+
+			return configFile;
 		}
 		return null;
 	}
 
-	protected static File computeConfigFile(File mpcConfigLocation) {
+	private File handleLegacyRegistryFile(File userHome, File configFile, boolean save) {
+		File legacyConfigFile = computeLegacyUserHomeRegistryFile(userHome);
+		if (!configFile.getParentFile().isDirectory() && !configFile.getParentFile().mkdirs()) {
+			configFile = legacyConfigFile;// .eclipse dir is not writable, just use legacy if that exists
+		} else if (legacyConfigFile != null) {
+			if (save) {
+				if (!legacyConfigFile.delete()) {
+					legacyConfigFile.deleteOnExit();
+				}
+				if (!legacyConfigFile.getParentFile().delete()) {
+					legacyConfigFile.getParentFile().deleteOnExit();
+				}
+			} else {
+				//load from new location if it exists or fall back to old one
+				if (!configFile.isFile()) {
+					configFile = legacyConfigFile;
+				}
+			}
+		}
+		return configFile;
+	}
+
+	/**
+	 * This method is only protected for testing purposes. Do not override or call directly.
+	 *
+	 * @noreference This method is not intended to be referenced by clients.
+	 * @nooverride This method is not intended to be re-implemented or extended by clients.
+	 */
+	protected File computeBundleRegistryFile() {
+		File dataFile = Platform.getBundle(MarketplaceClientUi.BUNDLE_ID)
+				.getBundleContext()
+				.getDataFile(PERSISTENT_FILE);
+		return dataFile;
+	}
+
+	/**
+	 * This method is only protected for testing purposes. Do not override or call directly.
+	 *
+	 * @noreference This method is not intended to be referenced by clients.
+	 * @nooverride This method is not intended to be re-implemented or extended by clients.
+	 */
+	protected File computeUserHomeRegistryFile(File userHome) {
+		File eclipseConfigLocation = new File(userHome, ".eclipse/mpc"); //$NON-NLS-1$
+		eclipseConfigLocation.mkdirs();
+
+		File configFile = computeConfigFile(eclipseConfigLocation);
+		return configFile;
+	}
+
+	/**
+	 * This method is only protected for testing purposes. Do not override or call directly.
+	 *
+	 * @noreference This method is not intended to be referenced by clients.
+	 * @nooverride This method is not intended to be re-implemented or extended by clients.
+	 */
+	protected File computeLegacyUserHomeRegistryFile(File userHome) {
+		File legacyConfigLocation = new File(userHome, ".eclipse_mpc"); //$NON-NLS-1$
+		if (legacyConfigLocation.isDirectory()) {
+			File legacyConfigFile = computeConfigFile(legacyConfigLocation);
+			if (legacyConfigFile.isFile()) {
+				return legacyConfigFile;
+			}
+		}
+		return null;
+	}
+
+	private static File computeConfigFile(File mpcConfigLocation) {
 		return new File(mpcConfigLocation, PERSISTENT_FILE);
 	}
 

@@ -42,8 +42,23 @@ public class MarketplaceInfoSerializationTest {
 
 	private final class TestMarketplaceInfo extends MarketplaceInfo {
 		@Override
-		protected File computeRegistryFile() {
-			return getUserHomeRegistryFile();
+		public File computeRegistryFile(boolean save) {
+			return super.computeRegistryFile(save);
+		}
+
+		@Override
+		protected File computeBundleRegistryFile() {
+			return null;
+		}
+
+		@Override
+		protected File computeUserHomeRegistryFile(File userHome) {
+			return super.computeUserHomeRegistryFile(registryLocation);
+		}
+
+		@Override
+		protected File computeLegacyUserHomeRegistryFile(File userHome) {
+			return super.computeLegacyUserHomeRegistryFile(registryLocation);
 		}
 	}
 
@@ -65,6 +80,7 @@ public class MarketplaceInfoSerializationTest {
 		registryLocation.mkdirs();
 		assertTrue(registryLocation.isDirectory());
 		assertTrue(!getUserHomeRegistryFile().exists() || getUserHomeRegistryFile().delete());
+		assertTrue(!getLegacyUserHomeRegistryFile().exists() || getLegacyUserHomeRegistryFile().delete());
 
 		catalogRegistry = new TestMarketplaceInfo();
 	}
@@ -87,6 +103,48 @@ public class MarketplaceInfoSerializationTest {
 		if (!file.delete()) {
 			file.deleteOnExit();
 		}
+	}
+
+	@Test
+	public void loadFromUserHomeRegistryFile() {
+		File registryFile = catalogRegistry.computeRegistryFile(false);
+		File saveRegistryFile = catalogRegistry.computeRegistryFile(true);
+		assertEquals(getUserHomeRegistryFile(), registryFile);
+		assertEquals(getUserHomeRegistryFile(), saveRegistryFile);
+	}
+
+	@Test
+	public void loadFromLegacyUserHomeRegistryFile() throws Exception {
+		createEmptyRegistryFile(getLegacyUserHomeRegistryFile());
+		File registryFile = catalogRegistry.computeRegistryFile(false);
+		assertEquals(getLegacyUserHomeRegistryFile(), registryFile);
+	}
+
+	@Test
+	public void loadFromUserHomeRegistryFileWithLegacy() throws Exception {
+		createEmptyRegistryFile(getLegacyUserHomeRegistryFile());
+		createEmptyRegistryFile(getUserHomeRegistryFile());
+		File registryFile = catalogRegistry.computeRegistryFile(false);
+		assertEquals(getUserHomeRegistryFile(), registryFile);
+	}
+
+	@Test
+	public void saveToUserHomeRegistryFileWithLegacy() throws Exception {
+		createEmptyRegistryFile(getLegacyUserHomeRegistryFile());
+		File registryFile = catalogRegistry.computeRegistryFile(true);
+		assertEquals(getUserHomeRegistryFile(), registryFile);
+		assertFalse(MessageFormat.format("Migration to new location failed, ''{0}'' still exists",
+				getLegacyUserHomeRegistryFile().getAbsolutePath()), getLegacyUserHomeRegistryFile().exists());
+	}
+
+	@Test
+	public void saveToUserHomeRegistryFileWithCurrentAndLegacy() throws Exception {
+		createEmptyRegistryFile(getLegacyUserHomeRegistryFile());
+		createEmptyRegistryFile(getUserHomeRegistryFile());
+		File registryFile = catalogRegistry.computeRegistryFile(true);
+		assertEquals(getUserHomeRegistryFile(), registryFile);
+		assertFalse(MessageFormat.format("Migration to new location failed, ''{0}'' still exists",
+				getLegacyUserHomeRegistryFile().getAbsolutePath()), getLegacyUserHomeRegistryFile().exists());
 	}
 
 	@Test
@@ -203,6 +261,10 @@ public class MarketplaceInfoSerializationTest {
 	}
 
 	private File getUserHomeRegistryFile() {
+		return new File(registryLocation, ".eclipse/mpc/MarketplaceInfo.xml");
+	}
+
+	private File getLegacyUserHomeRegistryFile() {
 		return new File(registryLocation, ".eclipse_mpc/MarketplaceInfo.xml");
 	}
 }
