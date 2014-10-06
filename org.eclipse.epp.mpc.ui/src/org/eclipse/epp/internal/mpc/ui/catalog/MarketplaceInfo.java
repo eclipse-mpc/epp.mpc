@@ -30,7 +30,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
@@ -53,6 +55,12 @@ public class MarketplaceInfo {
 	private Map<String, List<String>> iuToNodeKey = new HashMap<String, List<String>>();
 
 	public MarketplaceInfo() {
+	}
+
+	public MarketplaceInfo(MarketplaceInfo info) {
+		this();
+		nodeKeyToIU.putAll(info.getNodeKeyToIU());
+		iuToNodeKey.putAll(info.getIuToNodeKey());
 	}
 
 	public Map<String, List<String>> getNodeKeyToIU() {
@@ -203,56 +211,82 @@ public class MarketplaceInfo {
 
 	public static MarketplaceInfo getInstance() {
 
+		MarketplaceInfo info = new MarketplaceInfo();
+		MarketplaceInfo loaded = info.load();
+		return loaded != null ? loaded : info;
+	}
+
+	/**
+	 * This method is only public for testing purposes. Do not override or call directly.
+	 *
+	 * @noreference This method is not intended to be referenced by clients.
+	 * @nooverride This method is not intended to be re-implemented or extended by clients.
+	 */
+	public MarketplaceInfo load() {
 		File registryFile = computeRegistryFile();
-		if (registryFile != null && registryFile.exists()) {
-			synchronized (MarketplaceInfo.class) {
+		synchronized (MarketplaceInfo.class) {
+			if (registryFile != null && registryFile.isFile() && registryFile.length() > 0) {
 				try {
 					final InputStream in = new BufferedInputStream(new FileInputStream(registryFile));
 					try {
 						XMLDecoder decoder = new XMLDecoder(in);
 						Object object = decoder.readObject();
 						decoder.close();
-						if (object instanceof MarketplaceInfo) {
-							return (MarketplaceInfo) object;
-						}
+						return (MarketplaceInfo) object;
 					} finally {
 						in.close();
 					}
 				} catch (Throwable t) {
 					// ignore, fallback
-					MarketplaceClientUi.error(t);
+					IStatus status = new Status(IStatus.WARNING, MarketplaceClientUi.BUNDLE_ID,
+							Messages.MarketplaceInfo_LoadError, t);
+					MarketplaceClientUi.getLog().log(status);
+					//try to delete broken file
+					registryFile.delete();
 				}
 			}
 		}
-		return new MarketplaceInfo();
+		return null;
 	}
 
 	public void save() {
 		File registryFile = computeRegistryFile();
 		if (registryFile != null) {
 			synchronized (MarketplaceInfo.class) {
-				try {
-					OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(registryFile));
-					try {
-						XMLEncoder encoder = new XMLEncoder(outputStream);
-						encoder.writeObject(this);
-						encoder.close();
-					} finally {
-						outputStream.close();
-					}
-				} catch (Throwable t) {
-					// fail safe
-				}
+				save(registryFile);
 			}
+		}
+	}
+
+	public void save(File registryFile) {
+		try {
+			File container = registryFile.getParentFile();
+			if (container != null && !container.exists()) {
+				container.mkdirs();
+			}
+			OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(registryFile));
+			try {
+				XMLEncoder encoder = new XMLEncoder(outputStream);
+				encoder.writeObject(this);
+				encoder.close();
+			} finally {
+				outputStream.close();
+			}
+		} catch (Throwable t) {
+			// fail safe
 		}
 	}
 
 	/**
 	 * compute the registry file
+	 * <p>
+	 * This method is only protected for testing purposes. Do not override or call directly.
 	 *
 	 * @return the registry file, or null if there's no persistent registry.
+	 * @noreference This method is not intended to be referenced by clients.
+	 * @nooverride This method is not intended to be re-implemented or extended by clients.
 	 */
-	private static final File computeRegistryFile() {
+	protected File computeRegistryFile() {
 		// compute the file we'll use for registry persistence, starting with the platform configuration location
 		File dataFile = Platform.getBundle(MarketplaceClientUi.BUNDLE_ID)
 				.getBundleContext()
@@ -276,7 +310,7 @@ public class MarketplaceInfo {
 		return null;
 	}
 
-	private static File computeConfigFile(File mpcConfigLocation) {
+	protected static File computeConfigFile(File mpcConfigLocation) {
 		return new File(mpcConfigLocation, PERSISTENT_FILE);
 	}
 

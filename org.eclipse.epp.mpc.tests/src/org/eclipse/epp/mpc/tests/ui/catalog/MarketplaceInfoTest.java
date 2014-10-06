@@ -45,8 +45,11 @@ public class MarketplaceInfoTest {
 	@Before
 	public void before() throws Exception {
 		catalogRegistry = new MarketplaceInfo();
+		item = createTestItem();
+	}
 
-		item = new MarketplaceNodeCatalogItem();
+	public static MarketplaceNodeCatalogItem createTestItem() throws Exception {
+		MarketplaceNodeCatalogItem item = new MarketplaceNodeCatalogItem();
 		item.setMarketplaceUrl(new URL("http://marketplace.eclipse.org"));
 		item.setId("123");
 		Node node = new Node();
@@ -57,6 +60,7 @@ public class MarketplaceInfoTest {
 		node.getIus().getIu().add("com.example.test.a2");
 		item.setData(node);
 		item.setInstallableUnits(node.getIus().getIu());
+		return item;
 	}
 
 	@Test

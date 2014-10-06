@@ -14,6 +14,7 @@ import org.eclipse.epp.mpc.tests.service.CatalogServiceTest;
 import org.eclipse.epp.mpc.tests.service.DefaultMarketplaceServiceTest;
 import org.eclipse.epp.mpc.tests.service.xml.UnmarshallerTest;
 import org.eclipse.epp.mpc.tests.ui.catalog.CatalogDescriptorTest;
+import org.eclipse.epp.mpc.tests.ui.catalog.MarketplaceInfoSerializationTest;
 import org.eclipse.epp.mpc.tests.ui.catalog.MarketplaceInfoTest;
 import org.eclipse.epp.mpc.tests.ui.wizard.MarketplaceUrlHandlerTest;
 import org.eclipse.epp.mpc.tests.ui.wizard.SelectionModelStateSerializerTest;
@@ -34,6 +35,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	MarketplaceUrlHandlerTest.class, //
 	TransportFactoryTest.class, //
 	MarketplaceInfoTest.class, //
+	MarketplaceInfoSerializationTest.class, //
 	CatalogServiceTest.class, //
 	CatalogDescriptorTest.class //
 

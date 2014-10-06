@@ -58,6 +58,8 @@ class Messages extends NLS {
 	public static String MarketplaceDiscoveryStrategy_unidentifiableItem;
 
 	public static String MarketplaceDiscoveryStrategy_unknownFilter;
+
+	public static String MarketplaceInfo_LoadError;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
