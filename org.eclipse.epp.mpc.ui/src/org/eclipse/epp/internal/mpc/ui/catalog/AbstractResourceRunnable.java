@@ -20,6 +20,7 @@ import java.util.concurrent.Callable;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.epp.internal.mpc.core.util.TransportFactory;
@@ -27,7 +28,6 @@ import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.osgi.util.NLS;
 
 /**
  * A runnable that downloads a resource from an URL
@@ -76,9 +76,8 @@ abstract class AbstractResourceRunnable implements IRunnableWithProgress, Callab
 				}
 			}
 		} catch (URISyntaxException e) {
-			MarketplaceClientUi.error(
-					NLS.bind(Messages.AbstractResourceRunnable_badUri, new Object[] { catalogItem.getName(),
-							catalogItem.getId(), resourceUrl }), e);
+			MarketplaceClientUi.log(IStatus.WARNING, Messages.AbstractResourceRunnable_badUri, catalogItem.getName(),
+					catalogItem.getId(), resourceUrl, e);
 		} catch (FileNotFoundException e) {
 			//MarketplaceClientUi.error(NLS.bind(Messages.AbstractResourceRunnable_resourceNotFound, new Object[] { catalogItem.getName(),
 			//catalogItem.getId(), resourceUrl }), e);
@@ -86,14 +85,12 @@ abstract class AbstractResourceRunnable implements IRunnableWithProgress, Callab
 			if (e.getCause() instanceof OperationCanceledException) {
 				// canceled, nothing we want to do here
 			} else {
-				MarketplaceClientUi.error(
-						NLS.bind(Messages.AbstractResourceRunnable_downloadError, new Object[] { catalogItem.getName(),
-								catalogItem.getId(), resourceUrl }), e);
+				MarketplaceClientUi.log(IStatus.WARNING, Messages.AbstractResourceRunnable_downloadError,
+						catalogItem.getName(), catalogItem.getId(), resourceUrl, e);
 			}
 		} catch (CoreException e) {
-			MarketplaceClientUi.error(
-					NLS.bind(Messages.AbstractResourceRunnable_downloadError, new Object[] { catalogItem.getName(),
-							catalogItem.getId(), resourceUrl }), e);
+			MarketplaceClientUi.log(IStatus.WARNING, Messages.AbstractResourceRunnable_downloadError,
+					catalogItem.getName(), catalogItem.getId(), resourceUrl, e);
 		}
 		if (resourceProvider.containsResource(resourceUrl)) {
 			resourceRetrieved();
