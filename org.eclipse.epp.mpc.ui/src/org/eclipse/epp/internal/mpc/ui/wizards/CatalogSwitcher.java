@@ -227,8 +227,13 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 	public void setSelection(ISelection newSelection) {
 		if (newSelection instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection = (IStructuredSelection) newSelection;
-			this.selection = (CatalogDescriptor) structuredSelection.getFirstElement();
+			CatalogDescriptor oldDescriptor = this.selection;
+			CatalogDescriptor newDescriptor = (CatalogDescriptor) structuredSelection.getFirstElement();
+			this.selection = newDescriptor;
 			refreshSelection();
+			if (newDescriptor != oldDescriptor) {
+				fireSelectionChanged();
+			}
 		}
 	}
 

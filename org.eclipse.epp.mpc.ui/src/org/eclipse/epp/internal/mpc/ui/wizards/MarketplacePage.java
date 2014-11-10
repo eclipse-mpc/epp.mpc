@@ -398,6 +398,7 @@ public class MarketplacePage extends CatalogPage {
 		CatalogDescriptor selectedDescriptor = configuration.getCatalogDescriptor();
 		if (selectedDescriptor != null) {
 			switcher.setSelection(new StructuredSelection(selectedDescriptor));
+			lastSelection = selectedDescriptor;
 		}
 		marketplaceSwitcher = switcher;
 		GridDataFactory.fillDefaults()
@@ -614,6 +615,9 @@ public class MarketplacePage extends CatalogPage {
 					computeSelectionLinkText();
 				} else {
 					if (marketplaceSwitcher != null) {
+						if (lastSelection == null) {
+							lastSelection = configuration.getCatalogDescriptor();
+						}
 						marketplaceSwitcher.setSelection(new StructuredSelection(lastSelection));
 					}
 					return Status.CANCEL_STATUS;
