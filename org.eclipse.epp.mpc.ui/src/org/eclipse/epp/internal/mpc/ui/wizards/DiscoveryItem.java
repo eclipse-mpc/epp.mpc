@@ -832,7 +832,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 						break;
 					}
 					Shell tipShell = (Shell) toolTip.getData(Shell.class.getName());
-					if (tipShell != null) {
+					if (tipShell != null && !tipShell.isDisposed()) {
 						Rectangle tipBounds = tipShell.getBounds();
 						if (tipBounds.contains(cursorLocation)) {
 							break;
