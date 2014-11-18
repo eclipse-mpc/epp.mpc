@@ -4,7 +4,7 @@
    <modelVersion>4.0.0</modelVersion>
 
    <prerequisites>
-      <maven>3.0.5</maven>
+      <maven>3.1.1</maven>
    </prerequisites>
 
    <groupId>org.eclipse.epp.mpc</groupId>
@@ -183,7 +183,7 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-compiler-plugin</artifactId>
-               <version>3.1</version>
+               <version>3.2</version>
                <configuration>
                   <source>${java-version}</source>
                   <target>${java-version}</target>
@@ -327,7 +327,7 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-resources-plugin</artifactId>
-               <version>2.6</version>
+               <version>2.7</version>
                <configuration>
                   <encoding>ISO-8859-1</encoding>
                </configuration>
@@ -336,7 +336,7 @@
             <plugin>
                <groupId>org.codehaus.mojo</groupId>
                <artifactId>findbugs-maven-plugin</artifactId>
-               <version>2.5.4</version>
+               <version>3.0.0</version>
                <configuration>
                   <findbugsXmlOutput>true</findbugsXmlOutput>
                   <failOnError>false</failOnError>
@@ -354,13 +354,13 @@
             <plugin>
                <groupId>org.codehaus.mojo</groupId>
                <artifactId>build-helper-maven-plugin</artifactId>
-               <version>1.9</version>
+               <version>1.9.1</version>
             </plugin>
 
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-pmd-plugin</artifactId>
-               <version>3.1</version>
+               <version>3.2</version>
                <configuration>
                   <sourceEncoding>utf-8</sourceEncoding>
                   <minimumTokens>100</minimumTokens>
