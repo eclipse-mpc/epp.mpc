@@ -16,6 +16,7 @@
       <mpc-version>${project.version}</mpc-version>
       <target-platform>luna</target-platform>
       <java-version>1.5</java-version>
+	  <java-jdk>SYSTEM</java-jdk>
 
       <tycho-version>0.21.0</tycho-version>
       <tycho-extras-version>0.21.0</tycho-extras-version>
@@ -119,6 +120,7 @@
             <skip-sign>false</skip-sign>
             <skip-pack>false</skip-pack>
             <skip-source-check>false</skip-source-check>
+			<java-jdk>BREE</java-jdk>
          </properties>
          <build>
             <pluginManagement>
@@ -133,6 +135,13 @@
                </plugins>
             </pluginManagement>
          </build>
+      </profile>
+      <profile>
+         <id>strict</id>
+         <properties>
+            <skip-source-check>false</skip-source-check>
+			<java-jdk>BREE</java-jdk>
+         </properties>
       </profile>
       <profile>
          <id>hudson.eclipse.org</id>
@@ -186,6 +195,8 @@
                <version>${tycho-version}</version>
                <configuration>
                   <encoding>UTF-8</encoding>
+				  <useJDK>${java-jdk}</useJDK>
+				  <strictCompilerTarget>true</strictCompilerTarget>
                </configuration>
             </plugin>
 
