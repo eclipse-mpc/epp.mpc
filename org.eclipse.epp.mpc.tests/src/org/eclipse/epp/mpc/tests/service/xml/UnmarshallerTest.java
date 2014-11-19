@@ -144,7 +144,7 @@ public class UnmarshallerTest {
 		// FIXME category id.
 
 		assertNotNull(node.getCreated());
-		assertEquals(1259955243L, node.getCreated().getTime());
+		assertEquals(1259955243L, node.getCreated().getTime() / 1000);
 		assertEquals(new Integer(3), node.getFavorited());
 		assertEquals(Boolean.TRUE, node.getFoundationmember());
 		assertNotNull(node.getChanged());
