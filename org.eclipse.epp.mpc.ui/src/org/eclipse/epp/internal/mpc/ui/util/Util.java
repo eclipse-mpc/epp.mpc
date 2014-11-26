@@ -23,6 +23,7 @@ import java.awt.image.PixelGrabber;
 import java.awt.image.WritableRaster;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
@@ -30,13 +31,17 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
+import org.osgi.framework.Version;
 
 public class Util {
-	private static boolean useAwt = true;
+	private static final String GTK_VERSION_PROPERTY = "org.eclipse.swt.internal.gtk.version"; //$NON-NLS-1$
+	private static Boolean useAwt;
+
+	private static Boolean isGtk3;
 
 	/**
 	 * Scale an image to a size that conforms to the given maximums while maintaining its original aspect ratio.
-	 * 
+	 *
 	 * @param image
 	 *            the image to scale
 	 * @param maxWidth
@@ -61,59 +66,79 @@ public class Util {
 			newHeight = maxHeight;
 		}
 
+		Image scaledImage = null;
 		// try high-quality scaling using AWT
-		if (useAwt) {
-			try {
-				// convert to awt
-				BufferedImage img = convertToAWT(image.getImageData());
-
-				// scale using best scaling filter; currently AreaAveragingScaleFilter, see BufferedImage.getScaledInstance() hint for SCALE_SMOOTH.
-				// we could just call BufferedImage.getScaledInstance(), but that does a full AWT initialization.
-				ImageFilter filter;
-				filter = new AreaAveragingScaleFilter(newWidth, newHeight);
-				ImageProducer prod;
-				prod = new FilteredImageSource(img.getSource(), filter);
-				final PixelGrabber pixelGrabber = new PixelGrabber(prod, 0, 0, newWidth, newHeight, null, 0, newWidth) {
-					@Override
-					public void setDimensions(int width, int height) {
-						super.setDimensions(width, height);
-					}
-				};
-				if (pixelGrabber.grabPixels()) {
-					final Image scaledImage = new Image(image.getDevice(), convertToSWT(pixelGrabber));
-					return scaledImage;
-				}
-				// else it didn't work on this image - no cause to completely disable AWT...
-			} catch (Exception e) {
-				//something went wrong with AWT - disable it
-				useAwt = false;
-			} catch (AWTError e) {
-				useAwt = false;
-			}
+		if (useAwt()) {
+			scaledImage = scaleImageAwt(image, newWidth, newHeight);
 		}
 		//fall back to SWT method
+		if (scaledImage == null)
 		{
 			if (newHeight == -1) {
 				newHeight = Math.min(maxHeight, (int) (bounds.height / widthRatio));
 			} else {
 				newWidth = Math.min(maxWidth, (int) (bounds.width / heightRatio));
 			}
-			final Image scaledImage = new Image(image.getDevice(), newWidth, newHeight);
-			GC gc = new GC(scaledImage);
-			try {
-				gc.drawImage(image, 0, 0, bounds.width, bounds.height, 0, 0, newWidth, newHeight);
-			} finally {
-				gc.dispose();
-			}
-			return scaledImage;
+			scaledImage = scaleImageSwt(image, newWidth, newHeight);
 		}
+		return scaledImage;
+	}
+
+	private static boolean useAwt() {
+		if (useAwt == null) {
+			useAwt = !isGtk3();
+		}
+		return useAwt;
+	}
+
+	private static Image scaleImageSwt(Image image, int newWidth, int newHeight) {
+		Rectangle bounds = image.getBounds();
+		Image scaledImage = new Image(image.getDevice(), newWidth, newHeight);
+		GC gc = new GC(scaledImage);
+		try {
+			gc.drawImage(image, 0, 0, bounds.width, bounds.height, 0, 0, newWidth, newHeight);
+		} finally {
+			gc.dispose();
+		}
+		return scaledImage;
+	}
+
+	private static Image scaleImageAwt(Image image, int newWidth, int newHeight) {
+		try {
+			// convert to awt
+			BufferedImage img = convertToAWT(image.getImageData());
+
+			// scale using best scaling filter; currently AreaAveragingScaleFilter, see BufferedImage.getScaledInstance() hint for SCALE_SMOOTH.
+			// we could just call BufferedImage.getScaledInstance(), but that does a full AWT initialization.
+			ImageFilter filter;
+			filter = new AreaAveragingScaleFilter(newWidth, newHeight);
+			ImageProducer prod;
+			prod = new FilteredImageSource(img.getSource(), filter);
+			final PixelGrabber pixelGrabber = new PixelGrabber(prod, 0, 0, newWidth, newHeight, null, 0, newWidth) {
+				@Override
+				public void setDimensions(int width, int height) {
+					super.setDimensions(width, height);
+				}
+			};
+			if (pixelGrabber.grabPixels()) {
+				final Image scaledImage = new Image(image.getDevice(), convertToSWT(pixelGrabber));
+				return scaledImage;
+			}
+			// else it didn't work on this image - no cause to completely disable AWT...
+		} catch (Exception e) {
+			//something went wrong with AWT - disable it
+			useAwt = false;
+		} catch (AWTError e) {
+			useAwt = false;
+		}
+		return null;
 	}
 
 	/**
 	 * Convert SWT image to AWT using <a href=
 	 * "http://git.eclipse.org/c/platform/eclipse.platform.swt.git/tree/examples/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet156.java"
 	 * >SWT code snippet</a>.
-	 * 
+	 *
 	 * @param data
 	 *            the SWT image to convert
 	 * @return the converted AWT image
@@ -168,7 +193,7 @@ public class Util {
 	 * Convert SWT image to AWT. This is based on the <a href=
 	 * "http://git.eclipse.org/c/platform/eclipse.platform.swt.git/tree/examples/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet156.java"
 	 * >SWT code snippet</a>, but rewritten to work on a PixelGrabber so we can avoid a full AWT initialization.
-	 * 
+	 *
 	 * @param bufferedImage
 	 *            the AWT image to convert
 	 * @return the converted SWT image
@@ -240,7 +265,7 @@ public class Util {
 
 	/**
 	 * Compute the message type of the given status.
-	 * 
+	 *
 	 * @see IMessageProvider
 	 */
 	public static int computeMessageType(IStatus status) {
@@ -258,5 +283,22 @@ public class Util {
 			break;
 		}
 		return messageType;
+	}
+
+	public static boolean isGtk3() {
+		if (isGtk3 == null) {
+			if (Platform.WS_GTK.equals(Platform.getWS())) {
+				String gtkVersionStr = System.getProperty(GTK_VERSION_PROPERTY);
+				if (gtkVersionStr != null) {
+					Version gtkVersion = new Version(gtkVersionStr);
+					isGtk3 = gtkVersion.getMajor() >= 3;
+				} else {
+					isGtk3 = false;
+				}
+			} else {
+				isGtk3 = false;
+			}
+		}
+		return isGtk3;
 	}
 }

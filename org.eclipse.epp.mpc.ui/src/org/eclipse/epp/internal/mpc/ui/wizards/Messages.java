@@ -193,11 +193,15 @@ class Messages extends NLS {
 
 	public static String SelectionModel_oneSolution;
 
+	public static String ShareSolutionLink_CopyToClipboard;
+
 	public static String ShareSolutionLink_EMail;
 
 	public static String ShareSolutionLink_failed_to_open_manually_share;
 
 	public static String ShareSolutionLink_mailSubject;
+
+	public static String ShareSolutionLink_OpenInBrowser;
 
 	public static String ShareSolutionLink_recipient;
 

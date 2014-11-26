@@ -12,6 +12,7 @@
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
 
@@ -19,6 +20,7 @@ import org.eclipse.core.runtime.URIUtil;
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.util.Util;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
@@ -34,6 +36,7 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -80,9 +83,9 @@ public class ShareSolutionLink {
 	private Menu createMenu(final Control control) {
 		final Menu popupMenu = new Menu(control);
 		createTweetMenu(popupMenu);
-		if (isMailSupported()) {
-			createMailMenu(popupMenu);
-		}
+		createMailMenu(popupMenu);
+		createOpenInBrowserMenu(popupMenu);
+		createCopyLinkMenu(popupMenu);
 		return popupMenu;
 	}
 
@@ -108,6 +111,41 @@ public class ShareSolutionLink {
 				openNewMail();
 			}
 		});
+	}
+
+	private void createCopyLinkMenu(final Menu popupMenu) {
+		MenuItem copyItem = new MenuItem(popupMenu, SWT.POP_UP);
+		copyItem.setText(Messages.ShareSolutionLink_CopyToClipboard);
+		copyItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				copyLinkToClipboard();
+			}
+		});
+	}
+
+	private void createOpenInBrowserMenu(final Menu popupMenu) {
+		MenuItem copyItem = new MenuItem(popupMenu, SWT.POP_UP);
+		copyItem.setText(Messages.ShareSolutionLink_OpenInBrowser);
+		copyItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				copyLinkToClipboard();
+			}
+		});
+	}
+
+	protected void openInBrowser() {
+		WorkbenchUtil.openUrl(getUrl(), IWorkbenchBrowserSupport.AS_EXTERNAL);
+	}
+
+	protected void copyLinkToClipboard() {
+		Clipboard clipboard = new Clipboard(control.getDisplay());
+		TextTransfer textTransfer = TextTransfer.getInstance();
+		Transfer[] transfers = new Transfer[] { textTransfer };
+		Object[] data = new Object[] { getUrl() };
+		clipboard.setContents(data, transfers);
+		clipboard.dispose();
 	}
 
 	protected void openNewMail() {
@@ -146,6 +184,22 @@ public class ShareSolutionLink {
 
 	private void openMail(URI uri) throws Exception {
 		// Desktop.getDesktop().mail(uri);
+		if (isAwtMailSupported()) {
+			openMailAwt(uri);
+		} else {
+			openMailSwt(uri);
+		}
+	}
+
+	private void openMailSwt(URI uri) {
+		//TODO bug 384840 - On linux, use xdb-open through Runtime.exec and check return status before falling back to Program.launch
+
+		//this works less reliably than the awt version. we also don't get any feedback if it worked. so only use as a last resort
+		Program.launch(uri.toString());
+	}
+
+	protected void openMailAwt(URI uri) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
+	InvocationTargetException {
 		Class<?> desktopClazz = getDesktopClazz();
 		Method getDesktopMethod = desktopClazz.getMethod("getDesktop"); //$NON-NLS-1$
 		Object desktop = getDesktopMethod.invoke(null);
@@ -154,14 +208,17 @@ public class ShareSolutionLink {
 		mailMethod.invoke(desktop, uri);
 	}
 
-	private boolean isMailSupported() {
-		// return Desktop.isDesktopSupported() &&
-		// Desktop.getDesktop().isSupported(Action.MAIL)
+	private boolean isAwtMailSupported() {
+		if (Util.isGtk3()) {
+			return false;
+		}
 		try {
 			Class<?> desktopClazz = getDesktopClazz();
 			Method isDesktopSupportedMethod = desktopClazz.getMethod("isDesktopSupported"); //$NON-NLS-1$
 			boolean isDesktopSupported = (Boolean) isDesktopSupportedMethod.invoke(null);
-
+			if (!isDesktopSupported) {
+				return false;
+			}
 			Method getDesktopMethod = desktopClazz.getMethod("getDesktop"); //$NON-NLS-1$
 			Object desktop = getDesktopMethod.invoke(null);
 
@@ -180,7 +237,7 @@ public class ShareSolutionLink {
 			Field mailEnumOption = actionEnum.getDeclaredField("MAIL"); //$NON-NLS-1$
 			boolean isMailSupported = (Boolean) isSupportedMethod.invoke(desktop, mailEnumOption.get(null));
 
-			return isDesktopSupported && isMailSupported;
+			return isMailSupported;
 		} catch (Exception e) {
 			// ignore, we don't support mail in this case
 		}
