@@ -184,28 +184,7 @@ public class DefaultMarketplaceServiceTest {
 
 	@Test
 	public void search() throws CoreException {
-		List<? extends IMarket> markets = marketplaceService.listMarkets(new NullProgressMonitor());
-		assertTrue(!markets.isEmpty());
-
-		IMarket toolsMarket = null;
-		for (IMarket market : markets) {
-			if ("Tools".equals(market.getName())) {
-				toolsMarket = market;
-				break;
-			}
-		}
-		assertNotNull(toolsMarket);
-		ICategory mylynCategory = null;
-		for (ICategory category : toolsMarket.getCategory()) {
-			if ("Mylyn Connectors".equals(category.getName())) {
-				mylynCategory = category;
-				break;
-			}
-		}
-		assertNotNull(mylynCategory);
-
-		ISearchResult result = marketplaceService.search(toolsMarket, mylynCategory, "WikiText",
-				new NullProgressMonitor());
+		ISearchResult result = search("Tools", "Mylyn Connectors", "WikiText");
 		assertNotNull(result);
 		assertNotNull(result.getNodes());
 		assertEquals(Integer.valueOf(1), result.getMatchCount());
@@ -215,6 +194,49 @@ public class DefaultMarketplaceServiceTest {
 
 		assertTrue(node.getName().startsWith("Mylyn WikiText"));
 		assertEquals("1065", node.getId());
+	}
+
+	@Test
+	public void search_bug448453() throws CoreException {
+		ISearchResult result = search(null, null, "play!");
+		assertNotNull(result);
+		assertNotNull(result.getNodes());
+	}
+
+	private ISearchResult search(String marketName, String categoryName, String queryText) throws CoreException {
+		IMarket toolsMarket = marketName == null ? null : findMarket(marketName);
+		ICategory mylynCategory = categoryName == null ? null : findCategory(toolsMarket, categoryName);
+
+		ISearchResult result = marketplaceService.search(toolsMarket, mylynCategory, queryText,
+				new NullProgressMonitor());
+		return result;
+	}
+
+	private ICategory findCategory(IMarket toolsMarket, String categoryName) {
+		ICategory mylynCategory = null;
+		for (ICategory category : toolsMarket.getCategory()) {
+			if (categoryName.equals(category.getName())) {
+				mylynCategory = category;
+				break;
+			}
+		}
+		assertNotNull(mylynCategory);
+		return mylynCategory;
+	}
+
+	private IMarket findMarket(String marketName) throws CoreException {
+		List<? extends IMarket> markets = marketplaceService.listMarkets(new NullProgressMonitor());
+		assertTrue(!markets.isEmpty());
+
+		IMarket toolsMarket = null;
+		for (IMarket market : markets) {
+			if (marketName.equals(market.getName())) {
+				toolsMarket = market;
+				break;
+			}
+		}
+		assertNotNull(toolsMarket);
+		return toolsMarket;
 	}
 
 	@Test
