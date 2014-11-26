@@ -274,7 +274,7 @@ MarketplaceService {
 				Throwable cause = ex.getCause();
 				if (cause instanceof FileNotFoundException) {
 					throw new CoreException(createErrorStatus(
-							Messages.DefaultMarketplaceService_UnsupportedSearchString + queryText, cause));
+							NLS.bind(Messages.DefaultMarketplaceService_UnsupportedSearchString, queryText), cause));
 				}
 				throw ex;
 			}
