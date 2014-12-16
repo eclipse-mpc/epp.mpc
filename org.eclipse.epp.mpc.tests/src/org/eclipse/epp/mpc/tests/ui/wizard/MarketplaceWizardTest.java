@@ -79,6 +79,7 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 	public void testShowSelected() {
 		selectToInstall(3);
 		SWTBotLink link = bot.link("<a>3 solutions selected</a>");
+		link.click();//swtbot issue, link sometimes doesn't get clicked...
 		link.click();
 		//wait for the action to be processed
 		bot.waitUntil(new DefaultCondition() {
