@@ -148,7 +148,7 @@ public class UnmarshallerTest {
 		assertEquals(new Integer(3), node.getFavorited());
 		assertEquals(Boolean.TRUE, node.getFoundationmember());
 		assertNotNull(node.getChanged());
-		assertEquals(1259964722L, node.getChanged().getTime());
+		assertEquals(1259964722L, node.getChanged().getTime() / 1000);
 		assertEquals("David Green", node.getOwner());
 		assertEquals("resource", node.getType());
 
