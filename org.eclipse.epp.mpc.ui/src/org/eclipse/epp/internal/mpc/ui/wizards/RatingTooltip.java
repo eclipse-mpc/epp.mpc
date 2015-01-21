@@ -128,7 +128,13 @@ class RatingTooltip extends ToolTip {
 
 	public void show() {
 		Rectangle bounds = parent.getBounds();
-		show(new Point(0, bounds.height));
+		int relativeY = bounds.height;
+		if (org.eclipse.jface.util.Util.isGtk()) {
+			//GTK sends MOUSE_EXIT on entering the tooltip shell, closing it (bug 455262)
+			//Workaround: open tooltip under cursor
+			relativeY = 0;
+		}
+		show(new Point(0, relativeY));
 	}
 
 	public static boolean shouldShowRatingTooltip() {
