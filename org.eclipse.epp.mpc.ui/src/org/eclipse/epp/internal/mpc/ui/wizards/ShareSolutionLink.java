@@ -71,6 +71,7 @@ public class ShareSolutionLink {
 		share.setImage(MarketplaceClientUiPlugin.getInstance()
 				.getImageRegistry()
 				.get(MarketplaceClientUiPlugin.ITEM_ICON_SHARE));
+		share.setToolTipText(Messages.ShareSolutionLink_Tooltip);
 		share.getAccessible().addAccessibleListener(new AccessibleAdapter() {
 			@Override
 			public void getName(AccessibleEvent e) {
