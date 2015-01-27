@@ -128,7 +128,12 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 				return;
 			}
 			StyledText link = (StyledText) e.getSource();
-			int offset = link.getOffsetAtLocation(new Point(e.x, e.y));
+			int offset;
+			try {
+				offset = link.getOffsetAtLocation(new Point(e.x, e.y));
+			} catch (IllegalArgumentException ex) {
+				offset = -1;
+			}
 			if (offset >= 0 && offset < link.getCharCount()) {
 				StyleRange style = link.getStyleRangeAtOffset(offset);
 				if (style != null && style.data != null) {
