@@ -326,7 +326,7 @@ public class MarketplacePage extends CatalogPage {
 		newsTabItem.setText(Messages.MarketplacePage_DefaultNewsTitle);
 		newsTabItem.setData(WIDGET_ID_KEY, WIDGET_ID_TAB_NEWS);
 
-		if (newsViewer == null) {
+		if (newsViewer == null || newsViewer.getControl().isDisposed()) {
 			createNewsViewer(tabFolder);
 		}
 		newsTabItem.setControl(newsViewer.getControl());
