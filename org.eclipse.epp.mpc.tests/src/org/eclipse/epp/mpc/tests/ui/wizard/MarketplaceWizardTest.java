@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui.wizard;
 
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.*;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.*;
 
 import java.util.List;
@@ -20,12 +22,15 @@ import org.eclipse.epp.internal.mpc.ui.wizards.MarketplacePage;
 import org.eclipse.epp.mpc.tests.ui.wizard.matcher.NodeMatcher;
 import org.eclipse.epp.mpc.tests.ui.wizard.widgets.SWTBotClickableStyledText;
 import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotBrowser;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotLink;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotStyledText;
+import org.hamcrest.Matcher;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -53,8 +58,13 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 
 	@Test
 	public void testSearchTag() {
-		SWTBotClickableStyledText tagsLabel = SWTBotClickableStyledText.from(bot.styledTextWithId(
-				DiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_TAGS));
+		Matcher<StyledText> widgetOfType = widgetOfType(StyledText.class);
+		Matcher<StyledText> withId = withId(DiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_TAGS);
+		Matcher<StyledText> emptyText = withText("");
+		@SuppressWarnings("unchecked")
+		Matcher<StyledText> nonEmptyTagMatcher = allOf(widgetOfType, withId, not(emptyText));
+		SWTBotClickableStyledText tagsLabel = SWTBotClickableStyledText.from(new SWTBotStyledText(bot.widget(
+				nonEmptyTagMatcher, 0), nonEmptyTagMatcher));
 		StyleRange linkRange = findLink(tagsLabel);
 		String tag = getText(linkRange, tagsLabel);
 		tagsLabel.click(linkRange);

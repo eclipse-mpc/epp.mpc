@@ -163,8 +163,8 @@ public class MarketplaceClientServiceTest extends AbstractMarketplaceWizardBotTe
 		initWizardBot();
 		checkSelectedTab("Search");
 		SWTBot itemBot = itemBot("206");
-		itemBot.button("Install Pending").isEnabled();
-		bot.button("Install Now >").isEnabled();
+		assertTrue(itemBot.button("Install Pending").isEnabled());
+		assertTrue(bot.button("Install Now >").isEnabled());
 	}
 
 	@Test
