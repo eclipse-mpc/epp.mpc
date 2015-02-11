@@ -148,6 +148,8 @@ public class MarketplacePage extends CatalogPage {
 		popularTabItem = createCatalogTab(-1, WIDGET_ID_TAB_POPULAR, currentBranding.getPopularTabName());
 		installedTabItem = createCatalogTab(-1, WIDGET_ID_TAB_INSTALLED, Messages.MarketplacePage_installed);
 		updateNewsTab();
+
+		searchTabItem.setControl(tabContent);
 		tabFolder.setSelection(searchTabItem);
 
 		tabFolder.addSelectionListener(new SelectionListener() {
@@ -272,8 +274,13 @@ public class MarketplacePage extends CatalogPage {
 		final TabItem tabItem = getTabItem(contentType);
 		TabItem currentTabItem = getSelectedTabItem();
 		if (currentTabItem != tabItem) {
+			if (currentTabItem.getControl() == tabContent) {
+				currentTabItem.setControl(null);
+			}
 			tabFolder.setSelection(tabItem);
 		}
+		tabItem.setControl(null);
+		tabItem.setControl(tabContent);
 		getViewer().setContentType(contentType);
 	}
 
@@ -304,8 +311,7 @@ public class MarketplacePage extends CatalogPage {
 	}
 
 	private TabItem createCatalogTab(int index, String widgetId, String label) {
-		Control tabControl = tabContent;
-		return createTab(index, widgetId, label, tabControl);
+		return createTab(index, widgetId, label, null);
 	}
 
 	private TabItem createTab(int index, String widgetId, String label, Control tabControl) {
