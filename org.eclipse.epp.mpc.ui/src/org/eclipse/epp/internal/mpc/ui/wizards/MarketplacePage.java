@@ -99,6 +99,8 @@ public class MarketplacePage extends CatalogPage {
 
 	private TabItem popularTabItem;
 
+	private TabItem relatedTabItem;
+
 	private TabItem newsTabItem;
 
 	private Control tabContent;
@@ -146,6 +148,7 @@ public class MarketplacePage extends CatalogPage {
 		searchTabItem = createCatalogTab(-1, WIDGET_ID_TAB_SEARCH, currentBranding.getSearchTabName());
 		recentTabItem = createCatalogTab(-1, WIDGET_ID_TAB_RECENT, currentBranding.getRecentTabName());
 		popularTabItem = createCatalogTab(-1, WIDGET_ID_TAB_POPULAR, currentBranding.getPopularTabName());
+		relatedTabItem = createCatalogTab(-1, "tab:related", "Recommendations");
 		installedTabItem = createCatalogTab(-1, WIDGET_ID_TAB_INSTALLED, Messages.MarketplacePage_installed);
 		updateNewsTab();
 
@@ -303,6 +306,8 @@ public class MarketplacePage extends CatalogPage {
 			return recentTabItem;
 		case SEARCH:
 			return searchTabItem;
+		case RELATED:
+			return relatedTabItem;
 		case SELECTION:
 			return searchTabItem;
 		default:

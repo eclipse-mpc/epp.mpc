@@ -1,0 +1,265 @@
+<?xml version='1.0' encoding='UTF-8'?><marketplace>
+  <related count="6">
+    <node id="1091" name="API Demonstration Listing" url="http://www.eclipseplugincentral.net/content/api-demonstration-listing">
+      <type>resource</type>
+      <categories>
+        <category id='3' name='Database' url='http://www.eclipseplugincentral.net/taxonomy/term/3'/>
+        <category id='4' name='Build and Deploy' url='http://www.eclipseplugincentral.net/taxonomy/term/4'/>
+        <category id='5' name='Documentation' url='http://www.eclipseplugincentral.net/taxonomy/term/5'/>
+        <category id='6' name='Editor' url='http://www.eclipseplugincentral.net/taxonomy/term/6'/>
+
+        <category id='7' name='Entertainment' url='http://www.eclipseplugincentral.net/taxonomy/term/7'/>
+        <category id='38' name='Mylyn Connectors' url='http://www.eclipseplugincentral.net/category/categories/mylyn-connectors'/>
+      </categories>
+      <owner>admin</owner>
+      <favorited>0</favorited>
+      <body><![CDATA[Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sed neque ac magna condimentum venenatis. Duis erat nisl, fermentum id viverra ac, lobortis a urna. Praesent facilisis hendrerit risus. Fusce nec mi sit amet eros consequat blandit.
+<!--break-->
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sed neque ac magna condimentum venenatis. Duis erat nisl, fermentum id viverra ac, lobortis a urna. Praesent facilisis hendrerit risus. Fusce nec mi sit amet eros consequat blandit. Donec adipiscing lobortis tortor, non condimentum quam scelerisque ut. Suspendisse euismod lorem et eros euismod in commodo massa sagittis. Aliquam vestibulum malesuada neque, ornare blandit leo pharetra a. Sed dapibus euismod posuere. Integer vitae nisi ac magna pretium sagittis. Aenean id sem in est sagittis pretium. Aenean tempus, enim et cursus laoreet, sem justo scelerisque tellus, non convallis justo libero nec turpis. Praesent in nulla ante, non semper ante. Integer cursus lacus a nunc congue semper. Sed nec tellus bibendum nisl laoreet hendrerit in id elit. Mauris vitae aliquam lectus.]]></body>
+      <created>1265643712</created>
+
+      <changed>1265643712</changed>
+      <foundationmember>1</foundationmember>
+      <homepageurl><![CDATA[http://marketplace.eclipse.org/xmlapi]]></homepageurl>
+      <image><![CDATA[http://marketplace.eclipse.org/sites/default/files/equinox.png]]></image>
+      <version>1.0</version>
+      <license>EPL</license>
+      <companyname><![CDATA[Eclipse Foundation Inc.]]></companyname>
+
+      <status>Mature</status>
+      <eclipseversion><![CDATA[3.5]]></eclipseversion>
+      <supporturl><![CDATA[http://marketplace.eclipse.org/support]]></supporturl>
+      <updateurl><![CDATA[http://update.eclipse.org/marketplace]]></updateurl>
+<ius>
+<iu>org.eclipse.one.one</iu>
+<iu>org.eclipse.one.two</iu>
+<iu>org.eclipse.two.one</iu>
+<iu>org.eclipse.three.one</iu>
+
+</ius>
+<platforms>
+<platform>Windows</platform>
+<platform>Mac</platform>
+<platform>Linux/GTK</platform>
+</platforms>
+    </node>
+    <node id="1092" name="API Demonstration Listing" url="http://www.eclipseplugincentral.net/content/api-demonstration-listing">
+      <type>resource</type>
+      <categories>
+
+        <category id='3' name='Database' url='http://www.eclipseplugincentral.net/taxonomy/term/3'/>
+        <category id='4' name='Build and Deploy' url='http://www.eclipseplugincentral.net/taxonomy/term/4'/>
+        <category id='5' name='Documentation' url='http://www.eclipseplugincentral.net/taxonomy/term/5'/>
+        <category id='6' name='Editor' url='http://www.eclipseplugincentral.net/taxonomy/term/6'/>
+        <category id='7' name='Entertainment' url='http://www.eclipseplugincentral.net/taxonomy/term/7'/>
+        <category id='38' name='Mylyn Connectors' url='http://www.eclipseplugincentral.net/category/categories/mylyn-connectors'/>
+      </categories>
+      <owner>admin</owner>
+
+      <favorited>0</favorited>
+      <body><![CDATA[Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sed neque ac magna condimentum venenatis. Duis erat nisl, fermentum id viverra ac, lobortis a urna. Praesent facilisis hendrerit risus. Fusce nec mi sit amet eros consequat blandit.
+<!--break-->
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sed neque ac magna condimentum venenatis. Duis erat nisl, fermentum id viverra ac, lobortis a urna. Praesent facilisis hendrerit risus. Fusce nec mi sit amet eros consequat blandit. Donec adipiscing lobortis tortor, non condimentum quam scelerisque ut. Suspendisse euismod lorem et eros euismod in commodo massa sagittis. Aliquam vestibulum malesuada neque, ornare blandit leo pharetra a. Sed dapibus euismod posuere. Integer vitae nisi ac magna pretium sagittis. Aenean id sem in est sagittis pretium. Aenean tempus, enim et cursus laoreet, sem justo scelerisque tellus, non convallis justo libero nec turpis. Praesent in nulla ante, non semper ante. Integer cursus lacus a nunc congue semper. Sed nec tellus bibendum nisl laoreet hendrerit in id elit. Mauris vitae aliquam lectus.]]></body>
+      <created>1265643712</created>
+      <changed>1265643712</changed>
+      <foundationmember>1</foundationmember>
+      <homepageurl><![CDATA[http://marketplace.eclipse.org/xmlapi]]></homepageurl>
+      <image><![CDATA[http://marketplace.eclipse.org/sites/default/files/equinox.png]]></image>
+
+      <version>1.0</version>
+      <license>EPL</license>
+      <companyname><![CDATA[Eclipse Foundation Inc.]]></companyname>
+      <status>Mature</status>
+      <eclipseversion><![CDATA[3.5]]></eclipseversion>
+      <supporturl><![CDATA[http://marketplace.eclipse.org/support]]></supporturl>
+      <updateurl><![CDATA[http://update.eclipse.org/marketplace]]></updateurl>
+
+<ius>
+<iu>org.eclipse.one.one</iu>
+<iu>org.eclipse.one.two</iu>
+<iu>org.eclipse.two.one</iu>
+<iu>org.eclipse.three.one</iu>
+</ius>
+<platforms>
+<platform>Windows</platform>
+<platform>Mac</platform>
+<platform>Linux/GTK</platform>
+
+</platforms>
+    </node>
+    <node id="1093" name="API Demonstration Listing" url="http://www.eclipseplugincentral.net/content/api-demonstration-listing">
+      <type>resource</type>
+      <categories>
+        <category id='3' name='Database' url='http://www.eclipseplugincentral.net/taxonomy/term/3'/>
+        <category id='4' name='Build and Deploy' url='http://www.eclipseplugincentral.net/taxonomy/term/4'/>
+        <category id='5' name='Documentation' url='http://www.eclipseplugincentral.net/taxonomy/term/5'/>
+        <category id='6' name='Editor' url='http://www.eclipseplugincentral.net/taxonomy/term/6'/>
+
+        <category id='7' name='Entertainment' url='http://www.eclipseplugincentral.net/taxonomy/term/7'/>
+        <category id='38' name='Mylyn Connectors' url='http://www.eclipseplugincentral.net/category/categories/mylyn-connectors'/>
+      </categories>
+      <owner>admin</owner>
+      <favorited>0</favorited>
+      <body><![CDATA[Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sed neque ac magna condimentum venenatis. Duis erat nisl, fermentum id viverra ac, lobortis a urna. Praesent facilisis hendrerit risus. Fusce nec mi sit amet eros consequat blandit.
+<!--break-->
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sed neque ac magna condimentum venenatis. Duis erat nisl, fermentum id viverra ac, lobortis a urna. Praesent facilisis hendrerit risus. Fusce nec mi sit amet eros consequat blandit. Donec adipiscing lobortis tortor, non condimentum quam scelerisque ut. Suspendisse euismod lorem et eros euismod in commodo massa sagittis. Aliquam vestibulum malesuada neque, ornare blandit leo pharetra a. Sed dapibus euismod posuere. Integer vitae nisi ac magna pretium sagittis. Aenean id sem in est sagittis pretium. Aenean tempus, enim et cursus laoreet, sem justo scelerisque tellus, non convallis justo libero nec turpis. Praesent in nulla ante, non semper ante. Integer cursus lacus a nunc congue semper. Sed nec tellus bibendum nisl laoreet hendrerit in id elit. Mauris vitae aliquam lectus.]]></body>
+      <created>1265643712</created>
+
+      <changed>1265643712</changed>
+      <foundationmember>1</foundationmember>
+      <homepageurl><![CDATA[http://marketplace.eclipse.org/xmlapi]]></homepageurl>
+      <image><![CDATA[http://marketplace.eclipse.org/sites/default/files/equinox.png]]></image>
+      <version>1.0</version>
+      <license>EPL</license>
+      <companyname><![CDATA[Eclipse Foundation Inc.]]></companyname>
+
+      <status>Mature</status>
+      <eclipseversion><![CDATA[3.5]]></eclipseversion>
+      <supporturl><![CDATA[http://marketplace.eclipse.org/support]]></supporturl>
+      <updateurl><![CDATA[http://update.eclipse.org/marketplace]]></updateurl>
+<ius>
+<iu>org.eclipse.one.one</iu>
+<iu>org.eclipse.one.two</iu>
+<iu>org.eclipse.two.one</iu>
+<iu>org.eclipse.three.one</iu>
+
+</ius>
+<platforms>
+<platform>Windows</platform>
+<platform>Mac</platform>
+<platform>Linux/GTK</platform>
+</platforms>
+    </node>
+    <node id="1094" name="API Demonstration Listing" url="http://www.eclipseplugincentral.net/content/api-demonstration-listing">
+      <type>resource</type>
+      <categories>
+
+        <category id='3' name='Database' url='http://www.eclipseplugincentral.net/taxonomy/term/3'/>
+        <category id='4' name='Build and Deploy' url='http://www.eclipseplugincentral.net/taxonomy/term/4'/>
+        <category id='5' name='Documentation' url='http://www.eclipseplugincentral.net/taxonomy/term/5'/>
+        <category id='6' name='Editor' url='http://www.eclipseplugincentral.net/taxonomy/term/6'/>
+        <category id='7' name='Entertainment' url='http://www.eclipseplugincentral.net/taxonomy/term/7'/>
+        <category id='38' name='Mylyn Connectors' url='http://www.eclipseplugincentral.net/category/categories/mylyn-connectors'/>
+      </categories>
+      <owner>admin</owner>
+
+      <favorited>0</favorited>
+      <body><![CDATA[Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sed neque ac magna condimentum venenatis. Duis erat nisl, fermentum id viverra ac, lobortis a urna. Praesent facilisis hendrerit risus. Fusce nec mi sit amet eros consequat blandit.
+<!--break-->
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sed neque ac magna condimentum venenatis. Duis erat nisl, fermentum id viverra ac, lobortis a urna. Praesent facilisis hendrerit risus. Fusce nec mi sit amet eros consequat blandit. Donec adipiscing lobortis tortor, non condimentum quam scelerisque ut. Suspendisse euismod lorem et eros euismod in commodo massa sagittis. Aliquam vestibulum malesuada neque, ornare blandit leo pharetra a. Sed dapibus euismod posuere. Integer vitae nisi ac magna pretium sagittis. Aenean id sem in est sagittis pretium. Aenean tempus, enim et cursus laoreet, sem justo scelerisque tellus, non convallis justo libero nec turpis. Praesent in nulla ante, non semper ante. Integer cursus lacus a nunc congue semper. Sed nec tellus bibendum nisl laoreet hendrerit in id elit. Mauris vitae aliquam lectus.]]></body>
+      <created>1265643712</created>
+      <changed>1265643712</changed>
+      <foundationmember>1</foundationmember>
+      <homepageurl><![CDATA[http://marketplace.eclipse.org/xmlapi]]></homepageurl>
+      <image><![CDATA[http://marketplace.eclipse.org/sites/default/files/equinox.png]]></image>
+
+      <version>1.0</version>
+      <license>EPL</license>
+      <companyname><![CDATA[Eclipse Foundation Inc.]]></companyname>
+      <status>Mature</status>
+      <eclipseversion><![CDATA[3.5]]></eclipseversion>
+      <supporturl><![CDATA[http://marketplace.eclipse.org/support]]></supporturl>
+      <updateurl><![CDATA[http://update.eclipse.org/marketplace]]></updateurl>
+
+<ius>
+<iu>org.eclipse.one.one</iu>
+<iu>org.eclipse.one.two</iu>
+<iu>org.eclipse.two.one</iu>
+<iu>org.eclipse.three.one</iu>
+</ius>
+<platforms>
+<platform>Windows</platform>
+<platform>Mac</platform>
+<platform>Linux/GTK</platform>
+
+</platforms>
+    </node>
+    <node id="1095" name="API Demonstration Listing" url="http://www.eclipseplugincentral.net/content/api-demonstration-listing">
+      <type>resource</type>
+      <categories>
+        <category id='3' name='Database' url='http://www.eclipseplugincentral.net/taxonomy/term/3'/>
+        <category id='4' name='Build and Deploy' url='http://www.eclipseplugincentral.net/taxonomy/term/4'/>
+        <category id='5' name='Documentation' url='http://www.eclipseplugincentral.net/taxonomy/term/5'/>
+        <category id='6' name='Editor' url='http://www.eclipseplugincentral.net/taxonomy/term/6'/>
+
+        <category id='7' name='Entertainment' url='http://www.eclipseplugincentral.net/taxonomy/term/7'/>
+        <category id='38' name='Mylyn Connectors' url='http://www.eclipseplugincentral.net/category/categories/mylyn-connectors'/>
+      </categories>
+      <owner>admin</owner>
+      <favorited>0</favorited>
+      <body><![CDATA[Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sed neque ac magna condimentum venenatis. Duis erat nisl, fermentum id viverra ac, lobortis a urna. Praesent facilisis hendrerit risus. Fusce nec mi sit amet eros consequat blandit.
+<!--break-->
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sed neque ac magna condimentum venenatis. Duis erat nisl, fermentum id viverra ac, lobortis a urna. Praesent facilisis hendrerit risus. Fusce nec mi sit amet eros consequat blandit. Donec adipiscing lobortis tortor, non condimentum quam scelerisque ut. Suspendisse euismod lorem et eros euismod in commodo massa sagittis. Aliquam vestibulum malesuada neque, ornare blandit leo pharetra a. Sed dapibus euismod posuere. Integer vitae nisi ac magna pretium sagittis. Aenean id sem in est sagittis pretium. Aenean tempus, enim et cursus laoreet, sem justo scelerisque tellus, non convallis justo libero nec turpis. Praesent in nulla ante, non semper ante. Integer cursus lacus a nunc congue semper. Sed nec tellus bibendum nisl laoreet hendrerit in id elit. Mauris vitae aliquam lectus.]]></body>
+      <created>1265643712</created>
+
+      <changed>1265643712</changed>
+      <foundationmember>1</foundationmember>
+      <homepageurl><![CDATA[http://marketplace.eclipse.org/xmlapi]]></homepageurl>
+      <image><![CDATA[http://marketplace.eclipse.org/sites/default/files/equinox.png]]></image>
+      <version>1.0</version>
+      <license>EPL</license>
+      <companyname><![CDATA[Eclipse Foundation Inc.]]></companyname>
+
+      <status>Mature</status>
+      <eclipseversion><![CDATA[3.5]]></eclipseversion>
+      <supporturl><![CDATA[http://marketplace.eclipse.org/support]]></supporturl>
+      <updateurl><![CDATA[http://update.eclipse.org/marketplace]]></updateurl>
+<ius>
+<iu>org.eclipse.one.one</iu>
+<iu>org.eclipse.one.two</iu>
+<iu>org.eclipse.two.one</iu>
+<iu>org.eclipse.three.one</iu>
+
+</ius>
+<platforms>
+<platform>Windows</platform>
+<platform>Mac</platform>
+<platform>Linux/GTK</platform>
+</platforms>
+    </node>
+    <node id="1096" name="API Demonstration Listing" url="http://www.eclipseplugincentral.net/content/api-demonstration-listing">
+      <type>resource</type>
+      <categories>
+
+        <category id='3' name='Database' url='http://www.eclipseplugincentral.net/taxonomy/term/3'/>
+        <category id='4' name='Build and Deploy' url='http://www.eclipseplugincentral.net/taxonomy/term/4'/>
+        <category id='5' name='Documentation' url='http://www.eclipseplugincentral.net/taxonomy/term/5'/>
+        <category id='6' name='Editor' url='http://www.eclipseplugincentral.net/taxonomy/term/6'/>
+        <category id='7' name='Entertainment' url='http://www.eclipseplugincentral.net/taxonomy/term/7'/>
+        <category id='38' name='Mylyn Connectors' url='http://www.eclipseplugincentral.net/category/categories/mylyn-connectors'/>
+      </categories>
+      <owner>admin</owner>
+
+      <favorited>0</favorited>
+      <body><![CDATA[Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sed neque ac magna condimentum venenatis. Duis erat nisl, fermentum id viverra ac, lobortis a urna. Praesent facilisis hendrerit risus. Fusce nec mi sit amet eros consequat blandit.
+<!--break-->
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sed neque ac magna condimentum venenatis. Duis erat nisl, fermentum id viverra ac, lobortis a urna. Praesent facilisis hendrerit risus. Fusce nec mi sit amet eros consequat blandit. Donec adipiscing lobortis tortor, non condimentum quam scelerisque ut. Suspendisse euismod lorem et eros euismod in commodo massa sagittis. Aliquam vestibulum malesuada neque, ornare blandit leo pharetra a. Sed dapibus euismod posuere. Integer vitae nisi ac magna pretium sagittis. Aenean id sem in est sagittis pretium. Aenean tempus, enim et cursus laoreet, sem justo scelerisque tellus, non convallis justo libero nec turpis. Praesent in nulla ante, non semper ante. Integer cursus lacus a nunc congue semper. Sed nec tellus bibendum nisl laoreet hendrerit in id elit. Mauris vitae aliquam lectus.]]></body>
+      <created>1265643712</created>
+      <changed>1265643712</changed>
+      <foundationmember>1</foundationmember>
+      <homepageurl><![CDATA[http://marketplace.eclipse.org/xmlapi]]></homepageurl>
+      <image><![CDATA[http://marketplace.eclipse.org/sites/default/files/equinox.png]]></image>
+
+      <version>1.0</version>
+      <license>EPL</license>
+      <companyname><![CDATA[Eclipse Foundation Inc.]]></companyname>
+      <status>Mature</status>
+      <eclipseversion><![CDATA[3.5]]></eclipseversion>
+      <supporturl><![CDATA[http://marketplace.eclipse.org/support]]></supporturl>
+      <updateurl><![CDATA[http://update.eclipse.org/marketplace]]></updateurl>
+
+<ius>
+<iu>org.eclipse.one.one</iu>
+<iu>org.eclipse.one.two</iu>
+<iu>org.eclipse.two.one</iu>
+<iu>org.eclipse.three.one</iu>
+</ius>
+<platforms>
+<platform>Windows</platform>
+<platform>Mac</platform>
+<platform>Linux/GTK</platform>
+
+</platforms>
+    </node>
+  </related>
+</marketplace>

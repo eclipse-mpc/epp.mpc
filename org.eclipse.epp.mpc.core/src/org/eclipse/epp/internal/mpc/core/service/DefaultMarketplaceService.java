@@ -59,6 +59,7 @@ MarketplaceService {
 //	/recent/api/p - Returns a server-defined number of recent updates
 //	/favorites/top/api/p - Returns a server-defined number of top favorites
 //	/popular/top/api/p - Returns a server-defined number of most active results
+//	/related/api/p - Returns a server-defined number of recommendations based on a list of nodes provided as query parameter
 //	/news/api/p - Returns the news configuration details (news location/title...).
 //
 //	There is one exception to adding /api/p at the end and that is for search results.
@@ -78,6 +79,8 @@ MarketplaceService {
 	public static final String API_NODE_URI = "node"; //$NON-NLS-1$
 
 	public static final String API_POPULAR_URI = "popular/top"; //$NON-NLS-1$
+
+	public static final String API_RELATED_URI = "related"; //$NON-NLS-1$
 
 	public static final String API_RECENT_URI = "recent"; //$NON-NLS-1$
 
@@ -156,6 +159,11 @@ MarketplaceService {
 	 * @see {@link #setRequestMetaParameters(Map)}
 	 */
 	public static final String META_PARAM_PRODUCT = "product"; //$NON-NLS-1$
+
+	/**
+	 * parameter identifying a list of nodes for a {@link #related(List, IProgressMonitor)} query
+	 */
+	public static final String PARAM_BASED_ON_NODES = "nodes"; //$NON-NLS-1$
 
 	static {
 		DEFAULT_SERVICE_URL = ServiceUtil.parseUrl(DEFAULT_SERVICE_LOCATION);
@@ -402,6 +410,24 @@ MarketplaceService {
 	public SearchResult popular(IProgressMonitor monitor) throws CoreException {
 		Marketplace marketplace = processRequest(API_POPULAR_URI + '/' + API_URI_SUFFIX, monitor);
 		return createSearchResult(marketplace.getPopular());
+	}
+
+	public SearchResult related(List<INode> basedOn, IProgressMonitor monitor) throws CoreException {
+		String basedOnQuery = ""; //$NON-NLS-1$
+		if (basedOn != null && !basedOn.isEmpty()) {
+			StringBuilder sb = new StringBuilder().append('?').append(PARAM_BASED_ON_NODES).append('=');
+			boolean first = true;
+			for (INode node : basedOn) {
+				if (!first) {
+					sb.append('+');
+				}
+				sb.append(node.getId());
+				first = false;
+			}
+			basedOnQuery = sb.toString();
+		}
+		Marketplace marketplace = processRequest(API_RELATED_URI + '/' + API_URI_SUFFIX + basedOnQuery, monitor);
+		return createSearchResult(marketplace.getRelated());
 	}
 
 	protected SearchResult createSearchResult(NodeListing nodeList) throws CoreException {

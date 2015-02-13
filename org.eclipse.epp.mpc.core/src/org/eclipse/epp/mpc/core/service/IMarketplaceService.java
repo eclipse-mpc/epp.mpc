@@ -125,6 +125,14 @@ public interface IMarketplaceService {
 	ISearchResult popular(IProgressMonitor monitor) throws CoreException;
 
 	/**
+	 * Find recommendations based on a list of other nodes. Usually those will be a list of already installed nodes or
+	 * nodes currently flagged for installation.
+	 *
+	 * @return the search result
+	 */
+	ISearchResult related(List<INode> basedOn, IProgressMonitor monitor) throws CoreException;
+
+	/**
 	 * Get the news configuration for the marketplace
 	 *
 	 * @return the news configuration

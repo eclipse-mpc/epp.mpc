@@ -4,13 +4,16 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *      The Eclipse Foundation  - initial API and implementation
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service.xml;
 
+import org.eclipse.epp.internal.mpc.core.service.Category;
+import org.eclipse.epp.internal.mpc.core.service.Marketplace;
 import org.eclipse.epp.internal.mpc.core.service.Node;
+import org.eclipse.epp.internal.mpc.core.service.NodeListing;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
@@ -41,7 +44,7 @@ public class NodeContentHandler extends UnmarshalContentHandler {
 		} else if (localName.equals("type")) { //$NON-NLS-1$
 			capturingContent = true;
 		} else if (localName.equals("categories")) { //$NON-NLS-1$
-			org.eclipse.epp.internal.mpc.core.service.xml.CategoriesContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.CategoriesContentHandler();
+			CategoriesContentHandler childHandler = new CategoriesContentHandler();
 			childHandler.setParentModel(model);
 			childHandler.setParentHandler(this);
 			childHandler.setUnmarshaller(getUnmarshaller());
@@ -87,14 +90,14 @@ public class NodeContentHandler extends UnmarshalContentHandler {
 		} else if (localName.equals("updateurl")) { //$NON-NLS-1$
 			capturingContent = true;
 		} else if (localName.equals("ius")) { //$NON-NLS-1$
-			org.eclipse.epp.internal.mpc.core.service.xml.IusContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.IusContentHandler();
+			IusContentHandler childHandler = new IusContentHandler();
 			childHandler.setParentModel(model);
 			childHandler.setParentHandler(this);
 			childHandler.setUnmarshaller(getUnmarshaller());
 			getUnmarshaller().setCurrentHandler(childHandler);
 			childHandler.startElement(uri, localName, attributes);
 		} else if (localName.equals("platforms")) { //$NON-NLS-1$
-			org.eclipse.epp.internal.mpc.core.service.xml.PlatformsContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.PlatformsContentHandler();
+			PlatformsContentHandler childHandler = new PlatformsContentHandler();
 			childHandler.setParentModel(model);
 			childHandler.setParentHandler(this);
 			childHandler.setUnmarshaller(getUnmarshaller());
@@ -106,20 +109,12 @@ public class NodeContentHandler extends UnmarshalContentHandler {
 	@Override
 	public boolean endElement(String uri, String localName) throws SAXException {
 		if (localName.equals("node")) { //$NON-NLS-1$
-			if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Marketplace) {
-				((org.eclipse.epp.internal.mpc.core.service.Marketplace) parentModel).getNode().add(model);
-			} else if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Category) {
-				((org.eclipse.epp.internal.mpc.core.service.Category) parentModel).getNode().add(model);
-			} else if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Search) {
-				((org.eclipse.epp.internal.mpc.core.service.Search) parentModel).getNode().add(model);
-			} else if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Recent) {
-				((org.eclipse.epp.internal.mpc.core.service.Recent) parentModel).getNode().add(model);
-			} else if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Featured) {
-				((org.eclipse.epp.internal.mpc.core.service.Featured) parentModel).getNode().add(model);
-			} else if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Popular) {
-				((org.eclipse.epp.internal.mpc.core.service.Popular) parentModel).getNode().add(model);
-			} else if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Favorites) {
-				((org.eclipse.epp.internal.mpc.core.service.Favorites) parentModel).getNode().add(model);
+			if (parentModel instanceof Marketplace) {
+				((Marketplace) parentModel).getNode().add(model);
+			} else if (parentModel instanceof NodeListing) {
+				((NodeListing) parentModel).getNode().add(model);
+			} else if (parentModel instanceof Category) {
+				((Category) parentModel).getNode().add(model);
 			}
 			getUnmarshaller().setModel(model);
 			model = null;

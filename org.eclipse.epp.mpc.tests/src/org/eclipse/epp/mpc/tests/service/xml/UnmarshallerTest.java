@@ -24,6 +24,7 @@ import org.eclipse.epp.internal.mpc.core.service.Featured;
 import org.eclipse.epp.internal.mpc.core.service.Marketplace;
 import org.eclipse.epp.internal.mpc.core.service.News;
 import org.eclipse.epp.internal.mpc.core.service.Recent;
+import org.eclipse.epp.internal.mpc.core.service.Related;
 import org.eclipse.epp.internal.mpc.core.service.Search;
 import org.eclipse.epp.internal.mpc.core.service.xml.Unmarshaller;
 import org.eclipse.epp.mpc.core.model.ICatalog;
@@ -368,6 +369,19 @@ public class UnmarshallerTest {
 			}
 		}
 
+	}
+
+	public void related() throws Exception {
+		Object model = process("resources/related.xml");
+		assertNotNull(model);
+		assertTrue(model instanceof Marketplace);
+		Marketplace marketplace = (Marketplace) model;
+
+		Related related = marketplace.getRelated();
+		assertNotNull(related);
+		assertEquals(Integer.valueOf(6), related.getCount());
+
+		assertEquals(6, related.getNode().size());
 	}
 
 	@Test

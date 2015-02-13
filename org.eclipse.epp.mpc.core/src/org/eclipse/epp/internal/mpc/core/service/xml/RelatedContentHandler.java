@@ -6,31 +6,31 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *      The Eclipse Foundation  - initial API and implementation
+ *      Yatta Solutions GmbH - initial API and implementation
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service.xml;
 
 
 import org.eclipse.epp.internal.mpc.core.service.Marketplace;
-import org.eclipse.epp.internal.mpc.core.service.Recent;
+import org.eclipse.epp.internal.mpc.core.service.Related;
 
 
 /**
- * @author David Green
+ * @author Carsten Reckord
  */
-public class RecentContentHandler extends NodeListingContentHandler<Recent> {
+public class RelatedContentHandler extends NodeListingContentHandler<Related> {
 
-	public RecentContentHandler() {
-		super("recent"); //$NON-NLS-1$
+	public RelatedContentHandler() {
+		super("related"); //$NON-NLS-1$
 	}
 
 	@Override
-	protected Recent createModel() {
-		return new Recent();
+	protected Related createModel() {
+		return new Related();
 	}
 
 	@Override
-	protected void setMarketplaceResult(Marketplace marketplace, Recent model) {
-		marketplace.setRecent(model);
+	protected void setMarketplaceResult(Marketplace marketplace, Related model) {
+		marketplace.setRelated(model);
 	}
 }

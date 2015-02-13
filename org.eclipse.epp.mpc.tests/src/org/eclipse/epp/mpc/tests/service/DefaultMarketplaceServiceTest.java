@@ -14,6 +14,8 @@ package org.eclipse.epp.mpc.tests.service;
 
 import static org.junit.Assert.*;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +33,7 @@ import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
+import org.eclipse.epp.mpc.core.service.QueryHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -143,11 +146,14 @@ public class DefaultMarketplaceServiceTest {
 	public void computeRelativeSearchUrl() {
 		DefaultMarketplaceService service = new DefaultMarketplaceService();
 
-		Market market = new Market();
-		market.setId("31");
-		Category category = new Category();
-		category.setId("38");
+		String marketId = "31";
+		String categoryId = "38";
 		String query = "some query";
+
+		Market market = new Market();
+		market.setId(marketId);
+		Category category = new Category();
+		category.setId(categoryId);
 
 		String apiSearchPrefix = DefaultMarketplaceService.API_SEARCH_URI_FULL;
 
@@ -155,31 +161,34 @@ public class DefaultMarketplaceServiceTest {
 		assertEquals(apiSearchPrefix + "some+query", searchUrl);
 
 		searchUrl = service.computeRelativeSearchUrl(market, null, query, true);
-		assertEquals(apiSearchPrefix + "some+query?filters=tid:31", searchUrl);
+		assertEquals(apiSearchPrefix + "some+query?filters=tid:" + marketId, searchUrl);
 
 		searchUrl = service.computeRelativeSearchUrl(null, category, query, true);
-		assertEquals(apiSearchPrefix + "some+query?filters=tid:38", searchUrl);
+		assertEquals(apiSearchPrefix + "some+query?filters=tid:" + categoryId, searchUrl);
 
 		// bug 397004 - make sure market comes first for api
 		searchUrl = service.computeRelativeSearchUrl(market, category, query, true);
-		assertEquals(apiSearchPrefix + "some+query?filters=tid:31%20tid:38", searchUrl);
+		assertEquals(apiSearchPrefix + "some+query?filters=tid:" + marketId + "%20tid:" + categoryId, searchUrl);
 		// bug 397004 - make sure category comes first for browser
 		searchUrl = service.computeRelativeSearchUrl(market, category, query, false);
-		assertEquals(DefaultMarketplaceService.API_SEARCH_URI + "some+query?filters=tid:38%20tid:31", searchUrl);
+		assertEquals(DefaultMarketplaceService.API_SEARCH_URI + "some+query?filters=tid:" + categoryId + "%20tid:"
+				+ marketId, searchUrl);
 
 		searchUrl = service.computeRelativeSearchUrl(market, null, null, true);
-		assertEquals(DefaultMarketplaceService.API_TAXONOMY_URI + "31/" + RemoteMarketplaceService.API_URI_SUFFIX,
+		assertEquals(DefaultMarketplaceService.API_TAXONOMY_URI + marketId + "/"
+				+ RemoteMarketplaceService.API_URI_SUFFIX,
 				searchUrl);
 
 		searchUrl = service.computeRelativeSearchUrl(null, category, null, false);
-		assertEquals(DefaultMarketplaceService.API_TAXONOMY_URI + "38", searchUrl);
+		assertEquals(DefaultMarketplaceService.API_TAXONOMY_URI + categoryId, searchUrl);
 
 		// taxonomy uri is category-first for both API and browser
 		searchUrl = service.computeRelativeSearchUrl(market, category, null, true);
-		assertEquals(DefaultMarketplaceService.API_TAXONOMY_URI + "38,31/" + RemoteMarketplaceService.API_URI_SUFFIX,
+		assertEquals(DefaultMarketplaceService.API_TAXONOMY_URI + categoryId + "," + marketId + "/"
+				+ RemoteMarketplaceService.API_URI_SUFFIX,
 				searchUrl);
 		searchUrl = service.computeRelativeSearchUrl(market, category, null, false);
-		assertEquals(DefaultMarketplaceService.API_TAXONOMY_URI + "38,31", searchUrl);
+		assertEquals(DefaultMarketplaceService.API_TAXONOMY_URI + categoryId + "," + marketId, searchUrl);
 	}
 
 	@Test
@@ -253,8 +262,6 @@ public class DefaultMarketplaceServiceTest {
 
 	@Test
 	public void popular() throws CoreException {
-		//	 NOTE: this test is failing until the following bug is fixed
-		//			bug 303275: REST API popular returns count of 6 with 10 nodes returned
 		ISearchResult result = marketplaceService.popular(new NullProgressMonitor());
 		assertSearchResultSanity(result);
 	}
@@ -263,6 +270,42 @@ public class DefaultMarketplaceServiceTest {
 	public void recent() throws CoreException {
 		ISearchResult result = marketplaceService.recent(new NullProgressMonitor());
 		assertSearchResultSanity(result);
+	}
+
+	@Test
+	public void related() throws Exception {
+		List<INode> basedOn = Arrays.asList(QueryHelper.nodeById("1139"), QueryHelper.nodeById("206"), QueryHelper
+				.nodeById("1147"));
+		related(basedOn);
+	}
+
+	@Test
+	public void relatedEmpty() throws Exception {
+		related(Collections.<INode> emptyList());
+	}
+
+	@Test
+	public void relatedNull() throws Exception {
+		related(null);
+	}
+
+	private void related(List<INode> basedOn) throws Exception {
+		MappedTransportFactory fileTransportFactory = MappedTransportFactory.get();
+		try {
+			String marketplaceRelatedApiUri = marketplaceService.getBaseUrl() + "/"
+					+ DefaultMarketplaceService.API_RELATED_URI + "/" + RemoteMarketplaceService.API_URI_SUFFIX;
+			//basically, we just expect any node list here.
+			//FIXME use actual server api call
+			fileTransportFactory.map(marketplaceRelatedApiUri, DefaultMarketplaceServiceTest.class.getResource(
+					"xml/resources/related.xml").toExternalForm());
+			setUp();
+			{
+				ISearchResult result = marketplaceService.related(basedOn, new NullProgressMonitor());
+				assertSearchResultSanity(result);
+			}
+		} finally {
+			fileTransportFactory.unregister();
+		}
 	}
 
 	protected void assertSearchResultSanity(ISearchResult result) {

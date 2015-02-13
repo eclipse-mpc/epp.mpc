@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *      The Eclipse Foundation  - initial API and implementation
  *******************************************************************************/
@@ -27,7 +27,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * XML unmarshaller
- * 
+ *
  * @author David Green
  * @author Benjamin Muskalla
  */
@@ -70,6 +70,7 @@ public class Unmarshaller extends DefaultHandler {
 		elementNameToUnmarshalContentHandler.put("recent", new RecentContentHandler()); //$NON-NLS-1$
 		elementNameToUnmarshalContentHandler.put("featured", new FeaturedContentHandler()); //$NON-NLS-1$
 		elementNameToUnmarshalContentHandler.put("popular", new PopularContentHandler()); //$NON-NLS-1$
+		elementNameToUnmarshalContentHandler.put("related", new RelatedContentHandler()); //$NON-NLS-1$
 		elementNameToUnmarshalContentHandler.put("favorites", new FavoritesContentHandler()); //$NON-NLS-1$
 		elementNameToUnmarshalContentHandler.put("news", new NewsContentHandler()); //$NON-NLS-1$
 	}
@@ -85,7 +86,7 @@ public class Unmarshaller extends DefaultHandler {
 
 	private void computeHandler(String localName) {
 		if (currentHandler == null) {
-			currentHandler = elementNameToUnmarshalContentHandler.get(localName);
+			currentHandler = getHandler(localName);
 			if (currentHandler == null) {
 				currentHandler = new DefaultContentHandler();
 			}
@@ -118,5 +119,9 @@ public class Unmarshaller extends DefaultHandler {
 
 	protected void setCurrentHandler(UnmarshalContentHandler currentHandler) {
 		this.currentHandler = currentHandler;
+	}
+
+	public UnmarshalContentHandler getHandler(String localName) {
+		return elementNameToUnmarshalContentHandler.get(localName);
 	}
 }

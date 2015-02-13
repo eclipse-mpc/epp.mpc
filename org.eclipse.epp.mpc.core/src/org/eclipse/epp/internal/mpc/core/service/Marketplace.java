@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *      The Eclipse Foundation  - initial API and implementation
  *******************************************************************************/
@@ -24,6 +24,8 @@ public class Marketplace {
 	protected Favorites favorites;
 	protected Popular popular;
 	protected Recent recent;
+
+	protected Related related;
 
 	protected News news;
 
@@ -92,6 +94,14 @@ public class Marketplace {
 
 	public void setRecent(Recent recent) {
 		this.recent = recent;
+	}
+
+	public Related getRelated() {
+		return related;
+	}
+
+	public void setRelated(Related related) {
+		this.related = related;
 	}
 
 	public News getNews() {

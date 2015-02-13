@@ -82,7 +82,7 @@ import org.osgi.framework.ServiceReference;
 public class MarketplaceViewer extends CatalogViewer {
 
 	public enum ContentType {
-		SEARCH, RECENT, POPULAR, INSTALLED, SELECTION
+		SEARCH, RECENT, POPULAR, INSTALLED, SELECTION, RELATED
 	}
 
 	public static class MarketplaceCatalogContentProvider extends CatalogContentProvider {

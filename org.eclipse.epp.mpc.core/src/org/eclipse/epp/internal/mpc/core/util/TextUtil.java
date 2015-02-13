@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
 /**
  * Utility for manipulating text.
- * 
+ *
  * @author David Green
  */
 public class TextUtil {
@@ -24,7 +24,7 @@ public class TextUtil {
 
 	/**
 	 * Strip HTML tags such that the returned text is suitable for display.
-	 * 
+	 *
 	 * @param text
 	 *            the text to adjust
 	 * @return the text, possibly altered
@@ -52,7 +52,7 @@ public class TextUtil {
 	/**
 	 * Given text that may include HTML tags but may also include whitespace intended to imply formatting, return
 	 * representative HTML markup
-	 * 
+	 *
 	 * @param text
 	 *            the text to be marked up
 	 * @return HTML markup
@@ -75,4 +75,23 @@ public class TextUtil {
 		return text;
 	}
 
+	public static String join(String delim, String... parts) {
+		if (parts == null) {
+			return null;
+		}
+		if (parts.length == 0) {
+			return ""; //$NON-NLS-1$
+		}
+		if ("".equals(delim)) { //$NON-NLS-1$
+			delim = null;
+		}
+		StringBuilder joined = new StringBuilder();
+		for (int i = 0; i < parts.length; i++) {
+			if (i > 0 && delim != null) {
+				joined.append(delim);
+			}
+			joined.append(parts[i]);
+		}
+		return joined.toString();
+	}
 }

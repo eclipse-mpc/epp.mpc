@@ -193,6 +193,23 @@ public class CachingMarketplaceService implements IMarketplaceService {
 
 	}
 
+	public ISearchResult related(final List<INode> basedOn, IProgressMonitor monitor) throws CoreException {
+		String searchKey = null;
+		if (basedOn != null && !basedOn.isEmpty()) {
+			StringBuilder searchKeyBldr = new StringBuilder();
+			for (INode node : basedOn) {
+				searchKeyBldr.append(node.getId()).append('+');
+			}
+			searchKey = searchKeyBldr.substring(0, searchKeyBldr.length() - 1);
+		}
+		String key = computeSearchKey("related", null, null, searchKey); //$NON-NLS-1$
+		return performSearch(monitor, key, new SearchOperation() {
+			public ISearchResult doSearch(IProgressMonitor monitor) throws CoreException {
+				return delegate.related(basedOn, monitor);
+			}
+		});
+	}
+
 	public INews news(IProgressMonitor monitor) throws CoreException {
 		return delegate.news(monitor);
 	}
