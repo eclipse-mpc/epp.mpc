@@ -18,6 +18,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -32,11 +33,13 @@ import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
+import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeInstallableUnitItem;
 import org.eclipse.epp.mpc.core.model.IIu;
 import org.eclipse.epp.mpc.core.model.IIus;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
+import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -131,10 +134,14 @@ public class MarketplaceCatalogTest {
 		catalog = new MarketplaceCatalog() {
 			@Override
 			protected IStatus checkForUpdates(List<MarketplaceNodeCatalogItem> updateCheckNeeded,
-					IProgressMonitor monitor) {
+					final Map<String, IInstallableUnit> installedIUs, final IProgressMonitor monitor) {
 				for (MarketplaceNodeCatalogItem item : updateCheckNeeded) {
 					checkedForUpdate.add(item.getData());
-					item.setUpdateAvailable(updateAvailable.contains(item.getData()));
+					List<MarketplaceNodeInstallableUnitItem> installableUnitItems = item.getInstallableUnitItems();
+					boolean hasUpdate = updateAvailable.contains(item.getData());
+					for (MarketplaceNodeInstallableUnitItem iuItem : installableUnitItems) {
+						iuItem.setUpdateAvailable(hasUpdate);
+					}
 				}
 				return Status.OK_STATUS;
 			}

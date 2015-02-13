@@ -33,14 +33,19 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
+import org.eclipse.epp.internal.mpc.ui.wizards.SelectionModel.FeatureEntry;
+import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
+import org.eclipse.equinox.p2.engine.ProvisioningContext;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.equinox.p2.metadata.Version;
+import org.eclipse.equinox.p2.operations.InstallOperation;
 import org.eclipse.equinox.p2.operations.ProfileChangeOperation;
 import org.eclipse.equinox.p2.operations.ProvisioningSession;
 import org.eclipse.equinox.p2.operations.RemediationOperation;
 import org.eclipse.equinox.p2.operations.RepositoryTracker;
+import org.eclipse.equinox.p2.operations.UninstallOperation;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepository;
 import org.eclipse.equinox.p2.ui.ProvisioningUI;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -73,7 +78,11 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 		/**
 		 * uninstall features
 		 */
-		UNINSTALL;
+		UNINSTALL,
+		/**
+		 * Change an installation - this might involve any of the above operations
+		 */
+		CHANGE;
 
 		public static OperationType map(org.eclipse.epp.mpc.ui.Operation operation) {
 			if (operation == null) {
@@ -86,6 +95,8 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 				return UNINSTALL;
 			case UPDATE:
 				return UPDATE;
+			case CHANGE:
+				return CHANGE;
 			case NONE:
 				return null;
 			default:
@@ -97,7 +108,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 
 	private final OperationType operationType;
 
-	private final List<FeatureDescriptor> featureDescriptors;
+	private final List<FeatureEntry> featureEntries;
 
 	private ProfileChangeOperation operation;
 
@@ -116,17 +127,16 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 	 *            the type of operation to perform
 	 * @param items
 	 *            the items for which features are being installed
-	 * @param featureDescriptors
+	 * @param featureEntries
 	 *            the features to install/update/uninstall, which must correspond to features provided by the given
 	 *            items
 	 * @param dependenciesRepository
 	 *            an optional URI to a repository from which dependencies may be installed, may be null
 	 */
-	public ProfileChangeOperationComputer(OperationType operationType, Collection<CatalogItem> items,
-			Set<FeatureDescriptor> featureDescriptors, URI dependenciesRepository,
-			ResolutionStrategy resolutionStrategy, boolean withRemediation) {
+	public ProfileChangeOperationComputer(OperationType operationType, Collection<CatalogItem> items, Collection<FeatureEntry> featureEntries,
+			URI dependenciesRepository, ResolutionStrategy resolutionStrategy, boolean withRemediation) {
 		super(items);
-		if (featureDescriptors == null || featureDescriptors.isEmpty()) {
+		if (featureEntries == null || featureEntries.isEmpty()) {
 			throw new IllegalArgumentException();
 		}
 		if (operationType == null) {
@@ -135,7 +145,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 		if (resolutionStrategy == null) {
 			throw new IllegalArgumentException();
 		}
-		this.featureDescriptors = new ArrayList<FeatureDescriptor>(featureDescriptors);
+		this.featureEntries = new ArrayList<FeatureEntry>(featureEntries);
 		this.operationType = operationType;
 		this.resolutionStrategy = resolutionStrategy;
 		this.dependenciesRepository = dependenciesRepository;
@@ -144,23 +154,36 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 
 	public void run(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
 		try {
+			boolean hasInstall = hasInstall();
+			boolean hasUninstall = hasUninstall();
 			SubMonitor monitor = SubMonitor.convert(progressMonitor,
-					Messages.ProvisioningOperation_configuringProvisioningOperation, 1500);
+					Messages.ProvisioningOperation_configuringProvisioningOperation, 1000 + (hasInstall ? 500 : 0)
+					+ (hasUninstall ? 100 : 0));
 			try {
-				ius = computeInstallableUnits(monitor.newChild(500));
-
+				IInstallableUnit[] uninstallIUs = null;
+				if (hasInstall) {
+					ius = computeInstallableUnits(monitor.newChild(500));
+				} else {
+					ius = new IInstallableUnit[0];
+				}
+				if (hasUninstall) {
+					uninstallIUs = computeUninstallUnits(monitor.newChild(100));
+				}
 				checkCancelled(monitor);
 
+				URI[] repositories = repositoryLocations == null ? new URI[0] : repositoryLocations.toArray(new URI[0]);
 				switch (operationType) {
 				case INSTALL:
-					operation = resolveInstall(monitor.newChild(500), ius, repositoryLocations.toArray(new URI[0]));
-					break;
-				case UNINSTALL:
-					operation = resolveUninstall(monitor.newChild(500), ius, repositoryLocations.toArray(new URI[0]));
+					operation = resolveInstall(monitor.newChild(500), ius, repositories);
 					break;
 				case UPDATE:
-					operation = resolveUpdate(monitor.newChild(500), computeInstalledIus(ius),
-							repositoryLocations.toArray(new URI[0]));
+					operation = resolveUpdate(monitor.newChild(500), computeInstalledIus(ius), repositories);
+					break;
+				case UNINSTALL:
+					operation = resolveUninstall(monitor.newChild(500), uninstallIUs, repositories);
+					break;
+				case CHANGE:
+					operation = resolveChange(monitor.newChild(500), ius, uninstallIUs, repositories);
 					break;
 				default:
 					throw new UnsupportedOperationException(operationType.name());
@@ -182,6 +205,45 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 			throw new InterruptedException();
 		} catch (Exception e) {
 			throw new InvocationTargetException(e);
+		}
+	}
+
+	private boolean hasInstall() {
+		switch (operationType) {
+		case INSTALL:
+		case UPDATE:
+			return true;
+		case UNINSTALL:
+			return false;
+		case CHANGE:
+			for (FeatureEntry entry : featureEntries) {
+				Operation operation = entry.computeChangeOperation();
+				if (operation == Operation.INSTALL || operation == Operation.UPDATE) {
+					return true;
+				}
+			}
+			//$fall-through$
+		default:
+			return false;
+		}
+	}
+
+	private boolean hasUninstall() {
+		switch (operationType) {
+		case INSTALL:
+		case UPDATE:
+			return false;
+		case UNINSTALL:
+			return true;
+		case CHANGE:
+			for (FeatureEntry entry : featureEntries) {
+				if (entry.computeChangeOperation() == Operation.UNINSTALL) {
+					return true;
+				}
+			}
+			//$fall-through$
+		default:
+			return false;
 		}
 	}
 
@@ -235,6 +297,27 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 		return resolve(monitor, new ProfileChangeOperationFactory() {
 			public ProfileChangeOperation create(List<IInstallableUnit> ius) throws CoreException {
 				return provisioningUI.getUpdateOperation(ius, null);
+			}
+		}, ius, repositories);
+	}
+
+	private ProfileChangeOperation resolveChange(IProgressMonitor monitor, IInstallableUnit[] ius,
+			final IInstallableUnit[] uninstallIUs, URI[] repositories) throws CoreException {
+		return resolve(monitor, new ProfileChangeOperationFactory() {
+			public ProfileChangeOperation create(List<IInstallableUnit> ius) throws CoreException {
+				InstallOperation installOperation = provisioningUI.getInstallOperation(ius, null);
+				UninstallOperation uninstallOperation = provisioningUI.getUninstallOperation(
+						Arrays.asList(uninstallIUs), null);
+				CompositeProfileChangeOperation operation = new CompositeProfileChangeOperation(
+						provisioningUI.getSession());
+				operation.setProfileId(provisioningUI.getProfileId());
+
+				ProvisioningContext provisioningContext = installOperation.getProvisioningContext();
+				operation.setProvisioningContext(provisioningContext);
+				uninstallOperation.setProvisioningContext(provisioningContext);
+
+				operation.add(uninstallOperation).add(installOperation);
+				return operation;
 			}
 		}, ius, repositories);
 	}
@@ -295,20 +378,17 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 		operation.resolveModal(new SubProgressMonitor(monitor, items.size()));
 	}
 
-	public IInstallableUnit[] computeInstallableUnits(SubMonitor monitor) throws CoreException {
+	public IInstallableUnit[] computeInstallableUnits(IProgressMonitor monitor) throws CoreException {
 		try {
-			monitor.setWorkRemaining(100);
+			SubMonitor progress = SubMonitor.convert(monitor, 100);
 			// add repository urls and load meta data
-			List<IMetadataRepository> repositories = addRepositories(monitor.newChild(50));
-			final List<IInstallableUnit> installableUnits = queryInstallableUnits(monitor.newChild(50), repositories);
-
+			List<IMetadataRepository> repositories = addRepositories(progress.newChild(50));
+			List<IInstallableUnit> installableUnits = queryInstallableUnits(progress.newChild(50), repositories);
 			checkForUnavailable(installableUnits);
-			pruneUnselected(installableUnits);
+			pruneNonInstall(installableUnits);
 
-			if (operationType != OperationType.UNINSTALL) {
-				// bug 306446 we never want to downgrade the installed version
-				pruneOlderVersions(installableUnits);
-			}
+			// bug 306446 we never want to downgrade the installed version
+			pruneOlderVersions(installableUnits);
 
 			return installableUnits.toArray(new IInstallableUnit[installableUnits.size()]);
 
@@ -316,6 +396,21 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 			// should never happen, since we already validated URLs.
 			throw new CoreException(new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
 					Messages.ProvisioningOperation_unexpectedErrorUrl, e));
+		} finally {
+			monitor.done();
+		}
+	}
+
+	public IInstallableUnit[] computeUninstallUnits(IProgressMonitor monitor) throws CoreException {
+		try {
+			// calculate installed ius
+			Map<String, IInstallableUnit> installedIUs = MarketplaceClientUi.computeInstalledIUsById(monitor);
+			List<IInstallableUnit> installableUnits = new ArrayList<IInstallableUnit>(installedIUs.values());
+
+			pruneNonUninstall(installableUnits);
+
+			return installableUnits.toArray(new IInstallableUnit[installableUnits.size()]);
+
 		} finally {
 			monitor.done();
 		}
@@ -349,10 +444,29 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 		}
 	}
 
-	private void pruneUnselected(List<IInstallableUnit> installableUnits) {
+	private void pruneNonInstall(List<IInstallableUnit> installableUnits) {
 		Set<String> installableFeatureIds = new HashSet<String>();
-		for (FeatureDescriptor descriptor : featureDescriptors) {
-			installableFeatureIds.add(descriptor.getId());
+		for (FeatureEntry featureEntry : featureEntries) {
+			Operation operation = featureEntry.computeChangeOperation();
+			if (operation == Operation.INSTALL || operation == Operation.UPDATE) {
+				installableFeatureIds.add(featureEntry.getFeatureDescriptor().getId());
+			}
+		}
+		Iterator<IInstallableUnit> it = installableUnits.iterator();
+		while (it.hasNext()) {
+			IInstallableUnit iu = it.next();
+			if (!installableFeatureIds.contains(iu.getId())) {
+				it.remove();
+			}
+		}
+	}
+
+	private void pruneNonUninstall(List<IInstallableUnit> installableUnits) {
+		Set<String> installableFeatureIds = new HashSet<String>();
+		for (FeatureEntry featureEntry : featureEntries) {
+			if (featureEntry.computeChangeOperation() == Operation.UNINSTALL) {
+				installableFeatureIds.add(featureEntry.getFeatureDescriptor().getId());
+			}
 		}
 		Iterator<IInstallableUnit> it = installableUnits.iterator();
 		while (it.hasNext()) {
@@ -376,8 +490,11 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 		}
 
 		Set<String> installFeatureIds = new HashSet<String>();
-		for (FeatureDescriptor descriptor : featureDescriptors) {
-			installFeatureIds.add(descriptor.getId());
+		for (FeatureEntry entry : featureEntries) {
+			Operation operation = entry.computeChangeOperation();
+			if (operation == Operation.INSTALL || operation == Operation.UPDATE) {
+				installFeatureIds.add(entry.getFeatureDescriptor().getId());
+			}
 		}
 
 		String message = ""; //$NON-NLS-1$

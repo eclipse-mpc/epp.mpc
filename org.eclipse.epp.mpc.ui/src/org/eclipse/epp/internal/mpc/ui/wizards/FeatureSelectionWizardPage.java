@@ -30,6 +30,7 @@ import org.eclipse.epp.internal.mpc.ui.operations.ResolveFeatureNamesOperation;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
 import org.eclipse.epp.internal.mpc.ui.wizards.SelectionModel.CatalogItemEntry;
 import org.eclipse.epp.internal.mpc.ui.wizards.SelectionModel.FeatureEntry;
+import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.ui.dialogs.RemediationGroup;
 import org.eclipse.equinox.p2.core.ProvisionException;
@@ -71,10 +72,33 @@ public class FeatureSelectionWizardPage extends WizardPage {
 
 		public StyledString getStyledText(Object element) {
 			StyledString styledString = new StyledString();
-			styledString.append(getText(element));
+			String text = getText(element);
 			if (element instanceof CatalogItemEntry) {
+				styledString.append(text);
 				CatalogItemEntry entry = (CatalogItemEntry) element;
 				styledString.append("  " + entry.getItem().getSiteUrl(), StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
+			} else if (element instanceof FeatureEntry) {
+				FeatureEntry entry = (FeatureEntry) element;
+				if (entry.isOptional()) {
+					styledString.append(text);
+				} else {
+					styledString.append(text, StyledString.QUALIFIER_STYLER);//TODO real "disabled" color
+					styledString.append(Messages.FeatureSelectionWizardPage_required, StyledString.DECORATIONS_STYLER);
+				}
+				Operation operation = entry.computeChangeOperation();
+				if (entry.getParent().getSelectedOperation() == Operation.CHANGE && operation != null) {
+					switch (operation) {
+					case UPDATE:
+						styledString.append(Messages.FeatureSelectionWizardPage_Update_Pending, StyledString.COUNTER_STYLER);//TODO better highlight color
+						break;
+					case INSTALL:
+						styledString.append(Messages.FeatureSelectionWizardPage_Install_Pending, StyledString.COUNTER_STYLER);
+						break;
+					case UNINSTALL:
+						styledString.append(Messages.FeatureSelectionWizardPage_Uninstall_Pending, StyledString.COUNTER_STYLER);
+						break;
+					}
+				}
 			}
 			return styledString;
 		}
@@ -83,15 +107,24 @@ public class FeatureSelectionWizardPage extends WizardPage {
 		public Image getImage(Object element) {
 			if (element instanceof FeatureEntry) {
 				FeatureEntry entry = (FeatureEntry) element;
-				switch (entry.getParent().getSelectedOperation()) {
+				switch (entry.computeChangeOperation()) {
 				case UPDATE:
-					if (entry.isInstalled()) {
-						return MarketplaceClientUiPlugin.getInstance()
-								.getImageRegistry()
-								.get(MarketplaceClientUiPlugin.IU_ICON_UPDATE);
-					}
-					// fall through
+					return MarketplaceClientUiPlugin.getInstance()
+							.getImageRegistry()
+							.get(MarketplaceClientUiPlugin.IU_ICON_UPDATE);
 				case INSTALL:
+					return MarketplaceClientUiPlugin.getInstance()
+							.getImageRegistry()
+							.get(MarketplaceClientUiPlugin.IU_ICON_INSTALL);
+				case UNINSTALL:
+					return MarketplaceClientUiPlugin.getInstance()
+							.getImageRegistry()
+							.get(MarketplaceClientUiPlugin.IU_ICON_UNINSTALL);
+				case NONE:
+					return MarketplaceClientUiPlugin.getInstance()
+							.getImageRegistry()
+							.get(MarketplaceClientUiPlugin.IU_ICON_DISABLED);
+				default:
 					return MarketplaceClientUiPlugin.getInstance()
 							.getImageRegistry()
 							.get(MarketplaceClientUiPlugin.IU_ICON);
@@ -134,9 +167,47 @@ public class FeatureSelectionWizardPage extends WizardPage {
 			if (inputElement == input && input != null) {
 				return ((SelectionModel) input).getCatalogItemEntries().toArray();
 			} else if (inputElement instanceof CatalogItemEntry) {
-				return ((CatalogItemEntry) inputElement).getChildren().toArray();
+				CatalogItemEntry itemEntry = (CatalogItemEntry) inputElement;
+				List<FeatureEntry> children = itemEntry.getChildren();
+				children = filterChildren(itemEntry.getSelectedOperation(), children);
+				return children.toArray();
 			}
 			return new Object[0];
+		}
+
+		private List<FeatureEntry> filterChildren(Operation selectedOperation, List<FeatureEntry> children) {
+			List<FeatureEntry> filtered;
+			switch (selectedOperation) {
+			case INSTALL:
+				filtered = new ArrayList<SelectionModel.FeatureEntry>();
+				for (FeatureEntry featureEntry : children) {
+					if (!featureEntry.isInstalled() || featureEntry.hasUpdateAvailable()) {//FIXME show installed features as disabled
+						filtered.add(featureEntry);
+					}
+				}
+				return filtered;
+			case UPDATE:
+				filtered = new ArrayList<SelectionModel.FeatureEntry>();
+				for (FeatureEntry featureEntry : children) {
+					if (featureEntry.hasUpdateAvailable()) {
+						filtered.add(featureEntry);
+					}
+				}
+				return filtered;
+			case UNINSTALL:
+				filtered = new ArrayList<SelectionModel.FeatureEntry>();
+				for (FeatureEntry featureEntry : children) {
+					if (featureEntry.isInstalled()) {
+						filtered.add(featureEntry);
+					}
+				}
+				return filtered;
+			case CHANGE:
+				//show everything
+				//$fall-through$
+			default:
+				return children;
+			}
 		}
 
 		public boolean hasChildren(Object element) {
@@ -213,8 +284,13 @@ public class FeatureSelectionWizardPage extends WizardPage {
 					s1 = ((CatalogItemEntry) e1).getItem().getName();
 					s2 = ((CatalogItemEntry) e2).getItem().getName();
 				} else {
-					s1 = ((FeatureEntry) e1).getFeatureDescriptor().getName();
-					s2 = ((FeatureEntry) e2).getFeatureDescriptor().getName();
+					FeatureEntry fe1 = (FeatureEntry) e1;
+					FeatureEntry fe2 = (FeatureEntry) e2;
+					if (fe1.getInstallableUnitItem().isOptional() != fe2.getInstallableUnitItem().isOptional()) {
+						return fe1.getInstallableUnitItem().isOptional() ? 1 : -1; //required items first
+					}
+					s1 = fe1.getFeatureDescriptor().getName();
+					s2 = fe2.getFeatureDescriptor().getName();
 				}
 				int i = s1.compareToIgnoreCase(s2);
 				if (i == 0) {
@@ -230,17 +306,17 @@ public class FeatureSelectionWizardPage extends WizardPage {
 		viewer.setInput(getWizard().getSelectionModel());
 		viewer.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(CheckStateChangedEvent event) {
+				boolean checked = event.getChecked();
 				if (event.getElement() instanceof CatalogItemEntry) {
 					CatalogItemEntry entry = (CatalogItemEntry) event.getElement();
 					for (FeatureEntry child : entry.getChildren()) {
-						child.setChecked(event.getChecked());
+						child.setChecked(checked);
 					}
 				} else if (event.getElement() instanceof FeatureEntry) {
-					((FeatureEntry) event.getElement()).setChecked(event.getChecked());
+					FeatureEntry featureEntry = (FeatureEntry) event.getElement();
+					featureEntry.setChecked(checked);
 				}
-				computeCheckedViewerState();
-				updateMessage();
-				setPageComplete(computePageComplete());
+				refreshState();
 			}
 		});
 
@@ -269,6 +345,7 @@ public class FeatureSelectionWizardPage extends WizardPage {
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {
+			refreshState();
 			Display.getCurrent().asyncExec(new Runnable() {
 				public void run() {
 					if (getControl() == null || getControl().isDisposed()
@@ -290,6 +367,12 @@ public class FeatureSelectionWizardPage extends WizardPage {
 				}
 			});
 		}
+	}
+
+	private void refreshState() {
+		computeCheckedViewerState();
+		updateMessage();
+		setPageComplete(computePageComplete());
 	}
 
 	private void updateFeatures() {
@@ -341,15 +424,6 @@ public class FeatureSelectionWizardPage extends WizardPage {
 
 	protected void showPreviousPage() {
 		((MarketplaceWizardDialog) getWizard().getContainer()).backPressed();
-	}
-
-	private void maybeUpdateProfileChangeOperation() {
-		if (getWizard().getProfileChangeOperation() == null) {
-			getWizard().updateProfileChangeOperation();
-		}
-		updateMessage();
-
-		setPageComplete(computePageComplete());
 	}
 
 	@Override
@@ -475,22 +549,55 @@ public class FeatureSelectionWizardPage extends WizardPage {
 		List<Object> grayCheckedElements = new ArrayList<Object>();
 		for (CatalogItemEntry entry : getWizard().getSelectionModel().getCatalogItemEntries()) {
 			int childCheckCount = 0;
+			boolean childGrayed = false;
 			for (FeatureEntry child : entry.getChildren()) {
 				if (child.isChecked()) {
 					checkedElements.add(child);
 					++childCheckCount;
 				}
 			}
+			if (childCheckCount > 0) {
+				for (FeatureEntry child : entry.getChildren()) {
+					if (!child.isChecked() && !child.getInstallableUnitItem().isOptional()) {
+						child.setChecked(true);
+						checkedElements.add(child);
+						++childCheckCount;
+					}
+				}
+			}
+			for (FeatureEntry child : entry.getChildren()) {
+				if (child.isGrayed()) {
+					checkedElements.add(child);
+					grayCheckedElements.add(child);
+					childGrayed = true;
+				}
+			}
 			if (childCheckCount == entry.getChildren().size()) {
 				checkedElements.add(entry);
-			} else if (childCheckCount > 0) {
+			} else if (childCheckCount > 0 || childGrayed) {
 				grayCheckedElements.add(entry);
 				checkedElements.add(entry);
 			}
 		}
 		viewer.setCheckedElements(checkedElements.toArray());
 		viewer.setGrayedElements(grayCheckedElements.toArray());
+		viewer.refresh(true);
 	}
+
+//	private boolean isChecked(FeatureEntry featureEntry) {
+//		Operation featureOperation = featureEntry.getOperation();
+//		CatalogItemEntry parent = featureEntry.getParent();
+//		if (parent.getSelectedOperation() == Operation.CHANGE) {
+//			//For CHANGE, unchecked means UNINSTALL, checked means INSTALL
+//			if (featureOperation == Operation.NONE) {
+//				return featureEntry.isInstalled();
+//			}
+//			return featureOperation == Operation.INSTALL || featureOperation == Operation.UPDATE;
+//		} else if (featureOperation != null && featureOperation != Operation.NONE) {
+//			return true;
+//		}
+//		return false;
+//	}
 
 	@Override
 	public void performHelp() {

@@ -19,6 +19,7 @@ public enum Operation {
 	INSTALL(Messages.Operation_install), //
 	UNINSTALL(Messages.Operation_uninstall), //
 	UPDATE(Messages.Operation_update), //
+	CHANGE(Messages.Operation_change), //
 	NONE(null);
 
 	private final String label;

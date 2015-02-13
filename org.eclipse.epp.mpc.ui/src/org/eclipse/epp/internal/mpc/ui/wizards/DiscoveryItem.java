@@ -20,6 +20,7 @@ import org.eclipse.epp.internal.mpc.core.util.TextUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
+import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ITag;
 import org.eclipse.epp.mpc.core.model.ITags;
@@ -33,6 +34,7 @@ import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryResources;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.RowLayoutFactory;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.osgi.util.NLS;
@@ -173,6 +175,10 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 	public static final String WIDGET_ID_LEARNMORE = "learn more"; //$NON-NLS-1$
 
 	public static final String WIDGET_ID_OVERVIEW = "overview"; //$NON-NLS-1$
+
+	public static final String WIDGET_ID_ALREADY_INSTALLED = "already installed"; //$NON-NLS-1$
+
+	public static final String WIDGET_ID_ACTION = "action"; //$NON-NLS-1$
 
 	private Composite checkboxContainer;
 
@@ -337,24 +343,47 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		GridDataFactory.fillDefaults().indent(0, BUTTONBAR_MARGIN_TOP).align(SWT.TRAIL, SWT.FILL).applyTo(composite);
 
 		int numColumns = 1;
-		if (hasInstallMetadata()) {
-			Button button = new Button(composite, SWT.PUSH);
-			GridDataFactory.swtDefaults().align(SWT.TRAIL, SWT.CENTER)
-			.minSize(56, SWT.DEFAULT)
+		boolean installed = connector.isInstalled();
+		if (installed && viewer.getContentType() != ContentType.INSTALLED
+				&& viewer.getContentType() != ContentType.SELECTION) {
+			Button alreadyInstalledButton = new Button(composite, SWT.PUSH | SWT.BOLD);
+			setWidgetId(alreadyInstalledButton, WIDGET_ID_ALREADY_INSTALLED);
+			alreadyInstalledButton.setText(Messages.DiscoveryItem_AlreadyInstalled);
+			alreadyInstalledButton.setFont(JFaceResources.getFontRegistry().getItalic("")); //$NON-NLS-1$
+			Point preferredSize = alreadyInstalledButton.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+			int preferredWidth = preferredSize.x + 10;//Give a bit of extra padding for italic font
+			GridDataFactory.swtDefaults()
+			.align(SWT.TRAIL, SWT.CENTER)
+			.minSize(preferredWidth, SWT.DEFAULT)
+			.hint(preferredWidth, SWT.DEFAULT)
+			.grab(false, true)
+			.applyTo(alreadyInstalledButton);
+			alreadyInstalledButton.addSelectionListener(new SelectionListener() {
+				public void widgetSelected(SelectionEvent e) {
+					//show installed tab
+					viewer.setContentType(ContentType.INSTALLED);
+					//then scroll to item
+					viewer.reveal(DiscoveryItem.this);
+				}
+
+				public void widgetDefaultSelected(SelectionEvent e) {
+					widgetSelected(e);
+				}
+			});
+		} else if (hasInstallMetadata()) {
+			DropDownButton dropDown = new DropDownButton(composite, SWT.PUSH);
+			Button button = dropDown.getButton();
+			setWidgetId(button, WIDGET_ID_ACTION);
+			Point preferredSize = button.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+			int preferredWidth = preferredSize.x + 10;//Give a bit of extra padding for bold or italic font
+
+			GridDataFactory.swtDefaults()
+			.align(SWT.TRAIL, SWT.CENTER)
+			.minSize(preferredWidth, SWT.DEFAULT)
 			.grab(false, true)
 			.applyTo(button);
 
-			Button secondaryButton = null;
-			if (connector.isInstalled()) {
-				secondaryButton = new Button(composite, SWT.PUSH);
-				numColumns = 2;
-				GridDataFactory.swtDefaults().align(SWT.TRAIL, SWT.CENTER)
-				.minSize(56, SWT.DEFAULT)
-				.grab(false, true)
-				.applyTo(secondaryButton);
-			}
-
-			buttonController = new ItemButtonController(viewer, this, button, secondaryButton);
+			buttonController = new ItemButtonController(viewer, this, dropDown);
 		} else {
 			installInfoLink = createStyledTextLabel(composite);
 			setWidgetId(installInfoLink, WIDGET_ID_LEARNMORE);

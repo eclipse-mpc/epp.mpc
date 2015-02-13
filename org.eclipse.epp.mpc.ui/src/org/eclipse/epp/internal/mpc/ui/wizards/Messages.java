@@ -33,6 +33,8 @@ class Messages extends NLS {
 
 	public static String CatalogSwitcher_retrieveMetaData;
 
+	public static String DiscoveryItem_AlreadyInstalled;
+
 	public static String DiscoveryItem_byProviderLicense;
 
 	public static String DiscoveryItem_cannotRenderImage_reason;
@@ -75,6 +77,8 @@ class Messages extends NLS {
 
 	public static String FeatureSelectionWizardPage_detailsUnavailable;
 
+	public static String FeatureSelectionWizardPage_Install_Pending;
+
 	public static String FeatureSelectionWizardPage_noneAvailable;
 
 	public static String FeatureSelectionWizardPage_oneOrMoreUnavailable;
@@ -83,7 +87,17 @@ class Messages extends NLS {
 
 	public static String FeatureSelectionWizardPage_provisioningWarningAdvisory;
 
+	public static String FeatureSelectionWizardPage_required;
+
 	public static String FeatureSelectionWizardPage_unexpectedException_verifyingFeatures;
+
+	public static String FeatureSelectionWizardPage_Uninstall_Pending;
+
+	public static String FeatureSelectionWizardPage_Update_Pending;
+
+	public static String ItemButtonController_change;
+
+	public static String ItemButtonController_changePending;
 
 	public static String ItemButtonController_install;
 
@@ -100,6 +114,8 @@ class Messages extends NLS {
 	public static String MarketplaceBrowserIntegration_cannotOpenMarketplaceWizard;
 
 	public static String MarketplaceCatalogConfiguration_invalidStateObject;
+
+	public static String MarketplaceClientService_ExecuteError;
 
 	public static String MarketplaceClientService_noProvisioningOperation;
 
@@ -198,6 +214,10 @@ class Messages extends NLS {
 	public static String SelectionModel_countSolutions;
 
 	public static String SelectionModel_countSolutionsSelectedForInstallUpdate;
+
+	public static String SelectionModel_Inconsistent_Actions;
+
+	public static String SelectionModel_Nothing_Selected;
 
 	public static String SelectionModel_oneSolution;
 

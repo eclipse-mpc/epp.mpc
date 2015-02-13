@@ -39,6 +39,7 @@ import org.eclipse.epp.internal.mpc.ui.util.ConcurrentTaskManager;
 import org.eclipse.epp.mpc.core.model.ICategories;
 import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IIdentifiable;
+import org.eclipse.epp.mpc.core.model.IIu;
 import org.eclipse.epp.mpc.core.model.IIus;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INews;
@@ -61,8 +62,6 @@ import org.eclipse.osgi.util.NLS;
  * @author David Green
  */
 public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
-
-	private static final String DOT_FEATURE_DOT_GROUP = ".feature.group"; //$NON-NLS-1$
 
 	private static final Pattern BREAK_PATTERN = Pattern.compile("<!--\\s*break\\s*-->"); //$NON-NLS-1$
 
@@ -167,14 +166,13 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 						catalogItem.setLicense(node.getLicense());
 						IIus ius = node.getIus();
 						if (ius != null) {
-							List<String> discoveryIus = new ArrayList<String>(ius.getIu());
-							for (int x = 0; x < discoveryIus.size(); ++x) {
-								String iu = discoveryIus.get(x);
-								if (!iu.endsWith(DOT_FEATURE_DOT_GROUP)) {
-									discoveryIus.set(x, iu + DOT_FEATURE_DOT_GROUP);
-								}
+							List<MarketplaceNodeInstallableUnitItem> installableUnitItems = new ArrayList<MarketplaceNodeInstallableUnitItem>();
+							for (IIu iu : ius.getIuElements()) {
+								MarketplaceNodeInstallableUnitItem iuItem = new MarketplaceNodeInstallableUnitItem();
+								iuItem.init(iu);
+								installableUnitItems.add(iuItem);
 							}
-							catalogItem.setInstallableUnits(discoveryIus);
+							catalogItem.setInstallableUnitItems(installableUnitItems);
 						}
 						if (node.getShortdescription() == null && node.getBody() != null) {
 							// bug 306653 <!--break--> marks the end of the short description.
@@ -246,8 +244,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 						}
 						items.add(catalogItem);
 						marketplaceInfo.map(catalogItem.getMarketplaceUrl(), node);
-						catalogItem.setInstalled(marketplaceInfo.computeInstalled(computeInstalledFeatures(monitor),
-								node));
+						marketplaceInfo.computeInstalled(computeInstalledFeatures(monitor), catalogItem);
 					} catch (RuntimeException ex) {
 						MarketplaceClientUi.error(
 								NLS.bind(Messages.MarketplaceDiscoveryStrategy_ParseError,
@@ -511,7 +508,10 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 				int unitWork = totalWork / (2 * catalogNodes.size());
 				for (INode node : catalogNodes) {
 					node = marketplaceService.getNode(node, monitor);
-					result.getNodes().add((Node) node);
+					//compute real installed state based on optional/required state
+					if (marketplaceInfo.computeInstalled(installedFeatures, node)) {
+						result.getNodes().add((Node) node);
+					}
 					monitor.worked(unitWork);
 				}
 			} else {

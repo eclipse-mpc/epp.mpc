@@ -21,9 +21,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
+import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
+import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeInstallableUnitItem;
 import org.eclipse.epp.internal.mpc.ui.operations.FeatureDescriptor;
 import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
@@ -139,30 +142,36 @@ public class SelectionModel {
 
 	private void computeChildren(CatalogItemEntry itemEntry) {
 		List<FeatureEntry> children = new ArrayList<FeatureEntry>();
-		for (String iu : itemEntry.getItem().getInstallableUnits()) {
-			FeatureEntry featureEntry = new FeatureEntry(itemEntry, new FeatureDescriptor(iu));
+		List<MarketplaceNodeInstallableUnitItem> iuItems = ((MarketplaceNodeCatalogItem) itemEntry.getItem()).getInstallableUnitItems();
+		for (MarketplaceNodeInstallableUnitItem iuItem : iuItems) {
+			FeatureEntry featureEntry = new FeatureEntry(itemEntry, iuItem);
 			featureEntry.setInstalled(computeInstalled(featureEntry));
-			computeInitialChecked(featureEntry);
+			featureEntry.setChecked(computeInitiallyChecked(featureEntry));
 			children.add(featureEntry);
 		}
 		itemEntry.children = children;
+	}
+
+	private Boolean computeInitiallyChecked(FeatureEntry featureEntry) {
+		CatalogItemEntry parent = featureEntry.getParent();
+		Operation selectedOperation = parent.getSelectedOperation();
+		switch (selectedOperation) {
+		case INSTALL:
+			return !featureEntry.isInstalled() || featureEntry.hasUpdateAvailable();
+		case UNINSTALL:
+			return featureEntry.isInstalled();
+		case UPDATE:
+			return featureEntry.hasUpdateAvailable() || featureEntry.isRequiredInstall();
+		case CHANGE:
+			return featureEntry.isInstalled();
+		}
+		return false;
 	}
 
 	private boolean computeInstalled(FeatureEntry entry) {
 		Set<String> installedFeatures = installProfile.getInstalledFeatures();
 		return installedFeatures.contains(entry.featureDescriptor.getId())
 				|| installedFeatures.contains(entry.featureDescriptor.getSimpleId());
-	}
-
-	private void computeInitialChecked(FeatureEntry entry) {
-		Operation operation = entry.parent.operation;
-		if (operation == Operation.UPDATE) {
-			if (entry.isInstalled()) {
-				entry.checked = true;
-			}
-		} else {
-			entry.checked = true;
-		}
 	}
 
 	public static class CatalogItemEntry {
@@ -233,15 +242,21 @@ public class SelectionModel {
 
 		private final CatalogItemEntry parent;
 
+		private final MarketplaceNodeInstallableUnitItem installableUnitItem;
+
 		private FeatureDescriptor featureDescriptor;
 
-		private boolean checked;
+		private Boolean checked;
 
-		private boolean installed;
+		private FeatureEntry(CatalogItemEntry parent, MarketplaceNodeInstallableUnitItem installableUnitItem) {
+			this(parent, installableUnitItem, new FeatureDescriptor(installableUnitItem.getId()));
+		}
 
-		private FeatureEntry(CatalogItemEntry parent, FeatureDescriptor featureDescriptor) {
+		private FeatureEntry(CatalogItemEntry parent, MarketplaceNodeInstallableUnitItem installableUnitItem,
+				FeatureDescriptor featureDescriptor) {
 			super();
 			this.parent = parent;
+			this.installableUnitItem = installableUnitItem;
 			this.featureDescriptor = featureDescriptor;
 		}
 
@@ -257,25 +272,95 @@ public class SelectionModel {
 			this.featureDescriptor = featureDescriptor;
 		}
 
-		public boolean isChecked() {
-			return checked;
+		public MarketplaceNodeInstallableUnitItem getInstallableUnitItem() {
+			return installableUnitItem;
 		}
 
-		public void setChecked(boolean checked) {
-			this.checked = checked;
-			selectionChanged();
+		public boolean isOptional() {
+			return getInstallableUnitItem().isOptional();
 		}
 
 		public boolean isInstalled() {
-			return installed;
+			return Boolean.TRUE.equals(getInstallableUnitItem().getInstalled());
 		}
 
 		public void setInstalled(boolean installed) {
-			this.installed = installed;
+			getInstallableUnitItem().setInstalled(installed);
+		}
+
+		public boolean hasUpdateAvailable() {
+			return isInstalled() && Boolean.TRUE.equals(getInstallableUnitItem().getUpdateAvailable());
+		}
+
+		public boolean isRequiredInstall() {
+			return !isInstalled() && !getInstallableUnitItem().isOptional();
 		}
 
 		public CatalogItemEntry getParent() {
 			return parent;
+		}
+
+		public void setChecked(Boolean checked) {
+			this.checked = checked;
+		}
+
+		public boolean isChecked() {
+			return Boolean.TRUE.equals(this.checked);
+		}
+
+		public boolean isGrayed() {
+			return this.checked == null;
+		}
+
+		public void setGrayed() {
+			setChecked(null);
+		}
+
+		public Operation computeChangeOperation() {
+			return isGrayed() ? Operation.NONE : computeChangeOperation(isChecked());
+		}
+
+		public Operation computeChangeOperation(boolean checked) {
+			CatalogItemEntry parent = getParent();
+			switch (parent.getSelectedOperation()) {
+			case INSTALL:
+			case UPDATE:
+				if (checked) {
+					if (hasUpdateAvailable()) {
+						return Operation.UPDATE;
+					} else if (isRequiredInstall() && !isInstalled()) {
+						return Operation.INSTALL;
+					}
+					if (!isInstalled()) {
+						return Operation.INSTALL;
+					}
+				}
+				return Operation.NONE;
+			case UNINSTALL:
+				if (checked && isInstalled()) {
+					return Operation.UNINSTALL;
+				}
+				return Operation.NONE;
+			case CHANGE:
+				if (checked) {
+					if (isInstalled()) {
+						if (hasUpdateAvailable()) {
+							return Operation.UPDATE;
+						}
+						return Operation.NONE;
+					} else {
+						return Operation.INSTALL;
+					}
+				} else {
+					if (isInstalled()) {
+						return Operation.UNINSTALL;
+					} else {
+						return Operation.NONE;
+					}
+				}
+			default:
+				return Operation.NONE;
+			}
 		}
 
 		@Override
@@ -340,14 +425,44 @@ public class SelectionModel {
 
 	}
 
-	public Set<FeatureDescriptor> getSelectedFeatureDescriptors() {
-		Set<FeatureDescriptor> featureDescriptors = new HashSet<FeatureDescriptor>();
+	public Map<FeatureEntry, Operation> getFeatureEntryToOperation(boolean includeNone, boolean verify) {
+		Map<FeatureEntry, Operation> featureEntries = new HashMap<FeatureEntry, Operation>();
 		for (CatalogItemEntry entry : getCatalogItemEntries()) {
 			for (FeatureEntry featureEntry : entry.getChildren()) {
-				if (featureEntry.isChecked()) {
-					featureDescriptors.add(featureEntry.getFeatureDescriptor());
+				Operation operation = featureEntry.computeChangeOperation();
+				if (operation != null && (includeNone || operation != Operation.NONE)) {
+					Operation old = featureEntries.put(featureEntry, operation);
+					if (old != null && old != Operation.NONE) {
+						if (operation == Operation.NONE) {
+							featureEntries.put(featureEntry, old);
+							old = null;
+						} else if (verify && !old.equals(operation)) {
+							IStatus error = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
+									Messages.SelectionModel_Inconsistent_Actions, new Object[] {
+											featureEntry.getFeatureDescriptor().getName(), old, operation }));
+							throw new IllegalStateException(new CoreException(error));
+						}
+					}
 				}
 			}
+		}
+		return Collections.unmodifiableMap(featureEntries);
+	}
+
+	public Set<FeatureEntry> getSelectedFeatureEntries() {
+		return getFeatureEntryToOperation(false, false).keySet();
+	}
+
+	/**
+	 * @deprecated use {@link #getSelectedFeatureEntries()} instead
+	 * @return the descriptors for all selected features
+	 */
+	@Deprecated
+	public Set<FeatureDescriptor> getSelectedFeatureDescriptors() {
+		Set<FeatureDescriptor> featureDescriptors = new HashSet<FeatureDescriptor>();
+		Set<FeatureEntry> selectedFeatureEntries = getSelectedFeatureEntries();
+		for (FeatureEntry featureEntry : selectedFeatureEntries) {
+			featureDescriptors.add(featureEntry.getFeatureDescriptor());
 		}
 		return Collections.unmodifiableSet(featureDescriptors);
 	}
@@ -358,10 +473,18 @@ public class SelectionModel {
 	public Set<CatalogItem> getSelectedCatalogItems() {
 		Set<CatalogItem> items = new HashSet<CatalogItem>();
 		for (CatalogItemEntry entry : getCatalogItemEntries()) {
+			if (entry.getSelectedOperation() == Operation.NONE) {
+				continue;
+			}
 			for (FeatureEntry featureEntry : entry.getChildren()) {
-				if (featureEntry.isChecked()) {
+				Operation operation = featureEntry.computeChangeOperation();
+				if (operation != null && operation != Operation.NONE) {
 					items.add(entry.item);
+					break;
 				}
+			}
+			if (entry.getSelectedOperation() == Operation.CHANGE) {
+				items.add(entry.item);
 			}
 		}
 		return Collections.unmodifiableSet(items);
@@ -381,10 +504,21 @@ public class SelectionModel {
 		return operation == null ? Operation.NONE : operation;
 	}
 
-	public boolean computeProvisioningOperationViable() {
-		if (getSelectedFeatureDescriptors().isEmpty()) {
+	public boolean computeProvisioningOperationViableForFeatureSelection() {
+		IStatus status = computeFeatureOperationViability();
+		if (status == null) {
+			//no operation
+			//this is okay for a CHANGE
+			Map<Operation, List<CatalogItem>> operationToItem = computeOperationToItem();
+			if (operationToItem.size() == 1 && operationToItem.containsKey(Operation.CHANGE)) {
+				return true;
+			}
 			return false;
 		}
+		return computeProvisioningOperationViable();
+	}
+
+	public boolean computeProvisioningOperationViable() {
 		IStatus status = computeProvisioningOperationViability();
 		if (status != null) {
 			switch (status.getSeverity()) {
@@ -395,7 +529,7 @@ public class SelectionModel {
 			}
 			return false;
 		}
-		return true;
+		return false;//no operations
 	}
 
 	/**
@@ -404,13 +538,16 @@ public class SelectionModel {
 	 * @return the message, or null if there should be no message.
 	 */
 	public IStatus computeProvisioningOperationViability() {
-		Set<FeatureDescriptor> selectedFeatureDescriptors = getSelectedFeatureDescriptors();
-		if (selectedFeatureDescriptors.isEmpty()) {
-			return null;
+		IStatus featureStatus = computeFeatureOperationViability();
+		if (featureStatus == null || !featureStatus.isOK()) {
+			return featureStatus;
 		}
+
 		Map<Operation, List<CatalogItem>> operationToItem = computeOperationToItem();
 
-		if (operationToItem.size() == 1) {
+		if (operationToItem.size() == 0) {
+			return new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, Messages.SelectionModel_Nothing_Selected);
+		} else if (operationToItem.size() == 1) {
 			Entry<Operation, List<CatalogItem>> entry = operationToItem.entrySet().iterator().next();
 			return new Status(IStatus.INFO, MarketplaceClientUi.BUNDLE_ID,
 					NLS.bind(
@@ -426,13 +563,24 @@ public class SelectionModel {
 			}
 			return new Status(IStatus.INFO, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
 					Messages.SelectionModel_countSolutionsSelectedForInstallUpdate, count));
-		} else if (operationToItem.size() > 1) {
-			if (!(operationToItem.size() == 2 && operationToItem.containsKey(Operation.INSTALL) && operationToItem.containsKey(Operation.UPDATE))) {
-				return new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
-						Messages.SelectionModel_cannotInstallRemoveConcurrently);
-			}
+		} else {
+			return new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
+					Messages.SelectionModel_cannotInstallRemoveConcurrently);
 		}
-		return null;
+	}
+
+	private IStatus computeFeatureOperationViability() {
+		Map<FeatureEntry, Operation> selectedFeatureEntries;
+		try {
+			selectedFeatureEntries = getFeatureEntryToOperation(false, true);
+		} catch (IllegalStateException ex) {
+			CoreException cause = (CoreException) ex.getCause();
+			return cause.getStatus();
+		}
+		if (selectedFeatureEntries.isEmpty()) {
+			return null;
+		}
+		return Status.OK_STATUS;
 	}
 
 	private Map<Operation, List<CatalogItem>> computeOperationToItem() {

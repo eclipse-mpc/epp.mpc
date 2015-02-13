@@ -82,7 +82,8 @@ public class MarketplaceInfo {
 	}
 
 	/**
-	 * Calculate the known catalog nodes that are installed
+	 * Calculate the known catalog nodes that might be installed. Since no remote query should happen, this only checks
+	 * if any one of the IUs for a node are installed.
 	 *
 	 * @param repositoryUrl
 	 *            the catalog url for which installed nodes should be computed
@@ -97,7 +98,7 @@ public class MarketplaceInfo {
 		for (Map.Entry<String, List<String>> entry : nodeKeyToIU.entrySet()) {
 			if (entry.getKey().startsWith(keyPrefix)) {
 				List<String> ius = nodeKeyToIU.get(entry.getKey());
-				if (computeInstalled(installedIus, ius, false)) { //FIXME all vs any
+				if (computeInstalled(installedIus, ius, false)) {
 					String nodeId = entry.getKey().substring(keyPrefix.length());
 					Node node = new Node();
 					node.setId(nodeId);
@@ -108,6 +109,7 @@ public class MarketplaceInfo {
 
 		return nodes;
 	}
+
 
 	/**
 	 * Compute if the given node is installed. The given node must be fully realized, including its
@@ -170,17 +172,48 @@ public class MarketplaceInfo {
 	private boolean computeInstalled(Set<String> installedIus, Collection<String> ius, boolean all) {
 		int installCount = 0;
 		for (String iu : ius) {
-			if (installedIus.contains(iu) || installedIus.contains(iu + P2_FEATURE_GROUP_SUFFIX)) {
+			if (computeInstalled(installedIus, iu)) {
 				++installCount;
 			}
 		}
 		return all ? installCount == ius.size() : installCount > 0;
 	}
 
+	public void computeInstalled(Set<String> installedFeatures, MarketplaceNodeCatalogItem catalogItem) {
+		List<MarketplaceNodeInstallableUnitItem> installableUnitItems = catalogItem.getInstallableUnitItems();
+		boolean installed = false;
+		if (installableUnitItems != null) {
+			boolean anyInstalled = false;
+			boolean requiredInstalled = true;
+			for (MarketplaceNodeInstallableUnitItem installableUnitItem : installableUnitItems) {
+				boolean iuInstalled = computeInstalled(installedFeatures, installableUnitItem.getId());
+				installableUnitItem.setInstalled(iuInstalled);
+				if (iuInstalled) {
+					anyInstalled = true;
+				} else if (!installableUnitItem.isOptional()) {
+					requiredInstalled = false;
+				}
+			}
+			installed = requiredInstalled && anyInstalled;
+		}
+		catalogItem.setInstalled(installed);
+	}
+
+	private boolean computeInstalled(Set<String> installedIus, String iu) {
+		return installedIus.contains(iu) || installedIus.contains(iu + P2_FEATURE_GROUP_SUFFIX);
+	}
+
 	public synchronized void map(URL marketUrl, INode node) {
 		String itemKey = computeItemKey(marketUrl, node);
-		if (node.getIus() != null && !node.getIus().getIu().isEmpty()) {
-			List<String> ius = new ArrayList<String>(new HashSet<String>(node.getIus().getIu()));
+		if (node.getIus() != null && !node.getIus().getIuElements().isEmpty()) {
+			List<String> ius = new ArrayList<String>();
+			Set<String> uniqueIus = new HashSet<String>();
+			List<IIu> iuElements = node.getIus().getIuElements();
+			for (IIu iIu : iuElements) {
+				if (uniqueIus.add(iIu.getId())) {
+					ius.add(iIu.getId());
+				}
+			}
 			nodeKeyToIU.put(itemKey, ius);
 			for (String iu : ius) {
 				List<String> catalogNodes = iuToNodeKey.get(iu);

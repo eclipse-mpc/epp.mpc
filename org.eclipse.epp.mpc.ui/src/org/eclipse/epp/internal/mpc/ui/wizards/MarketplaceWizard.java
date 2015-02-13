@@ -24,6 +24,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -48,7 +49,6 @@ import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.commands.MarketplaceWizardCommand;
 import org.eclipse.epp.internal.mpc.ui.operations.AbstractProvisioningOperation;
-import org.eclipse.epp.internal.mpc.ui.operations.FeatureDescriptor;
 import org.eclipse.epp.internal.mpc.ui.operations.ProfileChangeOperationComputer;
 import org.eclipse.epp.internal.mpc.ui.operations.ProfileChangeOperationComputer.OperationType;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
@@ -720,16 +720,28 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 					}
 					OperationType entryOperationType = OperationType.map(entry.getValue());
 					if (entryOperationType != null) {
-						if (operationType == null || operationType == OperationType.UPDATE) {
+						if (operationType == null || operationType == OperationType.UPDATE || entryOperationType == OperationType.CHANGE) {
 							operationType = entryOperationType;
-							if (operationType == OperationType.UPDATE) {
-								for (FeatureDescriptor descriptor : getSelectionModel().getSelectedFeatureDescriptors()) {
-									if (!getInstalledFeatures().contains(descriptor.getId())) {
-										operationType = OperationType.INSTALL;
-									}
-								}
-							}
 						}
+					}
+				}
+				Map<FeatureEntry, Operation> featureEntries = getSelectionModel().getFeatureEntryToOperation(false,
+						false);
+				if (operationType == OperationType.CHANGE || operationType == OperationType.UPDATE) {
+					Set<OperationType> featureOperations = EnumSet.noneOf(OperationType.class);
+					for (Entry<FeatureEntry, Operation> entry : featureEntries.entrySet()) {
+						OperationType operation = OperationType.map(entry.getValue());
+						if (operation != null) {
+							featureOperations.add(operation);
+						}
+					}
+					if (featureOperations.contains(OperationType.INSTALL)
+							&& featureOperations.contains(OperationType.UPDATE)) {
+						//just perform install instead, which covers update
+						featureOperations.remove(OperationType.UPDATE);
+					}
+					if (featureOperations.size() == 1) {
+						operationType = featureOperations.iterator().next();
 					}
 				}
 				URI dependenciesRepository = null;
@@ -745,7 +757,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				provisioningOperation = new ProfileChangeOperationComputer(
 						operationType,
 						selectedItems,
-						getSelectionModel().getSelectedFeatureDescriptors(),
+						featureEntries.keySet(),
 						dependenciesRepository,
 						getConfiguration().getCatalogDescriptor().isInstallFromAllRepositories() ? ProfileChangeOperationComputer.ResolutionStrategy.FALLBACK_STRATEGY
 								: ProfileChangeOperationComputer.ResolutionStrategy.SELECTED_REPOSITORIES,
@@ -820,15 +832,16 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		Set<CatalogItem> items = new HashSet<CatalogItem>();
 		Map<CatalogItem, Collection<String>> iusByCatalogItem = new HashMap<CatalogItem, Collection<String>>();
 		for (CatalogItemEntry entry : getSelectionModel().getCatalogItemEntries()) {
-			if (entry.getSelectedOperation() != Operation.INSTALL) {
-				continue;
-			}
 			List<FeatureEntry> features = entry.getChildren();
 			Collection<String> featureIds = new ArrayList<String>(features.size());
 			for (FeatureEntry feature : features) {
-				featureIds.add(feature.getFeatureDescriptor().getId());
+				if (feature.computeChangeOperation() == Operation.INSTALL) {
+					featureIds.add(feature.getFeatureDescriptor().getId());
+				}
 			}
-			iusByCatalogItem.put(entry.getItem(), featureIds);
+			if (!featureIds.isEmpty()) {
+				iusByCatalogItem.put(entry.getItem(), featureIds);
+			}
 		}
 		for (IInstallableUnit unit : operationIUs) {
 			for (Entry<CatalogItem, Collection<String>> entry : iusByCatalogItem.entrySet()) {

@@ -59,7 +59,7 @@ import org.eclipse.osgi.util.NLS;
  */
 public class MarketplaceCatalog extends Catalog {
 
-	private final Map<String, Boolean> updateAvailableByNodeId = new HashMap<String, Boolean>();
+	private final Map<String, Version> repositoryIuVersionById = new HashMap<String, Version>();
 
 	private INews news;
 
@@ -151,31 +151,26 @@ public class MarketplaceCatalog extends Catalog {
 	}
 
 	public IStatus checkForUpdates(final IProgressMonitor monitor) {
-		monitor.beginTask(Messages.MarketplaceCatalog_checkingForUpdates, 10000000);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceCatalog_checkingForUpdates, 10000000);
 		try {
+			Map<String, IInstallableUnit> installedIUs = calculateInstalledIUs(progress.newChild(100000));
 			List<MarketplaceNodeCatalogItem> updateCheckNeeded = new ArrayList<MarketplaceNodeCatalogItem>();
 			for (CatalogItem item : getItems()) {
+				if (monitor.isCanceled()) {
+					return Status.CANCEL_STATUS;
+				}
 				if (!(item instanceof MarketplaceNodeCatalogItem)) {
 					continue;
 				}
 				MarketplaceNodeCatalogItem catalogItem = (MarketplaceNodeCatalogItem) item;
 				if (catalogItem.isInstalled()) {
-					Boolean updateAvailable = updateAvailableByNodeId.get(item.getId());
-					if (updateAvailable != null) {
-						catalogItem.setUpdateAvailable(updateAvailable);
-					} else {
+					if (setUpdatesAvailable(installedIUs, catalogItem)) {
 						updateCheckNeeded.add(catalogItem);
 					}
 				}
 			}
 			if (!updateCheckNeeded.isEmpty()) {
-				checkForUpdates(updateCheckNeeded, monitor);
-
-				for (MarketplaceNodeCatalogItem item : updateCheckNeeded) {
-					if (item.getUpdateAvailable() != null) {
-						updateAvailableByNodeId.put(item.getData().getId(), item.getUpdateAvailable());
-					}
-				}
+				checkForUpdates(updateCheckNeeded, installedIUs, progress.newChild(10000000 - 100000));
 			}
 
 			return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
@@ -184,9 +179,27 @@ public class MarketplaceCatalog extends Catalog {
 		}
 	}
 
-	protected IStatus checkForUpdates(List<MarketplaceNodeCatalogItem> updateCheckNeeded, IProgressMonitor monitor) {
-		int remainingWork = 10000000;
-		final SubMonitor progress = SubMonitor.convert(monitor, remainingWork);
+	private Map<String, IInstallableUnit> calculateInstalledIUs(IProgressMonitor monitor) {
+		Map<String, IInstallableUnit> installedIUs = new HashMap<String, IInstallableUnit>();
+		List<AbstractDiscoveryStrategy> discoveryStrategies = getDiscoveryStrategies();
+		SubMonitor progress = SubMonitor.convert(monitor, discoveryStrategies.size() * 1000);
+		for (AbstractDiscoveryStrategy discoveryStrategy : discoveryStrategies) {
+			if (monitor.isCanceled()) {
+				break;
+			}
+			SubMonitor childProgress = progress.newChild(1000);
+			if (discoveryStrategy instanceof MarketplaceDiscoveryStrategy) {
+				MarketplaceDiscoveryStrategy marketplaceDiscoveryStrategy = (MarketplaceDiscoveryStrategy) discoveryStrategy;
+				Map<String, IInstallableUnit> ius = marketplaceDiscoveryStrategy.computeInstalledIUs(childProgress);
+				installedIUs.putAll(ius);
+			}
+			childProgress.setWorkRemaining(0);
+		}
+		return installedIUs;
+	}
+
+	protected IStatus checkForUpdates(List<MarketplaceNodeCatalogItem> updateCheckNeeded,
+			final Map<String, IInstallableUnit> installedIUs, final IProgressMonitor monitor) {
 		Map<URI, List<MarketplaceNodeCatalogItem>> installedCatalogItemsByUpdateUri = new HashMap<URI, List<MarketplaceNodeCatalogItem>>();
 
 		for (MarketplaceNodeCatalogItem catalogItem : updateCheckNeeded) {
@@ -213,16 +226,13 @@ public class MarketplaceCatalog extends Catalog {
 			return Status.OK_STATUS;
 		}
 
-		final Map<String, IInstallableUnit> installedIUs = MarketplaceClientUi.computeInstalledIUsById(progress.newChild(remainingWork / 20));
-		remainingWork -= remainingWork / 20;
-
 		ConcurrentTaskManager executor = new ConcurrentTaskManager(installedCatalogItemsByUpdateUri.size(),
 				Messages.MarketplaceCatalog_checkingForUpdates);
 		try {
 			final IProgressMonitor pm = new NullProgressMonitor() {
 				@Override
 				public boolean isCanceled() {
-					return super.isCanceled() || progress.isCanceled();
+					return super.isCanceled() || monitor.isCanceled();
 				}
 			};
 			for (Map.Entry<URI, List<MarketplaceNodeCatalogItem>> entry : installedCatalogItemsByUpdateUri.entrySet()) {
@@ -234,6 +244,9 @@ public class MarketplaceCatalog extends Catalog {
 						IMetadataRepositoryManager manager = (IMetadataRepositoryManager) session.getProvisioningAgent()
 								.getService(IMetadataRepositoryManager.SERVICE_NAME);
 						try {
+							for (MarketplaceNodeCatalogItem item : catalogItemsThisSite) {
+								item.setAvailable(null);
+							}
 							IMetadataRepository repository = manager.loadRepository(uri, pm);
 							IQuery<IInstallableUnit> query = QueryUtil.createMatchQuery( //
 									"id ~= /*.feature.group/ && " + //$NON-NLS-1$
@@ -243,34 +256,26 @@ public class MarketplaceCatalog extends Catalog {
 							// compute highest version for all available IUs.
 							Map<String, Version> repositoryIuVersionById = new HashMap<String, Version>();
 							for (IInstallableUnit iu : result) {
-								String id = iu.getId();
+								String key = createRepositoryIuKey(uri.toString(), iu.getId());
 								Version version = iu.getVersion();
-								Version priorVersion = repositoryIuVersionById.put(id, version);
+								Version priorVersion = repositoryIuVersionById.put(key, version);
 								if (priorVersion != null && priorVersion.compareTo(version) > 0) {
-									repositoryIuVersionById.put(id, priorVersion);
+									repositoryIuVersionById.put(key, priorVersion);
 								}
 							}
 
 							for (MarketplaceNodeCatalogItem item : catalogItemsThisSite) {
-								item.setUpdateAvailable(false);
-								List<String> installableUnits = item.getInstallableUnits();
-								if (installableUnits.isEmpty()
-										|| !repositoryIuVersionById.keySet().containsAll(installableUnits)) {
-									item.setAvailable(false);
-								} else {
-									for (String iu : installableUnits) {
-										Version availableVersion = repositoryIuVersionById.get(iu);
-										if (availableVersion != null) {
-											IInstallableUnit installedIu = installedIUs.get(iu);
-											if (installedIu != null
-													&& installedIu.getVersion().compareTo(availableVersion) < 0) {
-												item.setUpdateAvailable(true);
-												break;
-											}
-										}
-									}
+								List<MarketplaceNodeInstallableUnitItem> installableUnitItems = item.getInstallableUnitItems();
+								for (MarketplaceNodeInstallableUnitItem iuItem : installableUnitItems) {
+									String key = createRepositoryIuKey(uri.toString(), iuItem.getId());
+									Version availableVersion = repositoryIuVersionById.get(key);
+									MarketplaceCatalog.this.repositoryIuVersionById.put(key, availableVersion);
 								}
 							}
+							for (MarketplaceNodeCatalogItem item : catalogItemsThisSite) {
+								setUpdatesAvailable(installedIUs, item);
+							}
+
 						} catch (ProvisionException e) {
 							MarketplaceClientUi.error(e);
 							for (MarketplaceNodeCatalogItem item : catalogItemsThisSite) {
@@ -283,7 +288,7 @@ public class MarketplaceCatalog extends Catalog {
 				});
 			}
 			try {
-				executor.waitUntilFinished(progress.newChild(remainingWork));
+				executor.waitUntilFinished(monitor);
 			} catch (CoreException e) {
 				MarketplaceClientUi.error(e);
 				return e.getStatus();
@@ -292,6 +297,31 @@ public class MarketplaceCatalog extends Catalog {
 		} finally {
 			executor.shutdownNow();
 		}
+	}
+
+	private String createRepositoryIuKey(String uri, String id) {
+		return uri.toString() + "!" + id; //$NON-NLS-1$
+	}
+
+	private boolean setUpdatesAvailable(Map<String, IInstallableUnit> installedIUs, MarketplaceNodeCatalogItem item) {
+		boolean needOnlineCheck = false;
+		List<MarketplaceNodeInstallableUnitItem> installableUnitItems = item.getInstallableUnitItems();
+		for (MarketplaceNodeInstallableUnitItem iuItem : installableUnitItems) {
+			String key = createRepositoryIuKey(item.getSiteUrl(), iuItem.getId());
+			Version availableVersion = repositoryIuVersionById.get(key);
+			iuItem.setUpdateAvailable(false);
+			iuItem.setAvailable(false);
+			if (availableVersion != null) {
+				iuItem.setAvailable(true);
+				IInstallableUnit installedIu = installedIUs.get(iuItem.getId());
+				if (installedIu != null && installedIu.getVersion().compareTo(availableVersion) < 0) {
+					iuItem.setUpdateAvailable(true);
+				}
+			} else if (!repositoryIuVersionById.containsKey(key)) {
+				needOnlineCheck = true;
+			}
+		}
+		return needOnlineCheck;
 	}
 
 	@Override

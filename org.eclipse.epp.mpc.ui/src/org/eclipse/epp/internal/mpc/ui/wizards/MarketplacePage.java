@@ -206,9 +206,9 @@ public class MarketplacePage extends CatalogPage {
 				if (!event.getSelection().isEmpty()) {
 
 					if (previousSelectionSize == 0 && newSelectionSize == 1
-							&& selectionModel.computeProvisioningOperationViable()) {
+							&& selectionModel.computeProvisioningOperationViableForFeatureSelection()) {
 						IWizardPage currentPage = getContainer().getCurrentPage();
-						if (currentPage.isPageComplete()) {
+						if (currentPage == MarketplacePage.this && currentPage.isPageComplete()) {
 							IWizardPage nextPage = getWizard().getNextPage(MarketplacePage.this);
 							if (nextPage != null && nextPage instanceof WizardPage) {
 								((WizardPage) nextPage).setPageComplete(true);
@@ -505,7 +505,7 @@ public class MarketplacePage extends CatalogPage {
 	@Override
 	public void setPageComplete(boolean complete) {
 		if (complete) {
-			complete = getWizard().getSelectionModel().computeProvisioningOperationViable();
+			complete = getWizard().getSelectionModel().computeProvisioningOperationViableForFeatureSelection();
 		}
 		computeMessages();
 		super.setPageComplete(complete);
@@ -589,7 +589,7 @@ public class MarketplacePage extends CatalogPage {
 			if (branding.getWizardIcon() == null) {
 				wizardIconDescriptor = DiscoveryImages.BANNER_DISOVERY;
 			} else {
-				wizardIconDescriptor = ImageDescriptor.createFromURL(URLUtil.toURL(branding.getWizardIcon()));
+				wizardIconDescriptor = ImageDescriptor.createFromURL(URLUtil.toURL(branding.getWizardIcon()));//FIXME this needs to be preloaded and cached
 			}
 			setImageDescriptor(wizardIconDescriptor);
 		} catch (MalformedURLException e) {

@@ -765,4 +765,8 @@ public class MarketplaceViewer extends CatalogViewer {
 			canvas.setSeparatorVisible(visible);
 		}
 	}
+
+	public void reveal(Object item) {
+		this.viewer.reveal(item);
+	}
 }

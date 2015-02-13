@@ -23,7 +23,7 @@
         <configuration>
           <useUIHarness>true</useUIHarness>
           <useUIThread>false</useUIThread>
-          <forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
+          <forkedProcessTimeoutInSeconds>1500</forkedProcessTimeoutInSeconds>
           <product>org.eclipse.sdk.ide</product>
           <application>org.eclipse.ui.ide.workbench</application>
           <testSuite>org.eclipse.epp.mpc.tests</testSuite>

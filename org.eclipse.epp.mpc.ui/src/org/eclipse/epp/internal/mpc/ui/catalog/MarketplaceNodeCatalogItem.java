@@ -12,9 +12,13 @@
 package org.eclipse.epp.internal.mpc.ui.catalog;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
+import org.eclipse.epp.mpc.core.model.IIu;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
@@ -24,9 +28,74 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
  */
 public class MarketplaceNodeCatalogItem extends CatalogItem {
 
+	public MarketplaceNodeCatalogItem() {
+		super();
+		// ignore
+	}
+
 	private URL marketplaceUrl;
 
-	private Boolean updateAvailable;
+	private List<MarketplaceNodeInstallableUnitItem> installableUnitItems;
+
+	@Override
+	public void setInstallableUnits(List<String> installableUnits) {
+		super.setInstallableUnits(installableUnits);
+		updateInstallableUnitItems();
+	}
+
+	private void updateInstallableUnitItems() {
+		List<IIu> iuElements = getData().getIus().getIuElements();
+		List<MarketplaceNodeInstallableUnitItem> installableUnitItems = new ArrayList<MarketplaceNodeInstallableUnitItem>();
+		for (String iuId : installableUnits) {
+			MarketplaceNodeInstallableUnitItem iuItem = getInstallableUnitItem(iuId);
+			if (iuItem == null) {
+				iuItem = new MarketplaceNodeInstallableUnitItem();
+				iuItem.setId(iuId);
+			}
+			for (IIu iu : iuElements) {
+				if (iu.getId().equals(iuId)) {
+					iuItem.init(iu);
+					break;
+				}
+			}
+			installableUnitItems.add(iuItem);
+		}
+		doSetInstallableUnitItems(installableUnitItems);
+	}
+
+	public MarketplaceNodeInstallableUnitItem getInstallableUnitItem(String iuId) {
+		if (installableUnitItems == null) {
+			return null;
+		}
+		for (MarketplaceNodeInstallableUnitItem iuItem : installableUnitItems) {
+			if (iuId.equals(iuItem.getId())) {
+				return iuItem;
+			}
+		}
+		return null;
+	}
+
+	public void setInstallableUnitItems(List<MarketplaceNodeInstallableUnitItem> installableUnitItems) {
+		doSetInstallableUnitItems(new ArrayList<MarketplaceNodeInstallableUnitItem>(
+				installableUnitItems));
+		updateInstallableUnits();
+	}
+
+	private void doSetInstallableUnitItems(List<MarketplaceNodeInstallableUnitItem> items) {
+		this.installableUnitItems = Collections.unmodifiableList(items);
+	}
+
+	private void updateInstallableUnits() {
+		installableUnits.clear();
+		for (MarketplaceNodeInstallableUnitItem iuItem : installableUnitItems) {
+			installableUnits.add(iuItem.getId());
+		}
+		super.setInstallableUnits(installableUnits);
+	}
+
+	public List<MarketplaceNodeInstallableUnitItem> getInstallableUnitItems() {
+		return installableUnitItems;
+	}
 
 	@Override
 	public INode getData() {
@@ -42,11 +111,66 @@ public class MarketplaceNodeCatalogItem extends CatalogItem {
 	}
 
 	public Boolean getUpdateAvailable() {
+		Boolean updateAvailable = false;
+		List<MarketplaceNodeInstallableUnitItem> installableUnitItems = getInstallableUnitItems();
+		for (MarketplaceNodeInstallableUnitItem iuItem : installableUnitItems) {
+			Boolean iuUpdateAvailable = iuItem.getUpdateAvailable();
+			if (iuUpdateAvailable == null) {
+				updateAvailable = null;
+			} else if (Boolean.TRUE.equals(iuUpdateAvailable)) {
+				return true;
+			}
+		}
 		return updateAvailable;
 	}
 
-	public void setUpdateAvailable(Boolean updateAvailable) {
-		this.updateAvailable = updateAvailable;
+	public Boolean getHasOptionalFeatures() {
+		Boolean hasOptional = false;
+		List<MarketplaceNodeInstallableUnitItem> installableUnitItems = getInstallableUnitItems();
+		for (MarketplaceNodeInstallableUnitItem iuItem : installableUnitItems) {
+			Boolean iuOptional = iuItem.getOptional();
+			if (iuOptional == null) {
+				hasOptional = null;
+			} else if (Boolean.TRUE.equals(iuOptional)) {
+				return true;
+			}
+		}
+		return hasOptional;
+	}
+
+	@Override
+	public Boolean getAvailable() {
+		Boolean available = super.getAvailable();
+		if (available == null) {
+			List<MarketplaceNodeInstallableUnitItem> installableUnitItems = getInstallableUnitItems();
+			if (installableUnitItems == null || installableUnitItems.isEmpty()) {
+				return false;
+			}
+			available = true;
+			boolean hasRequired = false;
+			for (MarketplaceNodeInstallableUnitItem iuItem : installableUnitItems) {
+				if (!iuItem.isOptional()) {
+					hasRequired = true;
+					Boolean iuAvailable = iuItem.getAvailable();
+					if (Boolean.FALSE.equals(iuAvailable)) {
+						return false;
+					} else if (iuAvailable == null) {
+						available = null;
+					}
+				}
+			}
+			if (!hasRequired) {
+				for (MarketplaceNodeInstallableUnitItem iuItem : installableUnitItems) {
+					Boolean iuAvailable = iuItem.getAvailable();
+					if (Boolean.FALSE.equals(iuAvailable)) {
+						return false;
+					} else if (iuAvailable == null) {
+						available = null;
+					}
+				}
+			}
+		}
+		return available;
 	}
 
 	public Set<Operation> getAvailableOperations() {
@@ -57,6 +181,9 @@ public class MarketplaceNodeCatalogItem extends CatalogItem {
 				available.add(Operation.UNINSTALL);
 				if (maybeUpdateAvailable()) {
 					available.add(Operation.UPDATE);
+				}
+				if (maybeHasOptionalFeatures()) {
+					available.add(Operation.CHANGE);
 				}
 			} else if (maybeAvailable()) {
 				available.add(Operation.INSTALL);
@@ -73,6 +200,11 @@ public class MarketplaceNodeCatalogItem extends CatalogItem {
 	private boolean maybeUpdateAvailable() {
 		Boolean updateAvailable = getUpdateAvailable();
 		return updateAvailable == null || Boolean.TRUE.equals(updateAvailable);
+	}
+
+	private boolean maybeHasOptionalFeatures() {
+		Boolean hasOptional = getHasOptionalFeatures();
+		return hasOptional == null || Boolean.TRUE.equals(hasOptional);
 	}
 
 	@Override

@@ -38,6 +38,21 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 	/**
 	 * image registry key
 	 */
+	public static final String IU_ICON_INSTALL = "IU_ICON_INSTALL"; //$NON-NLS-1$
+
+	/**
+	 * image registry key
+	 */
+	public static final String IU_ICON_UNINSTALL = "IU_ICON_UNINSTALL"; //$NON-NLS-1$
+
+	/**
+	 * image registry key
+	 */
+	public static final String IU_ICON_DISABLED = "IU_ICON_DISABLED"; //$NON-NLS-1$
+
+	/**
+	 * image registry key
+	 */
 	public static final String IU_ICON = "IU_ICON"; //$NON-NLS-1$
 
 	/**
@@ -102,6 +117,12 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 		imageRegistry.put(IU_ICON, imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/iu_obj.gif")); //$NON-NLS-1$
 		imageRegistry.put(IU_ICON_UPDATE, imageDescriptorFromPlugin(getBundle().getSymbolicName(),
 				"icons/iu_update_obj.gif")); //$NON-NLS-1$
+		imageRegistry.put(IU_ICON_INSTALL,
+				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/iu_install_obj.gif")); //$NON-NLS-1$
+		imageRegistry.put(IU_ICON_UNINSTALL,
+				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/iu_uninstall_obj.gif")); //$NON-NLS-1$
+		imageRegistry.put(IU_ICON_DISABLED,
+				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/iu_disabled_obj.gif")); //$NON-NLS-1$
 		{
 			ImageDescriptor errorOverlay = PlatformUI.getWorkbench()
 					.getSharedImages()

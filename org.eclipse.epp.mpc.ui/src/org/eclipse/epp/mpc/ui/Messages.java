@@ -19,6 +19,8 @@ class Messages extends NLS {
 
 	public static String MarketplaceUrlHandler_performInstallRequest;
 
+	public static String Operation_change;
+
 	public static String Operation_install;
 
 	public static String Operation_uninstall;

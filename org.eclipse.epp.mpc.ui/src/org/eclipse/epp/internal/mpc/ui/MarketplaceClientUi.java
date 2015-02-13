@@ -228,28 +228,9 @@ public class MarketplaceClientUi {
 	}
 
 	public static Set<String> computeInstalledFeatures(IProgressMonitor monitor) {
-		Set<String> features = new HashSet<String>();
+		Map<String, IInstallableUnit> iusById = computeInstalledIUsById(monitor);
+		Set<String> features = new HashSet<String>(iusById.keySet());
 
-		BundleContext bundleContext = MarketplaceClientUi.getBundleContext();
-		ServiceReference<IProvisioningAgent> serviceReference = bundleContext.getServiceReference(IProvisioningAgent.class);
-		if (serviceReference != null) {
-			IProvisioningAgent agent = bundleContext.getService(serviceReference);
-			try {
-				IProfileRegistry profileRegistry = (IProfileRegistry) agent.getService(IProfileRegistry.SERVICE_NAME);
-				if (profileRegistry != null) {
-					IProfile profile = profileRegistry.getProfile(ProvisioningUI.getDefaultUI().getProfileId());
-					if (profile != null) {
-						IQueryResult<IInstallableUnit> result = profile.available(QueryUtil.createIUGroupQuery(),
-								monitor);
-						for (IInstallableUnit unit : result) {
-							features.add(unit.getId());
-						}
-					}
-				}
-			} finally {
-				bundleContext.ungetService(serviceReference);
-			}
-		}
 		if (features.isEmpty()) {
 			// probably a self-hosted environment
 			IBundleGroupProvider[] bundleGroupProviders = Platform.getBundleGroupProviders();
