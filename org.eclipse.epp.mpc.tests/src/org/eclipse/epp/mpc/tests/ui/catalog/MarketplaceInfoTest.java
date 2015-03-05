@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.epp.internal.mpc.core.service.Iu;
 import org.eclipse.epp.internal.mpc.core.service.Ius;
 import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceInfo;
@@ -56,11 +57,15 @@ public class MarketplaceInfoTest {
 		node.setId(item.getId());
 		node.setUrl("http://marketplace.eclipse.org/node/" + node.getId());
 		node.setIus(new Ius());
-		node.getIus().getIu().add("com.example.test.a1");
-		node.getIus().getIu().add("com.example.test.a2");
+		addIu(node, "com.example.test.a1");
+		addIu(node, "com.example.test.a2");
 		item.setData(node);
 		item.setInstallableUnits(node.getIus().getIu());
 		return item;
+	}
+
+	protected static void addIu(Node node, String iuId) {
+		node.getIus().getIuElements().add(new Iu(iuId));
 	}
 
 	@Test

@@ -24,6 +24,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +37,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
+import org.eclipse.epp.mpc.core.model.IIu;
 import org.eclipse.epp.mpc.core.model.INode;
 
 /**
@@ -95,7 +97,7 @@ public class MarketplaceInfo {
 		for (Map.Entry<String, List<String>> entry : nodeKeyToIU.entrySet()) {
 			if (entry.getKey().startsWith(keyPrefix)) {
 				List<String> ius = nodeKeyToIU.get(entry.getKey());
-				if (computeInstalled(installedIus, ius)) {
+				if (computeInstalled(installedIus, ius, false)) { //FIXME all vs any
 					String nodeId = entry.getKey().substring(keyPrefix.length());
 					Node node = new Node();
 					node.setId(nodeId);
@@ -146,22 +148,33 @@ public class MarketplaceInfo {
 	 * {@link Node#getIus() ius}.
 	 */
 	public boolean computeInstalled(Set<String> installedFeatures, INode node) {
-		if (node.getIus() != null && !node.getIus().getIu().isEmpty()) {
-			List<String> ius = new ArrayList<String>(new HashSet<String>(node.getIus().getIu()));
-			return computeInstalled(installedFeatures, ius);
+		if (node.getIus() != null && !node.getIus().getIuElements().isEmpty()) {
+			boolean all = true;
+			Set<String> ius = new HashSet<String>();
+			for (IIu iu : node.getIus().getIuElements()) {
+				if (!iu.isOptional()) {
+					ius.add(iu.getId());
+				}
+			}
+			if (ius.isEmpty()) {
+				all = false;
+				for (IIu iu : node.getIus().getIuElements()) {
+					ius.add(iu.getId());
+				}
+			}
+			return computeInstalled(installedFeatures, ius, all);
 		}
 		return false;
 	}
 
-	private boolean computeInstalled(Set<String> installedIus, List<String> ius) {
+	private boolean computeInstalled(Set<String> installedIus, Collection<String> ius, boolean all) {
 		int installCount = 0;
 		for (String iu : ius) {
 			if (installedIus.contains(iu) || installedIus.contains(iu + P2_FEATURE_GROUP_SUFFIX)) {
 				++installCount;
 			}
 		}
-		// FIXME: review do we need to have _all_ installed, or just a minimum of one?  relates to bug 305441
-		return installCount > 0;
+		return all ? installCount == ius.size() : installCount > 0;
 	}
 
 	public synchronized void map(URL marketUrl, INode node) {

@@ -1,36 +1,28 @@
 /*******************************************************************************
- * Copyright (c) 2014 The Eclipse Foundation and others.
+ * Copyright (c) 2010 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     The Eclipse Foundation - initial API and implementation
- *     Yatta Solutions - bug 432803: public API
+ *     Yatta Solutions GmbH - initial API and implementation
  *******************************************************************************/
 package org.eclipse.epp.mpc.core.model;
 
-import java.util.List;
-
 /**
- * A list of installable units for an installable marketplace {@link INode node}
+ * A installable unit that can be optional and/or preseleted on install
  *
- * @author David Green
  * @author Carsten Reckord
  * @noextend This interface is not intended to be extended by clients.
  * @noimplement This interface is not intended to be implemented by clients.
  */
-public interface IIus {
+public interface IIu {
 
-	/**
-	 * List of IU ids
-	 * 
-	 * @deprecated use {@link #getIuElements()} instead
-	 */
-	@Deprecated
-	List<String> getIu();
+	String getId();
 
-	List<IIu> getIuElements();
+	boolean isOptional();
+
+	boolean isSelected();
 
 }

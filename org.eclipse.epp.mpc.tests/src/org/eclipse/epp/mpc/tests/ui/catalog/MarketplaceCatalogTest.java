@@ -32,6 +32,7 @@ import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
+import org.eclipse.epp.mpc.core.model.IIu;
 import org.eclipse.epp.mpc.core.model.IIus;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
@@ -113,8 +114,8 @@ public class MarketplaceCatalogTest {
 				for (INode node : installedNodes) {
 					IIus ius = node.getIus();
 					if (ius != null) {
-						for (String iu : ius.getIu()) {
-							installedIuIds.add(iu + ".feature.group");
+						for (IIu iu : ius.getIuElements()) {
+							installedIuIds.add(iu.getId() + ".feature.group");
 						}
 					}
 				}
