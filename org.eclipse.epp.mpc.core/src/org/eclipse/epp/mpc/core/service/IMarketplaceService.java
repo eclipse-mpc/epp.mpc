@@ -130,7 +130,7 @@ public interface IMarketplaceService {
 	 *
 	 * @return the search result
 	 */
-	ISearchResult related(List<INode> basedOn, IProgressMonitor monitor) throws CoreException;
+	ISearchResult related(List<? extends INode> basedOn, IProgressMonitor monitor) throws CoreException;
 
 	/**
 	 * Get the news configuration for the marketplace

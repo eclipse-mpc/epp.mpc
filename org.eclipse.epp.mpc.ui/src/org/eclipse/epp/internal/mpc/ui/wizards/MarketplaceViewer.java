@@ -382,6 +382,9 @@ public class MarketplaceViewer extends CatalogViewer {
 					case RECENT:
 						result[0] = getCatalog().recent(monitor);
 						break;
+					case RELATED:
+						result[0] = getCatalog().related(monitor);
+						break;
 					case INSTALLED:
 						result[0] = getCatalog().installed(monitor);
 						break;

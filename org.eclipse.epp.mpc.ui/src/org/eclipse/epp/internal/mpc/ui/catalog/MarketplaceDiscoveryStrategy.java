@@ -433,6 +433,24 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		}
 	}
 
+	public void related(IProgressMonitor monitor) throws CoreException {
+		final int totalWork = 1000000;
+		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_searchingMarketplace, totalWork);
+		try {
+			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
+			catalogCategory.setContents(Contents.RELATED);
+			SearchResult installed = computeInstalled(new SubProgressMonitor(monitor, totalWork / 8 * 2));
+			if (!monitor.isCanceled()) {
+				ISearchResult result = marketplaceService.related(installed.getNodes(), new SubProgressMonitor(monitor,
+						totalWork / 8 * 3));
+				handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 8 * 3));
+				maybeAddCatalogItem(catalogCategory);
+			}
+		} finally {
+			monitor.done();
+		}
+	}
+
 	public void featured(IProgressMonitor monitor, final IMarket market, final ICategory category) throws CoreException {
 		final int totalWork = 1000000;
 		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_searchingMarketplace, totalWork);
@@ -468,27 +486,35 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		try {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
 			catalogCategory.setContents(Contents.INSTALLED);
-			SearchResult result = new SearchResult();
-			result.setNodes(new ArrayList<Node>());
-			Set<String> installedFeatures = computeInstalledFeatures(monitor);
+			SearchResult result = computeInstalled(monitor);
 			if (!monitor.isCanceled()) {
-				Set<INode> catalogNodes = marketplaceInfo.computeInstalledNodes(catalogDescriptor.getUrl(),
-						installedFeatures);
-				if (!catalogNodes.isEmpty()) {
-					int unitWork = totalWork / (2 * catalogNodes.size());
-					for (INode node : catalogNodes) {
-						node = marketplaceService.getNode(node, monitor);
-						result.getNodes().add((Node) node);
-						monitor.worked(unitWork);
-					}
-				} else {
-					monitor.worked(totalWork / 2);
-				}
 				handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
 			}
 		} finally {
 			monitor.done();
 		}
+	}
+
+	protected SearchResult computeInstalled(IProgressMonitor monitor) throws CoreException {
+		final int totalWork = 1000000;
+		SearchResult result = new SearchResult();
+		result.setNodes(new ArrayList<Node>());
+		Set<String> installedFeatures = computeInstalledFeatures(monitor);
+		if (!monitor.isCanceled()) {
+			Set<INode> catalogNodes = marketplaceInfo.computeInstalledNodes(catalogDescriptor.getUrl(),
+					installedFeatures);
+			if (!catalogNodes.isEmpty()) {
+				int unitWork = totalWork / (2 * catalogNodes.size());
+				for (INode node : catalogNodes) {
+					node = marketplaceService.getNode(node, monitor);
+					result.getNodes().add((Node) node);
+					monitor.worked(unitWork);
+				}
+			} else {
+				monitor.worked(totalWork / 2);
+			}
+		}
+		return result;
 	}
 
 	public void performQuery(IProgressMonitor monitor, Set<String> nodeIds) throws CoreException {

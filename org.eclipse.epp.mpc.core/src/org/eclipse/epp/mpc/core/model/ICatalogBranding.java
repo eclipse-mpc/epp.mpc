@@ -36,6 +36,10 @@ public interface ICatalogBranding extends IIdentifiable {
 
 	String getRecentTabName();
 
+	boolean hasRelatedTab();
+
+	String getRelatedTabName();
+
 	String getWizardTitle();
 
 }

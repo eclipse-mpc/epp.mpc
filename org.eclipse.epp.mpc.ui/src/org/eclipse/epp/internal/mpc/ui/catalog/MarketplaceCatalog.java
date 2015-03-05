@@ -76,6 +76,14 @@ public class MarketplaceCatalog extends Catalog {
 		}, monitor);
 	}
 
+	public IStatus related(IProgressMonitor monitor) {
+		return performDiscovery(new DiscoveryOperation() {
+			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
+				strategy.related(monitor);
+			}
+		}, monitor);
+	}
+
 	public IStatus recent(IProgressMonitor monitor) {
 		return performDiscovery(new DiscoveryOperation() {
 			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {

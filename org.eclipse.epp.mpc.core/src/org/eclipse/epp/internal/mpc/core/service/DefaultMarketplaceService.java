@@ -412,7 +412,7 @@ MarketplaceService {
 		return createSearchResult(marketplace.getPopular());
 	}
 
-	public SearchResult related(List<INode> basedOn, IProgressMonitor monitor) throws CoreException {
+	public SearchResult related(List<? extends INode> basedOn, IProgressMonitor monitor) throws CoreException {
 		String basedOnQuery = ""; //$NON-NLS-1$
 		if (basedOn != null && !basedOn.isEmpty()) {
 			StringBuilder sb = new StringBuilder().append('?').append(PARAM_BASED_ON_NODES).append('=');

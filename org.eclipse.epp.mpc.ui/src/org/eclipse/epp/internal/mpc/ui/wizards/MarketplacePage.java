@@ -77,6 +77,8 @@ public class MarketplacePage extends CatalogPage {
 
 	public static final String WIDGET_ID_TAB_POPULAR = "tab:popular"; //$NON-NLS-1$
 
+	public static final String WIDGET_ID_TAB_RELATED = "tab:related"; //$NON-NLS-1$
+
 	public static final String WIDGET_ID_TAB_INSTALLED = "tab:installed"; //$NON-NLS-1$
 
 	public static final String WIDGET_ID_TAB_NEWS = "tab:news"; //$NON-NLS-1$
@@ -148,7 +150,7 @@ public class MarketplacePage extends CatalogPage {
 		searchTabItem = createCatalogTab(-1, WIDGET_ID_TAB_SEARCH, currentBranding.getSearchTabName());
 		recentTabItem = createCatalogTab(-1, WIDGET_ID_TAB_RECENT, currentBranding.getRecentTabName());
 		popularTabItem = createCatalogTab(-1, WIDGET_ID_TAB_POPULAR, currentBranding.getPopularTabName());
-		relatedTabItem = createCatalogTab(-1, "tab:related", "Recommendations");
+		relatedTabItem = createCatalogTab(-1, WIDGET_ID_TAB_RELATED, currentBranding.getRelatedTabName());
 		installedTabItem = createCatalogTab(-1, WIDGET_ID_TAB_INSTALLED, Messages.MarketplacePage_installed);
 		updateNewsTab();
 
@@ -569,6 +571,12 @@ public class MarketplacePage extends CatalogPage {
 		if (hasTab) {
 			tabIndex++;
 		}
+		hasTab = branding.hasRelatedTab();
+		relatedTabItem = updateTab(relatedTabItem, WIDGET_ID_TAB_RELATED, branding.getRelatedTabName(), hasTab,
+				oldBranding.hasRelatedTab(), tabIndex);
+		if (hasTab) {
+			tabIndex++;
+		}
 
 		updateNewsTab();
 
@@ -609,9 +617,11 @@ public class MarketplacePage extends CatalogPage {
 		branding.setHasSearchTab(true);
 		branding.setHasPopularTab(true);
 		branding.setHasRecentTab(true);
+		branding.setHasRelatedTab(false);
 		branding.setSearchTabName(Messages.MarketplacePage_search);
 		branding.setPopularTabName(Messages.MarketplacePage_popular);
 		branding.setRecentTabName(Messages.MarketplacePage_recent);
+		branding.setRelatedTabName(Messages.MarketplacePage_related);
 		branding.setWizardTitle(Messages.MarketplacePage_eclipseMarketplaceSolutions);
 		return branding;
 	}

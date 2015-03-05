@@ -119,6 +119,8 @@ class Messages extends NLS {
 
 	public static String MarketplacePage_recent;
 
+	public static String MarketplacePage_related;
+
 	public static String MarketplacePage_search;
 
 	public static String MarketplacePage_selectAlternateCatalog;

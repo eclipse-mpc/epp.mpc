@@ -23,7 +23,7 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 public class MarketplaceCategory extends CatalogCategory {
 
 	public enum Contents {
-		FEATURED, POPULAR, INSTALLED, RECENT, QUERY
+		FEATURED, POPULAR, INSTALLED, RECENT, QUERY, RELATED
 	}
 
 	private List<? extends IMarket> markets;
@@ -54,7 +54,7 @@ public class MarketplaceCategory extends CatalogCategory {
 
 	/**
 	 * Indicate how many solutions matched the query, which may not be the same as the number of nodes returned.
-	 * 
+	 *
 	 * @see ISearchResult#getMatchCount()
 	 */
 	public int getMatchCount() {

@@ -35,6 +35,10 @@ public class CatalogBranding extends Identifiable implements ICatalogBranding {
 
 	private String recentTabName;
 
+	private boolean hasRelatedTab;
+
+	private String relatedTabName;
+
 	public String getWizardIcon() {
 		return wizardIcon;
 	}
@@ -89,6 +93,22 @@ public class CatalogBranding extends Identifiable implements ICatalogBranding {
 
 	public void setRecentTabName(String recentTabName) {
 		this.recentTabName = recentTabName;
+	}
+
+	public boolean hasRelatedTab() {
+		return hasRelatedTab;
+	}
+
+	public void setHasRelatedTab(boolean hasRelatedTab) {
+		this.hasRelatedTab = hasRelatedTab;
+	}
+
+	public String getRelatedTabName() {
+		return relatedTabName;
+	}
+
+	public void setRelatedTabName(String relatedTabName) {
+		this.relatedTabName = relatedTabName;
 	}
 
 	public String getWizardTitle() {

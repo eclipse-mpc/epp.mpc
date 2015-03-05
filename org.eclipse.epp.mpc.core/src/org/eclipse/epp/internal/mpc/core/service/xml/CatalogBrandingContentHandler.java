@@ -40,6 +40,9 @@ public class CatalogBrandingContentHandler extends UnmarshalContentHandler {
 		} else if (localName.equals("recenttab")) { //$NON-NLS-1$
 			model.setHasRecentTab("1".equals(attributes.getValue(NS_URI, "enabled"))); //$NON-NLS-1$//$NON-NLS-2$
 			capturingContent = true;
+		} else if (localName.equals("relatedtab") || localName.equals("recommendationtab")) { //$NON-NLS-1$
+			model.setHasRelatedTab("1".equals(attributes.getValue(NS_URI, "enabled"))); //$NON-NLS-1$//$NON-NLS-2$
+			capturingContent = true;
 		}
 	}
 
@@ -77,6 +80,12 @@ public class CatalogBrandingContentHandler extends UnmarshalContentHandler {
 		} else if (localName.equals("recenttab")) { //$NON-NLS-1$
 			if (content != null) {
 				model.setRecentTabName(content.toString());
+				content = null;
+			}
+			capturingContent = false;
+		} else if (localName.equals("relatedtab")) { //$NON-NLS-1$
+			if (content != null) {
+				model.setRelatedTabName(content.toString());
 				content = null;
 			}
 			capturingContent = false;

@@ -193,7 +193,7 @@ public class CachingMarketplaceService implements IMarketplaceService {
 
 	}
 
-	public ISearchResult related(final List<INode> basedOn, IProgressMonitor monitor) throws CoreException {
+	public ISearchResult related(final List<? extends INode> basedOn, IProgressMonitor monitor) throws CoreException {
 		String searchKey = null;
 		if (basedOn != null && !basedOn.isEmpty()) {
 			StringBuilder searchKeyBldr = new StringBuilder();
