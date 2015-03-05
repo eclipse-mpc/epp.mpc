@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assume.*;
 
 import java.net.URL;
+import java.security.cert.Certificate;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,14 +34,20 @@ import org.eclipse.epp.mpc.core.model.IIus;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
 import org.eclipse.epp.mpc.core.service.QueryHelper;
+import org.eclipse.equinox.internal.p2.core.helpers.ServiceHelper;
+import org.eclipse.equinox.internal.p2.repository.Activator;
+import org.eclipse.equinox.p2.core.IProvisioningAgent;
+import org.eclipse.equinox.p2.core.UIServices;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.ComparisonFailure;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExternalResource;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runner.RunWith;
@@ -502,6 +509,58 @@ public class SolutionCompatibilityFilterTest {
 			flattened.add(value);
 		}
 	}
+
+	@ClassRule
+	public static TestRule stageCredentialsRule = new ExternalResource() {
+		private UIServices originalService;
+
+		private UIServices credentialsService;
+
+		@Override
+		protected void before() throws Throwable {
+			IProvisioningAgent agent = (IProvisioningAgent) ServiceHelper.getService(Activator.getContext(),
+					IProvisioningAgent.SERVICE_NAME);
+			UIServices adminUIService = (UIServices) agent.getService(UIServices.SERVICE_NAME);
+			originalService = adminUIService;
+			credentialsService = new UIServices() {
+				@Override
+				public AuthenticationInfo getUsernamePassword(String location, AuthenticationInfo previousInfo) {
+					if (previousInfo == null) {
+						return getUsernamePassword(location);
+					}
+					return null;
+				}
+
+				@Override
+				public AuthenticationInfo getUsernamePassword(String location) {
+					if (location != null && location.contains("marketplace-staging")) {
+						return new AuthenticationInfo("testuser", "plaintext", false);
+					}
+					throw new AssertionError("Unexpectedly required authentication for host " + location);
+				}
+
+				@Override
+				public TrustInfo getTrustInfo(Certificate[][] untrustedChain, String[] unsignedDetail) {
+					throw new AssertionError("Unexpectedly required trustinfo");
+				}
+			};
+			agent.registerService(UIServices.SERVICE_NAME, credentialsService);
+		}
+
+		@Override
+		protected void after() {
+			UIServices originalService = this.originalService;
+			UIServices credentialsService = this.credentialsService;
+			this.originalService = null;
+			this.credentialsService = null;
+			IProvisioningAgent agent = (IProvisioningAgent) ServiceHelper.getService(Activator.getContext(),
+					IProvisioningAgent.SERVICE_NAME);
+			Object currentUIService = agent.getService(UIServices.SERVICE_NAME);
+			if (currentUIService == credentialsService && originalService != null) {
+				agent.registerService(UIServices.SERVICE_NAME, originalService);
+			}
+		}
+	};
 
 	@Rule
 	public TestRule logRule = new TestRule() {
