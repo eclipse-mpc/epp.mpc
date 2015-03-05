@@ -10,26 +10,28 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests;
 
-import org.eclipse.epp.mpc.tests.ui.catalog.CatalogDescriptorTest;
-import org.eclipse.epp.mpc.tests.ui.catalog.MarketplaceInfoSerializationTest;
-import org.eclipse.epp.mpc.tests.ui.catalog.MarketplaceInfoTest;
-import org.eclipse.epp.mpc.tests.ui.wizard.MarketplaceUrlHandlerTest;
-import org.eclipse.epp.mpc.tests.ui.wizard.SelectionModelStateSerializerTest;
+import org.eclipse.epp.mpc.tests.service.CatalogServiceTest;
+import org.eclipse.epp.mpc.tests.service.DefaultMarketplaceServiceTest;
+import org.eclipse.epp.mpc.tests.service.SolutionCompatibilityFilterTest;
+import org.eclipse.epp.mpc.tests.service.xml.UnmarshallerTest;
+import org.eclipse.epp.mpc.tests.util.TextUtilTest;
+import org.eclipse.epp.mpc.tests.util.TransportFactoryTest;
 import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * @author David Green
+ * @author Carsten Reckord
  */
-@RunWith(UISuite.class)
+@RunWith(Suite.class)
 @SuiteClasses({ //
-	SelectionModelStateSerializerTest.class, //
-	MarketplaceUrlHandlerTest.class, //
-	MarketplaceInfoTest.class, //
-	MarketplaceInfoSerializationTest.class, //
-	CatalogDescriptorTest.class //
-
+	UnmarshallerTest.class, //
+	TextUtilTest.class, //
+	TransportFactoryTest.class, //
+	CatalogServiceTest.class, //
+	DefaultMarketplaceServiceTest.class, //
+	SolutionCompatibilityFilterTest.class
 })
-public class UITests {
+public class RestTests {
 
 }

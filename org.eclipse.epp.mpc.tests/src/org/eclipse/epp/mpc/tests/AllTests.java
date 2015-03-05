@@ -19,6 +19,7 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({ //
+	RestTests.class, //
 	UITests.class, //
 	BotTests.class //
 })
