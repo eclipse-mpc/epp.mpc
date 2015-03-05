@@ -25,6 +25,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.ServiceLocator;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
 import org.eclipse.epp.mpc.core.model.IIu;
@@ -429,75 +430,6 @@ public class SolutionCompatibilityFilterTest {
 		checkSolutionData(data, testDescription, solution, release, system, compatible, null, null);
 	}
 
-	@Rule
-	public TestRule requestInfoRule = new TestRule() {
-		public Statement apply(final Statement base, final Description description) {
-			String methodName = description.getMethodName();
-			if (methodName.endsWith("Search")) {
-				return new Statement() {
-					@Override
-					public void evaluate() throws Throwable {
-						try {
-							base.evaluate();
-						} catch (AssertionError t) {
-							failedSearchQuery(t, description);
-						}
-					}
-				};
-			} else {
-				return new Statement() {
-					@Override
-					public void evaluate() throws Throwable {
-						try {
-							base.evaluate();
-						} catch (AssertionError t) {
-							failedNodeQuery(t, description);
-						}
-					}
-				};
-			}
-		}
-
-		protected void failedSearchQuery(AssertionError error, Description description) {
-		}
-
-		protected void failedNodeQuery(AssertionError error, Description description) {
-			String queryDetail = "Unexpected result in query for node " + solution.shortName() + "\n   "
-					+ marketplaceService.addMetaParameters(solution.url() + "/api/p");
-			failedWithDetails(error, queryDetail);
-		}
-
-		protected void failedWithDetails(AssertionError error, String queryDetail) throws AssertionError {
-			String message = error.getMessage() == null ? queryDetail : queryDetail + "\n\n" + error.getMessage();
-
-			String testDescription = SolutionCompatibilityFilterTest.this.testDescription;
-			if (testDescription != null) {
-				message = testDescription + "\n\n" + message;
-			}
-			throw adaptAssertionError(error, message);
-		}
-
-		protected AssertionError adaptAssertionError(AssertionError error, String message) {
-			if (message == null || message.equals(error.getMessage())) {
-				return error;
-			}
-
-			AssertionError newError;
-			if (error.getClass() == AssertionError.class) {
-				newError = new AssertionError(message);
-			} else if (error.getClass() == ComparisonFailure.class) {
-				ComparisonFailure comparisonFailure = (ComparisonFailure) error;
-				newError = new ComparisonFailure(message, comparisonFailure.getExpected(), comparisonFailure
-						.getActual());
-			} else {
-				newError = new AssertionError(message);
-				newError.initCause(error);
-			}
-			newError.setStackTrace(error.getStackTrace());
-			return newError;
-		}
-	};
-
 	private static void assertTrue(String message, boolean b, Object... details) {
 		Assert.assertTrue(format(message, flatten(b, details)), b);
 	}
@@ -570,6 +502,93 @@ public class SolutionCompatibilityFilterTest {
 			flattened.add(value);
 		}
 	}
+
+	@Rule
+	public TestRule logRule = new TestRule() {
+
+		public Statement apply(final Statement base, final Description description) {
+			return new Statement() {
+				@Override
+				public void evaluate() throws Throwable {
+					try {
+						MarketplaceClientCore.error("Starting test " + description.getDisplayName(), null);
+						base.evaluate();
+					} finally {
+						MarketplaceClientCore.error("Finished test " + description.getDisplayName(), null);
+					}
+				}
+			};
+		}
+	};
+
+	@Rule
+	public TestRule requestInfoRule = new TestRule() {
+		public Statement apply(final Statement base, final Description description) {
+			String methodName = description.getMethodName();
+			if (methodName.endsWith("Search")) {
+				return new Statement() {
+					@Override
+					public void evaluate() throws Throwable {
+						try {
+							base.evaluate();
+						} catch (AssertionError t) {
+							failedSearchQuery(t, description);
+						}
+					}
+				};
+			} else {
+				return new Statement() {
+					@Override
+					public void evaluate() throws Throwable {
+						try {
+							base.evaluate();
+						} catch (AssertionError t) {
+							failedNodeQuery(t, description);
+						}
+					}
+				};
+			}
+		}
+
+		protected void failedSearchQuery(AssertionError error, Description description) {
+		}
+
+		protected void failedNodeQuery(AssertionError error, Description description) {
+			String queryDetail = "Unexpected result in query for node " + solution.shortName() + "\n   "
+					+ marketplaceService.addMetaParameters(solution.url() + "/api/p");
+			failedWithDetails(error, queryDetail);
+		}
+
+		protected void failedWithDetails(AssertionError error, String queryDetail) throws AssertionError {
+			String message = error.getMessage() == null ? queryDetail : queryDetail + "\n\n" + error.getMessage();
+
+			String testDescription = SolutionCompatibilityFilterTest.this.testDescription;
+			if (testDescription != null) {
+				message = testDescription + "\n\n" + message;
+			}
+			throw adaptAssertionError(error, message);
+		}
+
+		protected AssertionError adaptAssertionError(AssertionError error, String message) {
+			if (message == null || message.equals(error.getMessage())) {
+				return error;
+			}
+
+			AssertionError newError;
+			if (error.getClass() == AssertionError.class) {
+				newError = new AssertionError(message);
+			} else if (error.getClass() == ComparisonFailure.class) {
+				ComparisonFailure comparisonFailure = (ComparisonFailure) error;
+				newError = new ComparisonFailure(message, comparisonFailure.getExpected(), comparisonFailure
+						.getActual());
+			} else {
+				newError = new AssertionError(message);
+				newError.initCause(error);
+			}
+			newError.setStackTrace(error.getStackTrace());
+			return newError;
+		}
+	};
 
 	@Parameter(0)
 	public Solution solution;
