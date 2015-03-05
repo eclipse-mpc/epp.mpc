@@ -10,14 +10,12 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests;
 
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
+import org.eclipse.epp.mpc.tests.service.CatalogServiceTest;
+import org.eclipse.epp.mpc.tests.service.DefaultMarketplaceServiceTest;
 import org.eclipse.epp.mpc.tests.service.SolutionCompatibilityFilterTest;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.eclipse.epp.mpc.tests.service.xml.UnmarshallerTest;
+import org.eclipse.epp.mpc.tests.util.TextUtilTest;
+import org.eclipse.epp.mpc.tests.util.TransportFactoryTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -27,42 +25,12 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({ //
-//	UnmarshallerTest.class, //
-	//	TextUtilTest.class, //
-	//	TransportFactoryTest.class, //
-	//	CatalogServiceTest.class, //
-	//	DefaultMarketplaceServiceTest.class, //
-	SolutionCompatibilityFilterTest.class
+	UnmarshallerTest.class, //
+		TextUtilTest.class, //
+		TransportFactoryTest.class, //
+		CatalogServiceTest.class, //
+		DefaultMarketplaceServiceTest.class, //
+		SolutionCompatibilityFilterTest.class
 })
 public class RestTests {
-
-	private static Timer timer;
-
-	@BeforeClass
-	public static void start() {
-		MarketplaceClientCore.error("RestTests started", null);
-		final Thread testThread = Thread.currentThread();
-		timer = new Timer("stacktrace-logger", true);
-		timer.schedule(new TimerTask() {
-
-			@Override
-			public void run() {
-				Map<Thread, StackTraceElement[]> traces = Thread.getAllStackTraces();
-				StackTraceElement[] testTrace = traces.get(testThread);
-				if (testTrace != null) {
-					Throwable dump = new Throwable();
-					dump.setStackTrace(testTrace);
-					MarketplaceClientCore.error("RestTests thread dump", dump);
-				}
-			}
-
-		}, 1000, 30000);
-	}
-
-	@AfterClass
-	public static void stop() {
-		Timer cancel = timer;
-		timer = null;
-		cancel.cancel();
-	}
 }
