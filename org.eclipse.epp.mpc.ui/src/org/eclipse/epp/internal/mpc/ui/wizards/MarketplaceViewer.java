@@ -32,6 +32,7 @@ import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory.Contents;
+import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceWizard.WizardState;
 import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IIdentifiable;
 import org.eclipse.epp.mpc.core.model.IMarket;
@@ -260,18 +261,21 @@ public class MarketplaceViewer extends CatalogViewer {
 		doQuery(null, null, null, nodes);
 	}
 
-	public void search(IMarket market, ICategory category, String query) {
-		ContentType newContentType = ContentType.SEARCH;
-		ContentType oldContentType = contentType;
-		contentType = newContentType;
-		fireContentTypeChange(oldContentType, newContentType);
+	public void search(String query) {
+		search(getQueryMarket(), getQueryCategory(), query);
+	}
 
+	public void search(IMarket market, ICategory category, String query) {
 		setFilters(market, category, query);
 		queryMarket = market;
 		queryCategory = category;
 		queryText = query;
 
-		doQuery(market, category, query, null);
+		updateContent(contentType, new Runnable() {
+			public void run() {
+				doQuery(queryMarket, queryCategory, queryText, null);
+			}
+		});
 	}
 
 	private void setFilters(IMarket market, ICategory category, String query) {
@@ -505,14 +509,22 @@ public class MarketplaceViewer extends CatalogViewer {
 	}
 
 	private void doSetContentType(final ContentType contentType) {
-		ContentType oldContentType = this.contentType;
+		updateContent(contentType, new Runnable() {
+			public void run() {
+				doQuery();
+			}
+		});
+	}
+
+	private void updateContent(final ContentType contentType, final Runnable queryCall) {
+		final ContentType oldContentType = this.contentType;
 		this.contentType = contentType;
-		fireContentTypeChange(oldContentType, contentType);
 		runUpdate(new Runnable() {
 
 			public void run() {
+				fireContentTypeChange(oldContentType, contentType);
 				setHeaderVisible(contentType == ContentType.SEARCH || contentType == ContentType.SELECTION);
-				doQuery();
+				queryCall.run();
 			}
 		});
 	}
@@ -619,6 +631,10 @@ public class MarketplaceViewer extends CatalogViewer {
 		if (getWizard().wantInitializeInitialSelection()) {
 			try {
 				getWizard().initializeInitialSelection();
+				WizardState initialState = getWizard().getInitialState();
+				if (initialState != null) {
+					getWizard().getCatalogPage().initialize(initialState);
+				}
 				catalogUpdated(false, false);
 			} catch (CoreException e) {
 				boolean wasCancelled = e.getStatus().getSeverity() == IStatus.CANCEL;

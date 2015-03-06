@@ -65,6 +65,8 @@ class Messages extends NLS {
 
 	public static String DiscoveryItem_Unknown_Installs;
 
+	public static String DiscoveryItem_UnknownProvider;
+
 	public static String FeatureSelectionWizardPage_confirmSelectedFeatures;
 
 	public static String FeatureSelectionWizardPage_confirmSelectedFeatures_description;

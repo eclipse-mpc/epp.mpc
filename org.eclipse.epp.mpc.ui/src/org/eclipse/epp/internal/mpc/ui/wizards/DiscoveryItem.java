@@ -63,7 +63,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Widget;
@@ -86,6 +85,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 	private static final String ECLIPSE_MARKETPLACE_URL = "http://marketplace.eclipse.org/"; //$NON-NLS-1$
 
 	private static final String INFO_HREF = "info"; //$NON-NLS-1$
+
+	private static final String PROVIDER_PLACEHOLDER = "@PROVIDER@"; //$NON-NLS-1$
 
 	private static final int DESCRIPTION_MARGIN_LEFT = 8;
 
@@ -642,20 +643,50 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 	}
 
 	protected void createProviderLabel(Composite parent) {
-		Link providerLabel = new Link(parent, SWT.NONE);
-		setWidgetId(providerLabel, WIDGET_ID_PROVIDER);
+		StyledText providerLink = createStyledTextLabel(parent);
+		//Link providerLink = new Link(parent, SWT.NONE);
+		setWidgetId(providerLink, WIDGET_ID_PROVIDER);
 
+		providerLink.setEditable(false);
 		GridDataFactory.fillDefaults()
 		.indent(DESCRIPTION_MARGIN_LEFT, DESCRIPTION_MARGIN_TOP)
 		.span(3, 1)
 		.align(SWT.BEGINNING, SWT.CENTER)
 		.grab(true, false)
-		.applyTo(providerLabel);
+		.applyTo(providerLink);
 		// always disabled color to make it less prominent
-		providerLabel.setForeground(resources.getColorDisabled());
+		providerLink.setForeground(resources.getColorDisabled());
 
-		providerLabel.setText(NLS.bind(Messages.DiscoveryItem_byProviderLicense, connector.getProvider(),
+		providerLink.setText(NLS.bind(Messages.DiscoveryItem_byProviderLicense, PROVIDER_PLACEHOLDER,
 				connector.getLicense()));
+		int providerPos = providerLink.getText().indexOf(PROVIDER_PLACEHOLDER);
+		if (providerPos != -1) {
+			String providerName = connector.getProvider();
+			StyleRange range = new StyleRange(0, 0, providerLink.getForeground(), null, SWT.NONE);
+			if (providerName == null) {
+				providerName = Messages.DiscoveryItem_UnknownProvider;
+				range.fontStyle = range.fontStyle | SWT.ITALIC;
+			} else {
+				range.underline = true;
+				range.underlineStyle = SWT.UNDERLINE_LINK;
+				hookLinkListener(providerLink, new LinkListener() {
+
+					@Override
+					protected void selected(String href) {
+						String searchTerm = href;
+						if (searchTerm.contains(" ")) { //$NON-NLS-1$
+							searchTerm = "\"" + searchTerm + "\""; //$NON-NLS-1$//$NON-NLS-2$
+						}
+						viewer.search(searchTerm);
+					}
+				});
+			}
+			range.start = providerPos;
+			range.length = providerName.length();
+			range.data = providerName;
+			providerLink.replaceTextRange(providerPos, PROVIDER_PLACEHOLDER.length(), providerName);
+			providerLink.replaceStyleRanges(providerPos, range.length, new StyleRange[] { range });
+		}
 	}
 
 	protected void createTagsLabel(Composite parent) {

@@ -266,10 +266,6 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				}
 			}
 		}
-		WizardState initialState = getInitialState();
-		if (initialState != null && getStartingPage() == getCatalogPage()) {
-			getCatalogPage().initialize(initialState);
-		}
 	}
 
 	boolean wantInitializeInitialSelection() {
