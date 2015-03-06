@@ -254,7 +254,8 @@ public class MarketplaceCatalog extends Catalog {
 							for (MarketplaceNodeCatalogItem item : catalogItemsThisSite) {
 								item.setUpdateAvailable(false);
 								List<String> installableUnits = item.getInstallableUnits();
-								if (!repositoryIuVersionById.keySet().containsAll(installableUnits)) {
+								if (installableUnits.isEmpty()
+										|| !repositoryIuVersionById.keySet().containsAll(installableUnits)) {
 									item.setAvailable(false);
 								} else {
 									for (String iu : installableUnits) {

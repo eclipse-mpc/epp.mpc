@@ -12,7 +12,13 @@
 package org.eclipse.epp.internal.mpc.ui;
 
 import org.eclipse.epp.mpc.ui.IMarketplaceClientService;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.viewers.DecorationOverlayIcon;
+import org.eclipse.jface.viewers.IDecoration;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -33,6 +39,11 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 	 * image registry key
 	 */
 	public static final String IU_ICON = "IU_ICON"; //$NON-NLS-1$
+
+	/**
+	 * image registry key
+	 */
+	public static final String IU_ICON_ERROR = "IU_ICON_ERROR"; //$NON-NLS-1$
 
 	/**
 	 * image registry key
@@ -91,6 +102,16 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 		imageRegistry.put(IU_ICON, imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/iu_obj.gif")); //$NON-NLS-1$
 		imageRegistry.put(IU_ICON_UPDATE, imageDescriptorFromPlugin(getBundle().getSymbolicName(),
 				"icons/iu_update_obj.gif")); //$NON-NLS-1$
+		{
+			ImageDescriptor errorOverlay = PlatformUI.getWorkbench()
+					.getSharedImages()
+					.getImageDescriptor(ISharedImages.IMG_DEC_FIELD_ERROR);
+			Image iuImage = imageRegistry.get(IU_ICON);
+			DecorationOverlayIcon iuErrorIcon = new DecorationOverlayIcon(iuImage, errorOverlay,
+					IDecoration.BOTTOM_RIGHT);
+			imageRegistry.put(IU_ICON_ERROR, iuErrorIcon);
+		}
+
 		imageRegistry.put(NEWS_ICON_UPDATE,
 				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/news_update.gif")); //$NON-NLS-1$
 		imageRegistry.put(ITEM_ICON_STAR, imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/star.png")); //$NON-NLS-1$

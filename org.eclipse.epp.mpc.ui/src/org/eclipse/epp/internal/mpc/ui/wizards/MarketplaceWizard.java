@@ -73,10 +73,22 @@ import org.eclipse.equinox.p2.operations.RemediationOperation;
 import org.eclipse.equinox.p2.operations.UninstallOperation;
 import org.eclipse.equinox.p2.ui.AcceptLicensesWizardPage;
 import org.eclipse.equinox.p2.ui.ProvisioningUI;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
@@ -260,12 +272,83 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				// user canceled
 				throw new CoreException(Status.CANCEL_STATUS);
 			}
-			for (Entry<CatalogItem, Operation> entry : getSelectionModel().getItemToSelectedOperation().entrySet()) {
+			List<Entry<CatalogItem, Operation>> itemToSelectedOperation = new ArrayList<Entry<CatalogItem, Operation>>(
+					getSelectionModel().getItemToSelectedOperation().entrySet());
+			final List<CatalogItem> noninstallableItems = new ArrayList<CatalogItem>();
+			for (Entry<CatalogItem, Operation> entry : itemToSelectedOperation) {
 				if (entry.getValue() != Operation.NONE) {
-					entry.getKey().setSelected(true);
+					boolean unavailableInstall = Boolean.FALSE.equals(entry.getKey().getAvailable())
+							&& (entry.getValue() == Operation.INSTALL || entry.getValue() == Operation.UPDATE);
+					if (unavailableInstall) {
+						getSelectionModel().select(entry.getKey(), Operation.NONE);
+						noninstallableItems.add(entry.getKey());
+					} else {
+						entry.getKey().setSelected(true);
+					}
 				}
 			}
+			if (!noninstallableItems.isEmpty()) {
+				notifyNonInstallableItems(noninstallableItems);
+			}
 		}
+	}
+
+	protected void notifyNonInstallableItems(final List<CatalogItem> noninstallableItems) {
+		MessageDialog dialog = new MessageDialog(getShell(), Messages.MarketplaceWizard_UnableToInstallSolutions, null, Messages.MarketplaceWizard_IncompatibleSolutionsMessage, MessageDialog.ERROR,
+				new String[] { IDialogConstants.OK_LABEL }, 0) {
+			@Override
+			protected Control createCustomArea(Composite parent) {
+				parent.setLayout(new GridLayout());
+				TableViewer tableViewer = new TableViewer(parent, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL
+						| SWT.BORDER);
+				tableViewer.setLabelProvider(createLabelProvider());
+				tableViewer.setContentProvider(createContentProvider());
+				tableViewer.setInput(noninstallableItems);
+				Control tableControl = tableViewer.getControl();
+				GridDataFactory.fillDefaults()
+				.grab(true, true)
+				.align(SWT.FILL, SWT.FILL)
+				.hint(SWT.DEFAULT,
+						Math.max(40,
+								Math.min(120, tableControl.computeSize(SWT.DEFAULT, SWT.DEFAULT).y)))
+								.applyTo(tableControl);
+				return tableControl;
+			}
+
+			private LabelProvider createLabelProvider() {
+				return new LabelProvider() {
+					@Override
+					public String getText(Object element) {
+						//TODO it would be great to know the compatible version range
+						//we could show that with an IStyledLabelProvider behind the name
+						return ((CatalogItem) element).getName();
+					}
+
+					@Override
+					public Image getImage(Object element) {
+						return MarketplaceClientUiPlugin.getInstance()
+								.getImageRegistry()
+								.get(MarketplaceClientUiPlugin.IU_ICON_ERROR);
+					}
+				};
+			}
+
+			private IStructuredContentProvider createContentProvider() {
+				return new IStructuredContentProvider() {
+
+					public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+					}
+
+					public void dispose() {
+					}
+
+					public Object[] getElements(Object inputElement) {
+						return ((List<?>) inputElement).toArray();
+					}
+				};
+			}
+		};
+		dialog.open();
 	}
 
 	boolean wantInitializeInitialSelection() {

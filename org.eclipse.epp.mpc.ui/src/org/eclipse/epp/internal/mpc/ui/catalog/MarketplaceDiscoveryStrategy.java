@@ -205,6 +205,10 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 								// don't use malformed URLs
 							}
 						}
+						if (catalogItem.getInstallableUnits() == null || catalogItem.getInstallableUnits().isEmpty()
+								|| catalogItem.getSiteUrl() == null) {
+							catalogItem.setAvailable(false);
+						}
 						if (node.getBody() != null || node.getScreenshot() != null) {
 							final Overview overview = new Overview();
 							overview.setItem(catalogItem);

@@ -293,9 +293,15 @@ public class FeatureSelectionWizardPage extends WizardPage {
 	}
 
 	private void updateFeatures() {
-		viewer.setInput(getWizard().getSelectionModel());
+		SelectionModel selectionModel = getWizard().getSelectionModel();
+		Set<CatalogItem> selectedCatalogItems = selectionModel.getSelectedCatalogItems();
+		if (selectedCatalogItems.isEmpty()) {
+			showPreviousPage();
+			return;
+		}
+		viewer.setInput(selectionModel);
 		ResolveFeatureNamesOperation operation = new ResolveFeatureNamesOperation(new ArrayList<CatalogItem>(
-				getWizard().getSelectionModel().getItemToSelectedOperation().keySet())) {
+				selectionModel.getItemToSelectedOperation().keySet())) {
 
 			Display display = getControl().getDisplay();
 
@@ -331,6 +337,10 @@ public class FeatureSelectionWizardPage extends WizardPage {
 			// canceled
 		}
 		//maybeUpdateProfileChangeOperation();
+	}
+
+	protected void showPreviousPage() {
+		((MarketplaceWizardDialog) getWizard().getContainer()).backPressed();
 	}
 
 	private void maybeUpdateProfileChangeOperation() {
