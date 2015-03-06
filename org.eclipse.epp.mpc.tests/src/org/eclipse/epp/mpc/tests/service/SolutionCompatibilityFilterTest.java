@@ -731,8 +731,8 @@ public class SolutionCompatibilityFilterTest {
 
 	@Test
 	public void testCompatibleInstallableNode() throws CoreException {
-		assumeTrue(compatible);
-		assumeTrue(solution.installable());
+		assumeTrue("Skipping test - this solution and Eclipse/OS are incompatible", compatible);
+		assumeTrue("Skipping test - this solution is not installable", solution.installable());
 		INode node = queryNode();
 		String updateurl = node.getUpdateurl();
 		assertThat("Node {1} has no update url", updateurl, not(isEmptyOrNullString()), node);
@@ -760,8 +760,8 @@ public class SolutionCompatibilityFilterTest {
 
 	@Test
 	public void testCompatibleNonInstallableNode() throws CoreException {
-		assumeTrue(compatible);
-		assumeFalse(solution.installable());
+		assumeTrue("Skipping test - this solution and Eclipse/OS are incompatible", compatible);
+		assumeFalse("Skipping test - this solution is installable", solution.installable());
 		INode node = queryNode();
 		String updateurl = node.getUpdateurl();
 		assertNull("Uninstallable node {1} should not have an update url, but has {0}", updateurl, node);
@@ -771,7 +771,7 @@ public class SolutionCompatibilityFilterTest {
 
 	@Test
 	public void testIncompatibleNode() throws CoreException {
-		assumeFalse(compatible);
+		assumeFalse("Skipping test - this solution and Eclipse/OS are compatible", compatible);
 		INode node = queryNode();
 		String updateurl = node.getUpdateurl();
 		assertNull("Incompatible node {1} should not have an update url, but has {0}", updateurl, node);
@@ -782,7 +782,7 @@ public class SolutionCompatibilityFilterTest {
 	@Test
 	@Ignore
 	public void testCompatibleSearchResult() throws CoreException {
-		assumeTrue(compatible);
+		assumeTrue("Skipping test - this solution and Eclipse/OS are incompatible", compatible);
 		INode foundNode = searchForNode();
 		assertNotNull("Compatible node {1} not found in search", foundNode, solution);
 	}
@@ -790,7 +790,7 @@ public class SolutionCompatibilityFilterTest {
 	@Test
 	@Ignore
 	public void testIncompatibleSearchResult() throws CoreException {
-		assumeFalse(compatible);
+		assumeFalse("Skipping test - this solution and Eclipse/OS are compatible", compatible);
 		INode foundNode = searchForNode();
 		assertNull("Incompatible node {0} found in search", foundNode);
 	}
