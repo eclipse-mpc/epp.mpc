@@ -730,6 +730,18 @@ public class SolutionCompatibilityFilterTest {
 	}
 
 	@Test
+	public void testNodeQuery() throws CoreException {
+		if (compatible) {
+			if (solution.installable()) {
+				testCompatibleInstallableNode();
+			} else {
+				testCompatibleNonInstallableNode();
+			}
+		} else {
+			testIncompatibleNode();
+		}
+	}
+
 	public void testCompatibleInstallableNode() throws CoreException {
 		assumeTrue("Skipping test - this solution and Eclipse/OS are incompatible", compatible);
 		assumeTrue("Skipping test - this solution is not installable", solution.installable());
@@ -758,7 +770,6 @@ public class SolutionCompatibilityFilterTest {
 		}
 	}
 
-	@Test
 	public void testCompatibleNonInstallableNode() throws CoreException {
 		assumeTrue("Skipping test - this solution and Eclipse/OS are incompatible", compatible);
 		assumeFalse("Skipping test - this solution is installable", solution.installable());
@@ -769,7 +780,6 @@ public class SolutionCompatibilityFilterTest {
 		assertNull("Uninstallable node {1} should not have an <ius> element", ius, node);
 	}
 
-	@Test
 	public void testIncompatibleNode() throws CoreException {
 		assumeFalse("Skipping test - this solution and Eclipse/OS are compatible", compatible);
 		INode node = queryNode();
@@ -781,6 +791,14 @@ public class SolutionCompatibilityFilterTest {
 
 	@Test
 	@Ignore
+	public void testSearchResult() throws CoreException {
+		if (compatible) {
+			testCompatibleSearchResult();
+		} else {
+			testIncompatibleSearchResult();
+		}
+	}
+
 	public void testCompatibleSearchResult() throws CoreException {
 		assumeTrue("Skipping test - this solution and Eclipse/OS are incompatible", compatible);
 		INode foundNode = searchForNode();
