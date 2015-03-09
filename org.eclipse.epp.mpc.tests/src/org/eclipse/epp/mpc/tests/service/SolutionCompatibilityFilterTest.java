@@ -805,8 +805,6 @@ public class SolutionCompatibilityFilterTest {
 		assertNotNull("Compatible node {1} not found in search", foundNode, solution);
 	}
 
-	@Test
-	@Ignore
 	public void testIncompatibleSearchResult() throws CoreException {
 		assumeFalse("Skipping test - this solution and Eclipse/OS are compatible", compatible);
 		INode foundNode = searchForNode();
