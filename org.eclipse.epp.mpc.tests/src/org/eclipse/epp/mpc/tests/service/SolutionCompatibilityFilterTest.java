@@ -44,7 +44,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.ComparisonFailure;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExternalResource;
@@ -716,9 +715,9 @@ public class SolutionCompatibilityFilterTest {
 	}
 
 	protected void assertSearchResultSanity(ISearchResult result) {
-		assertNotNull(result);
-		assertNotNull(result.getNodes());
-		assertNotNull(result.getMatchCount());
+		assertNotNull("Search result is null", result);
+		assertNotNull("Result node list is null (internal error)", result.getNodes());
+		assertNotNull("Result match count is null ('count' attribute missing)", result.getMatchCount());
 		assertTrue("Total search result count {1} has to be at least the number of returned nodes {2}", result
 				.getMatchCount() >= result.getNodes().size(), result.getMatchCount(), result.getNodes().size());
 
@@ -790,7 +789,6 @@ public class SolutionCompatibilityFilterTest {
 	}
 
 	@Test
-	@Ignore
 	public void testSearchResult() throws CoreException {
 		if (compatible) {
 			testCompatibleSearchResult();
