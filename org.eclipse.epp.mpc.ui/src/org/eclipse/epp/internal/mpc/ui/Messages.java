@@ -27,6 +27,8 @@ class Messages extends NLS {
 
 	public static String MarketplaceClientUi_unexpectedException_reason;
 
+	public static String MarketplaceClientUi_notFound;
+
 	public static String MarketplaceClientUi_unknownHost;
 
 	public static String MarketplaceClientUi_connectionProblem;

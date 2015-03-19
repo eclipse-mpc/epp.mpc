@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui;
 
+import java.io.FileNotFoundException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.ConnectException;
 import java.net.NoRouteToHostException;
@@ -139,6 +140,12 @@ public class MarketplaceClientUi {
 	public static IStatus computeWellknownProblemStatus(Throwable exception) {
 		IStatus status = null;
 		while (exception != null) {
+			if (exception instanceof FileNotFoundException) {
+				// exception message is the URL
+				status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
+						Messages.MarketplaceClientUi_notFound, exception.getMessage()), exception);
+				break;
+			}
 			// name resolution didn't work - possibly offline...
 			if (exception instanceof UnknownHostException) {
 				status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
