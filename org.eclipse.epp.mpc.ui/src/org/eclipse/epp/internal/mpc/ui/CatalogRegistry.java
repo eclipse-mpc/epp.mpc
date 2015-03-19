@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.mpc.core.model.ICatalogBranding;
 import org.eclipse.epp.mpc.core.model.INews;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
@@ -93,6 +94,12 @@ public class CatalogRegistry {
 		if (url == null || url.length() == 0) {
 			return null;
 		}
+		for (CatalogDescriptor catalogDescriptor : catalogDescriptors) {
+			if (url.startsWith(catalogDescriptor.getUrl().toExternalForm())) {
+				return catalogDescriptor;
+			}
+		}
+		url = URLUtil.toggleHttps(url);
 		for (CatalogDescriptor catalogDescriptor : catalogDescriptors) {
 			if (url.startsWith(catalogDescriptor.getUrl().toExternalForm())) {
 				return catalogDescriptor;

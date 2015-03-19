@@ -77,4 +77,13 @@ public class URLUtil {
 	private static String encodeQuery(String query) {
 		return query == null ? null : query.replace(" ", "+"); //$NON-NLS-1$//$NON-NLS-2$
 	}
+
+	public static String toggleHttps(String url) {
+		if (url.startsWith("http:")) { //$NON-NLS-1$
+			url = "https:" + url.substring("http:".length()); //$NON-NLS-1$ //$NON-NLS-2$
+		} else if (url.startsWith("https:")) { //$NON-NLS-1$
+			url = "http:" + url.substring("https:".length()); //$NON-NLS-1$//$NON-NLS-2$
+		}
+		return url;
+	}
 }
