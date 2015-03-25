@@ -21,6 +21,8 @@
             <configuration>
                <excludes>
                   <plugin id="org.eclipse.epp.mpc.help.ui" />
+                  <plugin id="org.apache.httpcomponents.httpclient"/>
+                  <plugin id="org.apache.httpcomponents.httpcore"/>
                </excludes>
             </configuration>
          </plugin>
