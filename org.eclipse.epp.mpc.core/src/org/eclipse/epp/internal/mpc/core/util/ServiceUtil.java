@@ -21,21 +21,22 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
 
 /**
  * @author Carsten Reckord
  */
 public class ServiceUtil {
-   
-   /**
-    * Set the provided priority on a dictionary for an OSGi service registration. If the dictionary is null,
-    * a new one will be created and returned.
-    * 
-    * @param priority the service priority
-    * @param dict the dictionary to change or null
-    * @return the provided dictionary, or a new one if the provided was null, containing a service ranking entry
-    * @see Constants#SERVICE_RANKING
-    */
+
+	/**
+	 * Set the provided priority on a dictionary for an OSGi service registration. If the dictionary is null,
+	 * a new one will be created and returned.
+	 *
+	 * @param priority the service priority
+	 * @param dict the dictionary to change or null
+	 * @return the provided dictionary, or a new one if the provided was null, containing a service ranking entry
+	 * @see Constants#SERVICE_RANKING
+	 */
 	public static Dictionary<String, Object> serviceRanking(int priority, Dictionary<String, Object> dict) {
 		if (dict == null) {
 			dict = new Hashtable<String, Object>();
@@ -44,14 +45,34 @@ public class ServiceUtil {
 		return dict;
 	}
 
+	public static int getServiceRanking(ServiceReference<?> reference) {
+		if (reference == null) {
+			return 0;
+		}
+		Object ranking = reference.getProperty(Constants.SERVICE_RANKING);
+		if (ranking instanceof Integer) {
+			return (Integer) ranking;
+		}
+		return 0;
+	}
+
+	public static Dictionary<String, Object> higherServiceRanking(ServiceReference<?> reference,
+			Dictionary<String, Object> dict) {
+		int ranking = getServiceRanking(reference);
+		if (reference != null) {
+			ranking++;
+		}
+		return serviceRanking(ranking, dict);
+	}
+
 	/**
 	 * Get a URL from a property map for the given key. If no entry exists for the key,
 	 * or the value is not a string or it can't be parsed into an URL, the default value
 	 * is returned.
-	 * 
+	 *
 	 * @param properties the map to extract a URL from
 	 * @param key the key to search under
-	 * @param defaultValue the default value returned if the entry does not exist or can't 
+	 * @param defaultValue the default value returned if the entry does not exist or can't
 	 * 	be converted to a URL
 	 * @return an URL matching the string value found in the map under the given key, or the default value.
 	 */
@@ -77,7 +98,7 @@ public class ServiceUtil {
 	/**
 	 * Parse the given string to an URL. If the string can't be parsed, an error is logged
 	 * and null is returned
-	 * 
+	 *
 	 * @param url the url string to parse
 	 * @return the value as an URL, or null if there was a parse error
 	 */

@@ -10,17 +10,23 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core;
 
+import java.util.Dictionary;
+
+import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
+import org.eclipse.epp.mpc.core.service.ICatalogService;
+import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
 import org.eclipse.epp.mpc.core.service.IMarketplaceUnmarshaller;
 import org.eclipse.epp.mpc.core.service.ITransportFactory;
 import org.eclipse.epp.mpc.core.service.ServiceHelper;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * @author Carsten Reckord
  */
-class ServiceHelperImpl extends ServiceHelper {
+public class ServiceHelperImpl extends ServiceHelper {
 
 	private ServiceTracker<IMarketplaceServiceLocator, IMarketplaceServiceLocator> locatorServiceTracker;
 
@@ -28,7 +34,10 @@ class ServiceHelperImpl extends ServiceHelper {
 
 	private ServiceTracker<IMarketplaceUnmarshaller, IMarketplaceUnmarshaller> unmarshallerTracker;
 
+	private BundleContext context;
+
 	void startTracking(BundleContext context) {
+		this.context = context;
 		locatorServiceTracker = new ServiceTracker<IMarketplaceServiceLocator, IMarketplaceServiceLocator>(context,
 				IMarketplaceServiceLocator.class, null);
 		locatorServiceTracker.open(true);
@@ -43,6 +52,7 @@ class ServiceHelperImpl extends ServiceHelper {
 	}
 
 	void stopTracking(BundleContext context) {
+		this.context = null;
 		if (locatorServiceTracker != null) {
 			locatorServiceTracker.close();
 			locatorServiceTracker = null;
@@ -70,5 +80,34 @@ class ServiceHelperImpl extends ServiceHelper {
 	@Override
 	protected ITransportFactory doGetTransportFactory() {
 		return transportFactoryTracker == null ? null : transportFactoryTracker.getService();
+	}
+
+	public ServiceRegistration<IMarketplaceServiceLocator> registerMarketplaceServiceLocator(
+			IMarketplaceServiceLocator marketplaceServiceLocator) {
+		return context.registerService(IMarketplaceServiceLocator.class, marketplaceServiceLocator,
+				ServiceUtil.higherServiceRanking(locatorServiceTracker.getServiceReference(), null));
+	}
+
+	public ServiceRegistration<IMarketplaceUnmarshaller> registerMarketplaceUnmarshaller(
+			IMarketplaceUnmarshaller unmarshaller) {
+		return context.registerService(IMarketplaceUnmarshaller.class, unmarshaller,
+				ServiceUtil.higherServiceRanking(unmarshallerTracker.getServiceReference(), null));
+	}
+
+	public ServiceRegistration<ITransportFactory> registerTransportFactory(ITransportFactory transportFactory) {
+		return context.registerService(ITransportFactory.class, transportFactory,
+				ServiceUtil.higherServiceRanking(transportFactoryTracker.getServiceReference(), null));
+	}
+
+	public ServiceRegistration<IMarketplaceService> registerMarketplaceService(String baseUrl,
+			IMarketplaceService marketplaceService) {
+		Dictionary<String, Object> properties = ServiceUtil.serviceRanking(Integer.MAX_VALUE, null);
+		properties.put(IMarketplaceService.BASE_URL, baseUrl);
+		return context.registerService(IMarketplaceService.class, marketplaceService, properties);
+	}
+
+	public ServiceRegistration<ICatalogService> registerCatalogService(ICatalogService catalogService) {
+		return context.registerService(ICatalogService.class, catalogService,
+				ServiceUtil.serviceRanking(Integer.MAX_VALUE, null));
 	}
 }

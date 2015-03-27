@@ -13,27 +13,40 @@ package org.eclipse.epp.mpc.tests.service;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assume.*;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.security.cert.Certificate;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
+import org.eclipse.epp.internal.mpc.core.MarketplaceClientCorePlugin;
 import org.eclipse.epp.internal.mpc.core.ServiceLocator;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
 import org.eclipse.epp.mpc.core.model.IIu;
 import org.eclipse.epp.mpc.core.model.IIus;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
+import org.eclipse.epp.mpc.core.service.IMarketplaceUnmarshaller;
 import org.eclipse.epp.mpc.core.service.QueryHelper;
+import org.eclipse.epp.mpc.core.service.UnmarshalException;
 import org.eclipse.equinox.internal.p2.core.helpers.ServiceHelper;
 import org.eclipse.equinox.internal.p2.repository.Activator;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
@@ -48,12 +61,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExternalResource;
 import org.junit.rules.TestRule;
+import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import org.junit.runners.model.Statement;
+import org.osgi.framework.ServiceRegistration;
 
 @RunWith(Parameterized.class)
 public class SolutionCompatibilityFilterTest {
@@ -562,6 +577,133 @@ public class SolutionCompatibilityFilterTest {
 	};
 
 	@Rule
+	public final TestRule xmlDumpRule = new TestWatcher() {
+
+		private ServiceRegistration<IMarketplaceUnmarshaller> unmarshallerRegistration;
+
+		@Override
+		protected void starting(final Description description) {
+			final IMarketplaceUnmarshaller marketplaceUnmarshaller = org.eclipse.epp.mpc.core.service.ServiceHelper
+					.getMarketplaceUnmarshaller();
+			unmarshallerRegistration = MarketplaceClientCorePlugin.getDefault().getServiceHelper()
+					.registerMarketplaceUnmarshaller(
+					new IMarketplaceUnmarshaller() {
+
+						public <T> T unmarshal(InputStream in, Class<T> type, IProgressMonitor monitor)
+								throws UnmarshalException, IOException {
+							byte[] input = capture(in);
+							in = null;
+							try {
+								return marketplaceUnmarshaller
+										.unmarshal(new ByteArrayInputStream(input), type, monitor);
+							} catch (UnmarshalException ex) {
+								dump(description, ex, input);
+								throw ex;
+							} catch (IOException ex) {
+								dump(description, ex, input);
+								throw ex;
+							} catch (RuntimeException ex) {
+								dump(description, ex, input);
+								throw ex;
+							}
+						}
+
+						private byte[] capture(InputStream in) throws IOException {
+							try {
+								ByteArrayOutputStream dump = new ByteArrayOutputStream(32768);
+								byte[] buffer = new byte[8192];
+								for (int read = -1; (read = in.read(buffer)) != -1;) {
+									dump.write(buffer, 0, read);
+								}
+								byte[] input = dump.toByteArray();
+								return input;
+							} finally {
+								in.close();
+							}
+						}
+					});
+		}
+
+		@Override
+		protected void finished(Description description) {
+			if (unmarshallerRegistration != null) {
+				unmarshallerRegistration.unregister();
+			}
+		}
+
+		void dump(Description description, Throwable ex, byte[] input) {
+			String fileName = description.getDisplayName() + "_"
+					+ new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
+			fileName = safeFileName(fileName);
+			File outputDir = findOutputDir();
+			File dumpFile = new File(outputDir, fileName + ".xml");
+			for (int i = 1; dumpFile.exists(); i++) {
+				dumpFile = new File(outputDir, fileName + "_" + i + ".xml");
+			}
+			failed(new AssertionError("Dumping XML stream to " + dumpFile.getAbsolutePath()), description);
+			FileOutputStream os = null;
+			try {
+				os = new FileOutputStream(dumpFile);
+				os.write(input);
+			} catch (Exception e) {
+				failed(e, description);
+			} finally {
+				if (os != null) {
+					try {
+						os.close();
+					} catch (IOException e) {
+						failed(e, description);
+					}
+				}
+			}
+		}
+
+		private File findOutputDir() {
+			File targetDir = new File("target");
+			if (targetDir.isDirectory()) {
+				File sureFireDir = new File(targetDir, "surefire-reports");
+				if (sureFireDir.isDirectory()) {
+					return sureFireDir.getAbsoluteFile();
+				}
+				return targetDir.getAbsoluteFile();
+			}
+			URL resource = SolutionCompatibilityFilterTest.class.getResource("SolutionCompatibilityFilterTest.class");
+			if (resource != null) {
+				try {
+					resource = FileLocator.resolve(resource);
+					if ("file".equalsIgnoreCase(resource.getProtocol())) {
+						for (File file = new File(resource.toURI()); file != null && file.exists(); file = file
+								.getParentFile()) {
+							targetDir = new File(file, "target");
+							if (targetDir.isDirectory()) {
+								File sureFireDir = new File(targetDir, "surefire-reports");
+								if (sureFireDir.isDirectory()) {
+									return sureFireDir.getAbsoluteFile();
+								}
+								return targetDir.getAbsoluteFile();
+							}
+						}
+					}
+				} catch (Exception e) {
+				}
+			}
+			return new File(java.lang.System.getProperty("user.dir"));
+		}
+
+		private String safeFileName(String text) {
+			char[] fileName = text.toCharArray();
+			for (int i = 0; i < fileName.length; i++) {
+				char c = fileName[i];
+				if (!((c >= 48 && c <= 57 /* [0-9] */) || (c >= 65 && c <= 90 /* [A-Z] */)
+						|| (c >= 97 && c <= 122 /* [a-z] */) || c == 45 /* - */|| c == 46 /* . */|| c == 95 /* _ */)) {
+					fileName[i] = '_';
+				}
+			}
+			return new String(fileName);
+		}
+	};
+
+	@Rule
 	public TestRule logRule = new TestRule() {
 
 		public Statement apply(final Statement base, final Description description) {
@@ -569,11 +711,16 @@ public class SolutionCompatibilityFilterTest {
 				@Override
 				public void evaluate() throws Throwable {
 					try {
-						MarketplaceClientCore.error("Starting test " + description.getDisplayName(), null);
+						log("Starting test " + description.getDisplayName());
 						base.evaluate();
 					} finally {
-						MarketplaceClientCore.error("Finished test " + description.getDisplayName(), null);
+						log("Finished test " + description.getDisplayName());
 					}
+				}
+
+				private void log(String message) {
+					MarketplaceClientCore.error(message, null);
+					java.lang.System.out.println(message);
 				}
 			};
 		}
