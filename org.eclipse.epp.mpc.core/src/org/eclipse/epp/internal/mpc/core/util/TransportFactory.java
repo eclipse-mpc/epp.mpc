@@ -18,6 +18,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.http.NoHttpResponseException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -138,11 +139,14 @@ public abstract class TransportFactory implements ITransportFactory {
 
 
 	protected static void handleServiceUnavailable(CoreException e) throws ServiceUnavailableException {
-		if (e.getStatus().getCode() == 1002) {
+		if (e.getStatus().getCode() == 1002) { //failed to read
 			Throwable cause = e.getCause();
-			if (cause != null && cause.getMessage() != null && cause.getMessage().indexOf("503") != -1) { //$NON-NLS-1$
-				throw new ServiceUnavailableException(new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID, 503,
-						Messages.DefaultMarketplaceService_serviceUnavailable503, e));
+			if (cause != null) {
+				if (cause instanceof NoHttpResponseException || cause.getMessage() != null
+						&& cause.getMessage().indexOf("503") != -1) { //$NON-NLS-1$
+					throw new ServiceUnavailableException(new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID,
+							503, Messages.DefaultMarketplaceService_serviceUnavailable503, e));
+				}
 			}
 		}
 	}
