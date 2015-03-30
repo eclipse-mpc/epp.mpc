@@ -636,9 +636,9 @@ public class SolutionCompatibilityFilterTest {
 					+ new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
 			fileName = safeFileName(fileName);
 			File outputDir = findOutputDir();
-			File dumpFile = new File(outputDir, fileName + ".xml");
+			File dumpFile = new File(outputDir, fileName + "-response.dump");
 			for (int i = 1; dumpFile.exists(); i++) {
-				dumpFile = new File(outputDir, fileName + "_" + i + ".xml");
+				dumpFile = new File(outputDir, fileName + "_" + i + "-response.dump");
 			}
 			failed(new AssertionError("Dumping XML stream to " + dumpFile.getAbsolutePath()), description);
 			FileOutputStream os = null;
