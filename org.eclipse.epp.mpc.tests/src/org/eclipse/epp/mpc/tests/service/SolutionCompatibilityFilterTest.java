@@ -94,21 +94,26 @@ public class SolutionCompatibilityFilterTest {
 		}
 	}
 
-	public static enum EclipseRelease {
-		UNKNOWN(null, null, null), //
-		INDIGO("3.7.0.v201106131736", "3.7.0.v20110110", null), //
-		JUNO_3_8("3.8.0.v201206081200", "3.8.0.v20120521-2346", null), //
-		JUNO_3_8_WITH_PLATFORM(JUNO_3_8.productVersion(), JUNO_3_8.runtimeVersion(), "3.8.0.v201206081200"), //
-		JUNO("4.2.0.v201206081400", "3.8.0.v20120521-2346", null), //
-		JUNO_WITH_PLATFORM(JUNO.productVersion(), JUNO.runtimeVersion(), "4.2.0.v201206081400"), //
-		JUNO_SR2("4.2.2.v201302041200", "3.8.0.v20120521-2346", "4.2.2.v201302041200"), //
-		KEPLER("4.3.0.v20130605-2000", "3.9.0.v20130326-1255", "4.3.0.v20130605-2000"), //
-		KEPLER_SR2("4.3.2.v20140221-1700", "3.9.100.v20131218-1515", "4.3.2.v20140221-1700"), //
-		LUNA("4.4.0.v20140606-1215", "3.10.0.v20140318-2214", "4.4.0.v20140606-1215"), //
-		LUNA_SR2("4.4.2.v20150204-1700", "3.10.0.v20140318-2214", "4.4.2.v20150204-1700"), //
-		MARS("4.5.0.v20150203-1300", "3.10.0.v20150112-1422", "4.5.0.v20150203-1300");
+	private static final String JAVA_PRODUCT_ID = "epp.package.java";
 
-		private static final String PRODUCT_ID = "org.eclipse.sdk.ide";
+	private static final String SDK_PRODUCT_ID = "org.eclipse.sdk.ide";
+
+	public static enum EclipseRelease {
+		UNKNOWN(null, null, null, null), //
+		INDIGO(JAVA_PRODUCT_ID, "1.4.2.20120131-1457", "3.7.0.v20110110", null), //
+		JUNO_3_8(SDK_PRODUCT_ID, "3.8.0.v201206081200", "3.8.0.v20120521-2346", null), //
+		JUNO_3_8_WITH_PLATFORM(SDK_PRODUCT_ID, JUNO_3_8.productVersion(), JUNO_3_8.runtimeVersion(),
+				"3.8.0.v201206081200"), //
+				JUNO(JAVA_PRODUCT_ID, "1.5.0.20120131-1544", "3.8.0.v20120521-2346", null), //
+				JUNO_WITH_PLATFORM(JAVA_PRODUCT_ID, JUNO.productVersion(), JUNO.runtimeVersion(), "4.2.0.v201206081400"), //
+				JUNO_SR2(JAVA_PRODUCT_ID, "1.5.2.20130110-1126", "3.8.0.v20120521-2346", "4.2.2.v201302041200"), //
+				KEPLER(JAVA_PRODUCT_ID, "2.0.0.20130613-0530", "3.9.0.v20130326-1255", "4.3.0.v20130605-2000"), //
+				KEPLER_SR2(JAVA_PRODUCT_ID, "2.0.2.20140224-0000", "3.9.100.v20131218-1515", "4.3.2.v20140221-1700"), //
+				LUNA(JAVA_PRODUCT_ID, "4.4.0.20140612-0500", "3.10.0.v20140318-2214", "4.4.0.v20140606-1215"), //
+				LUNA_SR2(JAVA_PRODUCT_ID, "4.4.2.20150219-0708", "3.10.0.v20140318-2214", "4.4.2.v20150204-1700"), //
+				MARS(JAVA_PRODUCT_ID, "4.5.0.20150326-0704", "3.10.0.v20150112-1422", "4.5.0.v20150203-1300");
+
+		private final String productId;
 
 		private final String productVersion;
 
@@ -116,10 +121,19 @@ public class SolutionCompatibilityFilterTest {
 
 		private final String platformVersion;
 
-		private EclipseRelease(String productVersion, String runtimeVersion, String platformVersion) {
+		private EclipseRelease(String productId, String productVersion, String runtimeVersion, String platformVersion) {
+			this.productId = productId;
 			this.productVersion = productVersion;
 			this.runtimeVersion = runtimeVersion;
 			this.platformVersion = platformVersion;
+		}
+
+		private EclipseRelease(String productVersion, String runtimeVersion, String platformVersion) {
+			this(JAVA_PRODUCT_ID, productVersion, runtimeVersion, platformVersion);
+		}
+
+		public String productId() {
+			return productId;
 		}
 
 		public String productVersion() {
@@ -139,7 +153,7 @@ public class SolutionCompatibilityFilterTest {
 				metaParams.remove(DefaultMarketplaceService.META_PARAM_PRODUCT);
 				metaParams.remove(DefaultMarketplaceService.META_PARAM_PRODUCT_VERSION);
 			} else {
-				metaParams.put(DefaultMarketplaceService.META_PARAM_PRODUCT, PRODUCT_ID);
+				metaParams.put(DefaultMarketplaceService.META_PARAM_PRODUCT, productId);
 				metaParams.put(DefaultMarketplaceService.META_PARAM_PRODUCT_VERSION, productVersion);
 			}
 			if (runtimeVersion == null) {
@@ -276,25 +290,32 @@ public class SolutionCompatibilityFilterTest {
 		checkSolutionReleaseBounds(data, Solution.KEPLER);
 		checkSolutionReleaseBounds(data, Solution.LUNA);
 		checkSolutionReleaseBounds(data, Solution.MARS);
+
+		//bug 466627
+		checkSolutionWithEclipse(data, "Solution should not be installable in an older release", Solution.MARS,
+				EclipseRelease.INDIGO, null);
+		checkSolutionWithEclipse(data, "Solution should not be installable in an older release", Solution.MARS,
+				EclipseRelease.JUNO_3_8, null);
+		checkSolutionWithEclipse(data, "Solution should not be installable in an older release", Solution.MARS,
+				EclipseRelease.JUNO, null);
+
 		checkSolutionReleaseBounds(data, Solution.JUNO_AND_EARLIER);
 		checkSolutionReleaseBounds(data, Solution.KEPLER_AND_EARLIER);
 		checkSolutionReleaseBounds(data, Solution.KEPLER_LUNA);
+
 		checkSolutionData(data, "Solution should have version 1.0.0 features for Kepler release", Solution.KEPLER_LUNA,
-				EclipseRelease.KEPLER, System.WIN32, "1.0.0",
-				"http://example.org/kepler", "org.example.feature.kepler");
+				EclipseRelease.KEPLER, System.WIN32, "1.0.0", "http://example.org/kepler", "org.example.feature.kepler");
 		checkSolutionData(data, "Solution should have version 1.1.0 features for Luna release", Solution.KEPLER_LUNA,
-				EclipseRelease.LUNA, System.WIN32, "1.1.0",
-				"http://example.org/luna", "org.example.feature.luna");
+				EclipseRelease.LUNA, System.WIN32, "1.1.0", "http://example.org/luna", "org.example.feature.luna");
 		checkSolutionReleaseBounds(data, Solution.KEPLER_MARS);
 		checkSolutionData(data, "Solution should have version 1.0.0 features for Kepler release", Solution.KEPLER_MARS,
-				EclipseRelease.KEPLER, System.WIN32, "1.0.0",
-				"http://example.org/kepler-luna", "org.example.feature.kepler.luna");
+				EclipseRelease.KEPLER, System.WIN32, "1.0.0", "http://example.org/kepler-luna",
+				"org.example.feature.kepler.luna");
 		checkSolutionData(data, "Solution should have version 1.0.0 features for Luna release", Solution.KEPLER_MARS,
-				EclipseRelease.LUNA, System.WIN32, "1.0.0",
-				"http://example.org/kepler-luna", "org.example.feature.kepler.luna");
+				EclipseRelease.LUNA, System.WIN32, "1.0.0", "http://example.org/kepler-luna",
+				"org.example.feature.kepler.luna");
 		checkSolutionData(data, "Solution should have version 1.1.0 features for Mars release", Solution.KEPLER_MARS,
-				EclipseRelease.MARS, System.WIN32, "1.1.0",
-				"http://example.org/mars", "org.example.feature.mars");
+				EclipseRelease.MARS, System.WIN32, "1.1.0", "http://example.org/mars", "org.example.feature.mars");
 		checkSolutionWithEclipse(data, "Solution should be installable in a compatible release and os",
 				Solution.LUNA_WIN32, EclipseRelease.LUNA, System.WIN32);
 		checkSolutionWithEclipse(data, "Solution should not be installable in an incompatible os", Solution.LUNA_WIN32,
@@ -314,54 +335,54 @@ public class SolutionCompatibilityFilterTest {
 		checkSolutionWithEclipse(data, "Solution should not installable in an incompatible os",
 				Solution.LUNA_LINUX_MACOS, EclipseRelease.LUNA, System.WIN32);
 		checkSolutionData(data, "Solution should have version 1.1.0 features for Juno release", Solution.MULTI_VERSION,
-				EclipseRelease.JUNO, System.LINUX, "1.1.0",
-				"http://example.org/juno-kepler", "org.example.feature.juno.kepler");
+				EclipseRelease.JUNO, System.LINUX, "1.1.0", "http://example.org/juno-kepler",
+				"org.example.feature.juno.kepler");
 		checkSolutionData(data, "Solution should have version 1.1.0 features for Kepler release",
-				Solution.MULTI_VERSION, EclipseRelease.KEPLER, System.MACOS, "1.1.0",
-				"http://example.org/juno-kepler", "org.example.feature.juno.kepler");
+				Solution.MULTI_VERSION, EclipseRelease.KEPLER, System.MACOS, "1.1.0", "http://example.org/juno-kepler",
+				"org.example.feature.juno.kepler");
 		checkSolutionData(data, "Solution should have version 1.1.1 features for Kepler release on Windows",
 				Solution.MULTI_VERSION, EclipseRelease.KEPLER, System.WIN32, "1.1.1",
 				"http://example.org/juno-kepler-win32", "org.example.feature.juno.kepler.win32");
 		checkSolutionData(data, "Solution should have version 1.2.0 features for Luna release", Solution.MULTI_VERSION,
-				EclipseRelease.LUNA, System.WIN32, "1.2.0",
-				"http://example.org/luna", "org.example.feature.luna.nolinux");
+				EclipseRelease.LUNA, System.WIN32, "1.2.0", "http://example.org/luna",
+				"org.example.feature.luna.nolinux");
 		checkSolutionWithEclipse(data, "Solution should be incompatible with Linux for Luna release",
 				Solution.MULTI_VERSION, EclipseRelease.LUNA, System.LINUX, false);
 		checkSolutionData(data, "Solution should have version 1.3.0 features for Mars release", Solution.MULTI_VERSION,
-				EclipseRelease.MARS, System.MACOS, "1.3.0",
-				"http://example.org/mars", "org.example.feature.mars.nolinux");
+				EclipseRelease.MARS, System.MACOS, "1.3.0", "http://example.org/mars",
+				"org.example.feature.mars.nolinux");
 		checkSolutionWithEclipse(data, "Solution should be incompatible with Linux for Mars release",
 				Solution.MULTI_VERSION, EclipseRelease.MARS, System.LINUX, false);
 		checkSolutionData(
 				data,
 				"Solution with overlapping versions but separate os (pseudo-conflict) should have version 1.0.0 for Luna on Mac",
-				Solution.PSEUDO_CONFLICT, EclipseRelease.LUNA, System.MACOS, "1.0.0",
-				"http://example.org/maclinux", "org.example.feature.maclinux");
+				Solution.PSEUDO_CONFLICT, EclipseRelease.LUNA, System.MACOS, "1.0.0", "http://example.org/maclinux",
+				"org.example.feature.maclinux");
 		checkSolutionData(
 				data,
 				"Solution with overlapping versions but separate os (pseudo-conflict) should have version 1.1.0 for Luna on Windows",
-				Solution.PSEUDO_CONFLICT, EclipseRelease.LUNA, System.WIN32, "1.1.0",
-				"http://example.org/win", "org.example.feature.win");
+				Solution.PSEUDO_CONFLICT, EclipseRelease.LUNA, System.WIN32, "1.1.0", "http://example.org/win",
+				"org.example.feature.win");
 		checkSolutionData(
 				data,
 				"Solution with overlapping versions (real conflict) should have correct version for non-overlapping release (older version)",
-				Solution.CONFLICT, EclipseRelease.KEPLER, System.WIN32, "1.0.0",
-				"http://example.org/kepler-luna", "org.example.feature.keplerluna");
+				Solution.CONFLICT, EclipseRelease.KEPLER, System.WIN32, "1.0.0", "http://example.org/kepler-luna",
+				"org.example.feature.keplerluna");
 		checkSolutionData(
 				data,
 				"Solution with overlapping versions (real conflict) should have latest version for overlapping release",
-				Solution.CONFLICT, EclipseRelease.LUNA, System.WIN32, "1.1.0",
-				"http://example.org/luna-mars", "org.example.feature.lunamars");
+				Solution.CONFLICT, EclipseRelease.LUNA, System.WIN32, "1.1.0", "http://example.org/luna-mars",
+				"org.example.feature.lunamars");
 		checkSolutionData(
 				data,
 				"Solution with overlapping versions (real conflict) should have latest version for overlapping release",
-				Solution.CONFLICT, EclipseRelease.LUNA, System.MACOS, "1.1.0",
-				"http://example.org/luna-mars", "org.example.feature.lunamars");
+				Solution.CONFLICT, EclipseRelease.LUNA, System.MACOS, "1.1.0", "http://example.org/luna-mars",
+				"org.example.feature.lunamars");
 		checkSolutionData(
 				data,
 				"Solution with overlapping versions (real conflict) should have correct version for non-overlapping release (newer version)",
-				Solution.CONFLICT, EclipseRelease.MARS, System.WIN32, "1.1.0",
-				"http://example.org/luna-mars", "org.example.feature.lunamars");
+				Solution.CONFLICT, EclipseRelease.MARS, System.WIN32, "1.1.0", "http://example.org/luna-mars",
+				"org.example.feature.lunamars");
 		//		checkSolutionWithEclipse(data, Solution.UNINSTALLABLE, EclipseRelease.UNKNOWN, System.WIN32);
 		//		checkSolutionWithEclipse(data, Solution.UNINSTALLABLE, EclipseRelease.UNKNOWN, System.LINUX);
 		//		checkSolutionWithEclipse(data, Solution.UNINSTALLABLE, EclipseRelease.UNKNOWN, System.MACOS);
@@ -369,8 +390,7 @@ public class SolutionCompatibilityFilterTest {
 	}
 
 	private static void checkSolutionData(List<Object[]> data, String testDescription, Solution solution,
-			EclipseRelease release,
-			System system, String version, String site, String... features) {
+			EclipseRelease release, System system, String version, String site, String... features) {
 		if (release == null) {
 			release = EclipseRelease.UNKNOWN;
 		}
@@ -386,8 +406,7 @@ public class SolutionCompatibilityFilterTest {
 	}
 
 	private static void checkSolutionData(List<Object[]> data, String testDescription, Solution solution,
-			EclipseRelease release,
-			System system, boolean compatible, String version, String site, String... features) {
+			EclipseRelease release, System system, boolean compatible, String version, String site, String... features) {
 		if (release == null) {
 			release = EclipseRelease.UNKNOWN;
 		}
@@ -440,14 +459,12 @@ public class SolutionCompatibilityFilterTest {
 	}
 
 	private static void checkSolutionWithEclipse(List<Object[]> data, String testDescription, Solution solution,
-			EclipseRelease release,
-			System system) {
+			EclipseRelease release, System system) {
 		checkSolutionData(data, testDescription, solution, release, system, null, null);
 	}
 
 	private static void checkSolutionWithEclipse(List<Object[]> data, String testDescription, Solution solution,
-			EclipseRelease release,
-			System system, boolean compatible) {
+			EclipseRelease release, System system, boolean compatible) {
 		checkSolutionData(data, testDescription, solution, release, system, compatible, null, null);
 	}
 
@@ -586,8 +603,7 @@ public class SolutionCompatibilityFilterTest {
 			final IMarketplaceUnmarshaller marketplaceUnmarshaller = org.eclipse.epp.mpc.core.service.ServiceHelper
 					.getMarketplaceUnmarshaller();
 			unmarshallerRegistration = MarketplaceClientCorePlugin.getDefault().getServiceHelper()
-					.registerMarketplaceUnmarshaller(
-					new IMarketplaceUnmarshaller() {
+					.registerMarketplaceUnmarshaller(new IMarketplaceUnmarshaller() {
 
 						public <T> T unmarshal(InputStream in, Class<T> type, IProgressMonitor monitor)
 								throws UnmarshalException, IOException {
@@ -730,7 +746,7 @@ public class SolutionCompatibilityFilterTest {
 	public TestRule requestInfoRule = new TestRule() {
 		public Statement apply(final Statement base, final Description description) {
 			String methodName = description.getMethodName();
-			if (methodName.endsWith("Search")) {
+			if (methodName.contains("SearchResult")) {
 				return new Statement() {
 					@Override
 					public void evaluate() throws Throwable {
@@ -756,6 +772,10 @@ public class SolutionCompatibilityFilterTest {
 		}
 
 		protected void failedSearchQuery(AssertionError error, Description description) {
+			String request = marketplaceService.addMetaParameters(BASE_URL + "/"
+					+ DefaultMarketplaceService.API_SEARCH_URI_FULL + solution.query());
+			String queryDetail = "Unexpected result in search for node " + solution.shortName() + "\n   " + request;
+			failedWithDetails(error, queryDetail);
 		}
 
 		protected void failedNodeQuery(AssertionError error, Description description) {
