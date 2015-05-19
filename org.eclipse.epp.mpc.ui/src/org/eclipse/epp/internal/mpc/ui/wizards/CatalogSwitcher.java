@@ -146,6 +146,8 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 	}
 
 	private void retrieveCatalogImage(final CatalogDescriptor catalogDescriptor, final Label label) {
+		//TODO we could simplify all this using the ResourceManager and/or MarketplaceDiscoveryResources,
+		// if the CatalogDescriptor had the image URL instead of an ImageDescriptor
 		Job job = new Job(Messages.CatalogSwitcher_retrieveMetaData) {
 
 			@Override

@@ -7,10 +7,11 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
- * 	Yatta Solutions - bug 432803: public API
+ * 	Yatta Solutions - bug 432803: public API, bug 413871: performance
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui;
 
+import org.eclipse.epp.internal.mpc.ui.catalog.ResourceProvider;
 import org.eclipse.epp.mpc.ui.IMarketplaceClientService;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
@@ -80,6 +81,8 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 
 	private ServiceTracker<IMarketplaceClientService, IMarketplaceClientService> clientServiceTracker;
 
+	private ResourceProvider resourceProvider;
+
 	public MarketplaceClientUiPlugin() {
 	}
 
@@ -90,12 +93,19 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 		clientServiceTracker = new ServiceTracker<IMarketplaceClientService, IMarketplaceClientService>(context,
 				IMarketplaceClientService.class, null);
 		clientServiceTracker.open();
+
+		resourceProvider = new ResourceProvider();
 	}
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		clientServiceTracker.close();
 		clientServiceTracker = null;
+
+		if (resourceProvider != null) {
+   		resourceProvider.dispose();
+   		resourceProvider = null;
+		}
 		super.stop(context);
 		instance = null;
 	}
@@ -142,5 +152,9 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 
 	public IMarketplaceClientService getClientService() {
 		return clientServiceTracker == null ? null : clientServiceTracker.getService();
+	}
+
+	public ResourceProvider getResourceProvider() {
+		return resourceProvider;
 	}
 }

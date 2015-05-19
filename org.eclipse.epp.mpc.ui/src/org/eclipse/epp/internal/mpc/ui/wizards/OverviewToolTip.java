@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     Tasktop Technologies - initial API and implementation
+ *     Yatta Solutions - bug 413871: performance
  *******************************************************************************/
 
 package org.eclipse.epp.internal.mpc.ui.wizards;
@@ -17,8 +18,11 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
+import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalogSource;
+import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
+import org.eclipse.epp.internal.mpc.ui.catalog.ResourceProvider;
+import org.eclipse.epp.internal.mpc.ui.catalog.ResourceProvider.ResourceReceiver;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
-import org.eclipse.equinox.internal.p2.discovery.AbstractCatalogSource;
 import org.eclipse.equinox.internal.p2.discovery.model.Overview;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -58,6 +62,7 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 /**
  * @author David Green
+ * @author Carsten Reckord
  */
 class OverviewToolTip extends ToolTip {
 
@@ -67,7 +72,7 @@ class OverviewToolTip extends ToolTip {
 
 	private final Overview overview;
 
-	private final AbstractCatalogSource source;
+	private final MarketplaceCatalogSource source;
 
 	private final Control parent;
 
@@ -75,7 +80,7 @@ class OverviewToolTip extends ToolTip {
 
 	private final IMarketplaceWebBrowser browser;
 
-	public OverviewToolTip(Control control, IMarketplaceWebBrowser browser, AbstractCatalogSource source,
+	public OverviewToolTip(Control control, IMarketplaceWebBrowser browser, MarketplaceCatalogSource source,
 			Overview overview, Image leftImage) {
 		super(control, ToolTip.RECREATE, true);
 		Assert.isNotNull(source);
@@ -99,17 +104,9 @@ class OverviewToolTip extends ToolTip {
 		final Composite container = new Composite(parent, SWT.NULL);
 		container.setBackground(backgroundColor);
 
-		Image image = null;
+		boolean hasImage = false;
 		if (overview.getScreenshot() != null) {
-			image = computeImage(source, overview.getScreenshot());
-			if (image != null) {
-				final Image fimage = image;
-				container.addDisposeListener(new DisposeListener() {
-					public void widgetDisposed(DisposeEvent e) {
-						fimage.dispose();
-					}
-				});
-			}
+			hasImage = true;
 		}
 		final boolean hasLearnMoreLink = overview.getUrl() != null && overview.getUrl().length() > 0;
 
@@ -121,7 +118,8 @@ class OverviewToolTip extends ToolTip {
 		final int containerWidthHintWithoutImage = 500;
 
 		GridDataFactory.fillDefaults().grab(true, true).hint(
-				image == null ? containerWidthHintWithoutImage : containerWidthHintWithImage, SWT.DEFAULT).applyTo(
+				hasImage ? containerWidthHintWithImage : containerWidthHintWithoutImage, SWT.DEFAULT)
+				.applyTo(
 						container);
 
 		GridLayoutFactory.fillDefaults().numColumns((leftImage != null) ? 3 : 2).margins(5, 5).spacing(3, 0).applyTo(
@@ -146,8 +144,8 @@ class OverviewToolTip extends ToolTip {
 
 		GridDataFactory gridDataFactory = GridDataFactory.fillDefaults()
 				.grab(true, true)
-				.span(image == null ? 2 : 1, 1);
-		if (image != null) {
+				.span(hasImage ? 1 : 2, 1);
+		if (hasImage) {
 			gridDataFactory.hint(widthHint, heightHint);
 		}
 		gridDataFactory.applyTo(summaryContainer);
@@ -187,9 +185,10 @@ class OverviewToolTip extends ToolTip {
 		});
 
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).hint(SWT.DEFAULT,
-				image == null ? SCREENSHOT_HEIGHT : SWT.DEFAULT).applyTo(summaryLabel);
+				hasImage ? SWT.DEFAULT : SCREENSHOT_HEIGHT)
+				.applyTo(summaryLabel);
 
-		if (image != null) {
+		if (hasImage) {
 			final Composite imageContainer = new Composite(container, SWT.BORDER);
 			GridLayoutFactory.fillDefaults().applyTo(imageContainer);
 
@@ -199,11 +198,12 @@ class OverviewToolTip extends ToolTip {
 			Label imageLabel = new Label(imageContainer, SWT.NULL);
 			GridDataFactory.fillDefaults().hint(widthHint, SCREENSHOT_HEIGHT).indent(borderWidth, borderWidth).applyTo(
 					imageLabel);
-			imageLabel.setImage(image);
 			imageLabel.setBackground(backgroundColor);
 			imageLabel.setSize(widthHint, SCREENSHOT_HEIGHT);
 
-			final Cursor handCursor = new Cursor(image.getDevice(), SWT.CURSOR_HAND);
+			provideImage(imageLabel, source, overview.getScreenshot());
+
+			final Cursor handCursor = new Cursor(imageLabel.getDisplay(), SWT.CURSOR_HAND);
 			imageLabel.setCursor(handCursor);
 			imageLabel.addDisposeListener(new DisposeListener() {
 				public void widgetDisposed(DisposeEvent e) {
@@ -239,7 +239,7 @@ class OverviewToolTip extends ToolTip {
 				}
 			});
 		}
-		if (image == null) {
+		if (!hasImage) {
 			// prevent overviews with no image from providing unlimited text.
 			Point optimalSize = summaryContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
 			if (optimalSize.y > (heightHint + 10)) {
@@ -264,27 +264,59 @@ class OverviewToolTip extends ToolTip {
 		setData(Shell.class.getName(), null);
 	}
 
-	private Image computeImage(AbstractCatalogSource discoverySource, String imagePath) {
-		URL resource = discoverySource.getResource(imagePath);
-		if (resource != null) {
-			try {
-				ImageDescriptor descriptor = ImageDescriptor.createFromURL(resource);
-				Image image = descriptor.createImage();
-				Rectangle imageBounds = image.getBounds();
-				if (imageBounds.width > SCREENSHOT_WIDTH || imageBounds.height > SCREENSHOT_HEIGHT) {
-					final Image scaledImage = Util.scaleImage(image, SCREENSHOT_WIDTH, SCREENSHOT_HEIGHT);
-					Image originalImage = image;
-					image = scaledImage;
-					originalImage.dispose();
+	private void provideImage(final Label imageLabel, MarketplaceCatalogSource discoverySource, final String imagePath) {
+		ResourceProvider resourceProvider = discoverySource.getResourceProvider();
+		MarketplaceDiscoveryStrategy.cacheResource(resourceProvider, overview.getItem(), imagePath);
+		resourceProvider.provideResource(new ResourceReceiver<Image>() {
+
+			public Image processResource(URL resource) {
+				if (imageLabel.isDisposed()) {
+					return null;
 				}
-				return image;
-			} catch (SWTException e) {
-				// ignore, probably a bad image format
-				MarketplaceClientUi.error(NLS.bind(Messages.OverviewToolTip_cannotRenderImage_reason, imagePath,
-						e.getMessage()), e);
+				try {
+					ImageDescriptor descriptor = ImageDescriptor.createFromURL(resource);
+					Image image = descriptor.createImage();
+					Rectangle imageBounds = image.getBounds();
+					if (imageBounds.width > SCREENSHOT_WIDTH || imageBounds.height > SCREENSHOT_HEIGHT) {
+						final Image scaledImage = Util.scaleImage(image, SCREENSHOT_WIDTH, SCREENSHOT_HEIGHT);
+						Image originalImage = image;
+						image = scaledImage;
+						originalImage.dispose();
+					}
+					if (image != null && !imageLabel.isDisposed()) {
+						final Image fimage = image;
+						imageLabel.addDisposeListener(new DisposeListener() {
+							public void widgetDisposed(DisposeEvent e) {
+								fimage.dispose();
+							}
+						});
+					}
+					if (image != null && imageLabel.isDisposed()) {
+						image.dispose();
+						image = null;
+					}
+					return image;
+				} catch (SWTException e) {
+					// ignore, probably a bad image format
+					MarketplaceClientUi.error(
+							NLS.bind(Messages.OverviewToolTip_cannotRenderImage_reason, imagePath, e.getMessage()), e);
+					return null;
+				}
 			}
-		}
-		return null;
+
+			public void setResource(final Image resource) {
+				if (resource != null && !resource.isDisposed() && !imageLabel.isDisposed()) {
+					imageLabel.getDisplay().asyncExec(new Runnable() {
+
+						public void run() {
+							if (!imageLabel.isDisposed() && !resource.isDisposed()) {
+								imageLabel.setImage(resource);
+							}
+						}
+					});
+				}
+			}
+		}, imagePath, null);
 	}
 
 	public void show(Control titleControl) {

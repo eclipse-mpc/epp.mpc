@@ -7,19 +7,27 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
- * 	Yatta Solutions - bug 432803: public API
+ * 	Yatta Solutions - bug 432803: public API, bug 413871: performance
  *******************************************************************************/
 package org.eclipse.epp.mpc.ui;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.catalog.ResourceProvider;
+import org.eclipse.epp.internal.mpc.ui.catalog.ResourceProvider.ResourceFuture;
+import org.eclipse.epp.internal.mpc.ui.catalog.ResourceProviderImageDescriptor;
 import org.eclipse.epp.mpc.core.model.ICatalog;
 import org.eclipse.epp.mpc.core.model.ICatalogBranding;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * A descriptor for identifying a solutions catalog, ie: a location that implements the Eclipse Marketplace API.
@@ -73,16 +81,47 @@ public final class CatalogDescriptor {
 	public CatalogDescriptor(ICatalog catalog) throws MalformedURLException {
 		setLabel(catalog.getName());
 		setUrl(URLUtil.toURL(catalog.getUrl()));
-		setIcon(ImageDescriptor.createFromURL(URLUtil.toURL(catalog.getImageUrl())));
+		String imageUrl = catalog.getImageUrl();
+		setIcon(imageDescriptorForUrl(catalog, imageUrl));
 		setDescription(catalog.getDescription());
 		setInstallFromAllRepositories(!catalog.isSelfContained());
 		if (catalog.getDependencyRepository() != null) {
 			setDependenciesRepository(URLUtil.toURL(catalog.getDependencyRepository()));
 		}
 		setCatalogBranding(catalog.getBranding());
+		if (catalog.getBranding() != null) {
+			imageDescriptorForUrl(catalog, catalog.getBranding().getWizardIcon());
+		}
 		if (catalog.getNews() != null) {
 			CatalogRegistry.getInstance().addCatalogNews(this, catalog.getNews());
 		}
+	}
+
+	private static ImageDescriptor imageDescriptorForUrl(ICatalog catalog, String imageUrl)
+			throws MalformedURLException {
+		if (imageUrl != null && imageUrl.length() > 0) {
+			ResourceProvider resourceProvider = MarketplaceClientUiPlugin.getInstance().getResourceProvider();
+			ResourceFuture resource = resourceProvider.getResource(imageUrl);
+			if (resource == null) {
+				String requestSource = NLS.bind(Messages.CatalogDescriptor_requestCatalog, catalog.getName(),
+						catalog.getId());
+				try {
+					resource = resourceProvider.retrieveResource(requestSource, imageUrl);
+				} catch (URISyntaxException e) {
+					MarketplaceClientUi.log(IStatus.WARNING, Messages.CatalogDescriptor_badUri,
+							catalog.getName(), catalog.getId(), resource, e);
+				} catch (IOException e) {
+					MarketplaceClientUi.log(IStatus.WARNING,
+							Messages.CatalogDescriptor_downloadError, catalog.getName(),
+							catalog.getId(), resource, e);
+				}
+			}
+			if (resource != null) {
+				return new ResourceProviderImageDescriptor(resourceProvider, imageUrl);
+			}
+			return ImageDescriptor.createFromURL(URLUtil.toURL(imageUrl));
+		}
+		return null;
 	}
 
 	/**

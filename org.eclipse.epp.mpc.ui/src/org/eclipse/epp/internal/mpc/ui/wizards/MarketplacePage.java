@@ -7,24 +7,24 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
- *  Yatta Solutions - news (bug 401721), public API (bug 432803)
- *  JBoss (Pascal Rapicault) - Bug 406907 - Add p2 remediation page to MPC install flow
+ * 	Yatta Solutions - news (bug 401721), public API (bug 432803), performance (bug 413871)
+ * 	JBoss (Pascal Rapicault) - Bug 406907 - Add p2 remediation page to MPC install flow
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.service.CatalogBranding;
-import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
+import org.eclipse.epp.internal.mpc.ui.catalog.ResourceProvider.ResourceReceiver;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceWizard.WizardState;
@@ -584,16 +584,28 @@ public class MarketplacePage extends CatalogPage {
 			tabFolder.setSelection(0);
 		}
 
-		try {
-			ImageDescriptor wizardIconDescriptor;
-			if (branding.getWizardIcon() == null) {
-				wizardIconDescriptor = DiscoveryImages.BANNER_DISOVERY;
-			} else {
-				wizardIconDescriptor = ImageDescriptor.createFromURL(URLUtil.toURL(branding.getWizardIcon()));//FIXME this needs to be preloaded and cached
-			}
-			setImageDescriptor(wizardIconDescriptor);
-		} catch (MalformedURLException e) {
-			MarketplaceClientUi.error(e);
+		ImageDescriptor defaultWizardIconDescriptor = DiscoveryImages.BANNER_DISOVERY;
+		if (branding.getWizardIcon() == null) {
+			setImageDescriptor(defaultWizardIconDescriptor);
+		} else {
+			final Display display = Display.getCurrent();
+			MarketplaceClientUiPlugin.getInstance()
+			.getResourceProvider()
+			.provideResource(new ResourceReceiver<ImageDescriptor>() {
+
+				public ImageDescriptor processResource(URL resource) {
+					return ImageDescriptor.createFromURL(resource);
+				}
+
+				public void setResource(final ImageDescriptor resource) {
+					display.asyncExec(new Runnable() {
+
+						public void run() {
+							setImageDescriptor(resource);
+						}
+					});
+				}
+			}, branding.getWizardIcon(), defaultWizardIconDescriptor);
 		}
 		disableTabSelection = false;
 	}
@@ -623,6 +635,7 @@ public class MarketplacePage extends CatalogPage {
 		branding.setRecentTabName(Messages.MarketplacePage_recent);
 		branding.setRelatedTabName(Messages.MarketplacePage_related);
 		branding.setWizardTitle(Messages.MarketplacePage_eclipseMarketplaceSolutions);
+		branding.setWizardIcon(null);
 		return branding;
 	}
 

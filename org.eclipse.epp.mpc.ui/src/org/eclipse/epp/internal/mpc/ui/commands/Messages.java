@@ -29,6 +29,8 @@ class Messages extends NLS {
 	public static String MarketplaceWizardCommand_eclipseMarketplace;
 
 	public static String MarketplaceWizardCommand_noRemoteCatalogs;
+
+	public static String MarketplaceWizardCommand_requestCatalog;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

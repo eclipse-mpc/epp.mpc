@@ -15,6 +15,12 @@ import org.eclipse.osgi.util.NLS;
 class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.epp.mpc.ui.messages"; //$NON-NLS-1$
 
+	public static String CatalogDescriptor_badUri;
+
+	public static String CatalogDescriptor_downloadError;
+
+	public static String CatalogDescriptor_requestCatalog;
+
 	public static String MarketplaceUrlHandler_cannotOpenMarketplaceWizard;
 
 	public static String MarketplaceUrlHandler_performInstallRequest;

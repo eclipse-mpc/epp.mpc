@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     Tasktop Technologies - initial API and implementation
- *     Yatta Solutions - bug 432803: public API
+ *     Yatta Solutions - bug 432803: public API, bug 413871: performance
  *******************************************************************************/
 
 package org.eclipse.epp.internal.mpc.ui.wizards;
@@ -19,7 +19,9 @@ import java.text.MessageFormat;
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalogSource;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
+import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceDiscoveryResources.ImageReceiver;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ITag;
@@ -27,15 +29,14 @@ import org.eclipse.epp.mpc.core.model.ITags;
 import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.AbstractCatalogSource;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
+import org.eclipse.equinox.internal.p2.discovery.model.Icon;
 import org.eclipse.equinox.internal.p2.discovery.model.Overview;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.AbstractDiscoveryItem;
-import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryResources;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.RowLayoutFactory;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
@@ -73,6 +74,7 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 /**
  * @author Steffen Pingel
  * @author David Green
+ * @author Carsten Reckord
  */
 public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<T> implements PropertyChangeListener {
 
@@ -204,20 +206,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 	private ShareSolutionLink shareSolutionLink;
 
-	/**
-	 * @param shellProvider
-	 *            - not used
-	 * @deprecated use
-	 *             {@link #DiscoveryItem(Composite, int, DiscoveryResources, IMarketplaceWebBrowser, CatalogItem, MarketplaceViewer)}
-	 *             instead
-	 */
-	@Deprecated
-	public DiscoveryItem(Composite parent, int style, DiscoveryResources resources, IShellProvider shellProvider,
-			IMarketplaceWebBrowser browser, final T connector, MarketplaceViewer viewer) {
-		this(parent, style, resources, browser, connector, viewer);
-	}
-
-	public DiscoveryItem(Composite parent, int style, DiscoveryResources resources, IMarketplaceWebBrowser browser,
+	public DiscoveryItem(Composite parent, int style, MarketplaceDiscoveryResources resources,
+			IMarketplaceWebBrowser browser,
 			final T connector, MarketplaceViewer viewer) {
 		super(parent, style, resources, connector);
 		this.browser = browser;
@@ -602,31 +592,53 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		.align(SWT.CENTER, SWT.BEGINNING).grab(true, true)
 		.applyTo(iconLabel);
 		if (connector.getIcon() != null) {
-			try {
-				Image image = resources.getIconImage(connector.getSource(), connector.getIcon(), 64, true);
-				Rectangle bounds = image.getBounds();
-				if (bounds.width < 0.8 * MAX_IMAGE_WIDTH || bounds.width > MAX_IMAGE_WIDTH
-						|| bounds.height > MAX_IMAGE_HEIGHT) {
-					final Image scaledImage = Util.scaleImage(image, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT);
-					image = scaledImage;
-					iconLabel.addDisposeListener(new DisposeListener() {
-						public void widgetDisposed(DisposeEvent e) {
-							scaledImage.dispose();
-						}
-					});
-				}
-				iconLabel.setImage(image);
-			} catch (SWTException e) {
-				// ignore, probably a bad image format
-//				MarketplaceClientUi.error(NLS.bind(Messages.DiscoveryItem_cannotRenderImage_reason, connector.getIcon()
-//						.getImage32(), e.getMessage()), e);
-			}
-		}
-		if (iconLabel.getImage() == null) {
+			provideIconImage(iconLabel, connector.getSource(), connector.getIcon(), 64, true);
+		} else {
 			iconLabel.setImage(MarketplaceClientUiPlugin.getInstance()
 					.getImageRegistry()
 					.get(MarketplaceClientUiPlugin.NO_ICON_PROVIDED));
 		}
+	}
+
+	private void provideIconImage(final Label iconLabel, AbstractCatalogSource source, Icon icon, int size,
+			boolean fallback) {
+		String iconPath = getResources().getIconPath(icon, size, fallback);
+		getResources().setImage(
+				new ImageReceiver() {
+
+					public void setImage(Image image) {
+						if (image.isDisposed() || iconLabel.isDisposed()) {
+							return;
+						}
+						try {
+							Rectangle bounds = image.getBounds();
+							if (bounds.width < 0.8 * MAX_IMAGE_WIDTH || bounds.width > MAX_IMAGE_WIDTH
+									|| bounds.height > MAX_IMAGE_HEIGHT) {
+								final Image scaledImage = Util.scaleImage(image, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT);
+								image = scaledImage;
+								iconLabel.addDisposeListener(new DisposeListener() {
+									public void widgetDisposed(DisposeEvent e) {
+										scaledImage.dispose();
+									}
+								});
+							}
+							iconLabel.setImage(image);
+						} catch (SWTException e) {
+							// ignore, probably a bad image format
+//							MarketplaceClientUi.error(NLS.bind(Messages.DiscoveryItem_cannotRenderImage_reason, connector.getIcon()
+//									.getImage32(), e.getMessage()), e);
+						}
+					}
+				},
+				source,
+				iconPath,
+				MarketplaceClientUiPlugin.getInstance()
+				.getImageRegistry()
+				.get(MarketplaceClientUiPlugin.NO_ICON_PROVIDED));
+	}
+
+	public MarketplaceDiscoveryResources getResources() {
+		return (MarketplaceDiscoveryResources) resources;
 	}
 
 	private StyleRange appendLink(StyledText styledText, String text, int style) {
@@ -834,7 +846,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 	@Override
 	protected void hookTooltip(final Control parent, final Widget tipActivator, final Control exitControl,
 			final Control titleControl, AbstractCatalogSource source, Overview overview, Image image) {
-		final OverviewToolTip toolTip = new OverviewToolTip(parent, browser, source, overview, image);
+		final OverviewToolTip toolTip = new OverviewToolTip(parent, browser, (MarketplaceCatalogSource) source,
+				overview, image);
 		hookTooltip(toolTip, tipActivator, exitControl);
 
 		if (image != null) {

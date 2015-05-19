@@ -6,9 +6,10 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- * 	  The Eclipse Foundation - initial API and implementation
- *    Yatta Solutions - category filtering (bug 314936), error handling (bug 374105),
- *                      multiselect hints (bug 337774), public API (bug 432803)
+ * 	The Eclipse Foundation - initial API and implementation
+ * 	Yatta Solutions - category filtering (bug 314936), error handling (bug 374105),
+ *                      multiselect hints (bug 337774), public API (bug 432803), 
+ *                      performance (bug 413871)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.commands;
 
@@ -32,8 +33,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
+import org.eclipse.epp.internal.mpc.ui.catalog.ResourceProvider;
 import org.eclipse.epp.internal.mpc.ui.wizards.AbstractTagFilter;
 import org.eclipse.epp.internal.mpc.ui.wizards.ComboTagFilter;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceCatalogConfiguration;
@@ -58,6 +61,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.statushandlers.StatusManager;
 
@@ -283,6 +287,15 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 
 			List<? extends ICatalog> catalogs = result.get();
 			for (ICatalog catalog : catalogs) {
+				ResourceProvider resourceProvider = MarketplaceClientUiPlugin.getInstance().getResourceProvider();
+				String requestSource = NLS.bind(Messages.MarketplaceWizardCommand_requestCatalog, catalog.getName(),
+						catalog.getId());
+				if (catalog.getImageUrl() != null) {
+					resourceProvider.retrieveResource(requestSource, catalog.getImageUrl());
+				}
+				if (catalog.getBranding() != null && catalog.getBranding().getWizardIcon() != null) {
+					resourceProvider.retrieveResource(requestSource, catalog.getBranding().getWizardIcon());
+				}
 				CatalogDescriptor descriptor = new CatalogDescriptor(catalog);
 				registerOrOverrideCatalog(descriptor);
 			}

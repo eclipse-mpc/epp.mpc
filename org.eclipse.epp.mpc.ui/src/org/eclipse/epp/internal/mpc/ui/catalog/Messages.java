@@ -15,12 +15,6 @@ import org.eclipse.osgi.util.NLS;
 class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.epp.internal.mpc.ui.catalog.messages"; //$NON-NLS-1$
 
-	public static String AbstractResourceRunnable_badUri;
-
-	public static String AbstractResourceRunnable_downloadError;
-
-	public static String AbstractResourceRunnable_resourceNotFound;
-
 	public static String MarketplaceCatalog_Checking_News;
 
 	public static String MarketplaceCatalog_checkingForUpdates;
@@ -33,7 +27,11 @@ class Messages extends NLS {
 
 	public static String MarketplaceCatalog_queryingMarketplace;
 
+	public static String MarketplaceDiscoveryStrategy_badUri;
+
 	public static String MarketplaceDiscoveryStrategy_catalogCategory;
+
+	public static String MarketplaceDiscoveryStrategy_downloadError;
 
 	public static String MarketplaceDiscoveryStrategy_findingInstalled;
 
@@ -51,6 +49,8 @@ class Messages extends NLS {
 
 	public static String MarketplaceDiscoveryStrategy_ParseError;
 
+	public static String MarketplaceDiscoveryStrategy_requestSource;
+
 	public static String MarketplaceDiscoveryStrategy_searchingMarketplace;
 
 	public static String MarketplaceDiscoveryStrategy_sendingErrorNotification;
@@ -60,6 +60,13 @@ class Messages extends NLS {
 	public static String MarketplaceDiscoveryStrategy_unknownFilter;
 
 	public static String MarketplaceInfo_LoadError;
+	
+	public static String ResourceProvider_downloadError;
+
+	public static String ResourceProvider_retrievingResource;
+
+	public static String ResourceProvider_waitingForDownload;
+	
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

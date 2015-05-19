@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
- *     Yatta Solutions - bug 432803: public API
+ *     Yatta Solutions - bug 432803: public API, bug 413871: performance
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service;
 

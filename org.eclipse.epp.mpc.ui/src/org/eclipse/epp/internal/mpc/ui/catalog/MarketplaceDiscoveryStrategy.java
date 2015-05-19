@@ -7,11 +7,13 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
- *  Yatta Solutions - bug 314936, bug 398200, public API (bug 432803)
+ * 	Yatta Solutions - bug 314936, bug 398200, bug 432803: public API, bug 413871: performance
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.catalog;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -35,7 +37,6 @@ import org.eclipse.epp.internal.mpc.core.service.SearchResult;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory.Contents;
-import org.eclipse.epp.internal.mpc.ui.util.ConcurrentTaskManager;
 import org.eclipse.epp.mpc.core.model.ICategories;
 import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IIdentifiable;
@@ -60,6 +61,7 @@ import org.eclipse.osgi.util.NLS;
 
 /**
  * @author David Green
+ * @author Carsten Reckord
  */
 public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
@@ -145,8 +147,6 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		if (!result.getNodes().isEmpty()) {
 			int totalWork = 10000000;
 			monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_loadingResources, totalWork);
-			ConcurrentTaskManager executor = new ConcurrentTaskManager(result.getNodes().size(),
-					Messages.MarketplaceDiscoveryStrategy_loadingResources);
 			try {
 				for (final INode node : result.getNodes()) {
 					try {
@@ -207,6 +207,12 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 								|| catalogItem.getSiteUrl() == null) {
 							catalogItem.setAvailable(false);
 						}
+						if (node.getImage() != null) {
+							if (!source.getResourceProvider().containsResource(node.getImage())) {
+								cacheResource(source.getResourceProvider(), catalogItem, node.getImage());
+							}
+							createIcon(catalogItem, node);
+						}
 						if (node.getBody() != null || node.getScreenshot() != null) {
 							final Overview overview = new Overview();
 							overview.setItem(catalogItem);
@@ -216,30 +222,9 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 							if (node.getScreenshot() != null) {
 								if (!source.getResourceProvider().containsResource(node.getScreenshot())) {
-									executor.submit(new AbstractResourceRunnable(monitor, catalogItem,
-											source.getResourceProvider(), node.getScreenshot()) {
-										@Override
-										protected void resourceRetrieved() {
-											overview.setScreenshot(node.getScreenshot());
-										}
-									});
-								} else {
-									overview.setScreenshot(node.getScreenshot());
+									cacheResource(source.getResourceProvider(), catalogItem, node.getScreenshot());
 								}
-							}
-						}
-						if (node.getImage() != null) {
-							if (!source.getResourceProvider().containsResource(node.getImage())) {
-								executor.submit(new AbstractResourceRunnable(monitor, catalogItem,
-										source.getResourceProvider(), node.getImage()) {
-									@Override
-									protected void resourceRetrieved() {
-										createIcon(catalogItem, node);
-									}
-
-								});
-							} else {
-								createIcon(catalogItem, node);
+								overview.setScreenshot(node.getScreenshot());
 							}
 						}
 						items.add(catalogItem);
@@ -251,14 +236,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 										node == null ? "null" : node.getId()), ex); //$NON-NLS-1$
 					}
 				}
-				try {
-					executor.waitUntilFinished(new SubProgressMonitor(monitor, totalWork - 10));
-				} catch (CoreException e) {
-					// just log, since this is expected to occur frequently
-					MarketplaceClientUi.error(e);
-				}
 			} finally {
-				executor.shutdownNow();
 				monitor.done();
 			}
 			if (result.getMatchCount() != null) {
@@ -267,6 +245,24 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 					// add an item here to indicate that the search matched more items than were returned by the server
 					addCatalogItem(catalogCategory);
 				}
+			}
+		}
+	}
+
+	public static void cacheResource(ResourceProvider resourceProvider, CatalogItem catalogItem,
+			String resource) {
+		if (!resourceProvider.containsResource(resource)) {
+			String requestSource = NLS.bind(Messages.MarketplaceDiscoveryStrategy_requestSource, catalogItem.getName(), catalogItem.getId());
+			try {
+				resourceProvider.retrieveResource(requestSource, resource);
+			} catch (URISyntaxException e) {
+				MarketplaceClientUi.log(IStatus.WARNING, Messages.MarketplaceDiscoveryStrategy_badUri,
+						catalogItem.getName(),
+						catalogItem.getId(), resource, e);
+			} catch (IOException e) {
+				MarketplaceClientUi.log(IStatus.WARNING, Messages.MarketplaceDiscoveryStrategy_downloadError,
+						catalogItem.getName(),
+						catalogItem.getId(), resource, e);
 			}
 		}
 	}

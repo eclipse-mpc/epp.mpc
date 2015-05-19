@@ -7,32 +7,30 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
- * 	Yatta Solutions - bug 432803: public API
+ * 	Yatta Solutions - bug 432803: public API, bug 413871: performance
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.catalog;
 
 import java.io.IOException;
 import java.net.URL;
 
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.equinox.internal.p2.discovery.AbstractCatalogSource;
 
 /**
  * @author David Green
+ * @author Carsten Reckord
  */
 public class MarketplaceCatalogSource extends AbstractCatalogSource {
 
 	private final IMarketplaceService marketplaceService;
 
-	private ResourceProvider resourceProvider;
+	private final ResourceProvider resourceProvider;
 
 	public MarketplaceCatalogSource(IMarketplaceService marketplaceService) {
 		this.marketplaceService = marketplaceService;
-		try {
-			resourceProvider = new ResourceProvider();
-		} catch (IOException e) {
-			throw new IllegalStateException(e);
-		}
+		this.resourceProvider = MarketplaceClientUiPlugin.getInstance().getResourceProvider();
 	}
 
 	@Override
@@ -42,7 +40,14 @@ public class MarketplaceCatalogSource extends AbstractCatalogSource {
 
 	@Override
 	public URL getResource(String resourceName) {
-		return resourceProvider.getResource(resourceName);
+		try {
+			//This waits for the resource to finish downloading. That's the best
+			//we can do here given the CatalogSource API.
+			return resourceProvider.getResource(resourceName).getURL();
+		} catch (IOException e) {
+			//already logged during download
+			return null;
+		}
 	}
 
 	public ResourceProvider getResourceProvider() {
@@ -54,9 +59,5 @@ public class MarketplaceCatalogSource extends AbstractCatalogSource {
 	}
 
 	public void dispose() {
-		if (resourceProvider != null) {
-			resourceProvider.dispose();
-			resourceProvider = null;
-		}
 	}
 }

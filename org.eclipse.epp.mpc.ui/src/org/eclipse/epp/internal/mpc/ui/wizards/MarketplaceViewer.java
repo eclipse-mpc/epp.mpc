@@ -6,9 +6,9 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- * 	  The Eclipse Foundation - initial API and implementation
- *    Yatta Solutions - error handling (bug 374105), header layout (bug 341014),
- *                      news (bug 401721), public API (bug 432803)
+ * 	The Eclipse Foundation - initial API and implementation
+ * 	Yatta Solutions - error handling (bug 374105), header layout (bug 341014),
+ *                      news (bug 401721), public API (bug 432803), performance (bug 413871)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
@@ -141,6 +141,8 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	private IDiscoveryItemFactory discoveryItemFactory;
 
+	private MarketplaceDiscoveryResources discoveryResources;
+
 	private boolean inUpdate;
 
 	public MarketplaceViewer(Catalog catalog, IShellProvider shellProvider, MarketplaceWizard wizard) {
@@ -185,6 +187,11 @@ public class MarketplaceViewer extends CatalogViewer {
 	@Override
 	protected CatalogContentProvider doCreateContentProvider() {
 		return new MarketplaceCatalogContentProvider();
+	}
+
+	@Override
+	protected MarketplaceDiscoveryResources getResources() {
+		return discoveryResources;
 	}
 
 	@Override
@@ -584,6 +591,14 @@ public class MarketplaceViewer extends CatalogViewer {
 			MarketplaceClientUi.error(ex);
 		}
 		StructuredViewer viewer = super.doCreateViewer(container);
+		discoveryResources = new MarketplaceDiscoveryResources(container.getDisplay());
+		viewer.getControl().addDisposeListener(new DisposeListener() {
+			public void widgetDisposed(DisposeEvent e) {
+				discoveryResources.dispose();
+			}
+		});
+		super.getResources().dispose();
+
 		viewer.setSorter(null);
 		if (serviceReference != null) {
 			final ServiceReference<IDiscoveryItemFactory> ref = serviceReference;
