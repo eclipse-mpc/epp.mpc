@@ -12,7 +12,9 @@
 package org.eclipse.epp.internal.mpc.core.service;
 
 import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,16 +34,9 @@ public class CachingMarketplaceService implements IMarketplaceService {
 
 	private final IMarketplaceService delegate;
 
-	private int maxCacheSize = 30;
+	private final Map<String, Reference<Object>> cache = new LinkedHashMap<String, Reference<Object>>();
 
-	private final Map<String, Reference<Object>> cache = new LinkedHashMap<String, Reference<Object>>() {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		protected boolean removeEldestEntry(Map.Entry<String, Reference<Object>> eldest) {
-			return size() > maxCacheSize || eldest.getValue().get() == null;
-		}
-	};
+	private final ReferenceQueue<Object> cacheReferenceQueue = new ReferenceQueue<Object>();
 
 	public CachingMarketplaceService(IMarketplaceService delegate) {
 		if (delegate == null) {
@@ -50,51 +45,133 @@ public class CachingMarketplaceService implements IMarketplaceService {
 		this.delegate = delegate;
 	}
 
-	public int getMaxCacheSize() {
-		return maxCacheSize;
-	}
-
-	public void setMaxCacheSize(int maxCacheSize) {
-		this.maxCacheSize = maxCacheSize;
-	}
-
 	public List<? extends IMarket> listMarkets(IProgressMonitor monitor) throws CoreException {
-		return delegate.listMarkets(monitor);
+		String marketsKey = "Markets:Markets"; //$NON-NLS-1$
+		@SuppressWarnings("unchecked")
+		List<? extends IMarket> marketsResult = getCached(marketsKey, List.class);
+		if (marketsResult == null) {
+			marketsResult = delegate.listMarkets(monitor);
+			synchronized (cache) {
+				cache(marketsKey, marketsResult);
+				for (IMarket market : marketsResult) {
+					cacheMarket(market);
+				}
+			}
+		}
+		return marketsResult;
 	}
 
 	public IMarket getMarket(IMarket market, IProgressMonitor monitor) throws CoreException {
-		return delegate.getMarket(market, monitor);
+		String marketKey = computeMarketKey(market);
+		IMarket marketResult = null;
+		if (marketKey != null) {
+			marketResult = getCached(marketKey, IMarket.class);
+		}
+		if (marketResult == null) {
+			marketResult = delegate.getMarket(market, monitor);
+			if (marketResult != null) {
+				synchronized (cache) {
+					cacheMarket(marketResult);
+				}
+			}
+		}
+		return marketResult;
+	}
+
+	private void cacheMarket(IMarket market) {
+		String marketKey = computeMarketKey(market);
+		cache(marketKey, market);
+		List<? extends ICategory> categories = market.getCategory();
+		for (ICategory category : categories) {
+			cacheCategory(category);
+		}
+	}
+
+	private void cacheCategory(ICategory category) {
+		String categoryKey = computeCategoryKey(category);
+		cache(categoryKey, category);
 	}
 
 	public ICategory getCategory(ICategory category, IProgressMonitor monitor) throws CoreException {
-		return delegate.getCategory(category, monitor);
+		String categoryKey = computeCategoryKey(category);
+		ICategory categoryResult = null;
+		if (categoryKey != null) {
+			categoryResult = getCached(categoryKey, ICategory.class);
+		}
+		if (categoryResult == null) {
+			categoryResult = delegate.getCategory(category, monitor);
+			if (categoryResult != null) {
+				synchronized (cache) {
+					cacheCategory(categoryResult);
+				}
+			}
+		}
+		return categoryResult;
 	}
 
 	public INode getNode(INode node, IProgressMonitor monitor) throws CoreException {
 		String nodeKey = computeNodeKey(node);
 		INode nodeResult = null;
 		if (nodeKey != null) {
-			synchronized (cache) {
-				Reference<Object> reference = cache.get(nodeKey);
-				if (reference != null) {
-					nodeResult = (Node) reference.get();
-				}
-			}
+			nodeResult = getCached(nodeKey, INode.class);
 		}
 		if (nodeResult == null) {
 			nodeResult = delegate.getNode(node, monitor);
 			if (nodeResult != null) {
 				synchronized (cache) {
-					cache.put(computeNodeKey(nodeResult), new SoftReference<Object>(nodeResult));
+					cache(nodeKey, nodeResult);
 				}
 			}
 		}
 		return nodeResult;
 	}
 
+	private void cache(String key, Object value) {
+		cache.put(key, new SoftReference<Object>(value, cacheReferenceQueue));
+	}
+
+	private <T> T getCached(String key, Class<T> type) {
+		synchronized (cache) {
+			gcCache();
+			Reference<Object> reference = cache.get(key);
+			if (reference != null) {
+				return type.cast(reference.get());
+			}
+		}
+		return null;
+	}
+
+	private void gcCache() {
+		if (cacheReferenceQueue.poll() != null) {
+			while (cacheReferenceQueue.poll() != null) {
+				//clear the queue
+			}
+			for (Iterator<Reference<Object>> i = cache.values().iterator(); i.hasNext();) {
+				Reference<Object> reference = i.next();
+				if (reference.isEnqueued()) {
+					i.remove();
+				}
+			}
+		}
+	}
+
 	private String computeNodeKey(INode node) {
 		if (node.getId() != null) {
 			return "Node:" + node.getId(); //$NON-NLS-1$
+		}
+		return null;
+	}
+
+	private String computeMarketKey(IMarket market) {
+		if (market.getId() != null) {
+			return "Market:" + market.getId(); //$NON-NLS-1$
+		}
+		return null;
+	}
+
+	private String computeCategoryKey(ICategory category) {
+		if (category.getId() != null) {
+			return "Category:" + category.getId(); //$NON-NLS-1$
 		}
 		return null;
 	}
@@ -127,9 +204,9 @@ public class CachingMarketplaceService implements IMarketplaceService {
 			result = searchOperation.doSearch(monitor);
 			if (result != null) {
 				synchronized (cache) {
-					cache.put(key, new SoftReference<Object>(result));
+					cache(key, result);
 					for (INode node : result.getNodes()) {
-						cache.put(computeNodeKey(node), new SoftReference<Object>(node));
+						cache(computeNodeKey(node), node);
 					}
 				}
 			}
@@ -211,7 +288,15 @@ public class CachingMarketplaceService implements IMarketplaceService {
 	}
 
 	public INews news(IProgressMonitor monitor) throws CoreException {
-		return delegate.news(monitor);
+		String newsKey = "News:News"; //$NON-NLS-1$
+		INews newsResult = getCached(newsKey, INews.class);
+		if (newsResult == null) {
+			newsResult = delegate.news(monitor);
+			synchronized (cache) {
+				cache(newsKey, newsResult);
+			}
+		}
+		return newsResult;
 	}
 
 	public void reportInstallError(IProgressMonitor monitor, IStatus result, Set<Node> nodes,
