@@ -157,7 +157,10 @@ public class SelectionModel {
 		Operation selectedOperation = parent.getSelectedOperation();
 		switch (selectedOperation) {
 		case INSTALL:
-			return !featureEntry.isInstalled() || featureEntry.hasUpdateAvailable();
+			if (!featureEntry.isInstalled()) {
+				return featureEntry.isRequiredInstall() || featureEntry.getInstallableUnitItem().isDefaultSelected();
+			}
+			return featureEntry.hasUpdateAvailable();
 		case UNINSTALL:
 			return featureEntry.isInstalled();
 		case UPDATE:

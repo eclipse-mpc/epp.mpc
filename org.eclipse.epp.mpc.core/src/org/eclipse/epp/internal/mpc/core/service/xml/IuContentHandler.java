@@ -28,10 +28,21 @@ public class IuContentHandler extends UnmarshalContentHandler {
 	public void startElement(String uri, String localName, Attributes attributes) {
 		if (localName.equals("iu")) { //$NON-NLS-1$
 			model = new Iu();
+			//FIXME at some point we sent optional, at another required, so we handle both for now...
+			Boolean optional = null;
 			String optionalValue = attributes.getValue(NS_URI, "optional"); //$NON-NLS-1$
 			if (optionalValue != null) {
-				model.setOptional(Boolean.valueOf(optionalValue));
+				optional = Boolean.valueOf(optionalValue);
 			}
+			String requiredValue = attributes.getValue(NS_URI, "required"); //$NON-NLS-1$
+			if (requiredValue != null) {
+				Boolean required = Boolean.valueOf(requiredValue);
+				optional = optional == null ? !required : optional && !required;
+			}
+			if (optional != null) {
+				model.setOptional(optional);
+			}
+
 			String selectedValue = attributes.getValue(NS_URI, "selected"); //$NON-NLS-1$
 			if (selectedValue != null) {
 				model.setSelected(Boolean.valueOf(selectedValue));
