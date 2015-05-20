@@ -7,7 +7,7 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
- *  Yatta Solutions - bug 397004, bug 432803: public API
+ * 	Yatta Solutions - bug 397004, bug 432803: public API, bug 461603: featured market
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
@@ -76,7 +76,8 @@ public class BrowseCatalogItem extends AbstractDiscoveryItem<CatalogDescriptor> 
 		GridLayoutFactory.swtDefaults().applyTo(parent);
 
 		Link link = new Link(parent, SWT.NULL);
-		if (viewer.getQueryContentType() == ContentType.SEARCH) {
+		if (viewer.getQueryContentType() == ContentType.SEARCH
+				|| viewer.getQueryContentType() == ContentType.FEATURED_MARKET) {
 			link.setText(NLS.bind(Messages.BrowseCatalogItem_browseMoreLink, category.getMatchCount()));
 		} else {
 			link.setText(Messages.BrowseCatalogItem_browseMoreLinkNoCount);

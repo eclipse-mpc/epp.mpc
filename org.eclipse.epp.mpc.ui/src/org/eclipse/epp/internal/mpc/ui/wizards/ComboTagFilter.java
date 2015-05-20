@@ -7,10 +7,12 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
+ * 	Yatta Solutions - bug 461603: featured market
  *******************************************************************************/
 
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.equinox.internal.p2.discovery.model.Tag;
@@ -40,15 +42,16 @@ public class ComboTagFilter extends AbstractTagFilter {
 			throw new IllegalStateException();
 		}
 		combo = new Combo(parent, SWT.READ_ONLY | SWT.DROP_DOWN);
+		combo.setData(this);
 		listener = new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
 				int selectionIndex = combo.getSelectionIndex();
-				getSelected().clear();
 				if (selectionIndex > 0) {
 					Tag tag = getChoices().get(selectionIndex - 1);
-					getSelected().add(tag);
+					setSelected(Collections.singleton(tag));
+				} else {
+					setSelected(Collections.<Tag> emptySet());
 				}
-				selectionUpdated();
 			}
 
 			public void widgetDefaultSelected(SelectionEvent e) {

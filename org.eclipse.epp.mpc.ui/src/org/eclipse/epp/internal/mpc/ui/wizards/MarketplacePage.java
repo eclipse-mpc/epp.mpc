@@ -7,13 +7,15 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
- * 	Yatta Solutions - news (bug 401721), public API (bug 432803), performance (bug 413871)
+ * 	Yatta Solutions - news (bug 401721), public API (bug 432803), performance (bug 413871),
+ * 	                  bug 461603: featured market
  * 	JBoss (Pascal Rapicault) - Bug 406907 - Add p2 remediation page to MPC install flow
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -73,6 +75,8 @@ public class MarketplacePage extends CatalogPage {
 
 	public static final String WIDGET_ID_TAB_SEARCH = "tab:search"; //$NON-NLS-1$
 
+	public static final String WIDGET_ID_TAB_FEATURED_MARKET = "tab:featured-market"; //$NON-NLS-1$
+
 	public static final String WIDGET_ID_TAB_RECENT = "tab:recent"; //$NON-NLS-1$
 
 	public static final String WIDGET_ID_TAB_POPULAR = "tab:popular"; //$NON-NLS-1$
@@ -100,6 +104,8 @@ public class MarketplacePage extends CatalogPage {
 	private TabItem recentTabItem;
 
 	private TabItem popularTabItem;
+
+	private TabItem featuredMarketTabItem;
 
 	private TabItem relatedTabItem;
 
@@ -150,7 +156,6 @@ public class MarketplacePage extends CatalogPage {
 		searchTabItem = createCatalogTab(-1, WIDGET_ID_TAB_SEARCH, currentBranding.getSearchTabName());
 		recentTabItem = createCatalogTab(-1, WIDGET_ID_TAB_RECENT, currentBranding.getRecentTabName());
 		popularTabItem = createCatalogTab(-1, WIDGET_ID_TAB_POPULAR, currentBranding.getPopularTabName());
-		relatedTabItem = createCatalogTab(-1, WIDGET_ID_TAB_RELATED, currentBranding.getRelatedTabName());
 		installedTabItem = createCatalogTab(-1, WIDGET_ID_TAB_INSTALLED, Messages.MarketplacePage_installed);
 		updateNewsTab();
 
@@ -272,7 +277,7 @@ public class MarketplacePage extends CatalogPage {
 		throw new IllegalArgumentException();
 	}
 
-	private void setActiveTab(ContentType contentType) {
+	public void setActiveTab(ContentType contentType) {
 		if (disableTabSelection) {
 			return;
 		}
@@ -302,6 +307,8 @@ public class MarketplacePage extends CatalogPage {
 		switch (content) {
 		case INSTALLED:
 			return installedTabItem;
+		case FEATURED_MARKET:
+			return featuredMarketTabItem;
 		case POPULAR:
 			return popularTabItem;
 		case RECENT:
@@ -557,6 +564,12 @@ public class MarketplacePage extends CatalogPage {
 		if (hasTab) {
 			tabIndex++;
 		}
+		hasTab = branding.hasFeaturedMarketTab();
+		featuredMarketTabItem = updateTab(featuredMarketTabItem, WIDGET_ID_TAB_FEATURED_MARKET,
+				branding.getFeaturedMarketTabName(), hasTab, oldBranding.hasFeaturedMarketTab(), tabIndex);
+		if (hasTab) {
+			tabIndex++;
+		}
 		hasTab = branding.hasRecentTab();
 		recentTabItem = updateTab(recentTabItem, WIDGET_ID_TAB_RECENT, branding.getRecentTabName(), hasTab,
 				oldBranding.hasRecentTab(),
@@ -610,6 +623,21 @@ public class MarketplacePage extends CatalogPage {
 		disableTabSelection = false;
 	}
 
+	private boolean hasFeaturedMarketTab(ICatalogBranding branding) {
+		if (branding.hasFeaturedMarketTab()) {
+			String marketName = branding.getFeaturedMarketTabName();
+			if (marketName != null && marketName.length() > 0) {
+				List<IMarket> markets = getCatalog().getMarkets();
+				for (IMarket market : markets) {
+					if (marketName.equals(market.getName())) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
 	private TabItem updateTab(TabItem tabItem, String widgetId, String tabLabel, boolean hasTab, boolean hadTab,
 			int tabIndex) {
 		if (hasTab) {
@@ -630,10 +658,12 @@ public class MarketplacePage extends CatalogPage {
 		branding.setHasPopularTab(true);
 		branding.setHasRecentTab(true);
 		branding.setHasRelatedTab(false);
+		branding.setHasFeaturedMarketTab(false);
 		branding.setSearchTabName(Messages.MarketplacePage_search);
 		branding.setPopularTabName(Messages.MarketplacePage_popular);
 		branding.setRecentTabName(Messages.MarketplacePage_recent);
 		branding.setRelatedTabName(Messages.MarketplacePage_related);
+		branding.setFeaturedMarketTabName(Messages.MarketplacePage_featuredMarket);
 		branding.setWizardTitle(Messages.MarketplacePage_eclipseMarketplaceSolutions);
 		branding.setWizardIcon(null);
 		return branding;
@@ -742,6 +772,11 @@ public class MarketplacePage extends CatalogPage {
 				search(configuration.getCatalogDescriptor(), market, category, query);
 			}
 		}
+	}
+
+	@Override
+	public MarketplaceCatalog getCatalog() {
+		return (MarketplaceCatalog) super.getCatalog();
 	}
 
 	@Override

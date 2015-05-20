@@ -7,6 +7,7 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
+ * 	Yatta Solutions - bug 461603: featured market
  *******************************************************************************/
 
 package org.eclipse.epp.internal.mpc.ui.wizards;
@@ -84,10 +85,16 @@ public abstract class AbstractTagFilter extends MarketplaceFilter {
 	}
 
 	public void setSelected(Set<Tag> selected) {
+		boolean changed = (selected == null ? !this.selected.isEmpty() : !selected.equals(this.selected));
 		this.selected.clear();
 		if (selected != null) {
 			this.selected.addAll(selected);
 		}
+		if (changed) {
+			updateUi();
+			selectionUpdated();
+		}
+
 	}
 
 	public boolean isSelectAllOnNoSelection() {

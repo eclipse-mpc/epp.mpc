@@ -7,7 +7,7 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
- * 	Yatta Solutions - bug 432803: public API
+ * 	Yatta Solutions - bug 432803: public API, bug 461603: featured market
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
@@ -17,6 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.epp.mpc.ui.IMarketplaceClientConfiguration;
 import org.eclipse.epp.mpc.ui.Operation;
@@ -35,6 +36,8 @@ public class MarketplaceCatalogConfiguration extends CatalogConfiguration implem
 
 	private Map<String, Operation> initialOperations;
 
+	private ContentType initialContentType;
+
 	public MarketplaceCatalogConfiguration() {
 		setShowTagFilter(false);
 		setShowInstalled(true);
@@ -49,6 +52,14 @@ public class MarketplaceCatalogConfiguration extends CatalogConfiguration implem
 		setCatalogDescriptor(configuration.getCatalogDescriptor());
 		setInitialState(configuration.getInitialState());
 		setInitialOperations(configuration.getInitialOperations());
+	}
+
+	public ContentType getInitialContentType() {
+		return initialContentType;
+	}
+
+	public void setInitialContentType(ContentType initialContentType) {
+		this.initialContentType = initialContentType;
 	}
 
 	public List<CatalogDescriptor> getCatalogDescriptors() {

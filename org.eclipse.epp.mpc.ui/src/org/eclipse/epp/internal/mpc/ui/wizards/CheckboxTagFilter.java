@@ -7,6 +7,7 @@
  *
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
+ * 	Yatta Solutions - bug 461603: featured market
  *******************************************************************************/
 
 package org.eclipse.epp.internal.mpc.ui.wizards;
@@ -37,6 +38,7 @@ public class CheckboxTagFilter extends AbstractTagFilter {
 			throw new IllegalStateException();
 		}
 		buttonContainer = new Composite(parent, SWT.NULL);
+		buttonContainer.setData(this);
 		rebuildChoicesUi();
 	}
 

@@ -7,7 +7,7 @@
  *
  * Contributors:
  *      The Eclipse Foundation  - initial API and implementation
- *      Yatta Solutions - bug 432803: public API
+ *      Yatta Solutions - bug 432803: public API, bug 461603: featured market
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service;
 
@@ -38,6 +38,10 @@ public class CatalogBranding extends Identifiable implements ICatalogBranding {
 	private boolean hasRelatedTab;
 
 	private String relatedTabName;
+
+	private boolean hasFeaturedMarketTab;
+
+	private String featuredMarketTabName;
 
 	public String getWizardIcon() {
 		return wizardIcon;
@@ -109,6 +113,22 @@ public class CatalogBranding extends Identifiable implements ICatalogBranding {
 
 	public void setRelatedTabName(String relatedTabName) {
 		this.relatedTabName = relatedTabName;
+	}
+
+	public boolean hasFeaturedMarketTab() {
+		return hasFeaturedMarketTab;
+	}
+
+	public void setHasFeaturedMarketTab(boolean hasFeaturedMarketTab) {
+		this.hasFeaturedMarketTab = hasFeaturedMarketTab;
+	}
+
+	public String getFeaturedMarketTabName() {
+		return featuredMarketTabName;
+	}
+
+	public void setFeaturedMarketTabName(String featuredMarketTabName) {
+		this.featuredMarketTabName = featuredMarketTabName;
 	}
 
 	public String getWizardTitle() {

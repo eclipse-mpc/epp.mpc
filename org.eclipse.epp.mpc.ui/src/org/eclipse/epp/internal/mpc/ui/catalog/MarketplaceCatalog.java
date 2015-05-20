@@ -8,6 +8,7 @@
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
  * 	Yatta Solutions - error handling (bug 374105), news (bug 401721), public API (bug 432803)
+ * 	                  featured market (bug 461603)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.catalog;
 
@@ -495,5 +496,20 @@ public class MarketplaceCatalog extends Catalog {
 
 	public void setNews(INews news) {
 		this.news = news;
+	}
+
+	public List<IMarket> getMarkets() {
+		List<IMarket> markets = new ArrayList<IMarket>();
+		for (CatalogCategory category : getCategories()) {
+			if (category instanceof MarketplaceCategory) {
+				MarketplaceCategory marketplaceCategory = (MarketplaceCategory) category;
+				for (IMarket market : marketplaceCategory.getMarkets()) {
+					if (!markets.contains(market)) {
+						markets.add(market);
+					}
+				}
+			}
+		}
+		return markets;
 	}
 }

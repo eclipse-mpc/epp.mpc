@@ -6,7 +6,8 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Yatta Solutions - initial API and implementation, bug 432803: public API
+ *     Yatta Solutions - initial API and implementation, bug 432803: public API,
+ *                       bug 461603: featured market
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
@@ -35,9 +36,20 @@ public class MarketplaceClientService implements IMarketplaceClientService {
 		MarketplaceWizardCommand command = new MarketplaceWizardCommand();
 		command.setConfiguration(configuration);
 		WizardState wizardState = new WizardState();
+		setInitialContentType(configuration, wizardState);
 		wizardState.setProceedWithInstallation(false);
 		command.setWizardDialogState(wizardState);
 		execute(command);
+	}
+
+	private void setInitialContentType(IMarketplaceClientConfiguration configuration, WizardState wizardState) {
+		if (configuration instanceof MarketplaceCatalogConfiguration) {
+			MarketplaceCatalogConfiguration catalogConfiguration = (MarketplaceCatalogConfiguration) configuration;
+			ContentType initialContentType = catalogConfiguration.getInitialContentType();
+			if (initialContentType != null) {
+				wizardState.setContentType(initialContentType);
+			}
+		}
 	}
 
 	public void openSelected(IMarketplaceClientConfiguration configuration) {
@@ -79,6 +91,7 @@ public class MarketplaceClientService implements IMarketplaceClientService {
 		MarketplaceWizardCommand command = new MarketplaceWizardCommand();
 		command.setConfiguration(configuration);
 		WizardState wizardState = new WizardState();
+		setInitialContentType(configuration, wizardState);
 		wizardState.setContent(nodes);
 		wizardState.setProceedWithInstallation(false);
 		command.setWizardDialogState(wizardState);

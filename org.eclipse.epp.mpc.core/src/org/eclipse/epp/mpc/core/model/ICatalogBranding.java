@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
- *     Yatta Solutions - bug 432803: public API
+ *     Yatta Solutions - bug 432803: public API, bug 461603: featured market
  *******************************************************************************/
 package org.eclipse.epp.mpc.core.model;
 
@@ -39,6 +39,10 @@ public interface ICatalogBranding extends IIdentifiable {
 	boolean hasRelatedTab();
 
 	String getRelatedTabName();
+
+	boolean hasFeaturedMarketTab();
+
+	String getFeaturedMarketTabName();
 
 	String getWizardTitle();
 

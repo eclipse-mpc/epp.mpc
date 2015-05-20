@@ -9,7 +9,7 @@
  * 	The Eclipse Foundation - initial API and implementation
  * 	Yatta Solutions - category filtering (bug 314936), error handling (bug 374105),
  *                      multiselect hints (bug 337774), public API (bug 432803), 
- *                      performance (bug 413871)
+ *                      performance (bug 413871), featured market (bug 461603)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.commands;
 
@@ -35,7 +35,6 @@ import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
-import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
 import org.eclipse.epp.internal.mpc.ui.catalog.ResourceProvider;
 import org.eclipse.epp.internal.mpc.ui.wizards.AbstractTagFilter;
 import org.eclipse.epp.internal.mpc.ui.wizards.ComboTagFilter;
@@ -53,7 +52,6 @@ import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.epp.mpc.ui.IMarketplaceClientConfiguration;
 import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.DiscoveryCore;
-import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 import org.eclipse.equinox.internal.p2.discovery.model.Tag;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogFilter;
@@ -139,15 +137,11 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 			@Override
 			public void catalogUpdated(boolean wasCancelled) {
 				List<Tag> choices = new ArrayList<Tag>();
-				for (CatalogCategory category : catalog.getCategories()) {
-					if (category instanceof MarketplaceCategory) {
-						MarketplaceCategory marketplaceCategory = (MarketplaceCategory) category;
-						for (IMarket market : marketplaceCategory.getMarkets()) {
-							Tag marketTag = new Tag(IMarket.class, market.getId(), market.getName());
-							marketTag.setData(market);
-							choices.add(marketTag);
-						}
-					}
+				List<IMarket> markets = catalog.getMarkets();
+				for (IMarket market : markets) {
+					Tag marketTag = new Tag(IMarket.class, market.getId(), market.getName());
+					marketTag.setData(market);
+					choices.add(marketTag);
 				}
 				setChoices(choices);
 			}
@@ -209,18 +203,14 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 		}
 
 		final MarketplaceCatalog catalog = (MarketplaceCatalog) marketCategoryTagFilter.getCatalog();
-		for (CatalogCategory category : catalog.getCategories()) {
-			if (category instanceof MarketplaceCategory) {
-				MarketplaceCategory marketplaceCategory = (MarketplaceCategory) category;
-				for (IMarket market : marketplaceCategory.getMarkets()) {
-					if (selectedMarkets.isEmpty() || selectedMarkets.contains(market)) {
-						for (ICategory marketCategory : market.getCategory()) {
-							Tag categoryTag = new Tag(ICategory.class, marketCategory.getId(), marketCategory.getName());
-							categoryTag.setData(marketCategory);
-							if (newChoices.add(categoryTag)) {
-								choices.add(categoryTag);
-							}
-						}
+		List<IMarket> markets = catalog.getMarkets();
+		for (IMarket market : markets) {
+			if (selectedMarkets.isEmpty() || selectedMarkets.contains(market)) {
+				for (ICategory marketCategory : market.getCategory()) {
+					Tag categoryTag = new Tag(ICategory.class, marketCategory.getId(), marketCategory.getName());
+					categoryTag.setData(marketCategory);
+					if (newChoices.add(categoryTag)) {
+						choices.add(categoryTag);
 					}
 				}
 			}
