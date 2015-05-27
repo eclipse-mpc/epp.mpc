@@ -283,6 +283,11 @@ public class MarketplaceViewer extends CatalogViewer {
 	}
 
 	@Override
+	protected void doCheckCatalog() {
+		// do nothing - don't complain about 'connectors' on empty search results
+	}
+
+	@Override
 	protected void filterTextChanged() {
 		doFind(getFilterText());
 	}
@@ -389,6 +394,7 @@ public class MarketplaceViewer extends CatalogViewer {
 				}
 			}
 		}
+		initQueryFromFilters();
 	}
 
 	private static boolean matches(IIdentifiable data, final Object tagData) {
@@ -443,12 +449,16 @@ public class MarketplaceViewer extends CatalogViewer {
 	 *
 	 * @param tag
 	 *            the tag to search for
-	 * @deprecated tag support was removed from Marketplace
 	 */
-	@Deprecated
-	public void doQueryForTag(String tag) {
-		setFindText(tag);
-		doSetContentType(ContentType.SEARCH);
+	public void doQueryForTag(final String tag) {
+		updateContent(ContentType.SEARCH, new Runnable() {
+			public void run() {
+				queryData = new QueryData();
+				queryData.queryText = tag;
+				setFilters(queryData);
+				doQuery();
+			}
+		});
 	}
 
 	private void setFindText(String tag) {

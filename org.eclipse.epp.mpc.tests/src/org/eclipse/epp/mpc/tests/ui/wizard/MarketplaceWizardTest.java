@@ -89,8 +89,7 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 	public void testShowSelected() {
 		selectToInstall(3);
 		SWTBotLink link = bot.link("<a>3 solutions selected</a>");
-		link.click();//swtbot issue, link sometimes doesn't get clicked...
-		link.click();
+		link.click("3 solutions selected");
 		//wait for the action to be processed
 		bot.waitUntil(new DefaultCondition() {
 			public boolean test() throws Exception {
@@ -122,7 +121,7 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 		checkMarketplaceBrowser();
 	}
 
-	//TODO conditional on embedded browser availability
+	@Ignore("We currently filter out non-installable items in MPC")
 	@Test
 	public void testNoninstallableLearnMore() {
 		searchField().setFocus();

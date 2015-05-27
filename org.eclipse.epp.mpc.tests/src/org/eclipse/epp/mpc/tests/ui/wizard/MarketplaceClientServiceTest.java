@@ -86,8 +86,7 @@ public class MarketplaceClientServiceTest extends AbstractMarketplaceWizardBotTe
 
 		initWizardBot();
 		checkSelectedTab("Installed");
-		//We should get a message dialog here. Let's check that and close it.
-		bot.shell("No Extensions Found").close();
+		checkNoItems();
 	}
 
 	@Test

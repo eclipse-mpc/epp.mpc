@@ -15,12 +15,11 @@ import static org.junit.Assert.*;
 
 import java.net.URL;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
+import org.eclipse.epp.internal.mpc.core.ServiceLocator;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
@@ -54,8 +53,7 @@ public class SelectionModelStateSerializerTest {
 			@Override
 			public IMarketplaceService createMarketplaceService() {
 				DefaultMarketplaceService marketplaceService = new DefaultMarketplaceService(catalogDescriptor.getUrl());
-				Map<String, String> requestMetaParameters = new HashMap<String, String>();
-				requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_CLIENT, MarketplaceClientCore.BUNDLE_ID);
+				Map<String, String> requestMetaParameters = ServiceLocator.computeDefaultRequestMetaParameters();
 				marketplaceService.setRequestMetaParameters(requestMetaParameters);
 				return marketplaceService;
 			}

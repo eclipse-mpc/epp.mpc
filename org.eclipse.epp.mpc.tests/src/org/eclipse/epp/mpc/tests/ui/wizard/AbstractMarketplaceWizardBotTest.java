@@ -278,6 +278,15 @@ public abstract class AbstractMarketplaceWizardBotTest {
 		return description.toString();
 	}
 
+	protected void checkNoItems() {
+		checkNoItems(NodeMatcher.any());
+	}
+
+	protected void checkNoItems(NodeMatcher<? extends Widget> matcher) {
+		List<? extends Widget> controls = bot.getFinder().findControls(matcher);
+		assertThat(controls, empty());
+	}
+
 	protected SWTBot itemBot(NodeMatcher<? extends Widget> matcher) {
 		List<? extends Widget> controls = bot.getFinder().findControls(matcher);
 		assertThat(controls.size(), greaterThanOrEqualTo(1));
@@ -286,7 +295,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 	}
 
 	protected SWTBot itemBot(String id) {
-		return itemBot(NodeMatcher.withId(id));
+		return itemBot(id == null ? NodeMatcher.any() : NodeMatcher.withId(id));
 	}
 
 	protected void checkSelectedTab(String tabLabel) {

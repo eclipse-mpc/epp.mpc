@@ -16,7 +16,6 @@ import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +23,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
+import org.eclipse.epp.internal.mpc.core.ServiceLocator;
 import org.eclipse.epp.internal.mpc.core.service.Category;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.service.Market;
@@ -51,9 +50,8 @@ public class DefaultMarketplaceServiceTest {
 	@Before
 	public void setUp() throws Exception {
 		marketplaceService = new DefaultMarketplaceService();
-		Map<String, String> requestMetaParameters = new HashMap<String, String>();
-		// bug 397004 - this is the only valid id for REST API calls
-		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_CLIENT, MarketplaceClientCore.BUNDLE_ID);
+		//configure client id (bug 397004), as well as eclipse and marketplace versions (bug 418865)
+		Map<String, String> requestMetaParameters = ServiceLocator.computeDefaultRequestMetaParameters();
 		marketplaceService.setRequestMetaParameters(requestMetaParameters);
 	}
 
@@ -312,7 +310,13 @@ public class DefaultMarketplaceServiceTest {
 		assertNotNull(result);
 		assertNotNull(result.getNodes());
 		assertNotNull(result.getMatchCount());
-		assertTrue(result.getMatchCount() >= result.getNodes().size());
+		int promotedCount = 0;
+		for (INode node : result.getNodes()) {
+			if (node.getShortdescription() != null && node.getShortdescription().startsWith("**Promoted**")) {
+				promotedCount++;
+			}
+		}
+		assertTrue(result.getMatchCount() >= result.getNodes().size() - promotedCount);
 		assertTrue(result.getNodes().size() > 0);
 
 		Set<String> ids = new HashSet<String>();
