@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
 import org.eclipse.epp.internal.mpc.core.util.TransportFactory;
+import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.epp.mpc.core.service.IMarketplaceUnmarshaller;
 import org.eclipse.epp.mpc.core.service.ITransport;
@@ -105,12 +106,7 @@ public class RemoteMarketplaceService<T> {
 			throw new IllegalArgumentException();
 		}
 
-		String uri = baseUri;
-		if (!uri.endsWith("/") && !relativePath.startsWith("/")) { //$NON-NLS-1$ //$NON-NLS-2$
-			uri += '/';
-		}
-		uri += relativePath;
-
+		String uri = URLUtil.appendPath(baseUri, relativePath);
 		if (withMetaParams) {
 			uri = addMetaParameters(uri);
 		}

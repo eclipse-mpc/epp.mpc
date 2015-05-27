@@ -14,6 +14,7 @@ package org.eclipse.epp.internal.mpc.core.service;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
+import java.net.URL;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INews;
@@ -116,10 +118,18 @@ public class CachingMarketplaceService implements IMarketplaceService {
 			nodeResult = getCached(nodeKey, INode.class);
 		}
 		if (nodeResult == null) {
+			String nodeUrlKey = computeNodeUrlKey(node);
+			if (nodeUrlKey != null) {
+				nodeResult = getCached(nodeUrlKey, INode.class);
+			}
+		}
+		if (nodeResult == null) {
 			nodeResult = delegate.getNode(node, monitor);
 			if (nodeResult != null) {
 				synchronized (cache) {
 					cache(nodeKey, nodeResult);
+					cache(computeNodeUrlKey(node), nodeResult);
+					cache(computeNodeIdUrlKey(node), nodeResult);
 				}
 			}
 		}
@@ -158,6 +168,23 @@ public class CachingMarketplaceService implements IMarketplaceService {
 	private String computeNodeKey(INode node) {
 		if (node.getId() != null) {
 			return "Node:" + node.getId(); //$NON-NLS-1$
+		}
+		return null;
+	}
+
+	private String computeNodeUrlKey(INode node) {
+		if (node.getUrl() != null) {
+			return "Node:" + node.getUrl(); //$NON-NLS-1$
+		}
+		return null;
+	}
+
+	private String computeNodeIdUrlKey(INode node) {
+		if (node.getId() != null) {
+			String url = URLUtil.appendPath(getBaseUrl().toString(), DefaultMarketplaceService.API_NODE_URI,
+					node.getId());
+
+			return "Node:" + url; //$NON-NLS-1$
 		}
 		return null;
 	}
@@ -217,6 +244,10 @@ public class CachingMarketplaceService implements IMarketplaceService {
 	private String computeSearchKey(String prefix, IMarket market, ICategory category, String queryText) {
 		return prefix
 				+ ":" + (market == null ? "" : market.getId()) + ":" + (category == null ? "" : category.getId()) + ":" + (queryText == null ? "" : queryText.trim()); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$ //$NON-NLS-6$
+	}
+
+	public URL getBaseUrl() {
+		return delegate.getBaseUrl();
 	}
 
 	public ISearchResult featured(IProgressMonitor monitor) throws CoreException {

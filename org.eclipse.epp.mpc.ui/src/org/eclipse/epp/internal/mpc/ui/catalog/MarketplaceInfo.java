@@ -39,6 +39,8 @@ import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.mpc.core.model.IIu;
 import org.eclipse.epp.mpc.core.model.INode;
+import org.eclipse.epp.mpc.core.service.QueryHelper;
+import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 
 /**
  * A means of knowing about how nodes map to IUs and visa versa. Can handle nodes from multiple marketplaces, and does a
@@ -47,6 +49,8 @@ import org.eclipse.epp.mpc.core.model.INode;
  * @author David Green
  */
 public class MarketplaceInfo {
+
+	public static final String MPC_NODE_IU_PROPERTY = "org.eclipse.epp.mpc.node"; //$NON-NLS-1$
 
 	private static final String P2_FEATURE_GROUP_SUFFIX = ".feature.group"; //$NON-NLS-1$
 
@@ -90,7 +94,9 @@ public class MarketplaceInfo {
 	 * @param installedIus
 	 *            all of the currently installed IUs
 	 * @return a set of node ids, or an empty set if there are no known installed nodes
+	 * @deprecated use {@link #computeInstalledNodes(URL, Map)} instead
 	 */
+	@Deprecated
 	public synchronized Set<INode> computeInstalledNodes(URL repositoryUrl, Set<String> installedIus) {
 		Set<INode> nodes = new HashSet<INode>();
 
@@ -110,6 +116,40 @@ public class MarketplaceInfo {
 		return nodes;
 	}
 
+	/**
+	 * Calculate the known catalog nodes that might be installed. Since no remote query should happen, this only checks
+	 * if any one of the IUs for a node are installed.
+	 *
+	 * @param repositoryUrl
+	 *            the catalog url for which installed nodes should be computed
+	 * @param installedIus
+	 *            all of the currently installed IUs
+	 * @return a set of node ids, or an empty set if there are no known installed nodes
+	 */
+	public synchronized Set<INode> computeInstalledNodes(URL repositoryUrl, Map<String, IInstallableUnit> installedIus) {
+		Set<INode> nodes = new HashSet<INode>();
+
+		String keyPrefix = computeUrlKey(repositoryUrl) + '#';
+		for (Map.Entry<String, List<String>> entry : nodeKeyToIU.entrySet()) {
+			if (entry.getKey().startsWith(keyPrefix)) {
+				List<String> ius = nodeKeyToIU.get(entry.getKey());
+				if (computeInstalled(installedIus.keySet(), ius, false)) {
+					String nodeId = entry.getKey().substring(keyPrefix.length());
+					INode node = QueryHelper.nodeById(nodeId);
+					nodes.add(node);
+				}
+			}
+		}
+		for (IInstallableUnit iu : installedIus.values()) {
+			String nodeUrl = iu.getProperty(MPC_NODE_IU_PROPERTY);
+			if (nodeUrl != null && nodeUrl.startsWith(repositoryUrl.toString())) {
+				INode node = QueryHelper.nodeByUrl(nodeUrl);
+				nodes.add(node);
+			}
+		}
+
+		return nodes;
+	}
 
 	/**
 	 * Compute if the given node is installed. The given node must be fully realized, including its

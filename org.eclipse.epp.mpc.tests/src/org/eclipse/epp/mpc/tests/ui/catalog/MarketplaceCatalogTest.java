@@ -16,6 +16,7 @@ import static org.junit.Assert.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.epp.internal.mpc.core.service.Iu;
 import org.eclipse.epp.internal.mpc.core.service.Ius;
 import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.core.service.SearchResult;
@@ -39,6 +41,7 @@ import org.eclipse.epp.mpc.core.model.IIus;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
+import org.eclipse.equinox.internal.p2.metadata.InstallableUnit;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,14 +73,14 @@ public class MarketplaceCatalogTest {
 		node.setName("Not installed");
 		node.setId("1001");
 		node.setIus(new Ius());
-		node.getIus().getIu().add("org.example.notinstalled.iu");
+		node.getIus().getIuElements().add(new Iu("org.example.notinstalled.iu"));
 		discoveryNodes.add(node);
 
 		node = new Node();
 		node.setName("Up to date");
 		node.setId("1002");
 		node.setIus(new Ius());
-		node.getIus().getIu().add("org.example.installed.iu");
+		node.getIus().getIuElements().add(new Iu("org.example.installed.iu"));
 		discoveryNodes.add(node);
 		installedNodes.add(node);
 
@@ -85,7 +88,7 @@ public class MarketplaceCatalogTest {
 		node.setName("Update available");
 		node.setId("1003");
 		node.setIus(new Ius());
-		node.getIus().getIu().add("org.example.updateable.iu");
+		node.getIus().getIuElements().add(new Iu("org.example.updateable.iu"));
 		discoveryNodes.add(node);
 		installedNodes.add(node);
 		updateAvailable.add(node);
@@ -112,17 +115,20 @@ public class MarketplaceCatalogTest {
 			}
 
 			@Override
-			protected Set<String> computeInstalledFeatures(IProgressMonitor monitor) {
-				Set<String> installedIuIds = new HashSet<String>();
+			protected synchronized Map<String, IInstallableUnit> computeInstalledIUs(IProgressMonitor monitor) {
+				Map<String, IInstallableUnit> installedIus = new HashMap<String, IInstallableUnit>();
 				for (INode node : installedNodes) {
 					IIus ius = node.getIus();
 					if (ius != null) {
 						for (IIu iu : ius.getIuElements()) {
-							installedIuIds.add(iu.getId() + ".feature.group");
+							String featureId = iu.getId() + ".feature.group";
+							InstallableUnit installableUnit = new InstallableUnit();
+							installableUnit.setId(featureId);
+							installedIus.put(featureId, installableUnit);
 						}
 					}
 				}
-				return installedIuIds;
+				return installedIus;
 			}
 
 			@Override

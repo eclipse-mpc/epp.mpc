@@ -301,7 +301,7 @@ public class MarketplaceCatalog extends Catalog {
 	}
 
 	private String createRepositoryIuKey(String uri, String id) {
-		return uri.toString() + "!" + id; //$NON-NLS-1$
+		return uri + "!" + id; //$NON-NLS-1$
 	}
 
 	private boolean setUpdatesAvailable(Map<String, IInstallableUnit> installedIUs, MarketplaceNodeCatalogItem item) {

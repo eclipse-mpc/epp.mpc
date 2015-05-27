@@ -86,4 +86,21 @@ public class URLUtil {
 		}
 		return url;
 	}
+
+	public static String appendPath(String... urlParts) {
+		if (urlParts == null || urlParts.length == 0) {
+			return null;
+		} else if (urlParts.length == 1) {
+			return urlParts[0];
+		}
+		StringBuilder url = new StringBuilder();
+		for (String part : urlParts) {
+			if (((url.length() > 0 && url.charAt(url.length() - 1) != '/') && (part.length() == 0 || part.charAt(0) != '/'))
+					|| (url.length() == 0 && part.length() == 0)) {
+				url.append('/');
+			}
+			url.append(part);
+		}
+		return url.toString();
+	}
 }

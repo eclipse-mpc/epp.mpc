@@ -16,8 +16,10 @@ import static org.junit.Assert.*;
 import java.net.URI;
 import java.net.URL;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.epp.internal.mpc.core.service.Iu;
@@ -26,6 +28,8 @@ import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceInfo;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
 import org.eclipse.epp.mpc.core.model.INode;
+import org.eclipse.equinox.internal.p2.metadata.InstallableUnit;
+import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -96,22 +100,22 @@ public class MarketplaceInfoTest {
 
 		assertEquals(1, catalogRegistry.getNodeKeyToIU().size());
 
-		Set<String> installedIus = new HashSet<String>();
-		installedIus.add("com.foo.bar");
+		Map<String, IInstallableUnit> installedIus = new HashMap<String, IInstallableUnit>();
+		addIU(installedIus, "com.foo.bar");
 
 		Set<? extends INode> installedCatalogNodeIds = catalogRegistry.computeInstalledNodes(item.getMarketplaceUrl(),
 				installedIus);
 		assertNotNull(installedCatalogNodeIds);
 		assertEquals(0, installedCatalogNodeIds.size());
 
-		installedIus.add(item.getInstallableUnits().get(0));
+		addIU(installedIus, item.getInstallableUnits().get(0));
 
 		installedCatalogNodeIds = catalogRegistry.computeInstalledNodes(item.getMarketplaceUrl(), installedIus);
 		assertNotNull(installedCatalogNodeIds);
 		assertEquals(1, installedCatalogNodeIds.size());
 
 		for (String iu : item.getInstallableUnits()) {
-			installedIus.add(iu);
+			addIU(installedIus, iu);
 		}
 
 		installedCatalogNodeIds = catalogRegistry.computeInstalledNodes(item.getMarketplaceUrl(), installedIus);
@@ -120,6 +124,42 @@ public class MarketplaceInfoTest {
 
 		assertEquals(item.getId(), installedCatalogNodeIds.iterator().next().getId());
 
+	}
+
+	@Test
+	public void computeInstalledCatalogNodeIdsNoMarketplaceInfo() {
+		assertTrue(item.getInstallableUnits().size() > 1);
+		assertEquals(0, catalogRegistry.getNodeKeyToIU().size());
+
+		Map<String, IInstallableUnit> installedIus = new HashMap<String, IInstallableUnit>();
+		InstallableUnit mainIu = addIU(installedIus, item.getInstallableUnits().get(0));
+
+		Set<? extends INode> installedCatalogNodeIds = catalogRegistry.computeInstalledNodes(item.getMarketplaceUrl(),
+				installedIus);
+		assertNotNull(installedCatalogNodeIds);
+		assertEquals(0, installedCatalogNodeIds.size());
+
+		for (String iu : item.getInstallableUnits()) {
+			addIU(installedIus, iu);
+		}
+
+		mainIu.setProperty(MarketplaceInfo.MPC_NODE_IU_PROPERTY, item.getData().getUrl());
+		installedCatalogNodeIds = catalogRegistry.computeInstalledNodes(item.getMarketplaceUrl(), installedIus);
+		assertNotNull(installedCatalogNodeIds);
+		assertEquals(1, installedCatalogNodeIds.size());
+
+		assertEquals(item.getData().getUrl(), installedCatalogNodeIds.iterator().next().getUrl());
+	}
+
+	private InstallableUnit addIU(Map<String, IInstallableUnit> installedIus, String id) {
+		InstallableUnit installableUnit = (InstallableUnit) installedIus.get(id);
+		if (installableUnit == null) {
+			installableUnit = new InstallableUnit();
+			installableUnit.setId(id);
+			IInstallableUnit iu = installableUnit;
+			installedIus.put(iu.getId(), iu);
+		}
+		return installableUnit;
 	}
 
 	@Test

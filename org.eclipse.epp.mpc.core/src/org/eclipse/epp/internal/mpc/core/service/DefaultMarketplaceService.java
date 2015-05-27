@@ -177,6 +177,11 @@ MarketplaceService {
 		this(null);
 	}
 
+	@Override
+	public URL getBaseUrl() {
+		return super.getBaseUrl();
+	}
+
 	public List<Market> listMarkets(IProgressMonitor monitor) throws CoreException {
 		Marketplace marketplace = processRequest(API_URI_SUFFIX, monitor);
 		return marketplace.getMarket();

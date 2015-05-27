@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.core.service;
 
+import java.net.URL;
 import java.util.List;
 import java.util.Set;
 
@@ -38,6 +39,14 @@ public interface IMarketplaceService {
 	 * Property key for registered IMarketplaceService OSGi services indicating the marketplace's base URL.
 	 */
 	public static final String BASE_URL = "url"; //$NON-NLS-1$
+
+	/**
+	 * The base URL of the Marketplace REST API for this service instance. All REST calls will be made against pathes
+	 * under this URL.
+	 *
+	 * @return the base URL of the Marketplace REST API
+	 */
+	URL getBaseUrl();
 
 	/**
 	 * Get a list of all markets. This is the entrypoint to the marketplace.

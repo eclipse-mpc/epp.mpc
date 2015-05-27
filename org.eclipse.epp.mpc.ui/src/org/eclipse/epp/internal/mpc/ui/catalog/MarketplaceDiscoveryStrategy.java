@@ -496,16 +496,15 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		final int totalWork = 1000000;
 		SearchResult result = new SearchResult();
 		result.setNodes(new ArrayList<Node>());
-		Set<String> installedFeatures = computeInstalledFeatures(monitor);
+		Map<String, IInstallableUnit> installedIUs = computeInstalledIUs(monitor);
 		if (!monitor.isCanceled()) {
-			Set<INode> catalogNodes = marketplaceInfo.computeInstalledNodes(catalogDescriptor.getUrl(),
-					installedFeatures);
+			Set<INode> catalogNodes = marketplaceInfo.computeInstalledNodes(catalogDescriptor.getUrl(), installedIUs);
 			if (!catalogNodes.isEmpty()) {
 				int unitWork = totalWork / (2 * catalogNodes.size());
 				for (INode node : catalogNodes) {
 					node = marketplaceService.getNode(node, monitor);
 					//compute real installed state based on optional/required state
-					if (marketplaceInfo.computeInstalled(installedFeatures, node)) {
+					if (marketplaceInfo.computeInstalled(installedIUs.keySet(), node)) {
 						result.getNodes().add((Node) node);
 					}
 					monitor.worked(unitWork);
@@ -555,6 +554,10 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		}
 	}
 
+	/**
+	 * @deprecated use {@link #computeInstalledIUs(IProgressMonitor)} instead
+	 */
+	@Deprecated
 	protected Set<String> computeInstalledFeatures(IProgressMonitor monitor) {
 		return computeInstalledIUs(monitor).keySet();
 	}
