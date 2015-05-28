@@ -143,11 +143,13 @@ public class SelectionModel {
 	private void computeChildren(CatalogItemEntry itemEntry) {
 		List<FeatureEntry> children = new ArrayList<FeatureEntry>();
 		List<MarketplaceNodeInstallableUnitItem> iuItems = ((MarketplaceNodeCatalogItem) itemEntry.getItem()).getInstallableUnitItems();
-		for (MarketplaceNodeInstallableUnitItem iuItem : iuItems) {
-			FeatureEntry featureEntry = new FeatureEntry(itemEntry, iuItem);
-			featureEntry.setInstalled(computeInstalled(featureEntry));
-			featureEntry.setChecked(computeInitiallyChecked(featureEntry));
-			children.add(featureEntry);
+		if (iuItems != null) {
+			for (MarketplaceNodeInstallableUnitItem iuItem : iuItems) {
+				FeatureEntry featureEntry = new FeatureEntry(itemEntry, iuItem);
+				featureEntry.setInstalled(computeInstalled(featureEntry));
+				featureEntry.setChecked(computeInitiallyChecked(featureEntry));
+				children.add(featureEntry);
+			}
 		}
 		itemEntry.children = children;
 	}

@@ -35,7 +35,7 @@ public class MarketplaceNodeCatalogItem extends CatalogItem {
 
 	private URL marketplaceUrl;
 
-	private List<MarketplaceNodeInstallableUnitItem> installableUnitItems;
+	private List<MarketplaceNodeInstallableUnitItem> installableUnitItems = new ArrayList<MarketplaceNodeInstallableUnitItem>();
 
 	@Override
 	public void setInstallableUnits(List<String> installableUnits) {
