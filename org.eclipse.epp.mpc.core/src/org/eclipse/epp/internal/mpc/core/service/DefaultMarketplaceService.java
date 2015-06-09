@@ -103,6 +103,13 @@ MarketplaceService {
 	public static final String META_PARAM_CLIENT = "client"; //$NON-NLS-1$
 
 	/**
+	 * parameter identifying client plugin version
+	 *
+	 * @see {@link #setRequestMetaParameters(Map)}
+	 */
+	public static final String META_PARAM_CLIENT_VERSION = "client.version"; //$NON-NLS-1$
+
+	/**
 	 * parameter identifying windowing system as reported by {@link org.eclipse.core.runtime.Platform#getWS()}
 	 *
 	 * @see {@link #setRequestMetaParameters(Map)}

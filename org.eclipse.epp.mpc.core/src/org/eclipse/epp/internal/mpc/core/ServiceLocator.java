@@ -238,7 +238,12 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 
 	public static Map<String, String> computeDefaultRequestMetaParameters() {
 		Map<String, String> requestMetaParameters = new HashMap<String, String>();
+
 		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_CLIENT, MarketplaceClientCore.BUNDLE_ID);
+		Bundle clientBundle = Platform.getBundle(MarketplaceClientCore.BUNDLE_ID);
+		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_CLIENT_VERSION, clientBundle.getVersion()
+				.toString());
+
 		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_OS, Platform.getOS());
 		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_WS, Platform.getWS());
 		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_NL, Platform.getNL());
