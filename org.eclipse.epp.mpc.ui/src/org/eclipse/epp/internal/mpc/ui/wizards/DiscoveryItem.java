@@ -17,6 +17,7 @@ import java.beans.PropertyChangeListener;
 import java.text.MessageFormat;
 
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
+import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalogSource;
@@ -680,7 +681,15 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 	}
 
 	private boolean hasInstallMetadata() {
-		return !connector.getInstallableUnits().isEmpty() && connector.getSiteUrl() != null;
+		if (!connector.getInstallableUnits().isEmpty() && connector.getSiteUrl() != null) {
+			try {
+				URLUtil.toURI(connector.getSiteUrl());
+				return true;
+			} catch (Exception ex) {
+				//ignore
+			}
+		}
+		return false;
 	}
 
 	protected void createProviderLabel(Composite parent) {

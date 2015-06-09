@@ -57,7 +57,7 @@ public abstract class AbstractProvisioningOperation implements IRunnableWithProg
 	}
 
 	protected List<IMetadataRepository> addRepositories(SubMonitor monitor) throws
-			URISyntaxException, ProvisionException {
+	URISyntaxException, ProvisionException {
 		// tell p2 that it's okay to use these repositories
 		ProvisioningSession session = ProvisioningUI.getDefaultUI().getSession();
 		RepositoryTracker repositoryTracker = ProvisioningUI.getDefaultUI().getRepositoryTracker();
@@ -70,11 +70,14 @@ public abstract class AbstractProvisioningOperation implements IRunnableWithProg
 
 		monitor.setWorkRemaining(items.size() * 5);
 		for (CatalogItem descriptor : items) {
-			URI uri = URLUtil.toURI(descriptor.getSiteUrl());
-			if (repositoryLocations.add(uri) && !knownRepositories.contains(uri)) {
-				checkCancelled(monitor);
-				repositoryTracker.addRepository(uri, null, session);
-				addedRepositoryLocations.add(uri);
+			String siteUrl = descriptor.getSiteUrl();
+			if (siteUrl != null) {
+				URI uri = URLUtil.toURI(siteUrl);
+				if (repositoryLocations.add(uri) && !knownRepositories.contains(uri)) {
+					checkCancelled(monitor);
+					repositoryTracker.addRepository(uri, null, session);
+					addedRepositoryLocations.add(uri);
+				}
 			}
 			monitor.worked(1);
 		}
@@ -124,7 +127,8 @@ public abstract class AbstractProvisioningOperation implements IRunnableWithProg
 		final Set<String> installableUnitIdsThisRepository = new HashSet<String>();
 		// determine all installable units for this repository
 		for (CatalogItem descriptor : items) {
-			if (repository.getLocation().equals(URLUtil.toURI(descriptor.getSiteUrl()))) {
+			if (descriptor.getSiteUrl() != null
+					&& repository.getLocation().equals(URLUtil.toURI(descriptor.getSiteUrl()))) {
 				installableUnitIdsThisRepository.addAll(getFeatureIds(descriptor));
 			}
 		}
@@ -161,7 +165,7 @@ public abstract class AbstractProvisioningOperation implements IRunnableWithProg
 
 	/**
 	 * remove the given repository locations from the repository tracker.
-	 * 
+	 *
 	 * @param repositoryLocations
 	 */
 	public static void removeRepositoryLocations(Set<URI> repositoryLocations) {

@@ -246,7 +246,9 @@ public class MarketplaceCatalog extends Catalog {
 								.getService(IMetadataRepositoryManager.SERVICE_NAME);
 						try {
 							for (MarketplaceNodeCatalogItem item : catalogItemsThisSite) {
-								item.setAvailable(null);
+								if (Boolean.TRUE.equals(item.getAvailable())) {
+									item.setAvailable(null);
+								}
 							}
 							IMetadataRepository repository = manager.loadRepository(uri, pm);
 							IQuery<IInstallableUnit> query = QueryUtil.createMatchQuery( //
@@ -271,6 +273,9 @@ public class MarketplaceCatalog extends Catalog {
 									String key = createRepositoryIuKey(uri.toString(), iuItem.getId());
 									Version availableVersion = repositoryIuVersionById.get(key);
 									MarketplaceCatalog.this.repositoryIuVersionById.put(key, availableVersion);
+									if (availableVersion != null) {
+										item.setAvailable(true);
+									}
 								}
 							}
 							for (MarketplaceNodeCatalogItem item : catalogItemsThisSite) {

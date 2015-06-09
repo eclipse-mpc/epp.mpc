@@ -277,7 +277,8 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			final List<CatalogItem> noninstallableItems = new ArrayList<CatalogItem>();
 			for (Entry<CatalogItem, Operation> entry : itemToSelectedOperation) {
 				if (entry.getValue() != Operation.NONE) {
-					boolean unavailableInstall = Boolean.FALSE.equals(entry.getKey().getAvailable())
+					boolean unavailableInstall = (Boolean.FALSE.equals(entry.getKey().getAvailable()) || entry.getKey()
+							.getSiteUrl() == null)
 							&& (entry.getValue() == Operation.INSTALL || entry.getValue() == Operation.UPDATE);
 					if (unavailableInstall) {
 						getSelectionModel().select(entry.getKey(), Operation.NONE);
