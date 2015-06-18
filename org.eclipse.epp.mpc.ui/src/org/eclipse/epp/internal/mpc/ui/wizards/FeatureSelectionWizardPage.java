@@ -403,7 +403,6 @@ public class FeatureSelectionWizardPage extends WizardPage {
 		try {
 			getContainer().run(true, true, operation);
 		} catch (InvocationTargetException e) {
-			refresh();
 			// we only log here since any error will also be displayed when resolving the provisioning operation.
 			int statusFlags = StatusManager.LOG;
 			IStatus status;
@@ -416,8 +415,11 @@ public class FeatureSelectionWizardPage extends WizardPage {
 			}
 			StatusManager.getManager().handle(status, statusFlags);
 		} catch (InterruptedException e) {
-			refresh();
 			// canceled
+		} finally {
+			refresh();
+			//bug 470485: need to recompute button state, because run() resets that to previous state
+			refreshState();
 		}
 		//maybeUpdateProfileChangeOperation();
 	}
