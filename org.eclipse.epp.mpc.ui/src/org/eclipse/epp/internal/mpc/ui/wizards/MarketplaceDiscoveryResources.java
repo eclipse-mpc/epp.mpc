@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import java.io.File;
 import java.lang.reflect.Field;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -23,10 +26,12 @@ import org.eclipse.epp.internal.mpc.ui.catalog.ResourceProvider.ResourceFuture;
 import org.eclipse.equinox.internal.p2.discovery.AbstractCatalogSource;
 import org.eclipse.equinox.internal.p2.discovery.model.Icon;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryResources;
+import org.eclipse.jface.resource.DeviceResourceException;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.resource.LocalResourceManager;
 import org.eclipse.jface.resource.ResourceManager;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
@@ -103,8 +108,8 @@ public class MarketplaceDiscoveryResources extends DiscoveryResources {
 		if (imagePath != null && imagePath.length() > 0) {
 			URL resource = discoverySource.getResource(imagePath);
 			if (resource != null) {
-				ImageDescriptor descriptor = ImageDescriptor.createFromURL(resource);
-				return resourceManager.createImage(descriptor);
+				Image image = safeCreateImage(imagePath, resource);
+				return image;
 			}
 		}
 		return null;
@@ -113,18 +118,27 @@ public class MarketplaceDiscoveryResources extends DiscoveryResources {
 	public void setImage(final ImageReceiver receiver, final AbstractCatalogSource discoverySource,
 			final String imagePath, Image fallbackImage) {
 		if (imagePath != null && imagePath.length() > 0) {
+			Image image = null;
 			if (discoverySource instanceof MarketplaceCatalogSource) {
 				MarketplaceCatalogSource marketplaceSource = (MarketplaceCatalogSource) discoverySource;
 				ResourceFuture resource = marketplaceSource.getResourceProvider().getResource(imagePath);
 				if (resource != null) {
 					URL localURL = resource.getLocalURL();
 					if (localURL != null) {
-						ImageDescriptor descriptor = ImageDescriptor.createFromURL(localURL);
-						Image image = resourceManager.createImage(descriptor);
-						receiver.setImage(image);
-						return;
+						try {
+							File imageFile = new File(
+									new URI(localURL.getProtocol(), null, localURL.getPath(), null, null));
+							if (imageFile.exists()) {
+								image = safeCreateImage(imagePath, localURL);
+							}
+						} catch (URISyntaxException e) {
+							logFailedLoadingImage(imagePath, localURL, e);
+						}
 					}
 				}
+			}
+			if (image != null) {
+				receiver.setImage(image);
 			}
 			if (fallbackImage != null) {
 				receiver.setImage(fallbackImage);
@@ -157,4 +171,20 @@ public class MarketplaceDiscoveryResources extends DiscoveryResources {
 		}
 	}
 
+	private Image safeCreateImage(String imagePath, URL url) {
+		try {
+			ImageDescriptor descriptor = ImageDescriptor.createFromURL(url);
+			Image image = resourceManager.createImage(descriptor);
+			return image;
+		} catch (DeviceResourceException ex) {
+			logFailedLoadingImage(imagePath, url, ex);
+		} catch (SWTException ex) {
+			logFailedLoadingImage(imagePath, url, ex);
+		}
+		return null;
+	}
+
+	private void logFailedLoadingImage(String imagePath, URL url, Exception ex) {
+		MarketplaceClientUi.log(IStatus.WARNING, Messages.MarketplaceDiscoveryResources_LoadImageError, imagePath, ex);
+	}
 }

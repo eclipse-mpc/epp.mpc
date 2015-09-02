@@ -84,7 +84,7 @@ public class ResourceProvider {
 						success = true;
 					} finally {
 						output.close();
-						if (!success) {
+						if (!success || !outputFile.exists()) {
 							outputFile.delete();
 							outputURL = null;
 						}
@@ -218,7 +218,10 @@ public class ResourceProvider {
 				}
 				filenameHint = filenameHint.replaceAll("[^a-zA-Z0-9\\.]", "_"); //$NON-NLS-1$ //$NON-NLS-2$
 				if (filenameHint.length() > 32) {
-					filenameHint = filenameHint.substring(filenameHint.length() - 32);
+					String hash = Integer.toHexString(filenameHint.hashCode());
+					filenameHint = filenameHint.substring(0, 6) + "_" //$NON-NLS-1$
+							+ hash + "_" //$NON-NLS-1$
+							+ filenameHint.substring(filenameHint.length() - (32 - hash.length() - 1 - 6 - 1));
 				}
 				final File outputFile = File.createTempFile("res_", filenameHint, dir); //$NON-NLS-1$
 				outputFile.deleteOnExit();
@@ -230,7 +233,7 @@ public class ResourceProvider {
 	}
 
 	public ResourceFuture retrieveResource(String requestSource, String resourceUrl) throws IOException,
-			URISyntaxException {
+	URISyntaxException {
 		URI resourceUri = URLUtil.toURI(resourceUrl);
 		return retrieveResource(requestSource, resourceUrl, resourceUri);
 	}
