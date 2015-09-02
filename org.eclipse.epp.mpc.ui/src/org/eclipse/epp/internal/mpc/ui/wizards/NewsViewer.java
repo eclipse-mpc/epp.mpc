@@ -26,6 +26,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
@@ -265,13 +266,20 @@ public class NewsViewer {
 
 					public void run() {
 						try {
-							wizard.getContainer().run(true, true, ProgressRunnable.this);
+							IWizardContainer container = wizard.getContainer();
+							if (container != null) {
+								wizard.getContainer().run(true, true, ProgressRunnable.this);
+							}
 						} catch (InvocationTargetException e) {
 
 						} catch (InterruptedException e) {
 							// cancelled by the user
+						} finally {
 							completed(null);
-							getBrowser().stop();
+							Browser browser = getBrowser();
+							if (!browser.isDisposed()) {
+								browser.stop();
+							}
 						}
 					}
 
