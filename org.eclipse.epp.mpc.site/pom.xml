@@ -16,7 +16,7 @@
   <parent>
     <groupId>org.eclipse.epp.mpc</groupId>
     <artifactId>org.eclipse.epp.mpc-parent</artifactId>
-    <version>1.4.0-SNAPSHOT</version>
+    <version>1.4.1-SNAPSHOT</version>
     <relativePath>../org.eclipse.epp.mpc-parent</relativePath>
   </parent>
   <artifactId>org.eclipse.epp.mpc.site</artifactId>
