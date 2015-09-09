@@ -154,7 +154,15 @@ public class MarketplaceDiscoveryResources extends DiscoveryResources {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					if (!display.isDisposed()) {
-						final Image image = getImage(discoverySource, imagePath);
+						final Image image;
+						try {
+							image = getImage(discoverySource, imagePath);
+						} catch (Exception e) {
+							MarketplaceClientUi.log(IStatus.WARNING,
+									Messages.MarketplaceDiscoveryResources_FailedCreatingImage, imagePath,
+									discoverySource.getId(), e);
+							return Status.CANCEL_STATUS;//we don't want any additional logging or error popups...
+						}
 						if (image != null) {
 							display.asyncExec(new Runnable() {
 								public void run() {

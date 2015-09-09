@@ -122,6 +122,7 @@ class Messages extends NLS {
 	public static String MarketplaceClientService_noProvisioningOperation;
 
 	public static String MarketplaceDiscoveryResources_LoadImageError;
+	public static String MarketplaceDiscoveryResources_FailedCreatingImage;
 
 	public static String MarketplaceDiscoveryResources_retrievingImage;
 
