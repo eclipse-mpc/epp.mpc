@@ -38,10 +38,8 @@ public class NewsContentHandler extends UnmarshalContentHandler {
 	public boolean endElement(String uri, String localName) throws SAXException {
 		if (localName.equals("news")) { //$NON-NLS-1$
 			if (content != null) {
-				final String url = content.toString().trim();
-				if (url.length() > 0) {
-					model.setUrl(url);
-				}
+				final String url = toUrlString(content.toString());
+				model.setUrl(url);
 				content = null;
 			}
 			capturingContent = false;

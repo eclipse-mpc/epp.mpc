@@ -187,19 +187,19 @@ public class NodeContentHandler extends UnmarshalContentHandler {
 			capturingContent = false;
 		} else if (localName.equals("homepageurl")) { //$NON-NLS-1$
 			if (content != null) {
-				model.setHomepageurl(content.toString());
+				model.setHomepageurl(toUrlString(content.toString()));
 				content = null;
 			}
 			capturingContent = false;
 		} else if (localName.equals("image")) { //$NON-NLS-1$
 			if (content != null) {
-				model.setImage(content.toString());
+				model.setImage(toUrlString(content.toString()));
 				content = null;
 			}
 			capturingContent = false;
 		} else if (localName.equals("screenshot")) { //$NON-NLS-1$
 			if (content != null) {
-				model.setScreenshot(content.toString());
+				model.setScreenshot(toUrlString(content.toString()));
 				content = null;
 			}
 			capturingContent = false;
@@ -235,13 +235,13 @@ public class NodeContentHandler extends UnmarshalContentHandler {
 			capturingContent = false;
 		} else if (localName.equals("supporturl")) { //$NON-NLS-1$
 			if (content != null) {
-				model.setSupporturl(content.toString());
+				model.setSupporturl(toUrlString(content.toString()));
 				content = null;
 			}
 			capturingContent = false;
 		} else if (localName.equals("updateurl")) { //$NON-NLS-1$
 			if (content != null) {
-				model.setUpdateurl(content.toString());
+				model.setUpdateurl(toUrlString(content.toString()));
 				content = null;
 			}
 			capturingContent = false;

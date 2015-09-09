@@ -32,9 +32,9 @@ public class CatalogContentHandler extends UnmarshalContentHandler {
 
 			model.setId(attributes.getValue(NS_URI, "id")); //$NON-NLS-1$
 			model.setName(attributes.getValue(NS_URI, "title")); //$NON-NLS-1$
-			model.setUrl(attributes.getValue(NS_URI, "url")); //$NON-NLS-1$
+			model.setUrl(toUrlString(attributes.getValue(NS_URI, "url"))); //$NON-NLS-1$
 			model.setSelfContained("1".equals(attributes.getValue(NS_URI, "selfContained"))); //$NON-NLS-1$ //$NON-NLS-2$
-			model.setImageUrl(attributes.getValue(NS_URI, "icon")); //$NON-NLS-1$
+			model.setImageUrl(toUrlString(attributes.getValue(NS_URI, "icon"))); //$NON-NLS-1$
 		} else if (localName.equals("dependenciesRepository")) { //$NON-NLS-1$
 			capturingContent = true;
 		} else if (localName.equals("description")) { //$NON-NLS-1$
@@ -71,7 +71,7 @@ public class CatalogContentHandler extends UnmarshalContentHandler {
 			return true;
 		} else if (localName.equals("dependenciesRepository")) { //$NON-NLS-1$
 			if (content != null) {
-				model.setDependencyRepository(content.toString());
+				model.setDependencyRepository(toUrlString(content.toString()));
 				content = null;
 			}
 			capturingContent = false;

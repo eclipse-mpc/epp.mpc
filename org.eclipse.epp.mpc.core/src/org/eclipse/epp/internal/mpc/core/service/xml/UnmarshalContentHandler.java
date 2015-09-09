@@ -72,6 +72,28 @@ public abstract class UnmarshalContentHandler {
 		this.parentHandler = parentHandler;
 	}
 
+	protected String toUrlString(String string) {
+		if (string == null) {
+			return null;
+		}
+		string = string.trim();
+		if (string.length() == 0) {
+			return null;
+		}
+		//FIXME bug 476999 - re-enable once we have proper logging in place here - right now, this might hide error details
+		/*
+		try {
+			//check early
+			URLUtil.toURL(string);
+		} catch (Exception ex) {
+			// fail soft
+			//FIXME bug 476999 - we should really start logging these with proper context information (url, node, attribute...)
+			return null;
+		}
+		 */
+		return string;
+	}
+
 	protected Date toDate(String string) {
 		if (string == null) {
 			return null;
@@ -84,6 +106,7 @@ public abstract class UnmarshalContentHandler {
 			return new Date(Long.parseLong(string) * 1000);
 		} catch (NumberFormatException e) {
 			// fail soft
+			//FIXME bug 476999 - we should really start logging these with proper context information (url, node, attribute...)
 			return null;
 		}
 	}
@@ -111,6 +134,7 @@ public abstract class UnmarshalContentHandler {
 			return Integer.parseInt(string);
 		} catch (NumberFormatException e) {
 			// fail soft
+			//FIXME bug 476999 - we should really start logging these with proper context information (url, node, attribute...)
 			return null;
 		}
 	}
@@ -135,7 +159,9 @@ public abstract class UnmarshalContentHandler {
 			return Long.parseLong(string);
 		} catch (NumberFormatException e) {
 			// fail soft
+			//FIXME bug 476999 - we should really start logging these with proper context information (url, node, attribute...)
 			return null;
 		}
 	}
+
 }

@@ -32,7 +32,7 @@ public class SearchContentHandler extends NodeListingContentHandler<Search> {
 	@Override
 	protected void configureModel(Search model, Attributes attributes) {
 		super.configureModel(model, attributes);
-		model.setUrl(attributes.getValue(NS_URI, "url")); //$NON-NLS-1$
+		model.setUrl(toUrlString(attributes.getValue(NS_URI, "url"))); //$NON-NLS-1$
 		model.setTerm(attributes.getValue(NS_URI, "term")); //$NON-NLS-1$
 	}
 

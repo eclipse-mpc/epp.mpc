@@ -30,7 +30,7 @@ public class TagContentHandler extends UnmarshalContentHandler {
 
 			model.setId(attributes.getValue(NS_URI, "id")); //$NON-NLS-1$
 			model.setName(attributes.getValue(NS_URI, "name")); //$NON-NLS-1$
-			model.setUrl(attributes.getValue(NS_URI, "url")); //$NON-NLS-1$
+			model.setUrl(toUrlString(attributes.getValue(NS_URI, "url"))); //$NON-NLS-1$
 		} else if (localName.equals("node")) { //$NON-NLS-1$
 			org.eclipse.epp.internal.mpc.core.service.xml.NodeContentHandler childHandler = new org.eclipse.epp.internal.mpc.core.service.xml.NodeContentHandler();
 			childHandler.setParentModel(model);

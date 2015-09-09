@@ -65,7 +65,7 @@ public class CatalogBrandingContentHandler extends UnmarshalContentHandler {
 			return true;
 		} else if (localName.equals("icon")) { //$NON-NLS-1$
 			if (content != null) {
-				model.setWizardIcon(content.toString());
+				model.setWizardIcon(toUrlString(content.toString()));
 				content = null;
 			}
 			capturingContent = false;
