@@ -290,7 +290,9 @@ public class MarketplacePage extends CatalogPage {
 			tabFolder.setSelection(tabItem);
 		}
 		tabItem.setControl(null);
-		tabItem.setControl(tabContent);
+		if (tabContent != null && !tabContent.isDisposed()) {
+			tabItem.setControl(tabContent);
+		}
 		getViewer().setContentType(contentType);
 	}
 
