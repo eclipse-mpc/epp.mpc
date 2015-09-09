@@ -326,6 +326,10 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		.align(SWT.BEGINNING, SWT.CENTER)
 		.applyTo(nameLabel);
 		nameLabel.setFont(resources.getSmallHeaderFont());
+		String name = connector.getName();
+		if (name == null) {
+			name = NLS.bind(Messages.DiscoveryItem_UnnamedSolution, connector.getId());
+		}
 		nameLabel.setText(TextUtil.escapeText(connector.getName()));
 	}
 
