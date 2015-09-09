@@ -704,6 +704,9 @@ public class MarketplacePage extends CatalogPage {
 			getContainer().run(false, true, new IRunnableWithProgress() {
 
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					if (getViewer().getControl().isDisposed()) {
+						return;
+					}
 					getWizard().initializeCatalog();
 					getWizard().updateNews();
 					getViewer().updateCatalog();
