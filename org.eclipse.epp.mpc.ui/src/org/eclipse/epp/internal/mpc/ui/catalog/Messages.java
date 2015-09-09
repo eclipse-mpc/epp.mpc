@@ -63,6 +63,8 @@ class Messages extends NLS {
 	
 	public static String ResourceProvider_downloadError;
 
+	public static String ResourceProvider_FailedCreatingTempDir;
+
 	public static String ResourceProvider_retrievingResource;
 
 	public static String ResourceProvider_waitingForDownload;

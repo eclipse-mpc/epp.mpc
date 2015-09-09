@@ -8,7 +8,7 @@
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
  * 	Yatta Solutions - category filtering (bug 314936), error handling (bug 374105),
- *                      multiselect hints (bug 337774), public API (bug 432803), 
+ *                      multiselect hints (bug 337774), public API (bug 432803),
  *                      performance (bug 413871), featured market (bug 461603)
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.commands;
@@ -278,13 +278,28 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 			List<? extends ICatalog> catalogs = result.get();
 			for (ICatalog catalog : catalogs) {
 				ResourceProvider resourceProvider = MarketplaceClientUiPlugin.getInstance().getResourceProvider();
-				String requestSource = NLS.bind(Messages.MarketplaceWizardCommand_requestCatalog, catalog.getName(),
+				String catalogName = catalog.getName();
+				String requestSource = NLS.bind(Messages.MarketplaceWizardCommand_requestCatalog, catalogName,
 						catalog.getId());
-				if (catalog.getImageUrl() != null) {
-					resourceProvider.retrieveResource(requestSource, catalog.getImageUrl());
+				String catalogImageUrl = catalog.getImageUrl();
+				if (catalogImageUrl != null) {
+					try {
+						resourceProvider.retrieveResource(requestSource, catalogImageUrl);
+					} catch (Exception e) {
+						MarketplaceClientUi.log(IStatus.WARNING,
+								Messages.MarketplaceWizardCommand_FailedRetrievingCatalogImage, catalogName,
+								catalogImageUrl, e);
+					}
 				}
 				if (catalog.getBranding() != null && catalog.getBranding().getWizardIcon() != null) {
-					resourceProvider.retrieveResource(requestSource, catalog.getBranding().getWizardIcon());
+					String wizardIconUrl = catalog.getBranding().getWizardIcon();
+					try {
+						resourceProvider.retrieveResource(requestSource, wizardIconUrl);
+					} catch (Exception e) {
+						MarketplaceClientUi.log(IStatus.WARNING,
+								Messages.MarketplaceWizardCommand_FailedRetrievingCatalogWizardIcon, catalogName,
+								wizardIconUrl, e);
+					}
 				}
 				CatalogDescriptor descriptor = new CatalogDescriptor(catalog);
 				registerOrOverrideCatalog(descriptor);

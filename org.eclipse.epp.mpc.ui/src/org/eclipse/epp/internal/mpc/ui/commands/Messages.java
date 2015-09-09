@@ -28,6 +28,10 @@ class Messages extends NLS {
 
 	public static String MarketplaceWizardCommand_eclipseMarketplace;
 
+	public static String MarketplaceWizardCommand_FailedRetrievingCatalogImage;
+
+	public static String MarketplaceWizardCommand_FailedRetrievingCatalogWizardIcon;
+
 	public static String MarketplaceWizardCommand_noRemoteCatalogs;
 
 	public static String MarketplaceWizardCommand_requestCatalog;

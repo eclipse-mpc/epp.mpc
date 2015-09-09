@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.epp.internal.mpc.core.util.TransportFactory;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * @author David Green
@@ -181,8 +182,8 @@ public class ResourceProvider {
 	public ResourceProvider() throws IOException {
 		dir = File.createTempFile(ResourceProvider.class.getSimpleName(), ".tmp"); //$NON-NLS-1$
 		dir.delete();
-		if (!dir.mkdirs()) {
-			throw new IOException(dir.getAbsolutePath());
+		if (!dir.mkdirs() || !dir.isDirectory()) {
+			throw new IOException(NLS.bind(Messages.ResourceProvider_FailedCreatingTempDir, dir.getAbsolutePath()));
 		}
 	}
 
@@ -223,13 +224,33 @@ public class ResourceProvider {
 							+ hash + "_" //$NON-NLS-1$
 							+ filenameHint.substring(filenameHint.length() - (32 - hash.length() - 1 - 6 - 1));
 				}
-				final File outputFile = File.createTempFile("res_", filenameHint, dir); //$NON-NLS-1$
+				final File outputFile = createTempFile(filenameHint);
 				outputFile.deleteOnExit();
 				resourceFuture = new ResourceFuture(outputFile);
 				resources.put(resourceName, resourceFuture);
 			}
 		}
 		return resourceFuture;
+	}
+
+	private File createTempFile(String filenameHint) throws IOException {
+		for (int i = 0; i < 5; i++) {
+			// we sometimes get intermittent errors creating the temp file. so retry a couple of times
+			try {
+				if (!dir.isDirectory()) {
+					if (!dir.mkdirs()) {
+						throw new IOException(
+								NLS.bind(Messages.ResourceProvider_FailedCreatingTempDir, dir.getAbsolutePath()));
+					}
+				}
+				final File outputFile = File.createTempFile("res_", filenameHint, dir); //$NON-NLS-1$
+				return outputFile;
+			} catch (IOException e) {
+				//ignore
+			}
+		}
+		final File outputFile = File.createTempFile("res_", filenameHint, dir); //$NON-NLS-1$
+		return outputFile;
 	}
 
 	public ResourceFuture retrieveResource(String requestSource, String resourceUrl) throws IOException,
