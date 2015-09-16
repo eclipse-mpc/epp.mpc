@@ -151,18 +151,25 @@ class ItemButtonController {
 
 	private void createMenuItems(Menu menu) {
 		if (selectableStates != null) {
+			if (primaryState != null) {
+				createMenuItem(menu, primaryState);
+			}
 			for (ButtonState state : selectableStates) {
-				MenuItem menuItem = new MenuItem(menu, SWT.PUSH);
-				menuItem.setData(state);
-				menuItem.setText(state.label);
-				menuItem.addSelectionListener(new SelectionAdapter() {
-					@Override
-					public void widgetSelected(SelectionEvent e) {
-						buttonClicked((ButtonState) e.widget.getData());
-					}
-				});
+				createMenuItem(menu, state);
 			}
 		}
+	}
+
+	private void createMenuItem(Menu menu, ButtonState state) {
+		MenuItem menuItem = new MenuItem(menu, SWT.PUSH);
+		menuItem.setData(state);
+		menuItem.setText(state.label);
+		menuItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				buttonClicked((ButtonState) e.widget.getData());
+			}
+		});
 	}
 
 	private void updateMenuItems() {
