@@ -7,12 +7,12 @@
 <unit id="org.eclipse.equinox.p2.sdk.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.equinox.p2.discovery.feature.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.sdk.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/releases/maintenance"/>
+<repository location="http://download.eclipse.org/eclipse/updates/4.5-M-builds/M-4.5.1RC3-201509040015/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.httpcomponents.httpclient" version="4.3.6.v201411290715"/>
 <unit id="org.apache.httpcomponents.httpcore" version="4.3.3.v201411290715"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20150124073747/repository/"/>
+<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20150821153341/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.license.feature.group" version="0.0.0"/>
