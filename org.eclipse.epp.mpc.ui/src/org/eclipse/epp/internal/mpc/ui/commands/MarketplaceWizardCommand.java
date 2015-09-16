@@ -103,8 +103,14 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 				}
 				IStatus exitStatus = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, cause.getCode(),
 						Messages.MarketplaceWizardCommand_cannotOpenMarketplace, new CoreException(cause));
-				StatusManager.getManager().handle(exitStatus,
-						StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
+				try {
+					StatusManager.getManager().handle(exitStatus,
+							StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
+				} catch (Exception ex) {
+					// HOTFIX for bug 477269 - Display might get disposed during call to handle due to workspace shutdown or similar.
+					// In that case, just log...
+					MarketplaceClientUi.getLog().log(exitStatus);
+				}
 				return null;
 			} else if (!remoteCatalogStatus.isOK()) {
 				StatusManager.getManager().handle(remoteCatalogStatus, StatusManager.LOG);
