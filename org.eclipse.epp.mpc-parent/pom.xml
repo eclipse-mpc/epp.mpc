@@ -14,7 +14,7 @@
 
    <properties>
       <mpc-version>${project.version}</mpc-version>
-      <target-platform>staging</target-platform>
+      <target-platform>maintenance</target-platform>
       <java-version>1.5</java-version>
 	  <java-jdk>SYSTEM</java-jdk>
 
@@ -96,6 +96,9 @@
       </profile>
       <profile>
          <id>maintenance</id>
+         <activation>
+            <activeByDefault>true</activeByDefault>
+         </activation>
          <properties>
             <target-platform>maintenance</target-platform>
          </properties>
@@ -108,9 +111,6 @@
       </profile>
       <profile>
          <id>staging</id>
-         <activation>
-            <activeByDefault>true</activeByDefault>
-         </activation>
          <properties>
             <target-platform>staging</target-platform>
          </properties>
