@@ -203,6 +203,9 @@ public class NewsViewer {
 	}
 
 	public boolean isUpdated(INews news) {
+		if (news == null) {
+			return false;
+		}
 		String url = news.getUrl();
 		if (url == null || url.length() == 0) {
 			return false;
