@@ -549,12 +549,14 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				}
 			}
 			ProvisioningJob provisioningJob = profileChangeOperation.getProvisioningJob(null);
-			if (!operationNewInstallItems.isEmpty()) {
-				provisioningJob.addJobChangeListener(new ProvisioningJobListener(operationNewInstallItems));
+			if (provisioningJob != null) {
+				if (!operationNewInstallItems.isEmpty()) {
+					provisioningJob.addJobChangeListener(new ProvisioningJobListener(operationNewInstallItems));
+				}
+				ProvisioningUI.getDefaultUI().schedule(provisioningJob, StatusManager.SHOW | StatusManager.LOG);
+				addedRepositoryLocations = null;
+				return true;
 			}
-			ProvisioningUI.getDefaultUI().schedule(provisioningJob, StatusManager.SHOW | StatusManager.LOG);
-			addedRepositoryLocations = null;
-			return true;
 		}
 		return false;
 	}
