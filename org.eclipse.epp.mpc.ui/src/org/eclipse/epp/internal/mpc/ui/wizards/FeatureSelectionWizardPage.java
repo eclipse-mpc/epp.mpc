@@ -377,14 +377,15 @@ public class FeatureSelectionWizardPage extends WizardPage {
 
 	private void updateFeatures() {
 		SelectionModel selectionModel = getWizard().getSelectionModel();
+		Set<CatalogItem> allSelectionCatalogItems = selectionModel.getItemToSelectedOperation().keySet();
 		Set<CatalogItem> selectedCatalogItems = selectionModel.getSelectedCatalogItems();
-		if (selectedCatalogItems.isEmpty()) {
+		if (allSelectionCatalogItems.isEmpty() || selectedCatalogItems.isEmpty()) {
 			showPreviousPage();
 			return;
 		}
 		viewer.setInput(selectionModel);
 		ResolveFeatureNamesOperation operation = new ResolveFeatureNamesOperation(new ArrayList<CatalogItem>(
-				selectionModel.getItemToSelectedOperation().keySet())) {
+allSelectionCatalogItems)) {
 
 			Display display = getControl().getDisplay();
 
