@@ -564,6 +564,9 @@ public class MarketplaceViewer extends CatalogViewer {
 	}
 
 	private void runUpdate(Runnable r) {
+		if (getViewer().getControl().isDisposed()) {
+			return;
+		}
 		if (inUpdate) {
 			r.run();
 			return;

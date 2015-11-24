@@ -164,6 +164,9 @@ public class MarketplacePage extends CatalogPage {
 
 		tabFolder.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
+				if (e.item.isDisposed()) {
+					return;
+				}
 				setActiveTab((TabItem) e.item);
 			}
 
