@@ -857,13 +857,16 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 	}
 
 	void initializeCatalog() {
-		for (AbstractDiscoveryStrategy strategy : getCatalog().getDiscoveryStrategies()) {
-			strategy.dispose();
-		}
-		getCatalog().getDiscoveryStrategies().clear();
-		if (getConfiguration().getCatalogDescriptor() != null) {
-			getCatalog().getDiscoveryStrategies().add(
-					new MarketplaceDiscoveryStrategy(getConfiguration().getCatalogDescriptor()));
+		final MarketplaceCatalog catalog = getCatalog();
+		synchronized (catalog) {
+			List<AbstractDiscoveryStrategy> discoveryStrategies = catalog.getDiscoveryStrategies();
+			for (AbstractDiscoveryStrategy strategy : discoveryStrategies) {
+				strategy.dispose();
+			}
+			discoveryStrategies.clear();
+			if (getConfiguration().getCatalogDescriptor() != null) {
+				discoveryStrategies.add(new MarketplaceDiscoveryStrategy(getConfiguration().getCatalogDescriptor()));
+			}
 		}
 	}
 
