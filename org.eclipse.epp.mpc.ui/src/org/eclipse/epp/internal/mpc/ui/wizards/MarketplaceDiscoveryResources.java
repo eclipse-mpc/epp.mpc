@@ -104,17 +104,6 @@ public class MarketplaceDiscoveryResources extends DiscoveryResources {
 		return imagePath != null && imagePath.length() > 0 ? imagePath : null;
 	}
 
-	public Image getImage(AbstractCatalogSource discoverySource, String imagePath) {
-		if (imagePath != null && imagePath.length() > 0) {
-			URL resource = discoverySource.getResource(imagePath);
-			if (resource != null) {
-				Image image = safeCreateImage(imagePath, resource);
-				return image;
-			}
-		}
-		return null;
-	}
-
 	public void setImage(final ImageReceiver receiver, final AbstractCatalogSource discoverySource,
 			final String imagePath, Image fallbackImage) {
 		if (imagePath != null && imagePath.length() > 0) {
@@ -154,21 +143,23 @@ public class MarketplaceDiscoveryResources extends DiscoveryResources {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					if (!display.isDisposed()) {
-						final Image image;
 						try {
-							image = getImage(discoverySource, imagePath);
+							if (imagePath != null && imagePath.length() > 0) {
+								final URL resource = discoverySource.getResource(imagePath);
+								if (resource != null) {
+									display.asyncExec(new Runnable() {
+										public void run() {
+											final Image image = safeCreateImage(imagePath, resource);
+											receiver.setImage(image);
+										}
+									});
+								}
+							}
 						} catch (Exception e) {
 							MarketplaceClientUi.log(IStatus.WARNING,
 									Messages.MarketplaceDiscoveryResources_FailedCreatingImage, imagePath,
 									discoverySource.getId(), e);
 							return Status.CANCEL_STATUS;//we don't want any additional logging or error popups...
-						}
-						if (image != null) {
-							display.asyncExec(new Runnable() {
-								public void run() {
-									receiver.setImage(image);
-								}
-							});
 						}
 					}
 					return Status.OK_STATUS;
