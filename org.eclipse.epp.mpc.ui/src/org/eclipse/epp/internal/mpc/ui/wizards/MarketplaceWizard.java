@@ -312,7 +312,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				.hint(SWT.DEFAULT,
 						Math.max(40,
 								Math.min(120, tableControl.computeSize(SWT.DEFAULT, SWT.DEFAULT).y)))
-								.applyTo(tableControl);
+				.applyTo(tableControl);
 				return tableControl;
 			}
 
@@ -613,12 +613,12 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 					browser.openURL(new URL(originalUrl));
 				}
 			} catch (PartInitException e) {
-				StatusManager.getManager().handle(e.getStatus(),
+				MarketplaceClientUi.handle(e.getStatus(),
 						StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			} catch (MalformedURLException e) {
 				IStatus status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
 						Messages.MarketplaceWizard_cannotOpenUrl, new Object[] { url, e.getMessage() }), e);
-				StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
+				MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			}
 		} else {
 			WorkbenchUtil.openUrl(url, IWorkbenchBrowserSupport.AS_EXTERNAL);
@@ -812,7 +812,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 							Messages.MarketplaceWizard_problemsPerformingProvisioningOperation,
 							new Object[] { cause.getMessage() }), cause);
 				}
-				StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
+				MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			} catch (InterruptedException e) {
 				// canceled
 			} finally {
@@ -899,7 +899,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 						IStatus status = getCatalog().performNewsDiscovery(monitor);
 						if (!status.isOK() && status.getSeverity() != IStatus.CANCEL) {
 							// don't bother user with missing news
-							StatusManager.getManager().handle(status, StatusManager.LOG);
+							MarketplaceClientUi.handle(status, StatusManager.LOG);
 						}
 						result[0] = getCatalog().getNews();
 					}
@@ -909,7 +909,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				}
 			} catch (InvocationTargetException e) {
 				final IStatus status = MarketplaceClientUi.computeStatus(e, Messages.MarketplaceViewer_unexpectedException);
-				StatusManager.getManager().handle(status, StatusManager.LOG);
+				MarketplaceClientUi.handle(status, StatusManager.LOG);
 			} catch (InterruptedException e) {
 				// cancelled by user
 			}
@@ -974,7 +974,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				} catch (ExecutionException e) {
 					IStatus status = MarketplaceClientUi.computeStatus(e,
 							Messages.MarketplaceBrowserIntegration_cannotOpenMarketplaceWizard);
-					StatusManager.getManager().handle(status,
+					MarketplaceClientUi.handle(status,
 							StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 				}
 			}

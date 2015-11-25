@@ -13,6 +13,7 @@ package org.eclipse.epp.internal.mpc.ui.actions;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.mpc.ui.MarketplaceClient;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
@@ -32,7 +33,7 @@ public class WelcomeIntroAction implements IViewActionDelegate {
 			String message = String.format(Messages.WelcomeIntroAction_cannotOpenWizard);
 			IStatus status = new Status(IStatus.ERROR, org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi.BUNDLE_ID,
 					IStatus.ERROR, message, e);
-			StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
+			MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 		}
 	}
 

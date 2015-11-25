@@ -358,7 +358,7 @@ public class FeatureSelectionWizardPage extends WizardPage {
 						} catch (CoreException e) {
 							boolean wasCancelled = e.getStatus().getSeverity() == IStatus.CANCEL;
 							if (!wasCancelled) {
-								StatusManager.getManager().handle(e.getStatus(),
+								MarketplaceClientUi.handle(e.getStatus(),
 										StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 							}
 						}
@@ -385,7 +385,7 @@ public class FeatureSelectionWizardPage extends WizardPage {
 		}
 		viewer.setInput(selectionModel);
 		ResolveFeatureNamesOperation operation = new ResolveFeatureNamesOperation(new ArrayList<CatalogItem>(
-allSelectionCatalogItems)) {
+				allSelectionCatalogItems)) {
 
 			Display display = getControl().getDisplay();
 
@@ -414,7 +414,7 @@ allSelectionCatalogItems)) {
 						Messages.FeatureSelectionWizardPage_unexpectedException_verifyingFeatures);
 				statusFlags |= StatusManager.BLOCK | StatusManager.SHOW;
 			}
-			StatusManager.getManager().handle(status, statusFlags);
+			MarketplaceClientUi.handle(status, statusFlags);
 		} catch (InterruptedException e) {
 			// canceled
 		} finally {

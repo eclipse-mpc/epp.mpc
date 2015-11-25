@@ -247,7 +247,7 @@ public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationLis
 			return true;
 		} catch (InvocationTargetException e) {
 			IStatus status = MarketplaceClientUi.computeStatus(e, Messages.MarketplaceViewer_unexpectedException);
-			StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
+			MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 		} catch (InterruptedException e) {
 			// action canceled, but this still counts as handled
 			return true;

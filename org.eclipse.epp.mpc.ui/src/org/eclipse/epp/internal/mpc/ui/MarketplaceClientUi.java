@@ -41,8 +41,13 @@ import org.eclipse.equinox.p2.query.IQueryResult;
 import org.eclipse.equinox.p2.query.QueryUtil;
 import org.eclipse.equinox.p2.ui.ProvisioningUI;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
@@ -255,4 +260,69 @@ public class MarketplaceClientUi {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(control, "org.eclipse.epp.mpc.help.ui.userGuide"); //$NON-NLS-1$
 	}
 
+	public static void handle(final IStatus status, final int style) {
+		if (PlatformUI.isWorkbenchRunning()) {
+			IWorkbench workbench = PlatformUI.getWorkbench();
+			if (workbench != null) {
+				Display workbenchDisplay = workbench.getDisplay();
+				if (!workbenchDisplay.isDisposed()) {
+					Runnable logRunnable = new Runnable() {
+						public void run() {
+							if (PlatformUI.isWorkbenchRunning()) {
+								IWorkbench workbench = PlatformUI.getWorkbench();
+								if (workbench != null) {
+									//WorkspaceStatusManager explicitly uses Display.getDefault() in a couple of places.
+									//So make extra sure we are running in that Display's thread...
+									Display defaultDisplay = Display.getDefault();
+									if (!defaultDisplay.isDisposed()) {
+										if (defaultDisplay != Display.getCurrent()) {
+											if (runIn(defaultDisplay, this)) {
+												return;
+											}
+										} else {
+											try {
+												StatusManager.getManager().handle(status, style);
+												return;
+											} catch (Exception ex) {
+												// Display might get disposed during call to handle due to workspace shutdown or similar.
+												// In that case, just log...
+											}
+										}
+									}
+								}
+							}
+							getLog().log(status);
+						}
+					};
+					if (runIn(workbenchDisplay, logRunnable)) {
+						return;
+					}
+				}
+			}
+		}
+		//else just log
+		getLog().log(status);
+	}
+
+	private static boolean runIn(Display display, Runnable runnable) {
+		if (display == null || display.isDisposed()) {
+			return false;
+		} else if (display == Display.getCurrent()) {
+			if (display.isDisposed()) {
+				return false;
+			}
+			runnable.run();
+			return true;
+		} else {
+			try {
+				display.asyncExec(runnable);
+				return true;
+			} catch (SWTException e) {
+				if (e.code == SWT.ERROR_DEVICE_DISPOSED) {
+					return false;
+				}
+				throw e;
+			}
+		}
+	}
 }

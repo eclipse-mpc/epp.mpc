@@ -533,14 +533,14 @@ public class MarketplaceViewer extends CatalogViewer {
 			});
 
 			if (result[0] != null && !result[0].isOK() && result[0].getSeverity() != IStatus.CANCEL) {
-				StatusManager.getManager().handle(result[0],
+				MarketplaceClientUi.handle(result[0],
 						StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			} else {
 				verifyUpdateSiteAvailability();
 			}
 		} catch (InvocationTargetException e) {
 			IStatus status = computeStatus(e, Messages.MarketplaceViewer_unexpectedException);
-			StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
+			MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 		} catch (InterruptedException e) {
 			// cancelled by user so nothing to do here.
 		}
@@ -828,7 +828,7 @@ public class MarketplaceViewer extends CatalogViewer {
 			} catch (CoreException e) {
 				boolean wasCancelled = e.getStatus().getSeverity() == IStatus.CANCEL;
 				if (!wasCancelled) {
-					StatusManager.getManager().handle(e.getStatus(),
+					MarketplaceClientUi.handle(e.getStatus(),
 							StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 				}
 				catalogUpdated(wasCancelled, !wasCancelled);

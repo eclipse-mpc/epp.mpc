@@ -119,7 +119,7 @@ public class MarketplaceClientService implements IMarketplaceClientService {
 		try {
 			command.execute(new ExecutionEvent());
 		} catch (ExecutionException e) {
-			StatusManager.getManager().handle(
+			MarketplaceClientUi.handle(
 					MarketplaceClientUi.computeStatus(e, Messages.MarketplaceClientService_ExecuteError),
 					StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 		}
