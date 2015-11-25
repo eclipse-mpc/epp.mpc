@@ -16,8 +16,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
-import javax.xml.parsers.SAXParserFactory;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -38,15 +36,7 @@ public class MarketplaceUnmarshaller implements IMarketplaceUnmarshaller {
 	public <T> T unmarshal(InputStream in, Class<T> type, IProgressMonitor monitor) throws IOException,
 	UnmarshalException {
 		final Unmarshaller unmarshaller = new Unmarshaller();
-		SAXParserFactory parserFactory = SAXParserFactory.newInstance();
-		parserFactory.setNamespaceAware(true);
-		final XMLReader xmlReader;
-		try {
-			xmlReader = parserFactory.newSAXParser().getXMLReader();
-		} catch (Exception e1) {
-			throw new IllegalStateException(e1);
-		}
-		xmlReader.setContentHandler(unmarshaller);
+		final XMLReader xmlReader = Unmarshaller.createXMLReader(unmarshaller);
 
 		// FIXME how can the charset be determined?
 		Reader reader = new InputStreamReader(new BufferedInputStream(in), RemoteMarketplaceService.UTF_8);

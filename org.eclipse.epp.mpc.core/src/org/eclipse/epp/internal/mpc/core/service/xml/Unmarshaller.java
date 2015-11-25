@@ -13,6 +13,7 @@ package org.eclipse.epp.internal.mpc.core.service.xml;
 
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,8 +21,11 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.Attributes;
+import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -33,20 +37,60 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class Unmarshaller extends DefaultHandler {
 
+	private static SAXParserFactory parserFactory;
+
+	private static EntityResolver emptyResolver;
+
+	static {
+		parserFactory = SAXParserFactory.newInstance();
+		parserFactory.setNamespaceAware(true);
+		parserFactory.setValidating(false);
+		setFeature(parserFactory, "http://xml.org/sax/features/namespaces", true); //$NON-NLS-1$
+		setFeature(parserFactory, "http://xml.org/sax/features/validation", false); //$NON-NLS-1$
+		setFeature(parserFactory, "http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false); //$NON-NLS-1$
+		setFeature(parserFactory, "http://apache.org/xml/features/nonvalidating/load-external-dtd", false); //$NON-NLS-1$
+
+		emptyResolver = new EntityResolver() {
+
+			public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+				InputSource emptyInputSource = new InputSource(new StringReader("")); //$NON-NLS-1$
+				emptyInputSource.setPublicId(publicId);
+				emptyInputSource.setSystemId(systemId);
+				return emptyInputSource;
+			}
+		};
+	}
+
+	public static XMLReader createXMLReader(final Unmarshaller unmarshaller) {
+
+		try {
+			final XMLReader xmlReader = parserFactory.newSAXParser().getXMLReader();
+			xmlReader.setEntityResolver(emptyResolver);
+			xmlReader.setContentHandler(unmarshaller);
+			return xmlReader;
+		} catch (Exception e1) {
+			throw new IllegalStateException(e1);
+		}
+	}
+
+	private static void setFeature(SAXParserFactory parserFactory, String feature, boolean enablement) {
+		try {
+			parserFactory.setFeature(feature, enablement);
+		} catch (SAXNotRecognizedException e) {
+			//ignore
+		} catch (SAXNotSupportedException e) {
+			//ignore
+		} catch (ParserConfigurationException e) {
+			//ignore
+		}
+	}
+
 	/**
 	 * Unmarshal an object from the given input source
 	 */
 	public static Object parse(InputSource input) throws IOException, SAXException {
-		SAXParserFactory parserFactory = SAXParserFactory.newInstance();
-		parserFactory.setNamespaceAware(true);
-		XMLReader xmlReader;
-		try {
-			xmlReader = parserFactory.newSAXParser().getXMLReader();
-		} catch (ParserConfigurationException e) {
-			throw new IllegalStateException(e);
-		}
 		Unmarshaller unmarshaller = new Unmarshaller();
-		xmlReader.setContentHandler(unmarshaller);
+		XMLReader xmlReader = createXMLReader(unmarshaller);
 		xmlReader.parse(input);
 		return unmarshaller.getModel();
 	}
