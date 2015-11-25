@@ -276,6 +276,9 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 						final List<? extends ICatalog> catalogs = catalogService.listCatalogs(monitor);
 						result.set(catalogs);
 					} catch (CoreException e) {
+						if (e.getStatus().getSeverity() == IStatus.CANCEL) {
+							throw new InterruptedException();
+						}
 						throw new InvocationTargetException(e);
 					}
 				}
