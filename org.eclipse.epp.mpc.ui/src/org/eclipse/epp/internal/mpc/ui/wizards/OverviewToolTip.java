@@ -267,50 +267,44 @@ class OverviewToolTip extends ToolTip {
 	private void provideImage(final Label imageLabel, MarketplaceCatalogSource discoverySource, final String imagePath) {
 		ResourceProvider resourceProvider = discoverySource.getResourceProvider();
 		MarketplaceDiscoveryStrategy.cacheResource(resourceProvider, overview.getItem(), imagePath);
-		resourceProvider.provideResource(new ResourceReceiver<Image>() {
+		resourceProvider.provideResource(new ResourceReceiver<ImageDescriptor>() {
 
-			public Image processResource(URL resource) {
-				if (imageLabel.isDisposed()) {
-					return null;
-				}
-				try {
-					ImageDescriptor descriptor = ImageDescriptor.createFromURL(resource);
-					Image image = descriptor.createImage();
-					Rectangle imageBounds = image.getBounds();
-					if (imageBounds.width > SCREENSHOT_WIDTH || imageBounds.height > SCREENSHOT_HEIGHT) {
-						final Image scaledImage = Util.scaleImage(image, SCREENSHOT_WIDTH, SCREENSHOT_HEIGHT);
-						Image originalImage = image;
-						image = scaledImage;
-						originalImage.dispose();
-					}
-					if (image != null && !imageLabel.isDisposed()) {
-						final Image fimage = image;
-						imageLabel.addDisposeListener(new DisposeListener() {
-							public void widgetDisposed(DisposeEvent e) {
-								fimage.dispose();
-							}
-						});
-					}
-					if (image != null && imageLabel.isDisposed()) {
-						image.dispose();
-						image = null;
-					}
-					return image;
-				} catch (SWTException e) {
-					// ignore, probably a bad image format
-					MarketplaceClientUi.error(
-							NLS.bind(Messages.OverviewToolTip_cannotRenderImage_reason, imagePath, e.getMessage()), e);
-					return null;
-				}
+			public ImageDescriptor processResource(URL resource) {
+				return ImageDescriptor.createFromURL(resource);
 			}
 
-			public void setResource(final Image resource) {
-				if (resource != null && !resource.isDisposed() && !imageLabel.isDisposed()) {
+			public void setResource(final ImageDescriptor resource) {
+				if (resource != null && imageLabel != null && !imageLabel.isDisposed()) {
 					imageLabel.getDisplay().asyncExec(new Runnable() {
 
 						public void run() {
-							if (!imageLabel.isDisposed() && !resource.isDisposed()) {
-								imageLabel.setImage(resource);
+							if (!imageLabel.isDisposed()) {
+								try {
+									Image image = resource.createImage();
+									if (image != null) {
+										Rectangle imageBounds = image.getBounds();
+										if (imageBounds.width > SCREENSHOT_WIDTH
+												|| imageBounds.height > SCREENSHOT_HEIGHT) {
+											final Image scaledImage = Util.scaleImage(image, SCREENSHOT_WIDTH,
+													SCREENSHOT_HEIGHT);
+											Image originalImage = image;
+											image = scaledImage;
+											originalImage.dispose();
+										}
+										final Image fimage = image;
+										imageLabel.addDisposeListener(new DisposeListener() {
+											public void widgetDisposed(DisposeEvent e) {
+												fimage.dispose();
+											}
+										});
+										imageLabel.setImage(image);
+									}
+								} catch (SWTException e) {
+									// ignore, probably a bad image format
+									MarketplaceClientUi
+											.error(NLS.bind(Messages.OverviewToolTip_cannotRenderImage_reason,
+													imagePath, e.getMessage()), e);
+								}
 							}
 						}
 					});
