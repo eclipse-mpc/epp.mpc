@@ -174,17 +174,20 @@ public class ResourceProvider {
 
 	}
 
-
-	private final File dir;
+	private File dir;
 
 	private final Map<String, ResourceFuture> resources = new ConcurrentHashMap<String, ResourceFuture>();
 
-	public ResourceProvider() throws IOException {
+	public void init() throws IOException {
+		if (dir != null) {
+			return;
+		}
 		dir = File.createTempFile(ResourceProvider.class.getSimpleName(), ".tmp"); //$NON-NLS-1$
 		dir.delete();
 		if (!dir.mkdirs() || !dir.isDirectory()) {
 			throw new IOException(NLS.bind(Messages.ResourceProvider_FailedCreatingTempDir, dir.getAbsolutePath()));
 		}
+		dir.deleteOnExit();
 	}
 
 	public URL getLocalResource(String resourceName) {
@@ -211,6 +214,7 @@ public class ResourceProvider {
 	public ResourceFuture registerResource(String resourceName) throws IOException {
 		ResourceFuture resourceFuture;
 		synchronized (resources) {
+			init();
 			resourceFuture = resources.get(resourceName);
 			if (resourceFuture == null) {
 				String filenameHint = resourceName;
@@ -269,54 +273,59 @@ public class ResourceProvider {
 		synchronized (resources) {
 			resourceFuture = resources.get(resourceName);
 			if (resourceFuture == null) {
-				final ResourceFuture finalResourceFuture = registerResource(resourceName);
-				resourceFuture = finalResourceFuture;
-				new Job(Messages.ResourceProvider_retrievingResource) {
-
-					{
-						setPriority(INTERACTIVE);
-						setUser(false);
-						setSystem(true);
-					}
-
-					@Override
-					protected IStatus run(IProgressMonitor monitor) {
-						try {
-							InputStream in = TransportFactory.createTransport().stream(resourceUrl, monitor);
-							finalResourceFuture.retrieve(in);
-						} catch (FileNotFoundException e) {
-							//MarketplaceClientUi.error(NLS.bind(Messages.AbstractResourceRunnable_resourceNotFound, new Object[] { catalogItem.getName(),
-							//catalogItem.getId(), resourceUrl }), e);
-						} catch (IOException e) {
-							if (e.getCause() instanceof OperationCanceledException) {
-								// canceled, nothing we want to do here
-							} else {
-								MarketplaceClientUi.log(IStatus.WARNING, Messages.ResourceProvider_downloadError,
-										requestSource, resourceUrl, e);
-							}
-						} catch (CoreException e) {
-							MarketplaceClientUi.log(IStatus.WARNING, Messages.ResourceProvider_downloadError,
-									requestSource, resourceUrl, e);
-						}
-						return Status.OK_STATUS;
-					}
-				}.schedule();
+				resourceFuture = registerResource(resourceName);
 			}
 		}
+		final ResourceFuture finalResourceFuture = resourceFuture;
+		new Job(Messages.ResourceProvider_retrievingResource) {
+
+			{
+				setPriority(INTERACTIVE);
+				setUser(false);
+				setSystem(true);
+			}
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					InputStream in = TransportFactory.createTransport().stream(resourceUrl, monitor);
+					finalResourceFuture.retrieve(in);
+				} catch (FileNotFoundException e) {
+					//MarketplaceClientUi.error(NLS.bind(Messages.AbstractResourceRunnable_resourceNotFound, new Object[] { catalogItem.getName(),
+					//catalogItem.getId(), resourceUrl }), e);
+				} catch (IOException e) {
+					if (e.getCause() instanceof OperationCanceledException) {
+						// canceled, nothing we want to do here
+					} else {
+						MarketplaceClientUi.log(IStatus.WARNING, Messages.ResourceProvider_downloadError, requestSource,
+								resourceUrl, e);
+					}
+				} catch (CoreException e) {
+					MarketplaceClientUi.log(IStatus.WARNING, Messages.ResourceProvider_downloadError, requestSource,
+							resourceUrl, e);
+				}
+				return Status.OK_STATUS;
+			}
+		}.schedule();
 		return resourceFuture;
 	}
 
 	public void dispose() {
-		if (dir != null && dir.exists()) {
-			File[] files = dir.listFiles();
-			if (files != null) {
-				for (File file : files) {
+		File dir;
+		synchronized (resources) {
+			dir = this.dir;
+			this.dir = null;
+			resources.clear();
+		}
+		if (dir.isDirectory()) {
+			File[] resourceFiles = dir.listFiles();
+			if (resourceFiles != null) {
+				for (File file : resourceFiles) {
 					file.delete();
 				}
 			}
 			dir.delete();
 		}
-		resources.clear();
 	}
 
 	public <T> void provideResource(final ResourceReceiver<T> receiver, final String resourcePath, T fallbackResource) {
