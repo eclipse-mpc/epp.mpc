@@ -124,6 +124,9 @@ class ItemButtonController {
 		updateAppearance();
 		button.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
+				if (e.widget.isDisposed()) {
+					return;
+				}
 				if (e.detail == SWT.ARROW) {
 					menuClicked();
 				} else {
@@ -167,6 +170,9 @@ class ItemButtonController {
 		menuItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				if (e.widget.isDisposed()) {
+					return;
+				}
 				buttonClicked((ButtonState) e.widget.getData());
 			}
 		});
@@ -307,6 +313,9 @@ class ItemButtonController {
 	}
 
 	public void refresh() {
+		if (item.isDisposed()) {
+			return;
+		}
 		updateButtonState();
 		updateMenuItems();
 		updateAppearance();
