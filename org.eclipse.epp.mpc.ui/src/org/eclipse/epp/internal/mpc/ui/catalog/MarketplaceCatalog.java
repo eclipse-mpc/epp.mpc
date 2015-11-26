@@ -416,6 +416,21 @@ public class MarketplaceCatalog extends Catalog {
 									.getSimpleName()), e);
 						}
 						status.add(error);
+					} finally {
+						// remove everything from strategy again, so it can't accidentally mess with the results later
+						discoveryStrategy.setCategories(null);
+						discoveryStrategy.setItems(null);
+						discoveryStrategy.setCertifications(null);
+						discoveryStrategy.setTags(null);
+
+						// make sure strategy didn't misbehave
+						if (items.contains(null)) {
+							while (items.remove(null)) {
+							}
+							IStatus error = new Status(IStatus.WARNING, DiscoveryCore.ID_PLUGIN,
+									NLS.bind(Messages.MarketplaceCatalog_addedNullEntry, discoveryStrategy.getClass().getSimpleName()));
+							status.add(error);
+						}
 					}
 				}
 			}

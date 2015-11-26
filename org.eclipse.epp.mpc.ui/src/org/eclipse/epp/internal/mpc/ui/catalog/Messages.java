@@ -15,6 +15,8 @@ import org.eclipse.osgi.util.NLS;
 class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.epp.internal.mpc.ui.catalog.messages"; //$NON-NLS-1$
 
+	public static String MarketplaceCatalog_addedNullEntry;
+
 	public static String MarketplaceCatalog_Checking_News;
 
 	public static String MarketplaceCatalog_checkingForUpdates;

@@ -535,7 +535,8 @@ public class MarketplaceViewer extends CatalogViewer {
 
 			if (result[0] != null && !result[0].isOK() && result[0].getSeverity() != IStatus.CANCEL) {
 				MarketplaceClientUi.handle(result[0],
-						StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
+						(result[0].getSeverity() > IStatus.WARNING ? StatusManager.SHOW | StatusManager.BLOCK : 0)
+								| StatusManager.LOG);
 			} else {
 				verifyUpdateSiteAvailability();
 			}
