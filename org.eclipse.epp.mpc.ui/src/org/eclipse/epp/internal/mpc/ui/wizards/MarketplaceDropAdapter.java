@@ -54,7 +54,7 @@ import org.eclipse.ui.progress.UIJob;
 public class MarketplaceDropAdapter implements IStartup {
 
 	private static final int[] PREFERRED_DROP_OPERATIONS = { DND.DROP_DEFAULT, DND.DROP_COPY, DND.DROP_MOVE,
-		DND.DROP_LINK };
+			DND.DROP_LINK };
 
 	private static final int DROP_OPERATIONS = DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK | DND.DROP_DEFAULT;
 
@@ -328,9 +328,12 @@ public class MarketplaceDropAdapter implements IStartup {
 		}
 
 		public void hookWindow(IWorkbenchWindow window) {
+			if (window == null) {
+				return;
+			}
 			window.addPageListener(this);
 			window.addPerspectiveListener(this);
-			IPartService partService = (IPartService) window.getService(IPartService.class);
+			IPartService partService = window.getService(IPartService.class);
 			partService.addPartListener(this);
 			windowChanged(window);
 		}
@@ -366,6 +369,9 @@ public class MarketplaceDropAdapter implements IStartup {
 		}
 
 		private void partUpdate(IWorkbenchPartReference partRef) {
+			if (partRef == null) {
+				return;
+			}
 			IWorkbenchPage page = partRef.getPage();
 			pageChanged(page);
 		}
