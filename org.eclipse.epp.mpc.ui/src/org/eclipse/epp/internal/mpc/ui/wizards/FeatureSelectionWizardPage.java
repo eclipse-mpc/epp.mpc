@@ -363,6 +363,10 @@ public class FeatureSelectionWizardPage extends WizardPage {
 										StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 							}
 						}
+						if (getControl() == null || getControl().isDisposed()
+								|| getWizard().getContainer().getCurrentPage() != FeatureSelectionWizardPage.this) {
+							return;
+						}
 					}
 					updateFeatures();
 				}
