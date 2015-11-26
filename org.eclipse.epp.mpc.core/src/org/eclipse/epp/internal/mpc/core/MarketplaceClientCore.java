@@ -10,11 +10,8 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.ConnectException;
 import java.net.NoRouteToHostException;
@@ -38,22 +35,11 @@ public class MarketplaceClientCore {
 
 	public static final String BUNDLE_ID = "org.eclipse.epp.mpc.core"; //$NON-NLS-1$
 
-	private static final String STREAM_CLOSED_MESSAGE;
+	private static final String STREAM_CLOSED_MESSAGE = "Stream closed"; //$NON-NLS-1$
 
-	static {
-		InputStream is = new ByteArrayInputStream(new byte[1]);
-		BufferedInputStream bis = new BufferedInputStream(is);
-		String streamClosedMessage = "Stream closed"; //$NON-NLS-1$
-		try {
-			bis.close();
-			bis.available();
-		} catch (IOException ex) {
-			if (ex.getMessage() != null) {
-				streamClosedMessage = ex.getMessage();
-			}
-		}
-		STREAM_CLOSED_MESSAGE = streamClosedMessage;
-	}
+	private static final String PIPE_CLOSED_MESSAGE = "Pipe closed"; //$NON-NLS-1$
+
+	private static final String PIPE_BROKEN_MESSAGE = "Pipe broken"; //$NON-NLS-1$
 
 	public static ILog getLog() {
 		return Platform.getLog(MarketplaceClientCorePlugin.getBundle());
@@ -155,10 +141,27 @@ public class MarketplaceClientCore {
 	}
 
 	public static boolean isStreamClosedException(Throwable exception) {
+		return isIOExceptionWithMessage(exception, STREAM_CLOSED_MESSAGE);
+	}
+
+	public static boolean isPipeClosedException(Throwable exception) {
+		return isIOExceptionWithMessage(exception, PIPE_CLOSED_MESSAGE);
+	}
+
+	public static boolean isPipeBrokenException(Throwable exception) {
+		return isIOExceptionWithMessage(exception, PIPE_BROKEN_MESSAGE);
+	}
+
+	public static boolean isFailedDownloadException(Throwable exception) {
+		return isStreamClosedException(exception) || isPipeClosedException(exception)
+				|| isPipeBrokenException(exception);
+	}
+
+	private static boolean isIOExceptionWithMessage(Throwable exception, String message) {
 		while (exception != null) {
 			if (exception instanceof IOException) {
 				IOException ioException = (IOException) exception;
-				return STREAM_CLOSED_MESSAGE.equals(ioException.getMessage());
+				return message.equals(ioException.getMessage());
 			}
 			Throwable cause = exception.getCause();
 			if (cause != exception) {

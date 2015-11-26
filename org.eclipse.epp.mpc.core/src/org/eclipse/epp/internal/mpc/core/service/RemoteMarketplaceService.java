@@ -155,7 +155,7 @@ public class RemoteMarketplaceService<T> {
 					String causeMessage = e.getMessage();
 					String message = NLS.bind(Messages.DefaultMarketplaceService_cannotCompleteRequest_reason,
 							location.toString(), causeMessage);
-					if (MarketplaceClientCore.isStreamClosedException(e)) {
+					if (MarketplaceClientCore.isFailedDownloadException(e)) {
 						if (++retry < RETRY_COUNT) {
 							// retry on unreliable connections
 							MarketplaceClientCore.getLog().log(createStatus(IStatus.INFO, message, e));
