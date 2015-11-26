@@ -106,7 +106,8 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 						Messages.MarketplaceWizardCommand_cannotOpenMarketplace, new CoreException(cause));
 				try {
 					MarketplaceClientUi.handle(exitStatus,
-							StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
+ StatusManager.SHOW | StatusManager.BLOCK
+							| (exitStatus.getSeverity() == IStatus.CANCEL ? 0 : StatusManager.LOG));
 				} catch (Exception ex) {
 					// HOTFIX for bug 477269 - Display might get disposed during call to handle due to workspace shutdown or similar.
 					// In that case, just log...
