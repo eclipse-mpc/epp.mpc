@@ -55,6 +55,7 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
@@ -602,7 +603,7 @@ public class MarketplacePage extends CatalogPage {
 			tabFolder.setSelection(0);
 		}
 
-		ImageDescriptor defaultWizardIconDescriptor = DiscoveryImages.BANNER_DISOVERY;
+		final ImageDescriptor defaultWizardIconDescriptor = DiscoveryImages.BANNER_DISOVERY;
 		if (branding.getWizardIcon() == null) {
 			setImageDescriptor(defaultWizardIconDescriptor);
 		} else {
@@ -619,7 +620,12 @@ public class MarketplacePage extends CatalogPage {
 					display.asyncExec(new Runnable() {
 
 						public void run() {
-							setImageDescriptor(resource);
+							try {
+								setImageDescriptor(resource);
+							} catch (SWTException ex) {
+								// broken image
+								setImageDescriptor(defaultWizardIconDescriptor);
+							}
 						}
 					});
 				}
