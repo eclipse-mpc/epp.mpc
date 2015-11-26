@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
@@ -246,7 +247,7 @@ public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationLis
 			});
 			return true;
 		} catch (InvocationTargetException e) {
-			IStatus status = MarketplaceClientUi.computeStatus(e, Messages.MarketplaceViewer_unexpectedException);
+			IStatus status = MarketplaceClientCore.computeStatus(e, Messages.MarketplaceViewer_unexpectedException);
 			MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 		} catch (InterruptedException e) {
 			// action canceled, but this still counts as handled

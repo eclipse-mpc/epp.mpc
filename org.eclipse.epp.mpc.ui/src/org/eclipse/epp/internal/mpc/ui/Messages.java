@@ -23,14 +23,39 @@ class Messages extends NLS {
 	public static String CatalogExtensionPointReader_labelRequired;
 
 	public static String CatalogExtensionPointReader_urlRequired;
+
+	/**
+	 * Only kept here to give translations time to move the message to the new bundle without causing warnings.
+	 *
+	 * @deprecated moved to {@link org.eclipse.epp.internal.mpc.core.Messages#MarketplaceClientCore_message_message2}
+	 */
+	@Deprecated
 	public static String MarketplaceClientUi_message_message2;
 
 	public static String MarketplaceClientUi_unexpectedException_reason;
 
+	/**
+	 * Only kept here to give translations time to move the message to the new bundle without causing warnings.
+	 *
+	 * @deprecated moved to {@link org.eclipse.epp.internal.mpc.core.Messages#MarketplaceClientCore_notFound}
+	 */
+	@Deprecated
 	public static String MarketplaceClientUi_notFound;
 
+	/**
+	 * Only kept here to give translations time to move the message to the new bundle without causing warnings.
+	 *
+	 * @deprecated moved to {@link org.eclipse.epp.internal.mpc.core.Messages#MarketplaceClientCore_unknownHost}
+	 */
+	@Deprecated
 	public static String MarketplaceClientUi_unknownHost;
 
+	/**
+	 * Only kept here to give translations time to move the message to the new bundle without causing warnings.
+	 *
+	 * @deprecated moved to {@link org.eclipse.epp.internal.mpc.core.Messages#MarketplaceClientCore_connectionProblem}
+	 */
+	@Deprecated
 	public static String MarketplaceClientUi_connectionProblem;
 	static {
 		// initialize resource bundle

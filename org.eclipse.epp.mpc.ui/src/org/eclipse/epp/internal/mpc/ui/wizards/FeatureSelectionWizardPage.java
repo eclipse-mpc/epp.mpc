@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.operations.FeatureDescriptor;
@@ -410,8 +411,7 @@ public class FeatureSelectionWizardPage extends WizardPage {
 			if (e.getCause() instanceof ProvisionException) {
 				status = ((ProvisionException) e.getCause()).getStatus();
 			} else {
-				status = MarketplaceClientUi.computeStatus(e,
-						Messages.FeatureSelectionWizardPage_unexpectedException_verifyingFeatures);
+				status = MarketplaceClientCore.computeStatus(e, Messages.FeatureSelectionWizardPage_unexpectedException_verifyingFeatures);
 				statusFlags |= StatusManager.BLOCK | StatusManager.SHOW;
 			}
 			MarketplaceClientUi.handle(status, statusFlags);

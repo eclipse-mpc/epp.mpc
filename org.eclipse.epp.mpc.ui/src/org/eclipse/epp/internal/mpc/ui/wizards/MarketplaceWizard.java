@@ -41,6 +41,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.service.News;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
@@ -266,8 +267,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 					}
 				});
 			} catch (InvocationTargetException e) {
-				throw new CoreException(MarketplaceClientUi.computeStatus(e,
-						Messages.MarketplaceViewer_unexpectedException));
+				throw new CoreException(MarketplaceClientCore.computeStatus(e, Messages.MarketplaceViewer_unexpectedException));
 			} catch (InterruptedException e) {
 				// user canceled
 				throw new CoreException(Status.CANCEL_STATUS);
@@ -908,7 +908,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 					news = result[0];
 				}
 			} catch (InvocationTargetException e) {
-				final IStatus status = MarketplaceClientUi.computeStatus(e, Messages.MarketplaceViewer_unexpectedException);
+				final IStatus status = MarketplaceClientCore.computeStatus(e, Messages.MarketplaceViewer_unexpectedException);
 				MarketplaceClientUi.handle(status, StatusManager.LOG);
 			} catch (InterruptedException e) {
 				// cancelled by user
@@ -972,8 +972,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				try {
 					command.execute(new ExecutionEvent());
 				} catch (ExecutionException e) {
-					IStatus status = MarketplaceClientUi.computeStatus(e,
-							Messages.MarketplaceBrowserIntegration_cannotOpenMarketplaceWizard);
+					IStatus status = MarketplaceClientCore.computeStatus(e, Messages.MarketplaceBrowserIntegration_cannotOpenMarketplaceWizard);
 					MarketplaceClientUi.handle(status,
 							StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 				}

@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
@@ -316,8 +317,7 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 		} catch (InterruptedException ie) {
 			return Status.CANCEL_STATUS;
 		} catch (Exception e) {
-			IStatus status = MarketplaceClientUi.computeStatus(e,
-					Messages.MarketplaceWizardCommand_CannotInstallRemoteLocations);
+			IStatus status = MarketplaceClientCore.computeStatus(e, Messages.MarketplaceWizardCommand_CannotInstallRemoteLocations);
 			return status;
 		}
 		return Status.OK_STATUS;

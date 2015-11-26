@@ -16,6 +16,15 @@ class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.epp.internal.mpc.core.messages"; //$NON-NLS-1$
 
 	public static String MarketplaceClientCore_unexpectedException;
+
+	public static String MarketplaceClientCore_message_message2;
+
+	public static String MarketplaceClientCore_notFound;
+
+	public static String MarketplaceClientCore_unknownHost;
+
+	public static String MarketplaceClientCore_connectionProblem;
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

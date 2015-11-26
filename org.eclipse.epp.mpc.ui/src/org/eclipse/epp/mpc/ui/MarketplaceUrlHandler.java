@@ -28,6 +28,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
@@ -191,8 +192,7 @@ public abstract class MarketplaceUrlHandler {
 		try {
 			command.execute(new ExecutionEvent());
 		} catch (ExecutionException e) {
-			IStatus status = MarketplaceClientUi.computeStatus(e,
-					Messages.MarketplaceUrlHandler_cannotOpenMarketplaceWizard);
+			IStatus status = MarketplaceClientCore.computeStatus(e, Messages.MarketplaceUrlHandler_cannotOpenMarketplaceWizard);
 			StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 		}
 	}

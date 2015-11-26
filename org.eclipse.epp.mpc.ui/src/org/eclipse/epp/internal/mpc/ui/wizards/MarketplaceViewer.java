@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.service.Identifiable;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
@@ -841,7 +842,7 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	@Override
 	protected IStatus computeStatus(InvocationTargetException e, String message) {
-		return MarketplaceClientUi.computeStatus(e, message);
+		return MarketplaceClientCore.computeStatus(e, message);
 	}
 
 	private MarketplaceWizard getWizard() {

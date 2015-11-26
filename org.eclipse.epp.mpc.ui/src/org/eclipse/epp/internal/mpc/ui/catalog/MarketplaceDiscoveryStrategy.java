@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.ServiceLocator;
 import org.eclipse.epp.internal.mpc.core.service.Identifiable;
 import org.eclipse.epp.internal.mpc.core.service.Node;
@@ -329,9 +330,9 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 					resolvedMarket = resolve(market, catalogCategory.getMarkets());
 					resolvedCategory = resolveCategory(category, catalogCategory.getMarkets());
 				} catch (IllegalArgumentException ex) {
-					throw new CoreException(MarketplaceClientUi.computeStatus(ex, Messages.MarketplaceDiscoveryStrategy_invalidFilter));
+					throw new CoreException(MarketplaceClientCore.computeStatus(ex, Messages.MarketplaceDiscoveryStrategy_invalidFilter));
 				} catch (NoSuchElementException ex) {
-					throw new CoreException(MarketplaceClientUi.computeStatus(ex, Messages.MarketplaceDiscoveryStrategy_unknownFilter));
+					throw new CoreException(MarketplaceClientCore.computeStatus(ex, Messages.MarketplaceDiscoveryStrategy_unknownFilter));
 				}
 
 				progress.setWorkRemaining(totalWork);

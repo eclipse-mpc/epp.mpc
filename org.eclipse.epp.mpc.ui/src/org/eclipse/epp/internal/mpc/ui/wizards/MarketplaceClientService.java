@@ -15,6 +15,7 @@ import java.util.Set;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.commands.MarketplaceWizardCommand;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
@@ -120,7 +121,7 @@ public class MarketplaceClientService implements IMarketplaceClientService {
 			command.execute(new ExecutionEvent());
 		} catch (ExecutionException e) {
 			MarketplaceClientUi.handle(
-					MarketplaceClientUi.computeStatus(e, Messages.MarketplaceClientService_ExecuteError),
+					MarketplaceClientCore.computeStatus(e, Messages.MarketplaceClientService_ExecuteError),
 					StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 		}
 	}
