@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.Composite;
 /**
  * A tag filter that presents choices as a combo box. This filter can accomodate changes to the {@link #getChoices()
  * choices} after initialization.
- * 
+ *
  * @author David Green
  */
 public class ComboTagFilter extends AbstractTagFilter {
@@ -99,6 +99,9 @@ public class ComboTagFilter extends AbstractTagFilter {
 
 	@Override
 	protected void updateUi() {
+		if (combo.isDisposed()) {
+			return;
+		}
 		int index = -1;
 		if (!getSelected().isEmpty()) {
 			Tag selected = getSelected().iterator().next();
