@@ -60,13 +60,27 @@ public class ResourceProvider {
 
 		private final FutureTask<URL> delegate;
 
-		ResourceFuture(final File outputFile) {
+		ResourceFuture(final File dir, final String resourceName) {
 			delegate = new FutureTask<URL>(new Callable<URL>() {
 
 				public URL call() throws Exception {
 					if (input == null) {
 						throw new IllegalStateException();
 					}
+					String filenameHint = resourceName;
+					if (filenameHint.lastIndexOf('/') != -1) {
+						filenameHint = filenameHint.substring(filenameHint.lastIndexOf('/') + 1);
+					}
+					filenameHint = filenameHint.replaceAll("[^a-zA-Z0-9\\.]", "_"); //$NON-NLS-1$ //$NON-NLS-2$
+					if (filenameHint.length() > 32) {
+						String hash = Integer.toHexString(filenameHint.hashCode());
+						filenameHint = filenameHint.substring(0, 6) + "_" //$NON-NLS-1$
+								+ hash + "_" //$NON-NLS-1$
+								+ filenameHint.substring(filenameHint.length() - (32 - hash.length() - 1 - 6 - 1));
+					}
+					final File outputFile = createTempFile(dir, filenameHint);
+					outputFile.deleteOnExit();
+
 					URL outputURL;
 					try {
 						outputURL = outputFile.toURI().toURL();
@@ -217,43 +231,30 @@ public class ResourceProvider {
 			init();
 			resourceFuture = resources.get(resourceName);
 			if (resourceFuture == null) {
-				String filenameHint = resourceName;
-				if (filenameHint.lastIndexOf('/') != -1) {
-					filenameHint = filenameHint.substring(filenameHint.lastIndexOf('/') + 1);
-				}
-				filenameHint = filenameHint.replaceAll("[^a-zA-Z0-9\\.]", "_"); //$NON-NLS-1$ //$NON-NLS-2$
-				if (filenameHint.length() > 32) {
-					String hash = Integer.toHexString(filenameHint.hashCode());
-					filenameHint = filenameHint.substring(0, 6) + "_" //$NON-NLS-1$
-							+ hash + "_" //$NON-NLS-1$
-							+ filenameHint.substring(filenameHint.length() - (32 - hash.length() - 1 - 6 - 1));
-				}
-				final File outputFile = createTempFile(filenameHint);
-				outputFile.deleteOnExit();
-				resourceFuture = new ResourceFuture(outputFile);
+				resourceFuture = new ResourceFuture(dir, resourceName);
 				resources.put(resourceName, resourceFuture);
 			}
 		}
 		return resourceFuture;
 	}
 
-	private File createTempFile(String filenameHint) throws IOException {
+	private static File createTempFile(File tempDir, String filenameHint) throws IOException {
 		for (int i = 0; i < 5; i++) {
 			// we sometimes get intermittent errors creating the temp file. so retry a couple of times
 			try {
-				if (!dir.isDirectory()) {
-					if (!dir.mkdirs()) {
+				if (!tempDir.isDirectory()) {
+					if (!tempDir.mkdirs()) {
 						throw new IOException(
-								NLS.bind(Messages.ResourceProvider_FailedCreatingTempDir, dir.getAbsolutePath()));
+								NLS.bind(Messages.ResourceProvider_FailedCreatingTempDir, tempDir.getAbsolutePath()));
 					}
 				}
-				final File outputFile = File.createTempFile("res_", filenameHint, dir); //$NON-NLS-1$
+				final File outputFile = File.createTempFile("res_", filenameHint, tempDir); //$NON-NLS-1$
 				return outputFile;
 			} catch (IOException e) {
 				//ignore
 			}
 		}
-		final File outputFile = File.createTempFile("res_", filenameHint, dir); //$NON-NLS-1$
+		final File outputFile = File.createTempFile("res_", filenameHint, tempDir); //$NON-NLS-1$
 		return outputFile;
 	}
 
