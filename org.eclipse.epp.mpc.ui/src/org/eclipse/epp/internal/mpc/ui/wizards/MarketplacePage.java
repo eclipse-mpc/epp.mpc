@@ -238,7 +238,10 @@ public class MarketplacePage extends CatalogPage {
 			}
 		});
 		setControl(pageContent);
-		MarketplaceClientUi.setDefaultHelp(tabContent);
+		if (!tabContent.isDisposed()) {
+			// bug 473031 - no clue how this can happen during createControl...
+			MarketplaceClientUi.setDefaultHelp(tabContent);
+		}
 	}
 
 	private void setActiveTab(TabItem tab) {
