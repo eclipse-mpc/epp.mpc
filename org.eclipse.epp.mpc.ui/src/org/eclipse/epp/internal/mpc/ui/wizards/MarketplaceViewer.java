@@ -402,9 +402,9 @@ public class MarketplaceViewer extends CatalogViewer {
 		return tagData instanceof IIdentifiable && Identifiable.matches((IIdentifiable) tagData, data);
 	}
 
-	private void doQuery() {
+	private IStatus doQuery() {
 		initQueryFromFilters();
-		doQuery(queryData, null);
+		return doQuery(queryData, null);
 	}
 
 	private void initQueryFromFilters() {
@@ -481,7 +481,7 @@ public class MarketplaceViewer extends CatalogViewer {
 		firePropertyChangeEvent(new PropertyChangeEvent(source, property, oldValue, newValue));
 	}
 
-	private void doQuery(final QueryData queryData,
+	private IStatus doQuery(final QueryData queryData,
 			final Set<? extends INode> nodes) {
 		try {
 			final ContentType queryType = contentType;
@@ -536,15 +536,19 @@ public class MarketplaceViewer extends CatalogViewer {
 			if (result[0] != null && !result[0].isOK() && result[0].getSeverity() != IStatus.CANCEL) {
 				MarketplaceClientUi.handle(result[0],
 						(result[0].getSeverity() > IStatus.WARNING ? StatusManager.SHOW | StatusManager.BLOCK : 0)
-								| StatusManager.LOG);
+						| StatusManager.LOG);
+				return result[0];
 			} else {
 				verifyUpdateSiteAvailability();
+				return Status.OK_STATUS;
 			}
 		} catch (InvocationTargetException e) {
 			IStatus status = computeStatus(e, Messages.MarketplaceViewer_unexpectedException);
 			MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
+			return status;
 		} catch (InterruptedException e) {
 			// cancelled by user so nothing to do here.
+			return Status.CANCEL_STATUS;
 		}
 	}
 
@@ -623,9 +627,13 @@ public class MarketplaceViewer extends CatalogViewer {
 	}
 
 	private void doSetContentType(final ContentType contentType) {
+		final ContentType oldContentType = this.contentType;
 		updateContent(contentType, new Runnable() {
 			public void run() {
-				doQuery();
+				IStatus status = doQuery();
+				if (status.getSeverity() == IStatus.CANCEL || status.getSeverity() >= IStatus.ERROR) {
+					setContentType(oldContentType);
+				}
 			}
 		});
 	}

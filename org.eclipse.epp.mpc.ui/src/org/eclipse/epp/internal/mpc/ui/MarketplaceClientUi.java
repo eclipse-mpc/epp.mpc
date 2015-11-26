@@ -190,34 +190,28 @@ public class MarketplaceClientUi {
 		if (PlatformUI.isWorkbenchRunning()) {
 			IWorkbench workbench = PlatformUI.getWorkbench();
 			if (workbench != null) {
-				Display workbenchDisplay = workbench.getDisplay();
+				final Display workbenchDisplay = workbench.getDisplay();
 				if (!workbenchDisplay.isDisposed()) {
 					Runnable logRunnable = new Runnable() {
 						public void run() {
-							if (PlatformUI.isWorkbenchRunning()) {
+							if (!workbenchDisplay.isDisposed() && PlatformUI.isWorkbenchRunning()) {
 								IWorkbench workbench = PlatformUI.getWorkbench();
 								if (workbench != null) {
-									//WorkspaceStatusManager explicitly uses Display.getDefault() in a couple of places.
-									//So make extra sure we are running in that Display's thread...
-									Display defaultDisplay = Display.getDefault();
-									if (!defaultDisplay.isDisposed()) {
-										if (defaultDisplay != Display.getCurrent()) {
-											if (runIn(defaultDisplay, this)) {
-												return;
-											}
-										} else {
-											try {
-												StatusManager.getManager().handle(status, style);
-												return;
-											} catch (Exception ex) {
-												// Display might get disposed during call to handle due to workspace shutdown or similar.
-												// In that case, just log...
-											}
-										}
+									try {
+										StatusManager.getManager().handle(status, style);
+										return;
+									} catch (Exception ex) {
+										// Display might get disposed during call to handle due to workspace shutdown or similar.
+										// In that case, just log...
 									}
 								}
 							}
-							getLog().log(status);
+							ILog log = getLog();
+							if (log != null) {
+								log.log(status);
+							} else {
+								System.out.println(status);
+							}
 						}
 					};
 					if (runIn(workbenchDisplay, logRunnable)) {
@@ -227,7 +221,12 @@ public class MarketplaceClientUi {
 			}
 		}
 		//else just log
-		getLog().log(status);
+		ILog log = getLog();
+		if (log != null) {
+			log.log(status);
+		} else {
+			System.out.println(status);
+		}
 	}
 
 	private static boolean runIn(Display display, Runnable runnable) {
