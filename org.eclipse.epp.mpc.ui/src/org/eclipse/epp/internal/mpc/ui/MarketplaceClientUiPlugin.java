@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui;
 
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.epp.internal.mpc.ui.catalog.ResourceProvider;
 import org.eclipse.epp.mpc.ui.IMarketplaceClientService;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -79,6 +80,8 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 
 	private static MarketplaceClientUiPlugin instance;
 
+	private static BundleContext bundleContext;
+
 	private ServiceTracker<IMarketplaceClientService, IMarketplaceClientService> clientServiceTracker;
 
 	private ResourceProvider resourceProvider;
@@ -90,6 +93,7 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		instance = this;
 		super.start(context);
+		MarketplaceClientUiPlugin.bundleContext = context;
 		clientServiceTracker = new ServiceTracker<IMarketplaceClientService, IMarketplaceClientService>(context,
 				IMarketplaceClientService.class, null);
 		clientServiceTracker.open();
@@ -99,6 +103,7 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
+	   Job.getJobManager().cancel(context.getBundle());
 		clientServiceTracker.close();
 		clientServiceTracker = null;
 
@@ -106,6 +111,7 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
    		resourceProvider.dispose();
    		resourceProvider = null;
 		}
+		MarketplaceClientUiPlugin.bundleContext = null;
 		super.stop(context);
 		instance = null;
 	}
@@ -156,5 +162,9 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 
 	public ResourceProvider getResourceProvider() {
 		return resourceProvider;
+	}
+
+	public static BundleContext getBundleContext() {
+		return bundleContext;
 	}
 }

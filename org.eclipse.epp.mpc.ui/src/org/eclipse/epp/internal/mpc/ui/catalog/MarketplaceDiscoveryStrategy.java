@@ -28,8 +28,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.ServiceLocator;
 import org.eclipse.epp.internal.mpc.core.service.Identifiable;
@@ -37,6 +39,7 @@ import org.eclipse.epp.internal.mpc.core.service.Node;
 import org.eclipse.epp.internal.mpc.core.service.SearchResult;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory.Contents;
 import org.eclipse.epp.mpc.core.model.ICategories;
 import org.eclipse.epp.mpc.core.model.ICategory;
@@ -59,6 +62,7 @@ import org.eclipse.equinox.internal.p2.discovery.model.Overview;
 import org.eclipse.equinox.internal.p2.discovery.model.Tag;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.osgi.util.NLS;
+import org.osgi.framework.BundleContext;
 
 /**
  * @author David Green
@@ -116,7 +120,32 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			source = null;
 		}
 		if (marketplaceInfo != null) {
-			marketplaceInfo.save();
+			final MarketplaceInfo fMarketplaceInfo = marketplaceInfo;
+			new Job(Messages.MarketplaceDiscoveryStrategy_saveMarketplaceInfoJobName) {
+
+				{
+					setSystem(true);
+					setPriority(SHORT);
+					setUser(false);
+				}
+				@Override
+				public boolean belongsTo(Object family) {
+					BundleContext bundleContext = MarketplaceClientUiPlugin.getBundleContext();
+					MarketplaceClientUiPlugin plugin = MarketplaceClientUiPlugin.getInstance();
+					return (bundleContext != null && (family == bundleContext || family == bundleContext.getBundle()))
+							|| (plugin != null && family == plugin);
+				}
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						fMarketplaceInfo.save();
+					} catch (Exception e) {
+						return MarketplaceClientCore.computeStatus(e, Messages.MarketplaceDiscoveryStrategy_failedToSaveMarketplaceInfo);
+					}
+					return Status.OK_STATUS;
+				}
+			}.schedule();
 			marketplaceInfo = null;
 		}
 		super.dispose();

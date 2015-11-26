@@ -35,6 +35,8 @@ class Messages extends NLS {
 
 	public static String MarketplaceDiscoveryStrategy_downloadError;
 
+	public static String MarketplaceDiscoveryStrategy_failedToSaveMarketplaceInfo;
+
 	public static String MarketplaceDiscoveryStrategy_findingInstalled;
 
 	public static String MarketplaceDiscoveryStrategy_invalidFilter;
@@ -52,6 +54,8 @@ class Messages extends NLS {
 	public static String MarketplaceDiscoveryStrategy_ParseError;
 
 	public static String MarketplaceDiscoveryStrategy_requestSource;
+
+	public static String MarketplaceDiscoveryStrategy_saveMarketplaceInfoJobName;
 
 	public static String MarketplaceDiscoveryStrategy_searchingMarketplace;
 
