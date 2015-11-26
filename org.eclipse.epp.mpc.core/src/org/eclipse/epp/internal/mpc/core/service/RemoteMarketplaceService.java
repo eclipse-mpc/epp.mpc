@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
 import org.eclipse.epp.internal.mpc.core.util.TransportFactory;
@@ -43,6 +44,8 @@ public class RemoteMarketplaceService<T> {
 
 	protected static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
 
+	private static final int RETRY_COUNT = 3;
+
 	protected final ITransport transport;
 
 	protected final IMarketplaceUnmarshaller unmarshaller;
@@ -60,7 +63,11 @@ public class RemoteMarketplaceService<T> {
 	}
 
 	protected IStatus createErrorStatus(String message, Throwable t) {
-		return new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID, 0, message, t);
+		return createStatus(IStatus.ERROR, message, t);
+	}
+
+	protected IStatus createStatus(int severity, String message, Throwable t) {
+		return new Status(severity, MarketplaceClientCore.BUNDLE_ID, 0, message, t);
 	}
 
 	private void checkConfiguration() {
@@ -119,29 +126,51 @@ public class RemoteMarketplaceService<T> {
 			throw new CoreException(createErrorStatus(message, e));
 		}
 
-		monitor.beginTask(NLS.bind(Messages.DefaultMarketplaceService_retrievingDataFrom, baseUri), 100);
+		int retry = 0;
+		SubMonitor progress = SubMonitor.convert(monitor,
+				NLS.bind(Messages.DefaultMarketplaceService_retrievingDataFrom, baseUri), 100);
 		try {
-			InputStream in = transport.stream(location, monitor);
-			try {
-				monitor.worked(30);
+			while (true) {
+				progress.setWorkRemaining(100);
+				try {
+					InputStream in = transport.stream(location, progress.newChild(70));
+					try {
+						progress.setWorkRemaining(100);
+						progress.worked(30);
 
-				return (T) unmarshaller.unmarshal(in, Object.class, monitor);//FIXME having T.class available here would be great...
-			} catch (UnmarshalException e) {
-				MarketplaceClientCore.error(
-						NLS.bind(Messages.DefaultMarketplaceService_parseError, location.toString()), e);
-				throw e;
-			} finally {
-				if (in != null) {
-					in.close();
+						return (T) unmarshaller.unmarshal(in, Object.class, progress.newChild(70));//FIXME having T.class available here would be great...
+					} catch (UnmarshalException e) {
+						MarketplaceClientCore.error(
+								NLS.bind(Messages.DefaultMarketplaceService_parseError, location.toString()), e);
+						throw e;
+					} finally {
+						if (in != null) {
+							in.close();
+						}
+					}
+				} catch (Exception e) {
+					if (e.getCause() instanceof OperationCanceledException) {
+						throw new CoreException(Status.CANCEL_STATUS);
+					}
+					String causeMessage = e.getMessage();
+					String message = NLS.bind(Messages.DefaultMarketplaceService_cannotCompleteRequest_reason,
+							location.toString(), causeMessage);
+					if (MarketplaceClientCore.isStreamClosedException(e)) {
+						if (++retry < RETRY_COUNT) {
+							// retry on unreliable connections
+							MarketplaceClientCore.getLog().log(createStatus(IStatus.INFO, message, e));
+							continue;
+						}
+						IStatus connectionProblemStatus = MarketplaceClientCore.createConnectionProblemStatus(e);
+						causeMessage = connectionProblemStatus.getMessage();
+						e = new CoreException(connectionProblemStatus);
+						//rebind with updated message
+						message = NLS.bind(Messages.DefaultMarketplaceService_cannotCompleteRequest_reason, location.toString(),
+								causeMessage);
+					}
+					throw new CoreException(createErrorStatus(message, e));
 				}
 			}
-		} catch (Exception e) {
-			if (e.getCause() instanceof OperationCanceledException) {
-				throw new CoreException(Status.CANCEL_STATUS);
-			}
-			String message = NLS.bind(Messages.DefaultMarketplaceService_cannotCompleteRequest_reason,
-					location.toString(), e.getMessage());
-			throw new CoreException(createErrorStatus(message, e));
 		} finally {
 			monitor.done();
 		}

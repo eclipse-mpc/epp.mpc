@@ -10,7 +10,11 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.ConnectException;
 import java.net.NoRouteToHostException;
@@ -33,6 +37,23 @@ import org.eclipse.osgi.util.NLS;
 public class MarketplaceClientCore {
 
 	public static final String BUNDLE_ID = "org.eclipse.epp.mpc.core"; //$NON-NLS-1$
+
+	private static final String STREAM_CLOSED_MESSAGE;
+
+	static {
+		InputStream is = new ByteArrayInputStream(new byte[1]);
+		BufferedInputStream bis = new BufferedInputStream(is);
+		String streamClosedMessage = "Stream closed"; //$NON-NLS-1$
+		try {
+			bis.close();
+			bis.available();
+		} catch (IOException ex) {
+			if (ex.getMessage() != null) {
+				streamClosedMessage = ex.getMessage();
+			}
+		}
+		STREAM_CLOSED_MESSAGE = streamClosedMessage;
+	}
 
 	public static ILog getLog() {
 		return Platform.getLog(MarketplaceClientCorePlugin.getBundle());
@@ -92,27 +113,20 @@ public class MarketplaceClientCore {
 			}
 			// some oddly configured networks throw timeouts instead of DNS or routing errors
 			if (exception instanceof ConnectException) {
-				status = new Status(IStatus.ERROR, BUNDLE_ID,
-						NLS.bind(Messages.MarketplaceClientCore_connectionProblem, exception.getMessage()), exception);
+				status = createConnectionProblemStatus(exception);
 				break;
 			}
 			// no specific details on this one, but could still point to network issues
 			if (exception instanceof SocketException) {
-				//the original exception's message is likely more informative than the cause in this case
-				status = new Status(IStatus.ERROR, BUNDLE_ID,
-						NLS.bind(Messages.MarketplaceClientCore_connectionProblem, exception.getMessage()), exception);
+				status = createConnectionProblemStatus(exception);
 				break;
 			}
 			if (exception instanceof SocketTimeoutException) {
-				//the original exception's message is likely more informative than the cause in this case
-				status = new Status(IStatus.ERROR, BUNDLE_ID,
-						NLS.bind(Messages.MarketplaceClientCore_connectionProblem, exception.getMessage()), exception);
+				status = createConnectionProblemStatus(exception);
 				break;
 			}
 			if (exception instanceof NoHttpResponseException) {
-				//the original exception's message is likely more informative than the cause in this case
-				status = new Status(IStatus.ERROR, BUNDLE_ID,
-						NLS.bind(Messages.MarketplaceClientCore_connectionProblem, exception.getMessage()), exception);
+				status = createConnectionProblemStatus(exception);
 				break;
 			}
 			if (exception instanceof CoreException) {
@@ -134,4 +148,25 @@ public class MarketplaceClientCore {
 		return status;
 	}
 
+	public static IStatus createConnectionProblemStatus(Throwable exception) {
+		IStatus status = new Status(IStatus.ERROR, BUNDLE_ID,
+				NLS.bind(Messages.MarketplaceClientCore_connectionProblem, exception.getMessage()), exception);
+		return status;
+	}
+
+	public static boolean isStreamClosedException(Throwable exception) {
+		while (exception != null) {
+			if (exception instanceof IOException) {
+				IOException ioException = (IOException) exception;
+				return STREAM_CLOSED_MESSAGE.equals(ioException.getMessage());
+			}
+			Throwable cause = exception.getCause();
+			if (cause != exception) {
+				exception = cause;
+			} else {
+				break;
+			}
+		}
+		return false;
+	}
 }
