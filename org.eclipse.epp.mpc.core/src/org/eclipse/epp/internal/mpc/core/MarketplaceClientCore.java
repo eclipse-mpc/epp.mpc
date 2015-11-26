@@ -18,6 +18,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
+import org.apache.http.NoHttpResponseException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
@@ -103,6 +104,12 @@ public class MarketplaceClientCore {
 				break;
 			}
 			if (exception instanceof SocketTimeoutException) {
+				//the original exception's message is likely more informative than the cause in this case
+				status = new Status(IStatus.ERROR, BUNDLE_ID,
+						NLS.bind(Messages.MarketplaceClientCore_connectionProblem, exception.getMessage()), exception);
+				break;
+			}
+			if (exception instanceof NoHttpResponseException) {
 				//the original exception's message is likely more informative than the cause in this case
 				status = new Status(IStatus.ERROR, BUNDLE_ID,
 						NLS.bind(Messages.MarketplaceClientCore_connectionProblem, exception.getMessage()), exception);
