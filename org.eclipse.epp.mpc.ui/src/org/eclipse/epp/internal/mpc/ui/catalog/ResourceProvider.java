@@ -192,16 +192,27 @@ public class ResourceProvider {
 
 	private final Map<String, ResourceFuture> resources = new ConcurrentHashMap<String, ResourceFuture>();
 
-	public void init() throws IOException {
+	public synchronized void init() throws IOException {
 		if (dir != null) {
 			return;
 		}
-		dir = File.createTempFile(ResourceProvider.class.getSimpleName(), ".tmp"); //$NON-NLS-1$
-		dir.delete();
-		if (!dir.mkdirs() || !dir.isDirectory()) {
-			throw new IOException(NLS.bind(Messages.ResourceProvider_FailedCreatingTempDir, dir.getAbsolutePath()));
+		for (int i = 0; i < 5; i++) {
+			// we sometimes get intermittent errors creating the temp file. so retry a couple of times
+			try {
+				dir = File.createTempFile(ResourceProvider.class.getSimpleName(), ".tmp"); //$NON-NLS-1$
+				dir.delete();
+				if (!dir.mkdirs() || !dir.isDirectory()) {
+					throw new IOException(
+							NLS.bind(Messages.ResourceProvider_FailedCreatingTempDir, dir.getAbsolutePath()));
+				}
+				dir.deleteOnExit();
+				return;
+			} catch (IOException e) {
+				//ignore
+			}
 		}
-		dir.deleteOnExit();
+		throw new IOException(
+				NLS.bind(Messages.ResourceProvider_FailedCreatingTempDir, dir == null ? null : dir.getAbsolutePath()));
 	}
 
 	public URL getLocalResource(String resourceName) {
@@ -214,20 +225,20 @@ public class ResourceProvider {
 	}
 
 	public ResourceFuture getResource(String resourceName) {
-		synchronized (resources) {
+		synchronized (this) {
 			return resources.get(resourceName);
 		}
 	}
 
 	public boolean containsResource(String resourceName) {
-		synchronized (resources) {
+		synchronized (this) {
 			return resources.containsKey(resourceName);
 		}
 	}
 
 	public ResourceFuture registerResource(String resourceName) throws IOException {
 		ResourceFuture resourceFuture;
-		synchronized (resources) {
+		synchronized (this) {
 			init();
 			resourceFuture = resources.get(resourceName);
 			if (resourceFuture == null) {
@@ -271,49 +282,53 @@ public class ResourceProvider {
 	public ResourceFuture retrieveResource(final String requestSource, final String resourceName, final URI resourceUrl)
 			throws IOException {
 		ResourceFuture resourceFuture;
-		synchronized (resources) {
+		boolean retrieve = false;
+		synchronized (this) {
 			resourceFuture = resources.get(resourceName);
 			if (resourceFuture == null) {
 				resourceFuture = registerResource(resourceName);
+				retrieve = true;
 			}
 		}
-		final ResourceFuture finalResourceFuture = resourceFuture;
-		new Job(Messages.ResourceProvider_retrievingResource) {
+		if (retrieve) {
+			final ResourceFuture finalResourceFuture = resourceFuture;
+			new Job(Messages.ResourceProvider_retrievingResource) {
 
-			{
-				setPriority(INTERACTIVE);
-				setUser(false);
-				setSystem(true);
-			}
+				{
+					setPriority(INTERACTIVE);
+					setUser(false);
+					setSystem(true);
+				}
 
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					InputStream in = TransportFactory.createTransport().stream(resourceUrl, monitor);
-					finalResourceFuture.retrieve(in);
-				} catch (FileNotFoundException e) {
-					//MarketplaceClientUi.error(NLS.bind(Messages.AbstractResourceRunnable_resourceNotFound, new Object[] { catalogItem.getName(),
-					//catalogItem.getId(), resourceUrl }), e);
-				} catch (IOException e) {
-					if (e.getCause() instanceof OperationCanceledException) {
-						// canceled, nothing we want to do here
-					} else {
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						InputStream in = TransportFactory.createTransport().stream(resourceUrl, monitor);
+						finalResourceFuture.retrieve(in);
+					} catch (FileNotFoundException e) {
+						//MarketplaceClientUi.error(NLS.bind(Messages.AbstractResourceRunnable_resourceNotFound, new Object[] { catalogItem.getName(),
+						//catalogItem.getId(), resourceUrl }), e);
+					} catch (IOException e) {
+						if (e.getCause() instanceof OperationCanceledException) {
+							// canceled, nothing we want to do here
+						} else {
+							MarketplaceClientUi.log(IStatus.WARNING, Messages.ResourceProvider_downloadError, requestSource,
+									resourceUrl, e);
+						}
+					} catch (CoreException e) {
 						MarketplaceClientUi.log(IStatus.WARNING, Messages.ResourceProvider_downloadError, requestSource,
 								resourceUrl, e);
 					}
-				} catch (CoreException e) {
-					MarketplaceClientUi.log(IStatus.WARNING, Messages.ResourceProvider_downloadError, requestSource,
-							resourceUrl, e);
+					return Status.OK_STATUS;
 				}
-				return Status.OK_STATUS;
-			}
-		}.schedule();
+			}.schedule();
+		}
 		return resourceFuture;
 	}
 
 	public void dispose() {
 		File dir;
-		synchronized (resources) {
+		synchronized (this) {
 			dir = this.dir;
 			this.dir = null;
 			resources.clear();
