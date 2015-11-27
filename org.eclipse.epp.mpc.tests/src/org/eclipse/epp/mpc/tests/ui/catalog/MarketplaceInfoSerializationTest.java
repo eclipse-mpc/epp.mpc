@@ -40,10 +40,10 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 @RunWith(BlockJUnit4ClassRunner.class)
 public class MarketplaceInfoSerializationTest {
 
-	private final class TestMarketplaceInfo extends MarketplaceInfo {
-		@Override
+	private class TestMarketplaceInfo extends MarketplaceInfo {
+
 		public File computeRegistryFile(boolean save) {
-			return super.computeRegistryFile(save);
+			return save ? createRegistryFile().save() : createRegistryFile().load();
 		}
 
 		@Override
@@ -64,6 +64,35 @@ public class MarketplaceInfoSerializationTest {
 
 	private File registryLocation;
 	private TestMarketplaceInfo catalogRegistry;
+
+	private TestMarketplaceInfo createReadOnlyBundleMarketplaceInfo() {
+		return new TestMarketplaceInfo() {
+			@Override
+			protected RegistryFile createRegistryFile() {
+				return new RegistryFile(super.createRegistryFile()) {
+					@Override
+					protected boolean canWrite(File file) {
+						return !file.equals(getLocations()[0]) && super.canWrite(file);
+					}
+
+					@Override
+					protected boolean mkdirs(File file) {
+						return !file.equals(getLocations()[0].getParentFile()) && super.mkdirs(file);
+					}
+
+					@Override
+					protected boolean createNewFile(File file) throws IOException {
+						return !file.equals(getLocations()[0]) && super.createNewFile(file);
+					}
+				};
+			}
+
+			@Override
+			protected File computeBundleRegistryFile() {
+				return new File(registryLocation, "bundle-registry.tmp");
+			}
+		};
+	}
 
 	@Before
 	public void before() throws Exception {
@@ -145,6 +174,22 @@ public class MarketplaceInfoSerializationTest {
 		assertEquals(getUserHomeRegistryFile(), registryFile);
 		assertFalse(MessageFormat.format("Migration to new location failed, ''{0}'' still exists",
 				getLegacyUserHomeRegistryFile().getAbsolutePath()), getLegacyUserHomeRegistryFile().exists());
+	}
+
+	@Test
+	public void saveToUserHomeReadOnlyBundleLoation() throws Exception {
+		catalogRegistry = createReadOnlyBundleMarketplaceInfo();
+		File registryFile = catalogRegistry.computeRegistryFile(true);
+		assertEquals(getUserHomeRegistryFile(), registryFile);
+	}
+
+	@Test
+	public void loadFromReadOnlyBundleLoation() throws Exception {
+		catalogRegistry = createReadOnlyBundleMarketplaceInfo();
+		File bundleRegistryFile = catalogRegistry.computeBundleRegistryFile();
+		createEmptyRegistryFile(bundleRegistryFile);
+		File registryFile = catalogRegistry.computeRegistryFile(false);
+		assertEquals(bundleRegistryFile, registryFile);
 	}
 
 	@Test

@@ -18,6 +18,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
@@ -309,11 +310,12 @@ public class MarketplaceInfo {
 	 * @nooverride This method is not intended to be re-implemented or extended by clients.
 	 */
 	public MarketplaceInfo load() {
-		File registryFile = computeRegistryFile(false);
-		synchronized (MarketplaceInfo.class) {
-			if (registryFile != null && registryFile.isFile() && registryFile.length() > 0) {
+		RegistryFile registryFile = createRegistryFile();
+		File loadFile = registryFile.load();
+		if (loadFile != null) {
+			synchronized (MarketplaceInfo.class) {
 				try {
-					final InputStream in = new BufferedInputStream(new FileInputStream(registryFile));
+					final InputStream in = new BufferedInputStream(new FileInputStream(loadFile));
 					try {
 						XMLDecoder decoder = new XMLDecoder(in);
 						Object object = decoder.readObject();
@@ -328,7 +330,7 @@ public class MarketplaceInfo {
 							Messages.MarketplaceInfo_LoadError, t);
 					MarketplaceClientUi.getLog().log(status);
 					//try to delete broken file
-					registryFile.delete();
+					loadFile.delete();
 				}
 			}
 		}
@@ -336,10 +338,11 @@ public class MarketplaceInfo {
 	}
 
 	public void save() {
-		File registryFile = computeRegistryFile(true);
-		if (registryFile != null) {
+		RegistryFile registryFile = createRegistryFile();
+		File saveFile = registryFile.save();
+		if (saveFile != null) {
 			synchronized (MarketplaceInfo.class) {
-				save(registryFile);
+				save(saveFile);
 			}
 		}
 	}
@@ -372,47 +375,20 @@ public class MarketplaceInfo {
 	 * @noreference This method is not intended to be referenced by clients.
 	 * @nooverride This method is not intended to be re-implemented or extended by clients.
 	 */
-	protected File computeRegistryFile(boolean save) {
-		// compute the file we'll use for registry persistence, starting with the platform configuration location
+	protected RegistryFile createRegistryFile() {
 		File dataFile = computeBundleRegistryFile();
-		if (dataFile != null) {
-			return dataFile;
-		}
 
-		// platform config location no good, so let's try the user's home directory
 		String userHome = System.getProperty("user.home"); //$NON-NLS-1$
 		File userHomeFile = new File(userHome);
 		if (userHomeFile.exists()) {
 			File configFile = computeUserHomeRegistryFile(userHomeFile);
-
-			configFile = handleLegacyRegistryFile(userHomeFile, configFile, save);
-
-			return configFile;
+			File legacyConfigFile = computeLegacyUserHomeRegistryFile(userHomeFile);
+			return dataFile != null ? new RegistryFile(dataFile, configFile, legacyConfigFile)
+					: new RegistryFile(configFile, legacyConfigFile);
 		}
-		return null;
+		return dataFile != null ? new RegistryFile(dataFile) : new RegistryFile();
 	}
 
-	private File handleLegacyRegistryFile(File userHome, File configFile, boolean save) {
-		File legacyConfigFile = computeLegacyUserHomeRegistryFile(userHome);
-		if (!configFile.getParentFile().isDirectory() && !configFile.getParentFile().mkdirs()) {
-			configFile = legacyConfigFile;// .eclipse dir is not writable, just use legacy if that exists
-		} else if (legacyConfigFile != null) {
-			if (save) {
-				if (!legacyConfigFile.delete()) {
-					legacyConfigFile.deleteOnExit();
-				}
-				if (!legacyConfigFile.getParentFile().delete()) {
-					legacyConfigFile.getParentFile().deleteOnExit();
-				}
-			} else {
-				//load from new location if it exists or fall back to old one
-				if (!configFile.isFile()) {
-					configFile = legacyConfigFile;
-				}
-			}
-		}
-		return configFile;
-	}
 
 	/**
 	 * This method is only protected for testing purposes. Do not override or call directly.
@@ -435,8 +411,6 @@ public class MarketplaceInfo {
 	 */
 	protected File computeUserHomeRegistryFile(File userHome) {
 		File eclipseConfigLocation = new File(userHome, ".eclipse/mpc"); //$NON-NLS-1$
-		eclipseConfigLocation.mkdirs();
-
 		File configFile = computeConfigFile(eclipseConfigLocation);
 		return configFile;
 	}
@@ -449,17 +423,103 @@ public class MarketplaceInfo {
 	 */
 	protected File computeLegacyUserHomeRegistryFile(File userHome) {
 		File legacyConfigLocation = new File(userHome, ".eclipse_mpc"); //$NON-NLS-1$
-		if (legacyConfigLocation.isDirectory()) {
-			File legacyConfigFile = computeConfigFile(legacyConfigLocation);
-			if (legacyConfigFile.isFile()) {
-				return legacyConfigFile;
-			}
-		}
-		return null;
+		File legacyConfigFile = computeConfigFile(legacyConfigLocation);
+		return legacyConfigFile;
 	}
 
 	private static File computeConfigFile(File mpcConfigLocation) {
 		return new File(mpcConfigLocation, PERSISTENT_FILE);
 	}
 
+	/**
+	 * This is only non-private for testing purposes
+	 *
+	 * @noreference This class is not intended to be referenced by clients.
+	 * @noextend This class is not intended to be subclassed by clients.
+	 * @noinstantiate This class is not intended to be instantiated by clients.
+	 */
+	protected static class RegistryFile {
+		private final File[] locations;
+
+		public RegistryFile(File... locations) {
+			this.locations = locations;
+		}
+
+		public RegistryFile(RegistryFile registryFile) {
+			this(registryFile.getLocations());
+		}
+
+		protected File[] getLocations() {
+			return locations;
+		}
+
+		public File load() {
+			for (File file : locations) {
+				if (isFile(file) && canRead(file)) {
+					return file;
+				}
+			}
+			if (locations.length > 0) {
+				return locations[0];
+			}
+			return null;
+		}
+
+		public File save() {
+			for (int i = 0; i < locations.length; i++) {
+				File file = locations[i];
+				try {
+					if ((isDirectory(file.getParentFile()) || mkdirs(file.getParentFile()))
+							&& ((isFile(file) && canWrite(file)) || (!exists(file) && createNewFile(file)))) {
+						for (int j = i + 1; j < locations.length; j++) {
+							File parentFile = locations[j].getParentFile();
+							if (exists(parentFile)) {
+								if (locations[j].exists() && !locations[j].delete()) {
+									locations[j].deleteOnExit();
+								}
+								if (!parentFile.delete()) {
+									parentFile.deleteOnExit();
+								}
+							}
+						}
+						return file;
+					}
+				} catch (IOException ex) {
+					//ignore
+				}
+			}
+			if (locations.length > 0) {
+				return locations[0];
+			}
+			return null;
+		}
+
+		protected boolean mkdirs(File file) {
+			return file.mkdirs();
+		}
+
+		protected boolean isDirectory(File file) {
+			return file.isDirectory();
+		}
+
+		protected boolean createNewFile(File file) throws IOException {
+			return file.createNewFile();
+		}
+
+		protected boolean exists(File file) {
+			return file.exists();
+		}
+
+		protected boolean canWrite(File file) {
+			return file.canWrite();
+		}
+
+		protected boolean canRead(File file) {
+			return file.canRead();
+		}
+
+		protected boolean isFile(File file) {
+			return file.isFile();
+		}
+	}
 }
