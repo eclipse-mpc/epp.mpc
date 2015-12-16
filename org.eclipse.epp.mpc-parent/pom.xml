@@ -210,7 +210,7 @@
                <configuration>
                   <resolver>p2</resolver>
                   <executionEnvironmentDefault>J2SE-${java-version}</executionEnvironmentDefault>
-                  <includePackedArtifacts>true</includePackedArtifacts>
+                  <includePackedArtifacts>false</includePackedArtifacts>
                   <ignoreTychoRepositories>true</ignoreTychoRepositories>
                   <target>
                      <artifact>
