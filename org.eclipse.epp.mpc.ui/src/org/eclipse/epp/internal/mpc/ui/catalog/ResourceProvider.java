@@ -333,7 +333,7 @@ public class ResourceProvider {
 			this.dir = null;
 			resources.clear();
 		}
-		if (dir.isDirectory()) {
+		if (dir != null && dir.isDirectory()) {
 			File[] resourceFiles = dir.listFiles();
 			if (resourceFiles != null) {
 				for (File file : resourceFiles) {

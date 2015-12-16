@@ -312,7 +312,7 @@ public class MarketplaceInfo {
 	public MarketplaceInfo load() {
 		RegistryFile registryFile = createRegistryFile();
 		File loadFile = registryFile.load();
-		if (loadFile != null) {
+		if (loadFile != null && loadFile.canRead()) {
 			synchronized (MarketplaceInfo.class) {
 				try {
 					final InputStream in = new BufferedInputStream(new FileInputStream(loadFile));
