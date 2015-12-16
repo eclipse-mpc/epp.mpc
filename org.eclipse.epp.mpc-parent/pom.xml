@@ -9,17 +9,17 @@
 
    <groupId>org.eclipse.epp.mpc</groupId>
    <artifactId>org.eclipse.epp.mpc-parent</artifactId>
-   <version>1.4.1-SNAPSHOT</version>
+   <version>1.5.0-SNAPSHOT</version>
    <packaging>pom</packaging>
 
    <properties>
       <mpc-version>${project.version}</mpc-version>
-      <target-platform>maintenance</target-platform>
+      <target-platform>staging</target-platform>
       <java-version>1.5</java-version>
-	  <java-jdk>SYSTEM</java-jdk>
+      <java-jdk>SYSTEM</java-jdk>
 
-      <tycho-version>0.23.1</tycho-version>
-      <tycho-extras-version>0.23.1</tycho-extras-version>
+      <tycho-version>0.24.0</tycho-version>
+      <tycho-extras-version>${tycho-version}</tycho-extras-version>
 
       <archive-dir>${basedir}/target/drops</archive-dir>
       <site-dir></site-dir>
@@ -95,22 +95,22 @@
          </properties>
       </profile>
       <profile>
+         <id>neon</id>
+         <properties>
+            <target-platform>neon</target-platform>
+         </properties>
+      </profile>
+      <profile>
          <id>maintenance</id>
-         <activation>
-            <activeByDefault>true</activeByDefault>
-         </activation>
          <properties>
             <target-platform>maintenance</target-platform>
          </properties>
       </profile>
       <profile>
-         <id>luna</id>
-         <properties>
-            <target-platform>luna</target-platform>
-         </properties>
-      </profile>
-      <profile>
          <id>staging</id>
+         <activation>
+            <activeByDefault>true</activeByDefault>
+         </activation>
          <properties>
             <target-platform>staging</target-platform>
          </properties>

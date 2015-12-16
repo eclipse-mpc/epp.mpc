@@ -5,7 +5,7 @@
    <parent>
       <groupId>org.eclipse.epp.mpc</groupId>
       <artifactId>org.eclipse.epp.mpc-parent</artifactId>
-      <version>1.4.1-SNAPSHOT</version>
+      <version>1.5.0-SNAPSHOT</version>
       <relativePath>../org.eclipse.epp.mpc-parent</relativePath>
    </parent>
    <artifactId>org.eclipse.epp.mpc-target</artifactId>
@@ -25,14 +25,14 @@
                   <configuration>
                      <artifacts>
                         <artifact>
-                           <file>luna.target</file>
-                           <type>target</type>
-                           <classifier>luna</classifier>
-                        </artifact>
-                        <artifact>
                            <file>mars.target</file>
                            <type>target</type>
                            <classifier>mars</classifier>
+                        </artifact>
+                        <artifact>
+                           <file>neon.target</file>
+                           <type>target</type>
+                           <classifier>neon</classifier>
                         </artifact>
                         <artifact>
                            <file>staging.target</file>
