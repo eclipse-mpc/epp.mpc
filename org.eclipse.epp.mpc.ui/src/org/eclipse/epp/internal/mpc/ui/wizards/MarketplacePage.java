@@ -45,6 +45,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -67,6 +68,8 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 /**
  * @author Steffen Pingel
@@ -89,6 +92,43 @@ public class MarketplacePage extends CatalogPage {
 	public static final String WIDGET_ID_TAB_NEWS = "tab:news"; //$NON-NLS-1$
 
 	public static final String WIDGET_ID_KEY = MarketplacePage.class.getName() + "::part"; //$NON-NLS-1$
+
+	static {
+		registerSearchControlIcons();
+	}
+
+	/**
+	 * Workaround for bug 484487
+	 */
+	private static void registerSearchControlIcons() {
+		String clearIconKey = "org.eclipse.ui.internal.dialogs.CLEAR_ICON"; //$NON-NLS-1$
+		String findIconKey = "org.eclipse.ui.internal.dialogs.FIND_ICON"; //$NON-NLS-1$
+		ImageDescriptor clearDescriptor = JFaceResources.getImageRegistry().getDescriptor(clearIconKey);
+		ImageDescriptor findDescriptor = JFaceResources.getImageRegistry().getDescriptor(findIconKey);
+		if (clearDescriptor == null || findDescriptor == null) {
+			try {
+				Class.forName(
+						"org.eclipse.equinox.internal.p2.ui.discovery.util.TextSearchControl", true,
+						MarketplacePage.class.getClassLoader());
+				clearDescriptor = JFaceResources.getImageRegistry().getDescriptor(clearIconKey);
+				findDescriptor = JFaceResources.getImageRegistry().getDescriptor(findIconKey);
+			} catch (ClassNotFoundException e) {
+				//ignore
+			}
+		}
+		if (clearDescriptor == null) {
+			clearDescriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PlatformUI.PLUGIN_ID,
+					"$nl$/icons/full/etool16/clear_co.png"); //$NON-NLS-1$
+			if (clearDescriptor == null) {
+				clearDescriptor = ImageDescriptor.getMissingImageDescriptor();
+			}
+			JFaceResources.getImageRegistry().put(clearIconKey, clearDescriptor);
+		}
+		if (findDescriptor == null) {
+			findDescriptor = ImageDescriptor.getMissingImageDescriptor();
+			JFaceResources.getImageRegistry().put(findIconKey, findDescriptor);
+		}
+	}
 
 	private final MarketplaceCatalogConfiguration configuration;
 
@@ -573,9 +613,9 @@ public class MarketplacePage extends CatalogPage {
 		if (hasTab) {
 			tabIndex++;
 		}
-		hasTab = branding.hasFeaturedMarketTab();
+		hasTab = hasFeaturedMarketTab(branding);
 		featuredMarketTabItem = updateTab(featuredMarketTabItem, WIDGET_ID_TAB_FEATURED_MARKET,
-				branding.getFeaturedMarketTabName(), hasTab, oldBranding.hasFeaturedMarketTab(), tabIndex);
+				branding.getFeaturedMarketTabName(), hasTab, hasFeaturedMarketTab(oldBranding), tabIndex);
 		if (hasTab) {
 			tabIndex++;
 		}
