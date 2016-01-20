@@ -16,7 +16,7 @@
   <parent>
     <groupId>org.eclipse.epp.mpc</groupId>
     <artifactId>org.eclipse.epp.mpc-bundle</artifactId>
-    <version>1.4.1-SNAPSHOT</version>
+    <version>1.4.2-SNAPSHOT</version>
     <relativePath>../org.eclipse.epp.mpc-parent/bundle</relativePath>
   </parent>
   <artifactId>org.eclipse.epp.mpc.ui</artifactId>

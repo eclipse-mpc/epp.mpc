@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Marketplace Client Tests
 Bundle-SymbolicName: org.eclipse.epp.mpc.tests
-Bundle-Version: 1.4.1.qualifier
+Bundle-Version: 1.4.2.qualifier
 Bundle-Vendor: Eclipse Marketplace Client
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Require-Bundle: org.eclipse.osgi;bundle-version="3.6.0",
