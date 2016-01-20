@@ -11,7 +11,10 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import java.util.Arrays;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
@@ -52,16 +55,76 @@ public class MarketplaceWizardDialog extends WizardDialog {
 		final IWorkbenchListener workbenchListener = new IWorkbenchListener() {
 
 			public boolean preShutdown(IWorkbench workbench, boolean forced) {
-				Shell wizardShell = MarketplaceWizardDialog.this.getShell();
+				MarketplaceWizardDialog wizardDialog = MarketplaceWizardDialog.this;
+				Shell wizardShell = wizardDialog.getShell();
 				if (wizardShell != null && !wizardShell.isDisposed()) {
+					if (!forced) {
+						MarketplaceWizard wizard = wizardDialog.getWizard();
+						boolean hasPendingActions = false;
+						IWizardPage currentPage = wizardDialog.getCurrentPage();
+						if (currentPage != null && wizard != null) {
+							if (currentPage == wizard.getCatalogPage()) {
+								hasPendingActions = !wizard.getSelectionModel().getSelectedCatalogItems().isEmpty();
+							} else {
+								hasPendingActions = true;
+							}
+						}
+						if (hasPendingActions) {
+							Shell parentShell = activate(wizardDialog.getShell());
+							MessageDialog messageDialog = new MessageDialog(parentShell, Messages.MarketplaceWizardDialog_PromptPendingActionsTitle,
+									null, Messages.MarketplaceWizardDialog_PromptPendingActionsMessage,
+									MessageDialog.QUESTION_WITH_CANCEL, new String[] { IDialogConstants.YES_LABEL,
+											IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL },
+									SWT.NONE);
+							int result = messageDialog.open();
+							switch (result) {
+							case 0: //yes
+								finishWizard();
+								return false;
+							case 1: //no
+								break;
+							case 3: //cancel
+							case SWT.DEFAULT: //[x]
+							default:
+								return false;
+							}
+						}
+					}
 					if (forced) {
 						wizardShell.close();
 					} else {
-						boolean closed = MarketplaceWizardDialog.this.close();
+						boolean closed = wizardDialog.close();
 						return closed;
 					}
 				}
 				return true;
+			}
+
+			private void finishWizard() {
+				MarketplaceWizardDialog wizardDialog = MarketplaceWizardDialog.this;
+				MarketplaceWizard wizard = wizardDialog.getWizard();
+				IWizardPage currentPage = wizardDialog.getCurrentPage();
+				if (currentPage == wizard.getCatalogPage()) {
+					((MarketplacePage) currentPage).showNextPage();
+				}
+			}
+
+			private Shell activate(Shell shell) {
+				Shell activeShell = shell.getDisplay().getActiveShell();
+				if (activeShell != shell) {
+					Shell[] childShells = shell.getShells();
+					if (childShells.length == 0 || !Arrays.asList(childShells).contains(activeShell)) {
+						shell.forceActive();
+						shell.forceFocus();
+					}
+				}
+				if (activeShell == null) {
+					activeShell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+					if (activeShell == null) {
+						activeShell = shell;
+					}
+				}
+				return activeShell;
 			}
 
 			public void postShutdown(IWorkbench workbench) {

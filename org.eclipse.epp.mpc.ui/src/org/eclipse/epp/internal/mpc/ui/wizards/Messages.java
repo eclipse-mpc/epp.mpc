@@ -186,6 +186,10 @@ class Messages extends NLS {
 
 	public static String MarketplaceWizardDialog_Install_Now;
 
+	public static String MarketplaceWizardDialog_PromptPendingActionsMessage;
+
+	public static String MarketplaceWizardDialog_PromptPendingActionsTitle;
+
 	public static String NewsViewer_Copy_Link_Address;
 
 	public static String NewsViewer_Loading;
