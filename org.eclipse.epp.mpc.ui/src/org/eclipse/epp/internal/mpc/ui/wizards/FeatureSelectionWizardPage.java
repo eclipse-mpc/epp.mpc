@@ -430,7 +430,15 @@ public class FeatureSelectionWizardPage extends WizardPage {
 	}
 
 	protected void showPreviousPage() {
-		((MarketplaceWizardDialog) getWizard().getContainer()).backPressed();
+		MarketplaceWizard wizard = getWizard();
+		//bug 485715 - be careful here, the dialog might have been closed during/after a container.run(...)
+		//making some of these references null.
+		if (wizard != null) {
+			MarketplaceWizardDialog container = (MarketplaceWizardDialog) wizard.getContainer();
+			if (container != null) {
+				container.backPressed();
+			}
+		}
 	}
 
 	@Override
