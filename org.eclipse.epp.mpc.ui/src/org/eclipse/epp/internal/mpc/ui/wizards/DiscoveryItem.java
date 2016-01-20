@@ -607,12 +607,15 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 	private void provideIconImage(final Label iconLabel, AbstractCatalogSource source, Icon icon, int size,
 			boolean fallback) {
+		if (iconLabel == null) {
+			return;
+		}
 		String iconPath = getResources().getIconPath(icon, size, fallback);
 		getResources().setImage(
 				new ImageReceiver() {
 
 					public void setImage(Image image) {
-						if (image.isDisposed() || iconLabel.isDisposed()) {
+						if (image == null || image.isDisposed() || iconLabel.isDisposed()) {
 							return;
 						}
 						try {

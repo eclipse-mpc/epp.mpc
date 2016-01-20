@@ -150,7 +150,9 @@ public class MarketplaceDiscoveryResources extends DiscoveryResources {
 									display.asyncExec(new Runnable() {
 										public void run() {
 											final Image image = safeCreateImage(imagePath, resource);
-											receiver.setImage(image);
+											if (image != null) {
+												receiver.setImage(image);
+											}
 										}
 									});
 								}
