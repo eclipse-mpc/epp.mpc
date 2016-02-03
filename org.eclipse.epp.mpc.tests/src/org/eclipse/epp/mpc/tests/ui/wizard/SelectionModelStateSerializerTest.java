@@ -27,16 +27,15 @@ import org.eclipse.epp.internal.mpc.ui.wizards.InstallProfile;
 import org.eclipse.epp.internal.mpc.ui.wizards.SelectionModel;
 import org.eclipse.epp.internal.mpc.ui.wizards.SelectionModelStateSerializer;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
+import org.eclipse.epp.mpc.tests.Categories.RemoteTests;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
+import org.junit.experimental.categories.Category;
 
-@RunWith(BlockJUnit4ClassRunner.class)
 public class SelectionModelStateSerializerTest {
 
 	private MarketplaceDiscoveryStrategy discoveryStrategy;
@@ -74,6 +73,7 @@ public class SelectionModelStateSerializerTest {
 	}
 
 	@Test
+	@Category(RemoteTests.class)
 	public void testSerialize() {
 		catalog.performQuery(null, null, "Mylyn", new NullProgressMonitor());
 		assertFalse(catalog.getItems().isEmpty());

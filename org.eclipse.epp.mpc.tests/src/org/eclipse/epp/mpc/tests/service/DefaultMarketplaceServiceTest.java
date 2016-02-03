@@ -12,10 +12,16 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.service;
 
+import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.*;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -27,22 +33,21 @@ import org.eclipse.epp.internal.mpc.core.ServiceLocator;
 import org.eclipse.epp.internal.mpc.core.service.Category;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.service.Market;
+import org.eclipse.epp.internal.mpc.core.service.News;
 import org.eclipse.epp.internal.mpc.core.service.RemoteMarketplaceService;
 import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
 import org.eclipse.epp.mpc.core.service.QueryHelper;
+import org.eclipse.epp.mpc.tests.Categories.RemoteTests;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
 
 /**
  * @author David Green
  * @author Carsten Reckord
  */
-@RunWith(BlockJUnit4ClassRunner.class)
 public class DefaultMarketplaceServiceTest {
 
 	private DefaultMarketplaceService marketplaceService;
@@ -56,6 +61,7 @@ public class DefaultMarketplaceServiceTest {
 	}
 
 	@Test
+	@org.junit.experimental.categories.Category(RemoteTests.class)
 	public void listMarkets() throws CoreException {
 		List<? extends IMarket> markets = marketplaceService.listMarkets(new NullProgressMonitor());
 		assertNotNull(markets);
@@ -69,6 +75,7 @@ public class DefaultMarketplaceServiceTest {
 	}
 
 	@Test
+	@org.junit.experimental.categories.Category(RemoteTests.class)
 	public void getCategory() throws CoreException {
 		List<? extends IMarket> markets = marketplaceService.listMarkets(new NullProgressMonitor());
 		assertNotNull(markets);
@@ -107,32 +114,31 @@ public class DefaultMarketplaceServiceTest {
 		assertEquals(category.getUrl(), result.getUrl());
 	}
 
-	//
-	//	@Test
-	//	public void testGetMarket() throws CoreException {
-	////		Failing due to bug 302670: REST API market response inconsistency
-	////		https://bugs.eclipse.org/bugs/show_bug.cgi?id=302670
-	//		List<Market> markets = marketplaceService.listMarkets(new NullProgressMonitor());
-	//		assertNotNull(markets);
-	//		assertFalse(markets.isEmpty());
-	//
-	//		final String marketName = "Tools";
-	//
-	//		Market market = null;
-	//		for (Market m: markets) {
-	//			if (marketName.equals(m.getName())) {
-	//				market = m;
-	//			}
-	//		}
-	//		assertNotNull("Expected market "+marketName,market);
-	//
-	//		Market result = marketplaceService.getMarket(market, new NullProgressMonitor());
-	//
-	//		assertEquals(market.getId(),result.getId());
-	//		assertEquals(market.getName(),result.getName());
-	//		assertEquals(market.getUrl(),result.getUrl());
-	//	}
-	//
+	@Test
+	@org.junit.experimental.categories.Category(RemoteTests.class)
+	public void testGetMarket() throws CoreException {
+		//		Failing due to bug 302670: REST API market response inconsistency
+		//		https://bugs.eclipse.org/bugs/show_bug.cgi?id=302670
+		List<Market> markets = marketplaceService.listMarkets(new NullProgressMonitor());
+		assertNotNull(markets);
+		assertFalse(markets.isEmpty());
+
+		final String marketName = "Tools";
+
+		Market market = null;
+		for (Market m : markets) {
+			if (marketName.equals(m.getName())) {
+				market = m;
+			}
+		}
+		assertNotNull("Expected market " + marketName, market);
+
+		Market result = marketplaceService.getMarket(market, new NullProgressMonitor());
+
+		assertEquals(market.getId(), result.getId());
+		assertEquals(market.getName(), result.getName());
+		assertEquals(market.getUrl(), result.getUrl());
+	}
 
 	/**
 	 * bug 302825 - Make sure that search URLs have the following form:<br/>
@@ -190,6 +196,7 @@ public class DefaultMarketplaceServiceTest {
 	}
 
 	@Test
+	@org.junit.experimental.categories.Category(RemoteTests.class)
 	public void search() throws CoreException {
 		ISearchResult result = search("Tools", "Mylyn Connectors", "WikiText");
 		assertNotNull(result);
@@ -204,6 +211,7 @@ public class DefaultMarketplaceServiceTest {
 	}
 
 	@Test
+	@org.junit.experimental.categories.Category(RemoteTests.class)
 	public void search_bug448453() throws CoreException {
 		ISearchResult result = search(null, null, "play!");
 		assertNotNull(result);
@@ -247,30 +255,35 @@ public class DefaultMarketplaceServiceTest {
 	}
 
 	@Test
+	@org.junit.experimental.categories.Category(RemoteTests.class)
 	public void featured() throws CoreException {
 		ISearchResult result = marketplaceService.featured(new NullProgressMonitor());
 		assertSearchResultSanity(result);
 	}
 
 	@Test
+	@org.junit.experimental.categories.Category(RemoteTests.class)
 	public void favorites() throws CoreException {
 		ISearchResult result = marketplaceService.favorites(new NullProgressMonitor());
 		assertSearchResultSanity(result);
 	}
 
 	@Test
+	@org.junit.experimental.categories.Category(RemoteTests.class)
 	public void popular() throws CoreException {
 		ISearchResult result = marketplaceService.popular(new NullProgressMonitor());
 		assertSearchResultSanity(result);
 	}
 
 	@Test
+	@org.junit.experimental.categories.Category(RemoteTests.class)
 	public void recent() throws CoreException {
 		ISearchResult result = marketplaceService.recent(new NullProgressMonitor());
 		assertSearchResultSanity(result);
 	}
 
 	@Test
+	@org.junit.experimental.categories.Category(RemoteTests.class)
 	public void related() throws Exception {
 		List<INode> basedOn = Arrays.asList(QueryHelper.nodeById("1139"), QueryHelper.nodeById("206"), QueryHelper
 				.nodeById("1147"));
@@ -278,11 +291,13 @@ public class DefaultMarketplaceServiceTest {
 	}
 
 	@Test
+	@org.junit.experimental.categories.Category(RemoteTests.class)
 	public void relatedEmpty() throws Exception {
 		related(Collections.<INode> emptyList());
 	}
 
 	@Test
+	@org.junit.experimental.categories.Category(RemoteTests.class)
 	public void relatedNull() throws Exception {
 		related(null);
 	}
@@ -328,7 +343,19 @@ public class DefaultMarketplaceServiceTest {
 	}
 
 	@Test
-	public void news() throws CoreException {
-		//TODO test once API is live on the server
+	@org.junit.experimental.categories.Category(RemoteTests.class)
+	public void news() throws CoreException, ParseException, MalformedURLException {
+		News news = marketplaceService.news(new NullProgressMonitor());
+		assertNotNull(news);
+		Long timestamp = news.getTimestamp();
+		assertNotNull(timestamp);
+		assertThat(new Date(timestamp * 1000), greaterThan(new SimpleDateFormat("yyyy-MM-dd").parse("2014-06-24")));
+
+		String shortTitle = news.getShortTitle();
+		assertNotNull(shortTitle);
+
+		String url = news.getUrl();
+		assertNotNull(url);
+		new URL(url);
 	}
 }

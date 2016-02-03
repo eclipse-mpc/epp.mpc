@@ -13,6 +13,7 @@ package org.eclipse.epp.internal.mpc.core;
 import java.util.Dictionary;
 
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
+import org.eclipse.epp.internal.mpc.core.util.TransportFactory;
 import org.eclipse.epp.mpc.core.service.ICatalogService;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
@@ -32,11 +33,13 @@ public class ServiceHelperImpl extends ServiceHelper {
 
 	private ServiceTracker<ITransportFactory, ITransportFactory> transportFactoryTracker;
 
+	private ServiceTracker<ITransportFactory, TransportFactory> legacyTransportFactoryTracker;
+
 	private ServiceTracker<IMarketplaceUnmarshaller, IMarketplaceUnmarshaller> unmarshallerTracker;
 
 	private BundleContext context;
 
-	void startTracking(BundleContext context) {
+	void startTracking(final BundleContext context) {
 		this.context = context;
 		locatorServiceTracker = new ServiceTracker<IMarketplaceServiceLocator, IMarketplaceServiceLocator>(context,
 				IMarketplaceServiceLocator.class, null);
@@ -45,6 +48,9 @@ public class ServiceHelperImpl extends ServiceHelper {
 		transportFactoryTracker = new ServiceTracker<ITransportFactory, ITransportFactory>(context,
 				ITransportFactory.class, null);
 		transportFactoryTracker.open(true);
+
+		legacyTransportFactoryTracker = new TransportFactory.LegacyTransportFactoryTracker(context);
+		legacyTransportFactoryTracker.open(true);
 
 		unmarshallerTracker = new ServiceTracker<IMarketplaceUnmarshaller, IMarketplaceUnmarshaller>(context,
 				IMarketplaceUnmarshaller.class, null);
@@ -60,6 +66,10 @@ public class ServiceHelperImpl extends ServiceHelper {
 		if (transportFactoryTracker != null) {
 			transportFactoryTracker.close();
 			transportFactoryTracker = null;
+		}
+		if (legacyTransportFactoryTracker != null) {
+			legacyTransportFactoryTracker.close();
+			legacyTransportFactoryTracker = null;
 		}
 		if (unmarshallerTracker != null) {
 			unmarshallerTracker.close();
@@ -80,6 +90,17 @@ public class ServiceHelperImpl extends ServiceHelper {
 	@Override
 	protected ITransportFactory doGetTransportFactory() {
 		return transportFactoryTracker == null ? null : transportFactoryTracker.getService();
+	}
+
+	/**
+	 * This method is just here to provide access to the legacy TransportFactory implementations without the need of a
+	 * singleton.
+	 *
+	 * @deprecated use {@link #getTransportFactory()}
+	 */
+	@Deprecated
+	public TransportFactory getLegacyTransportFactory() {
+		return legacyTransportFactoryTracker == null ? null : legacyTransportFactoryTracker.getService();
 	}
 
 	public ServiceRegistration<IMarketplaceServiceLocator> registerMarketplaceServiceLocator(

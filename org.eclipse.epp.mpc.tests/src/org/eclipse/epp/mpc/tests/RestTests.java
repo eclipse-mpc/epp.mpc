@@ -26,11 +26,11 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({ //
 	UnmarshallerTest.class, //
-		TextUtilTest.class, //
-		TransportFactoryTest.class, //
-		CatalogServiceTest.class, //
-		DefaultMarketplaceServiceTest.class, //
-		SolutionCompatibilityFilterTest.class
+	TextUtilTest.class, //
+	TransportFactoryTest.class, //
+	CatalogServiceTest.class, //
+	DefaultMarketplaceServiceTest.class, //
+	SolutionCompatibilityFilterTest.class
 })
 public class RestTests {
 }

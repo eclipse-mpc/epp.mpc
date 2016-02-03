@@ -29,15 +29,12 @@ import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
 
 /**
  * Test {@link MarketplaceInfo}
  *
  * @author David Green
  */
-@RunWith(BlockJUnit4ClassRunner.class)
 public class MarketplaceInfoSerializationTest {
 
 	private class TestMarketplaceInfo extends MarketplaceInfo {

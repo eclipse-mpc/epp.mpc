@@ -27,9 +27,11 @@ import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
 import org.eclipse.epp.mpc.core.model.ICatalog;
 import org.eclipse.epp.mpc.core.service.ICatalogService;
 import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
+import org.eclipse.epp.mpc.tests.Categories.RemoteTests;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.osgi.framework.BundleContext;
@@ -67,6 +69,7 @@ public class CatalogServiceTest {
 	}
 
 	@Test
+	@Category(RemoteTests.class)
 	public void listCatalogs() throws CoreException {
 		List<? extends ICatalog> catalogs = catalogService.listCatalogs(new NullProgressMonitor());
 		assertNotNull(catalogs);
@@ -81,13 +84,6 @@ public class CatalogServiceTest {
 
 	@Test
 	public void testSampleCatalog() throws Exception {
-		//		ServiceLocator oldInstance = ServiceLocator.getInstance();
-		//		ServiceLocator.setInstance(new ServiceLocator() {
-		//			@Override
-		//			public ICatalogService getCatalogService() {
-		//				return new MockCatalogService();
-		//			}
-		//		});
 		ServiceRegistration<ICatalogService> registration = bundleContext.registerService(ICatalogService.class,
 				new MockCatalogService(), ServiceUtil.serviceRanking(Integer.MAX_VALUE, null));
 		try {

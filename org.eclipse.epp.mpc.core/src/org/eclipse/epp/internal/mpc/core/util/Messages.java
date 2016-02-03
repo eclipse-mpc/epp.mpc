@@ -22,6 +22,8 @@ class Messages extends NLS {
 	public static String ProxyHelper_replacingAuthenticator;
 
 	public static String ServiceUtil_ignoringIncompatibleServiceProperty;
+
+	public static String TransportFactory_NoLegacyTransportFactoriesError;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

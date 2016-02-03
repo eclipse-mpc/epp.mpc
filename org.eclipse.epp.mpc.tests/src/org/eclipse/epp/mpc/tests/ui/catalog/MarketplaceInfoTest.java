@@ -32,15 +32,12 @@ import org.eclipse.equinox.internal.p2.metadata.InstallableUnit;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
 
 /**
  * Test {@link MarketplaceInfo}
  *
  * @author David Green
  */
-@RunWith(BlockJUnit4ClassRunner.class)
 public class MarketplaceInfoTest {
 
 	private MarketplaceNodeCatalogItem item;

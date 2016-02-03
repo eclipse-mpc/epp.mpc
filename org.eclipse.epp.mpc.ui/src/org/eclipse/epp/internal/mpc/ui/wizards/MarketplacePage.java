@@ -147,6 +147,8 @@ public class MarketplacePage extends CatalogPage {
 
 	private TabItem popularTabItem;
 
+	private TabItem favoritedTabItem;
+
 	private TabItem featuredMarketTabItem;
 
 	private TabItem relatedTabItem;
@@ -198,6 +200,7 @@ public class MarketplacePage extends CatalogPage {
 		searchTabItem = createCatalogTab(-1, WIDGET_ID_TAB_SEARCH, currentBranding.getSearchTabName());
 		recentTabItem = createCatalogTab(-1, WIDGET_ID_TAB_RECENT, currentBranding.getRecentTabName());
 		popularTabItem = createCatalogTab(-1, WIDGET_ID_TAB_POPULAR, currentBranding.getPopularTabName());
+		favoritedTabItem = createCatalogTab(-1, "tab:favorites", "Favorites");
 		installedTabItem = createCatalogTab(-1, WIDGET_ID_TAB_INSTALLED, Messages.MarketplacePage_installed);
 		updateNewsTab();
 
@@ -650,6 +653,11 @@ public class MarketplacePage extends CatalogPage {
 		hasTab = branding.hasRelatedTab();
 		relatedTabItem = updateTab(relatedTabItem, WIDGET_ID_TAB_RELATED, branding.getRelatedTabName(), hasTab,
 				oldBranding.hasRelatedTab(), tabIndex);
+		if (hasTab) {
+			tabIndex++;
+		}
+		hasTab = true;
+		favoritedTabItem = updateTab(favoritedTabItem, "tab:favorites", "Favorites", hasTab, true, tabIndex);
 		if (hasTab) {
 			tabIndex++;
 		}

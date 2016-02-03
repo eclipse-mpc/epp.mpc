@@ -19,6 +19,8 @@ import java.util.List;
 
 import org.eclipse.epp.internal.mpc.ui.wizards.DiscoveryItem;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplacePage;
+import org.eclipse.epp.mpc.tests.Categories.RemoteTests;
+import org.eclipse.epp.mpc.tests.Categories.UITests;
 import org.eclipse.epp.mpc.tests.ui.wizard.matcher.NodeMatcher;
 import org.eclipse.epp.mpc.tests.ui.wizard.widgets.SWTBotClickableStyledText;
 import org.eclipse.swt.custom.StyleRange;
@@ -33,8 +35,10 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotStyledText;
 import org.hamcrest.Matcher;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 
+@Category({ RemoteTests.class, UITests.class })
 public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 
 	@Test

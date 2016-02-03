@@ -11,13 +11,16 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.util;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCorePlugin;
@@ -27,12 +30,10 @@ import org.eclipse.epp.mpc.core.service.ITransportFactory;
 import org.eclipse.epp.mpc.core.service.ServiceHelper;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 
-@RunWith(BlockJUnit4ClassRunner.class)
 public class TransportFactoryTest {
 
 	@Test
@@ -41,13 +42,16 @@ public class TransportFactoryTest {
 		Collection<ServiceReference<ITransportFactory>> serviceReferences = context.getServiceReferences(
 				ITransportFactory.class, null);
 		assertFalse(serviceReferences.isEmpty());
-		List<Class<?>> registeredFactories;
-		registeredFactories = new ArrayList<Class<?>>();
+		List<Class<?>> registeredFactoryTypes = new ArrayList<Class<?>>();
+		Set<ITransportFactory> registeredFactories = new LinkedHashSet<ITransportFactory>();
 		for (ServiceReference<ITransportFactory> serviceReference : serviceReferences) {
 			try {
 				ITransportFactory service = context.getService(serviceReference);
 				assertNotNull(service);
-				registeredFactories.add(service.getClass());
+				assertThat(registeredFactoryTypes, not(hasItem(service.getClass())));
+				assertThat(registeredFactories, not(hasItem(service)));
+				registeredFactoryTypes.add(service.getClass());
+				registeredFactories.add(service);
 			} finally {
 				context.ungetService(serviceReference);
 			}
@@ -55,7 +59,7 @@ public class TransportFactoryTest {
 
 		List<ITransportFactory> legacyFactories = TransportFactory.listAvailableFactories();
 		for (ITransportFactory factory : legacyFactories) {
-			assertThat(registeredFactories, CoreMatchers.hasItem(factory.getClass()));
+			assertThat(registeredFactoryTypes, CoreMatchers.hasItem(factory.getClass()));
 		}
 	}
 
@@ -71,6 +75,35 @@ public class TransportFactoryTest {
 		TransportFactory instance = TransportFactory.instance();
 		org.eclipse.epp.internal.mpc.core.util.ITransport transport = instance.getTransport();
 		assertNotNull(transport);
+	}
+
+	@Test
+	public void testLegacyServices() {
+		BundleContext context = FrameworkUtil.getBundle(ITransportFactory.class).getBundleContext();
+		assertNotNull(context);
+		TransportFactory.LegacyTransportFactoryTracker legacyTransportFactoryTracker = new TransportFactory.LegacyTransportFactoryTracker(
+				context);
+		legacyTransportFactoryTracker.open();
+		try {
+			Object[] services = legacyTransportFactoryTracker.getServices();
+			List<Class<?>> registeredFactoryTypes = new ArrayList<Class<?>>();
+			Set<Object> registeredFactories = new LinkedHashSet<Object>();
+			for (Object service : services) {
+				assertNotNull(service);
+				assertThat(service, instanceOf(TransportFactory.class));
+				assertThat(registeredFactoryTypes, not(hasItem(service.getClass())));
+				assertThat(registeredFactories, not(hasItem(service)));
+				registeredFactoryTypes.add(service.getClass());
+				registeredFactories.add(service);
+			}
+
+			List<ITransportFactory> legacyFactories = TransportFactory.listAvailableFactories();
+			for (ITransportFactory factory : legacyFactories) {
+				assertThat(registeredFactoryTypes, CoreMatchers.hasItem(factory.getClass()));
+			}
+		} finally {
+			legacyTransportFactoryTracker.close();
+		}
 	}
 
 	@Test

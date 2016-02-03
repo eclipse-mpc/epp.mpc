@@ -45,8 +45,6 @@ import org.eclipse.epp.mpc.core.model.ITag;
 import org.eclipse.epp.mpc.core.service.UnmarshalException;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
 import org.xml.sax.SAXException;
 
 /**
@@ -54,7 +52,6 @@ import org.xml.sax.SAXException;
  * @author Benjamin Muskalla
  * @author Carsten Reckord
  */
-@RunWith(BlockJUnit4ClassRunner.class)
 public class UnmarshallerTest {
 
 	private MarketplaceUnmarshaller unmarshaller;

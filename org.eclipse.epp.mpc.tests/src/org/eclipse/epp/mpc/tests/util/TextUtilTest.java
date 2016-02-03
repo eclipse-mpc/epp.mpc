@@ -1,14 +1,10 @@
 package org.eclipse.epp.mpc.tests.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
 
-@RunWith(BlockJUnit4ClassRunner.class)
 public class TextUtilTest {
 
 	@Test

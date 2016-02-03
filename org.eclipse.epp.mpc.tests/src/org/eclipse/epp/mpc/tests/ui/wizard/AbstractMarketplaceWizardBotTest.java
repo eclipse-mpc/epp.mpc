@@ -42,6 +42,7 @@ import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogFilter;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabItem;
@@ -82,9 +83,12 @@ import org.junit.runners.model.Statement;
 
 public abstract class AbstractMarketplaceWizardBotTest {
 
+	private static long PROGRESS_TIMEOUT = Long.getLong("org.eclipse.epp.mpc.tests.progress.timeout", 30000);
+
 	private static final Logger logger = Logger.getLogger(AbstractMarketplaceWizardBotTest.class);
 
-	private static boolean dumpThreadsOnTearDownError = true;
+	private static boolean dumpThreadsOnTearDownError = Boolean.valueOf(System.getProperty(
+			"org.eclipse.epp.mpc.tests.dump.threads", "true"));
 
 	protected SWTBot bot;
 
@@ -162,25 +166,33 @@ public abstract class AbstractMarketplaceWizardBotTest {
 
 	protected void waitForWizardProgress() {
 		SWTBotButton cancelButton = bot.button("Cancel");
-		bot.waitUntil(Conditions.widgetIsEnabled(cancelButton), 30000);
+		bot.waitUntil(Conditions.widgetIsEnabled(cancelButton), PROGRESS_TIMEOUT);
 	}
 
 	protected void closeWizard() {
 		String problem = null;
+		List<Exception> exceptions = new ArrayList<Exception>();
+		SWTBotShell mpcShell;
 		try {
 			//check if dialog is still open
-			SWTBotShell mpcShell = bot.shell("Eclipse Marketplace");
-			try {
-				//check if any message dialogs are open
-				WaitForObjectCondition<Shell> subShellResult = Conditions.waitForShell(Matchers.any(Shell.class),
-						mpcShell.widget);
-				bot.waitUntil(subShellResult, 100, 60);
-				List<Shell> subShells = subShellResult.getAllMatches();
-				for (Shell shell : subShells) {
-					if (shell == mpcShell.widget) {
-						continue;
-					}
+			mpcShell = bot.shell("Eclipse Marketplace");
+		} catch (TimeoutException e) {
+			//no MPC wizard found - maybe a bit strange, but so be it...
+			return;
+		}
+		//check if any message dialogs are open
+		boolean dumpedThreads = false;
+		try {
+			WaitForObjectCondition<Shell> subShellResult = Conditions.waitForShell(Matchers.any(Shell.class),
+					mpcShell.widget);
+			bot.waitUntil(subShellResult, 100, 60);
+			List<Shell> subShells = subShellResult.getAllMatches();
+			for (Shell shell : subShells) {
+				if (shell == mpcShell.widget) {
+					continue;
+				}
 
+				try {
 					SWTBotShell botShell = new SWTBotShell(shell);
 					//children are unexpected, so let's cry foul...
 					if (problem == null) {
@@ -189,36 +201,48 @@ public abstract class AbstractMarketplaceWizardBotTest {
 					problem += "\n" + describeShell(botShell);
 					logger.info(problem);
 
-					captureShellScreenshot(botShell);
+					problem += "\n" + captureShellScreenshot(botShell);
 
 					//also dump threads, since this is often caused by the wizard not being cancellable due to a still running operation:
 					//"Wizard can not be closed due to an active operation"
-					dumpThreads();
+					if (!dumpedThreads) {
+						dumpedThreads = true;
+						dumpThreads();
+					}
 
 					//kill message dialog
 					botShell.close();
+				} catch (Exception ex) {
+					exceptions.add(ex);
 				}
-			} catch (TimeoutException ex) {
 			}
-			//try killing it softly
-			try {
-				mpcShell.bot().button("Cancel").click();
-				try {
-					ICondition shellCloses = Conditions.shellCloses(mpcShell);
-					bot.waitUntil(shellCloses);
-					return;
-				} catch (TimeoutException ex) {
-				}
-			} catch (TimeoutException ex) {
-			}
-			//now kill it hard - this is a last resort, because it can cause spurious errors in MPC jobs
+		} catch (Exception ex) {
+			exceptions.add(ex);
+		}
+		//try killing it softly
+		try {
+			mpcShell.bot().button("Cancel").click();
+			ICondition shellCloses = Conditions.shellCloses(mpcShell);
+			bot.waitUntil(shellCloses);
+			return;
+		} catch (Exception ex) {
+			exceptions.add(ex);
+		}
+		//now kill it hard - this is a last resort, because it can cause spurious errors in MPC jobs
+		try {
 			mpcShell.close();
-		} catch (TimeoutException e) {
-			//no MPC wizard found - maybe a bit strange, but so be it...
-		} finally {
-			if (problem != null) {
-				//something happened
+		} catch (Exception ex) {
+			exceptions.add(ex);
+		}
+		if (problem != null || !exceptions.isEmpty()) {
+			//something happened
+			try {
 				fail(problem);
+			} catch (AssertionError e) {
+				for (Exception exception : exceptions) {
+					e.addSuppressed(exception);
+				}
+				throw e;
 			}
 		}
 	}
@@ -243,7 +267,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 		}
 	}
 
-	private void captureShellScreenshot(SWTBotShell botShell) {
+	private String captureShellScreenshot(SWTBotShell botShell) {
 		if (botShell.isVisible()) {
 			try {
 				//try to bring to front
@@ -253,9 +277,12 @@ public abstract class AbstractMarketplaceWizardBotTest {
 			//make a screenshot
 			String fileName = "dialog_" + System.currentTimeMillis() + "."
 					+ SWTBotPreferences.SCREENSHOT_FORMAT.toLowerCase();
-			logger.info("Capturing screenshot of open shell in " + fileName);
 			SWTUtils.captureScreenshot(SWTBotPreferences.SCREENSHOTS_DIR + "/" + fileName);
+			String message = "Captured screenshot of open shell '" + botShell.getText() + "' in " + fileName;
+			logger.info(message);
+			return message;
 		}
+		return "";
 	}
 
 	private String describeShell(SWTBotShell botShell) {
@@ -264,12 +291,36 @@ public abstract class AbstractMarketplaceWizardBotTest {
 		try {
 			SWTBot childBot = botShell.bot();
 			@SuppressWarnings("unchecked")
-			Matcher<Label> matcher = allOf(widgetOfType(Label.class));
-			List<? extends Label> widgets = childBot.widgets(matcher);
-			for (Label label : widgets) {
+			Matcher<Label> labelMatcher = allOf(widgetOfType(Label.class));
+			List<? extends Label> labels = childBot.widgets(labelMatcher);
+			for (Label label : labels) {
 				if (label != null) {//TODO why can this be null?
-					String labelText = new SWTBotLabel(label, matcher).getText();
-					description.append("\n    > ").append(labelText);
+					String labelText = new SWTBotLabel(label, labelMatcher).getText();
+					if (labelText != null && labelText.trim().length() > 0) {
+						description.append("\n    > ").append(labelText.trim());
+					}
+				}
+			}
+			@SuppressWarnings("unchecked")
+			Matcher<Button> buttonMatcher = allOf(widgetOfType(Button.class));
+			List<? extends Button> buttons = childBot.widgets(buttonMatcher);
+			boolean firstButton = true;
+			for (Button button : buttons) {
+				if (button != null) {
+					String buttonText = new SWTBotButton(button, buttonMatcher).getText();
+					if (buttonText != null && buttonText.trim().length() > 0) {
+						if (firstButton) {
+							firstButton = false;
+							description.append("\n    >         ");
+						} else {
+							description.append("  ");
+						}
+						if (button.isEnabled()) {
+							description.append('[').append(buttonText.trim()).append(']');
+						} else {
+							description.append("[(").append(buttonText.trim()).append(")]");
+						}
+					}
 				}
 			}
 		} catch (Exception ex) {
@@ -464,7 +515,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 	}
 
 	protected void tryWaitForBrowser(SWTBotBrowser browser) {
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < 6; i++) {
 			try {
 				browser.waitForPageLoaded();
 			} catch (TimeoutException ex) {

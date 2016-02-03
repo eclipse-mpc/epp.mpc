@@ -47,6 +47,7 @@ import org.eclipse.epp.mpc.core.model.ISearchResult;
 import org.eclipse.epp.mpc.core.service.IMarketplaceUnmarshaller;
 import org.eclipse.epp.mpc.core.service.QueryHelper;
 import org.eclipse.epp.mpc.core.service.UnmarshalException;
+import org.eclipse.epp.mpc.tests.Categories.RemoteTests;
 import org.eclipse.equinox.internal.p2.core.helpers.ServiceHelper;
 import org.eclipse.equinox.internal.p2.repository.Activator;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
@@ -59,6 +60,7 @@ import org.junit.ClassRule;
 import org.junit.ComparisonFailure;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.ExternalResource;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
@@ -71,6 +73,7 @@ import org.junit.runners.model.Statement;
 import org.osgi.framework.ServiceRegistration;
 
 @RunWith(Parameterized.class)
+@Category(RemoteTests.class)
 public class SolutionCompatibilityFilterTest {
 	private static final String BASE_URL = "http://marketplace-staging.eclipse.org";
 
@@ -104,14 +107,14 @@ public class SolutionCompatibilityFilterTest {
 		JUNO_3_8(SDK_PRODUCT_ID, "3.8.0.v201206081200", "3.8.0.v20120521-2346", null), //
 		JUNO_3_8_WITH_PLATFORM(SDK_PRODUCT_ID, JUNO_3_8.productVersion(), JUNO_3_8.runtimeVersion(),
 				"3.8.0.v201206081200"), //
-				JUNO(JAVA_PRODUCT_ID, "1.5.0.20120131-1544", "3.8.0.v20120521-2346", null), //
-				JUNO_WITH_PLATFORM(JAVA_PRODUCT_ID, JUNO.productVersion(), JUNO.runtimeVersion(), "4.2.0.v201206081400"), //
-				JUNO_SR2(JAVA_PRODUCT_ID, "1.5.2.20130110-1126", "3.8.0.v20120521-2346", "4.2.2.v201302041200"), //
-				KEPLER(JAVA_PRODUCT_ID, "2.0.0.20130613-0530", "3.9.0.v20130326-1255", "4.3.0.v20130605-2000"), //
-				KEPLER_SR2(JAVA_PRODUCT_ID, "2.0.2.20140224-0000", "3.9.100.v20131218-1515", "4.3.2.v20140221-1700"), //
-				LUNA(JAVA_PRODUCT_ID, "4.4.0.20140612-0500", "3.10.0.v20140318-2214", "4.4.0.v20140606-1215"), //
-				LUNA_SR2(JAVA_PRODUCT_ID, "4.4.2.20150219-0708", "3.10.0.v20140318-2214", "4.4.2.v20150204-1700"), //
-				MARS(JAVA_PRODUCT_ID, "4.5.0.20150326-0704", "3.10.0.v20150112-1422", "4.5.0.v20150203-1300");
+		JUNO(JAVA_PRODUCT_ID, "1.5.0.20120131-1544", "3.8.0.v20120521-2346", null), //
+		JUNO_WITH_PLATFORM(JAVA_PRODUCT_ID, JUNO.productVersion(), JUNO.runtimeVersion(), "4.2.0.v201206081400"), //
+		JUNO_SR2(JAVA_PRODUCT_ID, "1.5.2.20130110-1126", "3.8.0.v20120521-2346", "4.2.2.v201302041200"), //
+		KEPLER(JAVA_PRODUCT_ID, "2.0.0.20130613-0530", "3.9.0.v20130326-1255", "4.3.0.v20130605-2000"), //
+		KEPLER_SR2(JAVA_PRODUCT_ID, "2.0.2.20140224-0000", "3.9.100.v20131218-1515", "4.3.2.v20140221-1700"), //
+		LUNA(JAVA_PRODUCT_ID, "4.4.0.20140612-0500", "3.10.0.v20140318-2214", "4.4.0.v20140606-1215"), //
+		LUNA_SR2(JAVA_PRODUCT_ID, "4.4.2.20150219-0708", "3.10.0.v20140318-2214", "4.4.2.v20150204-1700"), //
+		MARS(JAVA_PRODUCT_ID, "4.5.0.20150326-0704", "3.10.0.v20150112-1422", "4.5.0.v20150203-1300");
 
 		private final String productId;
 
@@ -197,10 +200,10 @@ public class SolutionCompatibilityFilterTest {
 		LUNA_WIN32("test-entry-luna-win32", EclipseRelease.LUNA, EclipseRelease.LUNA_SR2, System.WIN32), //
 		LUNA_LINUX_MACOS("test-entry-luna-mac-linux", EclipseRelease.LUNA, EclipseRelease.LUNA_SR2, System.LINUX,
 				System.MACOS), //
-				MULTI_VERSION("test-entry-multi-version", null, EclipseRelease.MARS), //
-				PSEUDO_CONFLICT("test-entry-pseudo-conflict", EclipseRelease.KEPLER, EclipseRelease.MARS), //
-				CONFLICT("test-entry-conflict", EclipseRelease.KEPLER, EclipseRelease.MARS), //
-				UNINSTALLABLE(""/* TODO */, null, null, System.WIN32, System.MACOS, System.LINUX);
+		MULTI_VERSION("test-entry-multi-version", null, EclipseRelease.MARS), //
+		PSEUDO_CONFLICT("test-entry-pseudo-conflict", EclipseRelease.KEPLER, EclipseRelease.MARS), //
+		CONFLICT("test-entry-conflict", EclipseRelease.KEPLER, EclipseRelease.MARS), //
+		UNINSTALLABLE(""/* TODO */, null, null, System.WIN32, System.MACOS, System.LINUX);
 
 		private final String id;
 

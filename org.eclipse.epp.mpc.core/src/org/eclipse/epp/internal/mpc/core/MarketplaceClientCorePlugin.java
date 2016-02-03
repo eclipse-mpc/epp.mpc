@@ -12,6 +12,7 @@
 package org.eclipse.epp.internal.mpc.core;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -22,6 +23,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 public class MarketplaceClientCorePlugin implements BundleActivator {
@@ -51,19 +54,50 @@ public class MarketplaceClientCorePlugin implements BundleActivator {
 		instance = null;
 	}
 
-	private void registerServices(BundleContext context) {
+	private void registerServices(BundleContext context) throws InvalidSyntaxException {
 		List<ServiceRegistration<?>> serviceRegistrations = new ArrayList<ServiceRegistration<?>>();
 		this.serviceRegistrations = serviceRegistrations;
 
 		List<ITransportFactory> factories = TransportFactory.listAvailableFactories();//highest-prio factory comes first
-		int prio = 100 * factories.size();//prio counts down from highest value to 0 in steps of 100
+		if (factories.isEmpty()) {
+			return;
+		}
+
+		Collection<ServiceReference<ITransportFactory>> serviceReferences = context
+				.getServiceReferences(ITransportFactory.class, null);
+		int lowestPriority = Integer.MAX_VALUE;
+		for (ServiceReference<ITransportFactory> serviceReference : serviceReferences) {
+			Object legacyProperty = serviceReference.getProperty(TransportFactory.LEGACY_TRANSPORT_KEY);
+			if (legacyProperty != null) {
+				continue;
+			}
+			Integer ranking = (Integer) serviceReference.getProperty(Constants.SERVICE_RANKING);
+			lowestPriority = Math.min(lowestPriority, ranking == null ? 0 : ranking.intValue());
+		}
+
+		int maxLegacyPriority, step;
+		if (lowestPriority >= 0) {
+			maxLegacyPriority = -100;
+			step = 100;
+		} else {
+			int available = lowestPriority - Integer.MIN_VALUE;
+			step = Math.min(100, available / factories.size());
+			if (step == 0) {
+				step = 1;
+				maxLegacyPriority = Integer.MIN_VALUE + factories.size();
+			} else {
+				maxLegacyPriority = lowestPriority - step;
+			}
+		}
+		int prio = maxLegacyPriority;//prio counts down from 0 in steps of 100
 		for (ITransportFactory factory : factories) {
-			prio -= 100;
 			Hashtable<String, Object> properties = new Hashtable<String, Object>();
 			properties.put(Constants.SERVICE_RANKING, prio);
+			properties.put(TransportFactory.LEGACY_TRANSPORT_KEY, true);
 			ServiceRegistration<ITransportFactory> registration = context.registerService(ITransportFactory.class,
 					factory, properties);
 			serviceRegistrations.add(registration);
+			prio -= step;
 		}
 	}
 
