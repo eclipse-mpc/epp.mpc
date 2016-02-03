@@ -34,6 +34,7 @@ import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
 import org.eclipse.epp.mpc.core.service.QueryHelper;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
@@ -253,6 +254,7 @@ public class DefaultMarketplaceServiceTest {
 	}
 
 	@Test
+	@Ignore //top favorites are not exposed in MPC anymore - this fails with a 503 due to the varnish cache failing
 	public void favorites() throws CoreException {
 		ISearchResult result = marketplaceService.favorites(new NullProgressMonitor());
 		assertSearchResultSanity(result);

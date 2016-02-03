@@ -10,7 +10,7 @@
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.httpcomponents.httpclient" version="4.3.6.v201411290715"/>
 <unit id="org.apache.httpcomponents.httpcore" version="4.3.3.v201411290715"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20150821153341/repository/"/>
+<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20151221205849/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.license.feature.group" version="0.0.0"/>
