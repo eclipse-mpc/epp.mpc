@@ -16,6 +16,9 @@
       <mpc-version>${project.version}</mpc-version>
       <target-platform>staging</target-platform>
       <java-version>1.5</java-version>
+      <!-- We need at least 1.8.0 to run the build, even though we're still building with 1.5 source level. 
+           Otherwise some plugin downloads won't work and the test runtime can't start -->
+      <enforced.java.version>[1.8.0,)</enforced.java.version>
       <java-jdk>SYSTEM</java-jdk>
 
       <tycho-version>0.24.0</tycho-version>
@@ -173,6 +176,10 @@
             <groupId>org.eclipse.tycho</groupId>
             <artifactId>target-platform-configuration</artifactId>
          </plugin>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+         </plugin>
       </plugins>
 
       <pluginManagement>
@@ -201,6 +208,27 @@
 				  <useJDK>${java-jdk}</useJDK>
 				  <strictCompilerTarget>true</strictCompilerTarget>
                </configuration>
+            </plugin>
+
+            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-enforcer-plugin</artifactId>
+               <version>1.4.1</version>
+               <executions>
+                  <execution>
+                     <id>enforce-java</id>
+                     <goals>
+                        <goal>enforce</goal>
+                     </goals>
+                     <configuration>
+                       <rules>
+                          <requireJavaVersion>
+                             <version>${enforced.java.version}</version>
+                          </requireJavaVersion>
+                       </rules>
+                     </configuration>
+                  </execution>
+               </executions>
             </plugin>
 
             <plugin>
