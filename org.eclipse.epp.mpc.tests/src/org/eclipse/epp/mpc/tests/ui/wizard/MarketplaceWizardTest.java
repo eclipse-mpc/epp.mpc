@@ -56,8 +56,8 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 
 	@Test
 	public void testSearch() {
-		search("Mylyn");
-		itemBot(NodeMatcher.withNameRegex(".*Mylyn.*"));
+		search("Snipmatch");
+		itemBot(NodeMatcher.withNameRegex(".*Snipmatch.*"));
 	}
 
 	@Test

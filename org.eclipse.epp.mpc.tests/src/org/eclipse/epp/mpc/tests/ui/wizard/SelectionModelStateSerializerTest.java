@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui.wizard;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.net.URL;
@@ -37,6 +38,8 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 public class SelectionModelStateSerializerTest {
+
+	private static final String PROMOTED_MARKER = "**Promoted**";
 
 	private MarketplaceDiscoveryStrategy discoveryStrategy;
 
@@ -72,15 +75,21 @@ public class SelectionModelStateSerializerTest {
 		catalog.dispose();
 	}
 
-	@Test
+	@Test //(expected=AssertionError.class)//FIXME bug 487157: disabled until entries declare Neon compatibility
 	@Category(RemoteTests.class)
 	public void testSerialize() {
-		catalog.performQuery(null, null, "Mylyn", new NullProgressMonitor());
+		catalog.performDiscovery(new NullProgressMonitor());
 		assertFalse(catalog.getItems().isEmpty());
-		assertTrue(catalog.getItems().size() > 3);
+		assertTrue(catalog.getItems().size() > 4);
 
-		CatalogItem firstItem = catalog.getItems().get(0);
-		CatalogItem secondItem = catalog.getItems().get(1);
+		//first two are promoted downloads, which might not be installable in current target
+		CatalogItem firstItem = catalog.getItems().get(2);
+		CatalogItem secondItem = catalog.getItems().get(3);
+		assertThat(firstItem.getDescription(), not(startsWith(PROMOTED_MARKER)));
+		assertThat(secondItem.getDescription(), not(startsWith(PROMOTED_MARKER)));
+		assertThat(firstItem.getInstallableUnits(), not(empty()));
+		assertThat(secondItem.getInstallableUnits(), not(empty()));
+
 		selectionModel.select(firstItem, Operation.INSTALL);
 		selectionModel.select(secondItem, Operation.INSTALL);
 

@@ -198,7 +198,7 @@ public class DefaultMarketplaceServiceTest {
 	@Test
 	@org.junit.experimental.categories.Category(RemoteTests.class)
 	public void search() throws CoreException {
-		ISearchResult result = search("Tools", "Mylyn Connectors", "WikiText");
+		ISearchResult result = search("Tools", "Editor", "snipmatch");
 		assertNotNull(result);
 		assertNotNull(result.getNodes());
 		assertEquals(Integer.valueOf(1), result.getMatchCount());
@@ -206,8 +206,8 @@ public class DefaultMarketplaceServiceTest {
 
 		INode node = result.getNodes().get(0);
 
-		assertTrue(node.getName().startsWith("Mylyn WikiText"));
-		assertEquals("1065", node.getId());
+		assertTrue(node.getName().startsWith("Snipmatch"));
+		assertEquals("1743547", node.getId());
 	}
 
 	@Test
@@ -228,15 +228,15 @@ public class DefaultMarketplaceServiceTest {
 	}
 
 	private ICategory findCategory(IMarket toolsMarket, String categoryName) {
-		ICategory mylynCategory = null;
+		ICategory namedCategory = null;
 		for (ICategory category : toolsMarket.getCategory()) {
 			if (categoryName.equals(category.getName())) {
-				mylynCategory = category;
+				namedCategory = category;
 				break;
 			}
 		}
-		assertNotNull(mylynCategory);
-		return mylynCategory;
+		assertNotNull(namedCategory);
+		return namedCategory;
 	}
 
 	private IMarket findMarket(String marketName) throws CoreException {

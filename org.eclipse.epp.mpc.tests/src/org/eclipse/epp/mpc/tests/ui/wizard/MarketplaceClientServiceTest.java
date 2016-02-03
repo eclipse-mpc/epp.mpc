@@ -40,6 +40,8 @@ import org.junit.experimental.categories.Category;
 @Category({ RemoteTests.class, UITests.class })
 public class MarketplaceClientServiceTest extends AbstractMarketplaceWizardBotTest {
 
+	private static final String ITEM_ID = "1743547";
+
 	private Display display;
 
 	private IMarketplaceClientConfiguration config;
@@ -98,24 +100,24 @@ public class MarketplaceClientServiceTest extends AbstractMarketplaceWizardBotTe
 		display.asyncExec(new Runnable() {
 
 			public void run() {
-				service.open(config, Collections.singleton(QueryHelper.nodeById("206")));
+				service.open(config, Collections.singleton(QueryHelper.nodeById(ITEM_ID)));
 			}
 		});
 
 		initWizardBot();
 		checkSelectedTab("Search");
-		itemBot("206");
+		itemBot(ITEM_ID);
 	}
 
 	@Test
 	public void testOpenSearch() throws Exception {
 		final IMarket toolsMarket = QueryHelper.marketByName("Tools");
-		final ICategory mylynCategory = QueryHelper.categoryByName("Mylyn Connectors");
+		final ICategory mylynCategory = QueryHelper.categoryByName("Editor");
 
 		display.asyncExec(new Runnable() {
 
 			public void run() {
-				service.openSearch(config, toolsMarket, mylynCategory, "WikiText");
+				service.openSearch(config, toolsMarket, mylynCategory, "snipmatch");
 			}
 		});
 
@@ -125,18 +127,18 @@ public class MarketplaceClientServiceTest extends AbstractMarketplaceWizardBotTe
 		SWTBotCombo marketCombo = bot.comboBox(0);
 		SWTBotCombo categoryCombo = bot.comboBox(1);
 		assertEquals("Tools", marketCombo.getText());
-		assertEquals("Mylyn Connectors", categoryCombo.getText());
+		assertEquals("Editor", categoryCombo.getText());
 
 		SWTBotText searchText = bot.text(0);
-		assertEquals("WikiText", searchText.getText());
+		assertEquals("snipmatch", searchText.getText());
 
-		itemBot(NodeMatcher.withNameRegex(".*WikiText.*"));
+		itemBot(NodeMatcher.withNameRegex(".*Snipmatch.*"));
 
 	}
 
 	@Test
 	public void testOpenWithSelection() throws Exception {
-		config.setInitialOperations(Collections.singletonMap("206", Operation.INSTALL));
+		config.setInitialOperations(Collections.singletonMap(ITEM_ID, Operation.INSTALL));
 
 		display.asyncExec(new Runnable() {
 
@@ -147,14 +149,14 @@ public class MarketplaceClientServiceTest extends AbstractMarketplaceWizardBotTe
 
 		initWizardBot();
 		checkSelectedTab("Search");
-		SWTBot itemBot = itemBot("206");
+		SWTBot itemBot = itemBot(ITEM_ID);
 		itemBot.button("Install Pending").isEnabled();
 		bot.button("Install Now >").isEnabled();
 	}
 
 	@Test
 	public void testOpenSelected() throws Exception {
-		config.setInitialOperations(Collections.singletonMap("206", Operation.INSTALL));
+		config.setInitialOperations(Collections.singletonMap(ITEM_ID, Operation.INSTALL));
 
 		display.asyncExec(new Runnable() {
 
@@ -165,14 +167,14 @@ public class MarketplaceClientServiceTest extends AbstractMarketplaceWizardBotTe
 
 		initWizardBot();
 		checkSelectedTab("Search");
-		SWTBot itemBot = itemBot("206");
+		SWTBot itemBot = itemBot(ITEM_ID);
 		assertTrue(itemBot.button("Install Pending").isEnabled());
 		assertTrue(bot.button("Install Now >").isEnabled());
 	}
 
 	@Test
 	public void testOpenProvisioning() throws Exception {
-		config.setInitialOperations(Collections.singletonMap("206", Operation.INSTALL));
+		config.setInitialOperations(Collections.singletonMap(ITEM_ID, Operation.INSTALL));
 
 		display.asyncExec(new Runnable() {
 
