@@ -82,6 +82,7 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
@@ -711,6 +712,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		addedRepositoryLocations = null;
 		profileChangeOperation = null;
 		operationIUs = null;
+		IWizardContainer wizardContainer = getContainer();
 		if (getSelectionModel().computeProvisioningOperationViable()) {
 			ProfileChangeOperationComputer provisioningOperation = null;
 			try {
@@ -765,7 +767,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 						getConfiguration().getCatalogDescriptor().isInstallFromAllRepositories() ? ProfileChangeOperationComputer.ResolutionStrategy.FALLBACK_STRATEGY
 								: ProfileChangeOperationComputer.ResolutionStrategy.SELECTED_REPOSITORIES,
 								withRemediation);
-				getContainer().run(true, true, provisioningOperation);
+				wizardContainer.run(true, true, provisioningOperation);
 
 				profileChangeOperation = provisioningOperation.getOperation();
 				operationIUs = provisioningOperation.getIus();
@@ -821,7 +823,9 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				}
 			}
 		}
-		if (getContainer().getCurrentPage() == featureSelectionWizardPage) {
+		//re-get the container - in case the wizard was closed in the meantime, this will be null...
+		wizardContainer = getContainer();
+		if (wizardContainer != null && wizardContainer.getCurrentPage() == featureSelectionWizardPage) {
 			featureSelectionWizardPage.updateMessage();
 		}
 	}

@@ -11,22 +11,28 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.service.xml;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.*;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParserFactory;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.service.Favorites;
 import org.eclipse.epp.internal.mpc.core.service.Featured;
 import org.eclipse.epp.internal.mpc.core.service.Marketplace;
+import org.eclipse.epp.internal.mpc.core.service.MarketplaceUnmarshaller;
 import org.eclipse.epp.internal.mpc.core.service.News;
 import org.eclipse.epp.internal.mpc.core.service.Recent;
 import org.eclipse.epp.internal.mpc.core.service.Related;
 import org.eclipse.epp.internal.mpc.core.service.Search;
-import org.eclipse.epp.internal.mpc.core.service.xml.Unmarshaller;
 import org.eclipse.epp.mpc.core.model.ICatalog;
 import org.eclipse.epp.mpc.core.model.ICatalogBranding;
 import org.eclipse.epp.mpc.core.model.ICatalogs;
@@ -36,13 +42,12 @@ import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INews;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ITag;
+import org.eclipse.epp.mpc.core.service.UnmarshalException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
 
 /**
  * @author David Green
@@ -52,24 +57,17 @@ import org.xml.sax.XMLReader;
 @RunWith(BlockJUnit4ClassRunner.class)
 public class UnmarshallerTest {
 
-	private Unmarshaller unmarshaller;
-
-	private XMLReader reader;
+	private MarketplaceUnmarshaller unmarshaller;
 
 	@Before
 	public void before() throws SAXException, ParserConfigurationException {
-		unmarshaller = new Unmarshaller();
-
-		SAXParserFactory parserFactory = SAXParserFactory.newInstance();
-		parserFactory.setNamespaceAware(true);
-		reader = parserFactory.newSAXParser().getXMLReader();
-		reader.setContentHandler(unmarshaller);
+		unmarshaller = new MarketplaceUnmarshaller();
 	}
 
 	@Test
-	public void marketplaceRoot() throws IOException, SAXException {
+	public void marketplaceRoot() throws IOException, UnmarshalException {
 		// from http://www.eclipseplugincentral.net/xml
-		Object model = process("resources/marketplace-root.xml");
+		Object model = processResource("resources/marketplace-root.xml");
 		assertNotNull(model);
 		assertTrue(model instanceof Marketplace);
 		Marketplace marketplace = (Marketplace) model;
@@ -90,9 +88,9 @@ public class UnmarshallerTest {
 	}
 
 	@Test
-	public void categoryTaxonomy() throws IOException, SAXException {
+	public void categoryTaxonomy() throws IOException, UnmarshalException {
 		// from http://www.eclipseplugincentral.net/taxonomy/term/38,31/xml
-		Object model = process("resources/category-taxonomy.xml");
+		Object model = processResource("resources/category-taxonomy.xml");
 		assertNotNull(model);
 		assertTrue(model instanceof Marketplace);
 		Marketplace marketplace = (Marketplace) model;
@@ -117,9 +115,9 @@ public class UnmarshallerTest {
 	}
 
 	@Test
-	public void node() throws IOException, SAXException {
+	public void node() throws IOException, UnmarshalException {
 		// from http://www.eclipseplugincentral.net/content/mylyn-wikitext-lightweight-markup-editing-tools-and-framework/xml
-		Object model = process("resources/node.xml");
+		Object model = processResource("resources/node.xml");
 		assertNotNull(model);
 		assertTrue(model instanceof Marketplace);
 		Marketplace marketplace = (Marketplace) model;
@@ -156,9 +154,9 @@ public class UnmarshallerTest {
 	}
 
 	@Test
-	public void featured() throws IOException, SAXException {
+	public void featured() throws IOException, UnmarshalException {
 		// from http://www.eclipseplugincentral.net/api/v2/featured
-		Object model = process("resources/featured.xml");
+		Object model = processResource("resources/featured.xml");
 		assertNotNull(model);
 		assertTrue(model instanceof Marketplace);
 		Marketplace marketplace = (Marketplace) model;
@@ -199,9 +197,9 @@ public class UnmarshallerTest {
 	}
 
 	@Test
-	public void search() throws IOException, SAXException {
+	public void search() throws IOException, UnmarshalException {
 		// from http://www.eclipseplugincentral.net/api/v2/search/apachesolr_search/test?filters=tid:16%20tid:31
-		Object model = process("resources/search.xml");
+		Object model = processResource("resources/search.xml");
 		assertNotNull(model);
 		assertTrue(model instanceof Marketplace);
 		Marketplace marketplace = (Marketplace) model;
@@ -256,10 +254,10 @@ public class UnmarshallerTest {
 	}
 
 	@Test
-	public void favorites() throws IOException, SAXException {
+	public void favorites() throws IOException, UnmarshalException {
 		// from http://www.eclipseplugincentral.net/favorites/top/api/p
 
-		Object model = process("resources/favorites.xml");
+		Object model = processResource("resources/favorites.xml");
 		assertNotNull(model);
 		assertTrue(model instanceof Marketplace);
 		Marketplace marketplace = (Marketplace) model;
@@ -302,10 +300,10 @@ public class UnmarshallerTest {
 	}
 
 	@Test
-	public void recent() throws IOException, SAXException {
+	public void recent() throws IOException, UnmarshalException {
 		// from http://www.eclipseplugincentral.net/featured/top/api/p
 
-		Object model = process("resources/recent.xml");
+		Object model = processResource("resources/recent.xml");
 		assertNotNull(model);
 		assertTrue(model instanceof Marketplace);
 		Marketplace marketplace = (Marketplace) model;
@@ -372,7 +370,7 @@ public class UnmarshallerTest {
 	}
 
 	public void related() throws Exception {
-		Object model = process("resources/related.xml");
+		Object model = processResource("resources/related.xml");
 		assertNotNull(model);
 		assertTrue(model instanceof Marketplace);
 		Marketplace marketplace = (Marketplace) model;
@@ -386,7 +384,7 @@ public class UnmarshallerTest {
 
 	@Test
 	public void tags() throws Exception {
-		Object model = process("resources/node.xml");
+		Object model = processResource("resources/node.xml");
 		Marketplace marketplace = (Marketplace) model;
 		INode node = marketplace.getNode().get(0);
 
@@ -399,8 +397,8 @@ public class UnmarshallerTest {
 	}
 
 	@Test
-	public void marketplaceCatalogs() throws IOException, SAXException {
-		Object model = process("resources/catalogs.xml");
+	public void marketplaceCatalogs() throws IOException, UnmarshalException {
+		Object model = processResource("resources/catalogs.xml");
 		assertNotNull(model);
 		assertTrue(model instanceof ICatalogs);
 		ICatalogs catalogs = (ICatalogs) model;
@@ -448,8 +446,8 @@ public class UnmarshallerTest {
 	}
 
 	@Test
-	public void news() throws IOException, SAXException {
-		Object model = process("resources/news.xml");
+	public void news() throws IOException, UnmarshalException {
+		Object model = processResource("resources/news.xml");
 		assertNotNull(model);
 		assertTrue(model instanceof Marketplace);
 
@@ -461,16 +459,140 @@ public class UnmarshallerTest {
 		assertEquals(Long.valueOf(1363181064000l), news.getTimestamp());
 	}
 
-	private Object process(String resource) throws IOException, SAXException {
+	@Test(expected = UnmarshalException.class)
+	public void invalidLeadingSpace() throws Exception {
+		ByteBuffer buffer = ByteBuffer.allocate(4096);
+		buffer.put("  ".getBytes("UTF-8"));
+		buffer = readResource("resources/catalogs.xml", buffer);
+		buffer.flip();
+		process(buffer);
+	}
+
+	@Test(expected = UnmarshalException.class)
+	public void invalidLeadingBytes() throws Exception {
+		ByteBuffer buffer = ByteBuffer.allocate(4096);
+		buffer.put((byte) 0);
+		buffer.put((byte) 0);
+		buffer = readResource("resources/catalogs.xml", buffer);
+		buffer.flip();
+		process(buffer);
+	}
+
+	@Test(expected = UnmarshalException.class)
+	public void invalidBytes() throws Exception {
+		ByteBuffer buffer = readResource("resources/catalogs.xml", null);
+		buffer.put(45, (byte) 0);
+		buffer.put(46, (byte) 0);
+		buffer.put(120, (byte) 0);
+		buffer.put(121, (byte) 0);
+		buffer.flip();
+		process(buffer);
+	}
+
+	@Test
+	public void invalidLeadingBytesErrorMessage() throws Exception {
+		try {
+			invalidLeadingBytes();
+			fail("Expected UnmarshalException");
+		} catch (UnmarshalException e) {
+			IStatus contentChild = getErrorContentInfo(e);
+			assertThat(contentChild.getMessage(), containsString("<?xml version='1.0' encoding='UTF-8'?>"));
+		}
+	}
+
+	@Test
+	public void invalidBytesErrorMessage() throws Exception {
+		try {
+			invalidBytes();
+			fail("Expected UnmarshalException");
+		} catch (UnmarshalException e) {
+			IStatus contentChild = getErrorContentInfo(e);
+			assertThat(contentChild.getMessage(), containsString("<mar??tplace>"));
+		}
+	}
+
+	@Test(expected = UnmarshalException.class)
+	public void emptyStream() throws Exception {
+		process(new byte[0]);
+	}
+
+	@Test(expected = UnmarshalException.class)
+	public void invalidContent() throws Exception {
+		process("This is some arbitrary test content\ninstead of the expected\nmarketplace rest xml data.");
+	}
+
+	@Test
+	public void invalidContentErrorMessage() throws Exception {
+		try {
+			invalidContent();
+			fail("Expected UnmarshalException");
+		} catch (UnmarshalException e) {
+			IStatus contentChild = getErrorContentInfo(e);
+			assertThat(contentChild.getMessage(), containsString("This is some arbitrary test content"));
+		}
+	}
+
+	private IStatus getErrorContentInfo(UnmarshalException e) {
+		IStatus status = e.getStatus();
+		assertTrue(status.isMultiStatus());
+		IStatus[] children = status.getChildren();
+		assertTrue(children.length > 0);
+		IStatus contentChild = children[0];
+		return contentChild;
+	}
+
+	private ByteBuffer readResource(String resource, ByteBuffer buffer) throws IOException {
+		ReadableByteChannel in = Channels.newChannel(getResourceAsStream(resource));
+		if (buffer == null) {
+			buffer = ByteBuffer.allocate(32768);
+		}
+		while (true) {
+			int read = in.read(buffer);
+			if (read == -1) {
+				break;
+			}
+			if (buffer.remaining() < read) {
+				ByteBuffer newBuffer = ByteBuffer.allocate(buffer.capacity() + Math.max(8192, 2 * read));
+				buffer.flip();
+				newBuffer.put(buffer);
+				buffer = newBuffer;
+			}
+		}
+		return buffer;
+	}
+
+	private InputStream getResourceAsStream(String resource) {
 		InputStream in = UnmarshallerTest.class.getResourceAsStream(resource);
 		if (in == null) {
 			throw new IllegalStateException(resource);
 		}
+		return in;
+	}
+
+	private Object processResource(String resource) throws IOException, UnmarshalException {
+		InputStream in = getResourceAsStream(resource);
+		return process(in);
+	}
+
+	private Object process(InputStream in) throws IOException, UnmarshalException {
 		try {
-			reader.parse(new InputSource(in));
+			return unmarshaller.unmarshal(in, Object.class, new NullProgressMonitor());
 		} finally {
 			in.close();
 		}
-		return unmarshaller.getModel();
+	}
+
+	private Object process(String content) throws IOException, UnmarshalException {
+		return process(content.getBytes("UTF-8"));
+	}
+
+	private Object process(ByteBuffer buffer) throws IOException, UnmarshalException {
+		InputStream in = new ByteArrayInputStream(buffer.array(), buffer.position(), buffer.remaining());
+		return process(in);
+	}
+
+	private Object process(byte[] content) throws IOException, UnmarshalException {
+		InputStream in = new ByteArrayInputStream(content);
+		return process(in);
 	}
 }

@@ -52,6 +52,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.osgi.util.NLS;
@@ -256,14 +257,7 @@ public class MarketplacePage extends CatalogPage {
 
 					if (previousSelectionSize == 0 && newSelectionSize == 1
 							&& selectionModel.computeProvisioningOperationViableForFeatureSelection()) {
-						IWizardPage currentPage = getContainer().getCurrentPage();
-						if (currentPage == MarketplacePage.this && currentPage.isPageComplete()) {
-							IWizardPage nextPage = getWizard().getNextPage(MarketplacePage.this);
-							if (nextPage != null && nextPage instanceof WizardPage) {
-								((WizardPage) nextPage).setPageComplete(true);
-								getContainer().showPage(nextPage);
-							}
-						}
+						showNextPage();
 					}
 				}
 				previousSelectionSize = newSelectionSize;
@@ -281,6 +275,21 @@ public class MarketplacePage extends CatalogPage {
 		if (!tabContent.isDisposed()) {
 			// bug 473031 - no clue how this can happen during createControl...
 			MarketplaceClientUi.setDefaultHelp(tabContent);
+		}
+	}
+
+	protected void showNextPage() {
+		IWizardContainer container = getContainer();
+		if (container == null) {
+			return;
+		}
+		IWizardPage currentPage = container.getCurrentPage();
+		if (currentPage == MarketplacePage.this && currentPage.isPageComplete()) {
+			IWizardPage nextPage = getWizard().getNextPage(MarketplacePage.this);
+			if (nextPage != null && nextPage instanceof WizardPage) {
+				((WizardPage) nextPage).setPageComplete(true);
+				container.showPage(nextPage);
+			}
 		}
 	}
 
@@ -560,10 +569,15 @@ public class MarketplacePage extends CatalogPage {
 
 	@Override
 	public void setPageComplete(boolean complete) {
-		if (complete) {
-			complete = getWizard().getSelectionModel().computeProvisioningOperationViableForFeatureSelection();
+		MarketplaceWizard wizard = getWizard();
+		if (wizard != null) {
+			if (complete) {
+				complete = wizard.getSelectionModel().computeProvisioningOperationViableForFeatureSelection();
+			}
+			if (wizard.getContainer() != null) {
+				computeMessages();
+			}
 		}
-		computeMessages();
 		super.setPageComplete(complete);
 	}
 

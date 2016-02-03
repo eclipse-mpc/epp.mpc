@@ -38,6 +38,12 @@ class Messages extends NLS {
 
 
 	public static String DefaultMarketplaceService_UnsupportedSearchString;
+
+
+	public static String MarketplaceUnmarshaller_invalidResponseContent;
+
+
+	public static String MarketplaceUnmarshaller_unexpectedResponseContentNullResult;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

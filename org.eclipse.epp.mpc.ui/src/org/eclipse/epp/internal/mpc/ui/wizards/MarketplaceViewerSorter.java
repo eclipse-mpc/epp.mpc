@@ -54,12 +54,28 @@ final class MarketplaceViewerSorter extends ViewerSorter {
 				i = -1;
 			} else {
 				// otherwise we sort by name
-				i = i1.getName().compareToIgnoreCase(i2.getName());
+				String n1 = i1.getName();
+				String n2 = i2.getName();
+				if (n1 == null) {
+					n1 = ""; //$NON-NLS-1$
+				}
+				if (n2 == null) {
+					n2 = ""; //$NON-NLS-1$
+				}
+				i = n1.compareToIgnoreCase(n2);
 				if (i == 0) {
-					i = i1.getName().compareTo(i2.getName());
+					i = n1.compareTo(n2);
 					if (i == 0) {
 						// same name, so we sort by id.
-						i = i1.getId().compareTo(i2.getId());
+						String id1 = i1.getId();
+						String id2 = i2.getId();
+						if (id1 == null) {
+							id1 = ""; //$NON-NLS-1$
+						}
+						if (id2 == null) {
+							id2 = ""; //$NON-NLS-1$
+						}
+						i = id1.compareTo(id2);
 					}
 				}
 			}
