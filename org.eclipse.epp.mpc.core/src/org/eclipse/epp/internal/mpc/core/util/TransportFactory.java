@@ -41,8 +41,8 @@ import org.osgi.framework.ServiceReference;
 public abstract class TransportFactory implements ITransportFactory {
 
 	private static final String[] factoryClasses = new String[] { //
-		"org.eclipse.epp.internal.mpc.core.util.P2TransportFactory", // //$NON-NLS-1$
-		"org.eclipse.epp.internal.mpc.core.util.Eclipse36TransportFactory", // //$NON-NLS-1$
+			"org.eclipse.epp.internal.mpc.core.util.P2TransportFactory", // //$NON-NLS-1$
+			"org.eclipse.epp.internal.mpc.core.util.Eclipse36TransportFactory", // //$NON-NLS-1$
 	"org.eclipse.epp.internal.mpc.core.util.JavaPlatformTransportFactory" }; //$NON-NLS-1$
 
 	private static TransportFactory instance;
@@ -92,8 +92,13 @@ public abstract class TransportFactory implements ITransportFactory {
 				// ignore
 				continue;
 			}
-			if (factory.isAvailable()) {
-				factories.add(factory);
+			try {
+				if (factory.isAvailable()) {
+					factories.add(factory);
+				}
+			} catch (Throwable t) {
+				MarketplaceClientCore.getLog().log(new Status(IStatus.WARNING, MarketplaceClientCore.BUNDLE_ID,
+						Messages.TransportFactory_transportAvailabilityError, t));
 			}
 		}
 		return factories;
