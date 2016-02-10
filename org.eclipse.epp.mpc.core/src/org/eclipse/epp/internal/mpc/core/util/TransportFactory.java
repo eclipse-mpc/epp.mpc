@@ -199,8 +199,13 @@ public abstract class TransportFactory implements ITransportFactory {
 				// ignore
 				continue;
 			}
-			if (factory.isAvailable()) {
-				factories.add(factory);
+			try {
+				if (factory.isAvailable()) {
+					factories.add(factory);
+				}
+			} catch (Throwable t) {
+				MarketplaceClientCore.getLog().log(new Status(IStatus.WARNING, MarketplaceClientCore.BUNDLE_ID,
+						Messages.TransportFactory_transportAvailabilityError, t));
 			}
 		}
 		return factories;

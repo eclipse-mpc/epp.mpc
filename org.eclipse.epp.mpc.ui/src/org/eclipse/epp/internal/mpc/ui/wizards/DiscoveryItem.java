@@ -214,13 +214,13 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		this.browser = browser;
 		this.connector = connector;
 		this.viewer = viewer;
+		createContent();
 		connector.addPropertyChangeListener(this);
 		this.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
 				connector.removePropertyChangeListener(DiscoveryItem.this);
 			}
 		});
-		createContent();
 	}
 
 	private void createContent() {

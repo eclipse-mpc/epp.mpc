@@ -24,6 +24,8 @@ class Messages extends NLS {
 	public static String ServiceUtil_ignoringIncompatibleServiceProperty;
 
 	public static String TransportFactory_NoLegacyTransportFactoriesError;
+
+	public static String TransportFactory_transportAvailabilityError;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
