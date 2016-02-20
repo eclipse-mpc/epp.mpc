@@ -129,8 +129,12 @@ public class ProxyHelper {
 						// make sure we don't hand out credentials to the wrong proxy
 						if (proxyData.isRequiresAuthentication() && proxyData.getPort() == getRequestingPort()
 								&& proxyData.getHost().equals(getRequestingHost())) {
-							return new PasswordAuthentication(proxyData.getUserId(), proxyData.getPassword()
-									.toCharArray());
+							String userId = proxyData.getUserId();
+							String password = proxyData.getPassword();
+							if (userId != null && password != null) {
+								return new PasswordAuthentication(userId, password
+										.toCharArray());
+							}
 						}
 					}
 				}
