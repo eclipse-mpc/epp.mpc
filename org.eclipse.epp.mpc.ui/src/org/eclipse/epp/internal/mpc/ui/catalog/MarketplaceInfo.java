@@ -35,7 +35,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.epp.internal.mpc.core.service.Node;
+import org.eclipse.epp.internal.mpc.core.model.Node;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.mpc.core.model.IIu;

@@ -42,7 +42,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
-import org.eclipse.epp.internal.mpc.core.service.News;
+import org.eclipse.epp.internal.mpc.core.model.News;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;

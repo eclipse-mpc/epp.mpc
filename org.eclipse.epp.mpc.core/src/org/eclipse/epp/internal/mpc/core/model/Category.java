@@ -4,32 +4,45 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *      The Eclipse Foundation  - initial API and implementation
  *      Yatta Solutions - bug 432803: public API
  *******************************************************************************/
-package org.eclipse.epp.internal.mpc.core.service;
+package org.eclipse.epp.internal.mpc.core.model;
 
-import org.eclipse.epp.mpc.core.model.IPlatforms;
+import org.eclipse.epp.mpc.core.model.ICategory;
 
 
 /**
  * @author David Green
  */
-public class Platforms implements IPlatforms {
-	
-	protected java.util.List<String> platform = new java.util.ArrayList<String>();
-	
-	public Platforms() {
+public class Category extends Identifiable implements ICategory {
+
+	protected Integer count;
+	protected java.util.List<Node> node = new java.util.ArrayList<Node>();
+
+	public Category() {
 	}
-	
-	public java.util.List<String> getPlatform() {
-		return platform;
+
+	public Integer getCount() {
+		return count;
 	}
-	
-	public void setPlatform(java.util.List<String> platform) {
-		this.platform = platform;
+
+	public void setCount(Integer count) {
+		this.count = count;
 	}
-	
+
+	public java.util.List<Node> getNode() {
+		return node;
+	}
+
+	public void setNode(java.util.List<Node> node) {
+		this.node = node;
+	}
+
+	@Override
+	protected boolean equalsType(Object obj) {
+		return obj instanceof Category;
+	}
 }

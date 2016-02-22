@@ -11,7 +11,7 @@
 package org.eclipse.epp.internal.mpc.core.service.xml;
 
 
-import org.eclipse.epp.internal.mpc.core.service.Category;
+import org.eclipse.epp.internal.mpc.core.model.Category;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
@@ -45,12 +45,12 @@ public class CategoryContentHandler extends UnmarshalContentHandler {
 	
 	public boolean endElement(String uri, String localName) throws SAXException {
 		if (localName.equals("category")) { //$NON-NLS-1$
-			if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Marketplace) {
-				((org.eclipse.epp.internal.mpc.core.service.Marketplace)parentModel).getCategory().add(model);
-			} else if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Market) {
-				((org.eclipse.epp.internal.mpc.core.service.Market)parentModel).getCategory().add(model);
-			} else if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Categories) {
-				((org.eclipse.epp.internal.mpc.core.service.Categories)parentModel).getCategory().add(model);
+			if (parentModel instanceof org.eclipse.epp.internal.mpc.core.model.Marketplace) {
+				((org.eclipse.epp.internal.mpc.core.model.Marketplace)parentModel).getCategory().add(model);
+			} else if (parentModel instanceof org.eclipse.epp.internal.mpc.core.model.Market) {
+				((org.eclipse.epp.internal.mpc.core.model.Market)parentModel).getCategory().add(model);
+			} else if (parentModel instanceof org.eclipse.epp.internal.mpc.core.model.Categories) {
+				((org.eclipse.epp.internal.mpc.core.model.Categories)parentModel).getCategory().add(model);
 			}
 			getUnmarshaller().setModel(model);
 			model = null;

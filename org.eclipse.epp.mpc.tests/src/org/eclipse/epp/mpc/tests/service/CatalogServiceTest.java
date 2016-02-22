@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCorePlugin;
 import org.eclipse.epp.internal.mpc.core.ServiceLocator;
-import org.eclipse.epp.internal.mpc.core.service.Catalog;
+import org.eclipse.epp.internal.mpc.core.model.Catalog;
 import org.eclipse.epp.internal.mpc.core.service.CatalogService;
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
 import org.eclipse.epp.mpc.core.model.ICatalog;

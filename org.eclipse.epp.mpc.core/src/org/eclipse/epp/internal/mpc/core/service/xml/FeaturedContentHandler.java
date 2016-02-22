@@ -11,8 +11,8 @@
 package org.eclipse.epp.internal.mpc.core.service.xml;
 
 
-import org.eclipse.epp.internal.mpc.core.service.Featured;
-import org.eclipse.epp.internal.mpc.core.service.Marketplace;
+import org.eclipse.epp.internal.mpc.core.model.Featured;
+import org.eclipse.epp.internal.mpc.core.model.Marketplace;
 
 
 /**

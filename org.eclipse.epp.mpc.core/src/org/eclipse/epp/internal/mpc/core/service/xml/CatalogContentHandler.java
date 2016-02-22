@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service.xml;
 
-import org.eclipse.epp.internal.mpc.core.service.Catalog;
-import org.eclipse.epp.internal.mpc.core.service.News;
+import org.eclipse.epp.internal.mpc.core.model.Catalog;
+import org.eclipse.epp.internal.mpc.core.model.News;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
@@ -59,8 +59,8 @@ public class CatalogContentHandler extends UnmarshalContentHandler {
 	@Override
 	public boolean endElement(String uri, String localName) throws SAXException {
 		if (localName.equals("catalog")) { //$NON-NLS-1$
-			if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Catalogs) {
-				((org.eclipse.epp.internal.mpc.core.service.Catalogs) parentModel).getCatalogs().add(model);
+			if (parentModel instanceof org.eclipse.epp.internal.mpc.core.model.Catalogs) {
+				((org.eclipse.epp.internal.mpc.core.model.Catalogs) parentModel).getCatalogs().add(model);
 			}
 			getUnmarshaller().setModel(model);
 			model = null;

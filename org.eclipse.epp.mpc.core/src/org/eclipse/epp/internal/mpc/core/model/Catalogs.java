@@ -4,32 +4,31 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *      The Eclipse Foundation  - initial API and implementation
  *      Yatta Solutions - bug 432803: public API
  *******************************************************************************/
-package org.eclipse.epp.internal.mpc.core.service;
+package org.eclipse.epp.internal.mpc.core.model;
 
-import org.eclipse.epp.mpc.core.model.ICategories;
-
+import org.eclipse.epp.mpc.core.model.ICatalogs;
 
 /**
- * @author David Green
+ * @author Benjamin Muskalla
  */
-public class Categories implements ICategories {
-	
-	protected java.util.List<Category> category = new java.util.ArrayList<Category>();
-	
-	public Categories() {
+public class Catalogs implements ICatalogs {
+
+	protected java.util.List<Catalog> catalogs = new java.util.ArrayList<Catalog>();
+
+	public Catalogs() {
 	}
-	
-	public java.util.List<Category> getCategory() {
-		return category;
+
+	public java.util.List<Catalog> getCatalogs() {
+		return catalogs;
 	}
-	
-	public void setCategory(java.util.List<Category> category) {
-		this.category = category;
+
+	public void setCatalogs(java.util.List<Catalog> catalogs) {
+		this.catalogs = catalogs;
 	}
-	
+
 }

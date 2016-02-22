@@ -8,7 +8,7 @@
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.epp.internal.mpc.core.service;
+package org.eclipse.epp.internal.mpc.core.model;
 
 import org.eclipse.epp.mpc.core.model.IIu;
 

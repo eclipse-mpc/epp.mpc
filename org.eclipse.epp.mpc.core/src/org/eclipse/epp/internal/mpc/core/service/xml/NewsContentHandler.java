@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service.xml;
 
-import org.eclipse.epp.internal.mpc.core.service.News;
+import org.eclipse.epp.internal.mpc.core.model.News;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 

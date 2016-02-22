@@ -9,7 +9,7 @@
  *      The Eclipse Foundation - initial API and implementation
  *      Yatta Solutions - bug 432803: public API
  *******************************************************************************/
-package org.eclipse.epp.internal.mpc.core.service;
+package org.eclipse.epp.internal.mpc.core.model;
 
 import java.util.List;
 

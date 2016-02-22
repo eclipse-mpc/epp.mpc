@@ -9,22 +9,21 @@
  *     Tasktop Technologies - initial API and implementation
  *     Yatta Solutions - bug 432803: public API
  *******************************************************************************/
-package org.eclipse.epp.internal.mpc.core.service;
+package org.eclipse.epp.internal.mpc.core.model;
 
-import org.eclipse.epp.mpc.core.model.ITags;
+import org.eclipse.epp.mpc.core.model.ITag;
 
 /**
  * @author Benjamin Muskalla
  */
-public class Tags implements ITags {
+public class Tag extends Identifiable implements ITag {
 
-	protected java.util.List<Tag> tags = new java.util.ArrayList<Tag>();
-
-	public Tags() {
+	public Tag() {
 	}
 
-	public java.util.List<Tag> getTags() {
-		return tags;
+	@Override
+	protected boolean equalsType(Object obj) {
+		return obj instanceof ITag;
 	}
 
 }

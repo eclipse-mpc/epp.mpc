@@ -8,15 +8,15 @@
  * Contributors:
  *      The Eclipse Foundation  - initial API and implementation
  *******************************************************************************/
-package org.eclipse.epp.internal.mpc.core.service;
-
+package org.eclipse.epp.internal.mpc.core.model;
 
 /**
  * @author David Green
  */
-public class Popular extends NodeListing {
+public class Featured extends NodeListing {
 	
-	public Popular() {
+	
+	public Featured() {
 	}
 	
 }

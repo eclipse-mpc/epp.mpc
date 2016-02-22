@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.epp.internal.mpc.core.model.Catalog;
 import org.eclipse.epp.mpc.core.service.ICatalogService;
 
 /**

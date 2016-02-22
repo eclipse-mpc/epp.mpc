@@ -11,10 +11,10 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.core.service;
 
-import org.eclipse.epp.internal.mpc.core.service.Category;
-import org.eclipse.epp.internal.mpc.core.service.Identifiable;
-import org.eclipse.epp.internal.mpc.core.service.Market;
-import org.eclipse.epp.internal.mpc.core.service.Node;
+import org.eclipse.epp.internal.mpc.core.model.Category;
+import org.eclipse.epp.internal.mpc.core.model.Identifiable;
+import org.eclipse.epp.internal.mpc.core.model.Market;
+import org.eclipse.epp.internal.mpc.core.model.Node;
 import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INode;

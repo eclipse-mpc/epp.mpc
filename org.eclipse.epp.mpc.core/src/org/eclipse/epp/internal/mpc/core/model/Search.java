@@ -4,17 +4,38 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  * Contributors:
- *      Yatta Solutions GmbH - initial API and implementation
+ *      The Eclipse Foundation  - initial API and implementation
  *******************************************************************************/
-package org.eclipse.epp.internal.mpc.core.service;
+package org.eclipse.epp.internal.mpc.core.model;
 
 
 /**
- * @author Carsten Reckord
+ * @author David Green
  */
-public class Related extends NodeListing {
-	public Related() {
+public class Search extends NodeListing {
+	
+	protected String term;
+	protected String url;
+	
+	public Search() {
 	}
+	
+	public String getTerm() {
+		return term;
+	}
+	
+	public void setTerm(String term) {
+		this.term = term;
+	}
+	
+	public String getUrl() {
+		return url;
+	}
+	
+	public void setUrl(String url) {
+		this.url = url;
+	}
+	
 }

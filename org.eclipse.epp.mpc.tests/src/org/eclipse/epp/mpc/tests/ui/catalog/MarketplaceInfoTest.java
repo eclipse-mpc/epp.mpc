@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.epp.internal.mpc.core.service.Iu;
-import org.eclipse.epp.internal.mpc.core.service.Ius;
-import org.eclipse.epp.internal.mpc.core.service.Node;
+import org.eclipse.epp.internal.mpc.core.model.Iu;
+import org.eclipse.epp.internal.mpc.core.model.Ius;
+import org.eclipse.epp.internal.mpc.core.model.Node;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceInfo;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
 import org.eclipse.epp.mpc.core.model.INode;

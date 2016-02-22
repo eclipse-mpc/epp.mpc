@@ -4,13 +4,13 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *      The Eclipse Foundation  - initial API and implementation
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service.xml;
 
-import org.eclipse.epp.internal.mpc.core.service.Categories;
+import org.eclipse.epp.internal.mpc.core.model.Categories;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
@@ -39,8 +39,8 @@ public class CategoriesContentHandler extends UnmarshalContentHandler {
 	@Override
 	public boolean endElement(String uri, String localName) throws SAXException {
 		if (localName.equals("categories")) { //$NON-NLS-1$
-			if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Node) {
-				((org.eclipse.epp.internal.mpc.core.service.Node) parentModel).setCategories(model);
+			if (parentModel instanceof org.eclipse.epp.internal.mpc.core.model.Node) {
+				((org.eclipse.epp.internal.mpc.core.model.Node) parentModel).setCategories(model);
 			}
 			getUnmarshaller().setModel(model);
 			model = null;

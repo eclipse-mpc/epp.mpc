@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service.xml;
 
-import org.eclipse.epp.internal.mpc.core.service.Category;
-import org.eclipse.epp.internal.mpc.core.service.Marketplace;
-import org.eclipse.epp.internal.mpc.core.service.Node;
-import org.eclipse.epp.internal.mpc.core.service.NodeListing;
+import org.eclipse.epp.internal.mpc.core.model.Category;
+import org.eclipse.epp.internal.mpc.core.model.Marketplace;
+import org.eclipse.epp.internal.mpc.core.model.Node;
+import org.eclipse.epp.internal.mpc.core.model.NodeListing;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 

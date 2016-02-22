@@ -9,8 +9,13 @@
  *      The Eclipse Foundation  - initial API and implementation
  *      Yatta Solutions - bug 432803: public API
  *******************************************************************************/
-package org.eclipse.epp.internal.mpc.core.service;
+package org.eclipse.epp.internal.mpc.core.model;
 
+import org.eclipse.epp.internal.mpc.core.model.Categories;
+import org.eclipse.epp.internal.mpc.core.model.Identifiable;
+import org.eclipse.epp.internal.mpc.core.model.Ius;
+import org.eclipse.epp.internal.mpc.core.model.Platforms;
+import org.eclipse.epp.internal.mpc.core.model.Tags;
 import org.eclipse.epp.mpc.core.model.INode;
 
 /**

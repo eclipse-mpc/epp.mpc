@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service.xml;
 
-import org.eclipse.epp.internal.mpc.core.service.Tag;
+import org.eclipse.epp.internal.mpc.core.model.Tag;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
@@ -44,8 +44,8 @@ public class TagContentHandler extends UnmarshalContentHandler {
 	@Override
 	public boolean endElement(String uri, String localName) throws SAXException {
 		if (localName.equals("tag")) { //$NON-NLS-1$
-			if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Tags) {
-				((org.eclipse.epp.internal.mpc.core.service.Tags) parentModel).getTags().add(model);
+			if (parentModel instanceof org.eclipse.epp.internal.mpc.core.model.Tags) {
+				((org.eclipse.epp.internal.mpc.core.model.Tags) parentModel).getTags().add(model);
 			}
 			getUnmarshaller().setModel(model);
 			model = null;

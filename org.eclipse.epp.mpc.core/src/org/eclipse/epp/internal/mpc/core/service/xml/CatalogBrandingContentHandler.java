@@ -11,7 +11,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service.xml;
 
-import org.eclipse.epp.internal.mpc.core.service.CatalogBranding;
+import org.eclipse.epp.internal.mpc.core.model.CatalogBranding;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
@@ -53,8 +53,8 @@ public class CatalogBrandingContentHandler extends UnmarshalContentHandler {
 	@Override
 	public boolean endElement(String uri, String localName) throws SAXException {
 		if (localName.equals("wizard")) { //$NON-NLS-1$
-			if (parentModel instanceof org.eclipse.epp.internal.mpc.core.service.Catalog) {
-				((org.eclipse.epp.internal.mpc.core.service.Catalog) parentModel).setBranding(model);
+			if (parentModel instanceof org.eclipse.epp.internal.mpc.core.model.Catalog) {
+				((org.eclipse.epp.internal.mpc.core.model.Catalog) parentModel).setBranding(model);
 			}
 			getUnmarshaller().setModel(model);
 			model = null;

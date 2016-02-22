@@ -17,10 +17,15 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.epp.internal.mpc.core.model.Category;
+import org.eclipse.epp.internal.mpc.core.model.Market;
+import org.eclipse.epp.internal.mpc.core.model.News;
+import org.eclipse.epp.internal.mpc.core.model.Node;
+import org.eclipse.epp.internal.mpc.core.model.SearchResult;
 
 /**
  * a service that provides access to the marketplace.
- * 
+ *
  * @author David Green
  * @deprecated use {@link org.eclipse.epp.mpc.core.service.IMarketplaceService}
  */
@@ -34,7 +39,7 @@ public interface MarketplaceService {
 
 	/**
 	 * Get a market by its id
-	 * 
+	 *
 	 * @param market
 	 *            the market which must have an {@link Market#getUrl() url}.
 	 * @return the identified node
@@ -43,7 +48,7 @@ public interface MarketplaceService {
 
 	/**
 	 * Get a category by its id
-	 * 
+	 *
 	 * @param category
 	 *            A category which must have an {@link Category#getUrl() url}.
 	 * @return the identified category
@@ -52,7 +57,7 @@ public interface MarketplaceService {
 
 	/**
 	 * Get a node by its id
-	 * 
+	 *
 	 * @param node
 	 *            the node which must either have an {@link Node#getUrl() url} or an {@link Node#getId() id}.
 	 * @return the identified node
@@ -61,7 +66,7 @@ public interface MarketplaceService {
 
 	/**
 	 * Find nodes in the marketplace with a text query, and optionally specify the market/category
-	 * 
+	 *
 	 * @param market
 	 *            the market to search in, or null if the search should span all markets
 	 * @param category
@@ -75,14 +80,14 @@ public interface MarketplaceService {
 
 	/**
 	 * Find featured nodes in the marketplace
-	 * 
+	 *
 	 * @return the search result
 	 */
 	public SearchResult featured(IProgressMonitor monitor) throws CoreException;
 
 	/**
 	 * Find featured nodes in the marketplace
-	 * 
+	 *
 	 * @param market
 	 *            the market in which to return featured, or null if featured should include all markets
 	 * @param category
@@ -93,35 +98,35 @@ public interface MarketplaceService {
 
 	/**
 	 * Find recently added/modified nodes in the marketplace
-	 * 
+	 *
 	 * @return the search result
 	 */
 	public SearchResult recent(IProgressMonitor monitor) throws CoreException;
 
 	/**
 	 * Find most-favorited nodes in the marketplace
-	 * 
+	 *
 	 * @return the search result
 	 */
 	public SearchResult favorites(IProgressMonitor monitor) throws CoreException;
 
 	/**
 	 * Find most active nodes in the marketplace
-	 * 
+	 *
 	 * @return the search result
 	 */
 	public SearchResult popular(IProgressMonitor monitor) throws CoreException;
 
 	/**
 	 * Get the news configuration for the marketplace
-	 * 
+	 *
 	 * @return the news configuration
 	 */
 	public News news(IProgressMonitor monitor) throws CoreException;
 
 	/**
 	 * Report an error in resolving an install operation.
-	 * 
+	 *
 	 * @param monitor
 	 * @param result
 	 *            the status of the install operation

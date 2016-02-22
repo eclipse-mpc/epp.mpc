@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service.xml;
 
-import org.eclipse.epp.internal.mpc.core.service.Catalogs;
+import org.eclipse.epp.internal.mpc.core.model.Catalogs;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 

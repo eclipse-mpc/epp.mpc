@@ -11,8 +11,8 @@
 package org.eclipse.epp.internal.mpc.core.service.xml;
 
 
-import org.eclipse.epp.internal.mpc.core.service.Favorites;
-import org.eclipse.epp.internal.mpc.core.service.Marketplace;
+import org.eclipse.epp.internal.mpc.core.model.Favorites;
+import org.eclipse.epp.internal.mpc.core.model.Marketplace;
 
 
 /**

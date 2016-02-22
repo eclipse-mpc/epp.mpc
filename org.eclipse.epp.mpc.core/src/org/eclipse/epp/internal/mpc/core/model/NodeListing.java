@@ -4,45 +4,40 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  * Contributors:
  *      The Eclipse Foundation  - initial API and implementation
- *      Yatta Solutions - bug 432803: public API
  *******************************************************************************/
-package org.eclipse.epp.internal.mpc.core.service;
-
-import org.eclipse.epp.mpc.core.model.ICategory;
-
+package org.eclipse.epp.internal.mpc.core.model;
 
 /**
  * @author David Green
  */
-public class Category extends Identifiable implements ICategory {
-
+public abstract class NodeListing {
+	
 	protected Integer count;
 	protected java.util.List<Node> node = new java.util.ArrayList<Node>();
-
-	public Category() {
+	
+	public NodeListing() {
 	}
-
+	
+	/**
+	 * The number of items that were matched for the node listing, which may be different than the number of nodes included in the response.
+	 */
 	public Integer getCount() {
 		return count;
 	}
-
+	
 	public void setCount(Integer count) {
 		this.count = count;
 	}
-
+	
 	public java.util.List<Node> getNode() {
 		return node;
 	}
-
+	
 	public void setNode(java.util.List<Node> node) {
 		this.node = node;
 	}
-
-	@Override
-	protected boolean equalsType(Object obj) {
-		return obj instanceof Category;
-	}
+	
 }

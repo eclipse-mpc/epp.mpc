@@ -17,7 +17,7 @@ import java.net.URL;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.epp.internal.mpc.core.service.News;
+import org.eclipse.epp.internal.mpc.core.model.News;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.mpc.core.model.INews;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;

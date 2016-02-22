@@ -7,35 +7,29 @@
  * 
  * Contributors:
  *      The Eclipse Foundation  - initial API and implementation
+ *      Yatta Solutions - bug 432803: public API
  *******************************************************************************/
-package org.eclipse.epp.internal.mpc.core.service;
+package org.eclipse.epp.internal.mpc.core.model;
+
+import org.eclipse.epp.mpc.core.model.ICategories;
 
 
 /**
  * @author David Green
  */
-public class Search extends NodeListing {
+public class Categories implements ICategories {
 	
-	protected String term;
-	protected String url;
+	protected java.util.List<Category> category = new java.util.ArrayList<Category>();
 	
-	public Search() {
+	public Categories() {
 	}
 	
-	public String getTerm() {
-		return term;
+	public java.util.List<Category> getCategory() {
+		return category;
 	}
 	
-	public void setTerm(String term) {
-		this.term = term;
-	}
-	
-	public String getUrl() {
-		return url;
-	}
-	
-	public void setUrl(String url) {
-		this.url = url;
+	public void setCategory(java.util.List<Category> category) {
+		this.category = category;
 	}
 	
 }
