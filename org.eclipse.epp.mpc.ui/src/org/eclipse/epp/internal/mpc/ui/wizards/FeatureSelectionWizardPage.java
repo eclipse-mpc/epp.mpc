@@ -61,6 +61,7 @@ import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
@@ -349,8 +350,7 @@ public class FeatureSelectionWizardPage extends WizardPage {
 			refreshState();
 			Display.getCurrent().asyncExec(new Runnable() {
 				public void run() {
-					if (getControl() == null || getControl().isDisposed()
-							|| getWizard().getContainer().getCurrentPage() != FeatureSelectionWizardPage.this) {
+					if (!isCurrentPage()) {
 						return;
 					}
 					if (getWizard().wantInitializeInitialSelection()) {
@@ -363,8 +363,7 @@ public class FeatureSelectionWizardPage extends WizardPage {
 										StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 							}
 						}
-						if (getControl() == null || getControl().isDisposed()
-								|| getWizard().getContainer().getCurrentPage() != FeatureSelectionWizardPage.this) {
+						if (!isCurrentPage()) {
 							return;
 						}
 					}
@@ -397,13 +396,15 @@ public class FeatureSelectionWizardPage extends WizardPage {
 			@Override
 			public void run(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
 				super.run(progressMonitor);
-				display.asyncExec(new Runnable() {
-					public void run() {
-						if (!getControl().isDisposed()) {
-							updateFeatureDescriptors(getFeatureDescriptors(), getUnresolvedFeatureDescriptors());
+				if (!display.isDisposed() && isActivePage()) {
+					display.asyncExec(new Runnable() {
+						public void run() {
+							if (isActivePage()) {
+								updateFeatureDescriptors(getFeatureDescriptors(), getUnresolvedFeatureDescriptors());
+							}
 						}
-					}
-				});
+					});
+				}
 			}
 		};
 		try {
@@ -422,11 +423,19 @@ public class FeatureSelectionWizardPage extends WizardPage {
 		} catch (InterruptedException e) {
 			// canceled
 		} finally {
+			if (!isActivePage()) {
+				return;
+			}
 			refresh();
 			//bug 470485: need to recompute button state, because run() resets that to previous state
 			refreshState();
 		}
 		//maybeUpdateProfileChangeOperation();
+	}
+
+	private boolean isActivePage() {
+		Control control = getControl();
+		return control != null && !control.isDisposed() && isCurrentPage();
 	}
 
 	protected void showPreviousPage() {
