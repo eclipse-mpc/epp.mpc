@@ -15,12 +15,15 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.MessageFormat;
+import java.util.concurrent.Callable;
 
+import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
+import org.eclipse.epp.internal.mpc.core.service.UserFavoritesService;
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalogSource;
+import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceDiscoveryResources.ImageReceiver;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
@@ -50,13 +53,10 @@ import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.FocusAdapter;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.events.TypedEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -71,23 +71,15 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
+import org.eclipse.userstorage.util.ConflictException;
 
 /**
  * @author Steffen Pingel
  * @author David Green
  * @author Carsten Reckord
  */
-public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<T> implements PropertyChangeListener {
-
-	/**
-	 * conditional login url for the eclipse marketplace
-	 */
-	private static final String MARKETPLACE_LOGIN_URL = "https://marketplace.eclipse.org/login/sso?redirect=node/{0}"; //$NON-NLS-1$
-
-	/**
-	 * Eclipse marketplace, which supports the login scheme in {@link #MARKETPLACE_LOGIN_URL}
-	 */
-	private static final String ECLIPSE_MARKETPLACE_URL = "http://marketplace.eclipse.org/"; //$NON-NLS-1$
+public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<T>
+implements PropertyChangeListener {
 
 	private static final String INFO_HREF = "info"; //$NON-NLS-1$
 
@@ -102,54 +94,6 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 	private static final int BUTTONBAR_MARGIN_TOP = 8;
 
 	private static final int SEPARATOR_MARGIN_TOP = 8;
-
-	private static abstract class LinkListener implements MouseListener, SelectionListener {
-
-		private boolean active = false;
-
-		public void widgetSelected(SelectionEvent e) {
-			StyledText link = (StyledText) e.getSource();
-			if (link.getSelectionCount() != 0) {
-				active = false;
-			}
-		}
-
-		public void widgetDefaultSelected(SelectionEvent e) {
-		}
-
-		public void mouseDoubleClick(MouseEvent e) {
-		}
-
-		public void mouseDown(MouseEvent e) {
-			StyledText link = (StyledText) e.getSource();
-			active = (e.button == 1) && link.getSelectionCount() == 0;
-		}
-
-		public void mouseUp(MouseEvent e) {
-			if (!active) {
-				return;
-			}
-			active = false;
-			if (e.button != 1) {
-				return;
-			}
-			StyledText link = (StyledText) e.getSource();
-			int offset;
-			try {
-				offset = link.getOffsetAtLocation(new Point(e.x, e.y));
-			} catch (IllegalArgumentException ex) {
-				offset = -1;
-			}
-			if (offset >= 0 && offset < link.getCharCount()) {
-				StyleRange style = link.getStyleRangeAtOffset(offset);
-				if (style != null && style.data != null) {
-					selected((String) style.data);
-				}
-			}
-		}
-
-		protected abstract void selected(String href);
-	}
 
 	private static final int MAX_IMAGE_HEIGHT = 86;
 
@@ -207,6 +151,15 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 	private ShareSolutionLink shareSolutionLink;
 
+	private Button favoriteButton;
+
+	private final SelectionListener toggleFavoritesListener = new SelectionAdapter() {
+		@Override
+		public void widgetSelected(SelectionEvent e) {
+			toggleFavorite();
+		}
+	};
+
 	public DiscoveryItem(Composite parent, int style, MarketplaceDiscoveryResources resources,
 			IMarketplaceWebBrowser browser,
 			final T connector, MarketplaceViewer viewer) {
@@ -260,7 +213,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 	}
 
 	private void createDescription(Composite parent) {
-		description = createStyledTextLabel(parent);
+		description = StyledTextHelper.createStyledTextLabel(parent);
 		setWidgetId(description, WIDGET_ID_DESCRIPTION);
 		GridDataFactory.fillDefaults()
 		.grab(true, false)
@@ -297,22 +250,6 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		}
 
 		createInfoLink(description);
-	}
-
-	/**
-	 * Create a StyledText that acts much like a Label, i.e. isn't editable and doesn't get focus
-	 */
-	private StyledText createStyledTextLabel(Composite parent) {
-		StyledText styledText = new StyledText(parent, SWT.READ_ONLY | SWT.WRAP | SWT.MULTI);
-		styledText.setEditable(false);
-		styledText.setCursor(getDisplay().getSystemCursor(SWT.CURSOR_ARROW));
-		styledText.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusGained(FocusEvent e) {
-				((StyledText) e.widget).getParent().setFocus();
-			}
-		});
-		return styledText;
 	}
 
 	private void createNameLabel(Composite parent) {
@@ -380,17 +317,17 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 
 			buttonController = new ItemButtonController(viewer, this, dropDown);
 		} else {
-			installInfoLink = createStyledTextLabel(composite);
+			installInfoLink = StyledTextHelper.createStyledTextLabel(composite);
 			setWidgetId(installInfoLink, WIDGET_ID_LEARNMORE);
 			installInfoLink.setToolTipText(Messages.DiscoveryItem_installInstructionsTooltip);
-			StyleRange link = appendLink(installInfoLink, Messages.DiscoveryItem_installInstructions, SWT.BOLD);
-			link.data = Messages.DiscoveryItem_installInstructions;
-			hookLinkListener(installInfoLink, new LinkListener() {
+			StyledTextHelper.appendLink(installInfoLink, Messages.DiscoveryItem_installInstructions,
+					Messages.DiscoveryItem_installInstructions, SWT.BOLD);
+			new LinkListener() {
 				@Override
-				protected void selected(String href) {
-					browser.openUrl(((INode) connector.getData()).getUrl());
+				protected void selected(Object href, TypedEvent e) {
+					browser.openUrl(getCatalogItemNode().getUrl());
 				}
-			});
+			}.register(installInfoLink);
 			GridDataFactory.swtDefaults().align(SWT.TRAIL, SWT.CENTER).grab(false, true).applyTo(installInfoLink);
 		}
 		GridLayoutFactory.fillDefaults()
@@ -436,7 +373,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 				if (formatTotalsStart > 0) {
 					installInfo.append(installInfoText.substring(0, formatTotalsStart));
 				}
-				appendStyled(installInfo, totalText, new StyleRange(0, 0, null, null, SWT.BOLD));
+				StyledTextHelper.appendStyled(installInfo, totalText, new StyleRange(0, 0, null, null, SWT.BOLD));
 				installInfo.append(installInfoText.substring(formatTotalsStart + totalText.length()));
 			}
 		} else {
@@ -447,11 +384,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 	}
 
 	private void createSocialButtons(Composite parent) {
-		Integer favorited = null;
-		if (connector.getData() instanceof INode) {
-			INode node = (INode) connector.getData();
-			favorited = node.getFavorited();
-		}
+		Integer favorited = getFavoriteCount();
 		if (favorited == null || getCatalogItemUrl() == null) {
 			Label spacer = new Label(this, SWT.NONE);
 			spacer.setText(" ");//$NON-NLS-1$
@@ -459,7 +392,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 			GridDataFactory.fillDefaults().indent(0, BUTTONBAR_MARGIN_TOP).align(SWT.CENTER, SWT.FILL).applyTo(spacer);
 
 		} else {
-			createRatingsButton(parent, favorited);
+			createFavoriteButton(parent);
 		}
 
 		if (getCatalogItemUrl() != null) {
@@ -476,47 +409,36 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		}
 	}
 
-	private void createRatingsButton(Composite parent, Integer favoritedCount) {
-		final Button ratingsButton = new Button(parent, SWT.PUSH);
-		ratingsButton.setImage(MarketplaceClientUiPlugin.getInstance()
-				.getImageRegistry()
-				.get(MarketplaceClientUiPlugin.ITEM_ICON_STAR));
-		setWidgetId(ratingsButton, WIDGET_ID_RATING);
+	private Integer getFavoriteCount() {
+		if (connector.getData() instanceof INode) {
+			INode node = (INode) connector.getData();
+			return node.getFavorited();
+		}
+		return null;
+	}
+
+	private void createFavoriteButton(Composite parent) {
+		favoriteButton = new Button(parent, SWT.PUSH);
+		setWidgetId(favoriteButton, WIDGET_ID_RATING);
+		refreshFavoriteButton();
 
 		//Make width more or less fixed
 		int width = SWT.DEFAULT;
 		{
-			ratingsButton.setText("999"); //$NON-NLS-1$
-			Point pSize = ratingsButton.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+			favoriteButton.setText("999"); //$NON-NLS-1$
+			Point pSize = favoriteButton.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
 			width = pSize.x;
 		}
-		ratingsButton.setText(favoritedCount.toString());
-		Point pSize = ratingsButton.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+		refreshFavoriteCount();
+		Point pSize = favoriteButton.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
 		width = Math.max(width, pSize.x);
 
-		final String ratingDescription = NLS.bind(Messages.DiscoveryItem_Favorited_Times, ratingsButton.getText());
-		ratingsButton.setToolTipText(ratingDescription);
-		ratingsButton.getAccessible().addAccessibleListener(new AccessibleAdapter() {
+		final String ratingDescription = NLS.bind(Messages.DiscoveryItem_Favorited_Times, favoriteButton.getText());
+		favoriteButton.setToolTipText(ratingDescription);
+		favoriteButton.getAccessible().addAccessibleListener(new AccessibleAdapter() {
 			@Override
 			public void getName(AccessibleEvent e) {
 				e.result = ratingDescription;
-			}
-		});
-		final RatingTooltip ratingTooltip = RatingTooltip.shouldShowRatingTooltip() ? new RatingTooltip(ratingsButton,
-				new Runnable() {
-			public void run() {
-				openSolutionFavorite();
-			}
-		}) : null;
-		hookTooltip(ratingTooltip, ratingsButton, ratingsButton);
-		ratingsButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (ratingTooltip != null && RatingTooltip.shouldShowRatingTooltip()) {
-					ratingTooltip.show();
-				} else {
-					openSolutionFavorite();
-				}
 			}
 		});
 
@@ -524,32 +446,121 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		.indent(0, BUTTONBAR_MARGIN_TOP)
 		.hint(Math.min(width, MAX_IMAGE_WIDTH), SWT.DEFAULT)
 		.align(SWT.CENTER, SWT.FILL)
-		.applyTo(ratingsButton);
+		.applyTo(favoriteButton);
 	}
 
-	protected void openSolutionFavorite() {
-		String url = getCatalogItemUrl();
-		if (url == null) {
-			MarketplaceClientUi.error(
-					NLS.bind(Messages.DiscoveryItem_missingNodeUrl, connector.getId(), connector.getName()),
-					new IllegalStateException());
+	private void refreshFavoriteButton() {
+		if (this.isDisposed() || favoriteButton.isDisposed()) {
 			return;
 		}
-		if (url.startsWith(ECLIPSE_MARKETPLACE_URL)) {
-			//massage url to redirect via login page
+		if (Display.getCurrent() != this.getDisplay()) {
+			this.getDisplay().asyncExec(new Runnable() {
 
-			url = NLS.bind(MARKETPLACE_LOGIN_URL, connector.getId());
+				public void run() {
+					refreshFavoriteButton();
+				}
+			});
+			return;
 		}
-		WorkbenchUtil.openUrl(url, IWorkbenchBrowserSupport.AS_EXTERNAL);
+		boolean favorited = isFavorited();
+		Object lastFavorited = favoriteButton.getData("favorited");
+		if (lastFavorited == null || (favorited != Boolean.TRUE.equals(lastFavorited))) {
+			favoriteButton.setData("favorited", lastFavorited);
+			String imageId = favorited ? MarketplaceClientUiPlugin.ITEM_ICON_STAR_SELECTED
+					: MarketplaceClientUiPlugin.ITEM_ICON_STAR;
+			favoriteButton.setImage(MarketplaceClientUiPlugin.getInstance().getImageRegistry().get(imageId));
+
+			UserFavoritesService userFavoritesService = getUserFavoritesService();
+			favoriteButton.setEnabled(userFavoritesService != null);
+			favoriteButton.removeSelectionListener(toggleFavoritesListener);
+			if (userFavoritesService != null) {
+				favoriteButton.addSelectionListener(toggleFavoritesListener);
+			}
+		}
+		refreshFavoriteCount();
 	}
 
-	private String getCatalogItemUrl() {
+	private void refreshFavoriteCount() {
+		Integer favoriteCount = getFavoriteCount();
+		String favoriteCountText;
+		if (favoriteCount == null) {
+			favoriteCountText = ""; //$NON-NLS-1$
+		} else {
+			favoriteCountText = favoriteCount.toString();
+		}
+		favoriteButton.setText(favoriteCountText);
+	}
+
+	private boolean isFavorited() {
+		MarketplaceNodeCatalogItem nodeConnector = (MarketplaceNodeCatalogItem) connector;
+		Boolean favorited = nodeConnector.getUserFavorite();
+		return Boolean.TRUE.equals(favorited);
+	}
+
+	private void setFavorited(boolean newFavorited) {
+		//FIXME we should type the connector to MarketplaceNodeCatalogItem
+		MarketplaceNodeCatalogItem nodeConnector = (MarketplaceNodeCatalogItem) connector;
+		nodeConnector.setUserFavorite(newFavorited);
+		refreshFavoriteButton();
+	}
+
+	private UserFavoritesService getUserFavoritesService() {
+		MarketplaceCatalogSource source = (MarketplaceCatalogSource) this.getData().getSource();
+		UserFavoritesService userFavoritesService = source.getMarketplaceService().getUserFavoritesService();
+		return userFavoritesService;
+	}
+
+	private void toggleFavorite() {
+		final INode node = this.getCatalogItemNode();
+		final UserFavoritesService userFavoritesService = getUserFavoritesService();
+		if (node != null && userFavoritesService != null) {
+			final boolean newFavorited = !isFavorited();
+//			String itemName = nameLabel.getText();
+//			new Job("Setting favorite " + itemName) {
+//				{
+//					setUser(false);
+//					setSystem(true);
+//					setPriority(Job.INTERACTIVE);
+//				}
+//
+//				@Override
+//				protected IStatus run(IProgressMonitor monitor) {
+			try {
+				userFavoritesService.getStorageService().runWithLogin(new Callable<Void>() {
+					public Void call() throws Exception {
+						userFavoritesService.setFavorite(node, newFavorited);
+						return null;
+					}
+				});
+				setFavorited(newFavorited);
+			} catch (NotAuthorizedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ConflictException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+//					return Status.OK_STATUS;
+//				}
+//			}.schedule();
+		}
+	}
+
+	private INode getCatalogItemNode() {
 		Object data = connector.getData();
 		if (data instanceof INode) {
 			INode node = (INode) data;
-			return node.getUrl();
+			return node;
 		}
 		return null;
+	}
+
+	private String getCatalogItemUrl() {
+		INode node = getCatalogItemNode();
+		return node == null ? null : node.getUrl();
 	}
 
 	private void createInfoLink(StyledText description) {
@@ -558,24 +569,22 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		if (internalBrowserAvailable && (hasTooltip(connector) || connector.isInstalled())) {
 			if (hasTooltip(connector)) {
 				String descriptionLink = Messages.DiscoveryItem_More_Info;
-				StyleRange linkRange = appendLink(description, descriptionLink, SWT.BOLD);
-				linkRange.data = INFO_HREF;
+				StyledTextHelper.appendLink(description, descriptionLink, INFO_HREF, SWT.BOLD);
 				hookTooltip(description.getParent(), description, description, description, connector.getSource(),
 						connector.getOverview(), null);
 			}
 		} else if (!internalBrowserAvailable && hasOverviewUrl(connector)) {
 			String descriptionLink = Messages.DiscoveryItem_More_Info;
-			StyleRange linkRange = appendLink(description, descriptionLink, SWT.BOLD);
-			linkRange.data = INFO_HREF;
-			hookLinkListener(description, new LinkListener() {
+			StyledTextHelper.appendLink(description, descriptionLink, INFO_HREF, SWT.BOLD);
+			new LinkListener() {
 				@Override
-				protected void selected(String href) {
+				protected void selected(Object href, TypedEvent e) {
 					if (INFO_HREF.equals(href)) {
 						WorkbenchUtil.openUrl(connector.getOverview().getUrl().trim(),
 								IWorkbenchBrowserSupport.AS_EXTERNAL);
 					}
 				}
-			});
+			}.register(description);
 		}
 	}
 
@@ -649,24 +658,6 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		return (MarketplaceDiscoveryResources) resources;
 	}
 
-	private StyleRange appendLink(StyledText styledText, String text, int style) {
-		StyleRange range = new StyleRange(0, 0, styledText.getForeground(), null, style);
-		range.underline = true;
-		range.underlineStyle = SWT.UNDERLINE_LINK;
-
-		appendStyled(styledText, text, range);
-
-		return range;
-	}
-
-	private void appendStyled(StyledText styledText, String text, StyleRange style) {
-		style.start = styledText.getCharCount();
-		style.length = text.length();
-
-		styledText.append(text);
-		styledText.setStyleRange(style);
-	}
-
 	private boolean hasOverviewUrl(CatalogItem connector) {
 		return connector.getOverview() != null && connector.getOverview().getUrl() != null
 				&& connector.getOverview().getUrl().trim().length() > 0;
@@ -700,7 +691,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 	}
 
 	protected void createProviderLabel(Composite parent) {
-		StyledText providerLink = createStyledTextLabel(parent);
+		StyledText providerLink = StyledTextHelper.createStyledTextLabel(parent);
 		//Link providerLink = new Link(parent, SWT.NONE);
 		setWidgetId(providerLink, WIDGET_ID_PROVIDER);
 
@@ -726,17 +717,18 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 			} else {
 				range.underline = true;
 				range.underlineStyle = SWT.UNDERLINE_LINK;
-				hookLinkListener(providerLink, new LinkListener() {
+				LinkListener listener = new LinkListener() {
 
 					@Override
-					protected void selected(String href) {
-						String searchTerm = href;
+					protected void selected(Object href, TypedEvent e) {
+						String searchTerm = href.toString();
 						if (searchTerm.contains(" ")) { //$NON-NLS-1$
 							searchTerm = "\"" + searchTerm + "\""; //$NON-NLS-1$//$NON-NLS-2$
 						}
 						viewer.search(searchTerm);
 					}
-				});
+				};
+				listener.register(providerLink);
 			}
 			range.start = providerPos;
 			range.length = providerName.length();
@@ -747,7 +739,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 	}
 
 	protected void createTagsLabel(Composite parent) {
-		tagsLink = createStyledTextLabel(parent);
+		tagsLink = StyledTextHelper.createStyledTextLabel(parent);
 		setWidgetId(tagsLink, WIDGET_ID_TAGS);
 
 		tagsLink.setEditable(false);
@@ -758,26 +750,21 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		.grab(true, false)
 		.applyTo(tagsLink);
 
-		ITags tags = ((INode) connector.getData()).getTags();
+		ITags tags = getCatalogItemNode().getTags();
 		if (tags == null) {
 			return;
 		}
 		for (ITag tag : tags.getTags()) {
 			String tagName = tag.getName();
-			appendLink(tagsLink, tagName, SWT.NORMAL).data = tagName;
+			StyledTextHelper.appendLink(tagsLink, tagName, tagName, SWT.NORMAL);
 			tagsLink.append(" "); //$NON-NLS-1$
 		}
-		hookLinkListener(tagsLink, new LinkListener() {
+		new LinkListener() {
 			@Override
-			protected void selected(String href) {
-				viewer.doQueryForTag(href);
+			protected void selected(Object href, TypedEvent e) {
+				viewer.doQueryForTag(href.toString());
 			}
-		});
-	}
-
-	private void hookLinkListener(StyledText link, LinkListener listener) {
-		link.addSelectionListener(listener);
-		link.addMouseListener(listener);
+		}.register(tagsLink);
 	}
 
 	protected boolean hasTooltip(CatalogItem connector) {
@@ -843,6 +830,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		if (updateState && buttonController != null) {
 			buttonController.refresh();
 		}
+		refreshFavoriteButton();
 	}
 
 	private void hookRecursively(Control control, Listener listener) {
@@ -878,12 +866,12 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<
 		if (tipActivator instanceof StyledText) {
 			StyledText link = (StyledText) tipActivator;
 
-			hookLinkListener(link, new LinkListener() {
+			new LinkListener() {
 				@Override
-				protected void selected(String href) {
+				protected void selected(Object href, TypedEvent e) {
 					toolTip.show(titleControl);
 				}
-			});
+			}.register(link);
 		} else {
 			Listener selectionListener = new Listener() {
 				public void handleEvent(Event event) {

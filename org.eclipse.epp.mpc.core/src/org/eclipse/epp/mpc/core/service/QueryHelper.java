@@ -16,6 +16,7 @@ import org.eclipse.epp.internal.mpc.core.model.Identifiable;
 import org.eclipse.epp.internal.mpc.core.model.Market;
 import org.eclipse.epp.internal.mpc.core.model.Node;
 import org.eclipse.epp.mpc.core.model.ICategory;
+import org.eclipse.epp.mpc.core.model.IIdentifiable;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INode;
 
@@ -105,5 +106,23 @@ public class QueryHelper {
 	private static <T extends Identifiable> T withName(T identifiable, String name) {
 		identifiable.setName(name);
 		return identifiable;
+	}
+
+	public static <T extends IIdentifiable> T findById(Iterable<? extends T> elements, String id) {
+		for (T element : elements) {
+			if (id.equals(element.getId())) {
+				return element;
+			}
+		}
+		return null;
+	}
+
+	public static <T extends IIdentifiable> T findById(Iterable<? extends T> elements, T template) {
+		for (T element : elements) {
+			if (element.equalsId(template)) {
+				return element;
+			}
+		}
+		return null;
 	}
 }

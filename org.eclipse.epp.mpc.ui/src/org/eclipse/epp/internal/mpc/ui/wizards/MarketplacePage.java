@@ -380,6 +380,8 @@ public class MarketplacePage extends CatalogPage {
 			return relatedTabItem;
 		case SELECTION:
 			return searchTabItem;
+		case FAVORITES:
+			return favoritedTabItem;
 		default:
 			throw new IllegalArgumentException();
 		}

@@ -31,11 +31,15 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.model.Identifiable;
+import org.eclipse.epp.internal.mpc.core.service.MarketplaceStorageService.LoginListener;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory.Contents;
+import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
+import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
+import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem.UserAction;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceWizard.WizardState;
 import org.eclipse.epp.mpc.core.model.ICatalogBranding;
 import org.eclipse.epp.mpc.core.model.ICategory;
@@ -44,6 +48,7 @@ import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.epp.mpc.ui.Operation;
+import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.equinox.internal.p2.discovery.Catalog;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
@@ -88,7 +93,7 @@ import org.osgi.framework.ServiceReference;
 public class MarketplaceViewer extends CatalogViewer {
 
 	public enum ContentType {
-		SEARCH, FEATURED_MARKET, RECENT, POPULAR, INSTALLED, SELECTION, RELATED
+		SEARCH, FEATURED_MARKET, RECENT, POPULAR, INSTALLED, SELECTION, RELATED, FAVORITES
 	}
 
 	public static class MarketplaceCatalogContentProvider extends CatalogContentProvider {
@@ -216,6 +221,13 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	private Composite header;
 
+	private final LoginListener loginListener = new LoginListener() {
+
+		public void loginChanged(String oldUser, String newUser) {
+			refreshFavorites();
+		}
+	};
+
 	public MarketplaceViewer(Catalog catalog, IShellProvider shellProvider, MarketplaceWizard wizard) {
 		super(catalog, shellProvider, wizard.getContainer(), wizard.getConfiguration());
 		this.browser = wizard;
@@ -268,6 +280,14 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	@Override
 	protected void catalogUpdated(final boolean wasCancelled, final boolean wasError) {
+		MarketplaceCatalog catalog = getCatalog();
+		List<AbstractDiscoveryStrategy> discoveryStrategies = catalog.getDiscoveryStrategies();
+		for (AbstractDiscoveryStrategy discoveryStrategy : discoveryStrategies) {
+			if (discoveryStrategy instanceof MarketplaceDiscoveryStrategy) {
+				MarketplaceDiscoveryStrategy marketplaceDiscoveryStrategy = (MarketplaceDiscoveryStrategy) discoveryStrategy;
+				marketplaceDiscoveryStrategy.addLoginListener(loginListener);
+			}
+		}
 		runUpdate(new Runnable() {
 
 			public void run() {
@@ -303,11 +323,14 @@ public class MarketplaceViewer extends CatalogViewer {
 	protected ControlListItem<?> doCreateViewerItem(Composite parent, Object element) {
 		if (element instanceof CatalogItem) {
 			CatalogItem catalogItem = (CatalogItem) element;
-			if (catalogItem.getData() instanceof CatalogDescriptor) {
-				CatalogDescriptor catalogDescriptor = (CatalogDescriptor) catalogItem.getData();
-				return new BrowseCatalogItem(parent, getResources(), shellProvider, browser,
-						(MarketplaceCategory) catalogItem.getCategory(), catalogDescriptor, this);
+			if (catalogItem instanceof UserActionCatalogItem) {
+				//user action link
+				return createUserActionViewerItem((UserActionCatalogItem) catalogItem, parent);
+			} else if (catalogItem.getData() instanceof CatalogDescriptor) {
+				//legacy browse item
+				return createBrowseItem(catalogItem, parent);
 			} else {
+				//marketplace entry
 				DiscoveryItem<CatalogItem> discoveryItem = createDiscoveryItem(parent, catalogItem);
 				discoveryItem.setSelected(getCheckedItems().contains(catalogItem));
 				return discoveryItem;
@@ -325,6 +348,26 @@ public class MarketplaceViewer extends CatalogViewer {
 			return categoryItem;
 		}
 		return super.doCreateViewerItem(parent, element);
+	}
+
+	private BrowseCatalogItem createBrowseItem(CatalogItem catalogItem, Composite parent) {
+		CatalogDescriptor catalogDescriptor = (CatalogDescriptor) catalogItem.getData();
+		return new BrowseCatalogItem(parent, getResources(), shellProvider, browser,
+				(MarketplaceCategory) catalogItem.getCategory(), catalogDescriptor, this);
+	}
+
+	private UserActionViewerItem<?> createUserActionViewerItem(UserActionCatalogItem catalogItem, Composite parent) {
+		UserAction userAction = catalogItem.getUserAction();
+		switch (userAction) {
+		case BROWSE:
+			return createBrowseItem(catalogItem, parent);
+		case CREATE_FAVORITES:
+			return new UserFavoritesFindFavoritesActionItem(parent, getResources(), shellProvider, catalogItem,
+					getWizard().getCatalogPage());
+		case LOGIN:
+			return new UserFavoritesLoginActionItem(parent, getResources(), shellProvider, catalogItem, this);
+		}
+		return null;
 	}
 
 	private DiscoveryItem<CatalogItem> createDiscoveryItem(Composite parent, CatalogItem catalogItem) {
@@ -481,6 +524,29 @@ public class MarketplaceViewer extends CatalogViewer {
 		firePropertyChangeEvent(new PropertyChangeEvent(source, property, oldValue, newValue));
 	}
 
+	protected IStatus refreshFavorites() {
+		IStatus status;
+		try {
+			final IStatus[] result = new IStatus[1];
+			context.run(true, true, new IRunnableWithProgress() {
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					result[0] = getCatalog().refreshUserFavorites(monitor);
+				}
+			});
+			status = result[0];
+		} catch (InvocationTargetException e) {
+			status = computeStatus(e, Messages.MarketplaceViewer_unexpectedException);
+		} catch (InterruptedException e) {
+			// cancelled by user so nothing to do here.
+			status = Status.CANCEL_STATUS;
+		}
+		if (status != null && !status.isOK() && status.getSeverity() != IStatus.CANCEL) {
+			//TODO WIP log
+			new CoreException(status).printStackTrace();
+		}
+		return status;
+	}
+
 	private IStatus doQuery(final QueryData queryData,
 			final Set<? extends INode> nodes) {
 		try {
@@ -501,6 +567,9 @@ public class MarketplaceViewer extends CatalogViewer {
 						break;
 					case INSTALLED:
 						result[0] = getCatalog().installed(monitor);
+						break;
+					case FAVORITES:
+						result[0] = getCatalog().userFavorites(false, monitor);
 						break;
 					case SELECTION:
 						Set<String> nodeIds = new HashSet<String>();

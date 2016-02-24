@@ -23,7 +23,7 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 public class MarketplaceCategory extends CatalogCategory {
 
 	public enum Contents {
-		FEATURED, POPULAR, INSTALLED, RECENT, QUERY, RELATED
+		FEATURED, POPULAR, INSTALLED, RECENT, QUERY, RELATED, USER_FAVORITES
 	}
 
 	private List<? extends IMarket> markets;
@@ -31,6 +31,11 @@ public class MarketplaceCategory extends CatalogCategory {
 	private Contents contents;
 
 	private int matchCount;
+
+	public MarketplaceCategory() {
+		super();
+		// ignore
+	}
 
 	public void setMarkets(List<? extends IMarket> markets) {
 		this.markets = markets;

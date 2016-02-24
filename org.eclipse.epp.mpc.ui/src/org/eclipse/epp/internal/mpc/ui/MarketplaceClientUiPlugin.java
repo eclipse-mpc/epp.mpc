@@ -76,6 +76,8 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 
 	public static final String ITEM_ICON_STAR = "ITEM_ICON_STAR"; //$NON-NLS-1$
 
+	public static final String ITEM_ICON_STAR_SELECTED = "ITEM_ICON_STAR_SELECTED"; //$NON-NLS-1$
+
 	public static final String ITEM_ICON_SHARE = "ITEM_ICON_SHARE"; //$NON-NLS-1$
 
 	private static MarketplaceClientUiPlugin instance;
@@ -103,13 +105,13 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
-	   Job.getJobManager().cancel(context.getBundle());
+		Job.getJobManager().cancel(context.getBundle());
 		clientServiceTracker.close();
 		clientServiceTracker = null;
 
 		if (resourceProvider != null) {
-   		resourceProvider.dispose();
-   		resourceProvider = null;
+			resourceProvider.dispose();
+			resourceProvider = null;
 		}
 		MarketplaceClientUiPlugin.bundleContext = null;
 		super.stop(context);
@@ -152,6 +154,8 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 		imageRegistry.put(NEWS_ICON_UPDATE,
 				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/news_update.gif")); //$NON-NLS-1$
 		imageRegistry.put(ITEM_ICON_STAR, imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/star.png")); //$NON-NLS-1$
+		imageRegistry.put(ITEM_ICON_STAR_SELECTED,
+				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/star-selected.png")); //$NON-NLS-1$
 		imageRegistry.put(ITEM_ICON_SHARE, imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/share.png")); //$NON-NLS-1$
 		return imageRegistry;
 	}

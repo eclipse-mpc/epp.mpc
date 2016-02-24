@@ -74,7 +74,7 @@ public class MarketplaceCatalog extends Catalog {
 			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
 				strategy.performQuery(market, category, queryText, monitor);
 			}
-		}, monitor);
+		}, false, monitor);
 	}
 
 	public IStatus related(IProgressMonitor monitor) {
@@ -82,7 +82,7 @@ public class MarketplaceCatalog extends Catalog {
 			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
 				strategy.related(monitor);
 			}
-		}, monitor);
+		}, false, monitor);
 	}
 
 	public IStatus recent(IProgressMonitor monitor) {
@@ -90,7 +90,7 @@ public class MarketplaceCatalog extends Catalog {
 			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
 				strategy.recent(monitor);
 			}
-		}, monitor);
+		}, false, monitor);
 	}
 
 	public IStatus popular(IProgressMonitor monitor) {
@@ -98,7 +98,7 @@ public class MarketplaceCatalog extends Catalog {
 			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
 				strategy.popular(monitor);
 			}
-		}, monitor);
+		}, false, monitor);
 	}
 
 	public IStatus featured(IProgressMonitor monitor, final IMarket market, final ICategory category) {
@@ -106,7 +106,7 @@ public class MarketplaceCatalog extends Catalog {
 			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
 				strategy.featured(monitor, market, category);
 			}
-		}, monitor);
+		}, false, monitor);
 	}
 
 	public IStatus installed(IProgressMonitor monitor) {
@@ -114,7 +114,23 @@ public class MarketplaceCatalog extends Catalog {
 			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
 				strategy.installed(monitor);
 			}
-		}, monitor);
+		}, false, monitor);
+	}
+
+	public IStatus userFavorites(final boolean login, IProgressMonitor monitor) {
+		return performDiscovery(new DiscoveryOperation() {
+			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
+				strategy.userFavorites(login, monitor);
+			}
+		}, false, monitor);
+	}
+
+	public IStatus refreshUserFavorites(IProgressMonitor monitor) {
+		return performDiscovery(new DiscoveryOperation() {
+			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
+				strategy.refreshUserFavorites(monitor);
+			}
+		}, true, monitor);
 	}
 
 	/**
@@ -131,7 +147,7 @@ public class MarketplaceCatalog extends Catalog {
 			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
 				strategy.performQuery(monitor, nodeIds);
 			}
-		}, monitor);
+		}, false, monitor);
 	}
 
 	/**
@@ -148,7 +164,7 @@ public class MarketplaceCatalog extends Catalog {
 			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
 				strategy.performNodeQuery(monitor, nodes);
 			}
-		}, monitor);
+		}, false, monitor);
 	}
 
 	public IStatus checkForUpdates(final IProgressMonitor monitor) {
@@ -373,7 +389,7 @@ public class MarketplaceCatalog extends Catalog {
 		return status;
 	}
 
-	protected IStatus performDiscovery(DiscoveryOperation operation, IProgressMonitor monitor) {
+	protected IStatus performDiscovery(DiscoveryOperation operation, boolean refresh, IProgressMonitor monitor) {
 		MultiStatus status = new MultiStatus(MarketplaceClientUi.BUNDLE_ID, 0, Messages.MarketplaceCatalog_queryFailed,
 				null);
 		if (getDiscoveryStrategies().isEmpty()) {
@@ -385,8 +401,10 @@ public class MarketplaceCatalog extends Catalog {
 		List<CatalogCategory> categories = new ArrayList<CatalogCategory>(getCategories());
 		List<Certification> certifications = new ArrayList<Certification>(getCertifications());
 		List<Tag> tags = new ArrayList<Tag>(getTags());
-		for (CatalogCategory catalogCategory : categories) {
-			catalogCategory.getItems().clear();
+		if (!refresh) {
+			for (CatalogCategory catalogCategory : categories) {
+				catalogCategory.getItems().clear();
+			}
 		}
 
 		final int totalTicks = 100000;

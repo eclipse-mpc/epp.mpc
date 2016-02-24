@@ -266,7 +266,7 @@ public class DefaultMarketplaceServiceTest {
 	@org.junit.experimental.categories.Category(RemoteTests.class)
 	@Ignore //top favorites are not exposed in MPC anymore - this fails with a 503 due to the varnish cache failing
 	public void favorites() throws CoreException {
-		ISearchResult result = marketplaceService.favorites(new NullProgressMonitor());
+		ISearchResult result = marketplaceService.topFavorites(new NullProgressMonitor());
 		assertSearchResultSanity(result);
 	}
 

@@ -20,6 +20,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,7 +33,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.model.Category;
 import org.eclipse.epp.internal.mpc.core.model.Market;
 import org.eclipse.epp.internal.mpc.core.model.Marketplace;
@@ -41,12 +44,14 @@ import org.eclipse.epp.internal.mpc.core.model.Node;
 import org.eclipse.epp.internal.mpc.core.model.NodeListing;
 import org.eclipse.epp.internal.mpc.core.model.Search;
 import org.eclipse.epp.internal.mpc.core.model.SearchResult;
+import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
 import org.eclipse.epp.internal.mpc.core.util.HttpUtil;
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
 import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IIdentifiable;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INode;
+import org.eclipse.epp.mpc.core.model.ISearchResult;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.osgi.util.NLS;
 
@@ -184,6 +189,8 @@ MarketplaceService {
 		DEFAULT_SERVICE_URL = ServiceUtil.parseUrl(DEFAULT_SERVICE_LOCATION);
 	}
 
+	private UserFavoritesService userFavoritesService;
+
 	public DefaultMarketplaceService(URL baseUrl) {
 		this.baseUrl = baseUrl == null ? DEFAULT_SERVICE_URL : baseUrl;
 	}
@@ -230,8 +237,8 @@ MarketplaceService {
 	}
 
 	public Category getCategory(ICategory category, IProgressMonitor monitor) throws CoreException {
+		SubMonitor progress = SubMonitor.convert(monitor, 200);
 		if (category.getId() != null && category.getUrl() == null) {
-			SubMonitor progress = SubMonitor.convert(monitor, 100);
 			List<Market> markets = listMarkets(progress.newChild(50));
 			ICategory resolvedCategory = null;
 			outer: for (Market market : markets) {
@@ -248,16 +255,17 @@ MarketplaceService {
 			} else if (resolvedCategory == null) {
 				throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_categoryNotFound, null));
 			} else {
-				return getCategory(resolvedCategory, progress.newChild(50));
+				return getCategory(resolvedCategory, progress.newChild(150));
 			}
 		}
-		Marketplace marketplace = processRequest(category.getUrl(), API_URI_SUFFIX, monitor);
+		Marketplace marketplace = processRequest(category.getUrl(), API_URI_SUFFIX, progress.newChild(200));
 		if (marketplace.getCategory().isEmpty()) {
 			throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_categoryNotFound, null));
 		} else if (marketplace.getCategory().size() > 1) {
 			throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_unexpectedResponse, null));
 		}
-		return marketplace.getCategory().get(0);
+		Category resolvedCategory = marketplace.getCategory().get(0);
+		return resolvedCategory;
 	}
 
 	public Category getCategory(Category category, IProgressMonitor monitor) throws CoreException {
@@ -279,7 +287,8 @@ MarketplaceService {
 		} else if (marketplace.getNode().size() > 1) {
 			throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_unexpectedResponse, null));
 		}
-		return marketplace.getNode().get(0);
+		Node resolvedNode = marketplace.getNode().get(0);
+		return resolvedNode;
 	}
 
 	public Node getNode(Node node, IProgressMonitor monitor) throws CoreException {
@@ -422,9 +431,81 @@ MarketplaceService {
 		return createSearchResult(marketplace.getRecent());
 	}
 
+	/**
+	 * @deprecated use {@link #topFavorites(IProgressMonitor)} instead
+	 */
+	@Deprecated
 	public SearchResult favorites(IProgressMonitor monitor) throws CoreException {
+		return topFavorites(monitor);
+	}
+
+	public SearchResult topFavorites(IProgressMonitor monitor) throws CoreException {
 		Marketplace marketplace = processRequest(API_FAVORITES_URI + '/' + API_URI_SUFFIX, monitor);
 		return createSearchResult(marketplace.getFavorites());
+	}
+
+	public ISearchResult userFavorites(IProgressMonitor monitor) throws CoreException, NotAuthorizedException {
+		SubMonitor progress = SubMonitor.convert(monitor, "Retrieving user favorites", 10000);
+		UserFavoritesService userFavoritesService = getUserFavoritesService();
+		if (userFavoritesService == null) {
+			throw new UnsupportedOperationException();
+		}
+		final List<INode> favorites;
+		try {
+			favorites = userFavoritesService.getFavorites();
+		} catch (NotAuthorizedException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new CoreException(
+					new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID, "Failed to retrieve user favorites", e));
+		}
+		progress.worked(1000);
+		resolveFavoriteNodes(favorites, progress.newChild(9000));
+		return new ISearchResult() {
+
+			public List<? extends INode> getNodes() {
+				return favorites;
+			}
+
+			public Integer getMatchCount() {
+				return favorites.size();
+			}
+		};
+	}
+
+	public void userFavorites(List<? extends INode> nodes, IProgressMonitor monitor) throws NotAuthorizedException {
+		UserFavoritesService userFavoritesService = getUserFavoritesService();
+		if (userFavoritesService == null) {
+			throw new UnsupportedOperationException();
+		}
+		if (nodes == null || nodes.isEmpty()) {
+			return;
+		}
+		//TODO use monitor
+		Set<String> favorites = null;
+		try {
+			favorites = userFavoritesService == null ? null : userFavoritesService.getFavoriteIds();
+		} catch (NotAuthorizedException e) {
+			throw e;
+		} catch (Exception e) {
+			//TODO WIP log
+			e.printStackTrace();
+		} finally {
+			//WIP TODO handle ClassCastEx
+			for (INode node : nodes) {
+				((Node) node).setUserFavorite(favorites == null ? null : favorites.contains(node.getId()));
+			}
+		}
+	}
+
+	private void resolveFavoriteNodes(final List<INode> nodes, IProgressMonitor monitor) throws CoreException {
+		SubMonitor resolveProgress = SubMonitor.convert(monitor, nodes.size() * 100);
+		for (ListIterator<INode> i = nodes.listIterator(); i.hasNext();) {
+			INode node = i.next();
+			Node resolved = getNode(node, resolveProgress.newChild(100));
+			resolved.setUserFavorite(true);
+			i.set(resolved);
+		}
 	}
 
 	public SearchResult popular(IProgressMonitor monitor) throws CoreException {
@@ -553,5 +634,13 @@ MarketplaceService {
 		} catch (Throwable e) {
 			//per bug 314028 logging this error is not useful.
 		}
+	}
+
+	public UserFavoritesService getUserFavoritesService() {
+		return userFavoritesService;
+	}
+
+	public void setUserFavoritesService(UserFavoritesService userFavoritesService) {
+		this.userFavoritesService = userFavoritesService;
 	}
 }

@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.epp.internal.mpc.core.model.Node;
+import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IMarket;
@@ -282,12 +283,12 @@ public class CachingMarketplaceService implements IMarketplaceService {
 		});
 	}
 
-	public ISearchResult favorites(IProgressMonitor monitor) throws CoreException {
+	public ISearchResult topFavorites(IProgressMonitor monitor) throws CoreException {
 		String key = computeSearchKey("favorites", null, null, null); //$NON-NLS-1$
 		return performSearch(monitor, key, new SearchOperation() {
 
 			public ISearchResult doSearch(IProgressMonitor monitor) throws CoreException {
-				return delegate.favorites(monitor);
+				return delegate.topFavorites(monitor);
 			}
 		});
 	}
@@ -343,6 +344,26 @@ public class CachingMarketplaceService implements IMarketplaceService {
 
 	public void reportInstallSuccess(INode node, IProgressMonitor monitor) {
 		delegate.reportInstallSuccess(node, monitor);
+	}
+
+	@Deprecated
+	public ISearchResult favorites(IProgressMonitor monitor) throws CoreException {
+		return topFavorites(monitor);
+	}
+
+	public ISearchResult userFavorites(IProgressMonitor monitor) throws CoreException, NotAuthorizedException {
+		//we don't cache the favorite status, only contents individual nodes, which happens internally...
+		return delegate.userFavorites(monitor);
+	}
+
+	public void userFavorites(List<? extends INode> nodes, IProgressMonitor monitor)
+			throws CoreException, NotAuthorizedException {
+		//we don't cache the favorite status, only contents individual nodes, which happens internally...
+		delegate.userFavorites(nodes, monitor);
+	}
+
+	public UserFavoritesService getUserFavoritesService() {
+		return delegate.getUserFavoritesService();
 	}
 
 }

@@ -13,7 +13,11 @@ package org.eclipse.epp.internal.mpc.core;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProduct;
@@ -21,6 +25,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.epp.internal.mpc.core.service.CachingMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.service.DefaultCatalogService;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
+import org.eclipse.epp.internal.mpc.core.service.MarketplaceStorageService;
+import org.eclipse.epp.internal.mpc.core.service.UserFavoritesService;
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.mpc.core.service.ICatalogService;
@@ -29,7 +35,9 @@ import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
 import org.eclipse.epp.mpc.core.service.ServiceHelper;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -42,17 +50,21 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 
 	private static ServiceLocator instance;
 
-	private Map<String, IMarketplaceService> marketplaceServices;
-
 	private ICatalogService catalogService;
 
 	private ServiceTracker<IMarketplaceService, IMarketplaceService> marketplaceServiceTracker;
 
 	private ServiceTracker<ICatalogService, ICatalogService> catalogServiceTracker;
 
+	private ServiceTracker<MarketplaceStorageService, MarketplaceStorageService> storageServiceTracker;
+
+	private ServiceTracker<UserFavoritesService, UserFavoritesService> favoritesServiceTracker;
+
 	private URL defaultCatalogUrl;
 
 	private URL defaultMarketplaceUrl;
+
+	private final List<ServiceRegistration<?>> dynamicServiceRegistrations = new ArrayList<ServiceRegistration<?>>();
 
 	public ServiceLocator() {
 		defaultMarketplaceUrl = DefaultMarketplaceService.DEFAULT_SERVICE_URL;
@@ -72,14 +84,35 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 	}
 
 	public synchronized IMarketplaceService getMarketplaceService(String baseUrl) {
-		IMarketplaceService service;
-		if (marketplaceServiceTracker != null) {
-			ServiceReference<IMarketplaceService>[] serviceReferences = marketplaceServiceTracker.getServiceReferences();
+		IMarketplaceService service = getService(marketplaceServiceTracker, baseUrl);
+		if (service != null) {
+			return service;
+		}
+		service = createMarketplaceService(baseUrl);
+		registerService(baseUrl, IMarketplaceService.class, service);
+		return service;
+	}
+
+	private <T> void registerService(String baseUrl, Class<T> serviceClass, T service) {
+		Dictionary<String, Object> properties = null;
+		if (baseUrl != null) {
+			properties = new Hashtable<String, Object>(1);
+			properties.put(IMarketplaceService.BASE_URL, baseUrl);
+		}
+		ServiceRegistration<T> registration = FrameworkUtil.getBundle(IMarketplaceServiceLocator.class)
+				.getBundleContext()
+				.registerService(serviceClass, service, properties);
+		dynamicServiceRegistrations.add(registration);
+	}
+
+	private <T> T getService(ServiceTracker<T, T> serviceTracker, String baseUrl) {
+		if (serviceTracker != null) {
+			ServiceReference<T>[] serviceReferences = serviceTracker.getServiceReferences();
 			if (serviceReferences != null) {
-				for (ServiceReference<IMarketplaceService> serviceReference : serviceReferences) {
+				for (ServiceReference<T> serviceReference : serviceReferences) {
 					Object serviceBaseUrl = serviceReference.getProperty(IMarketplaceService.BASE_URL);
 					if (baseUrl.equals(serviceBaseUrl)) {
-						service = marketplaceServiceTracker.getService(serviceReference);
+						T service = serviceTracker.getService(serviceReference);
 						//we don't cache this on our own, since it might become invalid
 						if (service != null) {
 							return service;
@@ -88,18 +121,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 				}
 			}
 		}
-		if (marketplaceServices != null) {
-			service = marketplaceServices.get(baseUrl);
-			if (service != null) {
-				return service;
-			}
-		}
-		service = createMarketplaceService(baseUrl);
-
-		if (marketplaceServices != null) {
-			marketplaceServices.put(baseUrl, service);
-		}
-		return service;
+		return null;
 	}
 
 	protected IMarketplaceService createMarketplaceService(String baseUrl) {
@@ -113,8 +135,26 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		DefaultMarketplaceService defaultService = new DefaultMarketplaceService(base);
 		Map<String, String> requestMetaParameters = computeDefaultRequestMetaParameters();
 		defaultService.setRequestMetaParameters(requestMetaParameters);
+		UserFavoritesService favoritesService = getFavoritesService(baseUrl);
+		defaultService.setUserFavoritesService(favoritesService);//FIXME WIP service reference!
 		service = new CachingMarketplaceService(defaultService);
 		return service;
+	}
+
+	public MarketplaceStorageService getStorageService(String marketplaceUrl) {
+		return getService(storageServiceTracker, marketplaceUrl);
+	}
+
+	public MarketplaceStorageService getDefaultStorageService() {
+		return getStorageService(defaultMarketplaceUrl.toExternalForm());
+	}
+
+	public UserFavoritesService getFavoritesService(String marketplaceUrl) {
+		return getService(favoritesServiceTracker, marketplaceUrl);
+	}
+
+	public UserFavoritesService getDefaultFavoritesService() {
+		return getFavoritesService(defaultMarketplaceUrl.toExternalForm());
 	}
 
 	/**
@@ -135,10 +175,6 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 			this.defaultMarketplaceUrl = marketplaceUrl;
 		} //else the default value from the constructor is used
 
-		if (marketplaceServices == null) {
-			marketplaceServices = new HashMap<String, IMarketplaceService>();
-		}
-
 		marketplaceServiceTracker = new ServiceTracker<IMarketplaceService, IMarketplaceService>(context,
 				IMarketplaceService.class, null);
 		marketplaceServiceTracker.open(true);
@@ -146,6 +182,14 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		catalogServiceTracker = new ServiceTracker<ICatalogService, ICatalogService>(context,
 				ICatalogService.class, null);
 		catalogServiceTracker.open(true);
+
+		storageServiceTracker = new ServiceTracker<MarketplaceStorageService, MarketplaceStorageService>(context,
+				MarketplaceStorageService.class, null);
+		storageServiceTracker.open(true);
+
+		favoritesServiceTracker = new ServiceTracker<UserFavoritesService, UserFavoritesService>(context,
+				UserFavoritesService.class, null);
+		favoritesServiceTracker.open(true);
 	}
 
 	/**
@@ -153,6 +197,14 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 	 * services. Multiple calls to {@link #getMarketplaceService(String)} will return a new instance every time.
 	 */
 	public synchronized void deactivate() {
+		if (favoritesServiceTracker != null) {
+			favoritesServiceTracker.close();
+			favoritesServiceTracker = null;
+		}
+		if (storageServiceTracker != null) {
+			storageServiceTracker.close();
+			storageServiceTracker = null;
+		}
 		if (marketplaceServiceTracker != null) {
 			marketplaceServiceTracker.close();
 			marketplaceServiceTracker = null;
@@ -161,8 +213,9 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 			catalogServiceTracker.close();
 			catalogServiceTracker = null;
 		}
-		marketplaceServices = null;
-		catalogService = null;
+		for (ServiceRegistration<?> serviceRegistration : dynamicServiceRegistrations) {
+			serviceRegistration.unregister();
+		}
 	}
 
 	public synchronized ICatalogService getCatalogService() {
@@ -177,9 +230,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 			return catalogService;
 		}
 		ICatalogService catalogService = new DefaultCatalogService(defaultCatalogUrl);
-		if (marketplaceServices != null) {//used as an indicator to cache value
-			this.catalogService = catalogService;
-		}
+		registerService(null, ICatalogService.class, catalogService);
 		return catalogService;
 	}
 
@@ -202,11 +253,9 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 			return instance;
 		}
 		IMarketplaceServiceLocator locator = getCompatibilityLocator();
-		if (locator != null) {
-			if (locator instanceof ServiceLocator) {
-				//don't remember service instance, it might get deregistered
-				return (ServiceLocator) locator;
-			}
+		if (locator != null && locator instanceof ServiceLocator) {
+			//don't remember service instance, it might get deregistered
+			return (ServiceLocator) locator;
 		}
 		//remember new default instance
 		instance = new ServiceLocator();

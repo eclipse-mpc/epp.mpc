@@ -35,6 +35,8 @@ public class MarketplaceNodeCatalogItem extends CatalogItem {
 
 	private URL marketplaceUrl;
 
+	private Boolean userFavorite;
+
 	private List<MarketplaceNodeInstallableUnitItem> installableUnitItems = new ArrayList<MarketplaceNodeInstallableUnitItem>();
 
 	@Override
@@ -205,6 +207,14 @@ public class MarketplaceNodeCatalogItem extends CatalogItem {
 	private boolean maybeHasOptionalFeatures() {
 		Boolean hasOptional = getHasOptionalFeatures();
 		return hasOptional == null || Boolean.TRUE.equals(hasOptional);
+	}
+
+	public void setUserFavorite(Boolean favorited) {
+		this.userFavorite = favorited;
+	}
+
+	public Boolean getUserFavorite() {
+		return userFavorite;
 	}
 
 	@Override

@@ -870,6 +870,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			discoveryStrategies.clear();
 			if (getConfiguration().getCatalogDescriptor() != null) {
 				discoveryStrategies.add(new MarketplaceDiscoveryStrategy(getConfiguration().getCatalogDescriptor()));
+
 			}
 		}
 	}

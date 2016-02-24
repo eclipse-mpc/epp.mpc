@@ -11,11 +11,6 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.model;
 
-import org.eclipse.epp.internal.mpc.core.model.Categories;
-import org.eclipse.epp.internal.mpc.core.model.Identifiable;
-import org.eclipse.epp.internal.mpc.core.model.Ius;
-import org.eclipse.epp.internal.mpc.core.model.Platforms;
-import org.eclipse.epp.internal.mpc.core.model.Tags;
 import org.eclipse.epp.mpc.core.model.INode;
 
 /**
@@ -49,6 +44,8 @@ public class Node extends Identifiable implements INode {
 	protected Ius ius;
 	protected Platforms platforms;
 
+	protected Boolean userFavorite;
+
 	public Node() {
 	}
 
@@ -61,6 +58,15 @@ public class Node extends Identifiable implements INode {
 
 	public void setFavorited(Integer favorited) {
 		this.favorited = favorited;
+	}
+
+	//TODO WIP javadoc
+	public Boolean getUserFavorite() {
+		return userFavorite;
+	}
+
+	public void setUserFavorite(Boolean userFavorite) {
+		this.userFavorite = userFavorite;
 	}
 
 	/**

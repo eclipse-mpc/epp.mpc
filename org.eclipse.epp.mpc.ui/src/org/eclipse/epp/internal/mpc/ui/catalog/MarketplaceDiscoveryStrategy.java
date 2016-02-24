@@ -16,31 +16,38 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.ServiceLocator;
 import org.eclipse.epp.internal.mpc.core.model.Identifiable;
-import org.eclipse.epp.internal.mpc.core.model.SearchResult;
 import org.eclipse.epp.internal.mpc.core.model.Node;
+import org.eclipse.epp.internal.mpc.core.model.SearchResult;
+import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
+import org.eclipse.epp.internal.mpc.core.service.MarketplaceStorageService;
+import org.eclipse.epp.internal.mpc.core.service.MarketplaceStorageService.LoginListener;
+import org.eclipse.epp.internal.mpc.core.service.UserFavoritesService;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory.Contents;
+import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem.UserAction;
 import org.eclipse.epp.mpc.core.model.ICategories;
 import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IIdentifiable;
@@ -82,12 +89,15 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	private Map<String, IInstallableUnit> featureIUById;
 
+	private List<LoginListener> loginListeners;
+
 	public MarketplaceDiscoveryStrategy(CatalogDescriptor catalogDescriptor) {
 		if (catalogDescriptor == null) {
 			throw new IllegalArgumentException();
 		}
 		this.catalogDescriptor = catalogDescriptor;
 		marketplaceService = createMarketplaceService();//use deprecated method in case someone has overridden it
+
 		source = new MarketplaceCatalogSource(marketplaceService);
 		marketplaceInfo = MarketplaceInfo.getInstance();
 	}
@@ -115,6 +125,17 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	@Override
 	public void dispose() {
+		List<LoginListener> loginListeners = this.loginListeners;
+		this.loginListeners = null;
+		if (loginListeners != null) {
+			UserFavoritesService favoritesService = marketplaceService.getUserFavoritesService();
+			if (favoritesService != null) {
+				MarketplaceStorageService storageService = favoritesService.getStorageService();
+				for (LoginListener loginListener : loginListeners) {
+					storageService.removeLoginListener(loginListener);
+				}
+			}
+		}
 		if (source != null) {
 			source.dispose();
 			source = null;
@@ -151,21 +172,46 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		super.dispose();
 	}
 
+	public synchronized void addLoginListener(LoginListener loginListener) {
+		UserFavoritesService favoritesService = marketplaceService.getUserFavoritesService();
+		if (favoritesService != null) {
+			if (loginListeners == null) {
+				loginListeners = new CopyOnWriteArrayList<LoginListener>();
+			}
+			if (!loginListeners.contains(loginListener)) {
+				loginListeners.add(loginListener);
+				MarketplaceStorageService storageService = favoritesService.getStorageService();
+				storageService.addLoginListener(loginListener);
+			}
+		}
+	}
+
+	public synchronized void removeLoginListener(LoginListener loginListener) {
+		if (loginListeners != null) {
+			loginListeners.remove(loginListener);
+		}
+		UserFavoritesService favoritesService = marketplaceService.getUserFavoritesService();
+		if (favoritesService != null) {
+			MarketplaceStorageService storageService = favoritesService.getStorageService();
+			storageService.removeLoginListener(loginListener);
+		}
+	}
+
+	public boolean hasUserFavoritesService() {
+		return marketplaceService.getUserFavoritesService() != null;
+	}
+
 	@Override
 	public void performDiscovery(IProgressMonitor monitor) throws CoreException {
-		if (monitor == null) {
-			monitor = new NullProgressMonitor();
-		}
-		final int totalWork = 10000000;
-		final int workSegment = totalWork / 3;
-		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_loadingMarketplace, totalWork);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_loadingMarketplace,
+				3000);
 		try {
-			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, workSegment));
+			MarketplaceCategory catalogCategory = findMarketplaceCategory(progress.newChild(1000));
 
 			catalogCategory.setContents(Contents.FEATURED);
 
-			ISearchResult featured = marketplaceService.featured(new SubProgressMonitor(monitor, workSegment));
-			handleSearchResult(catalogCategory, featured, new SubProgressMonitor(monitor, workSegment));
+			ISearchResult featured = marketplaceService.featured(progress.newChild(1000));
+			handleSearchResult(catalogCategory, featured, progress.newChild(1000));
 			maybeAddCatalogItem(catalogCategory);
 		} finally {
 			monitor.done();
@@ -175,14 +221,32 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	protected void handleSearchResult(MarketplaceCategory catalogCategory, ISearchResult result,
 			final IProgressMonitor monitor) {
 		if (!result.getNodes().isEmpty()) {
-			int totalWork = 10000000;
-			monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_loadingResources, totalWork);
+			int nodeWork = 1000;
+			SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_loadingResources,
+					result.getNodes().size() * nodeWork);
+
 			try {
+				boolean userFavoritesSupported = false;
+				if (catalogCategory.getContents() == Contents.USER_FAVORITES) {
+					userFavoritesSupported = true;
+				} else {
+					try {
+						marketplaceService.userFavorites(result.getNodes(), null/*TODO WIP*/);
+						userFavoritesSupported = true;
+					} catch (NotAuthorizedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
 				for (final INode node : result.getNodes()) {
+					String id = node.getId();
 					try {
 						final MarketplaceNodeCatalogItem catalogItem = new MarketplaceNodeCatalogItem();
 						catalogItem.setMarketplaceUrl(catalogDescriptor.getUrl());
-						catalogItem.setId(node.getId());
+						catalogItem.setId(id);
 						catalogItem.setName(getCatalogItemName(node));
 						catalogItem.setCategoryId(catalogCategory.getId());
 						ICategories categories = node.getCategories();
@@ -194,6 +258,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 						catalogItem.setData(node);
 						catalogItem.setSource(source);
 						catalogItem.setLicense(node.getLicense());
+						catalogItem.setUserFavorite(userFavoritesSupported ? node.getUserFavorite() : null);
 						IIus ius = node.getIus();
 						if (ius != null) {
 							List<MarketplaceNodeInstallableUnitItem> installableUnitItems = new ArrayList<MarketplaceNodeInstallableUnitItem>();
@@ -259,15 +324,17 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 						}
 						items.add(catalogItem);
 						marketplaceInfo.map(catalogItem.getMarketplaceUrl(), node);
-						marketplaceInfo.computeInstalled(computeInstalledFeatures(monitor), catalogItem);
+						marketplaceInfo.computeInstalled(computeInstalledFeatures(progress.newChild(nodeWork)),
+								catalogItem);
 					} catch (RuntimeException ex) {
 						MarketplaceClientUi.error(
 								NLS.bind(Messages.MarketplaceDiscoveryStrategy_ParseError,
-										node == null ? "null" : node.getId()), ex); //$NON-NLS-1$
+										node == null ? "null" : id), //$NON-NLS-1$
+								ex);
 					}
 				}
 			} finally {
-				monitor.done();
+				progress.done();
 			}
 			if (result.getMatchCount() != null) {
 				catalogCategory.setMatchCount(result.getMatchCount());
@@ -297,7 +364,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		}
 	}
 
-	private String getCatalogItemName(INode node) {
+	private static String getCatalogItemName(INode node) {
 		String name = node.getName();
 		String version = node.getVersion();
 		return version == null || version.length() == 0 ? name : NLS.bind(
@@ -322,7 +389,25 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		items.add(catalogItem);
 	}
 
-	private void createIcon(CatalogItem catalogItem, final INode node) {
+	public UserActionCatalogItem addUserActionItem(MarketplaceCategory catalogCategory, UserAction userAction) {
+		for (ListIterator<CatalogItem> i = items.listIterator(items.size()); i.hasPrevious();) {
+			CatalogItem item = i.previous();
+			if (item.getSource() == source && (item.getCategory() == catalogCategory || catalogCategory.getId().equals(item.getCategoryId()))
+					&& item instanceof UserActionCatalogItem) {
+				return (UserActionCatalogItem) item;
+			}
+		}
+		UserActionCatalogItem catalogItem = new UserActionCatalogItem();
+		catalogItem.setUserAction(userAction);
+		catalogItem.setSource(source);
+		catalogItem.setData(catalogDescriptor);
+		catalogItem.setId(catalogDescriptor.getUrl().toString() + "#" + userAction.name()); //$NON-NLS-1$
+		catalogItem.setCategoryId(catalogCategory.getId());
+		items.add(catalogItem);
+		return catalogItem;
+	}
+
+	private static void createIcon(CatalogItem catalogItem, final INode node) {
 		Icon icon = new Icon();
 		// don't know the size
 		icon.setImage32(node.getImage());
@@ -333,7 +418,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	public void performQuery(IMarket market, ICategory category, String queryText, IProgressMonitor monitor)
 			throws CoreException {
-		final int totalWork = 1000000;
+		final int totalWork = 1001;
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_searchingMarketplace,
 				totalWork);
 		try {
@@ -341,12 +426,15 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory(progress.newChild(1));
 			catalogCategory.setContents(Contents.QUERY);
 
+			SubMonitor nodeQueryProgress = progress.newChild(500);
 			try {
 				//check if the query matches a node url and just retrieve that node
-				result = performNodeQuery(queryText, progress.newChild(totalWork / 2));
+				result = performNodeQuery(queryText, nodeQueryProgress);
 			} catch (CoreException ex) {
 				// node not found, continue with regular query
 				result = null;
+				//no work was done
+				nodeQueryProgress.setWorkRemaining(0);
 			}
 
 			if (result == null) {
@@ -363,13 +451,11 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 				} catch (NoSuchElementException ex) {
 					throw new CoreException(MarketplaceClientCore.computeStatus(ex, Messages.MarketplaceDiscoveryStrategy_unknownFilter));
 				}
-
-				progress.setWorkRemaining(totalWork);
-				result = marketplaceService.search(resolvedMarket, resolvedCategory, queryText,
-						progress.newChild(totalWork / 2));
+				progress.setWorkRemaining(totalWork - 1);
+				result = marketplaceService.search(resolvedMarket, resolvedCategory, queryText, progress.newChild(500));
 			}
 
-			handleSearchResult(catalogCategory, result, progress.newChild(totalWork / 2));
+			handleSearchResult(catalogCategory, result, progress.newChild(500));
 			if (result.getNodes().isEmpty()) {
 				catalogCategory.setMatchCount(0);
 				addCatalogItem(catalogCategory);
@@ -379,7 +465,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		}
 	}
 
-	private ICategory resolveCategory(ICategory category, List<? extends IMarket> markets)
+	private static ICategory resolveCategory(ICategory category, List<? extends IMarket> markets)
 			throws IllegalArgumentException, NoSuchElementException {
 		if (category != null && category.getId() == null) {
 			//need to resolve
@@ -405,8 +491,9 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		return category;
 	}
 
-	private <T extends IIdentifiable> T resolve(T id, List<? extends T> candidates) throws IllegalArgumentException,
-	NoSuchElementException {
+	private static <T extends IIdentifiable> T resolve(T id, List<? extends T> candidates)
+			throws IllegalArgumentException,
+			NoSuchElementException {
 		if (id != null && id.getId() == null) {
 			//need to resolve
 			if (id.getUrl() == null && id.getName() == null) {
@@ -447,13 +534,13 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	}
 
 	public void recent(IProgressMonitor monitor) throws CoreException {
-		final int totalWork = 1000000;
-		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_searchingMarketplace, totalWork);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_searchingMarketplace,
+				1001);
 		try {
-			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
+			MarketplaceCategory catalogCategory = findMarketplaceCategory(progress.newChild(1));
 			catalogCategory.setContents(Contents.RECENT);
-			ISearchResult result = marketplaceService.recent(new SubProgressMonitor(monitor, totalWork / 2));
-			handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
+			ISearchResult result = marketplaceService.recent(progress.newChild(500));
+			handleSearchResult(catalogCategory, result, progress.newChild(500));
 			maybeAddCatalogItem(catalogCategory);
 		} finally {
 			monitor.done();
@@ -461,16 +548,16 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	}
 
 	public void related(IProgressMonitor monitor) throws CoreException {
-		final int totalWork = 1000000;
-		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_searchingMarketplace, totalWork);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_searchingMarketplace,
+				801);
 		try {
-			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
+			MarketplaceCategory catalogCategory = findMarketplaceCategory(progress.newChild(1));
 			catalogCategory.setContents(Contents.RELATED);
-			SearchResult installed = computeInstalled(new SubProgressMonitor(monitor, totalWork / 8 * 2));
+			SearchResult installed = computeInstalled(progress.newChild(200));
 			if (!monitor.isCanceled()) {
-				ISearchResult result = marketplaceService.related(installed.getNodes(), new SubProgressMonitor(monitor,
-						totalWork / 8 * 3));
-				handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 8 * 3));
+				ISearchResult result = marketplaceService.related(installed.getNodes(),
+						progress.newChild(300));
+				handleSearchResult(catalogCategory, result, progress.newChild(300));
 				maybeAddCatalogItem(catalogCategory);
 			}
 		} finally {
@@ -479,14 +566,13 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	}
 
 	public void featured(IProgressMonitor monitor, final IMarket market, final ICategory category) throws CoreException {
-		final int totalWork = 1000000;
-		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_searchingMarketplace, totalWork);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_searchingMarketplace,
+				1001);
 		try {
-			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
+			MarketplaceCategory catalogCategory = findMarketplaceCategory(progress.newChild(1));
 			catalogCategory.setContents(Contents.FEATURED);
-			ISearchResult result = marketplaceService.featured(market, category,
-					new SubProgressMonitor(monitor, totalWork / 2));
-			handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
+			ISearchResult result = marketplaceService.featured(market, category, progress.newChild(500));
+			handleSearchResult(catalogCategory, result, progress.newChild(500));
 			maybeAddCatalogItem(catalogCategory);
 		} finally {
 			monitor.done();
@@ -494,28 +580,127 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	}
 
 	public void popular(IProgressMonitor monitor) throws CoreException {
-		final int totalWork = 1000000;
-		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_searchingMarketplace, totalWork);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_searchingMarketplace,
+				1001);
 		try {
-			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
+			MarketplaceCategory catalogCategory = findMarketplaceCategory(progress.newChild(1));
 			catalogCategory.setContents(Contents.POPULAR);
-			ISearchResult result = marketplaceService.popular(new SubProgressMonitor(monitor, totalWork / 2));
-			handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
+			ISearchResult result = marketplaceService.popular(progress.newChild(500));
+			handleSearchResult(catalogCategory, result, progress.newChild(500));
 			maybeAddCatalogItem(catalogCategory);
 		} finally {
 			monitor.done();
 		}
 	}
 
-	public void installed(IProgressMonitor monitor) throws CoreException {
-		final int totalWork = 1000000;
-		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_findingInstalled, totalWork);
+	public void userFavorites(boolean promptLogin, IProgressMonitor monitor) throws CoreException {
+		final SubMonitor progress = SubMonitor.convert(monitor, "Getting user favorites", 1001);
 		try {
-			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
+			MarketplaceCategory catalogCategory = findMarketplaceCategory(progress.newChild(1));
+			catalogCategory.setContents(Contents.USER_FAVORITES);
+			UserFavoritesService userFavoritesService = marketplaceService.getUserFavoritesService();
+			if (userFavoritesService != null) {
+				try {
+					ISearchResult result;
+					if (promptLogin) {
+						MarketplaceStorageService storageService = userFavoritesService.getStorageService();
+						result = storageService.runWithLogin(new Callable<ISearchResult>() {
+							public ISearchResult call() throws Exception {
+								// ignore
+								return marketplaceService.userFavorites(progress.newChild(500));
+							}
+						});
+					} else {
+						result = marketplaceService.userFavorites(progress.newChild(500));
+					}
+					handleSearchResult(catalogCategory, result, progress.newChild(500));
+					if (result.getNodes().isEmpty()) {
+						addNoFavoritesItem(catalogCategory);
+					}
+				} catch (NotAuthorizedException e) {
+					addUserStorageLoginItem(catalogCategory);
+				} catch (UnsupportedOperationException ex) {
+					//TODO WIP addFavoritesNotSupportedItem(catalogCategory);
+					ex.printStackTrace();
+				} catch (Exception ex) {
+					addUserStorageLoginItem(catalogCategory);
+					//TODO WIP dispatch
+					ex.printStackTrace();
+				}
+			} else {
+				//TODO WIP addFavoritesNotSupportedItem(catalogCategory);
+			}
+		} finally {
+			monitor.done();
+		}
+	}
+
+	public void refreshUserFavorites(IProgressMonitor monitor) throws CoreException {
+		final SubMonitor progress = SubMonitor.convert(monitor, "Refreshing favorite status", 1001);
+		try {
+			MarketplaceCategory catalogCategory = findMarketplaceCategory(progress.newChild(1));
+			List<CatalogItem> items = catalogCategory.getItems();
+			UserFavoritesService userFavoritesService = marketplaceService.getUserFavoritesService();
+			if (userFavoritesService != null) {
+				Map<String, INode> nodes = new HashMap<String, INode>();
+				for (CatalogItem item : items) {
+					Object data = item.getData();
+					if (data instanceof INode) {
+						INode node = (INode) data;
+						nodes.put(node.getId(), node);
+					}
+				}
+				if (nodes.isEmpty()) {
+					return;
+				}
+				try {
+					marketplaceService.userFavorites(new ArrayList<INode>(nodes.values()), progress.newChild(500));
+					for (CatalogItem catalogItem : items) {
+						if (catalogItem instanceof MarketplaceNodeCatalogItem) {
+							MarketplaceNodeCatalogItem nodeItem = (MarketplaceNodeCatalogItem) catalogItem;
+							INode node = nodes.get(nodeItem.getId());
+							nodeItem.setUserFavorite(node == null ? null : node.getUserFavorite());
+						}
+					}
+				} catch (NotAuthorizedException e) {
+					//ignored
+				} catch (UnsupportedOperationException ex) {
+					//TODO WIP addFavoritesNotSupportedItem(catalogCategory);
+					ex.printStackTrace();
+				} catch (Exception ex) {
+					//TODO WIP dispatch
+					ex.printStackTrace();
+				}
+			} else {
+				for (CatalogItem catalogItem : items) {
+					if (catalogItem instanceof MarketplaceNodeCatalogItem) {
+						MarketplaceNodeCatalogItem nodeItem = (MarketplaceNodeCatalogItem) catalogItem;
+						nodeItem.setUserFavorite(null);
+					}
+				}
+			}
+		} finally {
+			monitor.done();
+		}
+	}
+
+	private void addUserStorageLoginItem(MarketplaceCategory catalogCategory) {
+		addUserActionItem(catalogCategory, UserAction.LOGIN);
+	}
+
+	private void addNoFavoritesItem(MarketplaceCategory catalogCategory) {
+		addUserActionItem(catalogCategory, UserAction.CREATE_FAVORITES);
+	}
+
+	public void installed(IProgressMonitor monitor) throws CoreException {
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_findingInstalled,
+				1000);
+		try {
+			MarketplaceCategory catalogCategory = findMarketplaceCategory(progress.newChild(1));
 			catalogCategory.setContents(Contents.INSTALLED);
-			SearchResult result = computeInstalled(monitor);
+			SearchResult result = computeInstalled(progress.newChild(500));
 			if (!monitor.isCanceled()) {
-				handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
+				handleSearchResult(catalogCategory, result, progress.newChild(500));
 			}
 		} finally {
 			monitor.done();
@@ -523,24 +708,24 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	}
 
 	protected SearchResult computeInstalled(IProgressMonitor monitor) throws CoreException {
-		final int totalWork = 1000000;
 		SearchResult result = new SearchResult();
 		result.setNodes(new ArrayList<Node>());
-		Map<String, IInstallableUnit> installedIUs = computeInstalledIUs(monitor);
+		SubMonitor progress = SubMonitor.convert(monitor, "Finding installed solutions", 1000);
+		Map<String, IInstallableUnit> installedIUs = computeInstalledIUs(progress.newChild(500));
 		if (!monitor.isCanceled()) {
 			Set<INode> catalogNodes = marketplaceInfo.computeInstalledNodes(catalogDescriptor.getUrl(), installedIUs);
 			if (!catalogNodes.isEmpty()) {
-				int unitWork = totalWork / (2 * catalogNodes.size());
+				SubMonitor nodeProgress = SubMonitor.convert(progress.newChild(500), catalogNodes.size() * 102);
 				for (INode node : catalogNodes) {
-					node = marketplaceService.getNode(node, monitor);
+					node = marketplaceService.getNode(node, nodeProgress.newChild(100));
 					//compute real installed state based on optional/required state
 					if (marketplaceInfo.computeInstalled(installedIUs.keySet(), node)) {
 						result.getNodes().add((Node) node);
 					}
-					monitor.worked(unitWork);
+					nodeProgress.worked(2);
 				}
 			} else {
-				monitor.worked(totalWork / 2);
+				monitor.worked(500);
 			}
 		}
 		return result;
@@ -557,26 +742,25 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	}
 
 	public void performNodeQuery(IProgressMonitor monitor, Set<? extends INode> nodes) throws CoreException {
-		final int totalWork = 1000000;
-		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_searchingMarketplace, totalWork);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_searchingMarketplace,
+				1001);
 		try {
-			MarketplaceCategory catalogCategory = findMarketplaceCategory(new SubProgressMonitor(monitor, 1));
+			MarketplaceCategory catalogCategory = findMarketplaceCategory(progress.newChild(1));
 			catalogCategory.setContents(Contents.QUERY);
 			SearchResult result = new SearchResult();
 			result.setNodes(new ArrayList<Node>());
 			if (!monitor.isCanceled()) {
 				if (!nodes.isEmpty()) {
-					int unitWork = totalWork / (2 * nodes.size());
+					SubMonitor nodesProgress = SubMonitor.convert(progress.newChild(500), nodes.size());
 					for (INode node : nodes) {
-						node = marketplaceService.getNode(node, monitor);
+						node = marketplaceService.getNode(node, nodesProgress.newChild(1));
 						result.getNodes().add((Node) node);
-						monitor.worked(unitWork);
 					}
 				} else {
-					monitor.worked(totalWork / 2);
+					progress.setWorkRemaining(500);
 				}
 				result.setMatchCount(result.getNodes().size());
-				handleSearchResult(catalogCategory, result, new SubProgressMonitor(monitor, totalWork / 2));
+				handleSearchResult(catalogCategory, result, progress.newChild(500));
 				maybeAddCatalogItem(catalogCategory);
 			}
 		} finally {
@@ -602,7 +786,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	protected MarketplaceCategory findMarketplaceCategory(IProgressMonitor monitor) throws CoreException {
 		MarketplaceCategory catalogCategory = null;
 
-		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_catalogCategory, 10000);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_catalogCategory, 10000);
 		try {
 			for (CatalogCategory candidate : getCategories()) {
 				if (candidate.getSource() == source) {
@@ -611,7 +795,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			}
 
 			if (catalogCategory == null) {
-				List<? extends IMarket> markets = marketplaceService.listMarkets(new SubProgressMonitor(monitor, 10000));
+				List<? extends IMarket> markets = marketplaceService.listMarkets(progress.newChild(10000));
 
 				// marketplace has markets and categories, however a node and/or category can appear in multiple
 				// markets.  This doesn't match well with discovery's concept of a category.  Discovery requires all
@@ -626,7 +810,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 				categories.add(catalogCategory);
 			}
 		} finally {
-			monitor.done();
+			progress.done();
 		}
 		return catalogCategory;
 	}
@@ -637,7 +821,8 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	public void installErrorReport(IProgressMonitor monitor, IStatus result, Set<CatalogItem> items,
 			IInstallableUnit[] operationIUs, String resolutionDetails) throws CoreException {
-		monitor.beginTask(Messages.MarketplaceDiscoveryStrategy_sendingErrorNotification, 100);
+		SubMonitor progress = SubMonitor.convert(monitor,
+				Messages.MarketplaceDiscoveryStrategy_sendingErrorNotification, 100);
 		try {
 			Set<Node> nodes = new HashSet<Node>();
 			for (CatalogItem item : items) {

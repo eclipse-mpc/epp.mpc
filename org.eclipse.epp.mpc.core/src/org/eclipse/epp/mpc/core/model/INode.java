@@ -55,6 +55,9 @@ public interface INode extends IIdentifiable {
 	 */
 	String getType();
 
+	//TODO WIP javadoc
+	Boolean getUserFavorite();
+
 	/**
 	 * the categories of this listing.
 	 */

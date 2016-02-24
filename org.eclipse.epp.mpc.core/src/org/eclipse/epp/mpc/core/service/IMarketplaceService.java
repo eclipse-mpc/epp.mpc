@@ -18,6 +18,8 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
+import org.eclipse.epp.internal.mpc.core.service.UserFavoritesService;
 import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INews;
@@ -123,8 +125,17 @@ public interface IMarketplaceService {
 	 * Find most-favorited nodes in the marketplace
 	 *
 	 * @return the search result
+	 * @deprecated use {@link #topFavorites(IProgressMonitor)} instead
 	 */
+	@Deprecated
 	ISearchResult favorites(IProgressMonitor monitor) throws CoreException;
+
+	/**
+	 * Find most-favorited nodes in the marketplace
+	 *
+	 * @return the search result
+	 */
+	ISearchResult topFavorites(IProgressMonitor monitor) throws CoreException;
 
 	/**
 	 * Find most active nodes in the marketplace
@@ -140,6 +151,19 @@ public interface IMarketplaceService {
 	 * @return the search result
 	 */
 	ISearchResult related(List<? extends INode> basedOn, IProgressMonitor monitor) throws CoreException;
+
+	/**
+	 * Find nodes favorited by the user
+	 *
+	 * @return the search result
+	 * @throws CoreException
+	 * @throws NotAuthorizedException
+	 */
+	ISearchResult userFavorites(IProgressMonitor monitor) throws CoreException, NotAuthorizedException;
+
+	//TODO WIP javadoc
+	void userFavorites(List<? extends INode> nodes, IProgressMonitor monitor)
+			throws CoreException, NotAuthorizedException;
 
 	/**
 	 * Get the news configuration for the marketplace
@@ -177,4 +201,5 @@ public interface IMarketplaceService {
 	 */
 	void reportInstallSuccess(INode node, IProgressMonitor monitor);
 
+	UserFavoritesService getUserFavoritesService();
 }
