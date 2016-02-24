@@ -14,6 +14,7 @@ import org.eclipse.epp.mpc.tests.service.CatalogServiceTest;
 import org.eclipse.epp.mpc.tests.service.DefaultMarketplaceServiceTest;
 import org.eclipse.epp.mpc.tests.service.SolutionCompatibilityFilterTest;
 import org.eclipse.epp.mpc.tests.service.xml.UnmarshallerTest;
+import org.eclipse.epp.mpc.tests.util.ProxyConfigurationTest;
 import org.eclipse.epp.mpc.tests.util.TextUtilTest;
 import org.eclipse.epp.mpc.tests.util.TransportFactoryTest;
 import org.junit.runner.RunWith;
@@ -25,6 +26,7 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({ //
+		ProxyConfigurationTest.class, //
 	UnmarshallerTest.class, //
 	TextUtilTest.class, //
 	TransportFactoryTest.class, //

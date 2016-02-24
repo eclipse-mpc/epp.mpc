@@ -43,6 +43,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabItem;
@@ -165,8 +166,12 @@ public abstract class AbstractMarketplaceWizardBotTest {
 	}
 
 	protected void waitForWizardProgress() {
+		waitForWizardProgress(PROGRESS_TIMEOUT);
+	}
+
+	protected void waitForWizardProgress(long timeout) {
 		SWTBotButton cancelButton = bot.button("Cancel");
-		bot.waitUntil(Conditions.widgetIsEnabled(cancelButton), PROGRESS_TIMEOUT);
+		bot.waitUntil(Conditions.widgetIsEnabled(cancelButton), timeout);
 	}
 
 	protected void closeWizard() {
@@ -221,16 +226,37 @@ public abstract class AbstractMarketplaceWizardBotTest {
 		}
 		//try killing it softly
 		try {
-			mpcShell.bot().button("Cancel").click();
+			mpcShell.activate();
+			waitForWizardProgress(SWTBotPreferences.TIMEOUT);
+			mpcShell.close();//same as pressing "Cancel" actually
 			ICondition shellCloses = Conditions.shellCloses(mpcShell);
 			bot.waitUntil(shellCloses);
 			return;
 		} catch (Exception ex) {
 			exceptions.add(ex);
 		}
+
 		//now kill it hard - this is a last resort, because it can cause spurious errors in MPC jobs
+		//also dump threads, since this is often caused by the wizard not being cancellable due to a still running operation:
+		//"Wizard can not be closed due to an active operation"
+		problem += "\nFailed to close wizard regularly. Forcing close.";
+		if (!dumpedThreads) {
+			dumpedThreads = true;
+			dumpThreads();
+		}
 		try {
-			mpcShell.close();
+			final Shell shell = mpcShell.widget;
+			if (!shell.isDisposed()) {
+				Display display = shell.getDisplay();
+				display.syncExec(new Runnable() {
+					@Override
+					public void run() {
+						if (!shell.isDisposed()) {
+							shell.dispose();
+						}
+					}
+				});
+			}
 		} catch (Exception ex) {
 			exceptions.add(ex);
 		}
@@ -307,7 +333,8 @@ public abstract class AbstractMarketplaceWizardBotTest {
 			boolean firstButton = true;
 			for (Button button : buttons) {
 				if (button != null) {
-					String buttonText = new SWTBotButton(button, buttonMatcher).getText();
+					SWTBotButton buttonBot = new SWTBotButton(button, buttonMatcher);
+					String buttonText = buttonBot.getText();
 					if (buttonText != null && buttonText.trim().length() > 0) {
 						if (firstButton) {
 							firstButton = false;
@@ -315,7 +342,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 						} else {
 							description.append("  ");
 						}
-						if (button.isEnabled()) {
+						if (buttonBot.isEnabled()) {
 							description.append('[').append(buttonText.trim()).append(']');
 						} else {
 							description.append("[(").append(buttonText.trim()).append(")]");

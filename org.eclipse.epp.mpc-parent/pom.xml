@@ -24,9 +24,6 @@
       <tycho-version>0.24.0</tycho-version>
       <tycho-extras-version>${tycho-version}</tycho-extras-version>
 
-      <archive-dir>${basedir}/target/drops</archive-dir>
-      <site-dir></site-dir>
-
       <qualifier-format>'v'yyyyMMdd-HHmm</qualifier-format>
 
       <skip-source-check>true</skip-source-check>
@@ -154,12 +151,10 @@
          <activation>
             <property>
                <name>user.name</name>
-               <value>hudsonbuild</value>
+               <value>genie.mpc</value>
             </property>
          </activation>
          <properties>
-            <archive-dir>/home/data/httpd/download.eclipse.org/mpc/drops</archive-dir>
-            <site-dir>/home/data/httpd/download.eclipse.org/mpc/nightly</site-dir>
             <test-args>-ea -Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -DhttpnonProxyHosts=*.eclipse.org</test-args>
          </properties>
       </profile>
