@@ -30,6 +30,8 @@ import org.eclipse.epp.mpc.core.model.ICatalog;
  */
 public interface ICatalogService {
 
+	public static final String DEDICATED_CATALOG_HOSTING_SEGMENT = "dedicated_catalog_hosting/"; //$NON-NLS-1$
+
 	List<? extends ICatalog> listCatalogs(IProgressMonitor monitor) throws CoreException;
 
 }

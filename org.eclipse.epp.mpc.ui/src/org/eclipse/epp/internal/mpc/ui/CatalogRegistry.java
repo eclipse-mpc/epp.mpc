@@ -20,6 +20,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.mpc.core.model.ICatalogBranding;
 import org.eclipse.epp.mpc.core.model.INews;
+import org.eclipse.epp.mpc.core.service.ICatalogService;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 
 /**
@@ -94,17 +95,40 @@ public class CatalogRegistry {
 		if (url == null || url.length() == 0) {
 			return null;
 		}
-		for (CatalogDescriptor catalogDescriptor : catalogDescriptors) {
-			if (url.startsWith(catalogDescriptor.getUrl().toExternalForm())) {
-				return catalogDescriptor;
-			}
-		}
+		CatalogDescriptor matchingDescriptor = doFindCatalogDescriptor(url);
 		url = URLUtil.toggleHttps(url);
-		for (CatalogDescriptor catalogDescriptor : catalogDescriptors) {
-			if (url.startsWith(catalogDescriptor.getUrl().toExternalForm())) {
-				return catalogDescriptor;
+		CatalogDescriptor matchingToggledDescriptor = doFindCatalogDescriptor(url);
+		if (matchingDescriptor == null) {
+			matchingDescriptor = matchingToggledDescriptor;
+		} else if (matchingToggledDescriptor != null) {
+			String matchingUrl = matchingDescriptor.getUrl().toExternalForm();
+			String matchingToggledUrl = matchingToggledDescriptor.getUrl().toExternalForm();
+			int protocolDelta = matchingToggledUrl.startsWith("https") ? 1 : -1; //$NON-NLS-1$
+			if (matchingToggledUrl.length() - protocolDelta > matchingUrl.length()) {
+				matchingDescriptor = matchingToggledDescriptor;
 			}
 		}
-		return null;
+		return matchingDescriptor;
+	}
+
+	private CatalogDescriptor doFindCatalogDescriptor(String url) {
+		CatalogDescriptor matchingDescriptor = null;
+		String matchingUrl = null;
+		for (CatalogDescriptor catalogDescriptor : catalogDescriptors) {
+			String descriptorUrl = catalogDescriptor.getUrl().toExternalForm();
+			if (url.startsWith(descriptorUrl)
+					&& (matchingUrl == null || matchingUrl.length() < descriptorUrl.length())) {
+				String suffix = url.substring(descriptorUrl.length());
+				if (suffix.length() > 0 && suffix.charAt(0) == '/') {
+					suffix = suffix.substring(1);
+				}
+				if (suffix.startsWith(ICatalogService.DEDICATED_CATALOG_HOSTING_SEGMENT)) {
+					continue;
+				}
+				matchingDescriptor = catalogDescriptor;
+				matchingUrl = descriptorUrl;
+			}
+		}
+		return matchingDescriptor;
 	}
 }

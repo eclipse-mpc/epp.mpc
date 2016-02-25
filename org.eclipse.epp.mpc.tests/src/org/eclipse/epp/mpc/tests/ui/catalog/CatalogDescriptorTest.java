@@ -11,15 +11,33 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui.catalog;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.eclipse.epp.internal.mpc.core.util.URLUtil;
+import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
+import org.eclipse.epp.mpc.core.service.ICatalogService;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 public class CatalogDescriptorTest {
+
+	@Before
+	@After
+	public void cleanRegistry() {
+		CatalogRegistry registry = CatalogRegistry.getInstance();
+		List<CatalogDescriptor> catalogs = new ArrayList<>(registry.getCatalogDescriptors());
+		for (CatalogDescriptor descriptor : catalogs) {
+			registry.unregister(descriptor);
+		}
+	}
 
 	@Test
 	public void testCatalogDescriptor() throws Exception {
@@ -71,5 +89,108 @@ public class CatalogDescriptorTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testCopyCtorNull() {
 		new CatalogDescriptor((CatalogDescriptor) null);
+	}
+
+	/**
+	 * @throws Exception
+	 * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=488436">bug 488436</a>
+	 */
+	@Test
+	public void testFindCatalogDescriptorWithCommonPrefix() throws Exception {
+		CatalogRegistry registry = CatalogRegistry.getInstance();
+		String marketplace = "http://marketplace.eclipse.org";
+		String hostedMarketplace = "http://marketplace.eclipse.org/hosted_catalog/test";
+		CatalogDescriptor marketplaceDescriptor = new CatalogDescriptor(new URL(marketplace), null);
+		CatalogDescriptor hostedMarketplaceDescriptor = new CatalogDescriptor(new URL(hostedMarketplace), null);
+		registry.register(marketplaceDescriptor);
+		registry.register(hostedMarketplaceDescriptor);
+
+		CatalogDescriptor found = registry.findCatalogDescriptor(marketplace);
+		assertThat(found, is(marketplaceDescriptor));
+
+		found = registry.findCatalogDescriptor(hostedMarketplace);
+		assertThat(found, is(hostedMarketplaceDescriptor));
+	}
+
+	/**
+	 * @throws Exception
+	 * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=488436">bug 488436</a>
+	 */
+	@Test
+	public void testFindCatalogDescriptorWithCommonPrefixDifferentProtocol1() throws Exception {
+		CatalogRegistry registry = CatalogRegistry.getInstance();
+		String marketplace = "http://marketplace.eclipse.org";
+		String marketplaceHttps = URLUtil.toggleHttps(marketplace);
+		String hostedMarketplace = "https://marketplace.eclipse.org/hosted_catalog/test";
+		String hostedMarketplaceHttp = URLUtil.toggleHttps(hostedMarketplace);
+
+		CatalogDescriptor marketplaceDescriptor = new CatalogDescriptor(new URL(marketplace), null);
+		CatalogDescriptor hostedMarketplaceDescriptor = new CatalogDescriptor(new URL(hostedMarketplace), null);
+		registry.register(marketplaceDescriptor);
+		registry.register(hostedMarketplaceDescriptor);
+
+		CatalogDescriptor found = registry.findCatalogDescriptor(marketplaceHttps);
+		assertThat(found, is(marketplaceDescriptor));
+
+		found = registry.findCatalogDescriptor(hostedMarketplaceHttp);
+		assertThat(found, is(hostedMarketplaceDescriptor));
+	}
+
+	/**
+	 * @throws Exception
+	 * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=488436">bug 488436</a>
+	 */
+	@Test
+	public void testFindCatalogDescriptorWithCommonPrefixDifferentProtocol2() throws Exception {
+		CatalogRegistry registry = CatalogRegistry.getInstance();
+		String marketplace = "https://marketplace.eclipse.org";
+		String marketplaceHttp = URLUtil.toggleHttps(marketplace);
+		String hostedMarketplace = "http://marketplace.eclipse.org/hosted_catalog/test";
+		String hostedMarketplaceHttps = URLUtil.toggleHttps(hostedMarketplace);
+
+		CatalogDescriptor marketplaceDescriptor = new CatalogDescriptor(new URL(marketplace), null);
+		CatalogDescriptor hostedMarketplaceDescriptor = new CatalogDescriptor(new URL(hostedMarketplace), null);
+		registry.register(marketplaceDescriptor);
+		registry.register(hostedMarketplaceDescriptor);
+
+		CatalogDescriptor found = registry.findCatalogDescriptor(marketplaceHttp);
+		assertThat(found, is(marketplaceDescriptor));
+
+		found = registry.findCatalogDescriptor(hostedMarketplaceHttps);
+		assertThat(found, is(hostedMarketplaceDescriptor));
+	}
+
+	@Test
+	public void testFindCatalogDescriptorMatchingProtocol() throws Exception {
+		CatalogRegistry registry = CatalogRegistry.getInstance();
+		String marketplace = "http://marketplace.eclipse.org";
+		String marketplaceHttps = URLUtil.toggleHttps(marketplace);
+		CatalogDescriptor marketplaceDescriptor = new CatalogDescriptor(new URL(marketplace), null);
+		CatalogDescriptor marketplaceHttpsDescriptor = new CatalogDescriptor(new URL(marketplaceHttps), null);
+		registry.register(marketplaceHttpsDescriptor);
+		registry.register(marketplaceDescriptor);
+
+		CatalogDescriptor found = registry.findCatalogDescriptor(marketplace);
+		assertThat(found, is(marketplaceDescriptor));
+
+		found = registry.findCatalogDescriptor(marketplaceHttps);
+		assertThat(found, is(marketplaceHttpsDescriptor));
+	}
+
+	@Test
+	public void testIgnoreCatalogDescriptorWithDedicatedHostingSuffix() throws Exception {
+		CatalogRegistry registry = CatalogRegistry.getInstance();
+		String marketplace = "http://marketplace.eclipse.org";
+		String dedicatedHostingMarketplace = marketplace + "/" + ICatalogService.DEDICATED_CATALOG_HOSTING_SEGMENT
+				+ "test";
+		CatalogDescriptor dedicatedHostingDescriptor = new CatalogDescriptor(new URL(dedicatedHostingMarketplace),
+				null);
+		registry.register(dedicatedHostingDescriptor);
+
+		CatalogDescriptor found = registry.findCatalogDescriptor(marketplace);
+		assertNull(found);
+
+		found = registry.findCatalogDescriptor(dedicatedHostingMarketplace);
+		assertThat(found, is(dedicatedHostingDescriptor));
 	}
 }
