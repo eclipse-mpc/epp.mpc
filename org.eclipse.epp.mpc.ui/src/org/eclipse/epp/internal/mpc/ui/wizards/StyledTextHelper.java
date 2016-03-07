@@ -13,8 +13,6 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.FocusAdapter;
-import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.widgets.Composite;
 
 class StyledTextHelper {
@@ -26,12 +24,12 @@ class StyledTextHelper {
 		StyledText styledText = new StyledText(parent, SWT.READ_ONLY | SWT.WRAP | SWT.MULTI);
 		styledText.setEditable(false);
 		styledText.setCursor(parent.getDisplay().getSystemCursor(SWT.CURSOR_ARROW));
-		styledText.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusGained(FocusEvent e) {
-				((StyledText) e.widget).getParent().setFocus();
-			}
-		});
+//		styledText.addFocusListener(new FocusAdapter() {
+//			@Override
+//			public void focusGained(FocusEvent e) {
+//				((StyledText) e.widget).getParent().setFocus();
+//			}
+//		});
 		return styledText;
 	}
 

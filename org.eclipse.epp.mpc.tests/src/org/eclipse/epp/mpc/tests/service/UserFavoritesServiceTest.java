@@ -15,9 +15,9 @@ import static org.junit.Assert.*;
 import java.net.URI;
 import java.util.List;
 
-import org.eclipse.epp.internal.mpc.core.service.MarketplaceStorageService;
-import org.eclipse.epp.internal.mpc.core.service.UserFavoritesService;
 import org.eclipse.epp.mpc.core.model.INode;
+import org.eclipse.epp.mpc.core.service.IMarketplaceStorageService;
+import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.epp.mpc.core.service.QueryHelper;
 import org.eclipse.epp.mpc.core.service.ServiceHelper;
 import org.eclipse.userstorage.IStorageService;
@@ -33,8 +33,9 @@ public class UserFavoritesServiceTest {
 
 	private static final URI USERSTORAGE_SERVICE_URI = URI.create("https://api-staging.eclipse.org");
 
-	protected MarketplaceStorageService marketplaceStorageService;
-	protected UserFavoritesService favoritesService;
+	protected IMarketplaceStorageService marketplaceStorageService;
+
+	protected IUserFavoritesService favoritesService;
 
 	@Before
 	public void setUp() throws Exception {

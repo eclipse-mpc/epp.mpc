@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.eclipse.epp.mpc.core.service.IMarketplaceStorageService;
 import org.eclipse.userstorage.IBlob;
 import org.eclipse.userstorage.IStorage;
 import org.eclipse.userstorage.IStorageService;
@@ -25,14 +26,11 @@ import org.eclipse.userstorage.internal.StorageService;
 import org.eclipse.userstorage.spi.Credentials;
 import org.eclipse.userstorage.spi.ICredentialsProvider;
 import org.eclipse.userstorage.spi.ISettings;
+import org.eclipse.userstorage.util.FileStorageCache;
 import org.eclipse.userstorage.util.Settings;
 import org.osgi.framework.BundleContext;
 
-public class MarketplaceStorageService {
-
-	public static interface LoginListener {
-		void loginChanged(String oldUser, String newUser);
-	}
+public class MarketplaceStorageService implements IMarketplaceStorageService {
 
 	private static final String DEFAULT_APPLICATION_TOKEN = "MZ04RMOpksKN5GpxKXafq2MSjSP";
 
@@ -83,7 +81,8 @@ public class MarketplaceStorageService {
 	}
 
 	protected IStorage createStorage() {
-		IStorage storage = getStorageFactory().create(applicationToken/*TODO, cache*/);
+		IStorage storage = getStorageFactory().create(applicationToken,
+				new FileStorageCache.SingleApplication(this.applicationToken));
 		storage.setCredentialsProvider(ICredentialsProvider.CANCEL);
 		return storage;
 	}
@@ -164,9 +163,13 @@ public class MarketplaceStorageService {
 	}
 
 	public void activate(BundleContext context, Map<?, ?> properties) {
-		String serviceUrlProperty = getProperty(properties, "serviceUrl", null);
+		String serviceUrlProperty = getProperty(properties, "serviceUrlProperty", null);
+		String serviceUrlValue = getProperty(properties, "serviceUrl", null);
 		if (serviceUrlProperty != null) {
-			URI serviceUri = URI.create(serviceUrlProperty);
+			serviceUrlValue = System.getProperty(serviceUrlProperty, serviceUrlValue);
+		}
+		if (serviceUrlValue != null) {
+			URI serviceUri = URI.create(serviceUrlValue);
 			String serviceName = getProperty(properties, "serviceName", "Marketplace User Storage");
 			registerStorageService(serviceUri, serviceName);
 			setServiceUri(serviceUri);

@@ -18,7 +18,6 @@ import java.text.MessageFormat;
 import java.util.concurrent.Callable;
 
 import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
-import org.eclipse.epp.internal.mpc.core.service.UserFavoritesService;
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
@@ -30,6 +29,7 @@ import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ITag;
 import org.eclipse.epp.mpc.core.model.ITags;
+import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.AbstractCatalogSource;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
@@ -169,6 +169,12 @@ implements PropertyChangeListener {
 		this.viewer = viewer;
 		createContent();
 		connector.addPropertyChangeListener(this);
+		this.getAccessible().addAccessibleListener(new AccessibleAdapter() {
+			@Override
+			public void getName(AccessibleEvent e) {
+				e.result = getNameLabelText();
+			}
+		});
 		this.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
 				connector.removePropertyChangeListener(DiscoveryItem.this);
@@ -267,7 +273,11 @@ implements PropertyChangeListener {
 		if (name == null) {
 			name = NLS.bind(Messages.DiscoveryItem_UnnamedSolution, connector.getId());
 		}
-		nameLabel.setText(TextUtil.escapeText(connector.getName()));
+		nameLabel.setText(getNameLabelText());
+	}
+
+	private String getNameLabelText() {
+		return TextUtil.escapeText(connector.getName());
 	}
 
 	private void createInstallButtons(Composite parent) {
@@ -412,7 +422,7 @@ implements PropertyChangeListener {
 	private Integer getFavoriteCount() {
 		if (connector.getData() instanceof INode) {
 			INode node = (INode) connector.getData();
-			UserFavoritesService userFavoritesService = getUserFavoritesService();
+			IUserFavoritesService userFavoritesService = getUserFavoritesService();
 			if (userFavoritesService != null) {
 				return userFavoritesService.getFavoriteCount(node);
 			}
@@ -474,7 +484,7 @@ implements PropertyChangeListener {
 					: MarketplaceClientUiPlugin.ITEM_ICON_STAR;
 			favoriteButton.setImage(MarketplaceClientUiPlugin.getInstance().getImageRegistry().get(imageId));
 
-			UserFavoritesService userFavoritesService = getUserFavoritesService();
+			IUserFavoritesService userFavoritesService = getUserFavoritesService();
 			favoriteButton.setEnabled(userFavoritesService != null);
 			favoriteButton.removeSelectionListener(toggleFavoritesListener);
 			if (userFavoritesService != null) {
@@ -502,21 +512,24 @@ implements PropertyChangeListener {
 	}
 
 	private void setFavorited(boolean newFavorited) {
-		//FIXME we should type the connector to MarketplaceNodeCatalogItem
-		MarketplaceNodeCatalogItem nodeConnector = (MarketplaceNodeCatalogItem) connector;
-		nodeConnector.setUserFavorite(newFavorited);
-		refreshFavoriteButton();
+		boolean oldFavorited = isFavorited();
+		if (oldFavorited != newFavorited) {
+			//FIXME we should type the connector to MarketplaceNodeCatalogItem
+			MarketplaceNodeCatalogItem nodeConnector = (MarketplaceNodeCatalogItem) connector;
+			nodeConnector.setUserFavorite(newFavorited);
+			refreshFavoriteButton();
+		}
 	}
 
-	private UserFavoritesService getUserFavoritesService() {
+	private IUserFavoritesService getUserFavoritesService() {
 		MarketplaceCatalogSource source = (MarketplaceCatalogSource) this.getData().getSource();
-		UserFavoritesService userFavoritesService = source.getMarketplaceService().getUserFavoritesService();
+		IUserFavoritesService userFavoritesService = source.getMarketplaceService().getUserFavoritesService();
 		return userFavoritesService;
 	}
 
 	private void toggleFavorite() {
 		final INode node = this.getCatalogItemNode();
-		final UserFavoritesService userFavoritesService = getUserFavoritesService();
+		final IUserFavoritesService userFavoritesService = getUserFavoritesService();
 		if (node != null && userFavoritesService != null) {
 			final boolean newFavorited = !isFavorited();
 //			String itemName = nameLabel.getText();
@@ -820,7 +833,7 @@ implements PropertyChangeListener {
 
 	@Override
 	protected void refresh() {
-		refresh(false);
+		refresh(true);
 	}
 
 	protected void refresh(boolean updateState) {

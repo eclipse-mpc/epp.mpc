@@ -31,7 +31,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.model.Identifiable;
-import org.eclipse.epp.internal.mpc.core.service.MarketplaceStorageService.LoginListener;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
@@ -46,6 +45,7 @@ import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IIdentifiable;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INode;
+import org.eclipse.epp.mpc.core.service.IMarketplaceStorageService.LoginListener;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
@@ -364,6 +364,8 @@ public class MarketplaceViewer extends CatalogViewer {
 		case CREATE_FAVORITES:
 			return new UserFavoritesFindFavoritesActionItem(parent, getResources(), shellProvider, catalogItem,
 					getWizard().getCatalogPage());
+		case INSTALL_ALL_FAVORITES:
+			return new UserFavoritesInstallAllActionItem(parent, getResources(), shellProvider, catalogItem, this);
 		case LOGIN:
 			return new UserFavoritesLoginActionItem(parent, getResources(), shellProvider, catalogItem, this);
 		}
@@ -670,6 +672,10 @@ public class MarketplaceViewer extends CatalogViewer {
 		contentType = ContentType.SEARCH;
 	}
 
+	public void updateContents() {
+		doSetContentType(contentType);
+	}
+
 	@Override
 	public MarketplaceCatalogConfiguration getConfiguration() {
 		return (MarketplaceCatalogConfiguration) super.getConfiguration();
@@ -826,7 +832,11 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	@Override
 	protected boolean doFilter(CatalogItem item) {
-		// all filtering is done server-side, so never filter here
+//		if (contentType == ContentType.FAVORITES && item instanceof MarketplaceNodeCatalogItem) {
+//			MarketplaceNodeCatalogItem nodeItem = (MarketplaceNodeCatalogItem) item;
+//			return Boolean.TRUE.equals(nodeItem.getUserFavorite());
+//		}
+		// all other filtering is done server-side, so never filter here
 		return true;
 	}
 
@@ -885,8 +895,12 @@ public class MarketplaceViewer extends CatalogViewer {
 			throw new IllegalArgumentException();
 		}
 
+		Operation selectedOperation = selectionModel.getSelectedOperation(connector);
 		selectionModel.select(connector, operation);
 		super.modifySelection(connector, operation != Operation.NONE);
+		if (selectedOperation != operation) {
+			getViewer().refresh(connector);
+		}
 	}
 
 	@Override

@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
-import org.eclipse.epp.internal.mpc.core.service.UserFavoritesService;
 import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INews;
@@ -201,5 +200,5 @@ public interface IMarketplaceService {
 	 */
 	void reportInstallSuccess(INode node, IProgressMonitor monitor);
 
-	UserFavoritesService getUserFavoritesService();
+	IUserFavoritesService getUserFavoritesService();
 }

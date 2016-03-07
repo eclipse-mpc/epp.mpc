@@ -40,9 +40,6 @@ import org.eclipse.epp.internal.mpc.core.model.Identifiable;
 import org.eclipse.epp.internal.mpc.core.model.Node;
 import org.eclipse.epp.internal.mpc.core.model.SearchResult;
 import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
-import org.eclipse.epp.internal.mpc.core.service.MarketplaceStorageService;
-import org.eclipse.epp.internal.mpc.core.service.MarketplaceStorageService.LoginListener;
-import org.eclipse.epp.internal.mpc.core.service.UserFavoritesService;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
@@ -59,6 +56,9 @@ import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
+import org.eclipse.epp.mpc.core.service.IMarketplaceStorageService;
+import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
+import org.eclipse.epp.mpc.core.service.IMarketplaceStorageService.LoginListener;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
@@ -128,9 +128,9 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		List<LoginListener> loginListeners = this.loginListeners;
 		this.loginListeners = null;
 		if (loginListeners != null) {
-			UserFavoritesService favoritesService = marketplaceService.getUserFavoritesService();
+			IUserFavoritesService favoritesService = marketplaceService.getUserFavoritesService();
 			if (favoritesService != null) {
-				MarketplaceStorageService storageService = favoritesService.getStorageService();
+				IMarketplaceStorageService storageService = favoritesService.getStorageService();
 				for (LoginListener loginListener : loginListeners) {
 					storageService.removeLoginListener(loginListener);
 				}
@@ -173,14 +173,14 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	}
 
 	public synchronized void addLoginListener(LoginListener loginListener) {
-		UserFavoritesService favoritesService = marketplaceService.getUserFavoritesService();
+		IUserFavoritesService favoritesService = marketplaceService.getUserFavoritesService();
 		if (favoritesService != null) {
 			if (loginListeners == null) {
 				loginListeners = new CopyOnWriteArrayList<LoginListener>();
 			}
 			if (!loginListeners.contains(loginListener)) {
 				loginListeners.add(loginListener);
-				MarketplaceStorageService storageService = favoritesService.getStorageService();
+				IMarketplaceStorageService storageService = favoritesService.getStorageService();
 				storageService.addLoginListener(loginListener);
 			}
 		}
@@ -190,9 +190,9 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		if (loginListeners != null) {
 			loginListeners.remove(loginListener);
 		}
-		UserFavoritesService favoritesService = marketplaceService.getUserFavoritesService();
+		IUserFavoritesService favoritesService = marketplaceService.getUserFavoritesService();
 		if (favoritesService != null) {
-			MarketplaceStorageService storageService = favoritesService.getStorageService();
+			IMarketplaceStorageService storageService = favoritesService.getStorageService();
 			storageService.removeLoginListener(loginListener);
 		}
 	}
@@ -598,12 +598,12 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		try {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory(progress.newChild(1));
 			catalogCategory.setContents(Contents.USER_FAVORITES);
-			UserFavoritesService userFavoritesService = marketplaceService.getUserFavoritesService();
+			IUserFavoritesService userFavoritesService = marketplaceService.getUserFavoritesService();
 			if (userFavoritesService != null) {
 				try {
 					ISearchResult result;
 					if (promptLogin) {
-						MarketplaceStorageService storageService = userFavoritesService.getStorageService();
+						IMarketplaceStorageService storageService = userFavoritesService.getStorageService();
 						result = storageService.runWithLogin(new Callable<ISearchResult>() {
 							public ISearchResult call() throws Exception {
 								// ignore
@@ -616,6 +616,8 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 					handleSearchResult(catalogCategory, result, progress.newChild(500));
 					if (result.getNodes().isEmpty()) {
 						addNoFavoritesItem(catalogCategory);
+					} else {
+						addFavoritesMassChangeItem(catalogCategory);
 					}
 				} catch (NotAuthorizedException e) {
 					addUserStorageLoginItem(catalogCategory);
@@ -640,7 +642,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		try {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory(progress.newChild(1));
 			List<CatalogItem> items = catalogCategory.getItems();
-			UserFavoritesService userFavoritesService = marketplaceService.getUserFavoritesService();
+			IUserFavoritesService userFavoritesService = marketplaceService.getUserFavoritesService();
 			if (userFavoritesService != null) {
 				Map<String, INode> nodes = new HashMap<String, INode>();
 				for (CatalogItem item : items) {
@@ -690,6 +692,10 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	private void addNoFavoritesItem(MarketplaceCategory catalogCategory) {
 		addUserActionItem(catalogCategory, UserAction.CREATE_FAVORITES);
+	}
+
+	private void addFavoritesMassChangeItem(MarketplaceCategory catalogCategory) {
+		addUserActionItem(catalogCategory, UserAction.INSTALL_ALL_FAVORITES);
 	}
 
 	public void installed(IProgressMonitor monitor) throws CoreException {

@@ -11,8 +11,6 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.core.service;
 
-import org.eclipse.epp.internal.mpc.core.service.MarketplaceStorageService;
-import org.eclipse.epp.internal.mpc.core.service.UserFavoritesService;
 import org.eclipse.epp.mpc.core.model.ICatalog;
 import org.osgi.framework.BundleContext;
 
@@ -65,6 +63,11 @@ public interface IMarketplaceServiceLocator {
 	 */
 	public static final String CATALOG_URL = "catalogUrl"; //$NON-NLS-1$
 
+	public static final String DEFAULT_STORAGE_SERVICE_URL = "https://api.eclipse.org";
+
+	public static final String DEFAULT_STORAGE_SERVICE_PROPERTY = IMarketplaceStorageService.class.getName()
+			+ ".default"; //$NON-NLS-1$
+
 	/**
 	 * Same as {@link #getMarketplaceService(String) getMarketplaceService(DEFAULT_MARKETPLACE_URL)}
 	 *
@@ -88,16 +91,16 @@ public interface IMarketplaceServiceLocator {
 	 * matching the url. If none is found, a marketplace service is located for the url and its configured storage
 	 * service - which may be null - is returned.
 	 */
-	MarketplaceStorageService getStorageService(String marketplaceUrl);
+	IMarketplaceStorageService getStorageService(String marketplaceUrl);
 
 	/**
 	 * Get a userstorage service for the default {@link #MARKETPLACE_URL marketplace url}.
 	 */
-	MarketplaceStorageService getDefaultStorageService();
+	IMarketplaceStorageService getDefaultStorageService();
 
 	//TODO WIP javadoc
-	UserFavoritesService getFavoritesService(String marketplaceUrl);
+	IUserFavoritesService getFavoritesService(String marketplaceUrl);
 
 	//TODO WIP javadoc
-	UserFavoritesService getDefaultFavoritesService();
+	IUserFavoritesService getDefaultFavoritesService();
 }

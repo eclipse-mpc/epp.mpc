@@ -33,6 +33,7 @@ import org.eclipse.epp.mpc.core.model.INews;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
+import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 
 public class CachingMarketplaceService implements IMarketplaceService {
 
@@ -353,6 +354,7 @@ public class CachingMarketplaceService implements IMarketplaceService {
 
 	public ISearchResult userFavorites(IProgressMonitor monitor) throws CoreException, NotAuthorizedException {
 		//we don't cache the favorite status, only contents individual nodes, which happens internally...
+		//FIXME this way node resolution isn't cached either...
 		return delegate.userFavorites(monitor);
 	}
 
@@ -362,7 +364,7 @@ public class CachingMarketplaceService implements IMarketplaceService {
 		delegate.userFavorites(nodes, monitor);
 	}
 
-	public UserFavoritesService getUserFavoritesService() {
+	public IUserFavoritesService getUserFavoritesService() {
 		return delegate.getUserFavoritesService();
 	}
 

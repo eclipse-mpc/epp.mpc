@@ -23,7 +23,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.epp.mpc.core.model.INode;
+import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.epp.mpc.core.service.QueryHelper;
 import org.eclipse.userstorage.IBlob;
 import org.eclipse.userstorage.util.ConflictException;
@@ -31,18 +33,21 @@ import org.eclipse.userstorage.util.NoServiceException;
 import org.eclipse.userstorage.util.NotFoundException;
 import org.eclipse.userstorage.util.ProtocolException;
 
-public class UserFavoritesService extends AbstractDataStorageService {
+public class UserFavoritesService extends AbstractDataStorageService implements IUserFavoritesService {
 
-	private static final String KEY = "mpc_favorites";
+	private static final String KEY = "mpc_favorites"; //$NON-NLS-1$
 
 	private static final int RETRY_COUNT = 3;
 
-	private static final String SEPARATOR = ",";
+	private static final String SEPARATOR = ","; //$NON-NLS-1$
 
 	private final Map<String, Integer> favoritesCorrections = new HashMap<String, Integer>();
 
 	private final Set<String> favorites = new HashSet<String>();
 
+	public UserFavoritesService() {
+		System.out.println();
+	}
 	protected IBlob getFavoritesBlob() {
 		return getStorageService().getBlob(KEY);
 	}
@@ -76,6 +81,8 @@ public class UserFavoritesService extends AbstractDataStorageService {
 		} catch (NotFoundException ex) {
 			//the user does not yet have favorites
 			return new LinkedHashSet<String>();
+		} catch (OperationCanceledException ex) {
+			throw processProtocolException(ex);
 		} catch (ProtocolException ex) {
 			throw processProtocolException(ex);
 		}
@@ -118,6 +125,8 @@ public class UserFavoritesService extends AbstractDataStorageService {
 		String favoritesData = createFavoritesBlobData(nodes);
 		try {
 			getFavoritesBlob().setContentsUTF(favoritesData);
+		} catch (OperationCanceledException ex) {
+			throw processProtocolException(ex);
 		} catch (ProtocolException ex) {
 			throw processProtocolException(ex);
 		}
@@ -183,6 +192,8 @@ public class UserFavoritesService extends AbstractDataStorageService {
 				return;
 			} catch (ConflictException e) {
 				conflictException = e;
+			} catch (OperationCanceledException ex) {
+				throw processProtocolException(ex);
 			} catch (ProtocolException ex) {
 				throw processProtocolException(ex);
 			}

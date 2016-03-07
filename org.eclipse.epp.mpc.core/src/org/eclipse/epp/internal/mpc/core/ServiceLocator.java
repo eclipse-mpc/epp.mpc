@@ -25,13 +25,13 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.epp.internal.mpc.core.service.CachingMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.service.DefaultCatalogService;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
-import org.eclipse.epp.internal.mpc.core.service.MarketplaceStorageService;
-import org.eclipse.epp.internal.mpc.core.service.UserFavoritesService;
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.mpc.core.service.ICatalogService;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
+import org.eclipse.epp.mpc.core.service.IMarketplaceStorageService;
+import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.epp.mpc.core.service.ServiceHelper;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -56,9 +56,9 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 
 	private ServiceTracker<ICatalogService, ICatalogService> catalogServiceTracker;
 
-	private ServiceTracker<MarketplaceStorageService, MarketplaceStorageService> storageServiceTracker;
+	private ServiceTracker<IMarketplaceStorageService, IMarketplaceStorageService> storageServiceTracker;
 
-	private ServiceTracker<UserFavoritesService, UserFavoritesService> favoritesServiceTracker;
+	private ServiceTracker<IUserFavoritesService, IUserFavoritesService> favoritesServiceTracker;
 
 	private URL defaultCatalogUrl;
 
@@ -135,25 +135,25 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		DefaultMarketplaceService defaultService = new DefaultMarketplaceService(base);
 		Map<String, String> requestMetaParameters = computeDefaultRequestMetaParameters();
 		defaultService.setRequestMetaParameters(requestMetaParameters);
-		UserFavoritesService favoritesService = getFavoritesService(baseUrl);
+		IUserFavoritesService favoritesService = getFavoritesService(baseUrl);
 		defaultService.setUserFavoritesService(favoritesService);//FIXME WIP service reference!
 		service = new CachingMarketplaceService(defaultService);
 		return service;
 	}
 
-	public MarketplaceStorageService getStorageService(String marketplaceUrl) {
+	public IMarketplaceStorageService getStorageService(String marketplaceUrl) {
 		return getService(storageServiceTracker, marketplaceUrl);
 	}
 
-	public MarketplaceStorageService getDefaultStorageService() {
+	public IMarketplaceStorageService getDefaultStorageService() {
 		return getStorageService(defaultMarketplaceUrl.toExternalForm());
 	}
 
-	public UserFavoritesService getFavoritesService(String marketplaceUrl) {
+	public IUserFavoritesService getFavoritesService(String marketplaceUrl) {
 		return getService(favoritesServiceTracker, marketplaceUrl);
 	}
 
-	public UserFavoritesService getDefaultFavoritesService() {
+	public IUserFavoritesService getDefaultFavoritesService() {
 		return getFavoritesService(defaultMarketplaceUrl.toExternalForm());
 	}
 
@@ -183,12 +183,12 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 				ICatalogService.class, null);
 		catalogServiceTracker.open(true);
 
-		storageServiceTracker = new ServiceTracker<MarketplaceStorageService, MarketplaceStorageService>(context,
-				MarketplaceStorageService.class, null);
+		storageServiceTracker = new ServiceTracker<IMarketplaceStorageService, IMarketplaceStorageService>(context,
+				IMarketplaceStorageService.class, null);
 		storageServiceTracker.open(true);
 
-		favoritesServiceTracker = new ServiceTracker<UserFavoritesService, UserFavoritesService>(context,
-				UserFavoritesService.class, null);
+		favoritesServiceTracker = new ServiceTracker<IUserFavoritesService, IUserFavoritesService>(context,
+				IUserFavoritesService.class, null);
 		favoritesServiceTracker.open(true);
 	}
 

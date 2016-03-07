@@ -70,7 +70,7 @@ public class BrowseCatalogItem extends UserActionViewerItem<CatalogDescriptor> {
 	}
 
 	@Override
-	protected void actionPerformed() {
+	protected void actionPerformed(Object data) {
 		openMarketplace();
 	}
 

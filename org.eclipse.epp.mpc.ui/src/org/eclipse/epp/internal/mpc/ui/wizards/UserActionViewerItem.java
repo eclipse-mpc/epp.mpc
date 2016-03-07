@@ -44,7 +44,7 @@ public abstract class UserActionViewerItem<E> extends AbstractDiscoveryItem<E> {
 		Control link = createActionLink(parent);
 		link.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
-				actionPerformed();
+				actionPerformed(event.data);
 			}
 		});
 
@@ -52,14 +52,18 @@ public abstract class UserActionViewerItem<E> extends AbstractDiscoveryItem<E> {
 	}
 
 	protected Control createActionLink(Composite parent) {
+		String linkText = getLinkText();
+		String toolTipText = getLinkToolTipText();
+		return createActionLink(parent, linkText, toolTipText);
+	}
+
+	protected Control createActionLink(Composite parent, String linkText, String toolTipText) {
 		Link link = new Link(parent, SWT.NONE);
 		link.setBackground(null);
-		String linkText = getLinkText();
 		if (linkText == null || "".equals(linkText)) { //$NON-NLS-1$
 			throw new IllegalArgumentException();
 		}
 		link.setText(linkText);
-		String toolTipText = getLinkToolTipText();
 		if (toolTipText != null && !"".equals(toolTipText)) { //$NON-NLS-1$
 			link.setToolTipText(toolTipText);
 		}
@@ -72,7 +76,7 @@ public abstract class UserActionViewerItem<E> extends AbstractDiscoveryItem<E> {
 		return getToolTipText();
 	}
 
-	protected abstract void actionPerformed();
+	protected abstract void actionPerformed(Object data);
 
 	@Override
 	protected void refresh() {

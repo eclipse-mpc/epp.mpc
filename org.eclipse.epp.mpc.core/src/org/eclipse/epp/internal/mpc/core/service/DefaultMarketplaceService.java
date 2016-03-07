@@ -53,6 +53,7 @@ import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
+import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -189,7 +190,7 @@ MarketplaceService {
 		DEFAULT_SERVICE_URL = ServiceUtil.parseUrl(DEFAULT_SERVICE_LOCATION);
 	}
 
-	private UserFavoritesService userFavoritesService;
+	private IUserFavoritesService userFavoritesService;
 
 	public DefaultMarketplaceService(URL baseUrl) {
 		this.baseUrl = baseUrl == null ? DEFAULT_SERVICE_URL : baseUrl;
@@ -446,7 +447,7 @@ MarketplaceService {
 
 	public ISearchResult userFavorites(IProgressMonitor monitor) throws CoreException, NotAuthorizedException {
 		SubMonitor progress = SubMonitor.convert(monitor, "Retrieving user favorites", 10000);
-		UserFavoritesService userFavoritesService = getUserFavoritesService();
+		IUserFavoritesService userFavoritesService = getUserFavoritesService();
 		if (userFavoritesService == null) {
 			throw new UnsupportedOperationException();
 		}
@@ -474,7 +475,7 @@ MarketplaceService {
 	}
 
 	public void userFavorites(List<? extends INode> nodes, IProgressMonitor monitor) throws NotAuthorizedException {
-		UserFavoritesService userFavoritesService = getUserFavoritesService();
+		IUserFavoritesService userFavoritesService = getUserFavoritesService();
 		if (userFavoritesService == null) {
 			throw new UnsupportedOperationException();
 		}
@@ -636,11 +637,11 @@ MarketplaceService {
 		}
 	}
 
-	public UserFavoritesService getUserFavoritesService() {
+	public IUserFavoritesService getUserFavoritesService() {
 		return userFavoritesService;
 	}
 
-	public void setUserFavoritesService(UserFavoritesService userFavoritesService) {
+	public void setUserFavoritesService(IUserFavoritesService userFavoritesService) {
 		this.userFavoritesService = userFavoritesService;
 	}
 }

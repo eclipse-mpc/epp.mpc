@@ -418,6 +418,11 @@ public class MarketplaceCatalog extends Catalog {
 					break;
 				}
 				if (discoveryStrategy instanceof MarketplaceDiscoveryStrategy) {
+					List<CatalogCategory> oldCategories = discoveryStrategy.getCategories();
+					List<CatalogItem> oldItems = discoveryStrategy.getItems();
+					List<Certification> oldCertifications = discoveryStrategy.getCertifications();
+					List<Tag> oldTags = discoveryStrategy.getTags();
+
 					discoveryStrategy.setCategories(categories);
 					discoveryStrategy.setItems(items);
 					discoveryStrategy.setCertifications(certifications);
@@ -436,10 +441,10 @@ public class MarketplaceCatalog extends Catalog {
 						status.add(error);
 					} finally {
 						// remove everything from strategy again, so it can't accidentally mess with the results later
-						discoveryStrategy.setCategories(null);
-						discoveryStrategy.setItems(null);
-						discoveryStrategy.setCertifications(null);
-						discoveryStrategy.setTags(null);
+						discoveryStrategy.setCategories(oldCategories);
+						discoveryStrategy.setItems(oldItems);
+						discoveryStrategy.setCertifications(oldCertifications);
+						discoveryStrategy.setTags(oldTags);
 
 						// make sure strategy didn't misbehave
 						if (items.contains(null)) {

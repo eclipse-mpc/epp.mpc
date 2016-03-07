@@ -16,9 +16,7 @@ import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.epp.mpc.core.model.IIu;
 import org.eclipse.epp.mpc.core.model.INode;
@@ -231,18 +229,17 @@ public class MarketplaceNodeCatalogItem extends CatalogItem {
 		return available;
 	}
 
-	public Set<Operation> getAvailableOperations() {
-		Set<Operation> available = EnumSet.noneOf(Operation.class);
-		MarketplaceNodeCatalogItem catalogItem = (MarketplaceNodeCatalogItem) getData();
-		if (!catalogItem.getInstallableUnits().isEmpty()) {
+	public List<Operation> getAvailableOperations() {
+		List<Operation> available = new ArrayList<Operation>();
+		if (!getInstallableUnits().isEmpty()) {
 			if (isInstalled()) {
-				available.add(Operation.UNINSTALL);
 				if (maybeUpdateAvailable()) {
 					available.add(Operation.UPDATE);
 				}
 				if (maybeHasOptionalFeatures()) {
 					available.add(Operation.CHANGE);
 				}
+				available.add(Operation.UNINSTALL);
 			} else if (maybeAvailable()) {
 				available.add(Operation.INSTALL);
 			}

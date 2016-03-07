@@ -14,7 +14,7 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 
 public class UserActionCatalogItem extends CatalogItem {
 	public static enum UserAction {
-		BROWSE, LOGIN, CREATE_FAVORITES;
+		BROWSE, LOGIN, CREATE_FAVORITES, INSTALL_ALL_FAVORITES;
 	}
 
 	private UserAction userAction;

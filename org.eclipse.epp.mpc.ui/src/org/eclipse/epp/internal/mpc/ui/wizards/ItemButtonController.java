@@ -11,13 +11,12 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
 import org.eclipse.epp.mpc.ui.Operation;
-import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -99,6 +98,17 @@ class ItemButtonController {
 			return this;
 		}
 
+		public static ButtonState forOperation(Operation operation) {
+			if (operation == Operation.NONE) {
+				return DISABLED;
+			}
+			for (ButtonState buttonState : ButtonState.values()) {
+				if (buttonState.operation == operation) {
+					return buttonState.noActionState();
+				}
+			}
+			return DISABLED;
+		}
 	}
 
 	private final DiscoveryItem item;
@@ -208,47 +218,43 @@ class ItemButtonController {
 
 	private void updateButtonState() {
 		primaryState = ButtonState.DISABLED;
+		selectableStates = Collections.emptyList();
 		MarketplaceNodeCatalogItem catalogItem = (MarketplaceNodeCatalogItem) item.getData();
 		if (catalogItem.getInstallableUnits().isEmpty()) {
-			primaryState = ButtonState.DISABLED;
-		} else {
-			Operation operation = item.getSelectedOperation();
-			boolean installed = isItemInstalled();
-			selectableStates = Collections.emptyList();
-			if (installed) {
-				switch (operation) {
-				case UPDATE:
-					primaryState = ButtonState.UPDATE_PENDING;
-					break;
-				case UNINSTALL:
-					primaryState = ButtonState.UNINSTALL_PENDING;
-					break;
-				case CHANGE:
-					primaryState = ButtonState.CHANGE_PENDING;
-					break;
-				case NONE:
-					primaryState = ButtonState.UPDATE;
-					if (hasUpdateAvailable()) {
-						selectableStates = hasOptionalFeatures() ? Arrays.asList(ButtonState.CHANGE,
-								ButtonState.UNINSTALL) : Collections.singletonList(ButtonState.UNINSTALL);
-					} else {
-						primaryState = hasOptionalFeatures() ? ButtonState.CHANGE : ButtonState.UNINSTALL;
-						selectableStates = hasOptionalFeatures() ? Collections.singletonList(ButtonState.UNINSTALL)
-								: Collections.<ButtonState> emptyList();
+			return;
+		}
+		List<Operation> availableOperations = catalogItem.getAvailableOperations();
+		if (availableOperations.isEmpty()) {
+			return;
+		}
+		Operation selectedOperation = item.getSelectedOperation();
+		Operation primaryOperation = selectedOperation;
+		switch (selectedOperation) {
+		case UPDATE:
+			primaryState = ButtonState.UPDATE_PENDING;
+			break;
+		case UNINSTALL:
+			primaryState = ButtonState.UNINSTALL_PENDING;
+			break;
+		case CHANGE:
+			primaryState = ButtonState.CHANGE_PENDING;
+			break;
+		case INSTALL:
+			primaryState = ButtonState.INSTALL_PENDING;
+			break;
+		case NONE:
+			primaryOperation = availableOperations.get(0);
+			primaryState = ButtonState.forOperation(primaryOperation);
+			break;
+		}
+		if (availableOperations.size() > 1) {
+			selectableStates = new ArrayList<ButtonState>(availableOperations.size() - 1);
+			for (Operation operation : availableOperations) {
+				if (operation != primaryOperation) {
+					ButtonState selectableState = ButtonState.forOperation(operation);
+					if (selectableState != ButtonState.DISABLED) {
+						selectableStates.add(selectableState);
 					}
-					break;
-				}
-			} else {
-				switch (operation) {
-				case INSTALL:
-					primaryState = ButtonState.INSTALL_PENDING;
-					break;
-				case NONE:
-					primaryState = ButtonState.INSTALL;
-					break;
-				}
-				if (!isItemAvailable()) {
-					primaryState = ButtonState.DISABLED;
 				}
 			}
 		}
@@ -259,25 +265,6 @@ class ItemButtonController {
 			updateButtonState();
 		}
 		return selectableStates;
-	}
-
-	private boolean hasUpdateAvailable() {
-		Boolean available = ((MarketplaceNodeCatalogItem) item.getData()).getUpdateAvailable();
-		return available == null || available.booleanValue();
-	}
-
-	private boolean hasOptionalFeatures() {
-		Boolean optional = ((MarketplaceNodeCatalogItem) item.getData()).getHasOptionalFeatures();
-		return isItemInstalled() && (optional == null || optional.booleanValue());
-	}
-
-	private boolean isItemInstalled() {
-		return ((CatalogItem) item.getData()).isInstalled();
-	}
-
-	private boolean isItemAvailable() {
-		Boolean available = ((CatalogItem) item.getData()).getAvailable();
-		return available == null || available;
 	}
 
 	private void updateAppearance() {
