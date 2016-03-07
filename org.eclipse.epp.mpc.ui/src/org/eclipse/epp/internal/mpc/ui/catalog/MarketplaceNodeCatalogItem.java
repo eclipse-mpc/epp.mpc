@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.catalog;
 
+import java.beans.PropertyChangeSupport;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,6 +30,26 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
  */
 public class MarketplaceNodeCatalogItem extends CatalogItem {
 
+	private static final Field changeSupportField;
+
+	static {
+		Boolean accessible = null;
+		Field field = null;
+		try {
+			field = CatalogItem.class.getDeclaredField("changeSupport"); //$NON-NLS-1$
+			accessible = field.isAccessible();
+			field.setAccessible(true);
+		} catch (Exception e) {
+			field = null;
+			//TODO log
+		} finally {
+			if (field != null && accessible != null && !accessible.equals(field.isAccessible())) {
+				field.setAccessible(accessible);
+			}
+		}
+		changeSupportField = field;
+	}
+
 	public MarketplaceNodeCatalogItem() {
 		super();
 		// ignore
@@ -38,6 +60,40 @@ public class MarketplaceNodeCatalogItem extends CatalogItem {
 	private Boolean userFavorite;
 
 	private List<MarketplaceNodeInstallableUnitItem> installableUnitItems = new ArrayList<MarketplaceNodeInstallableUnitItem>();
+
+	private transient PropertyChangeSupport propertyChangeSupport;
+
+	private PropertyChangeSupport getPropertyChangeSupport() {
+		if (propertyChangeSupport == null) {
+			propertyChangeSupport = accessPropertyChangeSupport();
+		}
+		return propertyChangeSupport;
+	}
+
+	private synchronized PropertyChangeSupport accessPropertyChangeSupport() {
+		Boolean accessible = null;
+		try {
+			accessible = changeSupportField.isAccessible();
+			changeSupportField.setAccessible(true);
+			PropertyChangeSupport changeSupport = (PropertyChangeSupport) changeSupportField.get(this);
+			return changeSupport;
+		} catch (Exception e) {
+			//TODO log - should not be possible
+		} finally {
+			if (changeSupportField != null && accessible != null
+					&& !accessible.equals(changeSupportField.isAccessible())) {
+				changeSupportField.setAccessible(accessible);
+			}
+		}
+		return null;
+	}
+
+	protected void firePropertyChange(String property, Object oldValue, Object newValue) {
+		PropertyChangeSupport propertyChangeSupport = getPropertyChangeSupport();
+		if (propertyChangeSupport != null) {
+			propertyChangeSupport.firePropertyChange(property, oldValue, newValue);
+		}
+	}
 
 	@Override
 	public void setInstallableUnits(List<String> installableUnits) {
@@ -210,7 +266,12 @@ public class MarketplaceNodeCatalogItem extends CatalogItem {
 	}
 
 	public void setUserFavorite(Boolean favorited) {
-		this.userFavorite = favorited;
+		if ((favorited == null && this.userFavorite != null)
+				|| (favorited != null && !favorited.equals(this.userFavorite))) {
+			Boolean oldValue = this.userFavorite;
+			this.userFavorite = favorited;
+			firePropertyChange("userFavorite", oldValue, favorited); //$NON-NLS-1$
+		}
 	}
 
 	public Boolean getUserFavorite() {
