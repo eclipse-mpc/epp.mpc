@@ -412,6 +412,10 @@ implements PropertyChangeListener {
 	private Integer getFavoriteCount() {
 		if (connector.getData() instanceof INode) {
 			INode node = (INode) connector.getData();
+			UserFavoritesService userFavoritesService = getUserFavoritesService();
+			if (userFavoritesService != null) {
+				return userFavoritesService.getFavoriteCount(node);
+			}
 			return node.getFavorited();
 		}
 		return null;
