@@ -54,6 +54,7 @@ import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
+import org.eclipse.epp.mpc.core.service.ServiceHelper;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -500,11 +501,20 @@ MarketplaceService {
 	}
 
 	private void resolveFavoriteNodes(final List<INode> nodes, IProgressMonitor monitor) throws CoreException {
+		IMarketplaceService resolveService = this;
+		IMarketplaceService registeredService = ServiceHelper.getMarketplaceServiceLocator()
+				.getMarketplaceService(this.getBaseUrl().toString());
+		if (registeredService instanceof CachingMarketplaceService) {
+			CachingMarketplaceService cachingService = (CachingMarketplaceService) registeredService;
+			if (cachingService.getDelegate() == this) {
+				resolveService = cachingService;
+			}
+		}
 		SubMonitor resolveProgress = SubMonitor.convert(monitor, nodes.size() * 100);
 		for (ListIterator<INode> i = nodes.listIterator(); i.hasNext();) {
 			INode node = i.next();
-			Node resolved = getNode(node, resolveProgress.newChild(100));
-			resolved.setUserFavorite(true);
+			INode resolved = resolveService.getNode(node, resolveProgress.newChild(100));
+			((Node) resolved).setUserFavorite(true);
 			i.set(resolved);
 		}
 	}
