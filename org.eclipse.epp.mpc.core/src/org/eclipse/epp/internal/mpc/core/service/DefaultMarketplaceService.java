@@ -53,6 +53,7 @@ import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
+import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
 import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.epp.mpc.core.service.ServiceHelper;
 import org.eclipse.osgi.util.NLS;
@@ -105,8 +106,8 @@ MarketplaceService {
 
 	public static final String API_TAXONOMY_URI = "taxonomy/term/"; //$NON-NLS-1$
 
-	public static final String DEFAULT_SERVICE_LOCATION = System.getProperty(MarketplaceService.class.getName()
-			+ ".url", "http://marketplace.eclipse.org"); //$NON-NLS-1$//$NON-NLS-2$
+	public static final String DEFAULT_SERVICE_LOCATION = System
+			.getProperty(IMarketplaceServiceLocator.DEFAULT_MARKETPLACE_PROPERTY_NAME, "http://marketplace.eclipse.org"); //$NON-NLS-1$
 
 	public static final URL DEFAULT_SERVICE_URL;
 

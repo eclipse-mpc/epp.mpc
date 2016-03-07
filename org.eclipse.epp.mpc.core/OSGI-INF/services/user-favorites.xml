@@ -12,6 +12,7 @@
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.epp.mpc.core.userFavorites">
    <implementation class="org.eclipse.epp.internal.mpc.core.service.UserFavoritesService"/>
    <property name="url" type="String" value="http://marketplace.eclipse.org"/>
+   <property name="urlProperty" type="String" value="org.eclipse.epp.internal.mpc.core.service.MarketplaceService.url"/>
    <service>
       <provide interface="org.eclipse.epp.mpc.core.service.IUserFavoritesService"/>
    </service>

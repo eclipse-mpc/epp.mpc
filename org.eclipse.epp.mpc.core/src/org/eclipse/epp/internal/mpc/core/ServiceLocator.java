@@ -111,6 +111,11 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 			if (serviceReferences != null) {
 				for (ServiceReference<T> serviceReference : serviceReferences) {
 					Object serviceBaseUrl = serviceReference.getProperty(IMarketplaceService.BASE_URL);
+					Object serviceBaseProperty = serviceReference.getProperty(MARKETPLACE_URL_PROPERTY);
+					if (serviceBaseProperty != null) {
+						serviceBaseUrl = System.getProperty(serviceBaseProperty.toString(),
+								serviceBaseUrl == null ? null : serviceBaseUrl.toString());
+					}
 					if (baseUrl.equals(serviceBaseUrl)) {
 						T service = serviceTracker.getService(serviceReference);
 						//we don't cache this on our own, since it might become invalid

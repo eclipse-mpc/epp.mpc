@@ -12,6 +12,7 @@
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.epp.mpc.core.marketplaceStorage-staging">
    <implementation class="org.eclipse.epp.internal.mpc.core.service.MarketplaceStorageService"/>
    <property name="url" type="String" value="http://marketplace.eclipse.org"/>
+   <property name="urlProperty" type="String" value="org.eclipse.epp.internal.mpc.core.service.MarketplaceService.url"/>
    <property name="serviceUrl" type="String" value="https://api.eclipse.org"/>
    <property name="serviceUrlProperty" type="String" value="org.eclipse.epp.mpc.core.service.IMarketplaceStorageService.default"/>
    <service>

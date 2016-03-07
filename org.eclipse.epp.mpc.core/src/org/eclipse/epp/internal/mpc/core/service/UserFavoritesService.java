@@ -45,9 +45,6 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 
 	private final Set<String> favorites = new HashSet<String>();
 
-	public UserFavoritesService() {
-		System.out.println();
-	}
 	protected IBlob getFavoritesBlob() {
 		return getStorageService().getBlob(KEY);
 	}
