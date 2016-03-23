@@ -23,7 +23,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.epp.mpc.core.service.QueryHelper;
@@ -65,10 +67,12 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		return Collections.unmodifiableSet(favorites);
 	}
 
-	public Set<String> getFavoriteIds()
+	public Set<String> getFavoriteIds(IProgressMonitor monitor)
 			throws NoServiceException, NotAuthorizedException, IllegalStateException, IOException {
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.DefaultMarketplaceService_FavoritesRetrieve, 1000);
 		try {
 			String favoritesData = getFavoritesBlob().getContentsUTF();
+			progress.worked(950);//FIXME waiting for USS bug 488335 to have proper progress and cancelation
 			Set<String> result = parseFavoritesBlobData(favoritesData);
 			synchronized (this) {
 				favorites.clear();
@@ -91,14 +95,14 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		return favoriteNodes;
 	}
 
-	public List<INode> getFavorites()
+	public List<INode> getFavorites(IProgressMonitor monitor)
 			throws NoServiceException, NotAuthorizedException, IllegalStateException, IOException {
-		Set<String> favoriteIds = getFavoriteIds();
+		Set<String> favoriteIds = getFavoriteIds(monitor);
 		List<INode> favoriteNodes = toNodes(favoriteIds);
 		return favoriteNodes;
 	}
 
-	private List<INode> toNodes(Set<String> favoriteIds) {
+	private static List<INode> toNodes(Set<String> favoriteIds) {
 		List<INode> favoriteNodes = new ArrayList<INode>(favoriteIds.size());
 		for (String nodeId : favoriteIds) {
 			INode node = QueryHelper.nodeById(nodeId);
@@ -116,18 +120,21 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		return favoriteIds;
 	}
 
-	public void setFavorites(Collection<? extends INode> nodes)
+	public void setFavorites(Collection<? extends INode> nodes, IProgressMonitor monitor)
 			throws NoServiceException, ConflictException, NotAuthorizedException, IllegalStateException, IOException
 	{
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.UserFavoritesService_SettingUserFavorites, 1000);
 		String favoritesData = createFavoritesBlobData(nodes);
 		try {
 			getFavoritesBlob().setContentsUTF(favoritesData);
+			progress.worked(900);//FIXME waiting for USS bug 488335 to have proper progress and cancelation
 		} catch (OperationCanceledException ex) {
 			throw processProtocolException(ex);
 		} catch (ProtocolException ex) {
 			throw processProtocolException(ex);
 		}
 		synchronized (this) {
+			SubMonitor notifyNewProgress = SubMonitor.convert(progress.newChild(50), nodes.size());
 			Set<String> newFavorites = new HashSet<String>();
 			for (INode node : nodes) {
 				String id = node.getId();
@@ -137,13 +144,16 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 						didChangeFavorite(id, true);
 					}
 				}
+				notifyNewProgress.worked(1);
 			}
+			SubMonitor notifyRemovedProgress = SubMonitor.convert(progress.newChild(50), favorites.size());
 			for (Iterator<String> i = favorites.iterator(); i.hasNext();) {
 				String id = i.next();
 				if (!newFavorites.contains(id)) {
 					i.remove();
 					didChangeFavorite(id, false);
 				}
+				notifyRemovedProgress.worked(1);
 			}
 		}
 	}
@@ -180,12 +190,15 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		return builder.toString();
 	}
 
-	public void setFavorite(INode node, boolean favorite)
+	public void setFavorite(INode node, boolean favorite, IProgressMonitor monitor)
 			throws NotFoundException, NotAuthorizedException, IOException, ConflictException {
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.UserFavoritesService_SettingUserFavorites, 1000);
 		ConflictException conflictException = null;
 		for (int i = 0; i < RETRY_COUNT; i++) {
 			try {
-				doSetFavorite(node, favorite);
+				progress.setWorkRemaining(1000);
+				doSetFavorite(node, favorite, progress.newChild(800));
+				progress.done();
 				return;
 			} catch (ConflictException e) {
 				conflictException = e;
@@ -200,15 +213,16 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		}
 	}
 
-	private void doSetFavorite(INode node, boolean favorite) throws NotFoundException, IOException, ConflictException {
-		List<INode> favorites = getFavorites();
+	private void doSetFavorite(INode node, boolean favorite, IProgressMonitor monitor)
+			throws NotFoundException, IOException, ConflictException {
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.UserFavoritesService_SettingUserFavorites, 1000);
+		List<INode> favorites = getFavorites(progress.newChild(300));
 		INode currentFavorite = QueryHelper.findById(favorites, node);
 		if (currentFavorite != null && !favorite) {
 			favorites.remove(currentFavorite);
-			setFavorites(favorites);
 		} else if (currentFavorite == null && favorite) {
 			favorites.add(node);
-			setFavorites(favorites);
 		}
+		setFavorites(favorites, progress.newChild(700));
 	}
 }

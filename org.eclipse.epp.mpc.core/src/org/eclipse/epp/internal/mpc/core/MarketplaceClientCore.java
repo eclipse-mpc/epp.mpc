@@ -49,14 +49,14 @@ public class MarketplaceClientCore {
 		if (message == null) {
 			message = NLS.bind(Messages.MarketplaceClientCore_unexpectedException, exception.getMessage());
 		}
-		getLog().log(new Status(IStatus.ERROR, BUNDLE_ID, IStatus.ERROR, message, exception));
+		getLog().log(computeStatus(exception, message));
 	}
 
 	public static void error(Throwable exception) {
 		error(null, exception);
 	}
 
-	public static IStatus computeStatus(Exception e, String message) {
+	public static IStatus computeStatus(Throwable e, String message) {
 		Throwable cause = e;
 		if (e instanceof InvocationTargetException) {
 			cause = e.getCause();
@@ -69,7 +69,9 @@ public class MarketplaceClientCore {
 				statusCause = new Status(IStatus.ERROR, BUNDLE_ID, cause.getMessage(), cause);
 			}
 		}
-		if (statusCause.getMessage() != null) {
+		if (message == null || "".equals(message.trim())) { //$NON-NLS-1$
+			message = statusCause.getMessage();
+		} else if (statusCause.getMessage() != null && !"".equals(statusCause.getMessage().trim())) { //$NON-NLS-1$
 			message = NLS.bind(Messages.MarketplaceClientCore_message_message2, message, statusCause.getMessage());
 		}
 		IStatus status = new MultiStatus(BUNDLE_ID, 0, new IStatus[] { statusCause }, message, cause);

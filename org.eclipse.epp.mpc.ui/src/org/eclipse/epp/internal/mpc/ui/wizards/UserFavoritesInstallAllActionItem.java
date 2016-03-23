@@ -20,7 +20,6 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryResources;
 import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 
 public class UserFavoritesInstallAllActionItem extends UserFavoritesAbstractImportActionItem {
 
@@ -51,8 +50,8 @@ public class UserFavoritesInstallAllActionItem extends UserFavoritesAbstractImpo
 	}
 
 	@Override
-	protected Control createSecondaryActionLink(Composite parent) {
-		return createActionLink(parent, "<a href=\"installAll\">Install all...</a>",
+	protected ActionLink createSecondaryActionLink() {
+		return new ActionLink("installAll", "Install all...",
 				"Select all your favorited entries for installation");
 	}
 

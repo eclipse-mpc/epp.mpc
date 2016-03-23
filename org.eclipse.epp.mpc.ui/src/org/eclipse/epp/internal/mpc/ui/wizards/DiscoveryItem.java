@@ -14,12 +14,18 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.concurrent.Callable;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalogSource;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
@@ -40,6 +46,8 @@ import org.eclipse.equinox.internal.p2.ui.discovery.wizards.AbstractDiscoveryIte
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.RowLayoutFactory;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.operation.ModalContext;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.osgi.util.NLS;
@@ -49,6 +57,7 @@ import org.eclipse.swt.SWTException;
 import org.eclipse.swt.accessibility.AccessibleAdapter;
 import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.DisposeEvent;
@@ -71,6 +80,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
+import org.eclipse.ui.statushandlers.StatusManager;
 import org.eclipse.userstorage.util.ConflictException;
 
 /**
@@ -532,37 +542,50 @@ implements PropertyChangeListener {
 		final IUserFavoritesService userFavoritesService = getUserFavoritesService();
 		if (node != null && userFavoritesService != null) {
 			final boolean newFavorited = !isFavorited();
-//			String itemName = nameLabel.getText();
-//			new Job("Setting favorite " + itemName) {
-//				{
-//					setUser(false);
-//					setSystem(true);
-//					setPriority(Job.INTERACTIVE);
-//				}
-//
-//				@Override
-//				protected IStatus run(IProgressMonitor monitor) {
-			try {
-				userFavoritesService.getStorageService().runWithLogin(new Callable<Void>() {
-					public Void call() throws Exception {
-						userFavoritesService.setFavorite(node, newFavorited);
-						return null;
+			final Throwable[] error = new Throwable[] { null };
+			BusyIndicator.showWhile(getDisplay(), new Runnable() {
+
+				public void run() {
+					try {
+						ModalContext.run(new IRunnableWithProgress() {
+
+							public void run(final IProgressMonitor monitor)
+									throws InvocationTargetException, InterruptedException {
+								try {
+									userFavoritesService.getStorageService().runWithLogin(new Callable<Void>() {
+										public Void call() throws Exception {
+											userFavoritesService.setFavorite(node, newFavorited, monitor);
+											return null;
+										}
+									});
+								} catch (Exception e) {
+									error[0] = e;
+								}
+							}
+						}, true, new NullProgressMonitor(), getDisplay());
+					} catch (InvocationTargetException e) {
+						error[0] = e.getCause();
+					} catch (InterruptedException e) {
+						error[0] = e;
 					}
-				});
-				setFavorited(newFavorited);
-			} catch (NotAuthorizedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ConflictException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				}
+			});
+			Throwable e = error[0];
+			if (e != null) {
+				if (e instanceof NotAuthorizedException) {
+					// authentication was cancelled
+					return;
+				} else if (e instanceof ConflictException) {
+					// silently ignored - service already tried to resolve this
+					return;
+				} else {
+					IStatus status = MarketplaceClientCore.computeStatus(e,
+							NLS.bind("Failed to change favorite status for {0}", this.getNameLabelText()));
+					MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
+					return;
+				}
 			}
-//					return Status.OK_STATUS;
-//				}
-//			}.schedule();
+			setFavorited(newFavorited);
 		}
 	}
 

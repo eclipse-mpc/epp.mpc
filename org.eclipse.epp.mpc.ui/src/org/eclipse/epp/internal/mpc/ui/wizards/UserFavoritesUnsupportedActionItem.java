@@ -11,38 +11,28 @@
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
-import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryResources;
 import org.eclipse.jface.window.IShellProvider;
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.widgets.Composite;
 
-public class UserFavoritesFindFavoritesActionItem extends UserFavoritesAbstractImportActionItem {
+public class UserFavoritesUnsupportedActionItem extends UserActionViewerItem<UserActionCatalogItem> {
 
 	private final MarketplacePage marketplacePage;
 
-	public UserFavoritesFindFavoritesActionItem(Composite parent, DiscoveryResources resources,
+	public UserFavoritesUnsupportedActionItem(Composite parent, DiscoveryResources resources,
 			IShellProvider shellProvider, UserActionCatalogItem element, MarketplacePage marketplacePage) {
 		super(parent, resources, shellProvider, element, marketplacePage.getViewer());
 		this.marketplacePage = marketplacePage;
+		createContent();
 	}
 
 	@Override
-	protected String getDescriptionText() {
-		return "You don't have any favorites yet. Choose some favorite on the marketplace to see them here.";
+	protected String getLinkText() {
+		return "Favorites are not supported on this Marketplace. <a>Go back</a>";
 	}
 
 	@Override
-	protected ActionLink createSecondaryActionLink() {
-		return new ActionLink("browse", "Browse Marketplace", "Find some interesting entries in the Marketplace");
-	}
-
-	@Override
-	protected void secondaryActionPerformed() {
-		MarketplaceWizard wizard = marketplacePage.getWizard();
-		IWizardPage currentPage = wizard.getContainer().getCurrentPage();
-		if (currentPage == marketplacePage && viewer.getContentType() == ContentType.FAVORITES) {
-			marketplacePage.setActiveTab(ContentType.SEARCH);
-		}
+	protected void actionPerformed(Object data) {
+		marketplacePage.setPreviouslyActiveTab();
 	}
 }

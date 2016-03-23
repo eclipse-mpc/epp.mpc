@@ -33,7 +33,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.model.Category;
@@ -448,21 +447,20 @@ MarketplaceService {
 	}
 
 	public ISearchResult userFavorites(IProgressMonitor monitor) throws CoreException, NotAuthorizedException {
-		SubMonitor progress = SubMonitor.convert(monitor, "Retrieving user favorites", 10000);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.DefaultMarketplaceService_FavoritesRetrieve, 10000);
 		IUserFavoritesService userFavoritesService = getUserFavoritesService();
 		if (userFavoritesService == null) {
 			throw new UnsupportedOperationException();
 		}
 		final List<INode> favorites;
 		try {
-			favorites = userFavoritesService.getFavorites();
+			favorites = userFavoritesService.getFavorites(progress.newChild(1000));
 		} catch (NotAuthorizedException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new CoreException(
-					new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID, "Failed to retrieve user favorites", e));
+			throw new CoreException(MarketplaceClientCore.computeStatus(e, Messages.DefaultMarketplaceService_FavoritesErrorRetrieving));
 		}
-		progress.worked(1000);
+		progress.setWorkRemaining(9000);
 		resolveFavoriteNodes(favorites, progress.newChild(9000));
 		return new ISearchResult() {
 
@@ -476,7 +474,9 @@ MarketplaceService {
 		};
 	}
 
-	public void userFavorites(List<? extends INode> nodes, IProgressMonitor monitor) throws NotAuthorizedException {
+	public void userFavorites(List<? extends INode> nodes, IProgressMonitor monitor)
+			throws NotAuthorizedException, CoreException {
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.DefaultMarketplaceService_FavoritesUpdate, 10000);
 		IUserFavoritesService userFavoritesService = getUserFavoritesService();
 		if (userFavoritesService == null) {
 			throw new UnsupportedOperationException();
@@ -484,17 +484,14 @@ MarketplaceService {
 		if (nodes == null || nodes.isEmpty()) {
 			return;
 		}
-		//TODO use monitor
 		Set<String> favorites = null;
 		try {
-			favorites = userFavoritesService == null ? null : userFavoritesService.getFavoriteIds();
+			favorites = userFavoritesService == null ? null : userFavoritesService.getFavoriteIds(progress);
 		} catch (NotAuthorizedException e) {
 			throw e;
 		} catch (Exception e) {
-			//TODO WIP log
-			e.printStackTrace();
+			throw new CoreException(MarketplaceClientCore.computeStatus(e, Messages.DefaultMarketplaceService_FavoritesErrorRetrieving));
 		} finally {
-			//WIP TODO handle ClassCastEx
 			for (INode node : nodes) {
 				((Node) node).setUserFavorite(favorites == null ? null : favorites.contains(node.getId()));
 			}

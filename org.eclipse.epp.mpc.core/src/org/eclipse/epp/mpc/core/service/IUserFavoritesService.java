@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService;
 import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
 import org.eclipse.epp.mpc.core.model.INode;
@@ -28,14 +29,14 @@ public interface IUserFavoritesService {
 
 	Integer getFavoriteCount(INode node);
 
-	Set<String> getFavoriteIds() throws NoServiceException, NotAuthorizedException, IllegalStateException, IOException;
+	Set<String> getFavoriteIds(IProgressMonitor monitor) throws NoServiceException, NotAuthorizedException, IllegalStateException, IOException;
 
-	List<INode> getFavorites() throws NoServiceException, NotAuthorizedException, IllegalStateException, IOException;
+	List<INode> getFavorites(IProgressMonitor monitor) throws NoServiceException, NotAuthorizedException, IllegalStateException, IOException;
 
-	void setFavorites(Collection<? extends INode> nodes)
+	void setFavorites(Collection<? extends INode> nodes, IProgressMonitor monitor)
 			throws NoServiceException, ConflictException, NotAuthorizedException, IllegalStateException, IOException;
 
-	void setFavorite(INode node, boolean favorite)
+	void setFavorite(INode node, boolean favorite, IProgressMonitor monitor)
 			throws NotFoundException, NotAuthorizedException, IOException, ConflictException;
 
 }

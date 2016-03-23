@@ -79,6 +79,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.BundleContext;
@@ -223,8 +224,22 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	private final LoginListener loginListener = new LoginListener() {
 
-		public void loginChanged(String oldUser, String newUser) {
-			refreshFavorites();
+		public void loginChanged(final String oldUser, final String newUser) {
+			final Control control = MarketplaceViewer.this.getControl();
+			if (control != null && !control.isDisposed()) {
+				Display display = control.getDisplay();
+				Display current = Display.getCurrent();
+				if (current == null || current != display) {
+					display.syncExec(new Runnable() {
+
+						public void run() {
+							loginChanged(oldUser, newUser);
+						}
+					});
+					return;
+				}
+				refreshFavorites();
+			}
 		}
 	};
 
@@ -366,8 +381,13 @@ public class MarketplaceViewer extends CatalogViewer {
 					getWizard().getCatalogPage());
 		case INSTALL_ALL_FAVORITES:
 			return new UserFavoritesInstallAllActionItem(parent, getResources(), shellProvider, catalogItem, this);
+		case FAVORITES_UNSUPPORTED:
+			return new UserFavoritesUnsupportedActionItem(parent, getResources(), shellProvider, catalogItem,
+					getWizard().getCatalogPage());
 		case LOGIN:
 			return new UserFavoritesLoginActionItem(parent, getResources(), shellProvider, catalogItem, this);
+		case RETRY_ERROR:
+			return new RetryErrorActionItem(parent, getResources(), shellProvider, catalogItem, this);
 		}
 		return null;
 	}
@@ -445,6 +465,14 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	private static boolean matches(IIdentifiable data, final Object tagData) {
 		return tagData instanceof IIdentifiable && Identifiable.matches((IIdentifiable) tagData, data);
+	}
+
+	public void reload() {
+		updateContent(this.contentType, new Runnable() {
+			public void run() {
+				doQuery();
+			}
+		});
 	}
 
 	private IStatus doQuery() {
@@ -543,8 +571,7 @@ public class MarketplaceViewer extends CatalogViewer {
 			status = Status.CANCEL_STATUS;
 		}
 		if (status != null && !status.isOK() && status.getSeverity() != IStatus.CANCEL) {
-			//TODO WIP log
-			new CoreException(status).printStackTrace();
+			MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 		}
 		return status;
 	}
@@ -937,7 +964,7 @@ public class MarketplaceViewer extends CatalogViewer {
 		return MarketplaceClientCore.computeStatus(e, message);
 	}
 
-	private MarketplaceWizard getWizard() {
+	protected MarketplaceWizard getWizard() {
 		return wizard;
 	}
 

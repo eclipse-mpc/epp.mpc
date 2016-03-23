@@ -20,6 +20,15 @@ class Messages extends NLS {
 
 	public static String DefaultMarketplaceService_categoryNotFound;
 
+	public static String DefaultMarketplaceService_FavoritesErrorRetrieving;
+
+
+	public static String DefaultMarketplaceService_FavoritesRetrieve;
+
+
+	public static String DefaultMarketplaceService_FavoritesUpdate;
+
+
 	public static String DefaultMarketplaceService_invalidLocation;
 
 	public static String DefaultMarketplaceService_marketNotFound;
@@ -44,6 +53,9 @@ class Messages extends NLS {
 
 
 	public static String MarketplaceUnmarshaller_unexpectedResponseContentNullResult;
+
+
+	public static String UserFavoritesService_SettingUserFavorites;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

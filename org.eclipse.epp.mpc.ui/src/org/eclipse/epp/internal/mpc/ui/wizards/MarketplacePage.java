@@ -94,6 +94,8 @@ public class MarketplacePage extends CatalogPage {
 
 	public static final String WIDGET_ID_KEY = MarketplacePage.class.getName() + "::part"; //$NON-NLS-1$
 
+	private static final String CONTENT_TYPE_KEY = ContentType.class.getName();
+
 	static {
 		registerSearchControlIcons();
 	}
@@ -169,6 +171,10 @@ public class MarketplacePage extends CatalogPage {
 
 	protected CatalogDescriptor lastSelection;
 
+	private ContentType currentContentType;
+
+	private ContentType previousContentType;
+
 	public MarketplacePage(MarketplaceCatalog catalog, MarketplaceCatalogConfiguration configuration) {
 		super(catalog);
 		this.configuration = configuration;
@@ -197,11 +203,15 @@ public class MarketplacePage extends CatalogPage {
 		super.createControl(tabFolder);
 
 		tabContent = getControl();
-		searchTabItem = createCatalogTab(-1, WIDGET_ID_TAB_SEARCH, currentBranding.getSearchTabName());
-		recentTabItem = createCatalogTab(-1, WIDGET_ID_TAB_RECENT, currentBranding.getRecentTabName());
-		popularTabItem = createCatalogTab(-1, WIDGET_ID_TAB_POPULAR, currentBranding.getPopularTabName());
-		favoritedTabItem = createCatalogTab(-1, "tab:favorites", "Favorites");
-		installedTabItem = createCatalogTab(-1, WIDGET_ID_TAB_INSTALLED, Messages.MarketplacePage_installed);
+		searchTabItem = createCatalogTab(-1, ContentType.SEARCH, WIDGET_ID_TAB_SEARCH,
+				currentBranding.getSearchTabName());
+		recentTabItem = createCatalogTab(-1, ContentType.RECENT, WIDGET_ID_TAB_RECENT,
+				currentBranding.getRecentTabName());
+		popularTabItem = createCatalogTab(-1, ContentType.POPULAR, WIDGET_ID_TAB_POPULAR,
+				currentBranding.getPopularTabName());
+		favoritedTabItem = createCatalogTab(-1, ContentType.FAVORITES, "tab:favorites", "Favorites");
+		installedTabItem = createCatalogTab(-1, ContentType.INSTALLED, WIDGET_ID_TAB_INSTALLED,
+				Messages.MarketplacePage_installed);
 		updateNewsTab();
 
 		searchTabItem.setControl(tabContent);
@@ -336,9 +346,21 @@ public class MarketplacePage extends CatalogPage {
 		throw new IllegalArgumentException();
 	}
 
+	public void setPreviouslyActiveTab() {
+		if (previousContentType == null) {
+			setActiveTab(tabFolder.getItem(0));
+		} else {
+			setActiveTab(previousContentType);
+		}
+	}
+
 	public void setActiveTab(ContentType contentType) {
 		if (disableTabSelection) {
 			return;
+		}
+		if (contentType != currentContentType) {
+			previousContentType = currentContentType;
+			currentContentType = contentType;
 		}
 		final TabItem tabItem = getTabItem(contentType);
 		TabItem currentTabItem = getSelectedTabItem();
@@ -353,6 +375,21 @@ public class MarketplacePage extends CatalogPage {
 			tabItem.setControl(tabContent);
 		}
 		getViewer().setContentType(contentType);
+	}
+
+	public ContentType getActiveTab() {
+		TabItem selectedTabItem = getSelectedTabItem();
+		return selectedTabItem == null ? null : getContentType(selectedTabItem);
+	}
+
+	private ContentType getContentType(TabItem tabItem) {
+		if (tabItem != null && !tabItem.isDisposed()) {
+			Object data = tabItem.getData(CONTENT_TYPE_KEY);
+			if (data instanceof ContentType) {
+				return (ContentType) data;
+			}
+		}
+		return null;
 	}
 
 	private TabItem getSelectedTabItem() {
@@ -387,11 +424,11 @@ public class MarketplacePage extends CatalogPage {
 		}
 	}
 
-	private TabItem createCatalogTab(int index, String widgetId, String label) {
-		return createTab(index, widgetId, label, null);
+	private TabItem createCatalogTab(int index, ContentType contentType, String widgetId, String label) {
+		return createTab(index, contentType, widgetId, label, null);
 	}
 
-	private TabItem createTab(int index, String widgetId, String label, Control tabControl) {
+	private TabItem createTab(int index, ContentType contentType, String widgetId, String label, Control tabControl) {
 		TabItem tabItem;
 		if (index == -1) {
 			tabItem = new TabItem(tabFolder, SWT.NULL);
@@ -399,6 +436,7 @@ public class MarketplacePage extends CatalogPage {
 			tabItem = new TabItem(tabFolder, SWT.NULL, index);
 		}
 		tabItem.setData(WIDGET_ID_KEY, widgetId);
+		tabItem.setData(CONTENT_TYPE_KEY, contentType);
 		tabItem.setText(label);
 		tabItem.setControl(tabControl);
 		return tabItem;
@@ -626,40 +664,45 @@ public class MarketplacePage extends CatalogPage {
 
 		int tabIndex = 0;
 		boolean hasTab = branding.hasSearchTab();
-		searchTabItem = updateTab(searchTabItem, WIDGET_ID_TAB_SEARCH, branding.getSearchTabName(), hasTab,
+		searchTabItem = updateTab(searchTabItem, ContentType.SEARCH, WIDGET_ID_TAB_SEARCH, branding.getSearchTabName(),
+				hasTab,
 				oldBranding.hasSearchTab(),
 				tabIndex);
 		if (hasTab) {
 			tabIndex++;
 		}
 		hasTab = hasFeaturedMarketTab(branding);
-		featuredMarketTabItem = updateTab(featuredMarketTabItem, WIDGET_ID_TAB_FEATURED_MARKET,
+		featuredMarketTabItem = updateTab(featuredMarketTabItem, ContentType.SEARCH, WIDGET_ID_TAB_FEATURED_MARKET,
 				branding.getFeaturedMarketTabName(), hasTab, hasFeaturedMarketTab(oldBranding), tabIndex);
 		if (hasTab) {
 			tabIndex++;
 		}
 		hasTab = branding.hasRecentTab();
-		recentTabItem = updateTab(recentTabItem, WIDGET_ID_TAB_RECENT, branding.getRecentTabName(), hasTab,
+		recentTabItem = updateTab(recentTabItem, ContentType.SEARCH, WIDGET_ID_TAB_RECENT, branding.getRecentTabName(),
+				hasTab,
 				oldBranding.hasRecentTab(),
 				tabIndex);
 		if (hasTab) {
 			tabIndex++;
 		}
 		hasTab = branding.hasPopularTab();
-		popularTabItem = updateTab(popularTabItem, WIDGET_ID_TAB_POPULAR, branding.getPopularTabName(), hasTab,
+		popularTabItem = updateTab(popularTabItem, ContentType.SEARCH, WIDGET_ID_TAB_POPULAR,
+				branding.getPopularTabName(), hasTab,
 				oldBranding.hasPopularTab(),
 				tabIndex);
 		if (hasTab) {
 			tabIndex++;
 		}
 		hasTab = branding.hasRelatedTab();
-		relatedTabItem = updateTab(relatedTabItem, WIDGET_ID_TAB_RELATED, branding.getRelatedTabName(), hasTab,
+		relatedTabItem = updateTab(relatedTabItem, ContentType.SEARCH, WIDGET_ID_TAB_RELATED,
+				branding.getRelatedTabName(), hasTab,
 				oldBranding.hasRelatedTab(), tabIndex);
 		if (hasTab) {
 			tabIndex++;
 		}
 		hasTab = true;
-		favoritedTabItem = updateTab(favoritedTabItem, "tab:favorites", "Favorites", hasTab, true, tabIndex);
+		favoritedTabItem = updateTab(favoritedTabItem, ContentType.SEARCH, "tab:favorites", "Favorites", hasTab, true,
+				tabIndex);
 		if (hasTab) {
 			tabIndex++;
 		}
@@ -716,11 +759,12 @@ public class MarketplacePage extends CatalogPage {
 		return false;
 	}
 
-	private TabItem updateTab(TabItem tabItem, String widgetId, String tabLabel, boolean hasTab, boolean hadTab,
+	private TabItem updateTab(TabItem tabItem, ContentType contentType, String widgetId, String tabLabel,
+			boolean hasTab, boolean hadTab,
 			int tabIndex) {
 		if (hasTab) {
 			if (!hadTab) {
-				tabItem = createCatalogTab(tabIndex, widgetId, tabLabel);
+				tabItem = createCatalogTab(tabIndex, contentType, widgetId, tabLabel);
 			} else {
 				tabItem.setText(tabLabel);
 			}

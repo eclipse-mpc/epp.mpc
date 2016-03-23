@@ -33,9 +33,17 @@ class Messages extends NLS {
 
 	public static String MarketplaceDiscoveryStrategy_catalogCategory;
 
+	public static String MarketplaceDiscoveryStrategy_ComputingInstalled;
+
 	public static String MarketplaceDiscoveryStrategy_downloadError;
 
 	public static String MarketplaceDiscoveryStrategy_failedToSaveMarketplaceInfo;
+
+	public static String MarketplaceDiscoveryStrategy_FavoritesRefreshing;
+
+	public static String MarketplaceDiscoveryStrategy_FavoritesRetrieve;
+
+	public static String MarketplaceDiscoveryStrategy_FavoritesRetrieveError;
 
 	public static String MarketplaceDiscoveryStrategy_findingInstalled;
 

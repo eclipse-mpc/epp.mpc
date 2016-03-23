@@ -57,8 +57,8 @@ import org.eclipse.epp.mpc.core.model.ISearchResult;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
 import org.eclipse.epp.mpc.core.service.IMarketplaceStorageService;
-import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.epp.mpc.core.service.IMarketplaceStorageService.LoginListener;
+import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
@@ -222,8 +222,9 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			final IProgressMonitor monitor) {
 		if (!result.getNodes().isEmpty()) {
 			int nodeWork = 1000;
+			int favoritesWork = catalogCategory.getContents() == Contents.USER_FAVORITES ? 0 : 1000;
 			SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_loadingResources,
-					result.getNodes().size() * nodeWork);
+					result.getNodes().size() * nodeWork + favoritesWork);
 
 			try {
 				boolean userFavoritesSupported = false;
@@ -231,14 +232,13 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 					userFavoritesSupported = true;
 				} else {
 					try {
-						marketplaceService.userFavorites(result.getNodes(), null/*TODO WIP*/);
+						marketplaceService.userFavorites(result.getNodes(), progress.newChild(favoritesWork));
 						userFavoritesSupported = true;
 					} catch (NotAuthorizedException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						// user is not logged in. we just ignore this.
 					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						// something went wrong. log and proceed.
+						MarketplaceClientCore.error(Messages.MarketplaceDiscoveryStrategy_FavoritesRetrieveError, e1);
 					}
 				}
 				for (final INode node : result.getNodes()) {
@@ -390,17 +390,25 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	}
 
 	public UserActionCatalogItem addUserActionItem(MarketplaceCategory catalogCategory, UserAction userAction) {
+		return addUserActionItem(catalogCategory, userAction, catalogDescriptor);
+	}
+
+	public UserActionCatalogItem addUserActionItem(MarketplaceCategory catalogCategory, UserAction userAction,
+			Object data) {
 		for (ListIterator<CatalogItem> i = items.listIterator(items.size()); i.hasPrevious();) {
 			CatalogItem item = i.previous();
 			if (item.getSource() == source && (item.getCategory() == catalogCategory || catalogCategory.getId().equals(item.getCategoryId()))
 					&& item instanceof UserActionCatalogItem) {
-				return (UserActionCatalogItem) item;
+				UserActionCatalogItem actionItem = (UserActionCatalogItem) item;
+				if (actionItem.getUserAction() == userAction) {
+					return actionItem;
+				}
 			}
 		}
 		UserActionCatalogItem catalogItem = new UserActionCatalogItem();
 		catalogItem.setUserAction(userAction);
 		catalogItem.setSource(source);
-		catalogItem.setData(catalogDescriptor);
+		catalogItem.setData(data);
 		catalogItem.setId(catalogDescriptor.getUrl().toString() + "#" + userAction.name()); //$NON-NLS-1$
 		catalogItem.setCategoryId(catalogCategory.getId());
 		items.add(catalogItem);
@@ -594,7 +602,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	}
 
 	public void userFavorites(boolean promptLogin, IProgressMonitor monitor) throws CoreException {
-		final SubMonitor progress = SubMonitor.convert(monitor, "Getting user favorites", 1001);
+		final SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_FavoritesRetrieve, 1001);
 		try {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory(progress.newChild(1));
 			catalogCategory.setContents(Contents.USER_FAVORITES);
@@ -606,7 +614,6 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 						IMarketplaceStorageService storageService = userFavoritesService.getStorageService();
 						result = storageService.runWithLogin(new Callable<ISearchResult>() {
 							public ISearchResult call() throws Exception {
-								// ignore
 								return marketplaceService.userFavorites(progress.newChild(500));
 							}
 						});
@@ -622,15 +629,13 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 				} catch (NotAuthorizedException e) {
 					addUserStorageLoginItem(catalogCategory);
 				} catch (UnsupportedOperationException ex) {
-					//TODO WIP addFavoritesNotSupportedItem(catalogCategory);
-					ex.printStackTrace();
+					addFavoritesNotSupportedItem(catalogCategory);
 				} catch (Exception ex) {
-					addUserStorageLoginItem(catalogCategory);
-					//TODO WIP dispatch
-					ex.printStackTrace();
+					MarketplaceClientCore.error(Messages.MarketplaceDiscoveryStrategy_FavoritesRetrieveError, ex);
+					addRetryErrorItem(catalogCategory, ex);
 				}
 			} else {
-				//TODO WIP addFavoritesNotSupportedItem(catalogCategory);
+				addFavoritesNotSupportedItem(catalogCategory);
 			}
 		} finally {
 			monitor.done();
@@ -638,7 +643,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	}
 
 	public void refreshUserFavorites(IProgressMonitor monitor) throws CoreException {
-		final SubMonitor progress = SubMonitor.convert(monitor, "Refreshing favorite status", 1001);
+		final SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_FavoritesRefreshing, 1001);
 		try {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory(progress.newChild(1));
 			List<CatalogItem> items = catalogCategory.getItems();
@@ -665,13 +670,12 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 						}
 					}
 				} catch (NotAuthorizedException e) {
-					//ignored
+					addUserStorageLoginItem(catalogCategory);
 				} catch (UnsupportedOperationException ex) {
-					//TODO WIP addFavoritesNotSupportedItem(catalogCategory);
-					ex.printStackTrace();
+					addFavoritesNotSupportedItem(catalogCategory);
 				} catch (Exception ex) {
-					//TODO WIP dispatch
-					ex.printStackTrace();
+					MarketplaceClientCore.error(Messages.MarketplaceDiscoveryStrategy_FavoritesRetrieveError, ex);
+					addRetryErrorItem(catalogCategory, ex);
 				}
 			} else {
 				for (CatalogItem catalogItem : items) {
@@ -698,6 +702,14 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		addUserActionItem(catalogCategory, UserAction.INSTALL_ALL_FAVORITES);
 	}
 
+	private void addFavoritesNotSupportedItem(MarketplaceCategory catalogCategory) {
+		addUserActionItem(catalogCategory, UserAction.FAVORITES_UNSUPPORTED);
+	}
+
+	private void addRetryErrorItem(MarketplaceCategory catalogCategory, Exception ex) {
+		addUserActionItem(catalogCategory, UserAction.RETRY_ERROR, ex);
+	}
+
 	public void installed(IProgressMonitor monitor) throws CoreException {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_findingInstalled,
 				1000);
@@ -716,7 +728,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	protected SearchResult computeInstalled(IProgressMonitor monitor) throws CoreException {
 		SearchResult result = new SearchResult();
 		result.setNodes(new ArrayList<Node>());
-		SubMonitor progress = SubMonitor.convert(monitor, "Finding installed solutions", 1000);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_ComputingInstalled, 1000);
 		Map<String, IInstallableUnit> installedIUs = computeInstalledIUs(progress.newChild(500));
 		if (!monitor.isCanceled()) {
 			Set<INode> catalogNodes = marketplaceInfo.computeInstalledNodes(catalogDescriptor.getUrl(), installedIUs);
@@ -843,9 +855,9 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 				String version = iu.getVersion() == null ? null : iu.getVersion().toString();
 				iuIdsAndVersions.add(id + "," + version); //$NON-NLS-1$
 			}
-			marketplaceService.reportInstallError(result, nodes, iuIdsAndVersions, resolutionDetails, monitor);
+			marketplaceService.reportInstallError(result, nodes, iuIdsAndVersions, resolutionDetails, progress);
 		} finally {
-			monitor.done();
+			progress.done();
 		}
 	}
 
