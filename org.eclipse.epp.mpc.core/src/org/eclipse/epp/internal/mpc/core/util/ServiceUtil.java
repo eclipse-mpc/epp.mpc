@@ -20,8 +20,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.osgi.util.NLS;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 
 /**
  * @author Carsten Reckord
@@ -111,4 +114,53 @@ public class ServiceUtil {
 		}
 	}
 
+	public static Object getOverridablePropertyValue(Map<?, ?> properties, String key) {
+		String overridePropertyKey = key + "Property"; //$NON-NLS-1$
+		Object overrideProperty = properties.get(overridePropertyKey);
+		Object value = overrideProperty == null ? null : System.getProperty(overrideProperty.toString());
+		if (value == null) {
+			value = properties.get(key);
+		}
+		return value;
+	}
+
+	public static Object getOverridablePropertyValue(ServiceReference<?> serviceReference, String key) {
+		String overridePropertyKey = key + "Property"; //$NON-NLS-1$
+		Object overrideProperty = serviceReference.getProperty(overridePropertyKey);
+		Object value = overrideProperty == null ? null : System.getProperty(overrideProperty.toString());
+		if (value == null) {
+			value = serviceReference.getProperty(key);
+		}
+		return value;
+	}
+
+	public static Dictionary<String, Object> getProperties(ServiceReference<?> serviceReference) {
+		Hashtable<String, Object> properties = new Hashtable<String, Object>();
+		String[] propertyKeys = serviceReference.getPropertyKeys();
+		for (String key : propertyKeys) {
+			Object value = serviceReference.getProperty(key);
+			properties.put(key, value);
+		}
+		return properties;
+	}
+
+	public static BundleContext getBundleContext(ServiceRegistration<?> registration) {
+		ServiceReference<?> reference = registration.getReference();
+		return reference == null ? null : getBundleContext(reference);
+	}
+
+	public static BundleContext getBundleContext(ServiceReference<?> reference) {
+		Bundle bundle = reference.getBundle();
+		return bundle != null ? bundle.getBundleContext() : null;
+	}
+
+	public static <T> T getService(ServiceReference<T> reference) {
+		BundleContext bundleContext = getBundleContext(reference);
+		return bundleContext != null ? bundleContext.getService(reference) : null;
+	}
+
+	public static <T> T getService(ServiceRegistration<T> registration) {
+		ServiceReference<T> reference = registration.getReference();
+		return reference == null ? null : getService(reference);
+	}
 }

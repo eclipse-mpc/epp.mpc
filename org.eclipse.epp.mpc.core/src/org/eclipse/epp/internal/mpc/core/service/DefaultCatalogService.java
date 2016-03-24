@@ -16,10 +16,16 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.epp.internal.mpc.core.ServiceLocator;
+import org.eclipse.epp.internal.mpc.core.model.Catalog;
+import org.eclipse.epp.internal.mpc.core.model.CatalogBranding;
 import org.eclipse.epp.internal.mpc.core.model.Catalogs;
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
 import org.eclipse.epp.mpc.core.model.ICatalog;
 import org.eclipse.epp.mpc.core.service.ICatalogService;
+import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
+import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
+import org.eclipse.epp.mpc.core.service.ServiceHelper;
 
 public class DefaultCatalogService extends RemoteMarketplaceService<Catalogs> implements ICatalogService {
 
@@ -42,6 +48,34 @@ public class DefaultCatalogService extends RemoteMarketplaceService<Catalogs> im
 
 	public List<? extends ICatalog> listCatalogs(IProgressMonitor monitor) throws CoreException {
 		Catalogs result = processRequest("catalogs/" + API_URI_SUFFIX, monitor); //$NON-NLS-1$
-		return result.getCatalogs();
+		List<Catalog> catalogs = result.getCatalogs();
+		for (Catalog catalog : catalogs) {
+			registerDynamicFavoritesService(catalog);
+		}
+		return catalogs;
+	}
+
+	private void registerDynamicFavoritesService(Catalog catalog) {
+		CatalogBranding branding = catalog.getBranding();
+		if (branding == null) {
+			return;
+		}
+		if (!branding.hasFavoritesTab()) {
+			return;
+		}
+		String favoritesServer = branding.getFavoritesServer();
+		if (favoritesServer != null && !"".equals(favoritesServer.trim())) { //$NON-NLS-1$
+			registerDynamicFavoritesService(catalog.getUrl(), favoritesServer.trim(), branding.getFavoritesApiKey());
+		}
+	}
+
+	private void registerDynamicFavoritesService(String catalogUrl, String favoritesApiServer, String favoritesApiKey) {
+		IMarketplaceServiceLocator marketplaceServiceLocator = ServiceHelper.getMarketplaceServiceLocator();
+		IUserFavoritesService favoritesService = marketplaceServiceLocator.getFavoritesService(catalogUrl);
+		if (favoritesService != null) {
+			return;
+		}
+		((ServiceLocator) marketplaceServiceLocator).registerFavoritesService(catalogUrl, favoritesApiServer,
+				favoritesApiKey);
 	}
 }

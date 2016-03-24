@@ -68,12 +68,6 @@ public interface IMarketplaceServiceLocator {
 	public static final String CATALOG_URL = "catalogUrl"; //$NON-NLS-1$
 
 	//TODO WIP javadoc
-	public static final String MARKETPLACE_URL_PROPERTY = "urlProperty"; //$NON-NLS-1$
-
-	//TODO WIP javadoc
-	public static final String STORAGE_SERVICE_URL_PROPERTY = "serviceProperty"; //$NON-NLS-1$
-
-	//TODO WIP javadoc
 	public static final String DEFAULT_STORAGE_SERVICE_URL = "https://api.eclipse.org"; //$NON-NLS-1$
 
 	public static final String DEFAULT_STORAGE_SERVICE_PROPERTY_NAME = IMarketplaceStorageService.class.getName()

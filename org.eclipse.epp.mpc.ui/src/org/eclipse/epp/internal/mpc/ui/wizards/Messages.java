@@ -134,6 +134,8 @@ class Messages extends NLS {
 
 	public static String MarketplacePage_eclipseMarketplaceSolutions;
 
+	public static String MarketplacePage_favorites;
+
 	public static String MarketplacePage_featuredMarket;
 
 	public static String MarketplacePage_installed;

@@ -49,7 +49,13 @@ public class MarketplaceClientCore {
 		if (message == null) {
 			message = NLS.bind(Messages.MarketplaceClientCore_unexpectedException, exception.getMessage());
 		}
-		getLog().log(computeStatus(exception, message));
+		IStatus status;
+		if (exception != null) {
+			status = computeStatus(exception, message);
+		} else {
+			status = new Status(IStatus.ERROR, BUNDLE_ID, IStatus.ERROR, message, exception);
+		}
+		getLog().log(status);
 	}
 
 	public static void error(Throwable exception) {

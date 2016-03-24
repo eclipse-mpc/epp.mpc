@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
 import org.eclipse.epp.mpc.core.service.IMarketplaceStorageService;
 import org.eclipse.userstorage.IBlob;
 import org.eclipse.userstorage.IStorage;
@@ -32,7 +33,7 @@ import org.osgi.framework.BundleContext;
 
 public class MarketplaceStorageService implements IMarketplaceStorageService {
 
-	private static final String DEFAULT_APPLICATION_TOKEN = "MZ04RMOpksKN5GpxKXafq2MSjSP";
+	static final String DEFAULT_APPLICATION_TOKEN = "MZ04RMOpksKN5GpxKXafq2MSjSP";
 
 	private String applicationToken = DEFAULT_APPLICATION_TOKEN;
 
@@ -163,13 +164,9 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 	}
 
 	public void activate(BundleContext context, Map<?, ?> properties) {
-		String serviceUrlProperty = getProperty(properties, "serviceUrlProperty", null);
-		String serviceUrlValue = getProperty(properties, "serviceUrl", null);
-		if (serviceUrlProperty != null) {
-			serviceUrlValue = System.getProperty(serviceUrlProperty, serviceUrlValue);
-		}
+		Object serviceUrlValue = ServiceUtil.getOverridablePropertyValue(properties, "serviceUrl");
 		if (serviceUrlValue != null) {
-			URI serviceUri = URI.create(serviceUrlValue);
+			URI serviceUri = URI.create(serviceUrlValue.toString());
 			String serviceName = getProperty(properties, "serviceName", "Marketplace User Storage");
 			registerStorageService(serviceUri, serviceName);
 			setServiceUri(serviceUri);
@@ -186,7 +183,7 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 		}
 	}
 
-	private String getProperty(Map<?, ?> properties, String key, String defaultValue) {
+	private static String getProperty(Map<?, ?> properties, String key, String defaultValue) {
 		Object value = properties.get(key);
 		if (value == null) {
 			return defaultValue;

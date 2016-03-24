@@ -42,6 +42,14 @@ public interface ICatalogBranding extends IIdentifiable {
 
 	boolean hasFeaturedMarketTab();
 
+	boolean hasFavoritesTab();
+
+	String getFavoritesTabName();
+
+	String getFavoritesServer();
+
+	String getFavoritesApiKey();
+
 	String getFeaturedMarketTabName();
 
 	String getWizardTitle();
