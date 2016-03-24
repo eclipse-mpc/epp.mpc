@@ -145,7 +145,9 @@ public class FallbackTransportFactory implements ITransportFactory {
 			if (!serviceReferences.isEmpty()) {
 				for (ServiceReference<ITransportFactory> serviceReference : serviceReferences) {
 					ITransportFactory service = bundleContext.getService(serviceReference);
-					if (service != this && service != primaryFactory) {
+					if (service != this && service != primaryFactory
+							&& !"org.eclipse.epp.mpc.tests.service.MappedTransportFactory" //$NON-NLS-1$
+							.equals(service.getClass().getName())) {
 						delegateFactory = service;
 						break;
 					} else {
