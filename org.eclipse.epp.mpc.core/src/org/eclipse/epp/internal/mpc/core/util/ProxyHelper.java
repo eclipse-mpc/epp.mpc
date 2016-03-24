@@ -43,7 +43,11 @@ public class ProxyHelper {
 		}
 		Authenticator defaultAuthenticator = getDefaultAuthenticator();
 		if (authenticator == null || authenticator != defaultAuthenticator) {
-			authenticator = new ProxyAuthenticator(defaultAuthenticator);
+			if (defaultAuthenticator instanceof ProxyAuthenticator) {
+				authenticator = (ProxyAuthenticator) defaultAuthenticator;
+			} else {
+				authenticator = new ProxyAuthenticator(defaultAuthenticator);
+			}
 			Authenticator.setDefault(authenticator);
 		}
 	}

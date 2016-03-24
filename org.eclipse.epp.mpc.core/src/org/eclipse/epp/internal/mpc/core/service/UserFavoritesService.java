@@ -177,15 +177,20 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 	}
 
 	protected String createFavoritesBlobData(Collection<? extends INode> nodes) {
+		List<String> nodeIds = new ArrayList<String>(nodes.size());
+		for (INode node : nodes) {
+			nodeIds.add(node.getId());
+		}
+		Collections.sort(nodeIds);
 		StringBuilder builder = new StringBuilder();
 		boolean first = true;
-		for (INode node : nodes) {
+		for (String nodeId : nodeIds) {
 			if (first) {
 				first = false;
 			} else {
 				builder.append(SEPARATOR);
 			}
-			builder.append(node.getId());
+			builder.append(nodeId);
 		}
 		return builder.toString();
 	}

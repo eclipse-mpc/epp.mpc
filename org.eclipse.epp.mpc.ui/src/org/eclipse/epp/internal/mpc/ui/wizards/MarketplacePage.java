@@ -115,7 +115,7 @@ public class MarketplacePage extends CatalogPage {
 		if (clearDescriptor == null || findDescriptor == null) {
 			try {
 				Class.forName(
-"org.eclipse.equinox.internal.p2.ui.discovery.util.TextSearchControl", true, //$NON-NLS-1$
+						"org.eclipse.equinox.internal.p2.ui.discovery.util.TextSearchControl", true, //$NON-NLS-1$
 						MarketplacePage.class.getClassLoader());
 				clearDescriptor = JFaceResources.getImageRegistry().getDescriptor(clearIconKey);
 				findDescriptor = JFaceResources.getImageRegistry().getDescriptor(findIconKey);
@@ -705,9 +705,9 @@ public class MarketplacePage extends CatalogPage {
 		if (hasTab) {
 			tabIndex++;
 		}
-		hasTab = true;
+		hasTab = hasFavoritedTab(branding);
 		favoritedTabItem = updateTab(favoritedTabItem, ContentType.SEARCH, WIDGET_ID_TAB_FAVORITES,
-				getFavoritedTabName(branding), hasTab, hasFavoritedTab(branding),
+				getFavoritedTabName(branding), hasTab, hasFavoritedTab(oldBranding),
 				tabIndex);
 		if (hasTab) {
 			tabIndex++;

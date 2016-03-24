@@ -9,11 +9,9 @@
     Contributors:
     	The Eclipse Foundation - initial API and implementation
  -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.epp.mpc.core.transportfactory.legacy">
-   <implementation class="org.eclipse.epp.internal.mpc.core.util.TransportFactory$LegacyFactory"/>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.epp.mpc.core.transport.http">
+   <implementation class="org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientTransport"/>
    <service>
-      <provide interface="org.eclipse.epp.mpc.core.service.ITransportFactory"/>
+      <provide interface="org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientTransport"/>
    </service>
-   <property name="org.eclipse.epp.mpc.core.service.transport.legacy" type="Boolean" value="true"/>
-   <property name="service.ranking" type="Integer" value="-2147483647"/>
 </scr:component>
