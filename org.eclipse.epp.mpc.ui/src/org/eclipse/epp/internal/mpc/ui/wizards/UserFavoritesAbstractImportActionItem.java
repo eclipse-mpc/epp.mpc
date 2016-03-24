@@ -21,7 +21,7 @@ public abstract class UserFavoritesAbstractImportActionItem extends AbstractUser
 			IShellProvider shellProvider,
 			UserActionCatalogItem element, MarketplaceViewer viewer) {
 		super(parent, resources, shellProvider, element, viewer);
-		createContent(new ActionLink("import", "Import Favorites...", "Import another user's favorites into yours."),
+		createContent(/*new ActionLink("import", "Import Favorites...", "Import another user's favorites into yours."),*/
 				createSecondaryActionLink());
 	}
 
