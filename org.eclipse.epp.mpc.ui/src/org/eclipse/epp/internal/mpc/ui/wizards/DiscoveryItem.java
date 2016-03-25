@@ -474,7 +474,7 @@ implements PropertyChangeListener {
 	}
 
 	private void refreshFavoriteButton() {
-		if (this.isDisposed() || favoriteButton.isDisposed()) {
+		if (favoriteButton == null || this.isDisposed() || favoriteButton.isDisposed()) {
 			return;
 		}
 		if (Display.getCurrent() != this.getDisplay()) {
