@@ -397,11 +397,16 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 	}
 
 	IWizardPage getNextPage(IWizardPage page, boolean nextpressed) {
-		if(page ==getCatalogPage() && nextpressed){
+		boolean skipFeatureSelection = false;
+		MarketplacePage catalogPage = getCatalogPage();
+		if (page == catalogPage && nextpressed) {
 			profileChangeOperation = null;
 			featureSelectionWizardPage.updateMessage();
+			if (catalogPage.canSkipFeatureSelection()) {
+				skipFeatureSelection = true;
+			}
 		}
-		if (page == featureSelectionWizardPage) {
+		if (page == featureSelectionWizardPage || (page == catalogPage && skipFeatureSelection)) {
 			if (nextpressed && profileChangeOperation != null
 					&& profileChangeOperation instanceof RemediationOperation) {
 
@@ -419,32 +424,31 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 					ProvUI.handleException(e.getCause(), null, StatusManager.SHOW | StatusManager.LOG);
 				}
 			}
+			IWizardPage nextPage = null;
+			boolean operationUpdated = false;
 			if (profileChangeOperation == null) {
 				if (nextpressed) {
 					updateProfileChangeOperation();
-					if (profileChangeOperation != null) {
-						getContainer().updateButtons();
-					}
+					operationUpdated = true;
 				}
 				if (profileChangeOperation == null || !profileChangeOperation.getResolutionResult().isOK()) {
 					// can't compute a change operation, so there must be some kind of error
 					// we show these on the the feature selection wizard page
-					return featureSelectionWizardPage;
+					nextPage = featureSelectionWizardPage;
 				} else if (profileChangeOperation instanceof UninstallOperation) {
 					// next button was used to resolve errors on an uninstall.
 					// by returning the same page the finish button will be enabled, allowing the user to finish.
-					return featureSelectionWizardPage;
-				}
-				if (profileChangeOperation instanceof RemediationOperation) {
-					return featureSelectionWizardPage;
+					nextPage = featureSelectionWizardPage;
+				} else if (profileChangeOperation instanceof RemediationOperation) {
+					nextPage = featureSelectionWizardPage;
 				}
 			}
-			if (nextpressed && profileChangeOperation instanceof RemediationOperation
+			if (nextPage == null && nextpressed && profileChangeOperation instanceof RemediationOperation
 					&& !featureSelectionWizardPage.isInRemediationMode()) {
 				featureSelectionWizardPage.flipToRemediationComposite();
-				return featureSelectionWizardPage;
+				nextPage = featureSelectionWizardPage;
 			}
-			if (computeMustCheckLicenseAcceptance()) {
+			if (nextPage == null && computeMustCheckLicenseAcceptance()) {
 				if (acceptLicensesPage == null) {
 					acceptLicensesPage = new AcceptLicensesWizardPage(
 							ProvisioningUI.getDefaultUI().getLicenseManager(), operationIUs, profileChangeOperation);
@@ -453,11 +457,21 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 					acceptLicensesPage.update(operationIUs, profileChangeOperation);
 				}
 				if (acceptLicensesPage.hasLicensesToAccept() || profileChangeOperation instanceof RemediationOperation) {
-					return acceptLicensesPage;
+					nextPage = acceptLicensesPage;
 				}
 			}
-			return null;
+			if (nextPage == null && skipFeatureSelection) {
+				nextPage = featureSelectionWizardPage;
+			}
+			if (operationUpdated && nextPage == getContainer().getCurrentPage()) {
+				getContainer().updateButtons();
+			}
+			return nextPage;
 		}
+		return getNextPageInList(page);
+	}
+
+	protected IWizardPage getNextPageInList(IWizardPage page) {
 		return super.getNextPage(page);
 	}
 

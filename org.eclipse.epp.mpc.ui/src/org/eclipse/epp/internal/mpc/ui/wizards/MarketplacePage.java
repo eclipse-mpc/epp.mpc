@@ -16,6 +16,8 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -26,6 +28,8 @@ import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
+import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
+import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeInstallableUnitItem;
 import org.eclipse.epp.internal.mpc.ui.catalog.ResourceProvider.ResourceReceiver;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
@@ -38,6 +42,8 @@ import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.epp.mpc.core.service.ServiceHelper;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
+import org.eclipse.epp.mpc.ui.Operation;
+import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.DiscoveryImages;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogPage;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
@@ -303,12 +309,80 @@ public class MarketplacePage extends CatalogPage {
 		}
 		IWizardPage currentPage = container.getCurrentPage();
 		if (currentPage == MarketplacePage.this && currentPage.isPageComplete()) {
-			IWizardPage nextPage = getWizard().getNextPage(MarketplacePage.this);
+			IWizardPage nextPage = getNextPage();
 			if (nextPage != null && nextPage instanceof WizardPage) {
 				((WizardPage) nextPage).setPageComplete(true);
 				container.showPage(nextPage);
 			}
 		}
+	}
+
+	@Override
+	public boolean canFlipToNextPage() {
+		if (isPageComplete()) {
+			MarketplaceWizard wizard = getWizard();
+			if (wizard != null) {
+				return wizard.getNextPageInList(this) != null;
+			}
+		}
+		return false;
+	}
+
+	protected boolean canSkipFeatureSelection() {
+		SelectionModel selectionModel = getWizard().getSelectionModel();
+		Map<CatalogItem, Operation> selectedOperations = selectionModel.getItemToSelectedOperation();
+		Set<Entry<CatalogItem, Operation>> entrySet = selectedOperations.entrySet();
+		Operation mode = null;
+		for (Entry<CatalogItem, Operation> entry : entrySet) {
+			if (!(entry.getKey() instanceof MarketplaceNodeCatalogItem)) {
+				return false;
+			}
+			MarketplaceNodeCatalogItem item = (MarketplaceNodeCatalogItem) entry.getKey();
+			Operation value = entry.getValue();
+			switch (value) {
+			case NONE:
+				continue;
+			case INSTALL:
+			case UPDATE:
+				if (mode == null) {
+					mode = Operation.INSTALL;
+				} else if (mode == Operation.UNINSTALL) {
+					return false;
+				}
+				if (hasOptionalFeatures(item)) {
+					return false;
+				}
+				break;
+			case UNINSTALL:
+				if (mode == null) {
+					mode = Operation.UNINSTALL;
+				} else if (mode == Operation.INSTALL) {
+					return false;
+				}
+				if (hasOptionalFeatures(item)) {
+					return false;
+				}
+				break;
+			case CHANGE:
+				return false;
+			}
+		}
+		if (mode == null) {
+			return false;
+		}
+		return true;
+	}
+
+	private boolean hasOptionalFeatures(MarketplaceNodeCatalogItem item) {
+		List<MarketplaceNodeInstallableUnitItem> installableUnitItems = item.getInstallableUnitItems();
+		if (installableUnitItems.size() > 1) {
+			for (MarketplaceNodeInstallableUnitItem iuItem : installableUnitItems) {
+				if (iuItem.isOptional()) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	private void setActiveTab(TabItem tab) {

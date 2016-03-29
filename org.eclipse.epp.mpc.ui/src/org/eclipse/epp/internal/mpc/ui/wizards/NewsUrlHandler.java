@@ -234,7 +234,7 @@ public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationLis
 												new StructuredSelection(selectionModel.getSelectedCatalogItems()
 														.toArray()));
 										catalogPage.show(installInfo.getCatalogDescriptor(), ContentType.SELECTION);
-										IWizardPage nextPage = wizard.getNextPage(catalogPage);
+										IWizardPage nextPage = catalogPage.getNextPage();
 										if (nextPage != null && catalogPage.isPageComplete()) {
 											wizard.getContainer().showPage(nextPage);
 										}

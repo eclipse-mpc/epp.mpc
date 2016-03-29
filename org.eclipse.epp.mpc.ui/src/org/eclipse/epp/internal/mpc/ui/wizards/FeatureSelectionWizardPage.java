@@ -608,21 +608,6 @@ public class FeatureSelectionWizardPage extends WizardPage {
 		viewer.refresh(true);
 	}
 
-//	private boolean isChecked(FeatureEntry featureEntry) {
-//		Operation featureOperation = featureEntry.getOperation();
-//		CatalogItemEntry parent = featureEntry.getParent();
-//		if (parent.getSelectedOperation() == Operation.CHANGE) {
-//			//For CHANGE, unchecked means UNINSTALL, checked means INSTALL
-//			if (featureOperation == Operation.NONE) {
-//				return featureEntry.isInstalled();
-//			}
-//			return featureOperation == Operation.INSTALL || featureOperation == Operation.UPDATE;
-//		} else if (featureOperation != null && featureOperation != Operation.NONE) {
-//			return true;
-//		}
-//		return false;
-//	}
-
 	@Override
 	public void performHelp() {
 		getControl().notifyListeners(SWT.Help, new Event());
