@@ -259,7 +259,7 @@ public class MarketplaceNodeCatalogItem extends CatalogItem {
 
 	private boolean maybeHasOptionalFeatures() {
 		Boolean hasOptional = getHasOptionalFeatures();
-		return hasOptional == null || Boolean.TRUE.equals(hasOptional);
+		return !Boolean.FALSE.equals(hasOptional) && getInstallableUnitItems().size() > 1;
 	}
 
 	public void setUserFavorite(Boolean favorited) {
