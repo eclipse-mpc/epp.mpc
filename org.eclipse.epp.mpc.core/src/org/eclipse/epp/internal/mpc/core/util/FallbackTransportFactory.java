@@ -57,7 +57,7 @@ public class FallbackTransportFactory implements ITransportFactory {
 			connectionAttempts++;
 			if (connectionAttempts > 10 && connectionFailures / (double) connectionAttempts > 0.75) {
 				MarketplaceClientCore.getLog().log(new Status(IStatus.INFO, MarketplaceClientCore.BUNDLE_ID,
-						NLS.bind("Disabling transport {0} - too many failures", primaryTransport)));
+						NLS.bind(Messages.FallbackTransportFactory_disablingTransport, primaryTransport)));
 				primaryTransport = null;
 			}
 			if (primaryTransport == null) {
@@ -120,7 +120,7 @@ public class FallbackTransportFactory implements ITransportFactory {
 				String problemKey = ex.getClass().getName() + ": " + ex.getMessage() + "\n\t" + ex.getStackTrace()[0]; //$NON-NLS-1$ //$NON-NLS-2$
 				if (reportedProblems.add(problemKey)) {
 					MarketplaceClientCore.getLog().log(MarketplaceClientCore.computeStatus(ex,
-							NLS.bind("Failed to stream using {0} - falling back to {1}", primaryTransport,
+							NLS.bind(Messages.FallbackTransportFactory_fallbackStream, primaryTransport,
 									fallbackTransport)));
 				}
 				return fallbackTransport.stream(location, monitor);

@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.core.service;
 
+import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.service.MarketplaceService;
 import org.eclipse.epp.mpc.core.model.ICatalog;
 import org.osgi.framework.BundleContext;
@@ -56,7 +57,13 @@ public interface IMarketplaceServiceLocator {
 	 */
 	public static final String DEFAULT_MARKETPLACE_URL = "marketplaceUrl"; //$NON-NLS-1$
 
-	//TODO WIP javadoc
+	/**
+	 * System property key to override the default marketplace url
+	 *
+	 * @see DEFAULT_MARKETPLACE_URL
+	 * @see DefaultMarketplaceService#DEFAULT_SERVICE_LOCATION
+	 */
+	@SuppressWarnings("deprecation")
 	public static final String DEFAULT_MARKETPLACE_PROPERTY_NAME = MarketplaceService.class.getName() + ".url"; //$NON-NLS-1$
 
 	/**
@@ -66,12 +73,6 @@ public interface IMarketplaceServiceLocator {
 	 * @see #DEFAULT_MARKETPLACE_URL
 	 */
 	public static final String CATALOG_URL = "catalogUrl"; //$NON-NLS-1$
-
-	//TODO WIP javadoc
-	public static final String DEFAULT_STORAGE_SERVICE_URL = "https://api.eclipse.org"; //$NON-NLS-1$
-
-	public static final String DEFAULT_STORAGE_SERVICE_PROPERTY_NAME = IMarketplaceStorageService.class.getName()
-			+ ".default"; //$NON-NLS-1$
 
 	/**
 	 * Same as {@link #getMarketplaceService(String) getMarketplaceService(DEFAULT_MARKETPLACE_URL)}
@@ -103,9 +104,21 @@ public interface IMarketplaceServiceLocator {
 	 */
 	IMarketplaceStorageService getDefaultStorageService();
 
-	//TODO WIP javadoc
+	/**
+	 * Get the favorites service for the marketplace identified by the given url.
+	 *
+	 * @param marketplaceUrl
+	 *            the REST base url of the marketplace for which the favorites service is requested
+	 * @return a favorites service that manages the favorites for the given marketplace, or null if no such service is
+	 *         registered.
+	 */
 	IUserFavoritesService getFavoritesService(String marketplaceUrl);
 
-	//TODO WIP javadoc
+	/**
+	 * Get the favorites service for the default marketplace.
+	 * 
+	 * @return the favorites service for the default marketplace, or null if no default marketplace exists or it doesn't
+	 *         support the favorites API.
+	 */
 	IUserFavoritesService getDefaultFavoritesService();
 }

@@ -34,7 +34,7 @@ class P2TransportFactory extends AbstractP2TransportFactory {
 	@Override
 	public Transport getTransportService() throws Exception {
 		BundleContext bundleContext = Platform.getBundle(MarketplaceClientCore.BUNDLE_ID).getBundleContext();
-		ServiceReference serviceReference = bundleContext.getServiceReference(IProvisioningAgent.SERVICE_NAME);
+		ServiceReference<?> serviceReference = bundleContext.getServiceReference(IProvisioningAgent.SERVICE_NAME);
 		if (serviceReference != null) {
 			IProvisioningAgent agent = (IProvisioningAgent) bundleContext.getService(serviceReference);
 			if (agent != null) {

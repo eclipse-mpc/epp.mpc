@@ -23,9 +23,11 @@ import org.eclipse.swt.widgets.Composite;
 
 public class UserFavoritesInstallAllActionItem extends UserFavoritesAbstractImportActionItem {
 
+	private static final String INSTALL_ALL_ACTION_ID = "installAll"; //$NON-NLS-1$
+
 	public UserFavoritesInstallAllActionItem(Composite parent, DiscoveryResources resources,
-			IShellProvider shellProvider, UserActionCatalogItem element, MarketplaceViewer viewer) {
-		super(parent, resources, shellProvider, element, viewer);
+			IShellProvider shellProvider, UserActionCatalogItem element, MarketplacePage page) {
+		super(parent, resources, shellProvider, element, page);
 	}
 
 	@Override
@@ -51,8 +53,8 @@ public class UserFavoritesInstallAllActionItem extends UserFavoritesAbstractImpo
 
 	@Override
 	protected ActionLink createSecondaryActionLink() {
-		return new ActionLink("installAll", "Install all...",
-				"Select all your favorited entries for installation");
+		return new ActionLink(INSTALL_ALL_ACTION_ID, Messages.UserFavoritesInstallAllActionItem_installAllActionLabel,
+				Messages.UserFavoritesInstallAllActionItem_installAllTooltip);
 	}
 
 }

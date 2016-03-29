@@ -51,6 +51,8 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  */
 public class ServiceLocator implements IMarketplaceServiceLocator {
 
+	public static final String STORAGE_SERVICE_BINDING_ID = "bind.storageService"; //$NON-NLS-1$
+
 	private abstract class DynamicBindingOperation<T, B> implements ServiceReferenceOperation<T> {
 
 		private final String dynamicBindId;
@@ -223,9 +225,9 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 			String apiKey) {
 		MarketplaceStorageService marketplaceStorageService = new MarketplaceStorageService();
 		Hashtable<String, Object> config = new Hashtable<String, Object>();
-		config.put("serviceUrl", apiServerUrl);
+		config.put(IMarketplaceStorageService.STORAGE_SERVICE_URL_PROPERTY, apiServerUrl);
 		if (apiKey != null) {
-			config.put("applicationToken", apiKey);
+			config.put(IMarketplaceStorageService.APPLICATION_TOKEN_PROPERTY, apiKey);
 		}
 		ServiceRegistration<IMarketplaceStorageService> registration = registerService(marketplaceBaseUrl,
 				IMarketplaceStorageService.class, marketplaceStorageService, config);
@@ -258,8 +260,8 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 				IMarketplaceService.class, null);
 		marketplaceServiceTracker.open(true);
 
-		catalogServiceTracker = new ServiceTracker<ICatalogService, ICatalogService>(context,
-				ICatalogService.class, null);
+		catalogServiceTracker = new ServiceTracker<ICatalogService, ICatalogService>(context, ICatalogService.class,
+				null);
 		catalogServiceTracker.open(true);
 
 		storageServiceTracker = new ServiceTracker<IMarketplaceStorageService, IMarketplaceStorageService>(context,
@@ -308,7 +310,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 					return;
 				}
 				ServiceReference<?> storageServiceBinding = (ServiceReference<?>) reference
-						.getProperty("bind.storageService");
+						.getProperty(STORAGE_SERVICE_BINDING_ID);
 				if (storageServiceBinding != null && service.getStorageService() == null) {
 					((UserFavoritesService) service).bindStorageService(
 							(IMarketplaceStorageService) ServiceUtil.getService(storageServiceBinding));
@@ -343,8 +345,8 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 	private void bindToUserFavoritesServices(final String marketplaceUrl,
 			ServiceReference<IMarketplaceStorageService> serviceReference) {
 		applyServiceReferenceOperation(favoritesServiceTracker,
-				new DynamicBindingOperation<IUserFavoritesService, IMarketplaceStorageService>("bind.storageService",
-						serviceReference) {
+				new DynamicBindingOperation<IUserFavoritesService, IMarketplaceStorageService>(
+						STORAGE_SERVICE_BINDING_ID, serviceReference) {
 
 			@Override
 			public void apply(ServiceReference<IUserFavoritesService> reference) {
@@ -366,8 +368,8 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 			final ServiceReference<IMarketplaceStorageService> serviceReference,
 			final IMarketplaceStorageService serviceInstance) {
 		applyServiceReferenceOperation(favoritesServiceTracker,
-				new DynamicBindingOperation<IUserFavoritesService, IMarketplaceStorageService>("bind.storageService",
-						serviceReference) {
+				new DynamicBindingOperation<IUserFavoritesService, IMarketplaceStorageService>(
+						STORAGE_SERVICE_BINDING_ID, serviceReference) {
 
 			@Override
 			public void apply(ServiceReference<IUserFavoritesService> reference) {
@@ -390,8 +392,8 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 	private void unbindFromUserFavoritesServices(final ServiceReference<IMarketplaceStorageService> serviceReference,
 			final IMarketplaceStorageService serviceInstance) {
 		applyServiceReferenceOperation(favoritesServiceTracker,
-				new DynamicBindingOperation<IUserFavoritesService, IMarketplaceStorageService>("bind.storageService",
-						serviceReference) {
+				new DynamicBindingOperation<IUserFavoritesService, IMarketplaceStorageService>(
+						STORAGE_SERVICE_BINDING_ID, serviceReference) {
 
 			@Override
 			public void apply(ServiceReference<IUserFavoritesService> reference) {
@@ -411,17 +413,17 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		if (registration == null) {
 			return;
 		}
-		Object binding = reference.getProperty("bind.storageService");
+		Object binding = reference.getProperty(STORAGE_SERVICE_BINDING_ID);
 		if (binding != null && serviceReference.equals(binding)) {
 			if (registration != null) {
 				Dictionary<String, Object> properties = ServiceUtil.getProperties(reference);
-				properties.remove("bind.storageService");
+				properties.remove(STORAGE_SERVICE_BINDING_ID);
 				registration.setProperties(properties);
 			}
 		}
 		IUserFavoritesService service = ServiceUtil.getService(registration);
 		if (service.getStorageService() == serviceInstance) {
-			((UserFavoritesService)service).unbindStorageService(serviceInstance);
+			((UserFavoritesService) service).unbindStorageService(serviceInstance);
 		}
 	}
 
@@ -534,13 +536,14 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 
 		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_CLIENT, MarketplaceClientCore.BUNDLE_ID);
 		Bundle clientBundle = Platform.getBundle(MarketplaceClientCore.BUNDLE_ID);
-		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_CLIENT_VERSION, clientBundle.getVersion()
-				.toString());
+		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_CLIENT_VERSION,
+				clientBundle.getVersion().toString());
 
 		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_OS, Platform.getOS());
 		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_WS, Platform.getWS());
 		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_NL, Platform.getNL());
-		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_JAVA_VERSION, System.getProperty("java.version")); //$NON-NLS-1$
+		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_JAVA_VERSION,
+				System.getProperty("java.version")); //$NON-NLS-1$
 		IProduct product = Platform.getProduct();
 		if (product != null) {
 			requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_PRODUCT, product.getId());
@@ -552,8 +555,8 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		}
 		Bundle runtimeBundle = Platform.getBundle("org.eclipse.core.runtime"); //$NON-NLS-1$
 		if (runtimeBundle != null) {
-			requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_RUNTIME_VERSION, runtimeBundle.getVersion()
-					.toString());
+			requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_RUNTIME_VERSION,
+					runtimeBundle.getVersion().toString());
 		}
 		// also send the platform version to distinguish between 3.x and 4.x platforms using the same runtime
 		Bundle platformBundle = Platform.getBundle("org.eclipse.platform"); //$NON-NLS-1$

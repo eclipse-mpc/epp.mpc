@@ -10,7 +10,11 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,20 +26,46 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.apache.http.HttpHeaders;
+import org.apache.http.client.fluent.Request;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.epp.internal.mpc.core.transport.httpclient.RequestTemplate;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.epp.mpc.core.service.QueryHelper;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.userstorage.IBlob;
+import org.eclipse.userstorage.internal.Session;
+import org.eclipse.userstorage.internal.util.IOUtil;
+import org.eclipse.userstorage.internal.util.StringUtil;
 import org.eclipse.userstorage.util.ConflictException;
 import org.eclipse.userstorage.util.NoServiceException;
 import org.eclipse.userstorage.util.NotFoundException;
 import org.eclipse.userstorage.util.ProtocolException;
 
+@SuppressWarnings("restriction")
 public class UserFavoritesService extends AbstractDataStorageService implements IUserFavoritesService {
+
+	private static final Pattern JSON_CONTENT_ID_PATTERN = Pattern
+			.compile("\\{[^\\}]*\"content_id\"\\s*:\\s*\"([^\"]*)\"[^\\}]*\\}"); //$NON-NLS-1$
+
+	private static final Pattern JSON_MPC_FAVORITES_PATTERN = Pattern
+			.compile("\\{\\s*\"mpc_favorites\"\\s*:\\s*\\[((?:\\s*\\{[^\\{\\}]+\\}\\s*,?\\s*)*)\\],.*\\}"); //$NON-NLS-1$
+
+	private static final Pattern MARKETPLACE_USER_URL_PATTERN = Pattern.compile("https?://.*/user/([^/]+)"); //$NON-NLS-1$
+
+	private static final Pattern USER_MAIL_PATTERN = Pattern.compile(".+\\@.+"); //$NON-NLS-1$
+
+	private static final String FAVORITES_API__ENDPOINT = "/api/mpc_favorites?{0}={1}"; //$NON-NLS-1$
+
+	private static final String FAVORITES_API__USER_MAIL = "mail"; //$NON-NLS-1$
+
+	private static final String FAVORITES_API__USER_NAME = "name"; //$NON-NLS-1$
 
 	private static final String KEY = "mpc_favorites"; //$NON-NLS-1$
 
@@ -102,7 +132,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		return favoriteNodes;
 	}
 
-	private static List<INode> toNodes(Set<String> favoriteIds) {
+	private static List<INode> toNodes(Collection<String> favoriteIds) {
 		List<INode> favoriteNodes = new ArrayList<INode>(favoriteIds.size());
 		for (String nodeId : favoriteIds) {
 			INode node = QueryHelper.nodeById(nodeId);
@@ -229,5 +259,78 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 			favorites.add(node);
 		}
 		setFavorites(favorites, progress.newChild(700));
+	}
+
+	public List<INode> getFavorites(String user, IProgressMonitor monitor) throws IOException {
+		List<String> nodeIds = getFavoriteIds(user, monitor);
+		return toNodes(nodeIds);
+	}
+
+	public List<String> getFavoriteIds(String user, IProgressMonitor monitor) throws IOException {
+		Matcher matcher = MARKETPLACE_USER_URL_PATTERN.matcher(user);
+		if (matcher.find()) {
+			return importUserFavoriteIdsFromUserId(matcher.group(1));
+		}
+		matcher = USER_MAIL_PATTERN.matcher(user);
+		if (matcher.find()) {
+			return importUserFavoriteIdsFromUserEmail(user);
+		}
+		return importUserFavoriteIdsFromUserId(user);
+	}
+
+	private List<String> importUserFavoriteIdsFromUserId(String userId) throws IOException {
+		return importUserFavoriteIds(FAVORITES_API__USER_NAME, userId);
+	}
+
+	private List<String> importUserFavoriteIds(String userIdParam, String userId) throws IOException {
+		try {
+			return new RequestTemplate<List<String>>() {
+
+				@Override
+				protected Request configureRequest(Request request, URI uri) {
+					return super.configureRequest(request, uri).setHeader(HttpHeaders.USER_AGENT, Session.USER_AGENT_ID)
+							.addHeader(HttpHeaders.CONTENT_TYPE, Session.APPLICATION_JSON) //
+							.addHeader(HttpHeaders.ACCEPT, Session.APPLICATION_JSON);
+				}
+
+				@Override
+				protected List<String> handleResponseStream(InputStream content) throws IOException {
+					List<String> favoriteIds = new ArrayList<String>();
+					String body = read(content);
+					Matcher matcher = JSON_MPC_FAVORITES_PATTERN.matcher(body);
+					if (matcher.find()) {
+						String favorites = matcher.group(1);
+						Matcher contentIdMatcher = JSON_CONTENT_ID_PATTERN.matcher(favorites);
+						while (contentIdMatcher.find()) {
+							String id = contentIdMatcher.group(1);
+							favoriteIds.add(id);
+						}
+					}
+					return favoriteIds;
+				}
+
+				@Override
+				protected Request createRequest(URI uri) {
+					return Request.Get(uri);
+				}
+			}.execute(getStorageService().getServiceUri()
+					.resolve(NLS.bind(FAVORITES_API__ENDPOINT, userIdParam, userId)));
+		} catch (FileNotFoundException e) {
+			return new ArrayList<String>();
+		}
+	}
+
+	private List<String> importUserFavoriteIdsFromUserEmail(String email) throws IOException {
+		return importUserFavoriteIds(FAVORITES_API__USER_MAIL, email);
+	}
+
+	private static String read(InputStream in) {
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			IOUtil.copy(in, baos);
+			return StringUtil.fromUTF(baos.toByteArray());
+		} finally {
+			IOUtil.close(in);
+		}
 	}
 }

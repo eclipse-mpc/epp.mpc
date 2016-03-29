@@ -28,7 +28,7 @@ public class UserFavoritesUnsupportedActionItem extends UserActionViewerItem<Use
 
 	@Override
 	protected String getLinkText() {
-		return "Favorites are not supported on this Marketplace. <a>Go back</a>";
+		return Messages.UserFavoritesUnsupportedActionItem_unsupportedFavoritesLabel;
 	}
 
 	@Override

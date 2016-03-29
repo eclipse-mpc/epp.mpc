@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.transport.httpclient;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -98,7 +99,7 @@ public abstract class RequestTemplate<T> {
 			public T handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
 				final StatusLine statusLine = response.getStatusLine();
 				final HttpEntity entity = response.getEntity();
-				handleResponseStatus(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+				handleResponseStatus(statusLine.getStatusCode(), statusLine.getReasonPhrase(), entity);
 				return handleResponseEntity(entity);
 			}
 		});
@@ -117,8 +118,12 @@ public abstract class RequestTemplate<T> {
 		return null;
 	}
 
-	protected void handleResponseStatus(int statusCode, String reasonPhrase) throws HttpResponseException {
+	protected void handleResponseStatus(int statusCode, String reasonPhrase, HttpEntity entity)
+			throws IllegalStateException, IOException {
 		if (statusCode >= 300) {
+			if (statusCode == 404) {
+				throw new FileNotFoundException(reasonPhrase);
+			}
 			throw new HttpResponseException(statusCode, reasonPhrase);
 		}
 	}

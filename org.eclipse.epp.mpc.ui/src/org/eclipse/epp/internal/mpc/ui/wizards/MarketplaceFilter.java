@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.Composite;
 /**
  * A filter that can cause items to be hidden from the catalog view. Each filter may have an optional UI. Multiple
  * filters may be added to the {@link CatalogConfiguration#getFilters() configuration filters}.
- * 
+ *
  * @author David Green
  * @see CatalogConfiguration
  */
@@ -75,14 +75,15 @@ public abstract class MarketplaceFilter extends CatalogFilter {
 
 	/**
 	 * Returns whether the given element makes it through this filter.
-	 * 
+	 *
 	 * @return <code>true</code> if element is included in the filtered set, and <code>false</code> if excluded
 	 */
+	@Override
 	public abstract boolean select(CatalogItem item);
 
 	/**
 	 * Called when the category was modified.
-	 * 
+	 *
 	 * @param wasCancelled
 	 *            true if and only if the update was canceled before the update was completed
 	 */

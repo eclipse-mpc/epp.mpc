@@ -157,12 +157,37 @@ public interface IMarketplaceService {
 	 * @return the search result
 	 * @throws CoreException
 	 * @throws NotAuthorizedException
+	 *             if the user isn't logged in
 	 */
 	ISearchResult userFavorites(IProgressMonitor monitor) throws CoreException, NotAuthorizedException;
 
-	//TODO WIP javadoc
+	/**
+	 * Set the favorite status of the given nodes for the current user.
+	 *
+	 * @param nodes
+	 *            the nodes to update
+	 * @param monitor
+	 *            progress and cancellation
+	 * @throws CoreException
+	 * @throws NotAuthorizedException
+	 *             if the user isn't logged in
+	 */
 	void userFavorites(List<? extends INode> nodes, IProgressMonitor monitor)
 			throws CoreException, NotAuthorizedException;
+
+	/**
+	 * Retrieve the favorite nodes for the given user identifier. The user identifier can either be an email or a
+	 * marketplace user url of the form &lt;marketplace base url&gt;/user/&lt;user id&gt;
+	 *
+	 * @param user
+	 *            an email or marketplace url identifying the user
+	 * @param monitor
+	 *            progress and cancellation
+	 * @throws CoreException
+	 * @throws NotAuthorizedException
+	 *             if the current user isn't logged in
+	 */
+	ISearchResult userFavorites(String user, IProgressMonitor monitor) throws CoreException, NotAuthorizedException;
 
 	/**
 	 * Get the news configuration for the marketplace

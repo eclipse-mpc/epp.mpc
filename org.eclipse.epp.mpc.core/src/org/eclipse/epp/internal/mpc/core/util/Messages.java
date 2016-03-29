@@ -19,6 +19,10 @@ class Messages extends NLS {
 
 	public static String DefaultMarketplaceService_serviceUnavailable503;
 
+	public static String FallbackTransportFactory_disablingTransport;
+
+	public static String FallbackTransportFactory_fallbackStream;
+
 	public static String ProxyHelper_replacingAuthenticator;
 
 	public static String ServiceUtil_ignoringIncompatibleServiceProperty;

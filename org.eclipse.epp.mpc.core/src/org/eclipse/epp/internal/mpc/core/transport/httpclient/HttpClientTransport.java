@@ -51,11 +51,12 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.Version;
 
+@SuppressWarnings({ "deprecation", "restriction" })
 public class HttpClientTransport implements ITransport {
 
 	public static final String USER_AGENT_ID;
 
-	public static final String USER_AGENT_PROPERTY = HttpClientTransport.class.getPackage().getName() + ".userAgent";
+	public static final String USER_AGENT_PROPERTY = HttpClientTransport.class.getPackage().getName() + ".userAgent"; //$NON-NLS-1$
 
 	private static final org.apache.http.client.HttpClient CLIENT;
 
@@ -203,12 +204,10 @@ public class HttpClientTransport implements ITransport {
 		return new ChainedSystemDefaultCredentialsProvider(delegate);
 	}
 
-	@SuppressWarnings("restriction")
 	protected Response execute(Request request, URI uri) throws ClientProtocolException, IOException {
 		return ProxyUtil.proxyAuthentication(executor, uri).execute(request);
 	}
 
-	@SuppressWarnings("restriction")
 	protected Request configureRequest(Request request, URI uri) {
 		String userAgent = System.getProperty(USER_AGENT_PROPERTY, USER_AGENT_ID);
 

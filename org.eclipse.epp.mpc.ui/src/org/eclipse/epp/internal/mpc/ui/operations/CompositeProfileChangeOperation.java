@@ -31,6 +31,7 @@ import org.eclipse.equinox.p2.operations.ProfileChangeOperation;
 import org.eclipse.equinox.p2.operations.ProvisioningSession;
 import org.eclipse.equinox.p2.planner.IProfileChangeRequest;
 
+@SuppressWarnings("restriction")
 class CompositeProfileChangeOperation extends InstallOperation {
 
 	CompositeProfileChangeOperation(ProvisioningSession session) {

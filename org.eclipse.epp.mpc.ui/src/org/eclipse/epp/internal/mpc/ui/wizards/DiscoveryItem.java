@@ -91,6 +91,8 @@ import org.eclipse.userstorage.util.ConflictException;
 public class DiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<T>
 implements PropertyChangeListener {
 
+	private static final String FAVORITED_BUTTON_STATE_DATA = "favorited"; //$NON-NLS-1$
+
 	private static final String INFO_HREF = "info"; //$NON-NLS-1$
 
 	private static final String PROVIDER_PLACEHOLDER = "@PROVIDER@"; //$NON-NLS-1$
@@ -487,9 +489,9 @@ implements PropertyChangeListener {
 			return;
 		}
 		boolean favorited = isFavorited();
-		Object lastFavorited = favoriteButton.getData("favorited");
+		Object lastFavorited = favoriteButton.getData(FAVORITED_BUTTON_STATE_DATA);
 		if (lastFavorited == null || (favorited != Boolean.TRUE.equals(lastFavorited))) {
-			favoriteButton.setData("favorited", lastFavorited);
+			favoriteButton.setData(FAVORITED_BUTTON_STATE_DATA, lastFavorited);
 			String imageId = favorited ? MarketplaceClientUiPlugin.ITEM_ICON_STAR_SELECTED
 					: MarketplaceClientUiPlugin.ITEM_ICON_STAR;
 			favoriteButton.setImage(MarketplaceClientUiPlugin.getInstance().getImageRegistry().get(imageId));
@@ -580,7 +582,7 @@ implements PropertyChangeListener {
 					return;
 				} else {
 					IStatus status = MarketplaceClientCore.computeStatus(e,
-							NLS.bind("Failed to change favorite status for {0}", this.getNameLabelText()));
+							NLS.bind(Messages.DiscoveryItem_FavoriteActionFailed, this.getNameLabelText()));
 					MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 					return;
 				}

@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService;
 import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.userstorage.util.ConflictException;
@@ -38,5 +37,9 @@ public interface IUserFavoritesService {
 
 	void setFavorite(INode node, boolean favorite, IProgressMonitor monitor)
 			throws NotFoundException, NotAuthorizedException, IOException, ConflictException;
+
+	List<String> getFavoriteIds(String user, IProgressMonitor monitor) throws IOException;
+
+	List<INode> getFavorites(String user, IProgressMonitor monitor) throws IOException;
 
 }

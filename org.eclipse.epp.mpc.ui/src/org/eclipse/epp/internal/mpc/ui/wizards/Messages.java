@@ -41,6 +41,8 @@ class Messages extends NLS {
 
 	public static String DiscoveryItem_Compact_Number;
 
+	public static String DiscoveryItem_FavoriteActionFailed;
+
 	public static String DiscoveryItem_Favorited_Times;
 
 	public static String DiscoveryItem_installInstructions;
@@ -222,6 +224,20 @@ class Messages extends NLS {
 
 	public static String RatingTooltip_Note;
 
+	public static String RetryErrorActionItem_errorDetailsDialogTitle;
+
+	public static String RetryErrorActionItem_failedToLoadMessage;
+
+	public static String RetryErrorActionItem_retryActionLabel;
+
+	public static String RetryErrorActionItem_retryTooltip;
+
+	public static String RetryErrorActionItem_showDetailsActionLabel;
+
+	public static String RetryErrorActionItem_showDetailsTooltip;
+
+	public static String RetryErrorActionItem_unsupportedLinkMessage;
+
 	public static String SelectionModel_cannotInstallRemoveConcurrently;
 
 	public static String SelectionModel_count_selectedFor_operation;
@@ -257,6 +273,23 @@ class Messages extends NLS {
 	public static String ShareSolutionLink_Tooltip;
 
 	public static String ShareSolutionLink_Twitter;
+
+	public static String UserFavoritesAbstractImportActionItem_importFavoritesActionLabel;
+
+	public static String UserFavoritesAbstractImportActionItem_importFavoritesTooltip;
+	public static String UserFavoritesFindFavoritesActionItem_browseMarketplaceActionLabel;
+
+	public static String UserFavoritesFindFavoritesActionItem_browseMarketplaceTooltip;
+
+	public static String UserFavoritesFindFavoritesActionItem_noFavoritesYetMessage;
+
+	public static String UserFavoritesInstallAllActionItem_installAllActionLabel;
+
+	public static String UserFavoritesInstallAllActionItem_installAllTooltip;
+
+	public static String UserFavoritesLoginActionItem_logInActionLabel;
+
+	public static String UserFavoritesUnsupportedActionItem_unsupportedFavoritesLabel;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

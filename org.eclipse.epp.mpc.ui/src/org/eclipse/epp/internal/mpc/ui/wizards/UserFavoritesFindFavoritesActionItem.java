@@ -19,22 +19,25 @@ import org.eclipse.swt.widgets.Composite;
 
 public class UserFavoritesFindFavoritesActionItem extends UserFavoritesAbstractImportActionItem {
 
+	private static final String BROWSE_ACTION_ID = "browse"; //$NON-NLS-1$
 	private final MarketplacePage marketplacePage;
 
 	public UserFavoritesFindFavoritesActionItem(Composite parent, DiscoveryResources resources,
 			IShellProvider shellProvider, UserActionCatalogItem element, MarketplacePage marketplacePage) {
-		super(parent, resources, shellProvider, element, marketplacePage.getViewer());
+		super(parent, resources, shellProvider, element, marketplacePage);
 		this.marketplacePage = marketplacePage;
 	}
 
 	@Override
 	protected String getDescriptionText() {
-		return "You don't have any favorites yet. Choose some favorite on the marketplace to see them here.";
+		return Messages.UserFavoritesFindFavoritesActionItem_noFavoritesYetMessage;
 	}
 
 	@Override
 	protected ActionLink createSecondaryActionLink() {
-		return new ActionLink("browse", "Browse Marketplace", "Find some interesting entries in the Marketplace");
+		return new ActionLink(BROWSE_ACTION_ID,
+				Messages.UserFavoritesFindFavoritesActionItem_browseMarketplaceActionLabel,
+				Messages.UserFavoritesFindFavoritesActionItem_browseMarketplaceTooltip);
 	}
 
 	@Override

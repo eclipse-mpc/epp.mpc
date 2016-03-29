@@ -31,13 +31,13 @@ public class RetryErrorActionItem extends AbstractUserActionLinksItem {
 			UserActionCatalogItem element, MarketplaceViewer viewer) {
 		super(parent, resources, shellProvider, element, viewer);
 		this.error = MarketplaceClientCore.computeStatus((Throwable) element.getData(), null);
-		createContent(new ActionLink(DETAILS_ACTION_ID, "Show details", "Show more details about the error"),
-				new ActionLink(RETRY_ACTION_ID, "Retry", "Try loading this tab's contents again"));
+		createContent(new ActionLink(DETAILS_ACTION_ID, Messages.RetryErrorActionItem_showDetailsActionLabel, Messages.RetryErrorActionItem_showDetailsTooltip),
+				new ActionLink(RETRY_ACTION_ID, Messages.RetryErrorActionItem_retryActionLabel, Messages.RetryErrorActionItem_retryTooltip));
 	}
 
 	@Override
 	protected String getDescriptionText() {
-		return NLS.bind("Failed to load contents: {0}",
+		return NLS.bind(Messages.RetryErrorActionItem_failedToLoadMessage,
 				error.getMessage() == null ? error.getClass().getSimpleName() : error.getMessage());
 	}
 
@@ -48,12 +48,12 @@ public class RetryErrorActionItem extends AbstractUserActionLinksItem {
 		} else if (DETAILS_ACTION_ID.equals(data)) {
 			showDetails();
 		} else {
-			throw new IllegalArgumentException(NLS.bind("Unsupported link: {0}", data));
+			throw new IllegalArgumentException(NLS.bind(Messages.RetryErrorActionItem_unsupportedLinkMessage, data));
 		}
 	}
 
 	protected void showDetails() {
-		ErrorDialog.openError(getShell(), "Error details", getDescriptionText(), error);
+		ErrorDialog.openError(getShell(), Messages.RetryErrorActionItem_errorDetailsDialogTitle, getDescriptionText(), error);
 	}
 
 	protected void retry() {

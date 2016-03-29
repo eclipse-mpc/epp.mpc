@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *      The Eclipse Foundation  - initial API and implementation
  *******************************************************************************/
@@ -20,15 +20,16 @@ import org.xml.sax.SAXException;
  * @author David Green
  */
 public class CategoryContentHandler extends UnmarshalContentHandler {
-	
+
 	private static final String NS_URI = ""; //$NON-NLS-1$
-	
+
 	private Category model;
-	
+
+	@Override
 	public void startElement(String uri, String localName, Attributes attributes) {
 		if (localName.equals("category")) { //$NON-NLS-1$
 			model = new Category();
-			
+
 			model.setId(attributes.getValue(NS_URI,"id")); //$NON-NLS-1$
 			model.setName(attributes.getValue(NS_URI,"name")); //$NON-NLS-1$
 			model.setUrl(attributes.getValue(NS_URI,"url")); //$NON-NLS-1$
@@ -42,7 +43,8 @@ public class CategoryContentHandler extends UnmarshalContentHandler {
 			childHandler.startElement(uri,localName,attributes);
 		}
 	}
-	
+
+	@Override
 	public boolean endElement(String uri, String localName) throws SAXException {
 		if (localName.equals("category")) { //$NON-NLS-1$
 			if (parentModel instanceof org.eclipse.epp.internal.mpc.core.model.Marketplace) {
@@ -64,5 +66,5 @@ public class CategoryContentHandler extends UnmarshalContentHandler {
 		}
 		return false;
 	}
-	
+
 }

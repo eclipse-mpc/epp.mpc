@@ -26,7 +26,7 @@ public class UserFavoritesLoginActionItem extends UserActionViewerItem<UserActio
 
 	@Override
 	protected String getLinkText() {
-		return "<a>Log in to view your favorites</a>";
+		return "<a>" + Messages.UserFavoritesLoginActionItem_logInActionLabel + "</a>"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	@Override

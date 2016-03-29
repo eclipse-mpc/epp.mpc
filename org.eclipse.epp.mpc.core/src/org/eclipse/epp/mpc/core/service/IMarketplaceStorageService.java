@@ -17,7 +17,18 @@ import org.eclipse.userstorage.IBlob;
 import org.eclipse.userstorage.IStorage;
 import org.eclipse.userstorage.StorageFactory;
 
+/**
+ * @noimplement This interface is not intended to be implemented by clients.
+ * @noextend This interface is not intended to be extended by clients.
+ * @author Carsten Reckord
+ */
 public interface IMarketplaceStorageService {
+
+	String APPLICATION_TOKEN_PROPERTY = "applicationToken"; //$NON-NLS-1$
+
+	String STORAGE_SERVICE_NAME_PROPERTY = "serviceName"; //$NON-NLS-1$
+
+	String STORAGE_SERVICE_URL_PROPERTY = "serviceUrl"; //$NON-NLS-1$
 
 	public static interface LoginListener {
 		void loginChanged(String oldUser, String newUser);

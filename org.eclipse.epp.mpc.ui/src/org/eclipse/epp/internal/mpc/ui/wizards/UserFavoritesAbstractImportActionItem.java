@@ -10,28 +10,59 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import java.util.List;
+
+import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
+import org.eclipse.epp.mpc.core.service.IMarketplaceService;
+import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
+import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryResources;
 import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.swt.widgets.Composite;
 
 public abstract class UserFavoritesAbstractImportActionItem extends AbstractUserActionLinksItem {
 
+	private static final String IMPORT_ACTION_ID = "import"; //$NON-NLS-1$
+
+	private final MarketplacePage marketplacePage;
+
 	public UserFavoritesAbstractImportActionItem(Composite parent, DiscoveryResources resources,
-			IShellProvider shellProvider,
-			UserActionCatalogItem element, MarketplaceViewer viewer) {
-		super(parent, resources, shellProvider, element, viewer);
-		createContent(/*new ActionLink("import", "Import Favorites...", "Import another user's favorites into yours."),*/
+			IShellProvider shellProvider, UserActionCatalogItem element, MarketplacePage page) {
+		super(parent, resources, shellProvider, element, page.getViewer());
+		createContent(
+				new ActionLink(IMPORT_ACTION_ID,
+						Messages.UserFavoritesAbstractImportActionItem_importFavoritesActionLabel,
+						Messages.UserFavoritesAbstractImportActionItem_importFavoritesTooltip),
 				createSecondaryActionLink());
+		this.marketplacePage = page;
 	}
 
 	protected void importFavorites() {
-		//TODO
+		List<AbstractDiscoveryStrategy> discoveryStrategies = viewer.getCatalog().getDiscoveryStrategies();
+		for (AbstractDiscoveryStrategy strategy : discoveryStrategies) {
+			if (strategy instanceof MarketplaceDiscoveryStrategy) {
+				MarketplaceDiscoveryStrategy marketplaceStrategy = (MarketplaceDiscoveryStrategy) strategy;
+				IMarketplaceService marketplaceService = marketplaceStrategy.getMarketplaceService();
+				IUserFavoritesService userFavoritesService = marketplaceService.getUserFavoritesService();
+				if (userFavoritesService != null) {
+					importFavorites(marketplaceStrategy);
+					return;
+				}
+			}
+		}
+	}
+
+	private void importFavorites(MarketplaceDiscoveryStrategy marketplaceStrategy) {
+		MarketplaceWizard wizard = marketplacePage.getWizard();
+		ImportFavoritesPage importFavoritesPage = new ImportFavoritesPage(marketplacePage.getCatalog());
+		importFavoritesPage.setWizard(wizard);
+		wizard.getContainer().showPage(importFavoritesPage);
 	}
 
 	@Override
 	protected final void actionPerformed(Object data) {
-		if ("import".equals(data)) { //$NON-NLS-1$
+		if (IMPORT_ACTION_ID.equals(data)) {
 			importFavorites();
 		} else {
 			secondaryActionPerformed();

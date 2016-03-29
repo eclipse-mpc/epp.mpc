@@ -380,7 +380,8 @@ public class MarketplaceViewer extends CatalogViewer {
 			return new UserFavoritesFindFavoritesActionItem(parent, getResources(), shellProvider, catalogItem,
 					getWizard().getCatalogPage());
 		case INSTALL_ALL_FAVORITES:
-			return new UserFavoritesInstallAllActionItem(parent, getResources(), shellProvider, catalogItem, this);
+			return new UserFavoritesInstallAllActionItem(parent, getResources(), shellProvider, catalogItem,
+					getWizard().getCatalogPage());
 		case FAVORITES_UNSUPPORTED:
 			return new UserFavoritesUnsupportedActionItem(parent, getResources(), shellProvider, catalogItem,
 					getWizard().getCatalogPage());

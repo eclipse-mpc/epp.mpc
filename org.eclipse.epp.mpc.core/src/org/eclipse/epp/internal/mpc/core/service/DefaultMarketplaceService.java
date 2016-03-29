@@ -461,17 +461,27 @@ MarketplaceService {
 			throw new CoreException(MarketplaceClientCore.computeStatus(e, Messages.DefaultMarketplaceService_FavoritesErrorRetrieving));
 		}
 		progress.setWorkRemaining(9000);
-		resolveFavoriteNodes(favorites, progress.newChild(9000));
-		return new ISearchResult() {
+		return resolveFavoriteNodes(favorites, progress.newChild(9000));
+	}
 
-			public List<? extends INode> getNodes() {
-				return favorites;
-			}
-
-			public Integer getMatchCount() {
-				return favorites.size();
-			}
-		};
+	public ISearchResult userFavorites(String user, IProgressMonitor monitor)
+			throws CoreException, NotAuthorizedException {
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.DefaultMarketplaceService_FavoritesRetrieve, 10000);
+		IUserFavoritesService userFavoritesService = getUserFavoritesService();
+		if (userFavoritesService == null) {
+			throw new UnsupportedOperationException();
+		}
+		final List<INode> favorites;
+		try {
+			favorites = userFavoritesService.getFavorites(user, progress.newChild(1000));
+		} catch (NotAuthorizedException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new CoreException(MarketplaceClientCore.computeStatus(e,
+					Messages.DefaultMarketplaceService_FavoritesErrorRetrieving));
+		}
+		progress.setWorkRemaining(9000);
+		return resolveFavoriteNodes(favorites, progress.newChild(9000));
 	}
 
 	public void userFavorites(List<? extends INode> nodes, IProgressMonitor monitor)
@@ -498,7 +508,7 @@ MarketplaceService {
 		}
 	}
 
-	private void resolveFavoriteNodes(final List<INode> nodes, IProgressMonitor monitor) throws CoreException {
+	private ISearchResult resolveFavoriteNodes(final List<INode> nodes, IProgressMonitor monitor) throws CoreException {
 		IMarketplaceService resolveService = this;
 		IMarketplaceService registeredService = ServiceHelper.getMarketplaceServiceLocator()
 				.getMarketplaceService(this.getBaseUrl().toString());
@@ -515,6 +525,16 @@ MarketplaceService {
 			((Node) resolved).setUserFavorite(true);
 			i.set(resolved);
 		}
+		return new ISearchResult() {
+
+			public List<? extends INode> getNodes() {
+				return nodes;
+			}
+
+			public Integer getMatchCount() {
+				return nodes.size();
+			}
+		};
 	}
 
 	public SearchResult popular(IProgressMonitor monitor) throws CoreException {

@@ -31,9 +31,12 @@ import org.eclipse.userstorage.util.FileStorageCache;
 import org.eclipse.userstorage.util.Settings;
 import org.osgi.framework.BundleContext;
 
+@SuppressWarnings("restriction")
 public class MarketplaceStorageService implements IMarketplaceStorageService {
 
-	static final String DEFAULT_APPLICATION_TOKEN = "MZ04RMOpksKN5GpxKXafq2MSjSP";
+	private static final String DEFAULT_STORAGE_SERVICE_NAME = Messages.MarketplaceStorageService_defaultStorageServiceName;
+
+	static final String DEFAULT_APPLICATION_TOKEN = "MZ04RMOpksKN5GpxKXafq2MSjSP"; //$NON-NLS-1$
 
 	private String applicationToken = DEFAULT_APPLICATION_TOKEN;
 
@@ -164,14 +167,14 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 	}
 
 	public void activate(BundleContext context, Map<?, ?> properties) {
-		Object serviceUrlValue = ServiceUtil.getOverridablePropertyValue(properties, "serviceUrl");
+		Object serviceUrlValue = ServiceUtil.getOverridablePropertyValue(properties, STORAGE_SERVICE_URL_PROPERTY);
 		if (serviceUrlValue != null) {
 			URI serviceUri = URI.create(serviceUrlValue.toString());
-			String serviceName = getProperty(properties, "serviceName", "Marketplace User Storage");
+			String serviceName = getProperty(properties, STORAGE_SERVICE_NAME_PROPERTY, DEFAULT_STORAGE_SERVICE_NAME);
 			registerStorageService(serviceUri, serviceName);
 			setServiceUri(serviceUri);
 		}
-		String applicationToken = getProperty(properties, "applicationToken", DEFAULT_APPLICATION_TOKEN);
+		String applicationToken = getProperty(properties, APPLICATION_TOKEN_PROPERTY, DEFAULT_APPLICATION_TOKEN);
 		this.applicationToken = applicationToken;
 	}
 

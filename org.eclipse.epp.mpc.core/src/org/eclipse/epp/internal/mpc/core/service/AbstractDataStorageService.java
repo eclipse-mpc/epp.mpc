@@ -17,6 +17,7 @@ import org.eclipse.epp.mpc.core.service.IMarketplaceStorageService;
 import org.eclipse.userstorage.internal.Session;
 import org.eclipse.userstorage.util.ProtocolException;
 
+@SuppressWarnings("restriction")
 public abstract class AbstractDataStorageService {
 
 	public static class NotAuthorizedException extends ProtocolException {

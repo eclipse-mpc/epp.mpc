@@ -371,4 +371,9 @@ public class CachingMarketplaceService implements IMarketplaceService {
 		return delegate.getUserFavoritesService();
 	}
 
+	public ISearchResult userFavorites(String user, IProgressMonitor monitor)
+			throws CoreException, NotAuthorizedException {
+		return delegate.userFavorites(user, monitor);
+	}
+
 }

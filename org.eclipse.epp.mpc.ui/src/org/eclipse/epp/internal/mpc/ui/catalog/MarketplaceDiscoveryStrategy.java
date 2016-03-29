@@ -861,4 +861,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		}
 	}
 
+	public IMarketplaceService getMarketplaceService() {
+		return marketplaceService;
+	}
 }
