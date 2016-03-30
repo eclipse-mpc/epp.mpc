@@ -19,6 +19,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -48,6 +50,7 @@ import org.eclipse.epp.internal.mpc.core.util.HttpUtil;
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
 import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IIdentifiable;
+import org.eclipse.epp.mpc.core.model.IIus;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
@@ -525,6 +528,35 @@ MarketplaceService {
 			((Node) resolved).setUserFavorite(true);
 			i.set(resolved);
 		}
+		//sort the node list so uninstallable nodes come last
+		Collections.sort(nodes, new Comparator<INode>() {
+
+			public int compare(INode n1, INode n2) {
+				if (n1 == n2) {
+					return 0;
+				}
+				int iusCount1 = 0;
+				int iusCount2 = 0;
+				IIus ius1 = n1.getIus();
+				if (ius1 != null) {
+					iusCount1 = ius1.getIuElements().size();
+				}
+				IIus ius2 = n2.getIus();
+				if (ius2 != null) {
+					iusCount2 = ius2.getIuElements().size();
+				}
+				if (iusCount1 > 0) {
+					if (iusCount2 > 0) {
+						return 0;
+					}
+					return -1;
+				} else if (iusCount2 > 0) {
+					return 1;
+				}
+				return 0;
+			}
+		});
+
 		return new ISearchResult() {
 
 			public List<? extends INode> getNodes() {
