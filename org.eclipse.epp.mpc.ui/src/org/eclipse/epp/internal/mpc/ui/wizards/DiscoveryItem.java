@@ -529,7 +529,12 @@ implements PropertyChangeListener {
 			//FIXME we should type the connector to MarketplaceNodeCatalogItem
 			MarketplaceNodeCatalogItem nodeConnector = (MarketplaceNodeCatalogItem) connector;
 			nodeConnector.setUserFavorite(newFavorited);
-			refreshFavoriteButton();
+			if (!newFavorited && viewer.getContentType() == ContentType.FAVORITES) {
+				viewer.getCatalog().removeItem(connector);
+				viewer.refresh();
+			} else {
+				refreshFavoriteButton();
+			}
 		}
 	}
 

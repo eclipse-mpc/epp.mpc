@@ -555,4 +555,12 @@ public class MarketplaceCatalog extends Catalog {
 		}
 		return markets;
 	}
+
+	public void removeItem(CatalogItem item) {
+		getItems().remove(item);
+		getFilteredItems().remove(item);
+		for (CatalogCategory category : getCategories()) {
+			category.getItems().remove(item);
+		}
+	}
 }
