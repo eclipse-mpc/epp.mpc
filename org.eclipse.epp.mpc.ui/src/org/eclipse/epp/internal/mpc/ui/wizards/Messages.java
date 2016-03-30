@@ -73,6 +73,10 @@ class Messages extends NLS {
 
 	public static String DiscoveryItem_UnnamedSolution;
 
+	public static String FavoritesViewer_searchInputDescription;
+
+	public static String FavoritesViewer_searchLabel;
+
 	public static String FeatureSelectionWizardPage_confirmSelectedFeatures;
 
 	public static String FeatureSelectionWizardPage_confirmSelectedFeatures_description;
@@ -98,6 +102,18 @@ class Messages extends NLS {
 	public static String FeatureSelectionWizardPage_Uninstall_Pending;
 
 	public static String FeatureSelectionWizardPage_Update_Pending;
+
+	public static String ImportFavoritesPage_conflictErrorMessage;
+
+	public static String ImportFavoritesPage_Description;
+
+	public static String ImportFavoritesPage_NextButtonLabel;
+
+	public static String ImportFavoritesPage_Title;
+
+	public static String ImportFavoritesPage_unauthorizedErrorMessage;
+
+	public static String ImportFavoritesPage_unknownErrorMessage;
 
 	public static String ItemButtonController_change;
 

@@ -36,15 +36,15 @@ public class UserFavoritesInstallAllActionItem extends UserFavoritesAbstractImpo
 	}
 
 	protected void installAll() {
-		if (viewer.getContentType() == ContentType.FAVORITES) {
-			List<CatalogItem> items = viewer.getCatalog().getItems();
-			SelectionModel selectionModel = viewer.getSelectionModel();
+		if (getViewer().getContentType() == ContentType.FAVORITES) {
+			List<CatalogItem> items = getViewer().getCatalog().getItems();
+			SelectionModel selectionModel = getViewer().getSelectionModel();
 			for (CatalogItem catalogItem : items) {
 				if (catalogItem instanceof MarketplaceNodeCatalogItem) {
 					MarketplaceNodeCatalogItem nodeItem = (MarketplaceNodeCatalogItem) catalogItem;
 					if (selectionModel.getSelectedOperation(nodeItem) != Operation.INSTALL
 							&& nodeItem.getAvailableOperations().contains(Operation.INSTALL)) {
-						viewer.modifySelection(nodeItem, Operation.INSTALL);
+						getViewer().modifySelection(nodeItem, Operation.INSTALL);
 					}
 				}
 			}
@@ -55,6 +55,11 @@ public class UserFavoritesInstallAllActionItem extends UserFavoritesAbstractImpo
 	protected ActionLink createSecondaryActionLink() {
 		return new ActionLink(INSTALL_ALL_ACTION_ID, Messages.UserFavoritesInstallAllActionItem_installAllActionLabel,
 				Messages.UserFavoritesInstallAllActionItem_installAllTooltip);
+	}
+
+	@Override
+	protected MarketplaceViewer getViewer() {
+		return (MarketplaceViewer) super.getViewer();
 	}
 
 }

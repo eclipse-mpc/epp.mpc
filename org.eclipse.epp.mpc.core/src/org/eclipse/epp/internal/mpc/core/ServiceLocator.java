@@ -188,7 +188,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		Map<String, String> requestMetaParameters = computeDefaultRequestMetaParameters();
 		defaultService.setRequestMetaParameters(requestMetaParameters);
 		IUserFavoritesService favoritesService = getFavoritesService(baseUrl);
-		defaultService.setUserFavoritesService(favoritesService);//FIXME WIP service reference!
+		defaultService.setUserFavoritesService(favoritesService);//FIXME this should be a service reference!
 		service = new CachingMarketplaceService(defaultService);
 		return service;
 	}

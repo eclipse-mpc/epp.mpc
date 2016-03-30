@@ -44,8 +44,13 @@ public class UserFavoritesFindFavoritesActionItem extends UserFavoritesAbstractI
 	protected void secondaryActionPerformed() {
 		MarketplaceWizard wizard = marketplacePage.getWizard();
 		IWizardPage currentPage = wizard.getContainer().getCurrentPage();
-		if (currentPage == marketplacePage && viewer.getContentType() == ContentType.FAVORITES) {
+		if (currentPage == marketplacePage && getViewer().getContentType() == ContentType.FAVORITES) {
 			marketplacePage.setActiveTab(ContentType.SEARCH);
 		}
+	}
+
+	@Override
+	protected MarketplaceViewer getViewer() {
+		return (MarketplaceViewer) super.getViewer();
 	}
 }

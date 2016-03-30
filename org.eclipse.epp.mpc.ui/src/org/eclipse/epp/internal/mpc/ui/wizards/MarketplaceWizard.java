@@ -468,6 +468,9 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			}
 			return nextPage;
 		}
+		if (page instanceof ImportFavoritesPage) {
+			return catalogPage;
+		}
 		return getNextPageInList(page);
 	}
 

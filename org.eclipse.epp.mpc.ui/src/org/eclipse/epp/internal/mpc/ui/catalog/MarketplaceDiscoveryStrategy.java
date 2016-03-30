@@ -81,7 +81,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	protected final CatalogDescriptor catalogDescriptor;
 
-	private final IMarketplaceService marketplaceService;
+	protected final IMarketplaceService marketplaceService;
 
 	private MarketplaceCatalogSource source;
 
@@ -208,14 +208,22 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		try {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory(progress.newChild(1000));
 
-			catalogCategory.setContents(Contents.FEATURED);
+			handleDiscoveryCategory(catalogCategory);
 
-			ISearchResult featured = marketplaceService.featured(progress.newChild(1000));
-			handleSearchResult(catalogCategory, featured, progress.newChild(1000));
+			ISearchResult discoveryResult = doPerformDiscovery(progress.newChild(1000));
+			handleSearchResult(catalogCategory, discoveryResult, progress.newChild(1000));
 			maybeAddCatalogItem(catalogCategory);
 		} finally {
 			monitor.done();
 		}
+	}
+
+	protected ISearchResult doPerformDiscovery(IProgressMonitor monitor) throws CoreException {
+		return marketplaceService.featured(monitor);
+	}
+
+	protected void handleDiscoveryCategory(MarketplaceCategory catalogCategory) {
+		catalogCategory.setContents(Contents.FEATURED);
 	}
 
 	protected void handleSearchResult(MarketplaceCategory catalogCategory, ISearchResult result,
@@ -863,5 +871,9 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	public IMarketplaceService getMarketplaceService() {
 		return marketplaceService;
+	}
+
+	protected MarketplaceCatalogSource getCatalogSource() {
+		return source;
 	}
 }

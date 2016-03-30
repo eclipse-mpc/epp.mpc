@@ -60,7 +60,6 @@ public class Node extends Identifiable implements INode {
 		this.favorited = favorited;
 	}
 
-	//TODO WIP javadoc
 	public Boolean getUserFavorite() {
 		return userFavorite;
 	}

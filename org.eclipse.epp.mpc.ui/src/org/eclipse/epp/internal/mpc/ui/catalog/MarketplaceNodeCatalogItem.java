@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.mpc.core.model.IIu;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.ui.Operation;
@@ -39,7 +40,7 @@ public class MarketplaceNodeCatalogItem extends CatalogItem {
 			field.setAccessible(true);
 		} catch (Exception e) {
 			field = null;
-			//TODO log
+			MarketplaceClientCore.error(Messages.MarketplaceNodeCatalogItem_changeSupportError, e);
 		} finally {
 			if (field != null && accessible != null && !accessible.equals(field.isAccessible())) {
 				field.setAccessible(accessible);
@@ -76,7 +77,7 @@ public class MarketplaceNodeCatalogItem extends CatalogItem {
 			PropertyChangeSupport changeSupport = (PropertyChangeSupport) changeSupportField.get(this);
 			return changeSupport;
 		} catch (Exception e) {
-			//TODO log - should not be possible
+			MarketplaceClientCore.error(Messages.MarketplaceNodeCatalogItem_changeSupportAccessError, e);
 		} finally {
 			if (changeSupportField != null && accessible != null
 					&& !accessible.equals(changeSupportField.isAccessible())) {

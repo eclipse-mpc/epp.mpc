@@ -10,25 +10,19 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.catalog;
 
-import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
-public class UserActionCatalogItem extends CatalogItem {
-	public static enum UserAction {
-		BROWSE, LOGIN, CREATE_FAVORITES, INSTALL_ALL_FAVORITES, FAVORITES_UNSUPPORTED, RETRY_ERROR, INFO;
+public class FavoritesCatalog extends MarketplaceCatalog {
+
+	@Override
+	public IStatus performDiscovery(IProgressMonitor monitor) {
+		return super.performDiscovery(monitor);
 	}
 
-	private UserAction userAction;
-
-	public UserActionCatalogItem() {
-		super();
-		// ignore
-	}
-
-	public UserAction getUserAction() {
-		return userAction;
-	}
-
-	public void setUserAction(UserAction userAction) {
-		this.userAction = userAction;
+	@Override
+	public IStatus checkForUpdates(IProgressMonitor monitor) {
+		return Status.OK_STATUS;
 	}
 }

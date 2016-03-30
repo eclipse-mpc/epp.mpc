@@ -226,13 +226,28 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 	}
 
 	public void setFavorite(INode node, boolean favorite, IProgressMonitor monitor)
-			throws NotFoundException, NotAuthorizedException, IOException, ConflictException {
+			throws NotAuthorizedException, ConflictException, IOException {
+		alterFavorites(Collections.singleton(node), favorite, monitor);
+	}
+
+	public void addFavorites(Collection<? extends INode> nodes, IProgressMonitor monitor)
+			throws NotAuthorizedException, ConflictException, IOException {
+		alterFavorites(nodes, true, monitor);
+	}
+
+	public void removeFavorites(Collection<? extends INode> nodes, IProgressMonitor monitor)
+			throws NotAuthorizedException, ConflictException, IOException {
+		alterFavorites(nodes, false, monitor);
+	}
+
+	private void alterFavorites(Collection<? extends INode> nodes, boolean favorite, IProgressMonitor monitor)
+			throws NotAuthorizedException, ConflictException, IOException {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.UserFavoritesService_SettingUserFavorites, 1000);
 		ConflictException conflictException = null;
 		for (int i = 0; i < RETRY_COUNT; i++) {
 			try {
 				progress.setWorkRemaining(1000);
-				doSetFavorite(node, favorite, progress.newChild(800));
+				doAlterFavorites(nodes, favorite, progress.newChild(800));
 				progress.done();
 				return;
 			} catch (ConflictException e) {
@@ -248,15 +263,17 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		}
 	}
 
-	private void doSetFavorite(INode node, boolean favorite, IProgressMonitor monitor)
-			throws NotFoundException, IOException, ConflictException {
+	private void doAlterFavorites(Collection<? extends INode> nodes, boolean favorite, IProgressMonitor monitor)
+			throws ConflictException, IOException {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.UserFavoritesService_SettingUserFavorites, 1000);
 		List<INode> favorites = getFavorites(progress.newChild(300));
-		INode currentFavorite = QueryHelper.findById(favorites, node);
-		if (currentFavorite != null && !favorite) {
-			favorites.remove(currentFavorite);
-		} else if (currentFavorite == null && favorite) {
-			favorites.add(node);
+		for (INode node : nodes) {
+			INode currentFavorite = QueryHelper.findById(favorites, node);
+			if (currentFavorite != null && !favorite) {
+				favorites.remove(currentFavorite);
+			} else if (currentFavorite == null && favorite) {
+				favorites.add(node);
+			}
 		}
 		setFavorites(favorites, progress.newChild(700));
 	}

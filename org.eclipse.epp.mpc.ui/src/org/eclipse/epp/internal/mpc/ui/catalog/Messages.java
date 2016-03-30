@@ -15,6 +15,10 @@ import org.eclipse.osgi.util.NLS;
 class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.epp.internal.mpc.ui.catalog.messages"; //$NON-NLS-1$
 
+	public static String FavoritesDiscoveryStrategy_enterUserIdOrMailMessage;
+
+	public static String FavoritesDiscoveryStrategy_noFavoritesMessage;
+
 	public static String MarketplaceCatalog_addedNullEntry;
 
 	public static String MarketplaceCatalog_Checking_News;
@@ -74,6 +78,10 @@ class Messages extends NLS {
 	public static String MarketplaceDiscoveryStrategy_unknownFilter;
 
 	public static String MarketplaceInfo_LoadError;
+
+	public static String MarketplaceNodeCatalogItem_changeSupportAccessError;
+
+	public static String MarketplaceNodeCatalogItem_changeSupportError;
 	
 	public static String ResourceProvider_downloadError;
 

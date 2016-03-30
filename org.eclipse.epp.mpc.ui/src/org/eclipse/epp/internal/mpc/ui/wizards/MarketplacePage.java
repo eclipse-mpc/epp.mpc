@@ -84,7 +84,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
  * @author Steffen Pingel
  * @author Carsten Reckord
  */
-public class MarketplacePage extends CatalogPage {
+public class MarketplacePage extends CatalogPage implements IWizardButtonLabelProvider {
 
 	private static final String WIDGET_ID_TAB_FAVORITES = "tab:favorites"; //$NON-NLS-1$
 
@@ -1014,5 +1014,17 @@ public class MarketplacePage extends CatalogPage {
 			marketplaceSwitcher.dispose();
 		}
 		super.dispose();
+	}
+
+	public void reloadCatalog() {
+		getViewer().reload();
+	}
+
+	public String getNextButtonLabel() {
+		return Messages.MarketplaceWizardDialog_Install_Now;
+	}
+
+	public String getBackButtonLabel() {
+		return null;
 	}
 }

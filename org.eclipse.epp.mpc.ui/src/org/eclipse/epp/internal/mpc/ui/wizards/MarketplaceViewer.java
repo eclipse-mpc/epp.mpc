@@ -767,7 +767,6 @@ public class MarketplaceViewer extends CatalogViewer {
 				if (newQueryData == null) {
 					newQueryData = new QueryData();
 					if (queryType == ContentType.FEATURED_MARKET) {
-						//WIP init market
 						CatalogDescriptor catalogDescriptor = this.getWizard()
 								.getConfiguration()
 								.getCatalogDescriptor();

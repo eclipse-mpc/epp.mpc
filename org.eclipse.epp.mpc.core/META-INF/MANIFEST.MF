@@ -18,6 +18,7 @@ Export-Package: org.eclipse.epp.internal.mpc.core;x-friends:="org.eclipse.epp.mp
  org.eclipse.epp.internal.mpc.core.model;x-friends:="org.eclipse.epp.mpc.ui",
  org.eclipse.epp.internal.mpc.core.service;x-friends:="org.eclipse.epp.mpc.ui",
  org.eclipse.epp.internal.mpc.core.service.xml;x-internal:=true,
+ org.eclipse.epp.internal.mpc.core.transport.httpclient;x-internal:=true,
  org.eclipse.epp.internal.mpc.core.util;x-friends:="org.eclipse.epp.mpc.ui",
  org.eclipse.epp.mpc.core.model,
  org.eclipse.epp.mpc.core.service

@@ -11,6 +11,7 @@
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.AbstractDiscoveryItem;
+import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryResources;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -24,12 +25,12 @@ import org.eclipse.swt.widgets.Listener;
 
 public abstract class UserActionViewerItem<E> extends AbstractDiscoveryItem<E> {
 
-	protected final MarketplaceViewer viewer;
+	private final CatalogViewer viewer;
 	protected final DiscoveryResources resources;
 	protected final IShellProvider shellProvider;
 
 	public UserActionViewerItem(Composite parent, DiscoveryResources resources, IShellProvider shellProvider, E element,
-			MarketplaceViewer viewer) {
+			CatalogViewer viewer) {
 		super(parent, SWT.NULL, resources, element);
 		this.resources = resources;
 		this.shellProvider = shellProvider;
@@ -81,5 +82,9 @@ public abstract class UserActionViewerItem<E> extends AbstractDiscoveryItem<E> {
 	@Override
 	protected void refresh() {
 		// ignore
+	}
+
+	protected CatalogViewer getViewer() {
+		return viewer;
 	}
 }

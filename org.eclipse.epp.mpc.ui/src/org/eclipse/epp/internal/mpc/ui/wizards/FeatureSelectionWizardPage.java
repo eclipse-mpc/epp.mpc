@@ -68,7 +68,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.statushandlers.StatusManager;
 
-public class FeatureSelectionWizardPage extends WizardPage {
+public class FeatureSelectionWizardPage extends WizardPage implements IWizardButtonLabelProvider {
 
 	private static class LabelProvider extends ColumnLabelProvider implements IStyledLabelProvider {
 
@@ -625,5 +625,13 @@ public class FeatureSelectionWizardPage extends WizardPage {
 
 	public boolean isInRemediationMode() {
 		return switchResultLayout.topControl != defaultComposite;
+	}
+
+	public String getNextButtonLabel() {
+		return Messages.MarketplaceWizardDialog_Confirm;
+	}
+
+	public String getBackButtonLabel() {
+		return Messages.MarketplaceWizardDialog_Install_More;
 	}
 }

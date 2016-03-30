@@ -12,6 +12,8 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.util.List;
 
+import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesCatalog;
+import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
@@ -39,7 +41,7 @@ public abstract class UserFavoritesAbstractImportActionItem extends AbstractUser
 	}
 
 	protected void importFavorites() {
-		List<AbstractDiscoveryStrategy> discoveryStrategies = viewer.getCatalog().getDiscoveryStrategies();
+		List<AbstractDiscoveryStrategy> discoveryStrategies = getViewer().getCatalog().getDiscoveryStrategies();
 		for (AbstractDiscoveryStrategy strategy : discoveryStrategies) {
 			if (strategy instanceof MarketplaceDiscoveryStrategy) {
 				MarketplaceDiscoveryStrategy marketplaceStrategy = (MarketplaceDiscoveryStrategy) strategy;
@@ -55,7 +57,9 @@ public abstract class UserFavoritesAbstractImportActionItem extends AbstractUser
 
 	private void importFavorites(MarketplaceDiscoveryStrategy marketplaceStrategy) {
 		MarketplaceWizard wizard = marketplacePage.getWizard();
-		ImportFavoritesPage importFavoritesPage = new ImportFavoritesPage(marketplacePage.getCatalog());
+		FavoritesCatalog favoritesCatalog = new FavoritesCatalog();
+		favoritesCatalog.getDiscoveryStrategies().add(new FavoritesDiscoveryStrategy(marketplaceStrategy));
+		ImportFavoritesPage importFavoritesPage = new ImportFavoritesPage(favoritesCatalog);
 		importFavoritesPage.setWizard(wizard);
 		wizard.getContainer().showPage(importFavoritesPage);
 	}

@@ -25,6 +25,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.ResponseHandler;
@@ -60,7 +61,10 @@ public class HttpClientTransport implements ITransport {
 
 	private static final org.apache.http.client.HttpClient CLIENT;
 
-	private final Executor executor = Executor.newInstance(CLIENT);//WIP .cookieStore(cookieStore);
+	@SuppressWarnings("restriction")
+	private final CookieStore cookieStore = new org.apache.http.impl.client.BasicCookieStore();
+
+	private final Executor executor = Executor.newInstance(CLIENT).cookieStore(cookieStore);
 
 	static {
 		Bundle mpcCoreBundle = FrameworkUtil.getBundle(HttpClientTransport.class);

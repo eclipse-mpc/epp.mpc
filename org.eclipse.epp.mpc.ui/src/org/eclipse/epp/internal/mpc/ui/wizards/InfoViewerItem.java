@@ -10,35 +10,39 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
+import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryResources;
 import org.eclipse.jface.window.IShellProvider;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 
-public class UserFavoritesLoginActionItem extends UserActionViewerItem<UserActionCatalogItem> {
-	public UserFavoritesLoginActionItem(Composite parent, DiscoveryResources resources, IShellProvider shellProvider,
-			UserActionCatalogItem element, MarketplaceViewer viewer) {
+class InfoViewerItem extends UserActionViewerItem<UserActionCatalogItem> {
+	public InfoViewerItem(Composite parent, DiscoveryResources resources,
+			IShellProvider shellProvider, UserActionCatalogItem element, CatalogViewer viewer) {
 		super(parent, resources, shellProvider, element, viewer);
 		createContent();
 	}
 
 	@Override
+	protected Control createActionLink(Composite parent) {
+		String text = getLinkText();
+		Label label = new Label(parent, SWT.NONE);
+		label.setBackground(null);
+		label.setText(text);
+		return label;
+	}
+
+	@Override
 	protected String getLinkText() {
-		return "<a>" + Messages.UserFavoritesLoginActionItem_logInActionLabel + "</a>"; //$NON-NLS-1$ //$NON-NLS-2$
+		return this.getData().getDescription();
 	}
 
 	@Override
 	protected void actionPerformed(Object data) {
-		final MarketplaceCatalog catalog = getViewer().getCatalog();
-		catalog.userFavorites(true, new NullProgressMonitor());
-		getViewer().updateContents();
-	}
+		// ignore
 
-	@Override
-	protected MarketplaceViewer getViewer() {
-		return (MarketplaceViewer) super.getViewer();
 	}
-
 }

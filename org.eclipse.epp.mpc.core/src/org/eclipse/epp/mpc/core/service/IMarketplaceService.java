@@ -184,10 +184,8 @@ public interface IMarketplaceService {
 	 * @param monitor
 	 *            progress and cancellation
 	 * @throws CoreException
-	 * @throws NotAuthorizedException
-	 *             if the current user isn't logged in
 	 */
-	ISearchResult userFavorites(String user, IProgressMonitor monitor) throws CoreException, NotAuthorizedException;
+	ISearchResult userFavorites(String user, IProgressMonitor monitor) throws CoreException;
 
 	/**
 	 * Get the news configuration for the marketplace

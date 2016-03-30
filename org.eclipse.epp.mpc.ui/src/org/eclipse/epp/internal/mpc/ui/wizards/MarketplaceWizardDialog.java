@@ -161,6 +161,34 @@ public class MarketplaceWizardDialog extends WizardDialog {
 				&& ((FeatureSelectionWizardPage) fromPage).isInRemediationMode()) {
 			((FeatureSelectionWizardPage) fromPage).flipToDefaultComposite();
 		}
+		IWizardPage previousPage = getCurrentPage();
+		if (previousPage != fromPage) {
+			if (fromPage instanceof IWizardPageAction) {
+				IWizardPageAction sourceAction = (IWizardPageAction) fromPage;
+				sourceAction.exit(false);
+			}
+			if (previousPage instanceof IWizardPageAction) {
+				IWizardPageAction nextAction = (IWizardPageAction) previousPage;
+				nextAction.enter(false);
+			}
+		}
+	}
+
+	@Override
+	protected void nextPressed() {
+		IWizardPage fromPage = getCurrentPage();
+		if (fromPage instanceof IWizardPageAction) {
+			IWizardPageAction sourceAction = (IWizardPageAction) fromPage;
+			if (!sourceAction.exit(true)) {
+				return;
+			}
+		}
+		super.nextPressed();
+		IWizardPage nextPage = getCurrentPage();
+		if (nextPage != fromPage && nextPage instanceof IWizardPageAction) {
+			IWizardPageAction nextAction = (IWizardPageAction) nextPage;
+			nextAction.enter(true);
+		}
 	}
 
 	@Override
@@ -209,17 +237,23 @@ public class MarketplaceWizardDialog extends WizardDialog {
 	}
 
 	public String getNextButtonLabel(IWizardPage page) {
-		if (page == getWizard().getCatalogPage()) {
-			return Messages.MarketplaceWizardDialog_Install_Now;
-		} else if (page == getWizard().getFeatureSelectionWizardPage()) {
-			return Messages.MarketplaceWizardDialog_Confirm;
+		if (page instanceof IWizardButtonLabelProvider) {
+			IWizardButtonLabelProvider labelProvider = (IWizardButtonLabelProvider) page;
+			String nextButtonLabel = labelProvider.getNextButtonLabel();
+			if (nextButtonLabel != null) {
+				return nextButtonLabel;
+			}
 		}
 		return IDialogConstants.NEXT_LABEL;
 	}
 
 	public String getBackButtonLabel(IWizardPage page) {
-		if (page == getWizard().getFeatureSelectionWizardPage()) {
-			return Messages.MarketplaceWizardDialog_Install_More;
+		if (page instanceof IWizardButtonLabelProvider) {
+			IWizardButtonLabelProvider labelProvider = (IWizardButtonLabelProvider) page;
+			String backButtonLabel = labelProvider.getBackButtonLabel();
+			if (backButtonLabel != null) {
+				return backButtonLabel;
+			}
 		}
 		return IDialogConstants.BACK_LABEL;
 	}

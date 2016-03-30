@@ -57,6 +57,11 @@ public class RetryErrorActionItem extends AbstractUserActionLinksItem {
 	}
 
 	protected void retry() {
-		this.viewer.reload();
+		this.getViewer().reload();
+	}
+
+	@Override
+	protected MarketplaceViewer getViewer() {
+		return (MarketplaceViewer) super.getViewer();
 	}
 }

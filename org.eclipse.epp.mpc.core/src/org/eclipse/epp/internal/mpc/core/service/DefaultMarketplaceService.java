@@ -467,8 +467,7 @@ MarketplaceService {
 		return resolveFavoriteNodes(favorites, progress.newChild(9000));
 	}
 
-	public ISearchResult userFavorites(String user, IProgressMonitor monitor)
-			throws CoreException, NotAuthorizedException {
+	public ISearchResult userFavorites(String user, IProgressMonitor monitor) throws CoreException {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.DefaultMarketplaceService_FavoritesRetrieve, 10000);
 		IUserFavoritesService userFavoritesService = getUserFavoritesService();
 		if (userFavoritesService == null) {
@@ -477,8 +476,6 @@ MarketplaceService {
 		final List<INode> favorites;
 		try {
 			favorites = userFavoritesService.getFavorites(user, progress.newChild(1000));
-		} catch (NotAuthorizedException e) {
-			throw e;
 		} catch (Exception e) {
 			throw new CoreException(MarketplaceClientCore.computeStatus(e,
 					Messages.DefaultMarketplaceService_FavoritesErrorRetrieving));

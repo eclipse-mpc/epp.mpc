@@ -55,7 +55,9 @@ public interface INode extends IIdentifiable {
 	 */
 	String getType();
 
-	//TODO WIP javadoc
+	/**
+	 * The favorited status for the current user, or null if no user is logged in.
+	 */
 	Boolean getUserFavorite();
 
 	/**

@@ -56,8 +56,8 @@ public class BrowseCatalogItem extends UserActionViewerItem<CatalogDescriptor> {
 
 	@Override
 	protected String getLinkText() {
-		if (viewer.getQueryContentType() == ContentType.SEARCH
-				|| viewer.getQueryContentType() == ContentType.FEATURED_MARKET) {
+		if (getViewer().getQueryContentType() == ContentType.SEARCH
+				|| getViewer().getQueryContentType() == ContentType.FEATURED_MARKET) {
 			return NLS.bind(Messages.BrowseCatalogItem_browseMoreLink, category.getMatchCount());
 		} else {
 			return Messages.BrowseCatalogItem_browseMoreLinkNoCount;
@@ -80,11 +80,11 @@ public class BrowseCatalogItem extends UserActionViewerItem<CatalogDescriptor> {
 		try {
 			URL url = catalogDescriptor.getUrl();
 			try {
-				ContentType contentType = viewer.getQueryContentType();
+				ContentType contentType = getViewer().getQueryContentType();
 				if (contentType == ContentType.SEARCH) {
-					String queryText = viewer.getQueryText();
-					ICategory queryCategory = viewer.getQueryCategory();
-					IMarket queryMarket = viewer.getQueryMarket();
+					String queryText = getViewer().getQueryText();
+					ICategory queryCategory = getViewer().getQueryCategory();
+					IMarket queryMarket = getViewer().getQueryMarket();
 					String path = new DefaultMarketplaceService(url).computeRelativeSearchUrl(queryMarket,
 							queryCategory, queryText, false);
 					if (path != null) {
@@ -105,5 +105,10 @@ public class BrowseCatalogItem extends UserActionViewerItem<CatalogDescriptor> {
 			IStatus status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, IStatus.ERROR, message, e);
 			MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 		}
+	}
+
+	@Override
+	protected MarketplaceViewer getViewer() {
+		return (MarketplaceViewer) super.getViewer();
 	}
 }
