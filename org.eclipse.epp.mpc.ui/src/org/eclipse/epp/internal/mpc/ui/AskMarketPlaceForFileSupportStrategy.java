@@ -10,26 +10,37 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.epp.mpc.core.model.INode;
+import org.eclipse.epp.mpc.core.model.ISearchResult;
+import org.eclipse.epp.mpc.core.service.IMarketplaceService;
+import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
 import org.eclipse.epp.mpc.ui.IMarketplaceClientConfiguration;
 import org.eclipse.epp.mpc.ui.IMarketplaceClientService;
 import org.eclipse.epp.mpc.ui.MarketplaceClient;
-import org.eclipse.equinox.p2.operations.ProvisioningJob;
+import org.eclipse.epp.mpc.ui.Operation;
+import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorRegistry;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.dialogs.EditorSelectionDialog;
 import org.eclipse.ui.ide.IUnassociatedEditorStrategy;
-import org.eclipse.ui.internal.ide.IDEWorkbenchMessages;
+import org.eclipse.ui.internal.ide.SystemEditorOrTextEditorStrategy;
+import org.eclipse.ui.internal.registry.EditorRegistry;
+import org.eclipse.ui.internal.registry.FileEditorMapping;
+import org.eclipse.ui.progress.UIJob;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 /**
  * For a given file, search entries on marketplace that would match the search "fileExtension_${extension}". MarketPlace
@@ -39,82 +50,101 @@ import org.eclipse.ui.internal.ide.IDEWorkbenchMessages;
  */
 public class AskMarketPlaceForFileSupportStrategy implements IUnassociatedEditorStrategy {
 
-	private final class ProvisioningJobChangeListener implements IJobChangeListener {
-
-		private final Set<Job> provisioningJobs = new HashSet<Job>();
-
-		public void sleeping(IJobChangeEvent event) {
-			// ignore
-		}
-
-		public void scheduled(IJobChangeEvent event) {
-			if (event.getJob() instanceof ProvisioningJob) {
-				provisioningJobs.add(event.getJob());
-			}
-		}
-
-		public void running(IJobChangeEvent event) {
-			if (event.getJob() instanceof ProvisioningJob) {
-				provisioningJobs.add(event.getJob());
-			}
-		}
-
-		public void done(IJobChangeEvent event) {
-			if (event.getJob() instanceof ProvisioningJob) {
-				provisioningJobs.remove(event.getJob());
-			}
-		}
-
-		public void awake(IJobChangeEvent event) {
-			// ignore
-		}
-
-		public void aboutToRun(IJobChangeEvent event) {
-			if (event.getJob() instanceof ProvisioningJob) {
-				provisioningJobs.add(event.getJob());
-			}
-		}
-
-		public boolean hasProvisioningJobScheduledOrRunning() {
-			return !this.provisioningJobs.isEmpty();
-		}
-	}
 
 	public AskMarketPlaceForFileSupportStrategy() {
 	}
 
-	public IEditorDescriptor getEditorDescriptor(String fileName, IEditorRegistry editorRegistry)
+	public IEditorDescriptor getEditorDescriptor(final String fileName, final IEditorRegistry editorRegistry)
 			throws CoreException, OperationCanceledException {
-		IMarketplaceClientService marketplaceClientService = MarketplaceClient.getMarketplaceClientService();
-		IMarketplaceClientConfiguration config = marketplaceClientService.newConfiguration();
-		String[] split = fileName.split("\\."); //$NON-NLS-1$
-		String query = "fileExtension_" + split[split.length - 1]; //$NON-NLS-1$]
-		ProvisioningJobChangeListener provisioningJobMonitor = new ProvisioningJobChangeListener();
-		Job.getJobManager().addJobChangeListener(provisioningJobMonitor);
-		marketplaceClientService.openSearch(config, null, null, query);
-		// wait for installation to complete
-		while (provisioningJobMonitor.hasProvisioningJobScheduledOrRunning()) {
-			Display.getCurrent().readAndDispatch();
-		}
-		// after operation, a restart is prompted, what's following is then only relevant
-		// if user has canceled the installation.
+		final IEditorDescriptor res = new SystemEditorOrTextEditorStrategy().getEditorDescriptor(fileName, editorRegistry);
+		final Shell shell = WorkbenchUtil.getShell();
+		Job mpcJob = new Job(Messages.AskMarketPlaceForFileSupportStrategy_jobName) {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				BundleContext bundleContext = MarketplaceClientUiPlugin.getBundleContext();
+				ServiceReference<IMarketplaceServiceLocator> locatorReference = bundleContext
+						.getServiceReference(IMarketplaceServiceLocator.class);
+				IMarketplaceServiceLocator locator = bundleContext.getService(locatorReference);
+				IMarketplaceService marketplaceService = locator.getDefaultMarketplaceService();
+				String[] split = fileName.split("\\."); //$NON-NLS-1$
+				final String fileExtension = split[split.length - 1];
+				String query = "fileExtension_" + fileExtension; //$NON-NLS-1$]
+				ISearchResult searchResult = null;
+				try {
+					searchResult = marketplaceService.search(null, null, query, monitor);
+				} catch (CoreException ex) {
+					return new Status(IStatus.ERROR,
+							MarketplaceClientUiPlugin.getInstance().getBundle().getSymbolicName(), ex.getMessage(), ex);
+				}
+				final List<? extends INode> nodes = searchResult.getNodes();
+				// this list requires some filtering: bug 491530
+//				List<INode> nodes = new ArrayList<INode>();
+//				for (INode node : searchResult.getNodes()) {
+//					if (node.getTags() != null) {
+//						for (ITag tag : node.getTags().getTags()) {
+//							if (query.equals(tag.getName())) {
+//								nodes.add(node);
+//								break;
+//							}
+//						}
+//					}
+//				}
+				if (nodes.isEmpty()) {
+					return Status.OK_STATUS;
+				}
+				final MarketplaceOrAssociateDialog dialog = new MarketplaceOrAssociateDialog(shell,
+						fileExtension, res);
+				UIJob openDialog = new UIJob(Messages.AskMerketplaceForFileSupportStrategy_dialogJobName) {
+					@Override
+					public IStatus runInUIThread(IProgressMonitor monitor) {
+						if (dialog.open() == IDialogConstants.OK_ID) {
+							if (dialog.isShowProposals()) {
+								IMarketplaceClientService marketplaceClientService = MarketplaceClient
+										.getMarketplaceClientService();
+								Map<String, Operation> selection = new HashMap<String, Operation>();
+								for (INode node : nodes) {
+									selection.put(node.getId(), Operation.INSTALL);
+								}
+								IMarketplaceClientConfiguration config = marketplaceClientService.newConfiguration();
+								config.setInitialOperations(selection);
+								marketplaceClientService.openSelected(config);
+							} else if (dialog.isAssociateToExtension()) {
+								List<String> extensions = new ArrayList<String>(1);
+								extensions.add(fileExtension);
+								// need internal API:
+								// * https://bugs.eclipse.org/bugs/show_bug.cgi?id=110602
+								// * https://www.eclipse.org/forums/index.php/t/98199/
+								FileEditorMapping[] mappings = new FileEditorMapping[editorRegistry
+										.getFileEditorMappings().length + 1];
+								System.arraycopy(editorRegistry.getFileEditorMappings(), 0, mappings, 0,
+										mappings.length - 1);
+								FileEditorMapping newMapping = null;
+								if (fileName.equals(fileExtension)) {
+									newMapping = new FileEditorMapping(fileName, null);
+								} else {
+									newMapping = new FileEditorMapping(fileExtension);
+								}
+								newMapping.setDefaultEditor(res);
+								mappings[mappings.length - 1] = newMapping;
+								((EditorRegistry) editorRegistry).setFileEditorMappings(mappings);
+							}
+							return Status.OK_STATUS;
+						} else {
+							return Status.CANCEL_STATUS;
+						}
+					}
+				};
+				openDialog.setPriority(Job.INTERACTIVE);
+				openDialog.setSystem(true);
+				openDialog.schedule();
+				return Status.OK_STATUS;
+			}
+		};
+		mpcJob.setPriority(Job.INTERACTIVE);
+		mpcJob.setUser(true);
+		mpcJob.schedule();
 
-		// just after openSearch, we cannot immediately resolve to an editor. This require a restart.
-		// Assuming necessary extension points are dynamic and registry is automatically updated, we could:
-		// 1. wait for install operation completed
-		// 2. apply change to update editor bundles and extension registry
-		// 3. ask registry about best editor
-		// return editorRegistry.getDefaultEditor(fileName);
-
-		// case of "Cancel": ask user
-		EditorSelectionDialog dialog = new EditorSelectionDialog(
-				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
-		dialog.setFileName(fileName);
-		dialog.setBlockOnOpen(true);
-		if (IDialogConstants.CANCEL_ID == dialog.open()) {
-			throw new OperationCanceledException(IDEWorkbenchMessages.IDE_noFileEditorSelectedUserCanceled);
-		}
-		return dialog.getSelectedEditor();
+		return res;
 	}
 
 }

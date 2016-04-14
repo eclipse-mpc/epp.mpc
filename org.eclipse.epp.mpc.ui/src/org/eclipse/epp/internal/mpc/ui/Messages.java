@@ -24,6 +24,10 @@ class Messages extends NLS {
 
 	public static String CatalogExtensionPointReader_urlRequired;
 
+	public static String AskMarketPlaceForFileSupportStrategy_jobName;
+
+	public static String AskMerketplaceForFileSupportStrategy_dialogJobName;
+
 	/**
 	 * Only kept here to give translations time to move the message to the new bundle without causing warnings.
 	 *
@@ -57,6 +61,17 @@ class Messages extends NLS {
 	 */
 	@Deprecated
 	public static String MarketplaceClientUi_connectionProblem;
+
+	public static String MarketplaceOrAssociateDialog_title;
+
+	public static String MarketplaceOrAssociateDialog_linkToPreferences;
+
+	public static String MarketplaceOrAssociateDialog_message;
+
+	public static String MarketplaceOrAssociateDialog_showProposals;
+
+	public static String MarketplaceOrAssociateDialog_associate;
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
