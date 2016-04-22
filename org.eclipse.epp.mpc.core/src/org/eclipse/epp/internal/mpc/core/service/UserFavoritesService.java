@@ -156,7 +156,11 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.UserFavoritesService_SettingUserFavorites, 1000);
 		String favoritesData = createFavoritesBlobData(nodes);
 		try {
-			getFavoritesBlob().setContentsUTF(favoritesData);
+			if (favoritesData == null || "".equals(favoritesData)) { //$NON-NLS-1$
+				getFavoritesBlob().delete();
+			} else {
+				getFavoritesBlob().setContentsUTF(favoritesData);
+			}
 			progress.worked(900);//FIXME waiting for USS bug 488335 to have proper progress and cancelation
 		} catch (OperationCanceledException ex) {
 			throw processProtocolException(ex);
@@ -207,6 +211,9 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 	}
 
 	protected String createFavoritesBlobData(Collection<? extends INode> nodes) {
+		if (nodes.isEmpty()) {
+			return null;
+		}
 		List<String> nodeIds = new ArrayList<String>(nodes.size());
 		for (INode node : nodes) {
 			nodeIds.add(node.getId());
