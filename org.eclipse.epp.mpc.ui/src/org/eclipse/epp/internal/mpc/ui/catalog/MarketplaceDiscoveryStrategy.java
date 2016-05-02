@@ -238,12 +238,14 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 				boolean userFavoritesSupported = false;
 				if (catalogCategory.getContents() == Contents.USER_FAVORITES) {
 					userFavoritesSupported = true;
-				} else {
+				} else if (hasUserFavoritesService()) {
 					try {
 						marketplaceService.userFavorites(result.getNodes(), progress.newChild(favoritesWork));
 						userFavoritesSupported = true;
 					} catch (NotAuthorizedException e1) {
 						// user is not logged in. we just ignore this.
+					} catch (UnsupportedOperationException e1) {
+						// ignore
 					} catch (Exception e1) {
 						// something went wrong. log and proceed.
 						MarketplaceClientCore.error(Messages.MarketplaceDiscoveryStrategy_FavoritesRetrieveError, e1);
@@ -655,8 +657,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		try {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory(progress.newChild(1));
 			List<CatalogItem> items = catalogCategory.getItems();
-			IUserFavoritesService userFavoritesService = marketplaceService.getUserFavoritesService();
-			if (userFavoritesService != null) {
+			if (hasUserFavoritesService()) {
 				Map<String, INode> nodes = new HashMap<String, INode>();
 				for (CatalogItem item : items) {
 					Object data = item.getData();

@@ -16,8 +16,6 @@ import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
-import org.eclipse.epp.mpc.core.service.IMarketplaceService;
-import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryResources;
 import org.eclipse.jface.window.IShellProvider;
@@ -45,9 +43,7 @@ public abstract class UserFavoritesAbstractImportActionItem extends AbstractUser
 		for (AbstractDiscoveryStrategy strategy : discoveryStrategies) {
 			if (strategy instanceof MarketplaceDiscoveryStrategy) {
 				MarketplaceDiscoveryStrategy marketplaceStrategy = (MarketplaceDiscoveryStrategy) strategy;
-				IMarketplaceService marketplaceService = marketplaceStrategy.getMarketplaceService();
-				IUserFavoritesService userFavoritesService = marketplaceService.getUserFavoritesService();
-				if (userFavoritesService != null) {
+				if (marketplaceStrategy.hasUserFavoritesService()) {
 					importFavorites(marketplaceStrategy);
 					return;
 				}
