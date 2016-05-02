@@ -228,7 +228,8 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	protected void handleSearchResult(MarketplaceCategory catalogCategory, ISearchResult result,
 			final IProgressMonitor monitor) {
-		if (!result.getNodes().isEmpty()) {
+		List<CatalogItem> items = getItems();
+		if (items != null && !result.getNodes().isEmpty()) {
 			int nodeWork = 1000;
 			int favoritesWork = catalogCategory.getContents() == Contents.USER_FAVORITES ? 0 : 1000;
 			SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_loadingResources,
