@@ -12,6 +12,8 @@
 
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import java.util.List;
+
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalogSource;
@@ -27,6 +29,7 @@ import org.eclipse.equinox.internal.p2.discovery.model.Overview;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.AbstractDiscoveryItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.window.ToolTip;
@@ -46,6 +49,8 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -62,6 +67,12 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
  * @author Carsten Reckord
  */
 public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<T> {
+
+	private static final String ELLIPSIS = new String("\u2026"); //$NON-NLS-1$
+
+	private static final int MAX_SHOWN_TAGS = 5;
+
+	private static final int MAX_TOTAL_TAGS = 30;
 
 	protected static final String INFO_HREF = "info"; //$NON-NLS-1$
 
@@ -454,23 +465,91 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		.grab(true, false)
 		.applyTo(tagsLink);
 
-		ITags tags = getCatalogItemNode().getTags();
-		if (tags == null) {
+		ITags tagsObject = getCatalogItemNode().getTags();
+		if (tagsObject == null) {
 			return;
 		}
-		for (ITag tag : tags.getTags()) {
+		final List<? extends ITag> tags = tagsObject.getTags();
+		if (tags.isEmpty()) {
+			return;
+		}
+
+		boolean needsEllipsis = tags.size() > MAX_SHOWN_TAGS;
+		for (int i = 0; i < MAX_SHOWN_TAGS && i < tags.size(); i++) {
+			ITag tag = tags.get(i);
 			String tagName = tag.getName();
 			StyledTextHelper.appendLink(tagsLink, tagName, tagName, SWT.NORMAL);
 			tagsLink.append(" "); //$NON-NLS-1$
 		}
+		if (needsEllipsis) {
+			StyledTextHelper.appendLink(tagsLink, ELLIPSIS, ELLIPSIS, SWT.NORMAL);
+			createTagsTooltip(tagsLink, tags);
+		}
 		new LinkListener() {
 			@Override
 			protected void selected(Object href, TypedEvent e) {
-				if (href != null) {
+				if (href == ELLIPSIS) {
+					Object data = e.widget.getData();
+					if (data instanceof ToolTip) {
+						ToolTip tooltip = (ToolTip) data;
+						tooltip.show(new Point(0, 0));
+					}
+				} else if (href != null) {
 					searchForTag(href.toString());
 				}
 			}
 		}.register(tagsLink);
+	}
+
+	private void createTagsTooltip(final StyledText tagsLink, final List<? extends ITag> tags) {
+		final ToolTip tooltip = new ToolTip(tagsLink, ToolTip.NO_RECREATE, false) {
+
+			@Override
+			protected Composite createToolTipContentArea(Event event, Composite parent) {
+				Composite result = new Composite(parent, SWT.NONE);
+				result.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+				result.setLayout(new GridLayout());
+				StyledText fullTagLinks = StyledTextHelper.createStyledTextLabel(result);
+				fullTagLinks.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+				fullTagLinks.setForeground(parent.getDisplay().getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+				for (int i = 0; i < MAX_TOTAL_TAGS && i < tags.size(); i++) {
+					ITag tag = tags.get(i);
+					String tagName = tag.getName();
+					StyledTextHelper.appendLink(fullTagLinks, tagName, tagName, SWT.NORMAL);
+					fullTagLinks.append(" "); //$NON-NLS-1$
+				}
+				if (tags.size() > MAX_TOTAL_TAGS) {
+					//Limit shown tags to a hard maximum, because too many links
+					//can crash the StyledText widget (at least on Windows...)
+					fullTagLinks.append(ELLIPSIS);
+				}
+
+				new LinkListener() {
+					@Override
+					protected void selected(Object href, TypedEvent e) {
+						hide();
+						if (href != null) {
+							searchForTag(href.toString());
+						}
+					}
+				}.register(fullTagLinks);
+				GridData gridData = new GridData();
+				gridData.widthHint = tagsLink.getSize().x;
+				fullTagLinks.setLayoutData(gridData);
+				Dialog.applyDialogFont(result);
+				return result;
+			}
+
+			@Override
+			public Point getLocation(Point tipSize, Event event) {
+				Point size = tagsLink.getSize();
+				return tagsLink.toDisplay(0, size.y);
+			}
+		};
+		tagsLink.setData(tooltip);
+		tooltip.setHideOnMouseDown(false);
+		tooltip.setPopupDelay(0);
+		tooltip.activate();
 	}
 
 	protected abstract void searchForTag(String tag);
