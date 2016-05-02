@@ -662,12 +662,24 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 			Display.getCurrent().asyncExec(new Runnable() {
 				public void run() {
 					if (!getControl().isDisposed() && isCurrentPage()) {
-						getWizard().updateNews();
-						getViewer().updateCatalog();
-						updateBranding();
+						safeUpdateCatalog();
 					}
 				}
 			});
+		}
+	}
+
+	private void safeUpdateCatalog() {
+		try {
+			getWizard().updateNews();
+			getViewer().updateCatalog();
+			updateBranding();
+		} catch (SWTException ex) {
+			if (ex.code == SWT.ERROR_WIDGET_DISPOSED) {
+				//ignore - this happens if the wizard is closed during the update
+				return;
+			}
+			throw ex;
 		}
 	}
 
@@ -932,9 +944,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 						return;
 					}
 					getWizard().initializeCatalog();
-					getWizard().updateNews();
-					getViewer().updateCatalog();
-					updateBranding();
+					safeUpdateCatalog();
 				}
 			});
 		} catch (InvocationTargetException e) {
