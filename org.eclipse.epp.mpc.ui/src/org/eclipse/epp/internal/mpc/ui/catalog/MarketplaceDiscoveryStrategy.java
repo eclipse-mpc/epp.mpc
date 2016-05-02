@@ -382,7 +382,8 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	}
 
 	public void maybeAddCatalogItem(MarketplaceCategory catalogCategory) {
-		if (!items.isEmpty()) {
+		List<CatalogItem> items = getItems();
+		if (items != null && !items.isEmpty()) {
 			CatalogItem catalogItem = items.get(items.size() - 1);
 			if (catalogItem.getData() != catalogDescriptor) {
 				addCatalogItem(catalogCategory);
