@@ -16,9 +16,13 @@ import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
 
+import org.eclipse.epp.internal.mpc.core.util.DebugTraceUtil;
 import org.eclipse.epp.internal.mpc.core.util.ProxyHelper;
 import org.eclipse.epp.internal.mpc.core.util.TransportFactory;
 import org.eclipse.epp.mpc.core.service.ITransportFactory;
+import org.eclipse.osgi.service.debug.DebugOptions;
+import org.eclipse.osgi.service.debug.DebugOptionsListener;
+import org.eclipse.osgi.service.debug.DebugTrace;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -28,6 +32,20 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 public class MarketplaceClientCorePlugin implements BundleActivator {
+
+	public static final String DEBUG_OPTION = "/debug"; //$NON-NLS-1$
+
+	public static final String DEBUG_FAKE_CLIENT_OPTION = "/client/fakeVersion"; //$NON-NLS-1$
+
+	public static final String DEBUG_CLIENT_OPTIONS_PATH = MarketplaceClientCore.BUNDLE_ID + "/client/"; //$NON-NLS-1$
+
+	public static final String DEBUG_CLIENT_REMOVE_OPTION = "xxx"; //$NON-NLS-1$
+
+	public static boolean DEBUG = false;
+
+	public static boolean DEBUG_FAKE_CLIENT = false;
+
+	private static DebugTrace debugTrace;
 
 	private static MarketplaceClientCorePlugin instance;
 
@@ -44,6 +62,24 @@ public class MarketplaceClientCorePlugin implements BundleActivator {
 		registerServices(context);
 		serviceHelper = new ServiceHelperImpl();
 		serviceHelper.startTracking(context);
+
+		Hashtable<String, String> props = new Hashtable<String, String>(2);
+		props.put(org.eclipse.osgi.service.debug.DebugOptions.LISTENER_SYMBOLICNAME, MarketplaceClientCore.BUNDLE_ID);
+		context.registerService(DebugOptionsListener.class.getName(), new DebugOptionsListener() {
+			public void optionsChanged(DebugOptions options) {
+				DebugTrace debugTrace = null;
+				boolean debug = options.getBooleanOption(MarketplaceClientCore.BUNDLE_ID + DEBUG_OPTION, false);
+				boolean fakeClient = false;
+				if (debug) {
+					debugTrace = options.newDebugTrace(MarketplaceClientCore.BUNDLE_ID);
+					fakeClient = options.getBooleanOption(MarketplaceClientCore.BUNDLE_ID + DEBUG_FAKE_CLIENT_OPTION,
+							false);
+				}
+				DEBUG = debug;
+				DEBUG_FAKE_CLIENT = fakeClient;
+				MarketplaceClientCorePlugin.debugTrace = debugTrace;
+			}
+		}, props);
 	}
 
 	public void stop(BundleContext context) throws Exception {
@@ -51,6 +87,7 @@ public class MarketplaceClientCorePlugin implements BundleActivator {
 		serviceHelper = null;
 		unregisterServices();
 		ProxyHelper.releaseProxyService();
+		debugTrace = null;
 		instance = null;
 	}
 
@@ -121,5 +158,19 @@ public class MarketplaceClientCorePlugin implements BundleActivator {
 
 	public static Bundle getBundle() {
 		return instance == null ? null : instance.bundle;
+	}
+
+	public static void trace(String option, String message) {
+		final DebugTrace trace = debugTrace;
+		if (DEBUG && trace != null) {
+			trace.trace(option, message);
+		}
+	}
+
+	public static void trace(String option, String message, Object... parameters) {
+		final DebugTrace trace = debugTrace;
+		if (DEBUG && trace != null) {
+			DebugTraceUtil.trace(trace, option, message, parameters);
+		}
 	}
 }

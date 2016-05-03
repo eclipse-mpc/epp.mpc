@@ -11,10 +11,10 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui;
 
-import java.text.MessageFormat;
 import java.util.Hashtable;
 
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.epp.internal.mpc.core.util.DebugTraceUtil;
 import org.eclipse.epp.internal.mpc.ui.catalog.ResourceProvider;
 import org.eclipse.epp.mpc.ui.IMarketplaceClientService;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -210,19 +210,7 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 	public static void trace(String option, String message, Object... parameters) {
 		final DebugTrace trace = debugTrace;
 		if (DEBUG && trace != null) {
-			String formattedMessage = message;
-			Throwable exception = null;
-			if (parameters != null && parameters.length > 0) {
-				formattedMessage = MessageFormat.format(message, parameters);
-				for (int i = parameters.length - 1; i >= 0; i--) {
-					Object p = parameters[i];
-					if (p instanceof Throwable) {
-						exception = (Throwable) p;
-						break;
-					}
-				}
-			}
-			trace.trace(option, formattedMessage, exception);
+			DebugTraceUtil.trace(trace, option, message, parameters);
 		}
 	}
 }

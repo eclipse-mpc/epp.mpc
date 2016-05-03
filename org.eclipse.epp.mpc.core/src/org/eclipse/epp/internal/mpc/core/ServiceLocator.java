@@ -534,36 +534,53 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 	public static Map<String, String> computeDefaultRequestMetaParameters() {
 		Map<String, String> requestMetaParameters = new HashMap<String, String>();
 
-		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_CLIENT, MarketplaceClientCore.BUNDLE_ID);
+		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_CLIENT,
+				MarketplaceClientCore.BUNDLE_ID);
 		Bundle clientBundle = Platform.getBundle(MarketplaceClientCore.BUNDLE_ID);
-		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_CLIENT_VERSION,
+		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_CLIENT_VERSION,
 				clientBundle.getVersion().toString());
 
-		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_OS, Platform.getOS());
-		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_WS, Platform.getWS());
-		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_NL, Platform.getNL());
-		requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_JAVA_VERSION,
+		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_OS,
+				Platform.getOS());
+		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_WS,
+				Platform.getWS());
+		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_NL,
+				Platform.getNL());
+		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_JAVA_VERSION,
 				System.getProperty("java.version")); //$NON-NLS-1$
+
 		IProduct product = Platform.getProduct();
-		if (product != null) {
-			requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_PRODUCT, product.getId());
-			Bundle productBundle = product.getDefiningBundle();
-			if (productBundle != null) {
-				requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_PRODUCT_VERSION,
-						productBundle.getVersion().toString());
-			}
-		}
+		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_PRODUCT,
+				product == null ? null : product.getId());
+		Bundle productBundle = product == null ? null : product.getDefiningBundle();
+		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_PRODUCT_VERSION,
+				productBundle == null ? null : productBundle.getVersion().toString());
+
 		Bundle runtimeBundle = Platform.getBundle("org.eclipse.core.runtime"); //$NON-NLS-1$
-		if (runtimeBundle != null) {
-			requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_RUNTIME_VERSION,
-					runtimeBundle.getVersion().toString());
-		}
+		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_RUNTIME_VERSION,
+				runtimeBundle == null ? null : runtimeBundle.getVersion().toString());
+
 		// also send the platform version to distinguish between 3.x and 4.x platforms using the same runtime
 		Bundle platformBundle = Platform.getBundle("org.eclipse.platform"); //$NON-NLS-1$
-		if (platformBundle != null) {
-			requestMetaParameters.put(DefaultMarketplaceService.META_PARAM_PLATFORM_VERSION,
-					platformBundle.getVersion().toString());
-		}
+		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_PLATFORM_VERSION,
+				platformBundle == null ? null : platformBundle.getVersion().toString());
+
 		return requestMetaParameters;
+	}
+
+	private static void addDefaultRequestMetaParameter(Map<String, String> requestMetaParameters, String key,
+			String value) {
+		if (MarketplaceClientCorePlugin.DEBUG_FAKE_CLIENT) {
+			String debugOption = Platform.getDebugOption(MarketplaceClientCorePlugin.DEBUG_CLIENT_OPTIONS_PATH + key);
+			if (MarketplaceClientCorePlugin.DEBUG_CLIENT_REMOVE_OPTION.equals(debugOption)) {
+				requestMetaParameters.remove(key);
+				return;
+			} else if (debugOption != null && !"".equals(debugOption)) { //$NON-NLS-1$
+				value = debugOption;
+			}
+		}
+		if (value != null) {
+			requestMetaParameters.put(key, value);
+		}
 	}
 }
