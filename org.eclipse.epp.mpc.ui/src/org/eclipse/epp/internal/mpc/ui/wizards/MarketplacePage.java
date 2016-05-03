@@ -422,7 +422,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 				return;
 			}
 		}
-		throw new IllegalArgumentException();
+		throw new IllegalArgumentException(tab.getText());
 	}
 
 	public void setPreviouslyActiveTab() {
