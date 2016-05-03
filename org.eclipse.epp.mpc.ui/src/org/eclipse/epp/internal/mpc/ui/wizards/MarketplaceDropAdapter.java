@@ -11,11 +11,14 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import java.lang.reflect.Field;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler;
 import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler.SolutionInstallationInfo;
 import org.eclipse.jface.util.Util;
@@ -199,6 +202,7 @@ public class MarketplaceDropAdapter implements IStartup {
 			int allowedOperations = e.operations;
 			for (int op : PREFERRED_DROP_OPERATIONS) {
 				if ((allowedOperations & op) != 0) {
+					traceDropOperation(op);
 					e.detail = op;
 					return;
 				}
@@ -217,15 +221,18 @@ public class MarketplaceDropAdapter implements IStartup {
 				if (Util.isWindows()) {
 					//FIXME find a way to check the URL early on other platforms, too...
 					if (e.data == null && !extractEventData(e)) {
+						traceMissingEventData(e);
 						return false;
 					}
 					final String url = getUrlFromEvent(e);
 					if (!MarketplaceUrlHandler.isPotentialSolution(url)) {
+						traceInvalidEventData(e);
 						return false;
 					}
 				}
 				return true;
 			}
+			traceUnsupportedDataType(e);
 			return false;
 		}
 
@@ -244,10 +251,18 @@ public class MarketplaceDropAdapter implements IStartup {
 		@Override
 		public void drop(DropTargetEvent event) {
 			if (!URLTransfer.getInstance().isSupportedType(event.currentDataType)) {
+				traceUnsupportedDataType(event);
 				//ignore
 				return;
 			}
-			if (event.data == null || !dropTargetIsValid(event)) {
+			if (event.data == null) {
+				traceMissingEventData(event);
+				//reject
+				event.detail = DND.DROP_NONE;
+				return;
+			}
+			if (!dropTargetIsValid(event)) {
+				//reject
 				event.detail = DND.DROP_NONE;
 				return;
 			}
@@ -261,7 +276,44 @@ public class MarketplaceDropAdapter implements IStartup {
 						proceedInstallation(url);
 					}
 				});
+			} else {
+				traceInvalidEventData(event);
 			}
+		}
+
+		private void traceDropOperation(int op) {
+			if (MarketplaceClientUiPlugin.DEBUG) {
+				MarketplaceClientUiPlugin.trace(MarketplaceClientUiPlugin.DROP_ADAPTER_DEBUG_OPTION,
+						"Updating drop event: Setting drop operation to {0}", op); //$NON-NLS-1$
+			}
+		}
+
+		private void traceInvalidEventData(DropTargetEvent event) {
+			if (MarketplaceClientUiPlugin.DEBUG) {
+				MarketplaceClientUiPlugin.trace(MarketplaceClientUiPlugin.DROP_ADAPTER_DEBUG_OPTION,
+						"Drop event: Data is not a solution url: {0}", event.data, new Throwable()); //$NON-NLS-1$
+			}
+		}
+
+		private void traceMissingEventData(DropTargetEvent event) {
+			if (MarketplaceClientUiPlugin.DEBUG) {
+				MarketplaceClientUiPlugin.trace(MarketplaceClientUiPlugin.DROP_ADAPTER_DEBUG_OPTION,
+						"Missing drop event data {0}", event.data, new Throwable()); //$NON-NLS-1$
+			}
+		}
+
+		private void traceUnsupportedDataType(DropTargetEvent event) {
+			if (MarketplaceClientUiPlugin.DEBUG) {
+				MarketplaceClientUiPlugin.trace(MarketplaceClientUiPlugin.DROP_ADAPTER_DEBUG_OPTION,
+						"Unsupported drop data type {0}", traceTransferData(event.currentDataType), new Throwable()); //$NON-NLS-1$
+			}
+		}
+
+		private Object traceTransferData(TransferData data) {
+			if (MarketplaceClientUiPlugin.DEBUG) {
+				return new TransferDataTraceFormatter(data);
+			}
+			return null;
 		}
 
 		// Depending on the form the link and browser/os,
@@ -274,6 +326,48 @@ public class MarketplaceDropAdapter implements IStartup {
 			String[] dataLines = ((String) eventData).split(System.getProperty("line.separator")); //$NON-NLS-1$
 			String url = dataLines[0];
 			return url;
+		}
+	}
+
+	private static final class TransferDataTraceFormatter {
+		private static final Field TYPE_FIELD;
+
+		static {
+			Field typeField = null;
+			try {
+				typeField = TransferData.class.getDeclaredField("type"); //$NON-NLS-1$
+				typeField.setAccessible(true);
+			} catch (Exception e) {
+			}
+			TYPE_FIELD = typeField;
+		}
+
+		private final TransferData transferData;
+
+		public TransferDataTraceFormatter(TransferData transferData) {
+			this.transferData = transferData;
+		}
+
+		@Override
+		public String toString() {
+			if (transferData == null) {
+				return null;
+			}
+			return "TransferData[type=" + getType() + "]"; //$NON-NLS-1$//$NON-NLS-2$
+		}
+
+		private String getType() {
+			if (TYPE_FIELD == null) {
+				return "<unknown>"; //$NON-NLS-1$
+			}
+			try {
+				Object type = TYPE_FIELD.get(transferData);
+				return type == null ? null : type.toString();
+			} catch (IllegalArgumentException e) {
+				return "<unknown:" + transferData.getClass() + ">"; //$NON-NLS-1$ //$NON-NLS-2$
+			} catch (IllegalAccessException e) {
+				return "<inaccessible>"; //$NON-NLS-1$
+			}
 		}
 	}
 

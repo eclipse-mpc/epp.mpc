@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui;
 
+import java.text.MessageFormat;
+import java.util.Hashtable;
+
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.epp.internal.mpc.ui.catalog.ResourceProvider;
 import org.eclipse.epp.mpc.ui.IMarketplaceClientService;
@@ -18,6 +21,9 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.IDecoration;
+import org.eclipse.osgi.service.debug.DebugOptions;
+import org.eclipse.osgi.service.debug.DebugOptionsListener;
+import org.eclipse.osgi.service.debug.DebugTrace;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
@@ -80,9 +86,17 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 
 	public static final String ITEM_ICON_SHARE = "ITEM_ICON_SHARE"; //$NON-NLS-1$
 
+	public static final String DEBUG_OPTION = "/debug"; //$NON-NLS-1$
+
+	public static final String DROP_ADAPTER_DEBUG_OPTION = DEBUG_OPTION + "/dnd"; //$NON-NLS-1$
+
 	private static MarketplaceClientUiPlugin instance;
 
 	private static BundleContext bundleContext;
+
+	public static boolean DEBUG = false;
+
+	private static DebugTrace debugTrace;
 
 	private ServiceTracker<IMarketplaceClientService, IMarketplaceClientService> clientServiceTracker;
 
@@ -99,8 +113,21 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 		clientServiceTracker = new ServiceTracker<IMarketplaceClientService, IMarketplaceClientService>(context,
 				IMarketplaceClientService.class, null);
 		clientServiceTracker.open();
-
 		resourceProvider = new ResourceProvider();
+
+		Hashtable<String, String> props = new Hashtable<String, String>(2);
+		props.put(org.eclipse.osgi.service.debug.DebugOptions.LISTENER_SYMBOLICNAME, MarketplaceClientUi.BUNDLE_ID);
+		context.registerService(DebugOptionsListener.class.getName(), new DebugOptionsListener() {
+			public void optionsChanged(DebugOptions options) {
+				DebugTrace debugTrace = null;
+				boolean debug = options.getBooleanOption(MarketplaceClientUi.BUNDLE_ID + DEBUG_OPTION, false);
+				if (debug) {
+					debugTrace = options.newDebugTrace(MarketplaceClientUi.BUNDLE_ID);
+				}
+				DEBUG = debug;
+				MarketplaceClientUiPlugin.debugTrace = debugTrace;
+			}
+		}, props);
 	}
 
 	@Override
@@ -115,6 +142,7 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 		}
 		MarketplaceClientUiPlugin.bundleContext = null;
 		super.stop(context);
+		debugTrace = null;
 		instance = null;
 	}
 
@@ -170,5 +198,31 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 
 	public static BundleContext getBundleContext() {
 		return bundleContext;
+	}
+
+	public static void trace(String option, String message) {
+		final DebugTrace trace = debugTrace;
+		if (DEBUG && trace != null) {
+			trace.trace(option, message);
+		}
+	}
+
+	public static void trace(String option, String message, Object... parameters) {
+		final DebugTrace trace = debugTrace;
+		if (DEBUG && trace != null) {
+			String formattedMessage = message;
+			Throwable exception = null;
+			if (parameters != null && parameters.length > 0) {
+				formattedMessage = MessageFormat.format(message, parameters);
+				for (int i = parameters.length - 1; i >= 0; i--) {
+					Object p = parameters[i];
+					if (p instanceof Throwable) {
+						exception = (Throwable) p;
+						break;
+					}
+				}
+			}
+			trace.trace(option, formattedMessage, exception);
+		}
 	}
 }
