@@ -66,6 +66,9 @@ public class FallbackTransportFactory implements ITransportFactory {
 			InputStream stream;
 			try {
 				stream = primaryTransport.stream(location, monitor);
+				if (stream == null) {
+					throw new NullPointerException();
+				}
 			} catch (FileNotFoundException ex) {
 				InputStream fallbackStream = primaryFailed(location, monitor, ex);
 				if (fallbackStream == null) {

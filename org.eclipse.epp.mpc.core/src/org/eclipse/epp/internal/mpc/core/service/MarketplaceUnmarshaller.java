@@ -45,10 +45,14 @@ public class MarketplaceUnmarshaller implements IMarketplaceUnmarshaller {
 
 	public <T> T unmarshal(InputStream in, Class<T> type, IProgressMonitor monitor) throws IOException,
 	UnmarshalException {
+		if (in == null) {
+			throw new IOException(Messages.MarketplaceUnmarshaller_errorNullStream);
+		}
 		final Unmarshaller unmarshaller = new Unmarshaller();
 		final XMLReader xmlReader = Unmarshaller.createXMLReader(unmarshaller);
 
-		BufferedInputStream bufferedInput = new BufferedInputStream(in);
+		BufferedInputStream bufferedInput = in instanceof BufferedInputStream ? (BufferedInputStream) in
+				: new BufferedInputStream(in);
 		ByteBuffer peekBuffer = peekResponseContent(bufferedInput);
 
 		// FIXME how can the charset be determined?

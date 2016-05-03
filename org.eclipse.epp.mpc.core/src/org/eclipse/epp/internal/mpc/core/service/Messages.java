@@ -52,6 +52,9 @@ class Messages extends NLS {
 	public static String MarketplaceStorageService_defaultStorageServiceName;
 
 
+	public static String MarketplaceUnmarshaller_errorNullStream;
+
+
 	public static String MarketplaceUnmarshaller_invalidResponseContent;
 
 
