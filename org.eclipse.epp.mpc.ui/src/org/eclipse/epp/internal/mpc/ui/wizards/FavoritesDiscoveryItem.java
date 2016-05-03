@@ -16,6 +16,7 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
@@ -63,7 +64,14 @@ public class FavoritesDiscoveryItem extends AbstractMarketplaceDiscoveryItem<Mar
 		});
 		GridDataFactory.swtDefaults().align(SWT.CENTER, SWT.CENTER).applyTo(checkbox);
 		super.createIconControl(checkboxContainer);
+
 		GridLayoutFactory.fillDefaults().spacing(1, 1).margins(0, 0).numColumns(2).applyTo(checkboxContainer);
+		GridData containerLayoutData = (GridData) checkboxContainer.getLayoutData();
+		int xHint = containerLayoutData.widthHint + checkbox.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+		GridDataFactory.createFrom(containerLayoutData)
+				.hint(xHint, containerLayoutData.heightHint)
+				.minSize(xHint, containerLayoutData.minimumHeight)
+				.applyTo(checkboxContainer);
 	}
 
 	@Override
