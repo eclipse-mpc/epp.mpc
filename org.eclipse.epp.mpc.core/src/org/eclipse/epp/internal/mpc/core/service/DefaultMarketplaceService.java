@@ -464,7 +464,7 @@ MarketplaceService {
 			throw new CoreException(MarketplaceClientCore.computeStatus(e, Messages.DefaultMarketplaceService_FavoritesErrorRetrieving));
 		}
 		progress.setWorkRemaining(9000);
-		return resolveFavoriteNodes(favorites, progress.newChild(9000));
+		return resolveFavoriteNodes(favorites, progress.newChild(9000), true);
 	}
 
 	public ISearchResult userFavorites(String user, IProgressMonitor monitor) throws CoreException {
@@ -481,7 +481,7 @@ MarketplaceService {
 					Messages.DefaultMarketplaceService_FavoritesErrorRetrieving));
 		}
 		progress.setWorkRemaining(9000);
-		return resolveFavoriteNodes(favorites, progress.newChild(9000));
+		return resolveFavoriteNodes(favorites, progress.newChild(9000), false);
 	}
 
 	public void userFavorites(List<? extends INode> nodes, IProgressMonitor monitor)
@@ -508,7 +508,7 @@ MarketplaceService {
 		}
 	}
 
-	private ISearchResult resolveFavoriteNodes(final List<INode> nodes, IProgressMonitor monitor) throws CoreException {
+	private ISearchResult resolveFavoriteNodes(final List<INode> nodes, IProgressMonitor monitor, boolean filterIncompatible) throws CoreException {
 		IMarketplaceService resolveService = this;
 		IMarketplaceService registeredService = ServiceHelper.getMarketplaceServiceLocator()
 				.getMarketplaceService(this.getBaseUrl().toString());
@@ -523,36 +523,33 @@ MarketplaceService {
 			INode node = i.next();
 			INode resolved = resolveService.getNode(node, resolveProgress.newChild(100));
 			((Node) resolved).setUserFavorite(true);
-			i.set(resolved);
+			if (filterIncompatible && !isInstallable(resolved)) {
+				i.remove();
+			} else {
+				i.set(resolved);
+			}
 		}
-		//sort the node list so uninstallable nodes come last
-		Collections.sort(nodes, new Comparator<INode>() {
+		if (!filterIncompatible) {
+			//sort the node list so uninstallable nodes come last
+			Collections.sort(nodes, new Comparator<INode>() {
 
-			public int compare(INode n1, INode n2) {
-				if (n1 == n2) {
-					return 0;
-				}
-				int iusCount1 = 0;
-				int iusCount2 = 0;
-				IIus ius1 = n1.getIus();
-				if (ius1 != null) {
-					iusCount1 = ius1.getIuElements().size();
-				}
-				IIus ius2 = n2.getIus();
-				if (ius2 != null) {
-					iusCount2 = ius2.getIuElements().size();
-				}
-				if (iusCount1 > 0) {
-					if (iusCount2 > 0) {
+				public int compare(INode n1, INode n2) {
+					if (n1 == n2) {
 						return 0;
 					}
-					return -1;
-				} else if (iusCount2 > 0) {
+					boolean n1Installable = isInstallable(n1);
+					boolean n2Installable = isInstallable(n2);
+					if (n1Installable == n2Installable) {
+						return 0;
+					}
+					if (n1Installable) { // && !n2Installable
+						return -1;
+					}
+					// !n1Installable && n2Installable
 					return 1;
 				}
-				return 0;
-			}
-		});
+			});
+		}
 
 		return new ISearchResult() {
 
@@ -564,6 +561,11 @@ MarketplaceService {
 				return nodes.size();
 			}
 		};
+	}
+
+	private boolean isInstallable(INode resolved) {
+		IIus ius = resolved.getIus();
+		return ius != null && !ius.getIuElements().isEmpty();
 	}
 
 	public SearchResult popular(IProgressMonitor monitor) throws CoreException {
