@@ -533,12 +533,20 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 
 	public static Map<String, String> computeDefaultRequestMetaParameters() {
 		Map<String, String> requestMetaParameters = new HashMap<String, String>();
+		BundleContext bundleContext = FrameworkUtil.getBundle(MarketplaceClientCore.class).getBundleContext();
 
 		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_CLIENT,
 				MarketplaceClientCore.BUNDLE_ID);
 		Bundle clientBundle = Platform.getBundle(MarketplaceClientCore.BUNDLE_ID);
 		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_CLIENT_VERSION,
 				clientBundle.getVersion().toString());
+
+		String uuid = bundleContext.getProperty(DefaultMarketplaceService.META_PARAM_ECLIPSE_UUID);
+		String useUuid = bundleContext.getProperty(IMarketplaceServiceLocator.USE_ECLIPSE_UUID_TRACKING_PROPERTY_NAME);
+		if (uuid != null && useUuid != null && !Boolean.parseBoolean(useUuid)) {
+			uuid = null;
+		}
+		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_ECLIPSE_UUID, uuid);
 
 		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_OS,
 				Platform.getOS());
