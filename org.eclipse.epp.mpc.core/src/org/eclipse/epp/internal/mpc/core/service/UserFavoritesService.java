@@ -31,8 +31,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.fluent.Request;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.RequestTemplate;
@@ -52,6 +55,8 @@ import org.eclipse.userstorage.util.ProtocolException;
 
 @SuppressWarnings("restriction")
 public class UserFavoritesService extends AbstractDataStorageService implements IUserFavoritesService {
+
+	private static final int MALFORMED_CONTENT_ERROR_CODE = 499;
 
 	private static final Pattern JSON_CONTENT_ID_PATTERN = Pattern
 			.compile("\\{[^\\}]*\"content_id\"\\s*:\\s*\"([^\"]*)\"[^\\}]*\\}"); //$NON-NLS-1$
@@ -337,8 +342,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 								favoriteIds.add(id);
 							}
 						} else {
-							throw new ProtocolException("GET", endpoint, "1.1", 499, //$NON-NLS-1$ //$NON-NLS-2$
-									"Malformed response content: " + body); //$NON-NLS-1$
+							throw malformedContentException(endpoint, body);
 						}
 					}
 					return favoriteIds;
@@ -368,5 +372,66 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		} finally {
 			IOUtil.close(in);
 		}
+	}
+
+	private static ProtocolException malformedContentException(final URI endpoint, String body) {
+		return new ProtocolException("GET", endpoint, "1.1", MALFORMED_CONTENT_ERROR_CODE, //$NON-NLS-1$ //$NON-NLS-2$
+				"Malformed response content: " + body); //$NON-NLS-1$
+	}
+
+	public static boolean isInvalidFavoritesListException(Throwable error) {
+		while (error != null) {
+			if (isMalformedContentException(error) || isNotFoundException(error)) {
+				return true;
+			}
+			if (error instanceof CoreException) {
+				CoreException coreException = (CoreException) error;
+				IStatus status = coreException.getStatus();
+				if (status.isMultiStatus()) {
+					for (IStatus childStatus : status.getChildren()) {
+						if (childStatus.getException() != null
+								&& isInvalidFavoritesListException(childStatus.getException())) {
+							return true;
+						}
+					}
+				}
+			}
+			error = error.getCause();
+		}
+		return false;
+	}
+
+	private static boolean isMalformedContentException(Throwable error) {
+		if (error instanceof ProtocolException) {
+			ProtocolException protocolException = (ProtocolException) error;
+			switch (protocolException.getStatusCode()) {
+			case HttpStatus.SC_BAD_REQUEST:
+			case HttpStatus.SC_METHOD_NOT_ALLOWED:
+			case HttpStatus.SC_NOT_ACCEPTABLE:
+			case HttpStatus.SC_EXPECTATION_FAILED:
+			case MALFORMED_CONTENT_ERROR_CODE:
+				return true;
+			default:
+				return false;
+			}
+		}
+		return false;
+	}
+
+	private static boolean isNotFoundException(Throwable error) {
+		if (error instanceof NotFoundException) {
+			return true;
+		}
+		if (error instanceof ProtocolException) {
+			ProtocolException protocolException = (ProtocolException) error;
+			switch (protocolException.getStatusCode()) {
+			case HttpStatus.SC_NOT_FOUND:
+			case HttpStatus.SC_GONE:
+				return true;
+			default:
+				return false;
+			}
+		}
+		return false;
 	}
 }

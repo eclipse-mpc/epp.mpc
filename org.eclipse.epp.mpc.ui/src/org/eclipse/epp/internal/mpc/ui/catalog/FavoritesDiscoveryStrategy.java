@@ -60,10 +60,33 @@ public class FavoritesDiscoveryStrategy extends MarketplaceDiscoveryStrategy {
 
 	@Override
 	protected ISearchResult doPerformDiscovery(IProgressMonitor monitor) throws CoreException {
+		preDiscovery();
 		if (favoritesReference == null) {
 			return null;
 		}
-		return marketplaceService.userFavorites(favoritesReference, monitor);
+		try {
+			return marketplaceService.userFavorites(favoritesReference, monitor);
+		} catch (CoreException ex) {
+			//if we don't want an error dialog to pop up for discovery errors, we have
+			//to handle errors here...
+			handleDiscoveryError(ex);
+			return null;
+		} finally {
+			postDiscovery();
+		}
+	}
+
+	protected void postDiscovery() {
+		// ignore
+	}
+
+	protected void preDiscovery() {
+		// ignore
+	}
+
+	protected void handleDiscoveryError(CoreException ex) throws CoreException {
+		//by default just rethrow - but this gives subclasses the chance to override
+		throw ex;
 	}
 
 	@Override
