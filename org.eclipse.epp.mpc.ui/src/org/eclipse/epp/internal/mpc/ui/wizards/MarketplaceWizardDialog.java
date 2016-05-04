@@ -14,7 +14,11 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 import java.util.Arrays;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IPageChangedListener;
+import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.PageChangedEvent;
+import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
@@ -31,9 +35,49 @@ import org.eclipse.ui.IWorkbenchListener;
 import org.eclipse.ui.PlatformUI;
 
 public class MarketplaceWizardDialog extends WizardDialog {
+	private static final class PageListener implements IPageChangingListener, IPageChangedListener {
+
+		private Boolean forward;
+
+		public void pageChanged(PageChangedEvent event) {
+			if (forward != null) {
+				boolean isForward = forward;
+				reset();
+				Object selectedPage = event.getSelectedPage();
+				if (selectedPage instanceof IWizardPageAction) {
+					((IWizardPageAction) selectedPage).enter(isForward);
+				}
+			}
+		}
+
+		public void handlePageChanging(PageChangingEvent event) {
+			Object currentPage = event.getCurrentPage();
+			if (event.doit && forward != null && currentPage instanceof IWizardPageAction) {
+				event.doit = ((IWizardPageAction) currentPage).exit(forward);
+				if (!event.doit) {
+					forward = null;
+				}
+			}
+		}
+
+		public void setForward() {
+			forward = true;
+		}
+
+		public void setBackward() {
+			forward = false;
+		}
+
+		public void reset() {
+			forward = null;
+		}
+	}
+
 	private Button backButton;
 
 	private Button nextButton;
+
+	private final PageListener pageListener;
 
 	public MarketplaceWizardDialog(Shell parentShell, MarketplaceWizard newWizard) {
 		//bug 424729 - make the wizard dialog modal
@@ -45,6 +89,9 @@ public class MarketplaceWizardDialog extends WizardDialog {
 		shellStyle &= ~allModal;
 		shellStyle |= SWT.MODELESS;
 		setShellStyle(shellStyle);
+		pageListener = new PageListener();
+		addPageChangingListener(pageListener);
+		addPageChangedListener(pageListener);
 	}
 
 	@Override
@@ -156,38 +203,25 @@ public class MarketplaceWizardDialog extends WizardDialog {
 	@Override
 	protected void backPressed() {
 		IWizardPage fromPage = getCurrentPage();
-		super.backPressed();
+		pageListener.setBackward();
+		try {
+			super.backPressed();
+		} finally {
+			pageListener.reset();
+		}
 		if (fromPage instanceof FeatureSelectionWizardPage
 				&& ((FeatureSelectionWizardPage) fromPage).isInRemediationMode()) {
 			((FeatureSelectionWizardPage) fromPage).flipToDefaultComposite();
-		}
-		IWizardPage previousPage = getCurrentPage();
-		if (previousPage != fromPage) {
-			if (fromPage instanceof IWizardPageAction) {
-				IWizardPageAction sourceAction = (IWizardPageAction) fromPage;
-				sourceAction.exit(false);
-			}
-			if (previousPage instanceof IWizardPageAction) {
-				IWizardPageAction nextAction = (IWizardPageAction) previousPage;
-				nextAction.enter(false);
-			}
 		}
 	}
 
 	@Override
 	protected void nextPressed() {
-		IWizardPage fromPage = getCurrentPage();
-		if (fromPage instanceof IWizardPageAction) {
-			IWizardPageAction sourceAction = (IWizardPageAction) fromPage;
-			if (!sourceAction.exit(true)) {
-				return;
-			}
-		}
-		super.nextPressed();
-		IWizardPage nextPage = getCurrentPage();
-		if (nextPage != fromPage && nextPage instanceof IWizardPageAction) {
-			IWizardPageAction nextAction = (IWizardPageAction) nextPage;
-			nextAction.enter(true);
+		pageListener.setForward();
+		try {
+			super.nextPressed();
+		} finally {
+			pageListener.reset();
 		}
 	}
 
