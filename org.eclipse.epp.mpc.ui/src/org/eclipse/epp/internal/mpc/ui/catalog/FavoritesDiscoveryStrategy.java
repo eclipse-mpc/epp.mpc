@@ -89,7 +89,7 @@ public class FavoritesDiscoveryStrategy extends MarketplaceDiscoveryStrategy {
 
 	private void addInstructionInfoItem(CatalogCategory catalogCategory) {
 		addInfoItem(catalogCategory,
-				Messages.FavoritesDiscoveryStrategy_enterUserIdOrMailMessage);
+				Messages.FavoritesDiscoveryStrategy_enterFavoritesUrlMessage);
 	}
 
 	private void addInfoItem(CatalogCategory catalogCategory, String label) {
