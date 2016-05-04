@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
@@ -34,14 +35,21 @@ import org.eclipse.swt.widgets.Text;
 
 public class FavoritesViewer extends CatalogViewer {
 
+	private static final String HTTPS_PREFIX = "https://"; //$NON-NLS-1$
+
+	private static final String HTTP_PREFIX = "http://"; //$NON-NLS-1$
+
+	private static final int MIN_URL_LENGTH = HTTP_PREFIX.length() + 5;
+
 	private MarketplaceDiscoveryResources discoveryResources;
 
-	private final IMarketplaceWebBrowser browser;
+	private final MarketplaceWizard wizard;
 
 	public FavoritesViewer(Catalog catalog, IShellProvider shellProvider, MarketplaceWizard wizard) {
 		super(catalog, shellProvider, wizard.getContainer(), wizard.getConfiguration());
-		this.browser = wizard;
-		setAutomaticFind(false);
+		this.wizard = wizard;
+		setAutomaticFind(true);
+		setRefreshJobDelay(2500);
 	}
 
 	@Override
@@ -103,7 +111,7 @@ public class FavoritesViewer extends CatalogViewer {
 	}
 
 	private FavoritesDiscoveryItem createDiscoveryItem(Composite parent, MarketplaceNodeCatalogItem catalogItem) {
-		return new FavoritesDiscoveryItem(parent, SWT.NONE, getResources(), browser, catalogItem, this);
+		return new FavoritesDiscoveryItem(parent, SWT.NONE, getResources(), wizard, catalogItem, this);
 	}
 
 	@Override
@@ -113,7 +121,47 @@ public class FavoritesViewer extends CatalogViewer {
 
 	@Override
 	protected void filterTextChanged() {
-		doFind(getFilterText());
+		String filterText = getFilterText();
+		if (filterText == null) {
+			return;
+		}
+		filterText = filterText.trim();
+		if ("".equals(filterText)) { //$NON-NLS-1$
+			return;
+		}
+		if (isUrlReference(filterText)) {
+			if (filterText.length() < MIN_URL_LENGTH || filterText.lastIndexOf('/') < MIN_URL_LENGTH) {
+				//probably incomplete url
+				filterTextChangedWithExtraDelay();
+				return;
+			}
+			try {
+				URLUtil.toURL(filterText);
+			} catch (Exception ex) {
+				//invalid url
+				filterTextChangedWithExtraDelay();
+				return;
+			}
+		}
+		if (filterText.length() < HTTPS_PREFIX.length()) {
+			String lowerCase = filterText.toLowerCase();
+			if (HTTP_PREFIX.startsWith(lowerCase) || HTTPS_PREFIX.startsWith(lowerCase)) {
+				//probably incomplete url
+				filterTextChangedWithExtraDelay();
+				return;
+			}
+		}
+		super.filterTextChanged();
+	}
+
+	private synchronized void filterTextChangedWithExtraDelay() {
+		long refreshJobDelay = getRefreshJobDelay();
+		setRefreshJobDelay(1500);
+		try {
+			super.filterTextChanged();
+		} finally {
+			setRefreshJobDelay(refreshJobDelay);
+		}
 	}
 
 	@Override
@@ -136,5 +184,13 @@ public class FavoritesViewer extends CatalogViewer {
 		for (CatalogItem catalogItem : items) {
 			modifySelection(catalogItem, catalogItem.isSelected());
 		}
+	}
+
+	public static boolean isUrlReference(String text) {
+		if (text == null || "".equals(text)) { //$NON-NLS-1$
+			return false;
+		}
+		text = text.trim().toLowerCase();
+		return (text.startsWith(HTTP_PREFIX) || text.startsWith(HTTPS_PREFIX));
 	}
 }
