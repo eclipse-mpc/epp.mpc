@@ -19,51 +19,59 @@ import org.eclipse.epp.internal.mpc.core.service.UserFavoritesService;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
-import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
+import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
-import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryResources;
-import org.eclipse.jface.window.IShellProvider;
+import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
-public abstract class UserFavoritesAbstractImportActionItem extends AbstractUserActionLinksItem {
+public class ImportFavoritesActionLink extends ActionLink {
 
 	private static final String IMPORT_ACTION_ID = "import"; //$NON-NLS-1$
 
 	private final MarketplacePage marketplacePage;
 
-	public UserFavoritesAbstractImportActionItem(Composite parent, DiscoveryResources resources,
-			IShellProvider shellProvider, UserActionCatalogItem element, MarketplacePage page) {
-		super(parent, resources, shellProvider, element, page.getViewer());
-		createContent(
-				new ActionLink(IMPORT_ACTION_ID,
-						Messages.UserFavoritesAbstractImportActionItem_importFavoritesActionLabel,
-						Messages.UserFavoritesAbstractImportActionItem_importFavoritesTooltip),
-				createSecondaryActionLink());
+	public ImportFavoritesActionLink(MarketplacePage page) {
+		super(IMPORT_ACTION_ID, Messages.UserFavoritesAbstractImportActionItem_importFavoritesActionLabel,
+				Messages.UserFavoritesAbstractImportActionItem_importFavoritesTooltip);
 		this.marketplacePage = page;
 	}
 
+	@Override
+	public void selected() {
+		importFavorites();
+	}
+
 	protected void importFavorites() {
-		List<AbstractDiscoveryStrategy> discoveryStrategies = getViewer().getCatalog().getDiscoveryStrategies();
-		for (AbstractDiscoveryStrategy strategy : discoveryStrategies) {
-			if (strategy instanceof MarketplaceDiscoveryStrategy) {
-				MarketplaceDiscoveryStrategy marketplaceStrategy = (MarketplaceDiscoveryStrategy) strategy;
-				if (marketplaceStrategy.hasUserFavoritesService()) {
-					importFavorites(marketplaceStrategy);
-					return;
-				}
-			}
+		MarketplaceDiscoveryStrategy marketplaceStrategy = findMarketplaceDiscoveryStrategy();
+		if (marketplaceStrategy != null && marketplaceStrategy.hasUserFavoritesService()) {
+			importFavorites(marketplaceStrategy);
 		}
 	}
 
-	private void importFavorites(MarketplaceDiscoveryStrategy marketplaceStrategy) {
+	protected MarketplaceDiscoveryStrategy findMarketplaceDiscoveryStrategy() {
+		MarketplaceDiscoveryStrategy marketplaceStrategy = null;
+		List<AbstractDiscoveryStrategy> discoveryStrategies = marketplacePage.getCatalog().getDiscoveryStrategies();
+		for (AbstractDiscoveryStrategy strategy : discoveryStrategies) {
+			if (strategy instanceof MarketplaceDiscoveryStrategy) {
+				marketplaceStrategy = (MarketplaceDiscoveryStrategy) strategy;
+				break;
+			}
+		}
+		return marketplaceStrategy;
+	}
+
+	protected void importFavorites(MarketplaceDiscoveryStrategy marketplaceStrategy) {
 		MarketplaceWizard wizard = marketplacePage.getWizard();
 		FavoritesCatalog favoritesCatalog = new FavoritesCatalog();
-		final ImportFavoritesPage importFavoritesPage = new ImportFavoritesPage(favoritesCatalog);
+
+		ImportFavoritesWizard importFavoritesWizard = new ImportFavoritesWizard(favoritesCatalog,
+				wizard.getConfiguration(), wizard);
+		final ImportFavoritesPage importFavoritesPage = importFavoritesWizard.getImportFavoritesPage();
 		favoritesCatalog.getDiscoveryStrategies().add(new FavoritesDiscoveryStrategy(marketplaceStrategy) {
 			private String errorMessage;
+
 			@Override
 			protected void preDiscovery() {
 				errorMessage = null;
@@ -71,27 +79,32 @@ public abstract class UserFavoritesAbstractImportActionItem extends AbstractUser
 
 			@Override
 			protected void handleDiscoveryError(CoreException ex) throws CoreException {
+				String favoritesReference = getFavoritesReference();
 				if (UserFavoritesService.isInvalidFavoritesListException(ex)) {
-					String favoritesReference = getFavoritesReference();
-					boolean isUrl = (favoritesReference != null && (favoritesReference.toLowerCase().startsWith("http:")
-							|| favoritesReference.toLowerCase().startsWith("https:")));
+					boolean isUrl = (favoritesReference != null && (favoritesReference.toLowerCase().startsWith("http:") //$NON-NLS-1$
+							|| favoritesReference.toLowerCase().startsWith("https:"))); //$NON-NLS-1$
 					if (isUrl) {
-						errorMessage = NLS.bind("No favorites list found at {0}", favoritesReference);
+						errorMessage = NLS.bind(Messages.ImportFavoritesActionLink_noFavoritesFoundAtUrl,
+								favoritesReference);
 					} else {
-						errorMessage = NLS.bind("No favorites list found for {0}", favoritesReference);
+						errorMessage = NLS.bind(Messages.ImportFavoritesActionLink_noFavoritesFoundForUser,
+								favoritesReference);
 					}
+				} else if (UserFavoritesService.isInvalidUrlException(ex)) {
+					errorMessage = NLS.bind(Messages.ImportFavoritesActionLink_invalidUrl, favoritesReference);
 				} else {
 					String message = null;
 					IStatus statusCause = MarketplaceClientCore.computeWellknownProblemStatus(ex);
 					if (statusCause != null) {
 						message = statusCause.getMessage();
-					} else if (ex.getMessage() != null && !"".equals(ex.getMessage())) {
+					} else if (ex.getMessage() != null && !"".equals(ex.getMessage())) { //$NON-NLS-1$
 						message = ex.getMessage();
 					} else {
 						message = ex.getClass().getSimpleName();
 					}
-					errorMessage = NLS.bind("Failed to load favorites list: {0}", message);
-					MarketplaceClientCore.error(NLS.bind("Failed to load favorites list: {0}", message), ex);
+					errorMessage = NLS.bind(Messages.ImportFavoritesActionLink_errorLoadingFavorites, message);
+					MarketplaceClientCore
+							.error(NLS.bind(Messages.ImportFavoritesActionLink_errorLoadingFavorites, message), ex);
 				}
 			}
 
@@ -115,20 +128,12 @@ public abstract class UserFavoritesAbstractImportActionItem extends AbstractUser
 				}
 			}
 		});
-		importFavoritesPage.setWizard(wizard);
-		wizard.getContainer().showPage(importFavoritesPage);
-	}
-
-	@Override
-	protected final void actionPerformed(Object data) {
-		if (IMPORT_ACTION_ID.equals(data)) {
-			importFavorites();
-		} else {
-			secondaryActionPerformed();
+		int result = new ImportFavoritesWizardDialog(wizard.getShell(), importFavoritesWizard).open();
+		if (result == Window.OK) {
+			MarketplacePage catalogPage = wizard.getCatalogPage();
+			catalogPage.setActiveTab(ContentType.FAVORITES);
+			catalogPage.reloadCatalog();
 		}
 	}
 
-	protected abstract void secondaryActionPerformed();
-
-	protected abstract ActionLink createSecondaryActionLink();
 }

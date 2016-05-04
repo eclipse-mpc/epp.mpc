@@ -21,34 +21,34 @@ import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotA
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
-import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogPage;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
+import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryWizard;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.userstorage.util.ConflictException;
 
-public class ImportFavoritesPage extends CatalogPage implements IWizardPageAction, IWizardButtonLabelProvider {
+public class ImportFavoritesPage extends CatalogPage {
 
-	public ImportFavoritesPage(MarketplaceCatalog catalog) {
+	private final IMarketplaceWebBrowser browser;
+
+	public ImportFavoritesPage(MarketplaceCatalog catalog, IMarketplaceWebBrowser browser) {
 		super(catalog);
+		this.browser = browser;
 		setTitle(Messages.ImportFavoritesPage_Title);
 		setDescription(Messages.ImportFavoritesPage_Description);
 	}
 
 	@Override
-	public MarketplaceWizard getWizard() {
-		return (MarketplaceWizard) super.getWizard();
-	}
-
-	@Override
 	protected CatalogViewer doCreateViewer(Composite parent) {
-		CatalogViewer viewer = new FavoritesViewer(getCatalog(), this, getWizard());
+		DiscoveryWizard wizard = getWizard();
+		CatalogViewer viewer = new FavoritesViewer(getCatalog(), this, browser, wizard.getContainer(),
+				wizard.getConfiguration());
 		viewer.setMinimumHeight(MINIMUM_HEIGHT);
 		viewer.createControl(parent);
 		return viewer;
@@ -112,31 +112,5 @@ public class ImportFavoritesPage extends CatalogPage implements IWizardPageActio
 			}
 		}
 		return userFavoritesService;
-	}
-
-	public void enter(boolean forward) {
-	}
-
-	public boolean exit(boolean forward) {
-		if (forward) {
-			performImport();
-			if (getErrorMessage() != null) {
-				return false;
-			}
-			MarketplacePage catalogPage = getWizard().getCatalogPage();
-			catalogPage.setActiveTab(ContentType.FAVORITES);
-			catalogPage.reloadCatalog();
-			return true;
-		}
-		setErrorMessage(null);
-		return true;
-	}
-
-	public String getNextButtonLabel() {
-		return Messages.ImportFavoritesPage_NextButtonLabel;
-	}
-
-	public String getBackButtonLabel() {
-		return null;
 	}
 }

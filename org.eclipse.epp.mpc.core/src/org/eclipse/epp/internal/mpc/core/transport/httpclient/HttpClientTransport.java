@@ -61,7 +61,6 @@ public class HttpClientTransport implements ITransport {
 
 	private static final org.apache.http.client.HttpClient CLIENT;
 
-	@SuppressWarnings("restriction")
 	private final CookieStore cookieStore = new org.apache.http.impl.client.BasicCookieStore();
 
 	private final Executor executor = Executor.newInstance(CLIENT).cookieStore(cookieStore);

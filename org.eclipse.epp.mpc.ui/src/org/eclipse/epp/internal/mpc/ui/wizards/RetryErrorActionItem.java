@@ -31,25 +31,29 @@ public class RetryErrorActionItem extends AbstractUserActionLinksItem {
 			UserActionCatalogItem element, MarketplaceViewer viewer) {
 		super(parent, resources, shellProvider, element, viewer);
 		this.error = MarketplaceClientCore.computeStatus((Throwable) element.getData(), null);
-		createContent(new ActionLink(DETAILS_ACTION_ID, Messages.RetryErrorActionItem_showDetailsActionLabel, Messages.RetryErrorActionItem_showDetailsTooltip),
-				new ActionLink(RETRY_ACTION_ID, Messages.RetryErrorActionItem_retryActionLabel, Messages.RetryErrorActionItem_retryTooltip));
+		createContent(new ActionLink(DETAILS_ACTION_ID, Messages.RetryErrorActionItem_showDetailsActionLabel,
+				Messages.RetryErrorActionItem_showDetailsTooltip) {
+
+			@Override
+			public void selected() {
+				showDetails();
+			}
+
+		}, new ActionLink(RETRY_ACTION_ID, Messages.RetryErrorActionItem_retryActionLabel,
+				Messages.RetryErrorActionItem_retryTooltip) {
+
+			@Override
+			public void selected() {
+				retry();
+			}
+
+		});
 	}
 
 	@Override
 	protected String getDescriptionText() {
 		return NLS.bind(Messages.RetryErrorActionItem_failedToLoadMessage,
 				error.getMessage() == null ? error.getClass().getSimpleName() : error.getMessage());
-	}
-
-	@Override
-	protected void actionPerformed(Object data) {
-		if (RETRY_ACTION_ID.equals(data)) {
-			retry();
-		} else if (DETAILS_ACTION_ID.equals(data)) {
-			showDetails();
-		} else {
-			throw new IllegalArgumentException(NLS.bind(Messages.RetryErrorActionItem_unsupportedLinkMessage, data));
-		}
 	}
 
 	protected void showDetails() {

@@ -8,27 +8,32 @@
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.epp.internal.mpc.ui.catalog;
+package org.eclipse.epp.internal.mpc.ui.wizards;
 
-import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
+public abstract class ActionLink {
+	private final String id;
 
-public class UserActionCatalogItem extends CatalogItem {
-	public static enum UserAction {
-		BROWSE, LOGIN, CREATE_FAVORITES, FAVORITES_UNSUPPORTED, RETRY_ERROR, INFO;
+	private final String label;
+
+	private final String tooltip;
+
+	public ActionLink(String id, String label, String tooltip) {
+		this.id = id;
+		this.label = label;
+		this.tooltip = tooltip;
 	}
 
-	private UserAction userAction;
-
-	public UserActionCatalogItem() {
-		super();
-		// ignore
+	public final String getId() {
+		return id;
 	}
 
-	public UserAction getUserAction() {
-		return userAction;
+	public final String getLabel() {
+		return label;
 	}
 
-	public void setUserAction(UserAction userAction) {
-		this.userAction = userAction;
+	public final String getTooltip() {
+		return tooltip;
 	}
+
+	public abstract void selected();
 }

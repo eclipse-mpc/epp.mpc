@@ -14,71 +14,17 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 import java.util.Arrays;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.IPageChangedListener;
-import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.PageChangedEvent;
-import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.accessibility.Accessible;
-import org.eclipse.swt.accessibility.AccessibleAdapter;
-import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchListener;
 import org.eclipse.ui.PlatformUI;
 
-public class MarketplaceWizardDialog extends WizardDialog {
-	private static final class PageListener implements IPageChangingListener, IPageChangedListener {
-
-		private Boolean forward;
-
-		public void pageChanged(PageChangedEvent event) {
-			if (forward != null) {
-				boolean isForward = forward;
-				reset();
-				Object selectedPage = event.getSelectedPage();
-				if (selectedPage instanceof IWizardPageAction) {
-					((IWizardPageAction) selectedPage).enter(isForward);
-				}
-			}
-		}
-
-		public void handlePageChanging(PageChangingEvent event) {
-			Object currentPage = event.getCurrentPage();
-			if (event.doit && forward != null && currentPage instanceof IWizardPageAction) {
-				event.doit = ((IWizardPageAction) currentPage).exit(forward);
-				if (!event.doit) {
-					forward = null;
-				}
-			}
-		}
-
-		public void setForward() {
-			forward = true;
-		}
-
-		public void setBackward() {
-			forward = false;
-		}
-
-		public void reset() {
-			forward = null;
-		}
-	}
-
-	private Button backButton;
-
-	private Button nextButton;
-
-	private final PageListener pageListener;
-
+public class MarketplaceWizardDialog extends AbstractMarketplaceWizardDialog {
 	public MarketplaceWizardDialog(Shell parentShell, MarketplaceWizard newWizard) {
 		//bug 424729 - make the wizard dialog modal
 		//don't pass on parentShell, so we get a new top-level shell with its own taskbar entry
@@ -89,9 +35,6 @@ public class MarketplaceWizardDialog extends WizardDialog {
 		shellStyle &= ~allModal;
 		shellStyle |= SWT.MODELESS;
 		setShellStyle(shellStyle);
-		pageListener = new PageListener();
-		addPageChangingListener(pageListener);
-		addPageChangedListener(pageListener);
 	}
 
 	@Override
@@ -187,108 +130,7 @@ public class MarketplaceWizardDialog extends WizardDialog {
 	}
 
 	@Override
-	protected Button createButton(Composite parent, int id, String label, boolean defaultButton) {
-		Button button = super.createButton(parent, id, label, defaultButton);
-		switch (id) {
-		case IDialogConstants.NEXT_ID:
-			nextButton = button;
-			break;
-		case IDialogConstants.BACK_ID:
-			backButton = button;
-			break;
-		}
-		return button;
-	}
-
-	@Override
-	protected void backPressed() {
-		IWizardPage fromPage = getCurrentPage();
-		pageListener.setBackward();
-		try {
-			super.backPressed();
-		} finally {
-			pageListener.reset();
-		}
-		if (fromPage instanceof FeatureSelectionWizardPage
-				&& ((FeatureSelectionWizardPage) fromPage).isInRemediationMode()) {
-			((FeatureSelectionWizardPage) fromPage).flipToDefaultComposite();
-		}
-	}
-
-	@Override
-	protected void nextPressed() {
-		pageListener.setForward();
-		try {
-			super.nextPressed();
-		} finally {
-			pageListener.reset();
-		}
-	}
-
-	@Override
-	protected void createButtonsForButtonBar(Composite parent) {
-		super.createButtonsForButtonBar(parent);
-		AccessibleAdapter adapter = new AccessibleAdapter() {
-			@Override
-			public void getName(AccessibleEvent e) {
-				final Button button = (Button) ((Accessible) e.getSource()).getControl();
-				final String text = button.getText();
-				e.result = text.replace('<', ' ').replace('>', ' ');
-			}
-		};
-		backButton.getAccessible().addAccessibleListener(adapter);
-		nextButton.getAccessible().addAccessibleListener(adapter);
-	}
-
-	@Override
 	public MarketplaceWizard getWizard() {
 		return (MarketplaceWizard) super.getWizard();
-	}
-
-	@Override
-	public void updateButtons() {
-		super.updateButtons();
-		IWizardPage currentPage = getCurrentPage();
-		if (currentPage != null) {
-			boolean buttonsChanged = false;
-			String nextButtonLabel = getNextButtonLabel(currentPage);
-			if (!nextButtonLabel.equals(nextButton.getText())) {
-				nextButton.setText(nextButtonLabel);
-				setButtonLayoutData(nextButton);
-				buttonsChanged = true;
-			}
-			String backButtonLabel = getBackButtonLabel(currentPage);
-			if (!backButtonLabel.equals(backButton.getText())) {
-				backButton.setText(backButtonLabel);
-				setButtonLayoutData(backButton);
-				buttonsChanged = true;
-			}
-			if (buttonsChanged) {
-				Composite buttonBar = backButton.getParent();
-				buttonBar.layout(true);
-			}
-		}
-	}
-
-	public String getNextButtonLabel(IWizardPage page) {
-		if (page instanceof IWizardButtonLabelProvider) {
-			IWizardButtonLabelProvider labelProvider = (IWizardButtonLabelProvider) page;
-			String nextButtonLabel = labelProvider.getNextButtonLabel();
-			if (nextButtonLabel != null) {
-				return nextButtonLabel;
-			}
-		}
-		return IDialogConstants.NEXT_LABEL;
-	}
-
-	public String getBackButtonLabel(IWizardPage page) {
-		if (page instanceof IWizardButtonLabelProvider) {
-			IWizardButtonLabelProvider labelProvider = (IWizardButtonLabelProvider) page;
-			String backButtonLabel = labelProvider.getBackButtonLabel();
-			if (backButtonLabel != null) {
-				return backButtonLabel;
-			}
-		}
-		return IDialogConstants.BACK_LABEL;
 	}
 }

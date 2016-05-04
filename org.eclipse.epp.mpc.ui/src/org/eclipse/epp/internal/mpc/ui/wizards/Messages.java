@@ -103,11 +103,19 @@ class Messages extends NLS {
 
 	public static String FeatureSelectionWizardPage_Update_Pending;
 
+	public static String ImportFavoritesActionLink_errorLoadingFavorites;
+
+	public static String ImportFavoritesActionLink_invalidUrl;
+
+	public static String ImportFavoritesActionLink_noFavoritesFoundAtUrl;
+
+	public static String ImportFavoritesActionLink_noFavoritesFoundForUser;
+
 	public static String ImportFavoritesPage_conflictErrorMessage;
 
 	public static String ImportFavoritesPage_Description;
 
-	public static String ImportFavoritesPage_NextButtonLabel;
+	public static String ImportFavoritesWizardDialog_FinishButtonLabel;
 
 	public static String ImportFavoritesPage_Title;
 
@@ -293,9 +301,9 @@ class Messages extends NLS {
 	public static String UserFavoritesAbstractImportActionItem_importFavoritesActionLabel;
 
 	public static String UserFavoritesAbstractImportActionItem_importFavoritesTooltip;
-	public static String UserFavoritesFindFavoritesActionItem_browseMarketplaceActionLabel;
+	public static String UserFavoritesFindFavoritesActionItem_browsePopularActionLabel;
 
-	public static String UserFavoritesFindFavoritesActionItem_browseMarketplaceTooltip;
+	public static String UserFavoritesFindFavoritesActionItem_browsePopularTooltip;
 
 	public static String UserFavoritesFindFavoritesActionItem_noFavoritesYetMessage;
 

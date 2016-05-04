@@ -635,8 +635,6 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 					handleSearchResult(catalogCategory, result, progress.newChild(500));
 					if (result.getNodes().isEmpty()) {
 						addNoFavoritesItem(catalogCategory);
-					} else {
-						addFavoritesMassChangeItem(catalogCategory);
 					}
 				} catch (NotAuthorizedException e) {
 					addUserStorageLoginItem(catalogCategory);
@@ -707,10 +705,6 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	private void addNoFavoritesItem(MarketplaceCategory catalogCategory) {
 		addUserActionItem(catalogCategory, UserAction.CREATE_FAVORITES);
-	}
-
-	private void addFavoritesMassChangeItem(MarketplaceCategory catalogCategory) {
-		addUserActionItem(catalogCategory, UserAction.INSTALL_ALL_FAVORITES);
 	}
 
 	private void addFavoritesNotSupportedItem(MarketplaceCategory catalogCategory) {

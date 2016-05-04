@@ -11,6 +11,8 @@
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryResources;
@@ -26,32 +28,7 @@ import org.eclipse.swt.widgets.Listener;
 
 public abstract class AbstractUserActionLinksItem extends UserActionViewerItem<UserActionCatalogItem> {
 
-	public static final class ActionLink {
-		private final String id;
-
-		private final String linkText;
-
-		private final String tooltip;
-
-		public ActionLink(String id, String linkText, String tooltip) {
-			super();
-			this.id = id;
-			this.linkText = linkText;
-			this.tooltip = tooltip;
-		}
-
-		public String getId() {
-			return id;
-		}
-
-		public String getLinkText() {
-			return linkText;
-		}
-
-		public String getTooltip() {
-			return tooltip;
-		}
-	}
+	private final Map<String, ActionLink> actions = new HashMap<String, ActionLink>();
 
 	public AbstractUserActionLinksItem(Composite parent, DiscoveryResources resources,
 			IShellProvider shellProvider,
@@ -92,6 +69,7 @@ public abstract class AbstractUserActionLinksItem extends UserActionViewerItem<U
 
 		boolean first = true;
 		for (ActionLink actionLink : actionLinks) {
+			actions.put(actionLink.getId(), actionLink);
 			if (first) {
 				first = false;
 			} else {
@@ -112,7 +90,7 @@ public abstract class AbstractUserActionLinksItem extends UserActionViewerItem<U
 	}
 
 	private String getLinkText(ActionLink actionLink) {
-		return MessageFormat.format("<a href=\"{0}\">{1}</a>", actionLink.getId(), actionLink.getLinkText()); //$NON-NLS-1$
+		return MessageFormat.format("<a href=\"{0}\">{1}</a>", actionLink.getId(), actionLink.getLabel()); //$NON-NLS-1$
 	}
 
 	protected String getDescriptionText() {
@@ -122,5 +100,13 @@ public abstract class AbstractUserActionLinksItem extends UserActionViewerItem<U
 	@Override
 	protected String getLinkText() {
 		return null;
+	}
+
+	@Override
+	protected void actionPerformed(Object data) {
+		ActionLink actionLink = actions.get(data);
+		if (actionLink != null) {
+			actionLink.selected();
+		}
 	}
 }

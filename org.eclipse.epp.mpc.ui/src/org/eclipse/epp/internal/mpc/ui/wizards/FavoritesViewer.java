@@ -22,7 +22,9 @@ import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.equinox.internal.p2.discovery.Catalog;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.ControlListItem;
+import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogConfiguration;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.swt.SWT;
@@ -43,11 +45,12 @@ public class FavoritesViewer extends CatalogViewer {
 
 	private MarketplaceDiscoveryResources discoveryResources;
 
-	private final MarketplaceWizard wizard;
+	private final IMarketplaceWebBrowser browser;
 
-	public FavoritesViewer(Catalog catalog, IShellProvider shellProvider, MarketplaceWizard wizard) {
-		super(catalog, shellProvider, wizard.getContainer(), wizard.getConfiguration());
-		this.wizard = wizard;
+	public FavoritesViewer(Catalog catalog, IShellProvider shellProvider, IMarketplaceWebBrowser browser,
+			IRunnableContext context, CatalogConfiguration configuration) {
+		super(catalog, shellProvider, context, configuration);
+		this.browser = browser;
 		setAutomaticFind(true);
 		setRefreshJobDelay(2500);
 	}
@@ -94,6 +97,15 @@ public class FavoritesViewer extends CatalogViewer {
 	}
 
 	@Override
+	public void updateCatalog() {
+		List<CatalogItem> checkedItems = getCheckedItems();
+		for (CatalogItem catalogItem : checkedItems) {
+			modifySelection(catalogItem, false);
+		}
+		super.updateCatalog();
+	}
+
+	@Override
 	protected MarketplaceDiscoveryResources getResources() {
 		return discoveryResources;
 	}
@@ -111,7 +123,7 @@ public class FavoritesViewer extends CatalogViewer {
 	}
 
 	private FavoritesDiscoveryItem createDiscoveryItem(Composite parent, MarketplaceNodeCatalogItem catalogItem) {
-		return new FavoritesDiscoveryItem(parent, SWT.NONE, getResources(), wizard, catalogItem, this);
+		return new FavoritesDiscoveryItem(parent, SWT.NONE, getResources(), browser, catalogItem, this);
 	}
 
 	@Override

@@ -14,6 +14,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -297,17 +298,28 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 
 	public List<String> getFavoriteIds(String user, IProgressMonitor monitor) throws IOException {
 		if (user.toLowerCase().startsWith("http:") || user.toLowerCase().startsWith("https:")) { //$NON-NLS-1$ //$NON-NLS-2$
-			try {
-				return importUserFavoriteIds(URLUtil.toURI(user));
-			} catch (URISyntaxException e) {
-				throw new IllegalArgumentException(e);
-			}
+			return importUserFavoriteIds(toURI(user));
 		}
 		Matcher matcher = USER_MAIL_PATTERN.matcher(user);
 		if (matcher.find()) {
 			return importUserFavoriteIds(FAVORITES_API__USER_MAIL, user);
 		}
 		return importUserFavoriteIds(FAVORITES_API__USER_NAME, user);
+	}
+
+	private static URI toURI(String user) {
+		try {
+			URI uri = URLUtil.toURI(user);
+			if ((uri.getHost() == null || "".equals(uri.getHost())) && "/".equals(uri.getPath()) //$NON-NLS-1$//$NON-NLS-2$
+					&& uri.getScheme() != null
+					&& uri.getScheme().toLowerCase().startsWith("http")) { //$NON-NLS-1$
+				//incomplete uri
+				throw new IllegalArgumentException(new URISyntaxException(user, Messages.UserFavoritesService_uriMissingHost));
+			}
+			return uri;
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException(e);
+		}
 	}
 
 	private List<String> importUserFavoriteIds(String userIdParam, String userId) throws IOException {
@@ -391,6 +403,27 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 					for (IStatus childStatus : status.getChildren()) {
 						if (childStatus.getException() != null
 								&& isInvalidFavoritesListException(childStatus.getException())) {
+							return true;
+						}
+					}
+				}
+			}
+			error = error.getCause();
+		}
+		return false;
+	}
+
+	public static boolean isInvalidUrlException(Throwable error) {
+		while (error != null) {
+			if (error instanceof URISyntaxException || error instanceof MalformedURLException) {
+				return true;
+			}
+			if (error instanceof CoreException) {
+				CoreException coreException = (CoreException) error;
+				IStatus status = coreException.getStatus();
+				if (status.isMultiStatus()) {
+					for (IStatus childStatus : status.getChildren()) {
+						if (childStatus.getException() != null && isInvalidUrlException(childStatus.getException())) {
 							return true;
 						}
 					}

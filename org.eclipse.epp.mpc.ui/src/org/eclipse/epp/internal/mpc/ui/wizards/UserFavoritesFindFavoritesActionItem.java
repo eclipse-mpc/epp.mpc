@@ -17,40 +17,33 @@ import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.widgets.Composite;
 
-public class UserFavoritesFindFavoritesActionItem extends UserFavoritesAbstractImportActionItem {
+public class UserFavoritesFindFavoritesActionItem extends AbstractUserActionLinksItem {
 
 	private static final String BROWSE_ACTION_ID = "browse"; //$NON-NLS-1$
-	private final MarketplacePage marketplacePage;
 
 	public UserFavoritesFindFavoritesActionItem(Composite parent, DiscoveryResources resources,
-			IShellProvider shellProvider, UserActionCatalogItem element, MarketplacePage marketplacePage) {
-		super(parent, resources, shellProvider, element, marketplacePage);
-		this.marketplacePage = marketplacePage;
+			IShellProvider shellProvider, UserActionCatalogItem element, final MarketplacePage marketplacePage) {
+		super(parent, resources, shellProvider, element, marketplacePage.getViewer());
+		createContent(new ImportFavoritesActionLink(marketplacePage),
+				new ActionLink(BROWSE_ACTION_ID,
+						Messages.UserFavoritesFindFavoritesActionItem_browsePopularActionLabel,
+						Messages.UserFavoritesFindFavoritesActionItem_browsePopularTooltip) {
+
+			@Override
+			public void selected() {
+				MarketplaceWizard wizard = marketplacePage.getWizard();
+				IWizardPage currentPage = wizard.getContainer().getCurrentPage();
+				if (currentPage == marketplacePage
+						&& marketplacePage.getViewer().getContentType() == ContentType.FAVORITES) {
+							marketplacePage.setActiveTab(ContentType.POPULAR);
+				}
+			}
+
+		});
 	}
 
 	@Override
 	protected String getDescriptionText() {
 		return Messages.UserFavoritesFindFavoritesActionItem_noFavoritesYetMessage;
-	}
-
-	@Override
-	protected ActionLink createSecondaryActionLink() {
-		return new ActionLink(BROWSE_ACTION_ID,
-				Messages.UserFavoritesFindFavoritesActionItem_browseMarketplaceActionLabel,
-				Messages.UserFavoritesFindFavoritesActionItem_browseMarketplaceTooltip);
-	}
-
-	@Override
-	protected void secondaryActionPerformed() {
-		MarketplaceWizard wizard = marketplacePage.getWizard();
-		IWizardPage currentPage = wizard.getContainer().getCurrentPage();
-		if (currentPage == marketplacePage && getViewer().getContentType() == ContentType.FAVORITES) {
-			marketplacePage.setActiveTab(ContentType.SEARCH);
-		}
-	}
-
-	@Override
-	protected MarketplaceViewer getViewer() {
-		return (MarketplaceViewer) super.getViewer();
 	}
 }

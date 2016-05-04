@@ -8,27 +8,20 @@
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.epp.internal.mpc.ui.catalog;
+package org.eclipse.epp.internal.mpc.ui.wizards;
 
-import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
+import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.swt.widgets.Shell;
 
-public class UserActionCatalogItem extends CatalogItem {
-	public static enum UserAction {
-		BROWSE, LOGIN, CREATE_FAVORITES, FAVORITES_UNSUPPORTED, RETRY_ERROR, INFO;
+public class ImportFavoritesWizardDialog extends AbstractMarketplaceWizardDialog {
+
+	public ImportFavoritesWizardDialog(Shell parentShell, IWizard newWizard) {
+		super(parentShell, newWizard);
 	}
 
-	private UserAction userAction;
-
-	public UserActionCatalogItem() {
-		super();
-		// ignore
-	}
-
-	public UserAction getUserAction() {
-		return userAction;
-	}
-
-	public void setUserAction(UserAction userAction) {
-		this.userAction = userAction;
+	@Override
+	public String getFinishButtonLabel(IWizardPage page) {
+		return Messages.ImportFavoritesWizardDialog_FinishButtonLabel;
 	}
 }

@@ -62,6 +62,9 @@ class Messages extends NLS {
 
 
 	public static String UserFavoritesService_SettingUserFavorites;
+
+
+	public static String UserFavoritesService_uriMissingHost;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

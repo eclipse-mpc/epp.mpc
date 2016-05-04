@@ -15,9 +15,12 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -149,7 +152,9 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 
 	private boolean updated;
 
-	private Link selectionLink;
+	private Link contentListLinks;
+
+	private ActionLink selectionLink;
 
 	private TabFolder tabFolder;
 
@@ -184,6 +189,10 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 	private ContentType currentContentType;
 
 	private ContentType previousContentType;
+
+	private final List<ActionLink> actionLinks = new ArrayList<ActionLink>();
+
+	private final Map<String, ActionLink> actions = new HashMap<String, ActionLink>();
 
 	public MarketplacePage(MarketplaceCatalog catalog, MarketplaceCatalogConfiguration configuration) {
 		super(catalog);
@@ -242,20 +251,23 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		});
 
 		{
-			selectionLink = new Link(pageContent, SWT.NULL);//TODO id
-			selectionLink.setToolTipText(Messages.MarketplacePage_showSelection);
-			selectionLink.addSelectionListener(new SelectionListener() {
+			contentListLinks = new Link(pageContent, SWT.NULL);//TODO id
+			contentListLinks.setToolTipText(Messages.MarketplacePage_showSelection);
+			contentListLinks.addSelectionListener(new SelectionListener() {
 				public void widgetSelected(SelectionEvent e) {
-					selectionLinkActivated();
+					String actionId = e.text;
+					ActionLink actionLink = actions.get(actionId);
+					if (actionLink != null) {
+						actionLink.selected();
+					}
 				}
 
 				public void widgetDefaultSelected(SelectionEvent e) {
 					widgetSelected(e);
-
 				}
 			});
-			GridDataFactory.swtDefaults().align(SWT.CENTER, SWT.CENTER).applyTo(selectionLink);
-			computeSelectionLinkText();
+			GridDataFactory.swtDefaults().align(SWT.CENTER, SWT.CENTER).applyTo(contentListLinks);
+			updateSelectionLink();
 		}
 
 		if (needSwitchMarketplaceControl) {
@@ -437,6 +449,12 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		if (disableTabSelection) {
 			return;
 		}
+		boolean showSelected = false;
+		if (contentType == ContentType.SELECTION) {
+			showSelected = true;
+			contentType = ContentType.SEARCH;
+		}
+
 		if (contentType != currentContentType) {
 			previousContentType = currentContentType;
 			currentContentType = contentType;
@@ -453,7 +471,27 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		if (tabContent != null && !tabContent.isDisposed()) {
 			tabItem.setControl(tabContent);
 		}
-		getViewer().setContentType(contentType);
+		if (previousContentType != contentType) {
+			contentTypeChanged(previousContentType, contentType);
+		}
+		if (showSelected) {
+			getViewer().showSelected();
+		} else {
+			getViewer().setContentType(contentType);
+		}
+	}
+
+	private void contentTypeChanged(ContentType previousContentType, ContentType contentType) {
+		actionLinks.clear();
+		actions.clear();
+		if (selectionLink != null) {
+			doAddActionLink(0, selectionLink);
+		}
+		if (contentType == ContentType.FAVORITES) {
+			doAddActionLink(-1, new ImportFavoritesActionLink(this));
+			doAddActionLink(-1, new InstallAllActionLink(this));
+		}
+		updateContentListLinks();
 	}
 
 	public ContentType getActiveTab() {
@@ -609,9 +647,31 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		.applyTo(composite);
 	}
 
-	private void computeSelectionLinkText() {
-		if (selectionLink != null) {
-			final String originalText = selectionLink.getText();
+	private void updateContentListLinks() {
+		if (contentListLinks != null) {
+			final String originalText = contentListLinks.getText();
+
+			StringBuilder bldr = new StringBuilder();
+			boolean first = true;
+			for (ActionLink actionLink : actionLinks) {
+				if (first) {
+					first = false;
+				} else {
+					bldr.append(" | "); //$NON-NLS-1$
+				}
+				bldr.append(NLS.bind("<a href=\"{0}\">{1}</a>", actionLink.getId(), actionLink.getLabel())); //$NON-NLS-1$
+			}
+			String text = bldr.toString();
+			if (!text.equals(originalText)) {
+				contentListLinks.setText(text);
+				contentListLinks.getParent().layout(true, false);
+			}
+		}
+	}
+
+	private void updateSelectionLink() {
+		if (contentListLinks != null) {
+			final String originalText = selectionLink == null ? "" : selectionLink.getLabel(); //$NON-NLS-1$
 
 			String text = ""; //$NON-NLS-1$
 			int count = getWizard().getSelectionModel().getItemToSelectedOperation().size();
@@ -621,15 +681,38 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 				text = NLS.bind(Messages.MarketplacePage_linkShowSelection_Multiple, Integer.valueOf(count));
 			}
 			if (!text.equals(originalText)) {
-				selectionLink.setText(text);
-				selectionLink.getParent().layout(true, false);
+				if (text.equals("")) { //$NON-NLS-1$
+					if (selectionLink != null) {
+						removeActionLink(selectionLink);
+						selectionLink = null;
+					}
+				} else {
+					ActionLink newSelectionLink = createSelectionLink(text);
+					if (selectionLink != null) {
+						updateActionLink(selectionLink, newSelectionLink);
+					} else {
+						addActionLink(0, newSelectionLink);
+					}
+					selectionLink = newSelectionLink;
+				}
 			}
 		}
 	}
 
+	private ActionLink createSelectionLink(String text) {
+		return new ActionLink("showSelection", text, Messages.MarketplacePage_showSelection) {
+
+			@Override
+			public void selected() {
+				selectionLinkActivated();
+			}
+		};
+	}
+
 	protected void selectionLinkActivated() {
-		tabFolder.setSelection(searchTabItem);
-		getViewer().showSelected();
+//		tabFolder.setSelection(searchTabItem);
+//		getViewer().showSelected();
+		setActiveTab(ContentType.SELECTION);
 	}
 
 	@Override
@@ -717,7 +800,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 
 	private void computeMessages() {
 		computeStatusMessage();
-		computeSelectionLinkText();
+		updateSelectionLink();
 	}
 
 	private void computeStatusMessage() {
@@ -914,7 +997,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 						Messages.MarketplacePage_selectionSolutions, Messages.MarketplacePage_discardPendingSolutions);
 				if (discardSelection) {
 					getWizard().getSelectionModel().clear();
-					computeSelectionLinkText();
+					updateSelectionLink();
 				} else {
 					if (marketplaceSwitcher != null) {
 						if (lastSelection == null) {
@@ -1010,6 +1093,58 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 			if (market != null || category != null || query != null) {
 				search(configuration.getCatalogDescriptor(), market, category, query);
 			}
+		}
+	}
+
+	protected void addActionLink(int pos, ActionLink actionLink) {
+		doAddActionLink(pos, actionLink);
+		updateContentListLinks();
+	}
+
+	private void doAddActionLink(int pos, ActionLink actionLink) {
+		ActionLink existingAction = actions.get(actionLink.getId());
+		if (existingAction != null && existingAction != actionLink) {
+			throw new IllegalArgumentException();
+		}
+		int insertIndex = pos == -1 || pos > actionLinks.size() ? actionLinks.size() : pos;
+		actionLinks.add(insertIndex, actionLink);
+		actions.put(actionLink.getId(), actionLink);
+	}
+
+	protected void removeActionLink(ActionLink actionLink) {
+		doRemoveActionLink(actionLink);
+		updateContentListLinks();
+	}
+
+	private void doRemoveActionLink(ActionLink actionLink) {
+		actionLinks.remove(actionLink);
+		if (actions.get(actionLink.getId()) == actionLink) {
+			actions.remove(actionLink.getId());
+		}
+	}
+
+	protected void updateActionLink(ActionLink oldLink, ActionLink newLink) {
+		if (oldLink == newLink) {
+			return;
+		}
+		doUpdateActionLink(oldLink, newLink);
+		updateContentListLinks();
+	}
+
+	private void doUpdateActionLink(ActionLink oldLink, ActionLink newLink) {
+		int index = actionLinks.indexOf(oldLink);
+		if (index != -1) {
+			String id = oldLink.getId();
+			if (actions.get(id) != oldLink) {
+				throw new IllegalArgumentException();
+			}
+			if (!id.equals(newLink.getId())) {
+				throw new IllegalArgumentException();
+			}
+			actionLinks.set(index, newLink);
+			actions.put(id, newLink);
+		} else {
+			throw new NoSuchElementException();
 		}
 	}
 
