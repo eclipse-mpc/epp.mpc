@@ -10,15 +10,24 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service;
 
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
 import org.eclipse.epp.mpc.core.service.IMarketplaceStorageService;
+import org.eclipse.equinox.security.storage.ISecurePreferences;
+import org.eclipse.equinox.security.storage.StorageException;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.userstorage.IBlob;
 import org.eclipse.userstorage.IStorage;
 import org.eclipse.userstorage.IStorageService;
@@ -37,6 +46,8 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 	private static final String DEFAULT_STORAGE_SERVICE_NAME = Messages.MarketplaceStorageService_defaultStorageServiceName;
 
 	static final String DEFAULT_APPLICATION_TOKEN = "MZ04RMOpksKN5GpxKXafq2MSjSP"; //$NON-NLS-1$
+
+	private static final String[] MIGRATE_SECURE_STORAGE_KEYS = { "username", "password", "termsOfUseAgreed" }; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 
 	private String applicationToken = DEFAULT_APPLICATION_TOKEN;
 
@@ -171,18 +182,113 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 		if (serviceUrlValue != null) {
 			URI serviceUri = URI.create(serviceUrlValue.toString());
 			String serviceName = getProperty(properties, STORAGE_SERVICE_NAME_PROPERTY, DEFAULT_STORAGE_SERVICE_NAME);
-			registerStorageService(serviceUri, serviceName);
-			setServiceUri(serviceUri);
+			IStorageService registered = registerStorageService(serviceUri, serviceName);
+			setServiceUri(registered.getServiceURI());
 		}
 		String applicationToken = getProperty(properties, APPLICATION_TOKEN_PROPERTY, DEFAULT_APPLICATION_TOKEN);
 		this.applicationToken = applicationToken;
 	}
 
-	private void registerStorageService(URI serviceUri, String serviceName) {
+	private IStorageService registerStorageService(URI serviceUri, String serviceName) {
 		customStorageService = null;
-		IStorageService service = IStorageService.Registry.INSTANCE.getService(serviceUri);
+		URI normalizedUri = normalizePath(serviceUri);
+		URI denormalizedUri = normalizePath(serviceUri, false);
+		IStorageService service = IStorageService.Registry.INSTANCE.getService(normalizedUri);
+		IStorageService extraService = IStorageService.Registry.INSTANCE.getService(denormalizedUri);
 		if (service == null) {
-			customStorageService = IStorageService.Registry.INSTANCE.addService(serviceName, serviceUri);
+			if (extraService != null) {
+				return extraService;
+			}
+			customStorageService = IStorageService.Registry.INSTANCE.addService(serviceName, normalizedUri);
+			service = customStorageService;
+			return service;
+		}
+		if (extraService != null && extraService != service) {
+			service = cleanupExtraStorageService(service, extraService);
+		}
+
+		return service;
+	}
+
+	private static IStorageService cleanupExtraStorageService(IStorageService service, IStorageService extraService) {
+		IStorageService.Dynamic removeDynamic;
+		IStorageService keepService;
+		if (extraService instanceof IStorageService.Dynamic) {
+			removeDynamic = (IStorageService.Dynamic) extraService;
+			keepService = service;
+		} else if (service instanceof IStorageService.Dynamic) {
+			removeDynamic = (IStorageService.Dynamic) service;
+			keepService = extraService;
+		} else {
+			return service;
+		}
+		if (removeDynamic instanceof StorageService && keepService instanceof StorageService) {
+			StorageService removeImpl = (StorageService) removeDynamic;
+			StorageService keepImpl = (StorageService) keepService;
+			ISecurePreferences removeSecurePreferences = removeImpl.getSecurePreferences();
+			ISecurePreferences keepSecurePreferences = keepImpl.getSecurePreferences();
+			try {
+				copySecurePreferences(removeSecurePreferences, keepSecurePreferences);
+			} catch (Exception e) {
+				MarketplaceClientCore.error(NLS.bind("Failed to migrate secure storage values from {0} to {1}",
+						removeDynamic.getServiceURI(), keepService.getServiceURI()), e);
+			}
+		}
+		removeDynamic.remove();
+		return keepService;
+	}
+
+	private static void copySecurePreferences(ISecurePreferences source, ISecurePreferences target)
+			throws StorageException, IOException {
+		Set<String> sourceKeys = new HashSet<String>(Arrays.asList(source.keys()));
+		Set<String> targetKeys = new HashSet<String>(Arrays.asList(target.keys()));
+		boolean changed = false;
+		for (String key : MIGRATE_SECURE_STORAGE_KEYS) {
+			if (sourceKeys.contains(key) && !targetKeys.contains(key)) {
+				boolean encrypted = source.isEncrypted(key);
+				target.put(key, source.get(key, null), encrypted);
+				changed = true;
+			}
+		}
+		if (changed) {
+			target.flush();
+		}
+	}
+
+	private static URI normalizePath(URI uri) {
+		return normalizePath(uri, true);
+	}
+
+	private static URI normalizePath(URI uri, boolean trailingSlash) {
+		if (uri.isOpaque()) {
+			return uri;
+		}
+		String path = uri.getPath();
+		String normalizedPath;
+		if (path == null) {
+			if (trailingSlash) {
+				normalizedPath = "/"; //$NON-NLS-1$
+			} else {
+				return uri;
+			}
+		} else if (path.endsWith("/")) { //$NON-NLS-1$
+			if (trailingSlash) {
+				return uri;
+			} else {
+				normalizedPath = path.length() == 1 ? null : path.substring(0, path.length() - 1);
+			}
+		} else {
+			if (trailingSlash) {
+				normalizedPath = path + "/"; //$NON-NLS-1$
+			} else {
+				return uri;
+			}
+		}
+		try {
+			return new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(), normalizedPath,
+					uri.getQuery(), uri.getFragment());
+		} catch (URISyntaxException e) {
+			return uri;
 		}
 	}
 
