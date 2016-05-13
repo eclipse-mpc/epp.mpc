@@ -31,6 +31,7 @@ import org.eclipse.epp.mpc.ui.MarketplaceClient;
 import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorRegistry;
@@ -57,7 +58,7 @@ public class AskMarketPlaceForFileSupportStrategy implements IUnassociatedEditor
 	public IEditorDescriptor getEditorDescriptor(final String fileName, final IEditorRegistry editorRegistry)
 			throws CoreException, OperationCanceledException {
 		final IEditorDescriptor res = new SystemEditorOrTextEditorStrategy().getEditorDescriptor(fileName, editorRegistry);
-		final Shell shell = WorkbenchUtil.getShell();
+		final Display display = Display.getCurrent();
 		Job mpcJob = new Job(Messages.AskMarketPlaceForFileSupportStrategy_jobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -92,11 +93,12 @@ public class AskMarketPlaceForFileSupportStrategy implements IUnassociatedEditor
 				if (nodes.isEmpty()) {
 					return Status.OK_STATUS;
 				}
-				final MarketplaceOrAssociateDialog dialog = new MarketplaceOrAssociateDialog(shell,
-						fileExtension, res);
 				UIJob openDialog = new UIJob(Messages.AskMerketplaceForFileSupportStrategy_dialogJobName) {
 					@Override
 					public IStatus runInUIThread(IProgressMonitor monitor) {
+						final Shell shell = WorkbenchUtil.getShell();
+						final MarketplaceOrAssociateDialog dialog = new MarketplaceOrAssociateDialog(shell,
+								fileExtension, res);
 						if (dialog.open() == IDialogConstants.OK_ID) {
 							if (dialog.isShowProposals()) {
 								IMarketplaceClientService marketplaceClientService = MarketplaceClient
@@ -132,6 +134,14 @@ public class AskMarketPlaceForFileSupportStrategy implements IUnassociatedEditor
 						} else {
 							return Status.CANCEL_STATUS;
 						}
+					}
+
+					@Override
+					public Display getDisplay() {
+						if (display != null && !display.isDisposed()) {
+							return display;
+						}
+						return super.getDisplay();
 					}
 				};
 				openDialog.setPriority(Job.INTERACTIVE);
