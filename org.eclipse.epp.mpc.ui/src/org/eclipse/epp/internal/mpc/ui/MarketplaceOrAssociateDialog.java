@@ -29,7 +29,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorDescriptor;
+import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.dialogs.PreferencesUtil;
+import org.eclipse.ui.internal.ide.IDEWorkbenchPlugin;
 
 public class MarketplaceOrAssociateDialog extends TitleAreaDialog {
 
@@ -68,7 +70,7 @@ public class MarketplaceOrAssociateDialog extends TitleAreaDialog {
 		GridLayoutFactory.swtDefaults().equalWidth(false).applyTo(res);
 
 		Label label = new Label(res, SWT.WRAP);
-		label.setText(NLS.bind(Messages.MarketplaceOrAssociateDialog_message, fileExtension));
+		label.setText(createDescription());
 		GridData labelGridData = GridDataFactory.swtDefaults().align(SWT.FILL, SWT.TOP).grab(true, false).create();
 		label.setLayoutData(labelGridData);
 
@@ -128,6 +130,25 @@ public class MarketplaceOrAssociateDialog extends TitleAreaDialog {
 		showProposalsRadio.setSelection(true);
 		updateSelection();
 		return res;
+	}
+
+	private String createDescription() {
+		String editorId = currentEditor == null ? null : currentEditor.getId();
+		if (IEditorRegistry.SYSTEM_INPLACE_EDITOR_ID.equals(editorId)) {
+			return NLS.bind(
+					Messages.MarketplaceOrAssociateDialog_descriptionEmbeddedSystemEditor,
+					fileExtension);
+		} else if (IEditorRegistry.SYSTEM_EXTERNAL_EDITOR_ID.equals(editorId)) {
+			return NLS.bind(
+					Messages.MarketplaceOrAssociateDialog_descriptionExternalSystemEditor,
+					fileExtension);
+		} else if (IDEWorkbenchPlugin.DEFAULT_TEXT_EDITOR_ID.equals(editorId)) {
+			return NLS.bind(
+					Messages.MarketplaceOrAssociateDialog_descriptionSimpleTextEditor,
+					fileExtension);
+		} else {
+			return NLS.bind(Messages.MarketplaceOrAssociateDialog_message, fileExtension);
+		}
 	}
 
 	private void updateSelection() {

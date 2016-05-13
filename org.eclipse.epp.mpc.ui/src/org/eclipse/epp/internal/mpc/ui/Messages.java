@@ -72,6 +72,12 @@ class Messages extends NLS {
 
 	public static String MarketplaceOrAssociateDialog_associate;
 
+	public static String MarketplaceOrAssociateDialog_descriptionEmbeddedSystemEditor;
+
+	public static String MarketplaceOrAssociateDialog_descriptionExternalSystemEditor;
+
+	public static String MarketplaceOrAssociateDialog_descriptionSimpleTextEditor;
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
