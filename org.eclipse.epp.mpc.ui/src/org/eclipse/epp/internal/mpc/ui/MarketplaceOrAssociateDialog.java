@@ -50,7 +50,7 @@ public class MarketplaceOrAssociateDialog extends TitleAreaDialog {
 		this.fileExtension = fileExtension;
 		this.currentEditor = currentEditor;
 		setHelpAvailable(false);
-		setShellStyle(SWT.RESIZE);
+		setShellStyle(getShellStyle() | SWT.RESIZE);
 	}
 
 	@Override
