@@ -11,9 +11,8 @@
 package org.eclipse.epp.internal.mpc.ui;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -28,7 +27,6 @@ import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
 import org.eclipse.epp.mpc.ui.IMarketplaceClientConfiguration;
 import org.eclipse.epp.mpc.ui.IMarketplaceClientService;
 import org.eclipse.epp.mpc.ui.MarketplaceClient;
-import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.widgets.Display;
