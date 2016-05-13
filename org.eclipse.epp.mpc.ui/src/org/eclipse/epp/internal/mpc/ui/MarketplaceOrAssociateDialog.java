@@ -12,14 +12,16 @@ package org.eclipse.epp.internal.mpc.ui;
 
 import org.eclipse.equinox.internal.p2.ui.discovery.DiscoveryImages;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -61,11 +63,21 @@ public class MarketplaceOrAssociateDialog extends TitleAreaDialog {
 		setTitleImage(wizban);
 
 		Composite res = new Composite(parent, SWT.NONE);
-		res.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		res.setLayout(new GridLayout(1, false));
-		Label label = new Label(res, SWT.NONE);
+		GridData resGridData = GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, SWT.DEFAULT).create();
+		res.setLayoutData(resGridData);
+		GridLayoutFactory.swtDefaults().equalWidth(false).applyTo(res);
+
+		Label label = new Label(res, SWT.WRAP);
 		label.setText(NLS.bind(Messages.MarketplaceOrAssociateDialog_message, fileExtension));
+		GridData labelGridData = GridDataFactory.swtDefaults().align(SWT.FILL, SWT.TOP).grab(true, false).create();
+		label.setLayoutData(labelGridData);
+
 		showProposalsRadio = new Button(res, SWT.RADIO);
+		GridDataFactory.swtDefaults()
+				.align(SWT.FILL, SWT.TOP)
+				.grab(true, false)
+				.indent(0, 10)
+				.applyTo(showProposalsRadio);
 		showProposalsRadio.setText(Messages.MarketplaceOrAssociateDialog_showProposals);
 		showProposalsRadio.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -73,7 +85,9 @@ public class MarketplaceOrAssociateDialog extends TitleAreaDialog {
 				updateSelection();
 			}
 		});
+
 		associateRadio = new Button(res, SWT.RADIO);
+		GridDataFactory.swtDefaults().align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(associateRadio);
 		associateRadio
 		.setText(NLS.bind(Messages.MarketplaceOrAssociateDialog_associate, fileExtension,
 				currentEditor.getLabel()));
@@ -83,10 +97,13 @@ public class MarketplaceOrAssociateDialog extends TitleAreaDialog {
 				updateSelection();
 			}
 		});
+
 		Link linkToPreferences = new Link(res, SWT.NONE);
-		GridData linkLayoutData = new GridData(SWT.RIGHT, SWT.FILL, true, false);
-		linkLayoutData.verticalIndent = 20;
-		linkToPreferences.setLayoutData(linkLayoutData);
+		GridDataFactory.swtDefaults()
+				.align(SWT.FILL, SWT.TOP)
+				.grab(true, true)
+				.indent(0, 20)
+				.applyTo(linkToPreferences);
 		linkToPreferences.setText(Messages.MarketplaceOrAssociateDialog_linkToPreferences);
 		linkToPreferences.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -100,6 +117,13 @@ public class MarketplaceOrAssociateDialog extends TitleAreaDialog {
 				}
 			}
 		});
+
+		Point hint = res.computeSize(SWT.NONE, SWT.DEFAULT);
+		labelGridData.widthHint = hint.x + 20;
+		labelGridData.heightHint = SWT.DEFAULT;
+		hint = res.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		resGridData.widthHint = hint.x;
+		resGridData.heightHint = SWT.DEFAULT;
 
 		showProposalsRadio.setSelection(true);
 		updateSelection();
