@@ -11,6 +11,9 @@
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.accessibility.ACC;
+import org.eclipse.swt.accessibility.AccessibleControlAdapter;
+import org.eclipse.swt.accessibility.AccessibleControlEvent;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Composite;
@@ -21,15 +24,15 @@ class StyledTextHelper {
 	 * Create a StyledText that acts much like a Label, i.e. isn't editable and doesn't get focus
 	 */
 	protected static StyledText createStyledTextLabel(Composite parent) {
-		StyledText styledText = new StyledText(parent, SWT.READ_ONLY | SWT.WRAP | SWT.MULTI);
+		StyledText styledText = new StyledText(parent, SWT.READ_ONLY | SWT.WRAP | SWT.MULTI | SWT.NO_FOCUS);
 		styledText.setEditable(false);
 		styledText.setCursor(parent.getDisplay().getSystemCursor(SWT.CURSOR_ARROW));
-//		styledText.addFocusListener(new FocusAdapter() {
-//			@Override
-//			public void focusGained(FocusEvent e) {
-//				((StyledText) e.widget).getParent().setFocus();
-//			}
-//		});
+		styledText.getAccessible().addAccessibleControlListener(new AccessibleControlAdapter() {
+			@Override
+			public void getRole(AccessibleControlEvent e) {
+				e.detail = ACC.ROLE_LABEL;
+			}
+		});
 		return styledText;
 	}
 
