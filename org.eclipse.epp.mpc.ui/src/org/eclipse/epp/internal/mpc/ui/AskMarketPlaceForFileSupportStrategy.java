@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
+import org.eclipse.epp.mpc.core.model.ITag;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
 import org.eclipse.epp.mpc.ui.IMarketplaceClientConfiguration;
@@ -75,19 +76,26 @@ public class AskMarketPlaceForFileSupportStrategy implements IUnassociatedEditor
 					return new Status(IStatus.ERROR,
 							MarketplaceClientUiPlugin.getInstance().getBundle().getSymbolicName(), ex.getMessage(), ex);
 				}
-				final List<? extends INode> nodes = searchResult.getNodes();
-				// this list requires some filtering: bug 491530
-//				List<INode> nodes = new ArrayList<INode>();
-//				for (INode node : searchResult.getNodes()) {
-//					if (node.getTags() != null) {
-//						for (ITag tag : node.getTags().getTags()) {
-//							if (query.equals(tag.getName())) {
-//								nodes.add(node);
-//								break;
-//							}
-//						}
-//					}
-//				}
+				// this list requires some filtering: bug 492513
+				final List<INode> nodes = new ArrayList<INode>();
+				for (INode node : searchResult.getNodes()) {
+					if (node.getTags() != null) {
+						boolean hasTag = false;
+						for (ITag tag : node.getTags().getTags()) {
+							if (query.equals(tag.getName())) {
+								hasTag = true;
+								break;
+							}
+						}
+						// tags list returned by the server is limited: bug 491530
+						if (!hasTag && node.getTags().getTags().size() == 5) {
+							hasTag = true;
+						}
+						if (hasTag) {
+							nodes.add(node);
+						}
+					}
+				}
 				if (nodes.isEmpty()) {
 					return Status.OK_STATUS;
 				}
@@ -101,13 +109,8 @@ public class AskMarketPlaceForFileSupportStrategy implements IUnassociatedEditor
 							if (dialog.isShowProposals()) {
 								IMarketplaceClientService marketplaceClientService = MarketplaceClient
 										.getMarketplaceClientService();
-								Map<String, Operation> selection = new HashMap<String, Operation>();
-								for (INode node : nodes) {
-									selection.put(node.getId(), Operation.INSTALL);
-								}
 								IMarketplaceClientConfiguration config = marketplaceClientService.newConfiguration();
-								config.setInitialOperations(selection);
-								marketplaceClientService.openSelected(config);
+								marketplaceClientService.open(config, new LinkedHashSet<INode>(nodes));
 							} else if (dialog.isAssociateToExtension()) {
 								List<String> extensions = new ArrayList<String>(1);
 								extensions.add(fileExtension);
