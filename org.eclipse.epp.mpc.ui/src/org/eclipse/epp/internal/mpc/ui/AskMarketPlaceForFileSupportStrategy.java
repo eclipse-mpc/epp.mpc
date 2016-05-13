@@ -151,7 +151,7 @@ public class AskMarketPlaceForFileSupportStrategy implements IUnassociatedEditor
 			}
 		};
 		mpcJob.setPriority(Job.INTERACTIVE);
-		mpcJob.setUser(true);
+		mpcJob.setUser(false);
 		mpcJob.schedule();
 
 		return res;
