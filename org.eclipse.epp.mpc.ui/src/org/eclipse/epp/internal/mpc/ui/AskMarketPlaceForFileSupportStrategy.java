@@ -82,7 +82,7 @@ public class AskMarketPlaceForFileSupportStrategy implements IUnassociatedEditor
 					if (node.getTags() != null) {
 						boolean hasTag = false;
 						for (ITag tag : node.getTags().getTags()) {
-							if (query.equals(tag.getName())) {
+							if (query.equalsIgnoreCase(tag.getName())) {
 								hasTag = true;
 								break;
 							}
@@ -118,7 +118,7 @@ public class AskMarketPlaceForFileSupportStrategy implements IUnassociatedEditor
 								// * https://bugs.eclipse.org/bugs/show_bug.cgi?id=110602
 								// * https://www.eclipse.org/forums/index.php/t/98199/
 								FileEditorMapping[] mappings = new FileEditorMapping[editorRegistry
-										.getFileEditorMappings().length + 1];
+								                                                     .getFileEditorMappings().length + 1];
 								System.arraycopy(editorRegistry.getFileEditorMappings(), 0, mappings, 0,
 										mappings.length - 1);
 								FileEditorMapping newMapping = null;
