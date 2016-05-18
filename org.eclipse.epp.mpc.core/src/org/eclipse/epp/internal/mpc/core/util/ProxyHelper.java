@@ -124,10 +124,14 @@ public class ProxyHelper {
 				if (proxyService != null && proxyService.isProxiesEnabled()) {
 					URL requestingURL = getRequestingURL();
 					IProxyData[] proxies;
-					try {
-						proxies = proxyService.select(requestingURL.toURI());
-					} catch (URISyntaxException e) {
+					if (requestingURL == null) {
 						proxies = proxyService.getProxyData();
+					} else {
+						try {
+							proxies = proxyService.select(requestingURL.toURI());
+						} catch (URISyntaxException e) {
+							proxies = proxyService.getProxyData();
+						}
 					}
 					for (IProxyData proxyData : proxies) {
 						// make sure we don't hand out credentials to the wrong proxy
