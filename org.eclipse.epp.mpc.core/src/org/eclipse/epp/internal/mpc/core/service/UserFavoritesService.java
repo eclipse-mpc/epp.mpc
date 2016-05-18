@@ -40,11 +40,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.RequestTemplate;
-import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.epp.mpc.core.service.QueryHelper;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.userstorage.IBlob;
 import org.eclipse.userstorage.internal.Session;
 import org.eclipse.userstorage.internal.util.IOUtil;
@@ -291,44 +289,24 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		setFavorites(favorites, progress.newChild(700));
 	}
 
-	public List<INode> getFavorites(String user, IProgressMonitor monitor) throws IOException {
-		List<String> nodeIds = getFavoriteIds(user, monitor);
+	public List<INode> getFavorites(URI uri, IProgressMonitor monitor) throws IOException {
+		List<String> nodeIds = getFavoriteIds(uri, monitor);
 		return toNodes(nodeIds);
 	}
 
-	public List<String> getFavoriteIds(String user, IProgressMonitor monitor) throws IOException {
-		if (user.toLowerCase().startsWith("http:") || user.toLowerCase().startsWith("https:")) { //$NON-NLS-1$ //$NON-NLS-2$
-			return importUserFavoriteIds(toURI(user));
-		}
-		Matcher matcher = USER_MAIL_PATTERN.matcher(user);
-		if (matcher.find()) {
-			return importUserFavoriteIds(FAVORITES_API__USER_MAIL, user);
-		}
-		return importUserFavoriteIds(FAVORITES_API__USER_NAME, user);
-	}
-
-	private static URI toURI(String user) {
-		try {
-			URI uri = URLUtil.toURI(user);
-			if ((uri.getHost() == null || "".equals(uri.getHost())) && "/".equals(uri.getPath()) //$NON-NLS-1$//$NON-NLS-2$
-					&& uri.getScheme() != null
-					&& uri.getScheme().toLowerCase().startsWith("http")) { //$NON-NLS-1$
-				//incomplete uri
-				throw new IllegalArgumentException(new URISyntaxException(user, Messages.UserFavoritesService_uriMissingHost));
-			}
-			return uri;
-		} catch (URISyntaxException e) {
-			throw new IllegalArgumentException(e);
+	public static void validateURI(URI uri) {
+		if ("".equals(uri.toString()) //$NON-NLS-1$
+				|| ((uri.getHost() == null || "".equals(uri.getHost())) //$NON-NLS-1$
+						&& (uri.getScheme() != null && uri.getScheme().toLowerCase().startsWith("http"))) //$NON-NLS-1$
+				|| (uri.getScheme() == null && (uri.getPath() == null || "".equals(uri.getPath())))) { //$NON-NLS-1$
+			//incomplete uri
+			throw new IllegalArgumentException(
+					new URISyntaxException(uri.toString(), Messages.UserFavoritesService_uriMissingHost));
 		}
 	}
 
-	private List<String> importUserFavoriteIds(String userIdParam, String userId) throws IOException {
-		return importUserFavoriteIds(
-				getStorageService().getServiceUri()
-				.resolve(NLS.bind(FAVORITES_API__ENDPOINT, userIdParam, userId)));
-	}
-
-	private List<String> importUserFavoriteIds(final URI endpoint) throws IOException {
+	public List<String> getFavoriteIds(URI uri, IProgressMonitor monitor) throws IOException {
+		validateURI(uri);
 		try {
 			return new RequestTemplate<List<String>>() {
 
@@ -354,7 +332,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 								favoriteIds.add(id);
 							}
 						} else {
-							throw malformedContentException(endpoint, body);
+							throw malformedContentException(uri, body);
 						}
 					}
 					return favoriteIds;
@@ -364,7 +342,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 				protected Request createRequest(URI uri) {
 					return Request.Get(uri);
 				}
-			}.execute(endpoint);
+			}.execute(uri);
 		} catch (FileNotFoundException e) {
 			return new ArrayList<String>();
 		}

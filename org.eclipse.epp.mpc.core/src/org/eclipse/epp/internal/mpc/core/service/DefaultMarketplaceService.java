@@ -482,7 +482,7 @@ MarketplaceService {
 		return resolveFavoriteNodes(favorites, progress.newChild(9000), true);
 	}
 
-	public ISearchResult userFavorites(String user, IProgressMonitor monitor) throws CoreException {
+	public ISearchResult userFavorites(URI favoritesUri, IProgressMonitor monitor) throws CoreException {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.DefaultMarketplaceService_FavoritesRetrieve, 10000);
 		IUserFavoritesService userFavoritesService = getUserFavoritesService();
 		if (userFavoritesService == null) {
@@ -490,7 +490,7 @@ MarketplaceService {
 		}
 		final List<INode> favorites;
 		try {
-			favorites = userFavoritesService.getFavorites(user, progress.newChild(1000));
+			favorites = userFavoritesService.getFavorites(favoritesUri, progress.newChild(1000));
 		} catch (Exception e) {
 			throw new CoreException(MarketplaceClientCore.computeStatus(e,
 					Messages.DefaultMarketplaceService_FavoritesErrorRetrieving));

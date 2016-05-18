@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.core.service;
 
+import java.net.URI;
 import java.net.URL;
 import java.util.List;
 import java.util.Set;
@@ -176,16 +177,15 @@ public interface IMarketplaceService {
 			throws CoreException, NotAuthorizedException;
 
 	/**
-	 * Retrieve the favorite nodes for the given user identifier. The user identifier can either be an email or a
-	 * marketplace user url of the form &lt;marketplace base url&gt;/user/&lt;user id&gt;
+	 * Retrieve the favorite nodes for the given favorites uri.
 	 *
-	 * @param user
-	 *            an email or marketplace url identifying the user
+	 * @param favoritesUri
+	 *            a url pointing to a favorites list
 	 * @param monitor
 	 *            progress and cancellation
 	 * @throws CoreException
 	 */
-	ISearchResult userFavorites(String user, IProgressMonitor monitor) throws CoreException;
+	ISearchResult userFavorites(URI favoritesUri, IProgressMonitor monitor) throws CoreException;
 
 	/**
 	 * Get the news configuration for the marketplace

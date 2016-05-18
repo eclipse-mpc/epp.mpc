@@ -17,6 +17,8 @@ class Messages extends NLS {
 
 	public static String FavoritesDiscoveryStrategy_enterFavoritesUrlMessage;
 
+	public static String FavoritesDiscoveryStrategy_invalidUrl;
+
 	public static String FavoritesDiscoveryStrategy_noFavoritesMessage;
 
 	public static String MarketplaceCatalog_addedNullEntry;

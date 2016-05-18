@@ -11,6 +11,7 @@
 package org.eclipse.epp.mpc.core.service;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -43,8 +44,8 @@ public interface IUserFavoritesService {
 	void removeFavorites(Collection<? extends INode> nodes, IProgressMonitor monitor)
 			throws NotAuthorizedException, ConflictException, IOException;
 
-	List<String> getFavoriteIds(String user, IProgressMonitor monitor) throws IOException;
+	List<String> getFavoriteIds(URI user, IProgressMonitor monitor) throws IOException;
 
-	List<INode> getFavorites(String user, IProgressMonitor monitor) throws IOException;
+	List<INode> getFavorites(URI user, IProgressMonitor monitor) throws IOException;
 
 }

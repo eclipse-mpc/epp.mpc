@@ -10,11 +10,17 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.catalog;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.epp.internal.mpc.core.util.URLUtil;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory.Contents;
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem.UserAction;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
@@ -22,6 +28,7 @@ import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
+import org.eclipse.osgi.util.NLS;
 
 public class FavoritesDiscoveryStrategy extends MarketplaceDiscoveryStrategy {
 
@@ -65,11 +72,17 @@ public class FavoritesDiscoveryStrategy extends MarketplaceDiscoveryStrategy {
 			return null;
 		}
 		try {
-			return marketplaceService.userFavorites(favoritesReference, monitor);
+			URI uri = URLUtil.toURI(favoritesReference);
+			return marketplaceService.userFavorites(uri, monitor);
 		} catch (CoreException ex) {
 			//if we don't want an error dialog to pop up for discovery errors, we have
 			//to handle errors here...
 			handleDiscoveryError(ex);
+			return null;
+		} catch (URISyntaxException e) {
+			IStatus error = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
+					NLS.bind(Messages.FavoritesDiscoveryStrategy_invalidUrl, favoritesReference, e), e);
+			handleDiscoveryError(new CoreException(error));
 			return null;
 		} finally {
 			postDiscovery();

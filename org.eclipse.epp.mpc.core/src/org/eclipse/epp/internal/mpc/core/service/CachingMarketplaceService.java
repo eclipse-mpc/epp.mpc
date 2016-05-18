@@ -14,6 +14,7 @@ package org.eclipse.epp.internal.mpc.core.service;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
+import java.net.URI;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -371,8 +372,8 @@ public class CachingMarketplaceService implements IMarketplaceService {
 		return delegate.getUserFavoritesService();
 	}
 
-	public ISearchResult userFavorites(String user, IProgressMonitor monitor) throws CoreException {
-		return delegate.userFavorites(user, monitor);
+	public ISearchResult userFavorites(URI favoritesUri, IProgressMonitor monitor) throws CoreException {
+		return delegate.userFavorites(favoritesUri, monitor);
 	}
 
 }

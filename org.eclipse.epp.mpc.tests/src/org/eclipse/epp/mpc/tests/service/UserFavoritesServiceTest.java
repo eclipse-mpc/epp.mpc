@@ -38,7 +38,7 @@ import org.junit.Test;
 @org.junit.experimental.categories.Category(RemoteTests.class)
 public class UserFavoritesServiceTest {
 
-	private static final URI USERSTORAGE_SERVICE_URI = URI.create("https://api-staging.eclipse.org");
+	private static final URI USERSTORAGE_SERVICE_URI = URI.create("https://api-staging.eclipse.org/");
 
 	protected IMarketplaceStorageService marketplaceStorageService;
 
@@ -103,6 +103,6 @@ public class UserFavoritesServiceTest {
 	@Test
 	public void testImportFavorites() throws Exception {
 		//TODO
-		favoritesService.getFavoriteIds("creckord", null);
+		favoritesService.getFavoriteIds(URI.create("https://marketplace.eclipse.org/user/creckord/favorites"), null);
 	}
 }
