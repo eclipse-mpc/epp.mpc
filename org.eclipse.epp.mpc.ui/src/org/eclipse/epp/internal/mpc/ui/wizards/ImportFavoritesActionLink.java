@@ -13,18 +13,12 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
-import org.eclipse.epp.internal.mpc.core.service.UserFavoritesService;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.jface.window.Window;
-import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
 
 public class ImportFavoritesActionLink extends ActionLink {
 
@@ -70,62 +64,22 @@ public class ImportFavoritesActionLink extends ActionLink {
 				wizard.getConfiguration(), wizard);
 		final ImportFavoritesPage importFavoritesPage = importFavoritesWizard.getImportFavoritesPage();
 		favoritesCatalog.getDiscoveryStrategies().add(new FavoritesDiscoveryStrategy(marketplaceStrategy) {
-			private String errorMessage;
-
+			private String discoveryError = null;
 			@Override
 			protected void preDiscovery() {
-				errorMessage = null;
+				discoveryError = null;
 			}
-
+			
 			@Override
 			protected void handleDiscoveryError(CoreException ex) throws CoreException {
-				String favoritesReference = getFavoritesReference();
-				if (UserFavoritesService.isInvalidFavoritesListException(ex)) {
-					boolean isUrl = (favoritesReference != null && (favoritesReference.toLowerCase().startsWith("http:") //$NON-NLS-1$
-							|| favoritesReference.toLowerCase().startsWith("https:"))); //$NON-NLS-1$
-					if (isUrl) {
-						errorMessage = NLS.bind(Messages.ImportFavoritesActionLink_noFavoritesFoundAtUrl,
-								favoritesReference);
-					} else {
-						errorMessage = NLS.bind(Messages.ImportFavoritesActionLink_noFavoritesFoundForUser,
-								favoritesReference);
-					}
-				} else if (UserFavoritesService.isInvalidUrlException(ex)) {
-					errorMessage = NLS.bind(Messages.ImportFavoritesActionLink_invalidUrl, favoritesReference);
-				} else {
-					String message = null;
-					IStatus statusCause = MarketplaceClientCore.computeWellknownProblemStatus(ex);
-					if (statusCause != null) {
-						message = statusCause.getMessage();
-					} else if (ex.getMessage() != null && !"".equals(ex.getMessage())) { //$NON-NLS-1$
-						message = ex.getMessage();
-					} else {
-						message = ex.getClass().getSimpleName();
-					}
-					errorMessage = NLS.bind(Messages.ImportFavoritesActionLink_errorLoadingFavorites, message);
-					MarketplaceClientCore
-							.error(NLS.bind(Messages.ImportFavoritesActionLink_errorLoadingFavorites, message), ex);
-				}
+				discoveryError = importFavoritesPage.handleDiscoveryError(getFavoritesReference(), ex);
 			}
-
+			
 			@Override
 			protected void postDiscovery() {
-				final String errorMessage = this.errorMessage;
-				this.errorMessage = null;
-				Shell shell = importFavoritesPage.getShell();
-				Control pageControl = importFavoritesPage.getControl();
-				if (shell != null && !shell.isDisposed() && pageControl != null && !pageControl.isDisposed()) {
-					shell.getDisplay().asyncExec(new Runnable() {
-						public void run() {
-							Shell shell = importFavoritesPage.getShell();
-							Control pageControl = importFavoritesPage.getControl();
-							if (shell != null && !shell.isDisposed() && pageControl != null
-									&& !pageControl.isDisposed()) {
-								importFavoritesPage.setErrorMessage(errorMessage);
-							}
-						}
-					});
-				}
+				final String errorMessage = this.discoveryError;
+				this.discoveryError = null;
+				importFavoritesPage.setDiscoveryError(errorMessage);
 			}
 		});
 		int result = new ImportFavoritesWizardDialog(wizard.getShell(), importFavoritesWizard).open();

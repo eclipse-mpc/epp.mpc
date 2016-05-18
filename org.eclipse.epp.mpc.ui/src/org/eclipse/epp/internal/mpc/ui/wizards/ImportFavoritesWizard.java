@@ -19,6 +19,7 @@ public class ImportFavoritesWizard extends DiscoveryWizard {
 
 	public ImportFavoritesWizard(MarketplaceCatalog catalog, MarketplaceCatalogConfiguration configuration, IMarketplaceWebBrowser browser) {
 		super(catalog, configuration);
+		setWindowTitle("Import Favorites List");
 		this.importFavoritesPage = new ImportFavoritesPage(catalog, browser);
 	}
 

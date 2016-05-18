@@ -16,8 +16,10 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
+import org.eclipse.epp.internal.mpc.core.service.UserFavoritesService;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
@@ -31,6 +33,8 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.userstorage.util.ConflictException;
 
 public class ImportFavoritesPage extends CatalogPage {
@@ -44,10 +48,55 @@ public class ImportFavoritesPage extends CatalogPage {
 		setDescription(Messages.ImportFavoritesPage_Description);
 	}
 
+	public void setDiscoveryError(final String error) {
+		Shell shell = getShell();
+		Control pageControl = getControl();
+		if (shell != null && !shell.isDisposed() && pageControl != null && !pageControl.isDisposed()) {
+			shell.getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					Shell shell = getShell();
+					Control pageControl = getControl();
+					if (shell != null && !shell.isDisposed() && pageControl != null && !pageControl.isDisposed()) {
+						setErrorMessage(error);
+					}
+				}
+			});
+		}
+	}
+
+	public static String handleDiscoveryError(String favoritesReference, Exception ex) {
+		String errorMessage = null;
+		if (UserFavoritesService.isInvalidFavoritesListException(ex)) {
+			boolean isUrl = (favoritesReference != null && (favoritesReference.toLowerCase().startsWith("http:") //$NON-NLS-1$
+					|| favoritesReference.toLowerCase().startsWith("https:"))); //$NON-NLS-1$
+			if (isUrl) {
+				errorMessage = NLS.bind(Messages.ImportFavoritesActionLink_noFavoritesFoundAtUrl, favoritesReference);
+			} else {
+				errorMessage = NLS.bind(Messages.ImportFavoritesActionLink_noFavoritesFoundForUser, favoritesReference);
+			}
+		} else if (UserFavoritesService.isInvalidUrlException(ex)) {
+			errorMessage = NLS.bind(Messages.ImportFavoritesActionLink_invalidUrl, favoritesReference);
+		} else {
+			String message = null;
+			IStatus statusCause = MarketplaceClientCore.computeWellknownProblemStatus(ex);
+			if (statusCause != null) {
+				message = statusCause.getMessage();
+			} else if (ex.getMessage() != null && !"".equals(ex.getMessage())) { //$NON-NLS-1$
+				message = ex.getMessage();
+			} else {
+				message = ex.getClass().getSimpleName();
+			}
+			errorMessage = NLS.bind(Messages.ImportFavoritesActionLink_errorLoadingFavorites, message);
+			MarketplaceClientCore.error(NLS.bind(Messages.ImportFavoritesActionLink_errorLoadingFavorites, message),
+					ex);
+		}
+		return errorMessage;
+	}
+
 	@Override
 	protected CatalogViewer doCreateViewer(Composite parent) {
 		DiscoveryWizard wizard = getWizard();
-		CatalogViewer viewer = new FavoritesViewer(getCatalog(), this, browser, wizard.getContainer(),
+		CatalogViewer viewer = new FavoritesViewer(getCatalog(), this, browser,
 				wizard.getConfiguration());
 		viewer.setMinimumHeight(MINIMUM_HEIGHT);
 		viewer.createControl(parent);
