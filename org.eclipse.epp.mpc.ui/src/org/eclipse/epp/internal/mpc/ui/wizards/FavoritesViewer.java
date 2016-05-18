@@ -93,7 +93,7 @@ public class FavoritesViewer extends CatalogViewer {
 	protected void doCreateHeaderControls(Composite parent) {
 		//header will have two items: the label and the search field
 		Label searchLabel = findControl(parent, Label.class);
-		Text searchField = findControl(parent, Text.class);
+		final Text searchField = findControl(parent, Text.class);
 		if (searchLabel != null) {
 			searchLabel.setText(Messages.FavoritesViewer_searchLabel);
 		}
