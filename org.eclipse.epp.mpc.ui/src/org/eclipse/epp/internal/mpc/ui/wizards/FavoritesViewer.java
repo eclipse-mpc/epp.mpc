@@ -99,6 +99,16 @@ public class FavoritesViewer extends CatalogViewer {
 		}
 		if (searchField != null) {
 			searchField.setMessage(Messages.FavoritesViewer_searchInputDescription);
+			searchField.addVerifyListener(new VerifyListener() {
+
+				@Override
+				public void verifyText(VerifyEvent e) {
+					if (e.keyCode == 0 && e.start == 0 && e.end == searchField.getText().length()
+							&& e.text.length() > 0) {
+						filterTextChanged();
+					}
+				}
+			});
 		}
 	}
 
