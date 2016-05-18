@@ -305,7 +305,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		}
 	}
 
-	public List<String> getFavoriteIds(URI uri, IProgressMonitor monitor) throws IOException {
+	public List<String> getFavoriteIds(final URI uri, IProgressMonitor monitor) throws IOException {
 		validateURI(uri);
 		try {
 			return new RequestTemplate<List<String>>() {
