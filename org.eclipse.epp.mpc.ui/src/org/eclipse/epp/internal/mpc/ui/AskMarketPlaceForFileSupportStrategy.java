@@ -87,10 +87,6 @@ public class AskMarketPlaceForFileSupportStrategy implements IUnassociatedEditor
 								break;
 							}
 						}
-						// tags list returned by the server is limited: bug 491530
-						if (!hasTag && node.getTags().getTags().size() == 5) {
-							hasTag = true;
-						}
 						if (hasTag) {
 							nodes.add(node);
 						}
