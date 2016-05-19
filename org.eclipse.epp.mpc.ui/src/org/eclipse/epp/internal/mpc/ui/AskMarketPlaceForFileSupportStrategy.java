@@ -68,6 +68,8 @@ public class AskMarketPlaceForFileSupportStrategy implements IUnassociatedEditor
 				IMarketplaceService marketplaceService = locator.getDefaultMarketplaceService();
 				String[] split = fileName.split("\\."); //$NON-NLS-1$
 				final String fileExtension = split[split.length - 1];
+				final String fileExtensionLabel = fileExtension.length() == fileName.length() ? fileName
+						: "*." + fileExtension; //$NON-NLS-1$
 				String query = "fileExtension_" + fileExtension; //$NON-NLS-1$]
 				ISearchResult searchResult = null;
 				try {
@@ -100,7 +102,7 @@ public class AskMarketPlaceForFileSupportStrategy implements IUnassociatedEditor
 					public IStatus runInUIThread(IProgressMonitor monitor) {
 						final Shell shell = WorkbenchUtil.getShell();
 						final MarketplaceOrAssociateDialog dialog = new MarketplaceOrAssociateDialog(shell,
-								fileExtension, res);
+								fileExtensionLabel, res);
 						if (dialog.open() == IDialogConstants.OK_ID) {
 							if (dialog.isShowProposals()) {
 								IMarketplaceClientService marketplaceClientService = MarketplaceClient

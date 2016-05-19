@@ -35,7 +35,7 @@ import org.eclipse.ui.internal.ide.IDEWorkbenchPlugin;
 
 public class MarketplaceOrAssociateDialog extends TitleAreaDialog {
 
-	private final String fileExtension;
+	private final String fileExtensionLabel;
 
 	private final IEditorDescriptor currentEditor;
 
@@ -49,9 +49,9 @@ public class MarketplaceOrAssociateDialog extends TitleAreaDialog {
 
 	private Image wizban;
 
-	protected MarketplaceOrAssociateDialog(Shell shell, String fileExtension, IEditorDescriptor currentEditor) {
+	protected MarketplaceOrAssociateDialog(Shell shell, String fileExtensionLabel, IEditorDescriptor currentEditor) {
 		super(shell);
-		this.fileExtension = fileExtension;
+		this.fileExtensionLabel = fileExtensionLabel;
 		this.currentEditor = currentEditor;
 		setHelpAvailable(false);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
@@ -60,7 +60,7 @@ public class MarketplaceOrAssociateDialog extends TitleAreaDialog {
 	@Override
 	public Control createDialogArea(Composite parent) {
 		setTitle(Messages.MarketplaceOrAssociateDialog_title);
-		setMessage(NLS.bind(Messages.MarketplaceOrAssociateDialog_message, fileExtension));
+		setMessage(NLS.bind(Messages.MarketplaceOrAssociateDialog_message, fileExtensionLabel));
 		wizban = DiscoveryImages.BANNER_DISOVERY.createImage();
 		setTitleImage(wizban);
 
@@ -91,7 +91,7 @@ public class MarketplaceOrAssociateDialog extends TitleAreaDialog {
 		associateRadio = new Button(res, SWT.RADIO);
 		GridDataFactory.swtDefaults().align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(associateRadio);
 		associateRadio
-		.setText(NLS.bind(Messages.MarketplaceOrAssociateDialog_associate, fileExtension,
+		.setText(NLS.bind(Messages.MarketplaceOrAssociateDialog_associate, fileExtensionLabel,
 				currentEditor.getLabel()));
 		associateRadio.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -137,17 +137,17 @@ public class MarketplaceOrAssociateDialog extends TitleAreaDialog {
 		if (IEditorRegistry.SYSTEM_INPLACE_EDITOR_ID.equals(editorId)) {
 			return NLS.bind(
 					Messages.MarketplaceOrAssociateDialog_descriptionEmbeddedSystemEditor,
-					fileExtension);
+					fileExtensionLabel);
 		} else if (IEditorRegistry.SYSTEM_EXTERNAL_EDITOR_ID.equals(editorId)) {
 			return NLS.bind(
 					Messages.MarketplaceOrAssociateDialog_descriptionExternalSystemEditor,
-					fileExtension);
+					fileExtensionLabel);
 		} else if (IDEWorkbenchPlugin.DEFAULT_TEXT_EDITOR_ID.equals(editorId)) {
 			return NLS.bind(
 					Messages.MarketplaceOrAssociateDialog_descriptionSimpleTextEditor,
-					fileExtension);
+					fileExtensionLabel);
 		} else {
-			return NLS.bind(Messages.MarketplaceOrAssociateDialog_message, fileExtension);
+			return NLS.bind(Messages.MarketplaceOrAssociateDialog_message, fileExtensionLabel);
 		}
 	}
 
