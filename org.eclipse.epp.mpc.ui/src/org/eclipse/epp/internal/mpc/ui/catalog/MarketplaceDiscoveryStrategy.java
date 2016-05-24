@@ -436,6 +436,28 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		catalogItem.setIcon(icon);
 	}
 
+	public void tagged(String tag, IProgressMonitor monitor) throws CoreException {
+		final int totalWork = 1000;
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_searchingMarketplace,
+				totalWork);
+		try {
+			ISearchResult result;
+			MarketplaceCategory catalogCategory = findMarketplaceCategory(progress.newChild(1));
+			catalogCategory.setContents(Contents.QUERY);
+
+			//resolve market and category if necessary
+			result = marketplaceService.tagged(tag, progress.newChild(500));
+
+			handleSearchResult(catalogCategory, result, progress.newChild(500));
+			if (result.getNodes().isEmpty()) {
+				catalogCategory.setMatchCount(0);
+				addCatalogItem(catalogCategory);
+			}
+		} finally {
+			progress.done();
+		}
+	}
+
 	public void performQuery(IMarket market, ICategory category, String queryText, IProgressMonitor monitor)
 			throws CoreException {
 		final int totalWork = 1001;
@@ -784,7 +806,6 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 				}
 				result.setMatchCount(result.getNodes().size());
 				handleSearchResult(catalogCategory, result, progress.newChild(500));
-				maybeAddCatalogItem(catalogCategory);
 			}
 		} finally {
 			monitor.done();

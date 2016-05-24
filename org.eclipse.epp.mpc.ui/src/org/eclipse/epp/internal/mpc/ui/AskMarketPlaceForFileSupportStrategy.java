@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
-import org.eclipse.epp.mpc.core.model.ITag;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
 import org.eclipse.epp.mpc.ui.IMarketplaceClientConfiguration;
@@ -70,29 +69,14 @@ public class AskMarketPlaceForFileSupportStrategy implements IUnassociatedEditor
 				final String fileExtension = split[split.length - 1];
 				final String fileExtensionLabel = fileExtension.length() == fileName.length() ? fileName
 						: "*." + fileExtension; //$NON-NLS-1$
-				String query = "fileExtension_" + fileExtension; //$NON-NLS-1$]
-				ISearchResult searchResult = null;
+				String fileExtensionTag = "fileExtension_" + fileExtension; //$NON-NLS-1$]
+				final List<? extends INode> nodes;
 				try {
-					searchResult = marketplaceService.search(null, null, query, monitor);
+					ISearchResult searchResult = marketplaceService.tagged(fileExtensionTag, monitor);
+					nodes = searchResult.getNodes();
 				} catch (CoreException ex) {
 					return new Status(IStatus.ERROR,
 							MarketplaceClientUiPlugin.getInstance().getBundle().getSymbolicName(), ex.getMessage(), ex);
-				}
-				// this list requires some filtering: bug 492513
-				final List<INode> nodes = new ArrayList<INode>();
-				for (INode node : searchResult.getNodes()) {
-					if (node.getTags() != null) {
-						boolean hasTag = false;
-						for (ITag tag : node.getTags().getTags()) {
-							if (query.equalsIgnoreCase(tag.getName())) {
-								hasTag = true;
-								break;
-							}
-						}
-						if (hasTag) {
-							nodes.add(node);
-						}
-					}
 				}
 				if (nodes.isEmpty()) {
 					return Status.OK_STATUS;

@@ -109,6 +109,8 @@ MarketplaceService {
 
 	public static final String API_TAXONOMY_URI = "taxonomy/term/"; //$NON-NLS-1$
 
+	public static final String API_FREETAGGING_URI = "category/free-tagging/"; //$NON-NLS-1$
+
 	public static final String DEFAULT_SERVICE_LOCATION = System
 			.getProperty(IMarketplaceServiceLocator.DEFAULT_MARKETPLACE_PROPERTY_NAME, "http://marketplace.eclipse.org"); //$NON-NLS-1$
 
@@ -317,32 +319,8 @@ MarketplaceService {
 
 	public SearchResult search(IMarket market, ICategory category, String queryText, IProgressMonitor monitor)
 			throws CoreException {
-		SearchResult result = new SearchResult();
 		String relativeUrl = computeRelativeSearchUrl(market, category, queryText, true);
-		if (relativeUrl == null) {
-			// empty search
-			result.setMatchCount(0);
-			result.setNodes(new ArrayList<Node>());
-		} else {
-			Marketplace marketplace;
-			try {
-				marketplace = processRequest(relativeUrl, monitor);
-			} catch (CoreException ex) {
-				Throwable cause = ex.getCause();
-				if (cause instanceof FileNotFoundException) {
-					throw new CoreException(createErrorStatus(
-							NLS.bind(Messages.DefaultMarketplaceService_UnsupportedSearchString, queryText), cause));
-				}
-				throw ex;
-			}
-			Search search = marketplace.getSearch();
-			if (search == null) {
-				throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_unexpectedResponse, null));
-			}
-			result.setMatchCount(search.getCount());
-			result.setNodes(search.getNode());
-		}
-		return result;
+		return processSearchRequest(relativeUrl, queryText, monitor);
 	}
 
 	public SearchResult search(Market market, Category category, String queryText, IProgressMonitor monitor)
@@ -417,6 +395,44 @@ MarketplaceService {
 			relativeUrl = null;
 		}
 		return relativeUrl;
+	}
+
+	private SearchResult processSearchRequest(String relativeUrl, String queryText, IProgressMonitor monitor)
+			throws CoreException {
+		SearchResult result = new SearchResult();
+		if (relativeUrl == null) {
+			// empty search
+			result.setMatchCount(0);
+			result.setNodes(new ArrayList<Node>());
+		} else {
+			Marketplace marketplace;
+			try {
+				marketplace = processRequest(relativeUrl, monitor);
+			} catch (CoreException ex) {
+				Throwable cause = ex.getCause();
+				if (cause instanceof FileNotFoundException) {
+					throw new CoreException(createErrorStatus(
+							NLS.bind(Messages.DefaultMarketplaceService_UnsupportedSearchString, queryText), cause));
+				}
+				throw ex;
+			}
+			Search search = marketplace.getSearch();
+			if (search != null) {
+				result.setMatchCount(search.getCount());
+				result.setNodes(search.getNode());
+			} else if (marketplace.getCategory().size() == 1) {
+				Category category = marketplace.getCategory().get(0);
+				result.setMatchCount(category.getNode().size());
+				result.setNodes(category.getNode());
+			} else {
+				throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_unexpectedResponse, null));
+			}
+		}
+		return result;
+	}
+
+	public SearchResult tagged(String tag, IProgressMonitor monitor) throws CoreException {
+		return processSearchRequest(API_FREETAGGING_URI + tag + '/' + API_URI_SUFFIX, tag, monitor);
 	}
 
 	public SearchResult featured(IProgressMonitor monitor) throws CoreException {

@@ -226,6 +226,16 @@ public class CachingMarketplaceService implements IMarketplaceService {
 		});
 	}
 
+	public ISearchResult tagged(final String tag, IProgressMonitor monitor) throws CoreException {
+		String key = computeSearchKey("tagged", null, null, tag); //$NON-NLS-1$
+		return performSearch(monitor, key, new SearchOperation() {
+
+			public ISearchResult doSearch(IProgressMonitor monitor) throws CoreException {
+				return delegate.tagged(tag, monitor);
+			}
+		});
+	}
+
 	private ISearchResult performSearch(IProgressMonitor monitor, String key, SearchOperation searchOperation)
 			throws CoreException {
 		ISearchResult result = null;

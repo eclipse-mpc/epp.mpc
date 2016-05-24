@@ -93,6 +93,8 @@ import org.osgi.framework.ServiceReference;
  */
 public class MarketplaceViewer extends CatalogViewer {
 
+	private static final String QUERY_TAG_KEYWORD = "tag:"; //$NON-NLS-1$
+
 	public enum ContentType {
 		SEARCH, FEATURED_MARKET, RECENT, POPULAR, INSTALLED, SELECTION, RELATED, FAVORITES
 	}
@@ -526,7 +528,7 @@ public class MarketplaceViewer extends CatalogViewer {
 		updateContent(ContentType.SEARCH, new Runnable() {
 			public void run() {
 				queryData = new QueryData();
-				queryData.queryText = tag;
+				queryData.queryText = QUERY_TAG_KEYWORD + tag;
 				setFilters(queryData);
 				doQuery();
 			}
@@ -611,8 +613,13 @@ public class MarketplaceViewer extends CatalogViewer {
 						if (nodes != null && !nodes.isEmpty()) {
 							result[0] = getCatalog().performNodeQuery(monitor, nodes);
 						} else if (queryData.queryText != null && queryData.queryText.length() > 0) {
-							result[0] = getCatalog().performQuery(queryData.queryMarket, queryData.queryCategory,
-									queryData.queryText, monitor);
+							String tag = getTagQuery(queryData.queryText);
+							if (tag != null) {
+								result[0] = getCatalog().tagged(tag, monitor);
+							} else {
+								result[0] = getCatalog().performQuery(queryData.queryMarket, queryData.queryCategory,
+										queryData.queryText, monitor);
+							}
 						} else {
 							result[0] = getCatalog().featured(monitor, queryData.queryMarket, queryData.queryCategory);
 						}
@@ -646,6 +653,16 @@ public class MarketplaceViewer extends CatalogViewer {
 			// cancelled by user so nothing to do here.
 			return Status.CANCEL_STATUS;
 		}
+	}
+
+	private String getTagQuery(String queryText) {
+		if (queryText != null && queryText.toLowerCase().startsWith(QUERY_TAG_KEYWORD)) {
+			String tag = queryText.substring(QUERY_TAG_KEYWORD.length()).trim();
+			if (tag.length() > 0) {
+				return tag;
+			}
+		}
+		return null;
 	}
 
 	private void updateViewer(final String queryText) {
