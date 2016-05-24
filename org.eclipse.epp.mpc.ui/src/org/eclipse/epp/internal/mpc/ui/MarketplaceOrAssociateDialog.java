@@ -14,6 +14,7 @@ import org.eclipse.equinox.internal.p2.ui.discovery.DiscoveryImages;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.layout.LayoutConstants;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
@@ -73,7 +74,7 @@ public class MarketplaceOrAssociateDialog extends TitleAreaDialog {
 		Composite res = new Composite(parent, SWT.NONE);
 		GridData resGridData = GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, SWT.DEFAULT).create();
 		res.setLayoutData(resGridData);
-		GridLayoutFactory.swtDefaults().equalWidth(false).applyTo(res);
+		GridLayoutFactory.fillDefaults().margins(LayoutConstants.getMargins()).equalWidth(false).applyTo(res);
 
 		Label label = new Label(res, SWT.WRAP);
 		label.setText(createDescription());
@@ -84,7 +85,7 @@ public class MarketplaceOrAssociateDialog extends TitleAreaDialog {
 		GridDataFactory.swtDefaults()
 				.align(SWT.FILL, SWT.TOP)
 				.grab(true, false)
-				.indent(0, 10)
+				.indent(0, LayoutConstants.getMargins().y)
 				.applyTo(showProposalsRadio);
 		showProposalsRadio.setText(Messages.MarketplaceOrAssociateDialog_showProposals);
 		showProposalsRadio.addSelectionListener(new SelectionAdapter() {
@@ -110,7 +111,7 @@ public class MarketplaceOrAssociateDialog extends TitleAreaDialog {
 		GridDataFactory.swtDefaults()
 				.align(SWT.FILL, SWT.TOP)
 				.grab(true, true)
-				.indent(0, 20)
+				.indent(0, LayoutConstants.getMargins().y)
 				.applyTo(linkToPreferences);
 		linkToPreferences.setText(Messages.MarketplaceOrAssociateDialog_linkToPreferences);
 		linkToPreferences.addSelectionListener(new SelectionAdapter() {
