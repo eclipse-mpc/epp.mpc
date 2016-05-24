@@ -58,6 +58,12 @@ public class MarketplaceOrAssociateDialog extends TitleAreaDialog {
 	}
 
 	@Override
+	protected void configureShell(Shell newShell) {
+		super.configureShell(newShell);
+		newShell.setText(Messages.MarketplaceOrAssociateDialog_title);
+	}
+
+	@Override
 	public Control createDialogArea(Composite parent) {
 		setTitle(Messages.MarketplaceOrAssociateDialog_title);
 		setMessage(NLS.bind(Messages.MarketplaceOrAssociateDialog_message, fileExtensionLabel));
