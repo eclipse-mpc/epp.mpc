@@ -211,20 +211,23 @@ public class MarketplaceDropAdapter implements IStartup {
 		}
 
 		private void updateDragDetails(DropTargetEvent e) {
-			if (dropTargetIsValid(e)) {
+			if (dropTargetIsValid(e, false)) {
 				setDropOperation(e);
 			}
 		}
 
-		private boolean dropTargetIsValid(DropTargetEvent e) {
+		private boolean dropTargetIsValid(DropTargetEvent e, boolean isDrop) {
 			if (URLTransfer.getInstance().isSupportedType(e.currentDataType)) {
-				if (Util.isWindows()) {
-					//FIXME find a way to check the URL early on other platforms, too...
+				//on Windows, we get the URL already during drag operations...
+				//FIXME find a way to check the URL early on other platforms, too...
+				if (isDrop || Util.isWindows()) {
 					if (e.data == null && !extractEventData(e)) {
 						traceMissingEventData(e);
-						return false;
+						//... but if we don't, it's no problem, unless this is already
+						//the final drop event
+						return !isDrop;
 					}
-					final String url = getUrlFromEvent(e);
+					final String url = getUrl(e.data);
 					if (!MarketplaceUrlHandler.isPotentialSolution(url)) {
 						traceInvalidEventData(e);
 						return false;
@@ -240,7 +243,7 @@ public class MarketplaceDropAdapter implements IStartup {
 			TransferData transferData = e.currentDataType;
 			if (transferData != null) {
 				Object data = URLTransfer.getInstance().nativeToJava(transferData);
-				if (data != null) {
+				if (data != null && getUrl(data) != null) {
 					e.data = data;
 					return true;
 				}
@@ -261,12 +264,12 @@ public class MarketplaceDropAdapter implements IStartup {
 				event.detail = DND.DROP_NONE;
 				return;
 			}
-			if (!dropTargetIsValid(event)) {
+			if (!dropTargetIsValid(event, true)) {
 				//reject
 				event.detail = DND.DROP_NONE;
 				return;
 			}
-			final String url = getUrlFromEvent(event);
+			final String url = getUrl(event.data);
 			//http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=1640500
 			if (MarketplaceUrlHandler.isPotentialSolution(url)) {
 				DropTarget source = (DropTarget) event.getSource();
@@ -316,13 +319,15 @@ public class MarketplaceDropAdapter implements IStartup {
 			return null;
 		}
 
-		// Depending on the form the link and browser/os,
-		// we get the url twice in the data separated by new lines
-		private String getUrlFromEvent(DropTargetEvent event) {
-			Object eventData = event.data;
+		private String getUrl(Object eventData) {
+			if (eventData == null) {
+				return null;
+			}
 			if (eventData == null || !(eventData instanceof String)) {
 				return null;
 			}
+			// Depending on the form the link and browser/os,
+			// we get the url twice in the data separated by new lines
 			String[] dataLines = ((String) eventData).split(System.getProperty("line.separator")); //$NON-NLS-1$
 			String url = dataLines[0];
 			return url;
