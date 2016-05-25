@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.text.MessageFormat;
+import java.util.Map;
 
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
@@ -40,22 +41,28 @@ import org.apache.http.impl.client.SystemDefaultCredentialsProvider;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProduct;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
+import org.eclipse.epp.internal.mpc.core.ServiceLocator;
+import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
+import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
 import org.eclipse.epp.mpc.core.service.ITransport;
 import org.eclipse.epp.mpc.core.service.ServiceUnavailableException;
 import org.eclipse.userstorage.internal.StorageProperties;
 import org.eclipse.userstorage.internal.util.ProxyUtil;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.Version;
 
 @SuppressWarnings({ "deprecation", "restriction" })
 public class HttpClientTransport implements ITransport {
 
-	public static final String USER_AGENT_ID;
+	public static final String USER_AGENT;
 
 	public static final String USER_AGENT_PROPERTY = HttpClientTransport.class.getPackage().getName() + ".userAgent"; //$NON-NLS-1$
 
@@ -66,17 +73,11 @@ public class HttpClientTransport implements ITransport {
 	private final Executor executor = Executor.newInstance(CLIENT).cookieStore(cookieStore);
 
 	static {
-		Bundle mpcCoreBundle = FrameworkUtil.getBundle(HttpClientTransport.class);
-		String version;
-		if (mpcCoreBundle == null) {
-			version = ""; //$NON-NLS-1$
-		} else {
-			Version mpcCoreVersion = mpcCoreBundle.getVersion();
-			version = MessageFormat.format("/{0}.{1}.{2}", mpcCoreVersion.getMajor(), mpcCoreVersion.getMinor(), //$NON-NLS-1$
-					mpcCoreVersion.getMicro());
-		}
-		USER_AGENT_ID = "mpc" + version; //$NON-NLS-1$
+		USER_AGENT = initUserAgent();
+		CLIENT = initHttpClient();
+	}
 
+	private static org.apache.http.client.HttpClient initHttpClient() {
 		boolean accessible = false;
 		Field clientField = null;
 		org.apache.http.client.HttpClient client = null;
@@ -98,7 +99,101 @@ public class HttpClientTransport implements ITransport {
 			client = createClient();
 		}
 		client = wrapClient(client);
-		CLIENT = client;
+		return client;
+	}
+
+	private static String initUserAgent() {
+		Bundle mpcCoreBundle = FrameworkUtil.getBundle(HttpClientTransport.class);
+		BundleContext context = mpcCoreBundle.getBundleContext();
+
+		String version = getAgentVersion(mpcCoreBundle);
+		String java = getAgentJava(context);
+		String os = getAgentOS(context);
+		String language = getProperty(context, "osgi.nl", "unknownLanguage");//$NON-NLS-1$//$NON-NLS-2$
+		String uuid = getAgentUuid(context);
+		String agentDetail = getAgentDetail(context);
+
+		String userAgent = MessageFormat.format("mpc/{0} (Java {1}; {2}; {3}; {4}) {5}", //$NON-NLS-1$
+				/*{0}*/version, /*{1}*/java, /*{2}*/os, /*{3}*/language, /*{4}*/uuid, /*{5}*/agentDetail);
+		return userAgent;
+	}
+
+	private static String getAgentVersion(Bundle bundle) {
+		String version;
+		Version mpcCoreVersion = bundle.getVersion();
+		version = MessageFormat.format("{0}.{1}.{2}", mpcCoreVersion.getMajor(), mpcCoreVersion.getMinor(), //$NON-NLS-1$
+				mpcCoreVersion.getMicro());
+		return version;
+	}
+
+	private static String getAgentJava(BundleContext context) {
+		String java;
+		String javaSpec = getProperty(context, "java.runtime.version", "unknownJava"); //$NON-NLS-1$ //$NON-NLS-2$
+		String javaVendor = getProperty(context, "java.vendor", "unknownJavaVendor");//$NON-NLS-1$//$NON-NLS-2$
+		java = MessageFormat.format("{0} {1}", javaSpec, javaVendor); //$NON-NLS-1$
+		return java;
+	}
+
+	private static String getAgentOS(BundleContext context) {
+		String os;
+		String osName = getProperty(context, "org.osgi.framework.os.name", "unknownOS"); //$NON-NLS-1$ //$NON-NLS-2$
+		String osVersion = getProperty(context, "org.osgi.framework.os.version", "unknownOSVersion"); //$NON-NLS-1$ //$NON-NLS-2$
+		String osArch = getProperty(context, "org.osgi.framework.processor", "unknownArch");//$NON-NLS-1$//$NON-NLS-2$
+		os = MessageFormat.format("{0} {1} {2}", osName, osVersion, osArch); //$NON-NLS-1$
+		return os;
+	}
+
+	private static String getAgentUuid(BundleContext context) {
+		String uuid;
+		boolean trackUuid = Boolean.parseBoolean(
+				getProperty(context, IMarketplaceServiceLocator.USE_ECLIPSE_UUID_TRACKING_PROPERTY_NAME, "true")); //$NON-NLS-1$
+		uuid = trackUuid ? getProperty(context, "eclipse.uuid", "unknownUUID") : "unknownUUID"; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		return uuid;
+	}
+
+	private static String getAgentDetail(BundleContext context) {
+		String agentDetail;
+		agentDetail = getProperty(context, USER_AGENT_PROPERTY, null);
+		if (agentDetail == null) {
+			String productId = getProperty(context, "eclipse.product", null); //$NON-NLS-1$
+			String productVersion = getProperty(context, "eclipse.buildId", null); //$NON-NLS-1$
+			String appId = getProperty(context, "eclipse.application", null); //$NON-NLS-1$
+			if (productId == null || productVersion == null) {
+				Map<String, String> defaultRequestMetaParameters = ServiceLocator
+						.computeDefaultRequestMetaParameters();
+				productId = getProperty(defaultRequestMetaParameters, DefaultMarketplaceService.META_PARAM_PRODUCT,
+						"unknownProduct"); //$NON-NLS-1$
+				productVersion = getProperty(defaultRequestMetaParameters,
+						DefaultMarketplaceService.META_PARAM_PRODUCT_VERSION, "unknownBuildId"); //$NON-NLS-1$
+			}
+			if (appId == null) {
+				IProduct product = Platform.getProduct();
+				if (product != null) {
+					appId = product.getApplication();
+				}
+				if (appId == null) {
+					appId = "unknownApp"; //$NON-NLS-1$
+				}
+			}
+			agentDetail = MessageFormat.format("{0}/{1} ({2})", productId, productVersion, appId); //$NON-NLS-1$
+		}
+		return agentDetail;
+	}
+
+	private static String getProperty(BundleContext context, String key, String defaultValue) {
+		String value = context.getProperty(key);
+		if (value != null) {
+			return value;
+		}
+		return defaultValue;
+	}
+
+	private static String getProperty(Map<?, String> properties, Object key, String defaultValue) {
+		String value = properties.get(key);
+		if (value != null) {
+			return value;
+		}
+		return defaultValue;
 	}
 
 	private static final class ChainedSystemDefaultCredentialsProvider extends SystemDefaultCredentialsProvider {
@@ -212,13 +307,11 @@ public class HttpClientTransport implements ITransport {
 	}
 
 	protected Request configureRequest(Request request, URI uri) {
-		String userAgent = System.getProperty(USER_AGENT_PROPERTY, USER_AGENT_ID);
-
 		return request.viaProxy(ProxyUtil.getProxyHost(uri))
 				.staleConnectionCheck(true)
 				.connectTimeout(StorageProperties.getProperty(StorageProperties.CONNECT_TIMEOUT, 120000))
 				.socketTimeout(StorageProperties.getProperty(StorageProperties.SOCKET_TIMEOUT, 120000))
-				.setHeader(HttpHeaders.USER_AGENT, userAgent);
+				.setHeader(HttpHeaders.USER_AGENT, USER_AGENT);
 	}
 
 	public InputStream stream(URI location, IProgressMonitor monitor)

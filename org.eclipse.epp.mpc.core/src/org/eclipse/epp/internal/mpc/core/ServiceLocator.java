@@ -555,14 +555,30 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_NL,
 				Platform.getNL());
 		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_JAVA_VERSION,
-				System.getProperty("java.version")); //$NON-NLS-1$
+				bundleContext.getProperty("java.version")); //$NON-NLS-1$
 
 		IProduct product = Platform.getProduct();
+		String productId;
+		{
+			productId = bundleContext.getProperty("eclipse.product"); //$NON-NLS-1$
+			if (productId == null && product != null) {
+				productId = product.getId();
+			}
+		}
 		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_PRODUCT,
-				product == null ? null : product.getId());
-		Bundle productBundle = product == null ? null : product.getDefiningBundle();
+				productId);
+		String productVersion = null;
+		if (productId != null) {
+			productVersion = bundleContext.getProperty("eclipse.buildId"); //$NON-NLS-1$
+			if (productVersion == null && product != null) {
+				Bundle productBundle = product.getDefiningBundle();
+				if (productBundle != null) {
+					productVersion = productBundle.getVersion().toString();
+				}
+			}
+		}
 		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_PRODUCT_VERSION,
-				productBundle == null ? null : productBundle.getVersion().toString());
+				productVersion);
 
 		Bundle runtimeBundle = Platform.getBundle("org.eclipse.core.runtime"); //$NON-NLS-1$
 		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_RUNTIME_VERSION,
