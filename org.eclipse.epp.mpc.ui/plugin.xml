@@ -51,11 +51,16 @@
    </extension>
    <extension
          point="org.eclipse.mylyn.tasks.bugs.support">
-		<product featureId="org.eclipse.epp.mpc" id="org.eclipse.epp.mpc" providerId="org.eclipse"/>
-		<mapping namespace="org.eclipse.epp.mpc" productId="org.eclipse.epp.mpc">
-			<property name="product" value="MPC"/>
-			<property name="component" value="wizard"/>
-		</mapping>
+      <product
+            description="%support.description"
+            icon="icons/marketplace32.png"
+            id="org.eclipse.epp.mpc"
+            name="%support.name"
+            providerId="org.eclipse"/>
+         <mapping namespace="org.eclipse.epp.mpc" productId="org.eclipse.epp.mpc">
+            <property name="product" value="MPC"/>
+            <property name="component" value="wizard"/>
+         </mapping>
    </extension>
    <extension
          point="org.eclipse.ui.startup">
