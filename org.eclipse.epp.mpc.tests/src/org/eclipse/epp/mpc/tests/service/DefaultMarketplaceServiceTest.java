@@ -57,7 +57,7 @@ public class DefaultMarketplaceServiceTest {
 	public void setUp() throws Exception {
 		marketplaceService = new DefaultMarketplaceService();
 		//configure client id (bug 397004), as well as eclipse and marketplace versions (bug 418865)
-		Map<String, String> requestMetaParameters = ServiceLocator.computeDefaultRequestMetaParameters();
+		Map<String, String> requestMetaParameters = ServiceLocator.computeDefaultRequestMetaParameters(null);
 		marketplaceService.setRequestMetaParameters(requestMetaParameters);
 	}
 

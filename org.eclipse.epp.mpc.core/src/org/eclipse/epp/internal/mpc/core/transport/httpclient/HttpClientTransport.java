@@ -164,7 +164,7 @@ public class HttpClientTransport implements ITransport {
 			String appId = getProperty(context, "eclipse.application", null); //$NON-NLS-1$
 			if (productId == null || productVersion == null) {
 				Map<String, String> defaultRequestMetaParameters = ServiceLocator
-						.computeDefaultRequestMetaParameters();
+						.computeDefaultRequestMetaParameters(null);
 				productId = getProperty(defaultRequestMetaParameters, DefaultMarketplaceService.META_PARAM_PRODUCT,
 						"unknownProduct"); //$NON-NLS-1$
 				productVersion = getProperty(defaultRequestMetaParameters,
