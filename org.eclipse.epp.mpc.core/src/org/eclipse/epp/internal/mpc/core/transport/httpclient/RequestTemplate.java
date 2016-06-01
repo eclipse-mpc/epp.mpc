@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.net.URI;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
@@ -38,6 +39,10 @@ public abstract class RequestTemplate<T> {
 
 	protected RequestTemplate(HttpClientTransport transport) {
 		this.transport = transport;
+	}
+
+	public String getUserAgent() {
+		return HttpClientTransport.USER_AGENT;
 	}
 
 	public T execute(URI uri) throws ClientProtocolException, IOException {
@@ -90,6 +95,7 @@ public abstract class RequestTemplate<T> {
 	protected abstract Request createRequest(URI uri);
 
 	protected Request configureRequest(Request request, URI uri) {
+		request.setHeader(HttpHeaders.USER_AGENT, getUserAgent());
 		return transport.configureRequest(request, uri);
 	}
 
