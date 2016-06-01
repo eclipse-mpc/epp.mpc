@@ -15,8 +15,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -532,14 +532,8 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 	}
 
 	public static Map<String, String> computeDefaultRequestMetaParameters() {
-		Map<String, String> requestMetaParameters = new HashMap<String, String>();
+		Map<String, String> requestMetaParameters = new LinkedHashMap<String, String>();
 		BundleContext bundleContext = FrameworkUtil.getBundle(MarketplaceClientCore.class).getBundleContext();
-
-		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_CLIENT,
-				MarketplaceClientCore.BUNDLE_ID);
-		Bundle clientBundle = Platform.getBundle(MarketplaceClientCore.BUNDLE_ID);
-		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_CLIENT_VERSION,
-				clientBundle.getVersion().toString());
 
 		String uuid = bundleContext.getProperty(DefaultMarketplaceService.META_PARAM_ECLIPSE_UUID);
 		String useUuid = bundleContext.getProperty(IMarketplaceServiceLocator.USE_ECLIPSE_UUID_TRACKING_PROPERTY_NAME);
@@ -547,6 +541,12 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 			uuid = null;
 		}
 		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_ECLIPSE_UUID, uuid);
+
+		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_CLIENT,
+				MarketplaceClientCore.BUNDLE_ID);
+		Bundle clientBundle = Platform.getBundle(MarketplaceClientCore.BUNDLE_ID);
+		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_CLIENT_VERSION,
+				clientBundle.getVersion().toString());
 
 		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_OS,
 				Platform.getOS());
