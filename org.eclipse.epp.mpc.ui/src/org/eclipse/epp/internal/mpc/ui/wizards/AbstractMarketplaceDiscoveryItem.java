@@ -12,6 +12,9 @@
 
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
@@ -67,6 +70,8 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
  * @author Carsten Reckord
  */
 public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<T> {
+
+	private static final String FILE_EXTENSION_TAG_PREFIX = "fileExtension_"; //$NON-NLS-1$
 
 	private static final String ELLIPSIS = new String("\u2026"); //$NON-NLS-1$
 
@@ -469,19 +474,43 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		if (tagsObject == null) {
 			return;
 		}
-		final List<? extends ITag> tags = tagsObject.getTags();
+		List<? extends ITag> tags = tagsObject.getTags();
 		if (tags.isEmpty()) {
 			return;
 		}
+		tags = new ArrayList<ITag>(tags);
+		//sort list so that technical tags are at the end
+		Collections.sort(tags, new Comparator<ITag>() {
+
+			public int compare(ITag o1, ITag o2) {
+				if (o1 == o2) {
+					return 0;
+				}
+				if (o1.getName().startsWith(FILE_EXTENSION_TAG_PREFIX)) {
+					if (o2.getName().startsWith(FILE_EXTENSION_TAG_PREFIX)) {
+						return 0;
+					}
+					return 1;
+				}
+				if (o2.getName().startsWith(FILE_EXTENSION_TAG_PREFIX)) {
+					return -1;
+				}
+				return 0;
+			}
+		});
 
 		boolean needsEllipsis = tags.size() > MAX_SHOWN_TAGS;
 		for (int i = 0; i < MAX_SHOWN_TAGS && i < tags.size(); i++) {
+			if (i > 0)
+			{
+				tagsLink.append(" "); //$NON-NLS-1$
+			}
 			ITag tag = tags.get(i);
 			String tagName = tag.getName();
 			StyledTextHelper.appendLink(tagsLink, tagName, tagName, SWT.NORMAL);
-			tagsLink.append(" "); //$NON-NLS-1$
 		}
 		if (needsEllipsis) {
+			tagsLink.append(" "); //$NON-NLS-1$
 			StyledTextHelper.appendLink(tagsLink, ELLIPSIS, ELLIPSIS, SWT.NORMAL);
 			createTagsTooltip(tagsLink, tags);
 		}
@@ -611,7 +640,9 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 			new LinkListener() {
 				@Override
 				protected void selected(Object href, TypedEvent e) {
-					toolTip.show(titleControl);
+					if (INFO_HREF.equals(href)) {
+						toolTip.show(titleControl);
+					}
 				}
 			}.register(link);
 		} else {

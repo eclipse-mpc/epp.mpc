@@ -73,7 +73,9 @@ abstract class LinkListener implements MouseListener, SelectionListener {
 				data = style.data;
 			}
 		}
-		selected(data, e);
+		if (data != null) {
+			selected(data, e);
+		}
 	}
 
 	protected abstract void selected(Object href, TypedEvent event);
