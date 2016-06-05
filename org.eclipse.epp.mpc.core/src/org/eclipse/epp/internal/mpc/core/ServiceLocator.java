@@ -185,7 +185,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 			throw new IllegalArgumentException(e);
 		}
 		DefaultMarketplaceService defaultService = new DefaultMarketplaceService(base);
-		Map<String, String> requestMetaParameters = computeDefaultRequestMetaParameters(baseUrl);
+		Map<String, String> requestMetaParameters = computeDefaultRequestMetaParameters();
 		defaultService.setRequestMetaParameters(requestMetaParameters);
 		IUserFavoritesService favoritesService = getFavoritesService(baseUrl);
 		defaultService.setUserFavoritesService(favoritesService);//FIXME this should be a service reference!
@@ -531,32 +531,22 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		return locator;
 	}
 
-	/**
-	 * @deprecated Use {@link #computeDefaultRequestMetaParameters(String)} instead
-	 */
-	@Deprecated
 	public static Map<String, String> computeDefaultRequestMetaParameters() {
-		return computeDefaultRequestMetaParameters(null);
-	}
-
-	public static Map<String, String> computeDefaultRequestMetaParameters(String baseUrl) {
 		Map<String, String> requestMetaParameters = new LinkedHashMap<String, String>();
 		BundleContext bundleContext = FrameworkUtil.getBundle(MarketplaceClientCore.class).getBundleContext();
-
-		if (baseUrl != null && isEclipseHost(baseUrl)) {
-			String uuid = bundleContext.getProperty(DefaultMarketplaceService.META_PARAM_ECLIPSE_UUID);
-			String useUuid = bundleContext.getProperty(IMarketplaceServiceLocator.USE_ECLIPSE_UUID_TRACKING_PROPERTY_NAME);
-			if (uuid != null && useUuid != null && !Boolean.parseBoolean(useUuid)) {
-				uuid = null;
-			}
-			addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_ECLIPSE_UUID, uuid);
-		}
 
 		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_CLIENT,
 				MarketplaceClientCore.BUNDLE_ID);
 		Bundle clientBundle = Platform.getBundle(MarketplaceClientCore.BUNDLE_ID);
 		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_CLIENT_VERSION,
 				clientBundle.getVersion().toString());
+
+		String uuid = bundleContext.getProperty(DefaultMarketplaceService.META_PARAM_ECLIPSE_UUID);
+		String useUuid = bundleContext.getProperty(IMarketplaceServiceLocator.USE_ECLIPSE_UUID_TRACKING_PROPERTY_NAME);
+		if (uuid != null && useUuid != null && !Boolean.parseBoolean(useUuid)) {
+			uuid = null;
+		}
+		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_ECLIPSE_UUID, uuid);
 
 		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_OS,
 				Platform.getOS());
@@ -600,14 +590,6 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 				platformBundle == null ? null : platformBundle.getVersion().toString());
 
 		return requestMetaParameters;
-	}
-
-	private static boolean isEclipseHost(String baseUrl) {
-		try {
-			return URLUtil.toURL(baseUrl).getHost().endsWith(".eclipse.org"); //$NON-NLS-1$
-		} catch (Exception ex) {
-			return false;
-		}
 	}
 
 	private static void addDefaultRequestMetaParameter(Map<String, String> requestMetaParameters, String key,

@@ -55,7 +55,7 @@ public class SelectionModelStateSerializerTest {
 			@Override
 			public IMarketplaceService createMarketplaceService() {
 				DefaultMarketplaceService marketplaceService = new DefaultMarketplaceService(catalogDescriptor.getUrl());
-				Map<String, String> requestMetaParameters = ServiceLocator.computeDefaultRequestMetaParameters(null);
+				Map<String, String> requestMetaParameters = ServiceLocator.computeDefaultRequestMetaParameters();
 				marketplaceService.setRequestMetaParameters(requestMetaParameters);
 				return marketplaceService;
 			}

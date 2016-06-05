@@ -65,8 +65,6 @@ public class HttpClientTransport implements ITransport {
 
 	public static final String USER_AGENT;
 
-	public static final String USER_AGENT_WITH_UUID;
-
 	public static final String USER_AGENT_PROPERTY = HttpClientTransport.class.getPackage().getName() + ".userAgent"; //$NON-NLS-1$
 
 	private static final HttpClient CLIENT;
@@ -76,11 +74,7 @@ public class HttpClientTransport implements ITransport {
 	private final Executor executor = Executor.newInstance(CLIENT).cookieStore(cookieStore);
 
 	static {
-		USER_AGENT = initUserAgent(false);
-		BundleContext bundleContext = FrameworkUtil.getBundle(IMarketplaceServiceLocator.class).getBundleContext();
-		boolean trackUuid = Boolean.parseBoolean(
-				getProperty(bundleContext, IMarketplaceServiceLocator.USE_ECLIPSE_UUID_TRACKING_PROPERTY_NAME, "true")); //$NON-NLS-1$
-		USER_AGENT_WITH_UUID = trackUuid ? initUserAgent(true) : USER_AGENT;
+		USER_AGENT = initUserAgent();
 		CLIENT = initHttpClient();
 	}
 
@@ -109,7 +103,7 @@ public class HttpClientTransport implements ITransport {
 		return client;
 	}
 
-	private static String initUserAgent(boolean includeUuid) {
+	private static String initUserAgent() {
 		Bundle mpcCoreBundle = FrameworkUtil.getBundle(HttpClientTransport.class);
 		BundleContext context = mpcCoreBundle.getBundleContext();
 
@@ -117,11 +111,11 @@ public class HttpClientTransport implements ITransport {
 		String java = getAgentJava(context);
 		String os = getAgentOS(context);
 		String language = getProperty(context, "osgi.nl", "unknownLanguage");//$NON-NLS-1$//$NON-NLS-2$
-		String uuidPart = includeUuid ? "; " + getAgentUuid(context) : ""; //$NON-NLS-1$//$NON-NLS-2$
+		String uuid = getAgentUuid(context);
 		String agentDetail = getAgentDetail(context);
 
-		String userAgent = MessageFormat.format("mpc/{0} (Java {1}; {2}; {3}{4}) {5}", //$NON-NLS-1$
-				/*{0}*/version, /*{1}*/java, /*{2}*/os, /*{3}*/language, /*{4}*/uuidPart, /*{5}*/agentDetail);
+		String userAgent = MessageFormat.format("mpc/{0} (Java {1}; {2}; {3}; {4}) {5}", //$NON-NLS-1$
+				/*{0}*/version, /*{1}*/java, /*{2}*/os, /*{3}*/language, /*{4}*/uuid, /*{5}*/agentDetail);
 		return userAgent;
 	}
 
@@ -151,7 +145,10 @@ public class HttpClientTransport implements ITransport {
 	}
 
 	private static String getAgentUuid(BundleContext context) {
-		String uuid = getProperty(context, "eclipse.uuid", "unknownUUID"); //$NON-NLS-1$//$NON-NLS-2$
+		String uuid;
+		boolean trackUuid = Boolean.parseBoolean(
+				getProperty(context, IMarketplaceServiceLocator.USE_ECLIPSE_UUID_TRACKING_PROPERTY_NAME, "true")); //$NON-NLS-1$
+		uuid = trackUuid ? getProperty(context, "eclipse.uuid", "unknownUUID") : "unknownUUID"; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		return uuid;
 	}
 
@@ -164,7 +161,7 @@ public class HttpClientTransport implements ITransport {
 			String appId = getProperty(context, "eclipse.application", null); //$NON-NLS-1$
 			if (productId == null || productVersion == null) {
 				Map<String, String> defaultRequestMetaParameters = ServiceLocator
-						.computeDefaultRequestMetaParameters(null);
+						.computeDefaultRequestMetaParameters();
 				productId = getProperty(defaultRequestMetaParameters, DefaultMarketplaceService.META_PARAM_PRODUCT,
 						"unknownProduct"); //$NON-NLS-1$
 				productVersion = getProperty(defaultRequestMetaParameters,
@@ -327,14 +324,6 @@ public class HttpClientTransport implements ITransport {
 					return Request.Get(uri);
 				}
 
-				@Override
-				protected Request configureRequest(Request request, URI uri) {
-					request = super.configureRequest(request, uri);
-					if (uri.getHost() != null && uri.getHost().endsWith(".eclipse.org")) { //$NON-NLS-1$
-						request.setHeader(HttpHeaders.USER_AGENT, USER_AGENT_WITH_UUID);
-					}
-					return request;
-				}
 				@Override
 				protected InputStream handleResponse(Response response) throws ClientProtocolException, IOException {
 					return handleResponseEntity(response.returnResponse().getEntity());

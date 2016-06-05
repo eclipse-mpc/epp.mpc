@@ -851,7 +851,7 @@ public class SolutionCompatibilityFilterTest {
 	}
 
 	protected Map<String, String> computeRequestMetaParameters(System system, EclipseRelease eclipseRelease) {
-		Map<String, String> requestMetaParameters = ServiceLocator.computeDefaultRequestMetaParameters(null);
+		Map<String, String> requestMetaParameters = ServiceLocator.computeDefaultRequestMetaParameters();
 		system.applyTo(requestMetaParameters);
 		eclipseRelease.applyTo(requestMetaParameters);
 		return requestMetaParameters;
