@@ -67,15 +67,6 @@ public interface IMarketplaceServiceLocator {
 	public static final String DEFAULT_MARKETPLACE_PROPERTY_NAME = MarketplaceService.class.getName() + ".url"; //$NON-NLS-1$
 
 	/**
-	 * System property key to override the use of an anonymous uuid to identify the local machine in marketplace
-	 * requests.
-	 *
-	 * @see DefaultMarketplaceService#META_PARAM_ECLIPSE_UUID
-	 */
-	public static final String USE_ECLIPSE_UUID_TRACKING_PROPERTY_NAME = IMarketplaceService.class.getName()
-			+ ".uuid"; //$NON-NLS-1$
-
-	/**
 	 * Property key for registered IMarketplaceServiceLocator OSGi services indicating the URL of the catalog service.
 	 *
 	 * @see #DEFAULT_URL

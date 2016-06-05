@@ -58,7 +58,6 @@ import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
 import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.epp.mpc.core.service.ServiceHelper;
-import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -187,20 +186,6 @@ MarketplaceService {
 	 * @see {@link #setRequestMetaParameters(Map)}
 	 */
 	public static final String META_PARAM_PRODUCT = "product"; //$NON-NLS-1$
-
-	/**
-	 * Anonymous unique id for local machine, as provided by {@link EnvironmentInfo}.
-	 * <p>
-	 * Clients can override the generated UUID in <code>~/.eclipse/eclipse.uuid</code> or set
-	 * {@link IMarketplaceServiceLocator#USE_ECLIPSE_UUID_TRACKING_PROPERTY_NAME} to false in their java system
-	 * properties (e.g. in the eclipse.ini)
-	 *
-	 * @see {@link #setRequestMetaParameters(Map)}
-	 * @see IMarketplaceServiceLocator#USE_ECLIPSE_UUID_TRACKING_PROPERTY_NAME
-	 * @see <a href="http://eclip.se/492916">bug 492916</a>
-	 * @see <a href="http://eclip.se/490112">bug 490112</a>
-	 */
-	public static final String META_PARAM_ECLIPSE_UUID = "eclipse.uuid"; //$NON-NLS-1$
 
 	/**
 	 * parameter identifying a list of nodes for a {@link #related(List, IProgressMonitor)} query

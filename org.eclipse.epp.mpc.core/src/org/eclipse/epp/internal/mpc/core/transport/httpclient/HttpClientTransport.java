@@ -50,7 +50,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.ServiceLocator;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
-import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
 import org.eclipse.epp.mpc.core.service.ITransport;
 import org.eclipse.epp.mpc.core.service.ServiceUnavailableException;
 import org.eclipse.userstorage.internal.StorageProperties;
@@ -111,11 +110,10 @@ public class HttpClientTransport implements ITransport {
 		String java = getAgentJava(context);
 		String os = getAgentOS(context);
 		String language = getProperty(context, "osgi.nl", "unknownLanguage");//$NON-NLS-1$//$NON-NLS-2$
-		String uuid = getAgentUuid(context);
 		String agentDetail = getAgentDetail(context);
 
-		String userAgent = MessageFormat.format("mpc/{0} (Java {1}; {2}; {3}; {4}) {5}", //$NON-NLS-1$
-				/*{0}*/version, /*{1}*/java, /*{2}*/os, /*{3}*/language, /*{4}*/uuid, /*{5}*/agentDetail);
+		String userAgent = MessageFormat.format("mpc/{0} (Java {1}; {2}; {3}) {4}", //$NON-NLS-1$
+				/*{0}*/version, /*{1}*/java, /*{2}*/os, /*{3}*/language, /*{4}*/agentDetail);
 		return userAgent;
 	}
 
@@ -142,14 +140,6 @@ public class HttpClientTransport implements ITransport {
 		String osArch = getProperty(context, "org.osgi.framework.processor", "unknownArch");//$NON-NLS-1$//$NON-NLS-2$
 		os = MessageFormat.format("{0} {1} {2}", osName, osVersion, osArch); //$NON-NLS-1$
 		return os;
-	}
-
-	private static String getAgentUuid(BundleContext context) {
-		String uuid;
-		boolean trackUuid = Boolean.parseBoolean(
-				getProperty(context, IMarketplaceServiceLocator.USE_ECLIPSE_UUID_TRACKING_PROPERTY_NAME, "true")); //$NON-NLS-1$
-		uuid = trackUuid ? getProperty(context, "eclipse.uuid", "unknownUUID") : "unknownUUID"; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-		return uuid;
 	}
 
 	private static String getAgentDetail(BundleContext context) {
