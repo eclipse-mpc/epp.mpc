@@ -66,15 +66,14 @@ abstract class LinkListener implements MouseListener, SelectionListener {
 		} catch (IllegalArgumentException ex) {
 			offset = -1;
 		}
-		Object data = null;
 		if (offset >= 0 && offset < link.getCharCount()) {
 			StyleRange style = link.getStyleRangeAtOffset(offset);
 			if (style != null) {
-				data = style.data;
+				Object data = style.data;
+				if (data != null) {
+					selected(data, e);
+				}
 			}
-		}
-		if (data != null) {
-			selected(data, e);
 		}
 	}
 

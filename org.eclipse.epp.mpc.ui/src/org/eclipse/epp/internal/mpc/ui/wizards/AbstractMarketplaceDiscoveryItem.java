@@ -276,15 +276,15 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		.align(SWT.BEGINNING, SWT.CENTER)
 		.applyTo(nameLabel);
 		nameLabel.setFont(resources.getSmallHeaderFont());
-		String name = connector.getName();
-		if (name == null) {
-			name = NLS.bind(Messages.DiscoveryItem_UnnamedSolution, connector.getId());
-		}
 		nameLabel.setText(getNameLabelText());
 	}
 
 	protected String getNameLabelText() {
-		return TextUtil.escapeText(connector.getName());
+		String name = connector.getName();
+		if (name == null || "".equals(name.trim())) { //$NON-NLS-1$
+			name = NLS.bind(Messages.DiscoveryItem_UnnamedSolution, connector.getId());
+		}
+		return TextUtil.escapeText(name);
 	}
 
 	protected abstract void createInstallButtons(Composite parent);
