@@ -15,6 +15,7 @@ import java.util.List;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
 import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
+import org.eclipse.jface.viewers.StructuredSelection;
 
 public class InstallAllActionLink extends ActionLink {
 
@@ -36,15 +37,21 @@ public class InstallAllActionLink extends ActionLink {
 	protected void installAll() {
 		MarketplaceViewer viewer = marketplacePage.getViewer();
 		List<CatalogItem> items = viewer.getCatalog().getItems();
+		//We need to first select the items in the selection model and then
+		//set the selection to the viewer. Otherwise the MarketplacePage listener
+		//will advance the wizard on the first selected item.
 		SelectionModel selectionModel = viewer.getSelectionModel();
 		for (CatalogItem catalogItem : items) {
 			if (catalogItem instanceof MarketplaceNodeCatalogItem) {
 				MarketplaceNodeCatalogItem nodeItem = (MarketplaceNodeCatalogItem) catalogItem;
 				if (selectionModel.getSelectedOperation(nodeItem) != Operation.INSTALL
 						&& nodeItem.getAvailableOperations().contains(Operation.INSTALL)) {
-					viewer.modifySelection(nodeItem, Operation.INSTALL);
+					selectionModel.select(nodeItem, Operation.INSTALL);
 				}
 			}
 		}
+		//viewer.getCheckedItems() is based on the SelectionModel state, so it already has the
+		//updated selection. Just let the viewer synchronize its remaining selection state with it.
+		viewer.setSelection(new StructuredSelection(viewer.getCheckedItems()));
 	}
 }

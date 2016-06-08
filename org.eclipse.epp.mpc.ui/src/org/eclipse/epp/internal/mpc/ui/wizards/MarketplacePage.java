@@ -291,7 +291,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 				// sets the empty selection whenever the catalog is updated.
 				if (!event.getSelection().isEmpty()) {
 
-					if (previousSelectionSize == 0 && newSelectionSize == 1
+					if (previousSelectionSize == 0 && newSelectionSize > 0
 							&& selectionModel.computeProvisioningOperationViableForFeatureSelection()) {
 						showNextPage();
 					}
