@@ -531,7 +531,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 			return null;
 		}
 		bot.button("Install").click();
-		waitForWizardProgress();
+		waitForWizardProgress(3 * PROGRESS_TIMEOUT);
 		assertSame(getWizard().getPage(FeatureSelectionWizardPage.class.getName()), getWizardDialog().getCurrentPage());
 		bot.button("< Install More").click();
 		waitForWizardProgress();
