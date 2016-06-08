@@ -16,6 +16,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
+
+import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 
 public class URLUtil {
 
@@ -38,22 +41,13 @@ public class URLUtil {
 				}
 			}
 			try {
-				return new URI(url.getProtocol(), url.getAuthority(), decode(url.getPath()),
+				return new URI(url.getProtocol(), url.getAuthority(), urlDecode(url.getPath()),
 						encodeQuery(url.getQuery()),
 						url.getRef());
 			} catch (URISyntaxException e1) {
 				//throw original error
 				throw e;
 			}
-		}
-	}
-
-	private static String decode(String path) {
-		try {
-			return path == null ? null : URLDecoder.decode(path, "UTF-8"); //$NON-NLS-1$
-		} catch (UnsupportedEncodingException e) {
-			//should not be possible
-			return path;
 		}
 	}
 
@@ -102,5 +96,24 @@ public class URLUtil {
 			url.append(part);
 		}
 		return url.toString();
+	}
+
+	public static String urlEncode(String s) {
+		try {
+			return s == null ? null : URLEncoder.encode(s, "UTF-8"); //$NON-NLS-1$
+		} catch (UnsupportedEncodingException e) {
+			//this should be impossible
+			MarketplaceClientCore.error(e);
+			return s;
+		}
+	}
+
+	public static String urlDecode(String path) {
+		try {
+			return path == null ? null : URLDecoder.decode(path, "UTF-8"); //$NON-NLS-1$
+		} catch (UnsupportedEncodingException e) {
+			//should not be possible
+			return path;
+		}
 	}
 }

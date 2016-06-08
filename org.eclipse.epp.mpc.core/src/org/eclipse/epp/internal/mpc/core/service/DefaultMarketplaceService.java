@@ -48,6 +48,7 @@ import org.eclipse.epp.internal.mpc.core.model.SearchResult;
 import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
 import org.eclipse.epp.internal.mpc.core.util.HttpUtil;
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
+import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IIdentifiable;
 import org.eclipse.epp.mpc.core.model.IIus;
@@ -417,7 +418,7 @@ MarketplaceService {
 	}
 
 	public SearchResult tagged(String tag, IProgressMonitor monitor) throws CoreException {
-		return processSearchRequest(API_FREETAGGING_URI + tag + '/' + API_URI_SUFFIX, tag, monitor);
+		return processSearchRequest(API_FREETAGGING_URI + URLUtil.urlEncode(tag) + '/' + API_URI_SUFFIX, tag, monitor);
 	}
 
 	public SearchResult featured(IProgressMonitor monitor) throws CoreException {
