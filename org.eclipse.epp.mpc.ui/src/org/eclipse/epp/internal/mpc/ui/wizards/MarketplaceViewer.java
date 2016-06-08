@@ -93,7 +93,7 @@ import org.osgi.framework.ServiceReference;
  */
 public class MarketplaceViewer extends CatalogViewer {
 
-	private static final String QUERY_TAG_KEYWORD = "tag:"; //$NON-NLS-1$
+	public static final String QUERY_TAG_KEYWORD = "tag:"; //$NON-NLS-1$
 
 	public enum ContentType {
 		SEARCH, FEATURED_MARKET, RECENT, POPULAR, INSTALLED, SELECTION, RELATED, FAVORITES

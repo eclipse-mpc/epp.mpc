@@ -17,8 +17,10 @@ import static org.junit.Assert.*;
 
 import java.util.List;
 
+import org.eclipse.epp.internal.mpc.ui.wizards.AbstractMarketplaceDiscoveryItem;
 import org.eclipse.epp.internal.mpc.ui.wizards.DiscoveryItem;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplacePage;
+import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer;
 import org.eclipse.epp.mpc.tests.Categories.RemoteTests;
 import org.eclipse.epp.mpc.tests.Categories.UITests;
 import org.eclipse.epp.mpc.tests.ui.wizard.matcher.NodeMatcher;
@@ -63,7 +65,7 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 	@Test
 	public void testSearchTag() {
 		Matcher<StyledText> widgetOfType = widgetOfType(StyledText.class);
-		Matcher<StyledText> withId = withId(DiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_TAGS);
+		Matcher<StyledText> withId = withId(AbstractMarketplaceDiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_TAGS);
 		Matcher<StyledText> emptyText = withText("");
 		@SuppressWarnings("unchecked")
 		Matcher<StyledText> nonEmptyTagMatcher = allOf(widgetOfType, withId, not(emptyText));
@@ -74,7 +76,7 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 		tagsLabel.click(linkRange);
 		waitForWizardProgress();
 		String searchTerm = searchField().getText();
-		assertEquals(tag, searchTerm);
+		assertEquals(MarketplaceViewer.QUERY_TAG_KEYWORD + tag, searchTerm);
 	}
 
 	@Test
@@ -91,9 +93,8 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 
 	@Test
 	public void testShowSelected() {
-		selectToInstall(3);
-		SWTBotLink link = bot.link("<a>3 solutions selected</a>");
-		link.click("3 solutions selected");
+		SWTBotLink link = selectToInstall(3);
+		link.click();
 		//wait for the action to be processed
 		bot.waitUntil(new DefaultCondition() {
 			public boolean test() throws Exception {
@@ -113,13 +114,13 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 	@Test
 	public void testMoreInfoLearnMore() {
 		SWTBotClickableStyledText descriptionLabel = SWTBotClickableStyledText.from(bot.styledTextWithId(
-				DiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_DESCRIPTION));
+				AbstractMarketplaceDiscoveryItem.WIDGET_ID_KEY, AbstractMarketplaceDiscoveryItem.WIDGET_ID_DESCRIPTION));
 		StyleRange linkRange = findLink(descriptionLabel, "more\u00a0info");
 		bot.sleep(5000);
 		descriptionLabel.click(linkRange);
 		bot.sleep(5000);
-		SWTBotShell tooltip = bot.shellWithId(DiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_OVERVIEW);
-		SWTBotLink moreLink = tooltip.bot().linkWithId(DiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_LEARNMORE);
+		SWTBotShell tooltip = bot.shellWithId(AbstractMarketplaceDiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_OVERVIEW);
+		SWTBotLink moreLink = tooltip.bot().linkWithId(AbstractMarketplaceDiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_LEARNMORE);
 		moreLink.click();
 
 		checkMarketplaceBrowser();
@@ -132,7 +133,7 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 		searchField().setText("nodeclipse");
 		filterMarket("RCP Applications");
 		SWTBotClickableStyledText learnMoreLabel = SWTBotClickableStyledText.from(bot.styledTextWithId(
-				DiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_LEARNMORE));
+				AbstractMarketplaceDiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_LEARNMORE));
 		StyleRange linkRange = findLink(learnMoreLabel);
 		learnMoreLabel.click(linkRange);
 
@@ -148,7 +149,6 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 		assertFalse(wizardShell.isActive());//but no longer the active shell
 	}
 
-	@Ignore("Temporarily disabled due to build server problems - bug 443493")
 	@Test
 	public void testNews() {
 		bot.tabItemWithId(MarketplacePage.WIDGET_ID_KEY, MarketplacePage.WIDGET_ID_TAB_NEWS).activate();
@@ -179,21 +179,20 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 		//TODO test something useful
 	}
 
-	//FIXME
-	@Ignore("Tooltip doesn't stay open")
 	@Test
 	public void testFavorite() {
-		SWTBotButton favorite = bot.buttonWithId(DiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_RATING);
+		SWTBotButton favorite = bot.buttonWithId(AbstractMarketplaceDiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_RATING);
 		bot.sleep(5000);
 		favorite.click();
-		SWTBotShell tooltip = bot.shellWithId(DiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_RATING);
-		tooltip.bot().button("Continue >");//.click();
-		//TODO test something useful - clicking would open external browser, which is not good for tests
+		SWTBotShell login = bot.shell("Eclipse User Storage Service");
+		login.bot().button("Cancel").click();
+		//TODO test something useful - we'd need a proper login on the server to do this...
+		//better to get started with some server mocking in the ui tests...
 	}
 
 	@Test
 	public void testShare() {
-		SWTBotButton share = bot.buttonWithId(DiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_SHARE);
+		SWTBotButton share = bot.buttonWithId(AbstractMarketplaceDiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_SHARE);
 		share.click();
 		share.contextMenu("Twitter");//.click();
 		//TODO test something useful - clicking would open external browser, which is not good for tests

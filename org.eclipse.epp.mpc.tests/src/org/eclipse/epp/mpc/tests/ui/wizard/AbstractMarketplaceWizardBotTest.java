@@ -67,6 +67,7 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotBrowser;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCombo;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotLabel;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotLink;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotStyledText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTabItem;
@@ -525,20 +526,36 @@ public abstract class AbstractMarketplaceWizardBotTest {
 		}
 	}
 
-	protected void selectToInstall(int count) {
+	protected SWTBotLink selectToInstall(int count) {
 		if (count == 0) {
-			return;
+			return null;
 		}
 		bot.button("Install").click();
 		waitForWizardProgress();
 		assertSame(getWizard().getPage(FeatureSelectionWizardPage.class.getName()), getWizardDialog().getCurrentPage());
 		bot.button("< Install More").click();
 		waitForWizardProgress();
-		bot.link("<a>One solution selected</a>");
+		SWTBotLink selectedSolutionsLink = selectedSolutionsLink(1);
 		for (int i = 2; i <= count; i++) {
 			bot.button("Install").click();
-			bot.link("<a>" + i + " solutions selected</a>");
+			selectedSolutionsLink = selectedSolutionsLink(i);
 		}
+		return selectedSolutionsLink;
+	}
+
+	protected SWTBotLink selectedSolutionsLink(int count) {
+		String linkText;
+		switch (count) {
+		case 0:
+			return null;
+		case 1:
+			linkText = "One solution selected";
+			break;
+		default:
+			linkText = String.format("%s solutions selected", count);
+		}
+		String linkContent = String.format("<a href=\"showSelection\">%s</a>", linkText);
+		return bot.link(linkContent);
 	}
 
 	protected void tryWaitForBrowser(SWTBotBrowser browser) {
