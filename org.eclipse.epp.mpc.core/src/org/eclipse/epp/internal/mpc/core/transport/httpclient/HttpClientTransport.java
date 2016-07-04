@@ -19,10 +19,11 @@ import java.net.URI;
 import java.text.MessageFormat;
 import java.util.Map;
 
-import org.apache.http.HttpHeaders;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.ClientProtocolException;
@@ -307,28 +308,7 @@ public class HttpClientTransport implements ITransport {
 	public InputStream stream(URI location, IProgressMonitor monitor)
 			throws FileNotFoundException, ServiceUnavailableException, CoreException {
 		try {
-			return new RequestTemplate<InputStream>(this) {
-
-				@Override
-				protected Request createRequest(URI uri) {
-					return Request.Get(uri);
-				}
-
-				@Override
-				protected InputStream handleResponse(Response response) throws ClientProtocolException, IOException {
-					return handleResponseEntity(response.returnResponse().getEntity());
-				}
-
-				@Override
-				protected InputStream handleResponseStream(InputStream content) throws IOException {
-					return content;
-				}
-
-				@Override
-				protected InputStream handleEmptyResponse() {
-					return new ByteArrayInputStream(new byte[0]);
-				}
-			}.execute(location);
+			return createStreamingRequest().execute(location);
 		} catch (HttpResponseException e) {
 			int statusCode = e.getStatusCode();
 			switch (statusCode) {
@@ -345,5 +325,34 @@ public class HttpClientTransport implements ITransport {
 		} catch (IOException e) {
 			throw new CoreException(MarketplaceClientCore.computeStatus(e, null));
 		}
+	}
+
+	protected RequestTemplate<InputStream> createStreamingRequest() {
+		return new RequestTemplate<InputStream>(this) {
+
+			@Override
+			protected Request createRequest(URI uri) {
+				return Request.Get(uri);
+			}
+
+			@Override
+			protected InputStream handleResponse(Response response) throws ClientProtocolException, IOException {
+				HttpResponse returnResponse = response.returnResponse();
+				HttpEntity entity = returnResponse.getEntity();
+				StatusLine statusLine = returnResponse.getStatusLine();
+				handleResponseStatus(statusLine.getStatusCode(), statusLine.getReasonPhrase(), entity);
+				return handleResponseEntity(entity);
+			}
+
+			@Override
+			protected InputStream handleResponseStream(InputStream content) throws IOException {
+				return content;
+			}
+
+			@Override
+			protected InputStream handleEmptyResponse() {
+				return new ByteArrayInputStream(new byte[0]);
+			}
+		};
 	}
 }

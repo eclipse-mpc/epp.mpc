@@ -134,32 +134,36 @@ public class FallbackTransportFactory implements ITransportFactory {
 
 	private ITransportFactory primaryFactory;
 
+	private ITransportFactory secondaryFactory;
+
 	public FallbackTransportFactory() {
 		super();
 		// ignore
 	}
 
 	public ITransport getTransport() {
-		ITransportFactory delegateFactory = null;
-		BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
-		try {
-			Collection<ServiceReference<ITransportFactory>> serviceReferences = bundleContext
-					.getServiceReferences(ITransportFactory.class, null);
-			if (!serviceReferences.isEmpty()) {
-				for (ServiceReference<ITransportFactory> serviceReference : serviceReferences) {
-					ITransportFactory service = bundleContext.getService(serviceReference);
-					if (service != this && service != primaryFactory
-							&& !"org.eclipse.epp.mpc.tests.service.MappedTransportFactory" //$NON-NLS-1$
-							.equals(service.getClass().getName())) {
-						delegateFactory = service;
-						break;
-					} else {
-						bundleContext.ungetService(serviceReference);
+		ITransportFactory delegateFactory = this.secondaryFactory;
+		if (delegateFactory == null) {
+			BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
+			try {
+				Collection<ServiceReference<ITransportFactory>> serviceReferences = bundleContext
+						.getServiceReferences(ITransportFactory.class, null);
+				if (!serviceReferences.isEmpty()) {
+					for (ServiceReference<ITransportFactory> serviceReference : serviceReferences) {
+						ITransportFactory service = bundleContext.getService(serviceReference);
+						if (service != this && service != primaryFactory
+								&& !"org.eclipse.epp.mpc.tests.service.MappedTransportFactory" //$NON-NLS-1$
+								.equals(service.getClass().getName())) {
+							delegateFactory = service;
+							break;
+						} else {
+							bundleContext.ungetService(serviceReference);
+						}
 					}
 				}
+			} catch (InvalidSyntaxException e) {
+				//impossible
 			}
-		} catch (InvalidSyntaxException e) {
-			//impossible
 		}
 		if (delegateFactory == null) {
 			return primaryFactory.getTransport();
@@ -184,5 +188,13 @@ public class FallbackTransportFactory implements ITransportFactory {
 		if (primaryFactory == factory) {
 			setPrimaryFactory(null);
 		}
+	}
+
+	public ITransportFactory getSecondaryFactory() {
+		return secondaryFactory;
+	}
+
+	public void setSecondaryFactory(ITransportFactory secondaryFactory) {
+		this.secondaryFactory = secondaryFactory;
 	}
 }

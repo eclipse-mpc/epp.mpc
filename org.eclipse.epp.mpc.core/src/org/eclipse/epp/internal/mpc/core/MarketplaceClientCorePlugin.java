@@ -30,6 +30,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.ComponentConstants;
 
 public class MarketplaceClientCorePlugin implements BundleActivator {
 
@@ -130,6 +131,7 @@ public class MarketplaceClientCorePlugin implements BundleActivator {
 		for (ITransportFactory factory : factories) {
 			Hashtable<String, Object> properties = new Hashtable<String, Object>();
 			properties.put(Constants.SERVICE_RANKING, prio);
+			properties.put(ComponentConstants.COMPONENT_NAME, "legacy:" + factory.getClass().getName());
 			properties.put(TransportFactory.LEGACY_TRANSPORT_KEY, true);
 			ServiceRegistration<ITransportFactory> registration = context.registerService(ITransportFactory.class,
 					factory, properties);
