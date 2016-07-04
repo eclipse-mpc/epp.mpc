@@ -43,6 +43,7 @@ import org.eclipse.epp.mpc.core.service.ITransportFactory;
 import org.eclipse.epp.mpc.core.service.ServiceHelper;
 import org.eclipse.epp.mpc.core.service.ServiceUnavailableException;
 import org.hamcrest.CoreMatchers;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
@@ -52,6 +53,12 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentConstants;
 
 public class TransportFactoryTest {
+
+	@Before
+	public void clearTransportFilters() {
+		System.getProperties().remove("org.eclipse.epp.mpc.core.service.transport.disabled");
+		System.getProperties().remove("org.eclipse.ecf.provider.filetransfer.excludeContributors");
+	}
 
 	@Test
 	public void testRegisteredFactories() throws Exception {
@@ -138,6 +145,30 @@ public class TransportFactoryTest {
 		assertEquals("org.eclipse.epp.mpc.core.transport.http.wrapper", transportServiceName);
 	}
 
+	@Test
+	public void testDisableTransports() {
+		System.setProperty("org.eclipse.epp.mpc.core.service.transport.disabled",
+				"org.eclipse.epp.mpc.core.transport.http.wrapper");
+		String transportServiceName = getTransportServiceName();
+		assertEquals("legacy:org.eclipse.epp.internal.mpc.core.util.P2TransportFactory", transportServiceName);
+
+		System.setProperty("org.eclipse.epp.mpc.core.service.transport.disabled",
+				"org.eclipse.epp.mpc.core.transport.http.wrapper,"
+						+ "legacy:org.eclipse.epp.internal.mpc.core.util.P2TransportFactory,"
+						+ "legacy:org.eclipse.epp.internal.mpc.core.util.Eclipse36TransportFactory");
+		transportServiceName = getTransportServiceName();
+		assertEquals("legacy:org.eclipse.epp.internal.mpc.core.util.JavaPlatformTransportFactory",
+				transportServiceName);
+	}
+
+	@Test
+	public void testDisableHttpClientTransportsThroughECF() {
+		System.setProperty("org.eclipse.ecf.provider.filetransfer.excludeContributors",
+				"org.eclipse.ecf.provider.filetransfer.httpclient4");
+		String transportServiceName = getTransportServiceName();
+		assertEquals("legacy:org.eclipse.epp.internal.mpc.core.util.P2TransportFactory", transportServiceName);
+	}
+
 	@Test(expected = ServiceUnavailableException.class)
 	public void testHttpClientTransportErrorHandling() throws Exception {
 		createFailingHttpClientTransport().stream(URI.create("http://127.0.0.1:54321"), null);
@@ -186,6 +217,14 @@ public class TransportFactoryTest {
 		assertSame(expectedResultStream, stream);
 	}
 
+	@Test
+	public void testECFContributorPropertiesUnchanged() {
+		assertEquals("org.eclipse.ecf.provider.filetransfer.excludeContributors",
+				org.eclipse.ecf.internal.provider.filetransfer.Activator.PLUGIN_EXCLUDED_SYS_PROP_NAME);
+		assertEquals("org.eclipse.ecf.provider.filetransfer.httpclient4",
+				org.eclipse.ecf.internal.provider.filetransfer.httpclient4.Activator.PLUGIN_ID);
+	}
+
 	private static HttpResponse mockResponse(StatusLine statusLine, HttpEntity entity) {
 		HttpResponse mockResponse = Mockito.mock(HttpResponse.class);
 		Mockito.when(mockResponse.getStatusLine()).thenReturn(statusLine);
@@ -202,8 +241,8 @@ public class TransportFactoryTest {
 
 	private static String getTransportServiceName() {
 		BundleContext bundleContext = FrameworkUtil.getBundle(TransportFactory.class).getBundleContext();
-		ServiceReference<ITransportFactory> transportServiceReference = bundleContext.getServiceReference(
-				ITransportFactory.class);
+		ServiceReference<ITransportFactory> transportServiceReference = TransportFactory.getTransportServiceReference(
+				bundleContext);
 		if (transportServiceReference != null) {
 			String transportServiceName = (String) transportServiceReference.getProperty(
 					ComponentConstants.COMPONENT_NAME);

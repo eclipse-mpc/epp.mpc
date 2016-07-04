@@ -146,8 +146,9 @@ public class FallbackTransportFactory implements ITransportFactory {
 		if (delegateFactory == null) {
 			BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
 			try {
-				Collection<ServiceReference<ITransportFactory>> serviceReferences = bundleContext
-						.getServiceReferences(ITransportFactory.class, null);
+				String disabledTransportsFilter = TransportFactory.computeDisabledTransportsFilter();
+				Collection<ServiceReference<ITransportFactory>> serviceReferences = bundleContext.getServiceReferences(
+						ITransportFactory.class, "".equals(disabledTransportsFilter) ? null : disabledTransportsFilter); //$NON-NLS-1$
 				if (!serviceReferences.isEmpty()) {
 					for (ServiceReference<ITransportFactory> serviceReference : serviceReferences) {
 						ITransportFactory service = bundleContext.getService(serviceReference);

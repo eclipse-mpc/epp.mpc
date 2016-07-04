@@ -18,8 +18,10 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.http.NoHttpResponseException;
 import org.eclipse.core.runtime.CoreException;
@@ -32,6 +34,7 @@ import org.eclipse.epp.internal.mpc.core.service.ServiceUnavailableException;
 import org.eclipse.epp.mpc.core.service.ITransportFactory;
 import org.eclipse.epp.mpc.core.service.ServiceHelper;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentConstants;
@@ -52,10 +55,48 @@ public abstract class TransportFactory implements ITransportFactory {
 
 	public static final String LEGACY_TRANSPORT_COMPONENT_NAME = "org.eclipse.epp.mpc.core.transportfactory.legacy"; //$NON-NLS-1$
 
+	public static final String DISABLED_TRANSPORTS_KEY = "org.eclipse.epp.mpc.core.service.transport.disabled"; //$NON-NLS-1$
+
 	private static final String[] factoryClasses = new String[] { //
 			"org.eclipse.epp.internal.mpc.core.util.P2TransportFactory", // //$NON-NLS-1$
 			"org.eclipse.epp.internal.mpc.core.util.Eclipse36TransportFactory", // //$NON-NLS-1$
 	"org.eclipse.epp.internal.mpc.core.util.JavaPlatformTransportFactory" }; //$NON-NLS-1$
+
+	private static final String HTTP_TRANSPORT_FACTORY_ID = "org.eclipse.epp.mpc.core.transport.http.factory"; //$NON-NLS-1$
+
+	private static final String HTTP_TRANSPORT_WRAPPER_ID = "org.eclipse.epp.mpc.core.transport.http.wrapper"; //$NON-NLS-1$
+
+	private static final String ECF_HTTPCLIENT4_TRANSPORT_ID = "org.eclipse.ecf.provider.filetransfer.httpclient4"; //$NON-NLS-1$
+
+	private static final String ECF_EXCLUDES_PROPERTY = "org.eclipse.ecf.provider.filetransfer.excludeContributors"; //$NON-NLS-1$
+
+	public static String computeDisabledTransportsFilter() {
+		BundleContext bundleContext = FrameworkUtil.getBundle(TransportFactory.class).getBundleContext();
+		String disabledTransportsStr = bundleContext.getProperty(DISABLED_TRANSPORTS_KEY);
+		if (disabledTransportsStr == null) {
+			disabledTransportsStr = ""; //$NON-NLS-1$
+		}
+		String excludeContributors = bundleContext
+				.getProperty(ECF_EXCLUDES_PROPERTY);
+		if (excludeContributors != null && excludeContributors.contains(ECF_HTTPCLIENT4_TRANSPORT_ID)) {
+			disabledTransportsStr += "," + HTTP_TRANSPORT_WRAPPER_ID + "," + HTTP_TRANSPORT_FACTORY_ID; //$NON-NLS-1$//$NON-NLS-2$
+		}
+		Set<String> disabledTransports = new HashSet<String>();
+		StringBuilder bldr = new StringBuilder("(&"); //$NON-NLS-1$
+		for (String transportName : disabledTransportsStr.split(",")) { //$NON-NLS-1$
+			transportName = transportName.trim();
+			if (!"".equals(transportName) && disabledTransports.add(transportName)) { //$NON-NLS-1$
+				bldr.append("(!(") //$NON-NLS-1$
+				.append(ComponentConstants.COMPONENT_NAME)
+				.append("=") //$NON-NLS-1$
+				.append(transportName)
+				.append("))"); //$NON-NLS-1$
+			}
+		}
+		bldr.append(")"); //$NON-NLS-1$
+		String disabledTransportsFilter = disabledTransports.isEmpty() ? "" : bldr.toString(); //$NON-NLS-1$
+		return disabledTransportsFilter;
+	}
 
 	public static final class LegacyFactory implements ITransportFactory {
 		private ITransportFactory delegate;
@@ -77,9 +118,11 @@ public abstract class TransportFactory implements ITransportFactory {
 			BundleContext bundleContext = context.getBundleContext();
 			Collection<ServiceReference<ITransportFactory>> serviceReferences = bundleContext.getServiceReferences(
 					ITransportFactory.class,
-					"(&(" + LEGACY_TRANSPORT_KEY + "=true)" //$NON-NLS-1$//$NON-NLS-2$
-					+ "(!(" + ComponentConstants.COMPONENT_NAME + "=" + LEGACY_TRANSPORT_COMPONENT_NAME //$NON-NLS-1$//$NON-NLS-2$
-					+ ")))"); //$NON-NLS-1$
+					"(&" //$NON-NLS-1$
+					+ "(" + LEGACY_TRANSPORT_KEY + "=true)" //$NON-NLS-1$//$NON-NLS-2$
+					+ "(!(" + ComponentConstants.COMPONENT_NAME + "=" + LEGACY_TRANSPORT_COMPONENT_NAME + "))" //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+					+ computeDisabledTransportsFilter()
+					+ ")"); //$NON-NLS-1$
 			if (!serviceReferences.isEmpty()) {
 				for (ServiceReference<ITransportFactory> serviceReference : serviceReferences) {
 					ITransportFactory service = bundleContext.getService(serviceReference);
@@ -174,18 +217,39 @@ public abstract class TransportFactory implements ITransportFactory {
 	public static org.eclipse.epp.mpc.core.service.ITransport createTransport() {
 		//search for registered factory service
 		BundleContext context = MarketplaceClientCorePlugin.getBundle().getBundleContext();
-		ServiceReference<ITransportFactory> serviceReference = context.getServiceReference(ITransportFactory.class);
+		ServiceReference<ITransportFactory> serviceReference = getTransportServiceReference(context);
 		if (serviceReference != null) {
 			ITransportFactory transportService = context.getService(serviceReference);
 			if (transportService != null) {
 				try {
 					return transportService.getTransport();
 				} finally {
+					transportService = null;
 					context.ungetService(serviceReference);
 				}
 			}
 		}
 		throw new IllegalStateException();
+	}
+
+	public static ServiceReference<ITransportFactory> getTransportServiceReference(BundleContext context) {
+		ServiceReference<ITransportFactory> serviceReference = null;
+		String disabledTransportsFilter = computeDisabledTransportsFilter();
+		if ("".equals(disabledTransportsFilter)) { //$NON-NLS-1$
+			serviceReference = context.getServiceReference(ITransportFactory.class);
+		} else {
+			try {
+				Collection<ServiceReference<ITransportFactory>> serviceReferences = context
+						.getServiceReferences(ITransportFactory.class, disabledTransportsFilter);
+				if (!serviceReferences.isEmpty()) {
+					serviceReference = serviceReferences.iterator().next();
+				}
+			} catch (InvalidSyntaxException e) {
+				MarketplaceClientCore.error(e);
+				serviceReference = context.getServiceReference(ITransportFactory.class);
+			}
+		}
+		return serviceReference;
 	}
 
 	public static List<ITransportFactory> listAvailableFactories() {
