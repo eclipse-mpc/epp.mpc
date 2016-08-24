@@ -12,10 +12,12 @@ package org.eclipse.epp.internal.mpc.core.util;
 
 import java.lang.reflect.Field;
 import java.net.Authenticator;
+import java.net.InetAddress;
 import java.net.PasswordAuthentication;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.MessageFormat;
 
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.net.proxy.IProxyService;
@@ -41,6 +43,10 @@ public class ProxyHelper {
 					IProxyService.class.getName(), null);
 			proxyServiceTracker.open();
 		}
+		setAuthenticator();
+	}
+
+	public static void setAuthenticator() {
 		Authenticator defaultAuthenticator = getDefaultAuthenticator();
 		if (authenticator == null || authenticator != defaultAuthenticator) {
 			if (defaultAuthenticator instanceof ProxyAuthenticator) {
@@ -53,15 +59,19 @@ public class ProxyHelper {
 	}
 
 	public static synchronized void releaseProxyService() {
+		unsetAuthenticator();
+		if (proxyServiceTracker != null) {
+			proxyServiceTracker.close();
+		}
+	}
+
+	public static void unsetAuthenticator() {
 		Authenticator defaultAuthenticator = getDefaultAuthenticator();
 		if (authenticator != null) {
 			if (defaultAuthenticator == authenticator) {
 				Authenticator.setDefault(authenticator.getDelegate());
 			}
 			authenticator = null;
-		}
-		if (proxyServiceTracker != null) {
-			proxyServiceTracker.close();
 		}
 	}
 
@@ -74,11 +84,24 @@ public class ProxyHelper {
 			} catch (URISyntaxException e) {
 				throw new IllegalArgumentException(e.getMessage(), e);
 			}
-			final IProxyData[] proxyData = proxyService.select(uri);
-			if (proxyData != null && proxyData.length > 0 && proxyData[0] != null) {
-				final IProxyData pd = proxyData[0];
-				return pd;
-			}
+			return doGetProxyData(proxyService, uri);
+		}
+		return null;
+	}
+
+	public static IProxyData getProxyData(URI uri) {
+		final IProxyService proxyService = getProxyService();
+		if (proxyService != null) {
+			return doGetProxyData(proxyService, uri);
+		}
+		return null;
+	}
+
+	private static IProxyData doGetProxyData(final IProxyService proxyService, URI uri) {
+		final IProxyData[] proxyData = proxyService.select(uri);
+		if (proxyData != null && proxyData.length > 0 && proxyData[0] != null) {
+			final IProxyData pd = proxyData[0];
+			return pd;
 		}
 		return null;
 	}
@@ -152,9 +175,33 @@ public class ProxyHelper {
 				// Eclipse UI bundle registers one to query credentials from user
 				try {
 					Authenticator.setDefault(delegate);
-					Authenticator.requestPasswordAuthentication(getRequestingHost(), getRequestingSite(),
-							getRequestingPort(), getRequestingProtocol(), getRequestingPrompt(), getRequestingScheme(),
-							getRequestingURL(), getRequestorType());
+					String requestingHost = getRequestingHost();
+					InetAddress requestingSite = getRequestingSite();
+					int requestingPort = getRequestingPort();
+					String requestingProtocol = getRequestingProtocol();
+					String requestingPrompt = getRequestingPrompt();
+					String requestingScheme = getRequestingScheme();
+					URL requestingURL = getRequestingURL();
+					RequestorType requestorType = getRequestorType();
+					if (requestingSite == null) {
+						try {
+							requestingSite = InetAddress.getByName(requestingHost);
+						} catch (Exception ex) {
+							//ignore
+						}
+					}
+					if (requestingPrompt == null) {
+						//Help the Eclipse UI password dialog with its prompt
+						String promptHost = requestingSite == null
+								? String.format("%s:%s", requestingHost, requestingPort)
+										: requestingHost == null ? requestingSite.getHostName() : requestingHost;
+										String promptType = requestorType.toString().toLowerCase();
+										requestingPrompt = MessageFormat.format("{0} authentication for {1} {2}", requestingScheme,
+												promptType, promptHost);
+					}
+					return Authenticator.requestPasswordAuthentication(requestingHost, requestingSite,
+							requestingPort, requestingProtocol, requestingPrompt, requestingScheme,
+							requestingURL, requestorType);
 				} finally {
 					Authenticator.setDefault(this);
 				}

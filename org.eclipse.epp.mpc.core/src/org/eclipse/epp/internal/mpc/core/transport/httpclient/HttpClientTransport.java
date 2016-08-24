@@ -51,10 +51,10 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.ServiceLocator;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
+import org.eclipse.epp.internal.mpc.core.util.ProxyHelper;
 import org.eclipse.epp.mpc.core.service.ITransport;
 import org.eclipse.epp.mpc.core.service.ServiceUnavailableException;
 import org.eclipse.userstorage.internal.StorageProperties;
-import org.eclipse.userstorage.internal.util.ProxyUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -295,11 +295,12 @@ public class HttpClientTransport implements ITransport {
 	}
 
 	protected Response execute(Request request, URI uri) throws ClientProtocolException, IOException {
-		return ProxyUtil.proxyAuthentication(executor, uri).execute(request);
+		ProxyHelper.setAuthenticator();
+		return HttpClientProxyUtil.proxyAuthentication(executor, uri).execute(request);
 	}
 
 	protected Request configureRequest(Request request, URI uri) {
-		return request.viaProxy(ProxyUtil.getProxyHost(uri))
+		return request.viaProxy(HttpClientProxyUtil.getProxyHost(uri))
 				.staleConnectionCheck(true)
 				.connectTimeout(StorageProperties.getProperty(StorageProperties.CONNECT_TIMEOUT, 120000))
 				.socketTimeout(StorageProperties.getProperty(StorageProperties.SOCKET_TIMEOUT, 120000));
