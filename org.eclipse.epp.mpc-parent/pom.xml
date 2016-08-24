@@ -89,21 +89,9 @@
    <profiles>
       <!-- target platform profiles -->
       <profile>
-         <id>mars</id>
-         <properties>
-            <target-platform>mars</target-platform>
-         </properties>
-      </profile>
-      <profile>
          <id>neon</id>
          <properties>
             <target-platform>neon</target-platform>
-         </properties>
-      </profile>
-      <profile>
-         <id>maintenance</id>
-         <properties>
-            <target-platform>maintenance</target-platform>
          </properties>
       </profile>
       <profile>

@@ -25,11 +25,6 @@
                   <configuration>
                      <artifacts>
                         <artifact>
-                           <file>mars.target</file>
-                           <type>target</type>
-                           <classifier>mars</classifier>
-                        </artifact>
-                        <artifact>
                            <file>neon.target</file>
                            <type>target</type>
                            <classifier>neon</classifier>
@@ -38,11 +33,6 @@
                            <file>staging.target</file>
                            <type>target</type>
                            <classifier>staging</classifier>
-                        </artifact>
-                        <artifact>
-                           <file>maintenance.target</file>
-                           <type>target</type>
-                           <classifier>maintenance</classifier>
                         </artifact>
                      </artifacts>
                   </configuration>
