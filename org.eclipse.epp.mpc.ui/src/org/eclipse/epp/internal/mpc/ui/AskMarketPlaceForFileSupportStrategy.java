@@ -112,6 +112,7 @@ public class AskMarketPlaceForFileSupportStrategy implements IUnassociatedEditor
 								newMapping.setDefaultEditor(res);
 								mappings[mappings.length - 1] = newMapping;
 								((EditorRegistry) editorRegistry).setFileEditorMappings(mappings);
+								((EditorRegistry) editorRegistry).saveAssociations();
 							}
 							return Status.OK_STATUS;
 						} else {
