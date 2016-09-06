@@ -834,6 +834,8 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			} catch (InterruptedException e) {
 				// canceled
+				MarketplaceClientUi.log(IStatus.CANCEL, MarketplaceClientUi.BUNDLE_ID,
+						Messages.MarketplaceWizard_ProvisioningOperationCancelled, e);
 			} finally {
 				if (provisioningOperation != null) {
 					addedRepositoryLocations = provisioningOperation.getAddedRepositoryLocations();
