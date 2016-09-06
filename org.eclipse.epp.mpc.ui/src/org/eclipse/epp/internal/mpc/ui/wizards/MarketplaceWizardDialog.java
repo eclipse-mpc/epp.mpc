@@ -19,6 +19,8 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchListener;
@@ -127,6 +129,21 @@ public class MarketplaceWizardDialog extends AbstractMarketplaceWizardDialog {
 				PlatformUI.getWorkbench().removeWorkbenchListener(workbenchListener);
 			}
 		});
+
+		if (newShell.getParent() == null) {
+			//bug 500379 - root shells don't handle escape traversal by default
+			newShell.addTraverseListener(new TraverseListener() {
+
+				public void keyTraversed(TraverseEvent e) {
+					if (e.keyCode == SWT.ESC) {
+						Shell shell = (Shell) e.widget;
+						if (shell != null && !shell.isDisposed() && shell.isVisible() && shell.isEnabled()) {
+							shell.close();
+						}
+					}
+				}
+			});
+		}
 	}
 
 	@Override
