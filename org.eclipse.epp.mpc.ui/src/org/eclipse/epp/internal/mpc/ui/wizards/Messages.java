@@ -313,6 +313,8 @@ class Messages extends NLS {
 
 	public static String UserFavoritesLoginActionItem_logInActionLabel;
 
+	public static String UserFavoritesLoginActionItem_retryLoginLabel;
+
 	public static String UserFavoritesUnsupportedActionItem_unsupportedFavoritesLabel;
 	static {
 		// initialize resource bundle

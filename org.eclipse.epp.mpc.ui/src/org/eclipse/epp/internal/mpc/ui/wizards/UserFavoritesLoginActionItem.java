@@ -15,6 +15,7 @@ import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryResources;
 import org.eclipse.jface.window.IShellProvider;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Composite;
 
 public class UserFavoritesLoginActionItem extends UserActionViewerItem<UserActionCatalogItem> {
@@ -26,7 +27,14 @@ public class UserFavoritesLoginActionItem extends UserActionViewerItem<UserActio
 
 	@Override
 	protected String getLinkText() {
-		return "<a>" + Messages.UserFavoritesLoginActionItem_logInActionLabel + "</a>"; //$NON-NLS-1$ //$NON-NLS-2$
+		String linkText = "<a>" + Messages.UserFavoritesLoginActionItem_logInActionLabel + "</a>"; //$NON-NLS-1$ //$NON-NLS-2$
+		UserActionCatalogItem loginItem = getData();
+		if (loginItem != null && loginItem.getData() != null && !"".equals(loginItem.getData())) { //$NON-NLS-1$
+			String loginMessage = (String) loginItem.getData();
+			loginMessage = loginMessage.trim();
+			linkText = NLS.bind(Messages.UserFavoritesLoginActionItem_retryLoginLabel, loginMessage);
+		}
+		return linkText;
 	}
 
 	@Override

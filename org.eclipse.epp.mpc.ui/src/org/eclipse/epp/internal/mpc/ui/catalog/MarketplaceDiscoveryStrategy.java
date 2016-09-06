@@ -659,10 +659,11 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 						addNoFavoritesItem(catalogCategory);
 					}
 				} catch (NotAuthorizedException e) {
-					addUserStorageLoginItem(catalogCategory);
+					addUserStorageLoginItem(catalogCategory, e.getLocalizedMessage());
 				} catch (UnsupportedOperationException ex) {
 					addFavoritesNotSupportedItem(catalogCategory);
 				} catch (Exception ex) {
+					//FIXME we should use the wizard page's status line to show errors, but that's unreachable from here...
 					MarketplaceClientCore.error(Messages.MarketplaceDiscoveryStrategy_FavoritesRetrieveError, ex);
 					addRetryErrorItem(catalogCategory, ex);
 				}
@@ -701,7 +702,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 						}
 					}
 				} catch (NotAuthorizedException e) {
-					addUserStorageLoginItem(catalogCategory);
+					addUserStorageLoginItem(catalogCategory, e.getLocalizedMessage());
 				} catch (UnsupportedOperationException ex) {
 					addFavoritesNotSupportedItem(catalogCategory);
 				} catch (Exception ex) {
@@ -721,8 +722,8 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		}
 	}
 
-	private void addUserStorageLoginItem(MarketplaceCategory catalogCategory) {
-		addUserActionItem(catalogCategory, UserAction.LOGIN);
+	private void addUserStorageLoginItem(MarketplaceCategory catalogCategory, String authMessage) {
+		addUserActionItem(catalogCategory, UserAction.LOGIN, authMessage);
 	}
 
 	private void addNoFavoritesItem(MarketplaceCategory catalogCategory) {

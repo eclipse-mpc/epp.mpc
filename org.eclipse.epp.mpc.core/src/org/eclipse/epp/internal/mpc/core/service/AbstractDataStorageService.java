@@ -41,6 +41,23 @@ public abstract class AbstractDataStorageService {
 				String reasonPhrase) {
 			super(method, uri, protocolVersion, statusCode, reasonPhrase);
 		}
+
+		@Override
+		public String getMessage() {
+			String reasonPhrase = getReasonPhrase();
+			if (reasonPhrase != null && !"".equals(reasonPhrase)) {
+				return reasonPhrase;
+			}
+			return super.getMessage();
+		}
+
+		@Override
+		public String toString() {
+			String s = getClass().getName();
+			String message = super.getMessage();
+			return (message != null) ? (s + ": " + message) : s;
+		}
+
 	}
 
 	private IMarketplaceStorageService storageService;
@@ -73,6 +90,12 @@ public abstract class AbstractDataStorageService {
 
 	protected static ProtocolException processProtocolException(ProtocolException ex) {
 		if (ex.getStatusCode() == Session.AUTHORIZATION_REQUIRED || ex.getStatusCode() == Session.FORBIDDEN) {
+			return new NotAuthorizedException(ex);
+		}
+		//bug 499481 - uss server sends 406 instead of 403 for blocked accounts:
+		//"406 Not Acceptable : Account is temporarily blocked."
+		if (ex.getStatusCode() == 406 && ex.getMessage() != null && ex.getMessage().toLowerCase().contains("account")
+				&& ex.getMessage().toLowerCase().contains("blocked")) {
 			return new NotAuthorizedException(ex);
 		}
 		return ex;
