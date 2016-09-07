@@ -23,6 +23,8 @@ class Messages extends NLS {
 
 	public static String FallbackTransportFactory_fallbackStream;
 
+	public static String ProxyAuthenticator_prompt;
+
 	public static String ProxyHelper_replacingAuthenticator;
 
 	public static String ServiceUtil_ignoringIncompatibleServiceProperty;

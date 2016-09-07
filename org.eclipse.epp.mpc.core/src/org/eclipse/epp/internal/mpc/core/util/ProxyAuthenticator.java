@@ -19,15 +19,71 @@ import java.text.MessageFormat;
 
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.net.proxy.IProxyService;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.RegistryFactory;
+import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
+import org.eclipse.osgi.util.NLS;
 
 class ProxyAuthenticator extends Authenticator {
+	private static final String EGIT_AUTHENTICATOR_CLASS = "org.eclipse.egit.core.EclipseAuthenticator"; //$NON-NLS-1$
+
 	private final Authenticator delegate;
+
+	private final Authenticator previousAuthenticator;
 
 	public ProxyAuthenticator(Authenticator delegate) {
 		if (delegate instanceof ProxyAuthenticator) {
 			delegate = ((ProxyAuthenticator) delegate).getDelegate();
 		}
-		this.delegate = delegate;
+		this.previousAuthenticator = delegate;
+		this.delegate = fixDelegate(delegate);
+	}
+
+	private static Authenticator fixDelegate(Authenticator delegate) {
+		if (delegate == null) {
+			return null;
+		}
+		if (EGIT_AUTHENTICATOR_CLASS.equals(delegate.getClass().getName())) {
+			Authenticator replacement = getPluggedInNonEGitAuthenticator();
+			if (replacement != null) {
+				return replacement;
+			}
+		}
+		return delegate;
+	}
+
+	private static Authenticator getPluggedInNonEGitAuthenticator() {
+		@SuppressWarnings("restriction")
+		IExtension[] extensions = RegistryFactory.getRegistry()
+				.getExtensionPoint(org.eclipse.core.internal.net.Activator.ID,
+						org.eclipse.core.internal.net.Activator.PT_AUTHENTICATOR)
+				.getExtensions();
+		if (extensions.length == 0) {
+			return null;
+		}
+		IConfigurationElement config = null;
+		for (IExtension extension : extensions) {
+			IConfigurationElement[] configs = extension.getConfigurationElements();
+			if (configs.length == 0) {
+				continue;
+			}
+			String className = configs[0].getAttribute("class"); //$NON-NLS-1$
+			if (className != null && !EGIT_AUTHENTICATOR_CLASS.equals(className)) {
+				config = configs[0];
+				break;
+			}
+		}
+		if (config != null) {
+			try {
+				return (Authenticator) config.createExecutableExtension("class");//$NON-NLS-1$
+			} catch (CoreException ex) {
+				MarketplaceClientCore.error(NLS.bind("Unable to instantiate authenticator {0}", //$NON-NLS-1$
+						(new Object[] { config.getDeclaringExtension().getUniqueIdentifier() })), ex);
+			}
+		}
+		return null;
 	}
 
 	@Override
@@ -108,7 +164,7 @@ class ProxyAuthenticator extends Authenticator {
 		synchronized (Authenticator.class) {
 			Authenticator defaultAuthenticator = ProxyHelper.getDefaultAuthenticator();
 			if (defaultAuthenticator == this) {
-				Authenticator.setDefault(delegate);
+				Authenticator.setDefault(previousAuthenticator);
 			}
 		}
 	}
