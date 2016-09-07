@@ -295,7 +295,7 @@ public class HttpClientTransport implements ITransport {
 	}
 
 	protected Response execute(Request request, URI uri) throws ClientProtocolException, IOException {
-		ProxyHelper.setAuthenticator();
+		ProxyHelper.installAuthenticator();
 		return HttpClientProxyUtil.proxyAuthentication(executor, uri).execute(request);
 	}
 
