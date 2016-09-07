@@ -403,6 +403,12 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		}
 		if (tab == newsTabItem) {
 			final INews news = getNews();
+			if (news == null) {
+				setActiveTab(currentContentType != null ? currentContentType
+						: previousContentType != null ? previousContentType : ContentType.SEARCH);
+				updateNewsTab();
+				return;
+			}
 			boolean wasUpdated = newsViewer.isUpdated(news);
 			newsViewer.showNews(news);
 			if (wasUpdated) {
