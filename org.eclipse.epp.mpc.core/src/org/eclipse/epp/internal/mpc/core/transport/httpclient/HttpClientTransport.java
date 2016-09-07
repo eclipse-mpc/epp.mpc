@@ -31,7 +31,6 @@ import org.apache.http.client.fluent.Request;
 import org.apache.http.client.fluent.Response;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.SystemDefaultCredentialsProvider;
 import org.apache.http.impl.client.ProxyAuthenticationStrategy;
 import org.apache.http.impl.client.TargetAuthenticationStrategy;
 import org.eclipse.core.runtime.CoreException;
@@ -62,7 +61,7 @@ public class HttpClientTransport implements ITransport {
 	private static final HttpClientConnectionManager CONNMGR;
 
 	private final HttpClient client = createClient(CONNMGR,
-			new DefaultCredentialsProviderInterceptor(new SystemDefaultCredentialsProvider()),
+			new DefaultCredentialsProviderInterceptor(new SystemCredentialsProvider()),
 			new CacheCredentialsInterceptor(), SynchronizedCredentialsProviderInterceptor.INSTANCE);
 
 	private final CookieStore cookieStore = new org.apache.http.impl.client.BasicCookieStore();
