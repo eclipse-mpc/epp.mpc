@@ -28,6 +28,7 @@ import org.eclipse.epp.mpc.tests.ui.wizard.widgets.SWTBotClickableStyledText;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Widget;
+import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotBrowser;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
@@ -126,13 +127,10 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 		checkMarketplaceBrowser();
 	}
 
-	@Ignore("We currently filter out non-installable items in MPC")
 	@Test
 	public void testNoninstallableLearnMore() {
-		searchField().setFocus();
-		searchField().setText("nodeclipse");
-		filterMarket("RCP Applications");
-		SWTBotClickableStyledText learnMoreLabel = SWTBotClickableStyledText.from(bot.styledTextWithId(
+		SWTBot assumeLearnMoreBot = assume(bot);
+		SWTBotClickableStyledText learnMoreLabel = SWTBotClickableStyledText.from(assumeLearnMoreBot.styledTextWithId(
 				AbstractMarketplaceDiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_LEARNMORE));
 		StyleRange linkRange = findLink(learnMoreLabel);
 		learnMoreLabel.click(linkRange);

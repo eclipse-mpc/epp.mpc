@@ -22,20 +22,26 @@ import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.epp.internal.mpc.core.model.Node;
 import org.eclipse.epp.internal.mpc.ui.commands.MarketplaceWizardCommand;
 import org.eclipse.epp.internal.mpc.ui.wizards.AbstractTagFilter;
 import org.eclipse.epp.internal.mpc.ui.wizards.ComboTagFilter;
 import org.eclipse.epp.internal.mpc.ui.wizards.FeatureSelectionWizardPage;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceWizard;
+import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceWizard.WizardState;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceWizardDialog;
 import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IMarket;
+import org.eclipse.epp.mpc.core.model.INode;
+import org.eclipse.epp.mpc.core.service.QueryHelper;
 import org.eclipse.epp.mpc.tests.ui.wizard.matcher.NodeMatcher;
 import org.eclipse.equinox.internal.p2.discovery.model.Tag;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogFilter;
@@ -52,6 +58,7 @@ import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.matchers.WidgetMatcherFactory;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEditor;
 import org.eclipse.swtbot.swt.finder.SWTBot;
+import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
 import org.eclipse.swtbot.swt.finder.junit.ScreenshotCaptureListener;
 import org.eclipse.swtbot.swt.finder.results.ArrayResult;
@@ -76,6 +83,7 @@ import org.eclipse.swtbot.swt.finder.widgets.TimeoutException;
 import org.eclipse.ui.IEditorReference;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
+import org.junit.AssumptionViolatedException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestRule;
@@ -84,6 +92,31 @@ import org.junit.runner.notification.Failure;
 import org.junit.runners.model.Statement;
 
 public abstract class AbstractMarketplaceWizardBotTest {
+
+	protected static final INode[] TEST_NODES = new INode[] { //
+			testNode("206", "http://marketplace.eclipse.org/content/mylyn", "Mylyn"), //
+			testNode("311881", "http://marketplace.eclipse.org/content/eclipse-4-tools-css-spy",
+					"Eclipse 4 Tools: CSS Spy"), //
+			testNode("311774", "http://marketplace.eclipse.org/content/eclipse-4-tools-lightweight-css-editor",
+					"Eclipse 4 Tools: Lightweight CSS Editor"), //
+			testNode("311838", "http://marketplace.eclipse.org/content/eclipse-4-tools-application-model-editor", ""), //
+			testNode("2780381", "http://marketplace.eclipse.org/content/trace-compass", "Trace Compass"), //
+			testNode("2410217", "http://marketplace.eclipse.org/content/memory-analyzer-0", "Memory Analyzer"), //
+			testNode("1336", "http://marketplace.eclipse.org/content/egit-git-team-provider",
+					"EGit - Git Team Provider"), //
+			testNode("2706327", "http://marketplace.eclipse.org/content/eclipse-docker-tooling",
+					"Eclipse Docker Tooling"), //
+			testNode("2706342", "http://marketplace.eclipse.org/content/eclipse-vagrant-tooling",
+					"Eclipse Vagrant Tooling"), //
+			testNode("2579663", "http://marketplace.eclipse.org/content/egerrit", "EGerrit") //
+	};
+
+	private static INode testNode(String id, String url, String name) {
+		Node node = (Node) QueryHelper.nodeById(id);
+		node.setUrl(url);
+		node.setName(name);
+		return node;
+	}
 
 	private static long PROGRESS_TIMEOUT = Long.getLong("org.eclipse.epp.mpc.tests.progress.timeout", 30000);
 
@@ -144,6 +177,11 @@ public abstract class AbstractMarketplaceWizardBotTest {
 
 	protected void launchMarketplaceWizard() {
 		final MarketplaceWizardCommand marketplaceWizardCommand = new MarketplaceWizardCommand();
+		WizardState wizardState = new WizardState();
+		wizardState.setContent(new LinkedHashSet<INode>(Arrays.asList(TEST_NODES)));
+		wizardState.setProceedWithInstallation(false);
+		marketplaceWizardCommand.setWizardDialogState(wizardState);
+
 		UIThreadRunnable.asyncExec(new VoidResult() {
 
 			public void run() {
@@ -587,4 +625,36 @@ public abstract class AbstractMarketplaceWizardBotTest {
 		return getWizardDialog().getWizard();
 	}
 
+	protected SWTBot assume(SWTBot bot) {
+		return new SWTBot(bot.getFinder()) {
+			@Override
+			public void waitUntilWidgetAppears(ICondition waitForWidget) {
+				try {
+					super.waitUntilWidgetAppears(waitForWidget);
+				} catch (TimeoutException e) {
+					throw new AssumptionViolatedException(e.getMessage(), e);
+				} catch (WidgetNotFoundException e) {
+					throw new AssumptionViolatedException(e.getMessage(), e);
+				}
+			}
+
+			@Override
+			public void waitUntil(ICondition condition, long timeout, long interval) throws TimeoutException {
+				try {
+					super.waitUntil(condition, timeout, interval);
+				} catch (TimeoutException e) {
+					throw new AssumptionViolatedException(e.getMessage(), e);
+				}
+			}
+
+			@Override
+			public void waitWhile(ICondition condition, long timeout, long interval) throws TimeoutException {
+				try {
+					super.waitWhile(condition, timeout, interval);
+				} catch (TimeoutException e) {
+					throw new AssumptionViolatedException(e.getMessage(), e);
+				}
+			}
+		};
+	}
 }
