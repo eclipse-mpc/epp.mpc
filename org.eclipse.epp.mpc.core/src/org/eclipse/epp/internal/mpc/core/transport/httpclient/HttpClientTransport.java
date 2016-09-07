@@ -20,28 +20,20 @@ import java.text.MessageFormat;
 import java.util.Map;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.Credentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CookieStore;
-import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.client.fluent.Response;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.SystemDefaultCredentialsProvider;
-import org.apache.http.params.HttpParams;
-import org.apache.http.protocol.HttpContext;
+import org.apache.http.impl.client.ProxyAuthenticationStrategy;
+import org.apache.http.impl.client.TargetAuthenticationStrategy;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProduct;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -60,47 +52,47 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.Version;
 
-@SuppressWarnings({ "deprecation", "restriction" })
+@SuppressWarnings({ "restriction" })
 public class HttpClientTransport implements ITransport {
 
 	public static final String USER_AGENT;
 
 	public static final String USER_AGENT_PROPERTY = HttpClientTransport.class.getPackage().getName() + ".userAgent"; //$NON-NLS-1$
 
-	private static final HttpClient CLIENT;
+	private static final HttpClientConnectionManager CONNMGR;
+
+	private final HttpClient client = createClient(CONNMGR,
+			new DefaultCredentialsProviderInterceptor(new SystemDefaultCredentialsProvider()),
+			new CacheCredentialsInterceptor(), SynchronizedCredentialsProviderInterceptor.INSTANCE);
 
 	private final CookieStore cookieStore = new org.apache.http.impl.client.BasicCookieStore();
 
-	private final Executor executor = Executor.newInstance(CLIENT).cookieStore(cookieStore);
+	private final Executor executor = Executor.newInstance(client).cookieStore(cookieStore);
 
 	static {
 		USER_AGENT = initUserAgent();
-		CLIENT = initHttpClient();
+		CONNMGR = initConnectionManager();
 	}
 
-	private static HttpClient initHttpClient() {
+	private static HttpClientConnectionManager initConnectionManager() {
 		boolean accessible = false;
-		Field clientField = null;
-		HttpClient client = null;
+		HttpClientConnectionManager connectionManager = null;
+		Field connectionManagerField = null;
 		try {
-			clientField = Executor.class.getDeclaredField("CLIENT"); //$NON-NLS-1$
-			accessible = clientField.isAccessible();
-			clientField.setAccessible(true);
-			client = (HttpClient) clientField.get(null);
+			connectionManagerField = Executor.class.getDeclaredField("CONNMGR"); //$NON-NLS-1$
+			accessible = connectionManagerField.isAccessible();
+			connectionManagerField.setAccessible(true);
+			connectionManager = (HttpClientConnectionManager) connectionManagerField.get(null);
 		} catch (Throwable t) {
 		} finally {
-			if (clientField != null && !accessible) {
+			if (connectionManagerField != null && !accessible) {
 				try {
-					clientField.setAccessible(false);
+					connectionManagerField.setAccessible(false);
 				} catch (SecurityException e) {
 				}
 			}
 		}
-		if (client == null) {
-			client = createClient();
-		}
-		client = wrapClient(client);
-		return client;
+		return connectionManager;
 	}
 
 	private static String initUserAgent() {
@@ -188,110 +180,20 @@ public class HttpClientTransport implements ITransport {
 		return defaultValue;
 	}
 
-	private static final class ChainedSystemDefaultCredentialsProvider extends SystemDefaultCredentialsProvider {
-		private final CredentialsProvider chainedCredentialsProvider;
-
-		private ChainedSystemDefaultCredentialsProvider(CredentialsProvider configuredCredentialsProvider) {
-			this.chainedCredentialsProvider = configuredCredentialsProvider;
+	private static HttpClient createClient(HttpClientConnectionManager connectionManager,
+			HttpContextInterceptor... interceptors) {
+		HttpClientBuilder builder;
+		if (connectionManager == null) {
+			builder = HttpClientBuilder.create().setMaxConnPerRoute(100).setMaxConnTotal(200);
+		} else {
+			builder = HttpClientBuilder.create().setConnectionManager(connectionManager);
 		}
-
-		@Override
-		public void setCredentials(AuthScope authscope, Credentials credentials) {
-			chainedCredentialsProvider.setCredentials(authscope, credentials);
-		}
-
-		@Override
-		public Credentials getCredentials(AuthScope authscope) {
-			Credentials credentials = chainedCredentialsProvider.getCredentials(authscope);
-			if (credentials == null) {
-				credentials = super.getCredentials(authscope);
-			}
-			return credentials;
-		}
-
-		@Override
-		public void clear() {
-			chainedCredentialsProvider.clear();
-			super.clear();
-		}
-	}
-
-	private static HttpClient createClient() {
-		return HttpClientBuilder.create().setMaxConnPerRoute(100).setMaxConnTotal(200).build();
-	}
-
-	private static HttpClient wrapClient(final HttpClient client) {
-		return new HttpClient() {
-
-			@Deprecated
-			public HttpParams getParams() {
-				return client.getParams();
-			}
-
-			@Deprecated
-			public ClientConnectionManager getConnectionManager() {
-				return client.getConnectionManager();
-			}
-
-			public HttpResponse execute(HttpUriRequest request) throws IOException, ClientProtocolException {
-				return client.execute(request);
-			}
-
-			public HttpResponse execute(HttpUriRequest request, HttpContext context)
-					throws IOException, ClientProtocolException {
-				return client.execute(request, setCredentialsProvider(context));
-			}
-
-			public HttpResponse execute(HttpHost target, HttpRequest request)
-					throws IOException, ClientProtocolException {
-				return client.execute(target, request);
-			}
-
-			public HttpResponse execute(HttpHost target, HttpRequest request, HttpContext context)
-					throws IOException, ClientProtocolException {
-				return client.execute(target, request, setCredentialsProvider(context));
-			}
-
-			public <T> T execute(HttpUriRequest request, ResponseHandler<? extends T> responseHandler)
-					throws IOException, ClientProtocolException {
-				return client.execute(request, responseHandler);
-			}
-
-			public <T> T execute(HttpUriRequest request, ResponseHandler<? extends T> responseHandler,
-					HttpContext context) throws IOException, ClientProtocolException {
-				return client.execute(request, responseHandler, setCredentialsProvider(context));
-			}
-
-			public <T> T execute(HttpHost target, HttpRequest request, ResponseHandler<? extends T> responseHandler)
-					throws IOException, ClientProtocolException {
-				return client.execute(target, request, responseHandler);
-			}
-
-			public <T> T execute(HttpHost target, HttpRequest request, ResponseHandler<? extends T> responseHandler,
-					HttpContext context) throws IOException, ClientProtocolException {
-				return client.execute(target, request, responseHandler, setCredentialsProvider(context));
-			}
-
-		};
-	}
-
-	private static HttpContext setCredentialsProvider(HttpContext context) {
-		final CredentialsProvider configuredCredentialsProvider = (CredentialsProvider) context
-				.getAttribute(HttpClientContext.CREDS_PROVIDER);
-		if (configuredCredentialsProvider instanceof SystemDefaultCredentialsProvider) {
-			return context;
-		}
-		CredentialsProvider credentialsProvider = createCredentialsProvider(configuredCredentialsProvider);
-		context.setAttribute(HttpClientContext.CREDS_PROVIDER, credentialsProvider);
-		return context;
-	}
-
-	private static final CredentialsProvider createCredentialsProvider(final CredentialsProvider delegate) {
-
-		if (delegate == null) {
-			return new SystemDefaultCredentialsProvider();
-		}
-		return new ChainedSystemDefaultCredentialsProvider(delegate);
+		builder.setTargetAuthenticationStrategy(
+				new CacheCredentialsAuthenticationStrategy.Target(TargetAuthenticationStrategy.INSTANCE));
+		builder.setProxyAuthenticationStrategy(
+				new CacheCredentialsAuthenticationStrategy.Proxy(ProxyAuthenticationStrategy.INSTANCE));
+		builder.setUserAgent(USER_AGENT);
+		return new ExecutorClientWrapper(builder.build(), interceptors);
 	}
 
 	protected Response execute(Request request, URI uri) throws ClientProtocolException, IOException {

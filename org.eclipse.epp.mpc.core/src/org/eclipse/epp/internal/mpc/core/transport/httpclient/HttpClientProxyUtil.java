@@ -134,6 +134,7 @@ final class HttpClientProxyUtil {
 			return domain;
 		}
 
+		//FIXME some systems seem to need the DNS domain name instead of the NetBIOS name (from USERDNSDOMAIN env variable)
 		domain = System.getenv(ENV_USER_DOMAIN);
 		if (domain != null) {
 			return domain;
