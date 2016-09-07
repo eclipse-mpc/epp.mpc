@@ -15,6 +15,7 @@ import java.net.InetAddress;
 import java.net.PasswordAuthentication;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.text.MessageFormat;
 
 import org.eclipse.core.net.proxy.IProxyData;
@@ -86,31 +87,51 @@ class ProxyAuthenticator extends Authenticator {
 		return null;
 	}
 
+	private boolean hostMatches(final IProxyData proxy) {
+		String proxyHost = proxy.getHost();
+		if (proxyHost == null) {
+			return false;
+		}
+		try {
+			InetAddress requestingAddress = getRequestingSite();
+			if (requestingAddress != null) {
+				final InetAddress proxyAddress = InetAddress.getByName(proxyHost);
+				return proxyAddress.equals(requestingAddress);
+			}
+		} catch (UnknownHostException err) {
+			return false;
+		}
+		String requestingHost = getRequestingHost();
+		if (requestingHost != null && requestingHost.equals(proxyHost)) {
+			return true;
+		}
+		return false;
+	}
+
 	@Override
 	protected PasswordAuthentication getPasswordAuthentication() {
-		if (getRequestorType() == RequestorType.PROXY) {
-			IProxyService proxyService = ProxyHelper.getProxyService();
-			if (proxyService != null && proxyService.isProxiesEnabled()) {
-				URL requestingURL = getRequestingURL();
-				IProxyData[] proxies;
-				if (requestingURL == null) {
+		IProxyService proxyService = ProxyHelper.getProxyService();
+		if (proxyService != null && proxyService.isProxiesEnabled()) {
+			URL requestingURL = getRequestingURL();
+			IProxyData[] proxies;
+			if (requestingURL == null) {
+				proxies = proxyService.getProxyData();
+			} else {
+				try {
+					proxies = proxyService.select(requestingURL.toURI());
+				} catch (URISyntaxException e) {
 					proxies = proxyService.getProxyData();
-				} else {
-					try {
-						proxies = proxyService.select(requestingURL.toURI());
-					} catch (URISyntaxException e) {
-						proxies = proxyService.getProxyData();
-					}
 				}
-				for (IProxyData proxyData : proxies) {
-					// make sure we don't hand out credentials to the wrong proxy
-					if (proxyData.isRequiresAuthentication() && proxyData.getPort() == getRequestingPort()
-							&& proxyData.getHost().equals(getRequestingHost())) {
-						String userId = proxyData.getUserId();
-						String password = proxyData.getPassword();
-						if (userId != null && password != null) {
-							return new PasswordAuthentication(userId, password.toCharArray());
-						}
+			}
+
+			for (IProxyData proxyData : proxies) {
+				// make sure we don't hand out credentials to the wrong proxy
+				if (proxyData.isRequiresAuthentication() && proxyData.getPort() == getRequestingPort()
+						&& hostMatches(proxyData)) {
+					String userId = proxyData.getUserId();
+					String password = proxyData.getPassword();
+					if (userId != null && password != null) {
+						return new PasswordAuthentication(userId, password.toCharArray());
 					}
 				}
 			}
@@ -137,10 +158,10 @@ class ProxyAuthenticator extends Authenticator {
 				}
 				if (requestingPrompt == null) {
 					//Help the Eclipse UI password dialog with its prompt
-					String promptHost = requestingSite == null ? String.format("%s:%s", requestingHost, requestingPort)
+					String promptHost = requestingSite == null ? String.format("%s:%s", requestingHost, requestingPort) //$NON-NLS-1$
 							: requestingHost == null ? requestingSite.getHostName() : requestingHost;
 							String promptType = requestorType.toString().toLowerCase();
-							requestingPrompt = MessageFormat.format("{0} authentication for {1} {2}", requestingScheme,
+							requestingPrompt = MessageFormat.format(Messages.ProxyAuthenticator_prompt, requestingScheme,
 									promptType, promptHost);
 				}
 				return Authenticator.requestPasswordAuthentication(requestingHost, requestingSite, requestingPort,
