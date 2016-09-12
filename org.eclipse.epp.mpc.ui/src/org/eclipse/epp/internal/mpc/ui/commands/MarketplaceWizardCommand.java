@@ -106,7 +106,7 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 						Messages.MarketplaceWizardCommand_cannotOpenMarketplace, new CoreException(cause));
 				try {
 					MarketplaceClientUi.handle(exitStatus,
- StatusManager.SHOW | StatusManager.BLOCK
+							StatusManager.SHOW | StatusManager.BLOCK
 							| (exitStatus.getSeverity() == IStatus.CANCEL ? 0 : StatusManager.LOG));
 				} catch (Exception ex) {
 					// HOTFIX for bug 477269 - Display might get disposed during call to handle due to workspace shutdown or similar.
@@ -316,7 +316,17 @@ public class MarketplaceWizardCommand extends AbstractHandler implements IHandle
 				registerOrOverrideCatalog(descriptor);
 			}
 		} catch (InterruptedException ie) {
-			return Status.CANCEL_STATUS;
+			if (ie.getMessage() == null || "".equals(ie.getMessage())) {
+				InterruptedException ie1 = new InterruptedException("Operation cancelled");
+				ie1.setStackTrace(ie.getStackTrace());
+				if (ie.getCause() != null) {
+					ie1.initCause(ie.getCause());
+				}
+				ie = ie1;
+			}
+			IStatus errorStatus = MarketplaceClientCore.computeStatus(ie,
+					Messages.MarketplaceWizardCommand_CannotInstallRemoteLocations);
+			return new Status(IStatus.CANCEL, MarketplaceClientCore.BUNDLE_ID, errorStatus.getMessage(), ie);
 		} catch (Exception e) {
 			IStatus status = MarketplaceClientCore.computeStatus(e, Messages.MarketplaceWizardCommand_CannotInstallRemoteLocations);
 			return status;
