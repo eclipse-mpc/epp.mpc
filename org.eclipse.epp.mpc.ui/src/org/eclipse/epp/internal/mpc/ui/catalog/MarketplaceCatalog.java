@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.util.ConcurrentTaskManager;
 import org.eclipse.epp.mpc.core.model.ICategory;
@@ -229,8 +230,8 @@ public class MarketplaceCatalog extends Catalog {
 
 		for (MarketplaceNodeCatalogItem catalogItem : updateCheckNeeded) {
 			INode node = catalogItem.getData();
+			String updateurl = node.getUpdateurl();
 			try {
-				String updateurl = node.getUpdateurl();
 				if (updateurl == null) {
 					catalogItem.setAvailable(false);
 					continue;
@@ -243,7 +244,8 @@ public class MarketplaceCatalog extends Catalog {
 				}
 				catalogItemsThisSite.add(catalogItem);
 			} catch (URISyntaxException e) {
-				MarketplaceClientUi.error(e);
+				MarketplaceClientUi.log(IStatus.WARNING,
+						Messages.MarketplaceCatalog_InvalidRepositoryUrl, node.getName(), updateurl);
 				catalogItem.setAvailable(false);
 			}
 		}
@@ -307,10 +309,16 @@ public class MarketplaceCatalog extends Catalog {
 							}
 
 						} catch (ProvisionException e) {
-							MarketplaceClientUi.error(e);
+							MultiStatus errorStatus = new MultiStatus(MarketplaceClientUi.BUNDLE_ID, IStatus.WARNING,
+									NLS.bind(
+											Messages.MarketplaceCatalog_ErrorReadingRepository,
+											uri),
+									e);
 							for (MarketplaceNodeCatalogItem item : catalogItemsThisSite) {
 								item.setAvailable(false);
+								errorStatus.add(MarketplaceClientUi.newStatus(IStatus.INFO, item.getName()));
 							}
+							MarketplaceClientUi.getLog().log(errorStatus);
 						} catch (OperationCanceledException e) {
 							// nothing to do
 						}
@@ -388,7 +396,7 @@ public class MarketplaceCatalog extends Catalog {
 			}
 			if (!status.isMultiStatus()) {
 				Throwable exception = status.getException();
-				IStatus newStatus = MarketplaceClientUi.computeWellknownProblemStatus(exception);
+				IStatus newStatus = MarketplaceClientCore.computeWellknownProblemStatus(exception);
 				if (newStatus != null) {
 					return newStatus;
 				}
@@ -440,7 +448,7 @@ public class MarketplaceCatalog extends Catalog {
 						operation.run(marketplaceStrategy, new SubProgressMonitor(monitor, strategyTicks));
 
 					} catch (CoreException e) {
-						IStatus error = MarketplaceClientUi.computeWellknownProblemStatus(e);
+						IStatus error = MarketplaceClientCore.computeWellknownProblemStatus(e);
 						if (error == null) {
 							error = new Status(e.getStatus().getSeverity(), DiscoveryCore.ID_PLUGIN, NLS.bind(
 									Messages.MarketplaceCatalog_failedWithError, discoveryStrategy.getClass()

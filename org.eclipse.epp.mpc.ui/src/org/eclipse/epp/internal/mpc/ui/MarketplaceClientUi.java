@@ -81,7 +81,7 @@ public class MarketplaceClientUi {
 		getLog().log(newStatus(severity, message, params));
 	}
 
-	private static IStatus newStatus(int severity, String message, Object... params) {
+	public static IStatus newStatus(int severity, String message, Object... params) {
 		String formattedMessage = message;
 		if (message != null && params != null && params.length > 0) {
 			formattedMessage = NLS.bind(message, params);
@@ -90,7 +90,7 @@ public class MarketplaceClientUi {
 		return newStatus(severity, formattedMessage, exception);
 	}
 
-	private static IStatus newStatus(int severity, String message, Throwable exception) {
+	public static IStatus newStatus(int severity, String message, Throwable exception) {
 		if (message == null) {
 			String exceptionMessage = exception.getMessage();
 			if (exceptionMessage == null) {

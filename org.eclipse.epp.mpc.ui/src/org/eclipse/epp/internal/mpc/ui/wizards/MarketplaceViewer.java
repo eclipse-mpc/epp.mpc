@@ -542,9 +542,7 @@ public class MarketplaceViewer extends CatalogViewer {
 			TextSearchControl textSearchControl = (TextSearchControl) filterTextField.get(this);
 			textSearchControl.getTextControl().setText(tag);
 		} catch (Exception e) {
-			StatusManager.getManager()
-			.handle(new Status(IStatus.WARNING, MarketplaceClientUi.BUNDLE_ID,
-					Messages.MarketplaceViewer_Could_not_change_find_text, e));
+			MarketplaceClientUi.log(IStatus.WARNING, Messages.MarketplaceViewer_Could_not_change_find_text, e);
 		}
 	}
 

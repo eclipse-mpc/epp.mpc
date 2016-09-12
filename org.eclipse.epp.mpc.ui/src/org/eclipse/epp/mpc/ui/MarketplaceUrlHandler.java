@@ -193,7 +193,7 @@ public abstract class MarketplaceUrlHandler {
 			command.execute(new ExecutionEvent());
 		} catch (ExecutionException e) {
 			IStatus status = MarketplaceClientCore.computeStatus(e, Messages.MarketplaceUrlHandler_cannotOpenMarketplaceWizard);
-			StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
+			MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 		}
 	}
 

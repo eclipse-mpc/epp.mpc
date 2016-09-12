@@ -29,7 +29,11 @@ class Messages extends NLS {
 
 	public static String MarketplaceCatalog_Discovery_Error;
 
+	public static String MarketplaceCatalog_ErrorReadingRepository;
+
 	public static String MarketplaceCatalog_failedWithError;
+
+	public static String MarketplaceCatalog_InvalidRepositoryUrl;
 
 	public static String MarketplaceCatalog_queryFailed;
 
