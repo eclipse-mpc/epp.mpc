@@ -456,11 +456,12 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				} else {
 					acceptLicensesPage.update(operationIUs, profileChangeOperation);
 				}
-				if (acceptLicensesPage.hasLicensesToAccept() || profileChangeOperation instanceof RemediationOperation) {
+				if (nextpressed || acceptLicensesPage.hasLicensesToAccept()
+						|| profileChangeOperation instanceof RemediationOperation) {
 					nextPage = acceptLicensesPage;
 				}
 			}
-			if (nextPage == null && skipFeatureSelection) {
+			if (nextPage == null && page == catalogPage) {
 				nextPage = featureSelectionWizardPage;
 			}
 			if (operationUpdated && nextPage == getContainer().getCurrentPage()) {
