@@ -42,7 +42,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.ServiceLocator;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
-import org.eclipse.epp.internal.mpc.core.util.ProxyHelper;
 import org.eclipse.epp.mpc.core.service.ITransport;
 import org.eclipse.epp.mpc.core.service.ServiceUnavailableException;
 import org.eclipse.userstorage.internal.StorageProperties;
@@ -196,7 +195,6 @@ public class HttpClientTransport implements ITransport {
 	}
 
 	protected Response execute(Request request, URI uri) throws ClientProtocolException, IOException {
-		ProxyHelper.installAuthenticator();
 		return HttpClientProxyUtil.proxyAuthentication(executor, uri).execute(request);
 	}
 

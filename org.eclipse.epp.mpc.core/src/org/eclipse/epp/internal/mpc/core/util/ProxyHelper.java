@@ -27,7 +27,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * @author Carsten Reckord
  */
 public class ProxyHelper {
-	private static ProxyAuthenticator authenticator;
+//	private static ProxyAuthenticator authenticator;
 
 	@SuppressWarnings("rawtypes")
 	private static ServiceTracker proxyServiceTracker;
@@ -39,37 +39,37 @@ public class ProxyHelper {
 					IProxyService.class.getName(), null);
 			proxyServiceTracker.open();
 		}
-		installAuthenticator();
+//		installAuthenticator();
 	}
 
 	public static void installAuthenticator() {
-		synchronized (Authenticator.class) {
-			Authenticator defaultAuthenticator = getDefaultAuthenticator();
-			if (authenticator == null || authenticator != defaultAuthenticator) {
-				if (defaultAuthenticator instanceof ProxyAuthenticator) {
-					authenticator = (ProxyAuthenticator) defaultAuthenticator;
-				} else {
-					authenticator = new ProxyAuthenticator(defaultAuthenticator);
-				}
-				authenticator.install();
-			}
-		}
+//		synchronized (Authenticator.class) {
+//			Authenticator defaultAuthenticator = getDefaultAuthenticator();
+//			if (authenticator == null || authenticator != defaultAuthenticator) {
+//				if (defaultAuthenticator instanceof ProxyAuthenticator) {
+//					authenticator = (ProxyAuthenticator) defaultAuthenticator;
+//				} else {
+//					authenticator = new ProxyAuthenticator(defaultAuthenticator);
+//				}
+//				authenticator.install();
+//			}
+//		}
 	}
 
 	public static synchronized void releaseProxyService() {
-		uninstallAuthenticator();
+//		uninstallAuthenticator();
 		if (proxyServiceTracker != null) {
 			proxyServiceTracker.close();
 		}
 	}
 
 	public static void uninstallAuthenticator() {
-		synchronized (Authenticator.class) {
-			if (authenticator != null) {
-				authenticator.uninstall();
-				authenticator = null;
-			}
-		}
+//		synchronized (Authenticator.class) {
+//			if (authenticator != null) {
+//				authenticator.uninstall();
+//				authenticator = null;
+//			}
+//		}
 	}
 
 	public static IProxyData getProxyData(String url) {
