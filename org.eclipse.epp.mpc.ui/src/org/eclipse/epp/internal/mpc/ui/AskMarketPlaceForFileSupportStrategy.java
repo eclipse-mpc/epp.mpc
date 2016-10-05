@@ -93,7 +93,9 @@ public class AskMarketPlaceForFileSupportStrategy implements IUnassociatedEditor
 										.getMarketplaceClientService();
 								IMarketplaceClientConfiguration config = marketplaceClientService.newConfiguration();
 								marketplaceClientService.open(config, new LinkedHashSet<INode>(nodes));
-							} else if (dialog.isAssociateToExtension()) {
+							} else if (dialog.isAssociateToExtension() &&
+									// FIXME bug 498553: workaround for platform bug 502514 - persisting system editor association leads to NPE
+									res.isInternal() && !AskMarketPlaceForFileSupportStrategy.isSystem(res.getId())) {
 								List<String> extensions = new ArrayList<String>(1);
 								extensions.add(fileExtension);
 								// need internal API:
@@ -112,6 +114,7 @@ public class AskMarketPlaceForFileSupportStrategy implements IUnassociatedEditor
 								newMapping.setDefaultEditor(res);
 								mappings[mappings.length - 1] = newMapping;
 								((EditorRegistry) editorRegistry).setFileEditorMappings(mappings);
+
 								((EditorRegistry) editorRegistry).saveAssociations();
 							}
 							return Status.OK_STATUS;
@@ -141,4 +144,8 @@ public class AskMarketPlaceForFileSupportStrategy implements IUnassociatedEditor
 		return res;
 	}
 
+	private static boolean isSystem(String id) {
+		return IEditorRegistry.SYSTEM_EXTERNAL_EDITOR_ID.equals(id)
+				|| IEditorRegistry.SYSTEM_INPLACE_EDITOR_ID.equals(id);
+	}
 }
