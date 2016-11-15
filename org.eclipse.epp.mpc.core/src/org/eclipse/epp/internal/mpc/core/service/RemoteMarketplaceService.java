@@ -17,6 +17,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.MessageFormat;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
@@ -66,8 +67,34 @@ public class RemoteMarketplaceService<T> {
 		return createStatus(IStatus.ERROR, message, t);
 	}
 
+	protected IStatus createErrorStatus(String messageTemplate, Object... parameters) {
+		return createStatus(IStatus.ERROR, messageTemplate, parameters);
+	}
+
 	protected IStatus createStatus(int severity, String message, Throwable t) {
 		return new Status(severity, MarketplaceClientCore.BUNDLE_ID, 0, message, t);
+	}
+
+	protected IStatus createStatus(int severity, String messageTemplate, Object... parameters) {
+		String message = messageTemplate;
+		Throwable exception = null;
+		if (parameters != null && parameters.length > 0) {
+			message = messageTemplate == null ? null : MessageFormat.format(messageTemplate, parameters);
+			exception = findException(parameters);
+		}
+		return createStatus(severity, message, exception);
+	}
+
+	private static Throwable findException(Object... parameters) {
+		if (parameters == null || parameters.length == 0) {
+			return null;
+		}
+		for (int i = parameters.length - 1; i >= 0; i--) {
+			if (parameters[i] instanceof Throwable) {
+				return (Throwable) parameters[i];
+			}
+		}
+		return null;
 	}
 
 	private void checkConfiguration() {

@@ -33,9 +33,15 @@ class Messages extends NLS {
 
 	public static String DefaultMarketplaceService_marketNotFound;
 
+
+	public static String DefaultMarketplaceService_missingNodeId;
+
 	public static String DefaultMarketplaceService_mustConfigureBaseUrl;
 
 	public static String DefaultMarketplaceService_nodeNotFound;
+
+
+	public static String DefaultMarketplaceService_nullResultNodes;
 
 	public static String DefaultMarketplaceService_parseError;
 

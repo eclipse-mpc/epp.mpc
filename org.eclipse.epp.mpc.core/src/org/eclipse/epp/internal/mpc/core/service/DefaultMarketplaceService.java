@@ -19,6 +19,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -218,7 +219,7 @@ MarketplaceService {
 	}
 
 	public Market getMarket(IMarket market, IProgressMonitor monitor) throws CoreException {
-		if (market.getId() == null && market.getUrl() != null) {
+		if (market.getId() == null && market.getUrl() == null) {
 			throw new IllegalArgumentException();
 		}
 		List<Market> markets = listMarkets(monitor);
@@ -229,15 +230,18 @@ MarketplaceService {
 					return aMarket;
 				}
 			}
-		} else if (market.getUrl() != null) {
+			throw new CoreException(
+					createErrorStatus(Messages.DefaultMarketplaceService_marketNotFound, market.getId()));
+		} else { // (market.getUrl() != null)
 			String marketUrl = market.getUrl();
 			for (Market aMarket : markets) {
 				if (marketUrl.equals(aMarket.getUrl())) {
 					return aMarket;
 				}
 			}
+			throw new CoreException(
+					createErrorStatus(Messages.DefaultMarketplaceService_marketNotFound, market.getUrl()));
 		}
-		throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_marketNotFound, null));
 	}
 
 	public Market getMarket(Market market, IProgressMonitor monitor) throws CoreException {
@@ -261,16 +265,19 @@ MarketplaceService {
 			if (progress.isCanceled()) {
 				throw new OperationCanceledException();
 			} else if (resolvedCategory == null) {
-				throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_categoryNotFound, null));
+				throw new CoreException(
+						createErrorStatus(Messages.DefaultMarketplaceService_categoryNotFound, category.getId()));
 			} else {
 				return getCategory(resolvedCategory, progress.newChild(150));
 			}
 		}
 		Marketplace marketplace = processRequest(category.getUrl(), API_URI_SUFFIX, progress.newChild(200));
 		if (marketplace.getCategory().isEmpty()) {
-			throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_categoryNotFound, null));
+			throw new CoreException(
+					createErrorStatus(Messages.DefaultMarketplaceService_categoryNotFound, category.getUrl()));
 		} else if (marketplace.getCategory().size() > 1) {
-			throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_unexpectedResponse, null));
+			throw new CoreException(
+					createErrorStatus(Messages.DefaultMarketplaceService_unexpectedResponse, category.getUrl()));
 		}
 		Category resolvedCategory = marketplace.getCategory().get(0);
 		return resolvedCategory;
@@ -282,18 +289,21 @@ MarketplaceService {
 
 	public Node getNode(INode node, IProgressMonitor monitor) throws CoreException {
 		Marketplace marketplace;
+		String query;
 		if (node.getId() != null) {
 			// bug 304928: prefer the id method rather than the URL, since the id provides a stable URL and the
 			// URL is based on the name, which could change.
+			query = node.getId();
 			String encodedId = urlEncode(node.getId());
 			marketplace = processRequest(API_NODE_URI + '/' + encodedId + '/' + API_URI_SUFFIX, monitor);
 		} else {
+			query = node.getUrl();
 			marketplace = processRequest(node.getUrl(), API_URI_SUFFIX, monitor);
 		}
 		if (marketplace.getNode().isEmpty()) {
-			throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_nodeNotFound, null));
+			throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_nodeNotFound, query));
 		} else if (marketplace.getNode().size() > 1) {
-			throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_unexpectedResponse, null));
+			throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_unexpectedResponse, query));
 		}
 		Node resolvedNode = marketplace.getNode().get(0);
 		return resolvedNode;
@@ -301,6 +311,26 @@ MarketplaceService {
 
 	public Node getNode(Node node, IProgressMonitor monitor) throws CoreException {
 		return getNode((INode) node, monitor);
+	}
+
+	public List<INode> getNodes(Collection<? extends INode> nodes, IProgressMonitor monitor) throws CoreException {
+		if (nodes.isEmpty()) {
+			return new ArrayList<INode>();
+		}
+		StringBuilder nodeIds = new StringBuilder();
+		for (INode node : nodes) {
+			if (node.getId() == null) {
+				throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_missingNodeId, node));
+			}
+			String encodedId = urlEncode(node.getId());
+			if (nodeIds.length() > 0) {
+				nodeIds.append(","); //$NON-NLS-1$
+			}
+			nodeIds.append(encodedId);
+		}
+		Marketplace marketplace = processRequest(API_NODE_URI + '/' + nodeIds + '/' + API_URI_SUFFIX, monitor);
+		List<Node> resultNodes = marketplace.getNode();
+		return new ArrayList<INode>(resultNodes);
 	}
 
 	public SearchResult search(IMarket market, ICategory category, String queryText, IProgressMonitor monitor)
@@ -411,7 +441,8 @@ MarketplaceService {
 				result.setMatchCount(category.getNode().size());
 				result.setNodes(category.getNode());
 			} else {
-				throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_unexpectedResponse, null));
+				throw new CoreException(
+						createErrorStatus(Messages.DefaultMarketplaceService_unexpectedResponse, relativeUrl));
 			}
 		}
 		return result;
@@ -535,20 +566,17 @@ MarketplaceService {
 				resolveService = cachingService;
 			}
 		}
-		SubMonitor resolveProgress = SubMonitor.convert(monitor, nodes.size() * 100);
-		for (ListIterator<INode> i = nodes.listIterator(); i.hasNext();) {
-			INode node = i.next();
-			INode resolved = resolveService.getNode(node, resolveProgress.newChild(100));
+		final List<INode> resolvedNodes = resolveService.getNodes(nodes, monitor);
+		for (ListIterator<INode> i = resolvedNodes.listIterator(); i.hasNext();) {
+			INode resolved = i.next();
 			((Node) resolved).setUserFavorite(true);
 			if (filterIncompatible && !isInstallable(resolved)) {
 				i.remove();
-			} else {
-				i.set(resolved);
 			}
 		}
 		if (!filterIncompatible) {
 			//sort the node list so uninstallable nodes come last
-			Collections.sort(nodes, new Comparator<INode>() {
+			Collections.sort(resolvedNodes, new Comparator<INode>() {
 
 				public int compare(INode n1, INode n2) {
 					if (n1 == n2) {
@@ -571,11 +599,11 @@ MarketplaceService {
 		return new ISearchResult() {
 
 			public List<? extends INode> getNodes() {
-				return nodes;
+				return resolvedNodes;
 			}
 
 			public Integer getMatchCount() {
-				return nodes.size();
+				return resolvedNodes.size();
 			}
 		};
 	}
@@ -610,7 +638,8 @@ MarketplaceService {
 
 	protected SearchResult createSearchResult(NodeListing nodeList) throws CoreException {
 		if (nodeList == null) {
-			throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_unexpectedResponse, null));
+			throw new CoreException(
+					createErrorStatus(Messages.DefaultMarketplaceService_unexpectedResponse, Messages.DefaultMarketplaceService_nullResultNodes));
 		}
 		SearchResult result = new SearchResult();
 		result.setMatchCount(nodeList.getCount());

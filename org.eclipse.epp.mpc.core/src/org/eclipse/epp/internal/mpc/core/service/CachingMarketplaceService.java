@@ -16,6 +16,8 @@ import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -134,18 +136,63 @@ public class CachingMarketplaceService implements IMarketplaceService {
 		if (nodeResult == null) {
 			nodeResult = delegate.getNode(node, monitor);
 			if (nodeResult != null) {
-				synchronized (cache) {
-					cache(nodeKey, nodeResult);
-					cache(computeNodeUrlKey(node), nodeResult);
-					cache(computeNodeIdUrlKey(node), nodeResult);
-				}
+				cacheNode(nodeResult);
 			}
 		}
 		return nodeResult;
 	}
 
+	private void cacheNode(INode node) {
+		synchronized (cache) {
+			cache(computeNodeKey(node), node);
+			cache(computeNodeUrlKey(node), node);
+			cache(computeNodeIdUrlKey(node), node);
+		}
+	}
+
+	public List<INode> getNodes(Collection<? extends INode> nodes, IProgressMonitor monitor) throws CoreException {
+		Map<INode, INode> resolvedNodes = new LinkedHashMap<INode, INode>();
+		List<INode> unresolvedNodes = new ArrayList<INode>();
+		for (INode node : nodes) {
+			if (!mapCachedNode(node, resolvedNodes)) {
+				unresolvedNodes.add(node);
+			}
+		}
+		if (!unresolvedNodes.isEmpty()) {
+			List<INode> newResolvedNodes = delegate.getNodes(unresolvedNodes, monitor);
+			for (INode node : newResolvedNodes) {
+				cacheNode(node);
+			}
+			for (INode node : unresolvedNodes) {
+				mapCachedNode(node, resolvedNodes);
+			}
+		}
+		List<INode> result = new ArrayList<INode>(nodes.size());
+		for (INode node : nodes) {
+			INode resolvedNode = resolvedNodes.get(node);
+			if (resolvedNode != null) {
+				result.add(resolvedNode);
+			}
+		}
+		return result;
+	}
+
+	private boolean mapCachedNode(INode node, Map<INode, INode> resolvedNodes) {
+		String nodeKey = computeNodeKey(node);
+		if (nodeKey != null) {
+			INode nodeResult = getCached(nodeKey, INode.class);
+			if (nodeResult != null) {
+				resolvedNodes.put(node, nodeResult);
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private void cache(String key, Object value) {
-		cache.put(key, new SoftReference<Object>(value, cacheReferenceQueue));
+		if (key != null) {
+			cache.put(key, new SoftReference<Object>(value, cacheReferenceQueue));
+		}
 	}
 
 	private <T> T getCached(String key, Class<T> type) {

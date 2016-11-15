@@ -761,14 +761,14 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		if (!monitor.isCanceled()) {
 			Set<INode> catalogNodes = marketplaceInfo.computeInstalledNodes(catalogDescriptor.getUrl(), installedIUs);
 			if (!catalogNodes.isEmpty()) {
-				SubMonitor nodeProgress = SubMonitor.convert(progress.newChild(500), catalogNodes.size() * 102);
-				for (INode node : catalogNodes) {
-					node = marketplaceService.getNode(node, nodeProgress.newChild(100));
+				List<INode> resolvedNodes = marketplaceService.getNodes(catalogNodes, progress.newChild(490));
+				SubMonitor nodeProgress = SubMonitor.convert(progress.newChild(10), resolvedNodes.size());
+				for (INode node : resolvedNodes) {
 					//compute real installed state based on optional/required state
 					if (marketplaceInfo.computeInstalled(installedIUs.keySet(), node)) {
 						result.getNodes().add((Node) node);
 					}
-					nodeProgress.worked(2);
+					nodeProgress.worked(1);
 				}
 			} else {
 				monitor.worked(500);
@@ -797,9 +797,8 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			result.setNodes(new ArrayList<Node>());
 			if (!monitor.isCanceled()) {
 				if (!nodes.isEmpty()) {
-					SubMonitor nodesProgress = SubMonitor.convert(progress.newChild(500), nodes.size());
-					for (INode node : nodes) {
-						node = marketplaceService.getNode(node, nodesProgress.newChild(1));
+					List<INode> resolvedNodes = marketplaceService.getNodes(nodes, progress.newChild(500));
+					for (INode node : resolvedNodes) {
 						result.getNodes().add((Node) node);
 					}
 				} else {

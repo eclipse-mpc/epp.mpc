@@ -13,6 +13,7 @@ package org.eclipse.epp.mpc.core.service;
 
 import java.net.URI;
 import java.net.URL;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -81,6 +82,15 @@ public interface IMarketplaceService {
 	 * @return the identified node
 	 */
 	INode getNode(INode node, IProgressMonitor monitor) throws CoreException;
+
+	/**
+	 * Get a list of nodes by their ids
+	 *
+	 * @param nodes
+	 *            the nodes which must all have an {@link INode#getId() id}.
+	 * @return the identified nodes in iteration order of the {@code nodes} collection
+	 */
+	List<INode> getNodes(Collection<? extends INode> nodes, IProgressMonitor monitor) throws CoreException;
 
 	/**
 	 * Find nodes in the marketplace with a text query, and optionally specify the market/category
