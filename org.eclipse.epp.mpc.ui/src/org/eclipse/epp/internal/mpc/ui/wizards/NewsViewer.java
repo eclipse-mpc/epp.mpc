@@ -125,11 +125,11 @@ public class NewsViewer {
 	}
 
 	protected Control createBrowser(Composite parent) {
-		if (!WorkbenchBrowserSupport.getInstance().isInternalWebBrowserAvailable()) {
-			return null;
-		}
 		final Browser browser;
 		try {
+			if (!WorkbenchBrowserSupport.getInstance().isInternalWebBrowserAvailable()) {
+				return null;
+			}
 			browser = new Browser(parent, SWT.NONE);
 		} catch (Throwable t) {
 			// embedded browser not available
