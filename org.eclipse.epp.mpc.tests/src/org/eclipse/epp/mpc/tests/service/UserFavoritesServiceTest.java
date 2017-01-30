@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 import java.io.IOException;
 import java.net.URI;
@@ -28,8 +31,8 @@ import org.eclipse.epp.mpc.tests.util.TestProperties;
 import org.eclipse.userstorage.IStorageService;
 import org.eclipse.userstorage.internal.StorageService;
 import org.eclipse.userstorage.internal.StorageServiceRegistry;
+import org.eclipse.userstorage.spi.AbstractCredentialsProvider;
 import org.eclipse.userstorage.spi.Credentials;
-import org.eclipse.userstorage.spi.ICredentialsProvider;
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
@@ -50,7 +53,7 @@ public class UserFavoritesServiceTest {
 		marketplaceStorageService = ServiceHelper.getMarketplaceServiceLocator().getDefaultStorageService();
 		assertNotNull(marketplaceStorageService);
 		assertEquals(USERSTORAGE_SERVICE_URI, marketplaceStorageService.getServiceUri());
-		marketplaceStorageService.getStorage().setCredentialsProvider(new ICredentialsProvider() {
+		marketplaceStorageService.getStorage().setCredentialsProvider(new AbstractCredentialsProvider() {
 
 			@Override
 			public Credentials provideCredentials(IStorageService service, boolean reauthentication) {

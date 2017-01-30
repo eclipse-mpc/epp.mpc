@@ -33,6 +33,7 @@ import org.eclipse.userstorage.IStorage;
 import org.eclipse.userstorage.IStorageService;
 import org.eclipse.userstorage.StorageFactory;
 import org.eclipse.userstorage.internal.StorageService;
+import org.eclipse.userstorage.oauth.EclipseOAuthCredentialsProvider;
 import org.eclipse.userstorage.spi.Credentials;
 import org.eclipse.userstorage.spi.ICredentialsProvider;
 import org.eclipse.userstorage.spi.ISettings;
@@ -98,7 +99,18 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 	protected IStorage createStorage() {
 		IStorage storage = getStorageFactory().create(applicationToken,
 				new FileStorageCache.SingleApplication(this.applicationToken));
-		storage.setCredentialsProvider(ICredentialsProvider.CANCEL);
+		// FIXME: these should be the uss_project_* alternatives
+		//String[] scopes = { "profile", "uss_project_retrieve", "uss_project_update", "uss_project_delete" };
+		String[] scopes = { "profile", "uss_all_retrieve", "uss_all_update", "uss_all_delete" };
+		// FIXME: constants should be baked in at compile-time
+		String oauthClientId = System.getProperty("mpc.oauth.clientId", "@mpc.oauth.clientId@");
+		String oauthClientSecret = System.getProperty("mpc.oauth.clientSecret", "@mpc.oauth.clientSecret@");
+		try {
+			storage.setCredentialsProvider(new EclipseOAuthCredentialsProvider(new URI("https://accounts.eclipse.org/"),
+					oauthClientId, oauthClientSecret, scopes, new URI("http://localhost/")));
+		} catch (URISyntaxException ex) {
+			throw new RuntimeException(ex);
+		}
 		return storage;
 	}
 
@@ -125,15 +137,15 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 	public <T> T runWithLogin(Callable<T> c) throws Exception {
 		final IStorage storage = getStorage();
 		final ICredentialsProvider originalCredentialsProvider = storage.getCredentialsProvider();
-		storage.setCredentialsProvider(null);
-		String oldUser = getCurrentUser();
+		//storage.setCredentialsProvider(null);
+//		String oldUser = getCurrentUser();
 		try {
 			T result = c.call();
 			return result;
 		} finally {
-			storage.setCredentialsProvider(originalCredentialsProvider);
-			String newUser = getCurrentUser();
-			notifyLoginChanged(oldUser, newUser);
+//			storage.setCredentialsProvider(originalCredentialsProvider);
+//			String newUser = getCurrentUser();
+			//notifyLoginChanged(oldUser, newUser);
 		}
 	}
 
@@ -172,9 +184,11 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 	}
 
 	private Credentials getStorageCredentials() {
-		StorageService service = (StorageService) getStorage().getService();
-		Credentials credentials = service.getCredentials();
-		return credentials;
+		ICredentialsProvider provider = getStorage().getCredentialsProvider();
+		if (provider == null) {
+			return null;
+		}
+		return provider.getCredentials(getStorage().getService());
 	}
 
 	public void activate(BundleContext context, Map<?, ?> properties) {
