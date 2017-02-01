@@ -241,6 +241,21 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		} else {
 			descriptionText = TextUtil.stripHtmlMarkup(descriptionText).trim();
 		}
+		descriptionText = descriptionText.replaceAll("(\\r\\n)|\\n|\\r|\\s{2,}", " "); //$NON-NLS-1$ //$NON-NLS-2$
+
+		String promotionLabel = null;
+		if (descriptionText.startsWith(Messages.DiscoveryItem_Promotion_Marker)) {
+			promotionLabel = Messages.DiscoveryItem_Promotion_Display;
+			descriptionText = promotionLabel + "  - " //$NON-NLS-1$
+					+ descriptionText.substring(Messages.DiscoveryItem_Promotion_Marker.length());
+			maxDescriptionLength += promotionLabel.length() + 3;
+		}
+
+		boolean truncated = descriptionText.endsWith("..."); //$NON-NLS-1$
+		if (truncated) {
+			//avoid double elipsis
+			descriptionText = descriptionText.substring(0, descriptionText.length() - 3).trim();
+		}
 		if (descriptionText.length() > maxDescriptionLength) {
 			int truncationIndex = maxDescriptionLength;
 			for (int x = truncationIndex; x > 0; --x) {
@@ -251,13 +266,14 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 			}
 			descriptionText = descriptionText.substring(0, truncationIndex)
 					+ Messages.DiscoveryItem_truncatedTextSuffix;
+			truncated = true;
 		}
-		descriptionText = descriptionText.replaceAll("(\\r\\n)|\\n|\\r|\\s{2,}", " "); //$NON-NLS-1$ //$NON-NLS-2$
+		if (truncated && !descriptionText.endsWith(Messages.DiscoveryItem_truncatedTextSuffix)) {
+			descriptionText += Messages.DiscoveryItem_truncatedTextSuffix;
+		}
 		description.setText(descriptionText + "  "); //$NON-NLS-1$
-		if (descriptionText.startsWith(Messages.DiscoveryItem_Promotion_Marker)) {
-			description.replaceTextRange(0, Messages.DiscoveryItem_Promotion_Marker.length(),
-					Messages.DiscoveryItem_Promotion_Display + "  - "); //$NON-NLS-1$
-			StyleRange style = new StyleRange(0, Messages.DiscoveryItem_Promotion_Display.length(), null, null,
+		if (promotionLabel != null) {
+			StyleRange style = new StyleRange(0, promotionLabel.length(), null, null,
 					SWT.ITALIC | SWT.BOLD);
 			description.setStyleRange(style);
 		}
