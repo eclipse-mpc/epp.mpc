@@ -37,6 +37,7 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.browser.ProgressEvent;
@@ -68,15 +69,24 @@ public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationLis
 				// Links should open in external browser.
 				// Since explicit HREF targets interfere with that,
 				// we'll just remove them.
-				Object[] links = (Object[]) viewer.getBrowser().evaluate( //
-						"var links = document.links;" + //$NON-NLS-1$
-						"var hrefs = Array();" + //$NON-NLS-1$
-						"for (var i=0; i<links.length; i++) {" + //$NON-NLS-1$
-						"   links[i].target='_self';" + //$NON-NLS-1$
-						"   hrefs[i]=links[i].href;" + //$NON-NLS-1$
-						"};" + //$NON-NLS-1$
-						"return hrefs"); //$NON-NLS-1$
-
+				Object[] links = null;
+				try {
+					links = (Object[]) viewer.getBrowser().evaluate( //
+							"return (function() {" + //$NON-NLS-1$
+							"   var links = document.links;" + //$NON-NLS-1$
+							"   var hrefs = Array();" + //$NON-NLS-1$
+							"   for (var i=0; i<links.length; i++) {" + //$NON-NLS-1$
+							"      links[i].target='_self';" + //$NON-NLS-1$
+							"      hrefs[i]=links[i].href;" + //$NON-NLS-1$
+							"   };" + //$NON-NLS-1$
+							"   return hrefs;" + //$NON-NLS-1$
+							"})();"); //$NON-NLS-1$
+				} catch (SWTException ex) {
+					MarketplaceClientUi.log(IStatus.WARNING,
+							"Failed to process link targets on news page. Some links might not open in external browser.", //$NON-NLS-1$
+							ex);
+					documentLinks.clear();
+				}
 				// Remember document links for navigation handling since we
 				// don't want to deal with URLs from dynamic loading events
 				if (links != null) {
@@ -122,19 +132,24 @@ public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationLis
 		try {
 			URI currentUri = new URI(currentLocation);
 			URI newUri = new URI(newLocation);
-			return equalsIgnoreFragment(currentUri, newUri);
+			return equalsHostAndPath(currentUri, newUri);
 		} catch (URISyntaxException e) {
 			return false;
 		}
 	}
 
-	static boolean equalsIgnoreFragment(URI currentLocation, URI newLocation) {
+	static boolean equalsHostAndPath(URI currentLocation, URI newLocation) {
 		return eq(currentLocation.getHost(), newLocation.getHost())
-				&& eq(currentLocation.getPath(), newLocation.getPath())
-				&& currentLocation.getPort() == newLocation.getPort()
-				&& eq(currentLocation.getAuthority(), newLocation.getAuthority())
-				&& eq(currentLocation.getScheme(), newLocation.getScheme())
-				&& eq(currentLocation.getQuery(), newLocation.getQuery());
+				&& equalsIgnoreTrailingSlash(currentLocation.getPath(), newLocation.getPath());
+	}
+
+	static boolean equalsIgnoreTrailingSlash(String path1, String path2) {
+		if (path1.endsWith("/") && !path2.endsWith("/")) { //$NON-NLS-1$//$NON-NLS-2$
+			path1 = path1.substring(0, path1.length() - 1);
+		} else if (!path1.endsWith("/") && path2.endsWith("/")) { //$NON-NLS-1$ //$NON-NLS-2$
+			path2 = path2.substring(0, path2.length() - 1);
+		}
+		return eq(path1, path2);
 	}
 
 	static boolean eq(String s1, String s2) {
