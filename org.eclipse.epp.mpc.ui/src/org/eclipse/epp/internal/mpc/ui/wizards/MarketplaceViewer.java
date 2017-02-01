@@ -952,6 +952,9 @@ public class MarketplaceViewer extends CatalogViewer {
 		if (getWizard().wantInitializeInitialSelection()) {
 			try {
 				getWizard().initializeInitialSelection();
+				if (getControl().isDisposed()) {
+					return;
+				}
 				WizardState initialState = getWizard().getInitialState();
 				if (initialState != null) {
 					getWizard().getCatalogPage().initialize(initialState);
@@ -967,6 +970,9 @@ public class MarketplaceViewer extends CatalogViewer {
 			}
 		} else {
 			super.updateCatalog();
+			if (getControl().isDisposed()) {
+				return;
+			}
 		}
 		refresh();
 	}

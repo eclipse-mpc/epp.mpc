@@ -761,7 +761,13 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 	private void safeUpdateCatalog() {
 		try {
 			getWizard().updateNews();
+			if (getControl().isDisposed()) {
+				return;
+			}
 			getViewer().updateCatalog();
+			if (getControl().isDisposed()) {
+				return;
+			}
 			updateBranding();
 		} catch (SWTException ex) {
 			if (ex.code == SWT.ERROR_WIDGET_DISPOSED) {
