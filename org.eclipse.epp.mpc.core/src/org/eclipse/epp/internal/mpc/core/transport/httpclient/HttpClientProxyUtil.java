@@ -102,7 +102,7 @@ final class HttpClientProxyUtil {
 		String computerName = System.getenv("COMPUTERNAME");
 		String hostName = System.getenv("HOSTNAME");
 		if (computerName != null) {
-			if (hostName == null && !computerName.equals(hostName)) {
+			if (hostName != null && !computerName.equals(hostName)) {
 				if (Platform.getOS().equals(Platform.OS_WIN32)) {
 					hostName = computerName;
 				}
