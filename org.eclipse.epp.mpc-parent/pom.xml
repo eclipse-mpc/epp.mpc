@@ -89,9 +89,9 @@
    <profiles>
       <!-- target platform profiles -->
       <profile>
-         <id>neon</id>
+         <id>oxygen</id>
          <properties>
-            <target-platform>neon</target-platform>
+            <target-platform>oxygen</target-platform>
          </properties>
       </profile>
       <profile>
