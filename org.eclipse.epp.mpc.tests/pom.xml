@@ -13,7 +13,41 @@
   <packaging>eclipse-test-plugin</packaging>
   <properties>
     <test-suite>org.eclipse.epp.mpc.tests.AllTests</test-suite>
+    <test-args>-ea</test-args>
+    <test-proxy></test-proxy>
+    <test-browser></test-browser>
+    <test-app-args></test-app-args>
   </properties>
+
+  <profiles>
+    <profile>
+       <id>hudson.eclipse.org</id>
+       <activation>
+          <property>
+             <name>user.name</name>
+             <value>genie.mpc</value>
+          </property>
+       </activation>
+       <properties>
+          <test-proxy>-Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -Dhttp.nonProxyHosts=*.eclipse.org</test-proxy>
+       </properties>
+    </profile>
+    <profile>
+       <id>linux-gtk</id>
+       <activation>
+          <os>
+             <name>linux</name>
+          </os>
+          <property>
+             <name>env.SWT_GTK3</name>
+             <value>!0</value>
+          </property>
+       </activation>
+       <properties>
+          <test-browser>-Dorg.eclipse.swt.browser.UseWebKitGTK=true -Dorg.eclipse.swt.browser.DefaultType=WebKit</test-browser>
+       </properties>
+    </profile>
+  </profiles>
 
   <build>
     <plugins>
@@ -28,7 +62,7 @@
           <application>org.eclipse.ui.ide.workbench</application>
           <testSuite>org.eclipse.epp.mpc.tests</testSuite>
           <testClass>${test-suite}</testClass>
-          <argLine>-Xmx256m -XX:MaxPermSize=128m -Djava.io.tmpdir=${project.build.directory} ${test-args}</argLine>
+          <argLine>-Xmx256m -XX:MaxPermSize=128m -Djava.io.tmpdir=${project.build.directory} ${test-args} ${test-proxy} ${test-browser}</argLine>
           <appArgLine>${test-app-args}</appArgLine>
         </configuration>
       </plugin>

@@ -34,9 +34,6 @@
            2) pack has moved to the release profile so it won't happen in regular dev/ci builds anyway -->
       <skip-pack>true</skip-pack>
 
-      <test-args></test-args>
-      <test-app-args></test-app-args>
-
       <tycho.scmUrl>scm:git:https://git.eclipse.org/gitroot/mpc/org.eclipse.epp.mpc.git</tycho.scmUrl>
    </properties>
 
@@ -132,18 +129,6 @@
          <properties>
             <skip-source-check>false</skip-source-check>
             <java-jdk>BREE</java-jdk>
-         </properties>
-      </profile>
-      <profile>
-         <id>hudson.eclipse.org</id>
-         <activation>
-            <property>
-               <name>user.name</name>
-               <value>genie.mpc</value>
-            </property>
-         </activation>
-         <properties>
-            <test-args>-ea -Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -Dhttp.nonProxyHosts=*.eclipse.org</test-args>
          </properties>
       </profile>
    </profiles>
