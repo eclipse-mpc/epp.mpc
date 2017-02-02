@@ -14,11 +14,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
-import org.junit.runners.Suite;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.RunnerBuilder;
 
-public class UISuite extends Suite {
+public class UISuite extends LoggingSuite {
 
 	public UISuite(Class<?> klass, RunnerBuilder builder) throws InitializationError {
 		super(klass, builder);

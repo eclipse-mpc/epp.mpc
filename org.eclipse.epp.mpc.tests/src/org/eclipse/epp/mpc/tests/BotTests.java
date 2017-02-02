@@ -13,15 +13,14 @@ package org.eclipse.epp.mpc.tests;
 import org.eclipse.epp.mpc.tests.ui.wizard.MarketplaceClientServiceTest;
 import org.eclipse.epp.mpc.tests.ui.wizard.MarketplaceWizardTest;
 import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * @author David Green
  */
-@RunWith(Suite.class)
+@RunWith(LoggingSuite.class)
 @SuiteClasses({ //
-MarketplaceClientServiceTest.class, MarketplaceWizardTest.class
+	MarketplaceClientServiceTest.class, MarketplaceWizardTest.class
 })
 public class BotTests {
 
