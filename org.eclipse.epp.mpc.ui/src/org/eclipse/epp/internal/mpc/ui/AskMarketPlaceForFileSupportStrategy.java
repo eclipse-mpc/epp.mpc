@@ -75,8 +75,9 @@ public class AskMarketPlaceForFileSupportStrategy implements IUnassociatedEditor
 					ISearchResult searchResult = marketplaceService.tagged(fileExtensionTag, monitor);
 					nodes = searchResult.getNodes();
 				} catch (CoreException ex) {
-					return new Status(IStatus.ERROR,
-							MarketplaceClientUiPlugin.getInstance().getBundle().getSymbolicName(), ex.getMessage(), ex);
+					//Only log the error and return cancel. Otherwise user would be bothered with error dialog popups, e.g. when working offline
+					MarketplaceClientUi.error(ex);
+					return Status.CANCEL_STATUS;
 				}
 				if (nodes.isEmpty()) {
 					return Status.OK_STATUS;
