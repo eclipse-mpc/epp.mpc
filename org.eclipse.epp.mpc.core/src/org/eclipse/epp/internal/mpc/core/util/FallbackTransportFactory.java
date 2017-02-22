@@ -142,6 +142,15 @@ public class FallbackTransportFactory implements ITransportFactory {
 	}
 
 	public ITransport getTransport() {
+		ITransportFactory delegateFactory = getFallbackFactory();
+		if (delegateFactory == null) {
+			return primaryFactory.getTransport();
+		}
+
+		return new FallbackTransport(primaryFactory.getTransport(), delegateFactory.getTransport());
+	}
+
+	public ITransportFactory getFallbackFactory() {
 		ITransportFactory delegateFactory = this.secondaryFactory;
 		if (delegateFactory == null) {
 			BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
@@ -166,11 +175,7 @@ public class FallbackTransportFactory implements ITransportFactory {
 				//impossible
 			}
 		}
-		if (delegateFactory == null) {
-			return primaryFactory.getTransport();
-		}
-
-		return new FallbackTransport(primaryFactory.getTransport(), delegateFactory.getTransport());
+		return delegateFactory;
 	}
 
 	public ITransportFactory getPrimaryFactory() {

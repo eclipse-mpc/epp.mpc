@@ -23,6 +23,10 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCorePlugin;
+import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientTransport;
+import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientTransportFactory;
+import org.eclipse.epp.internal.mpc.core.util.FallbackTransportFactory;
+import org.eclipse.epp.internal.mpc.core.util.JavaPlatformTransportFactory;
 import org.eclipse.epp.mpc.core.service.ITransport;
 import org.eclipse.epp.mpc.core.service.ITransportFactory;
 import org.eclipse.epp.mpc.core.service.ServiceHelper;
@@ -57,8 +61,36 @@ public class MappedTransportFactory implements ITransportFactory {
 				}
 				if (mapped == null) {
 					mapped = location;
+				} else if (!mapped.getScheme().toLowerCase().startsWith("http")) {
+					ITransport nonHttpTransport = getNonHttpTransport(delegate, delegateTransport);
+					if (nonHttpTransport != null) {
+						return nonHttpTransport.stream(mapped, monitor);
+					}
 				}
 				return delegateTransport.stream(mapped, monitor);
+			}
+
+			private ITransport getNonHttpTransport(ITransportFactory delegate, ITransport delegateTransport) {
+				ITransport nonHttpTransport = delegateTransport;
+				if (delegate instanceof HttpClientTransportFactory) {
+					FallbackTransportFactory fallbackFactory = new FallbackTransportFactory();
+					fallbackFactory.setPrimaryFactory(delegate);
+					delegate = fallbackFactory;
+				}
+				if (delegate instanceof FallbackTransportFactory) {
+					FallbackTransportFactory fallbackFactory = (FallbackTransportFactory) delegate;
+					ITransportFactory primaryFactory = fallbackFactory.getPrimaryFactory();
+					if (primaryFactory instanceof HttpClientTransportFactory) {
+						ITransportFactory secondaryFactory = fallbackFactory.getFallbackFactory();
+						if (secondaryFactory != null) {
+							nonHttpTransport = secondaryFactory.getTransport();
+						}
+					}
+				}
+				if (nonHttpTransport instanceof HttpClientTransport) {
+					nonHttpTransport = new JavaPlatformTransportFactory().getTransport();
+				}
+				return nonHttpTransport;
 			}
 		};
 	}

@@ -18,15 +18,14 @@ import org.eclipse.epp.mpc.tests.util.ProxyConfigurationTest;
 import org.eclipse.epp.mpc.tests.util.TextUtilTest;
 import org.eclipse.epp.mpc.tests.util.TransportFactoryTest;
 import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * @author Carsten Reckord
  */
-@RunWith(Suite.class)
+@RunWith(LoggingSuite.class)
 @SuiteClasses({ //
-		ProxyConfigurationTest.class, //
+	ProxyConfigurationTest.class, //
 	UnmarshallerTest.class, //
 	TextUtilTest.class, //
 	TransportFactoryTest.class, //

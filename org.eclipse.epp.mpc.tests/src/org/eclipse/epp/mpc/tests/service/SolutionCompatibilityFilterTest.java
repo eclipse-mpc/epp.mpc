@@ -48,6 +48,7 @@ import org.eclipse.epp.mpc.core.service.IMarketplaceUnmarshaller;
 import org.eclipse.epp.mpc.core.service.QueryHelper;
 import org.eclipse.epp.mpc.core.service.UnmarshalException;
 import org.eclipse.epp.mpc.tests.Categories.RemoteTests;
+import org.eclipse.epp.mpc.tests.LoggingSuite;
 import org.eclipse.equinox.internal.p2.core.helpers.ServiceHelper;
 import org.eclipse.equinox.internal.p2.repository.Activator;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
@@ -726,7 +727,7 @@ public class SolutionCompatibilityFilterTest {
 	public TestRule logRule = new TestRule() {
 
 		public Statement apply(final Statement base, final Description description) {
-			return new Statement() {
+			return LoggingSuite.isLogging() ? base : new Statement() {
 				@Override
 				public void evaluate() throws Throwable {
 					try {
