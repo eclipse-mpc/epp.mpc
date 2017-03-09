@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010-2017 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
  *     Yatta Solutions - error handling (bug 374105)
+ *     Mickael Istria (Red Hat Inc.) - Discovery
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui;
 
@@ -77,6 +78,11 @@ class Messages extends NLS {
 	public static String MarketplaceOrAssociateDialog_descriptionExternalSystemEditor;
 
 	public static String MarketplaceOrAssociateDialog_descriptionSimpleTextEditor;
+
+	public static String MissingNatureDetector_Desc;
+	public static String MissingNatureDetector_Message;
+	public static String MissingNatureDetector_ShowSolutions;
+	public static String MissingNatureDetector_Title;
 
 	static {
 		// initialize resource bundle

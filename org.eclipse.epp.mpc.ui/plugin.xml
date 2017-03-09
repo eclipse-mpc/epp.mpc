@@ -65,6 +65,9 @@
    <extension
          point="org.eclipse.ui.startup">
       <startup class="org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceDropAdapter"/>
+      <startup
+            class="org.eclipse.epp.internal.mpc.ui.MissingNatureDetector">
+      </startup>
    </extension>
       <extension
          point="org.eclipse.ui.ide.unassociatedEditorStrategy">
