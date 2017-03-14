@@ -196,4 +196,17 @@ public class MarketplaceClientServiceTest extends AbstractMarketplaceWizardBotTe
 		SWTBotTreeItem[] featureItems = nodeItems[0].getItems();
 		assertTrue(featureItems.length > 0);
 	}
+
+	@Test
+	public void testOpenFavorites() throws Exception {
+		display.asyncExec(new Runnable() {
+
+			public void run() {
+				service.openFavorites(config);
+			}
+		});
+
+		initWizardBot();
+		checkSelectedTab("Favorites");
+	}
 }

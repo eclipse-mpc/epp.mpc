@@ -67,6 +67,15 @@ public interface IMarketplaceClientService {
 	void openInstalled(IMarketplaceClientConfiguration configuration);
 
 	/**
+	 * Open the Marketplace Wizard showing the "Favorites" tab for the
+	 * {@link IMarketplaceClientConfiguration#getCatalogDescriptor() active catalog}.
+	 *
+	 * @param configuration
+	 *            the initial configuration applied to the MPC wizard
+	 */
+	void openFavorites(IMarketplaceClientConfiguration configuration);
+
+	/**
 	 * Open the Marketplace Wizard showing the result of the given search on the
 	 * {@link IMarketplaceClientConfiguration#getCatalogDescriptor() active catalog}.
 	 *
@@ -104,5 +113,4 @@ public interface IMarketplaceClientService {
 	 *             {@link IMarketplaceClientConfiguration#getInitialState()}
 	 */
 	void openProvisioning(IMarketplaceClientConfiguration configuration);
-
 }

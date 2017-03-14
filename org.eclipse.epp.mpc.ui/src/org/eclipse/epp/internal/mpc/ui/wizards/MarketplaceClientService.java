@@ -109,6 +109,16 @@ public class MarketplaceClientService implements IMarketplaceClientService {
 		execute(command);
 	}
 
+	public void openFavorites(IMarketplaceClientConfiguration configuration) {
+		MarketplaceWizardCommand command = new MarketplaceWizardCommand();
+		command.setConfiguration(configuration);
+		WizardState wizardState = new WizardState();
+		wizardState.setContentType(ContentType.FAVORITES);
+		wizardState.setProceedWithInstallation(false);
+		command.setWizardDialogState(wizardState);
+		execute(command);
+	}
+
 	private void checkInitialState(IMarketplaceClientConfiguration configuration) {
 		if (configuration.getInitialState() == null
 				&& (configuration.getInitialOperations() == null || configuration.getInitialOperations().isEmpty())) {
@@ -125,5 +135,4 @@ public class MarketplaceClientService implements IMarketplaceClientService {
 					StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 		}
 	}
-
 }
