@@ -78,4 +78,39 @@
             interactive="true">
       </strategy>
    </extension>
+      <extension
+            point="org.eclipse.core.runtime.preferences">
+         <initializer
+               class="org.eclipse.epp.internal.mpc.ui.preferences.MPCPreferenceInitializer">
+         </initializer>
+      </extension>
+      <extension
+            point="org.eclipse.ui.preferencePages">
+         <page
+               category="org.eclipse.ui.preferencePages.Workbench"
+               class="org.eclipse.epp.internal.mpc.ui.preferences.ProjectNaturesPreferencePage"
+               id="org.eclipse.epp.mpc.projectnatures"
+               name="%projectNatures.preferencePage.label">
+            <keywordReference
+                  id="org.eclipse.ui.ide.project">
+            </keywordReference>
+            <keywordReference
+                  id="org.eclipse.epp.mpc.projectnature">
+            </keywordReference>
+            <keywordReference
+                  id="org.eclipse.epp.mpc.discovery">
+            </keywordReference>
+         </page>
+      </extension>
+      <extension
+            point="org.eclipse.ui.keywords">
+         <keyword
+               id="org.eclipse.epp.mpc.projectnature"
+               label="%keyword.projectnature">
+         </keyword>
+         <keyword
+               id="org.eclipse.epp.mpc.discovery"
+               label="%keyword.discovery">
+         </keyword>
+      </extension>
 </plugin>

@@ -15,7 +15,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -24,6 +27,7 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -33,6 +37,7 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.core.runtime.jobs.JobGroup;
+import org.eclipse.epp.internal.mpc.ui.preferences.ProjectNaturesPreferencePage;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
@@ -46,19 +51,28 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.LayoutConstants;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.progress.UIJob;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
-public class MissingNatureDetector implements IStartup {
+public class MissingNatureDetector implements IStartup, IPropertyChangeListener {
 
 	public static final String ENABLEMENT_PROPERTY = "org.eclipse.epp.mpc.naturelookup"; //$NON-NLS-1$
 
@@ -96,8 +110,8 @@ public class MissingNatureDetector implements IStartup {
 
 		private List<? extends INode> nodes;
 
-		private LookupByNatureJob(String name, String natureId) {
-			super(name);
+		private LookupByNatureJob(String natureId) {
+			super(NLS.bind(Messages.MissingNatureDetector_jobName, natureId));
 			this.natureId = natureId;
 		}
 
@@ -113,8 +127,11 @@ public class MissingNatureDetector implements IStartup {
 				ISearchResult searchResult = marketplaceService.tagged(fileExtensionTag, monitor);
 				nodes = searchResult.getNodes();
 			} catch (CoreException ex) {
-				return new Status(IStatus.ERROR,
+				IStatus status = new Status(IStatus.ERROR,
 						MarketplaceClientUiPlugin.getInstance().getBundle().getSymbolicName(), ex.getMessage(), ex);
+				MarketplaceClientUiPlugin.getInstance().getLog().log(status);
+				// Do not return this status as it would show an error
+				return Status.CANCEL_STATUS;
 			}
 			return Status.OK_STATUS;
 		}
@@ -140,6 +157,8 @@ public class MissingNatureDetector implements IStartup {
 				protected void configureShell(Shell newShell) {
 					super.configureShell(newShell);
 					newShell.setText(Messages.MissingNatureDetector_Title);
+					setHelpAvailable(false);
+					setShellStyle(getShellStyle() | SWT.RESIZE);
 				}
 
 				@Override
@@ -156,7 +175,33 @@ public class MissingNatureDetector implements IStartup {
 					GridLayoutFactory.fillDefaults().margins(LayoutConstants.getMargins()).equalWidth(false).applyTo(
 							res);
 					Label label = new Label(res, SWT.WRAP);
-					label.setText(Messages.MissingNatureDetector_Message);
+					StringBuilder message = new StringBuilder(Messages.MissingNatureDetector_Message);
+					message.append("\n\n"); //$NON-NLS-1$
+					SortedSet<String> relevantNatures = new TreeSet<String>();
+					for (Entry<String, LookupByNatureJob> entry : lookupJobs.entrySet()) {
+						if (entry.getValue().getCandidates() != null && !entry.getValue().getCandidates().isEmpty()) {
+							relevantNatures.add(entry.getKey());
+						}
+					}
+					for (String natureId : relevantNatures) {
+						message.append("- "); //$NON-NLS-1$
+						message.append(natureId);
+						message.append('\n');
+					}
+					label.setText(message.toString());
+					Link preferencesLink = new Link(res, SWT.NONE);
+					preferencesLink.setText(Messages.MissingNatureDetector_linkToPreferences);
+					preferencesLink.addSelectionListener(new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(getShell(),
+									ProjectNaturesPreferencePage.ID, null, null);
+							pref.setBlockOnOpen(false);
+							if (pref != null) {
+								pref.open();
+							}
+						}
+					});
 					return res;
 				}
 
@@ -189,36 +234,27 @@ public class MissingNatureDetector implements IStartup {
 		}
 	};
 
-	public void earlyStartup() {
-		String enablementValue = System.getProperty(ENABLEMENT_PROPERTY);
-		if (enablementValue == null || !Boolean.parseBoolean(enablementValue)) {
-			return;
-		}
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(new IResourceChangeListener() {
-			public void resourceChanged(IResourceChangeEvent event) {
-				if (event.getDelta() == null) {
-					return;
-				}
-				try {
-					CollectMissingNaturesVisitor visitor = new CollectMissingNaturesVisitor();
-					event.getDelta().accept(visitor);
-					for (String natureId : visitor.getMissingNatures()) {
-						triggerNatureLookup(natureId);
-					}
-					if (!visitor.getMissingNatures().isEmpty()) {
-						showProposalsIfReady();
-					}
-				} catch (CoreException e) {
-					MarketplaceClientUiPlugin.getInstance()
-					.getLog()
-					.log(new Status(IStatus.ERROR,
-							MarketplaceClientUiPlugin.getInstance().getBundle().getSymbolicName(),
-							e.getLocalizedMessage(), e));
-				}
+	private final IResourceChangeListener projectOpenListener = new IResourceChangeListener() {
+		public void resourceChanged(IResourceChangeEvent event) {
+			if (event.getDelta() == null) {
+				return;
 			}
-
-		});
-	}
+			try {
+				CollectMissingNaturesVisitor visitor = new CollectMissingNaturesVisitor();
+				event.getDelta().accept(visitor);
+				for (String natureId : visitor.getMissingNatures()) {
+					triggerNatureLookup(natureId);
+				}
+				if (!visitor.getMissingNatures().isEmpty()) {
+					showProposalsIfReady();
+				}
+			} catch (CoreException e) {
+				MarketplaceClientUiPlugin.getInstance().getLog().log(
+						new Status(IStatus.ERROR, MarketplaceClientUiPlugin.getInstance().getBundle().getSymbolicName(),
+								e.getLocalizedMessage(), e));
+			}
+		}
+	};
 
 	private void triggerNatureLookup(final String natureId) {
 		LookupByNatureJob mpcJob = null;
@@ -226,7 +262,7 @@ public class MissingNatureDetector implements IStartup {
 			if (lookupJobs.containsKey(natureId)) {
 				return;
 			} else {
-				mpcJob = new LookupByNatureJob(Messages.AskMarketPlaceForFileSupportStrategy_jobName, natureId);
+				mpcJob = new LookupByNatureJob(natureId);
 				lookupJobs.put(natureId, mpcJob);
 			}
 		}
@@ -257,4 +293,27 @@ public class MissingNatureDetector implements IStartup {
 			showCandidatesJob.schedule();
 		}
 	}
+
+	public void earlyStartup() {
+		IPreferenceStore preferenceStore = MarketplaceClientUiPlugin.getInstance().getPreferenceStore();
+		preferenceStore.addPropertyChangeListener(this);
+		boolean preferenceValue = preferenceStore.getBoolean(ENABLEMENT_PROPERTY);
+		String enablementValue = System.getProperty(ENABLEMENT_PROPERTY);
+		if (preferenceValue || Boolean.parseBoolean(enablementValue)) {
+			ResourcesPlugin.getWorkspace().addResourceChangeListener(projectOpenListener);
+		}
+
+	}
+
+	public void propertyChange(PropertyChangeEvent event) {
+		if (ENABLEMENT_PROPERTY.equals(event.getProperty())) {
+			IWorkspace workspace = ResourcesPlugin.getWorkspace();
+			if ((Boolean) event.getNewValue()) {
+				workspace.addResourceChangeListener(this.projectOpenListener);
+			} else {
+				workspace.removeResourceChangeListener(this.projectOpenListener);
+			}
+		}
+	}
+
 }

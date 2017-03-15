@@ -14,8 +14,12 @@ package org.eclipse.epp.internal.mpc.ui;
 
 import org.eclipse.osgi.util.NLS;
 
-class Messages extends NLS {
+public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.epp.internal.mpc.ui.messages"; //$NON-NLS-1$
+
+	public static String ProjectNatures;
+
+	public static String PreferencePage_linkToEditorSettings;
 
 	public static String CatalogExtensionPointReader_cannotFindResource;
 
@@ -83,6 +87,9 @@ class Messages extends NLS {
 	public static String MissingNatureDetector_Message;
 	public static String MissingNatureDetector_ShowSolutions;
 	public static String MissingNatureDetector_Title;
+	public static String MissingNatureDetector_jobName;
+	public static String MissingNatureDetector_enable;
+	public static String MissingNatureDetector_linkToPreferences;
 
 	static {
 		// initialize resource bundle
