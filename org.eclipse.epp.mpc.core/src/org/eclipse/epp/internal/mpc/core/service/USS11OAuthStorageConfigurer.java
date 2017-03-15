@@ -11,13 +11,17 @@
 package org.eclipse.epp.internal.mpc.core.service;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URI;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.userstorage.IStorage;
+import org.eclipse.userstorage.internal.oauth.ui.SWTInternalBrowserFacade;
 import org.eclipse.userstorage.oauth.EclipseOAuthCredentialsProvider;
 import org.eclipse.userstorage.oauth.OAuthCredentialsProvider;
 import org.eclipse.userstorage.spi.ICredentialsProvider;
@@ -103,7 +107,13 @@ class USS11OAuthStorageConfigurer extends StorageConfigurer {
 		EclipseOAuthCredentialsProvider oauthProvider = new EclipseOAuthCredentialsProvider(URI.create("https://accounts.eclipse.org/"), //$NON-NLS-1$
 				decrypt(CLIENT_ID, CLIENT_KEY), decrypt(CLIENT_SECRET, CLIENT_KEY), DEFAULT_MPC_SCOPES,
 				URI.create("http://localhost/")); //$NON-NLS-1$
-		//oauthProvider.setShell(null);
+		try {
+			Field uiFacadeField = oauthProvider.getClass().getDeclaredField("uiFacade"); //$NON-NLS-1$
+			uiFacadeField.setAccessible(true);
+			uiFacadeField.set(oauthProvider, new InternalUIFacade());
+		} catch (Exception e) {
+			MarketplaceClientCore.error(e);
+		}
 		return oauthProvider;
 	}
 
@@ -124,6 +134,36 @@ class USS11OAuthStorageConfigurer extends StorageConfigurer {
 	@Override
 	void restoreInteractive(IStorage storage, Object restoreValue) throws CoreException {
 		setInteractive(storage, Boolean.TRUE.equals(restoreValue));
+	}
+
+	boolean handleOAuthError(IStatus status) {
+		String message = status.getMessage();
+		int errorStart = message.indexOf("error="); //$NON-NLS-1$
+		if (errorStart != -1) {
+			int errorEnd = message.indexOf("&", errorStart); //$NON-NLS-1$
+			String error = message.substring(errorStart + 6, errorEnd == -1 ? message.length() : errorEnd);
+			return handleOAuthError(status, error);
+		}
+		return false;
+	}
+
+	boolean handleOAuthError(IStatus status, String error) {
+		if ("consent_required".equals(error)) {
+			throw new OperationCanceledException("No credentials provided");
+		}
+		return false;
+	}
+
+	private class InternalUIFacade extends SWTInternalBrowserFacade {
+		@Override
+		public void showError(String title, String description, IStatus status) {
+			if ("org.eclipse.userstorage.oauth".equals(status.getPlugin())) {
+				if (handleOAuthError(status)) {
+					return;
+				}
+			}
+			super.showError(title, description, status);
+		}
 	}
 
 	private static String decrypt(String str, String key) {
@@ -173,4 +213,5 @@ class USS11OAuthStorageConfigurer extends StorageConfigurer {
 
 		boolean isInteractive();
 	}
+
 }
