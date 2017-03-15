@@ -60,6 +60,8 @@ import org.osgi.framework.ServiceReference;
 
 public class MissingNatureDetector implements IStartup {
 
+	public static final String ENABLEMENT_PROPERTY = "org.eclipse.epp.mpc.naturelookup"; //$NON-NLS-1$
+
 	private static final class CollectMissingNaturesVisitor implements IResourceDeltaVisitor {
 		private final Set<String> missingNatures = new HashSet<String>();
 
@@ -188,6 +190,10 @@ public class MissingNatureDetector implements IStartup {
 	};
 
 	public void earlyStartup() {
+		String enablementValue = System.getProperty(ENABLEMENT_PROPERTY);
+		if (enablementValue == null || !Boolean.parseBoolean(enablementValue)) {
+			return;
+		}
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(new IResourceChangeListener() {
 			public void resourceChanged(IResourceChangeEvent event) {
 				if (event.getDelta() == null) {
