@@ -82,7 +82,7 @@ public abstract class StorageConfigurer {
 	private static String[] getFactories() {
 		String[] factories = DEFAULT_FACTORIES;
 		String factoriesValue = System.getProperty(PROP_FACTORIES);
-		if (factoriesValue != null && !factoriesValue.isEmpty()) {
+		if (factoriesValue != null && factoriesValue.length() > 0) {
 			String[] givenFactories = factoriesValue.split("\\s+"); //$NON-NLS-1$
 			List<String> givenFactoriesList = new ArrayList<String>(Arrays.asList(givenFactories));
 			Set<String> supportedFactories = new HashSet<String>(Arrays.asList(DEFAULT_FACTORIES));
