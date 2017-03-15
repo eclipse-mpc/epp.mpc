@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
 import org.eclipse.epp.mpc.core.service.IMarketplaceStorageService;
@@ -64,6 +65,8 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 
 	private EclipseOAuthCredentialsProvider credentialsProvider;
 
+	private StorageConfigurer configurer;
+
 	public URI getServiceUri() {
 		return serviceUri;
 	}
@@ -101,9 +104,14 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 	protected IStorage createStorage() {
 		IStorage storage = getStorageFactory().create(applicationToken,
 				new FileStorageCache.SingleApplication(this.applicationToken));
-		credentialsProvider = new EclipseOAuthCredentialsProvider(new MPCOAuthParameters());
-		credentialsProvider.setInteractive(false);
-		storage.setCredentialsProvider(credentialsProvider);
+		try {
+			configurer = StorageConfigurer.get();
+			configurer.configure(storage);
+			configurer.setInteractive(storage, false);
+		} catch (CoreException e) {
+			configurer = null;
+			MarketplaceClientCore.error(e);
+		}
 		return storage;
 	}
 
@@ -129,13 +137,10 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 
 	public <T> T runWithLogin(Callable<T> c) throws Exception {
 		String oldUser = getCurrentUser();
-		boolean wasInteractive = credentialsProvider.isInteractive();
-		credentialsProvider.setInteractive(true);
 		try {
-			T result = c.call();
+			T result = configurer != null ? configurer.runWithLogin(storage, c) : c.call();
 			return result;
 		} finally {
-			credentialsProvider.setInteractive(wasInteractive);
 			String newUser = getCurrentUser();//TODO the OAuth token might change with the user staying the same - this would cause an unnecessary refresh event
 			notifyLoginChanged(oldUser, newUser);
 		}
@@ -181,7 +186,8 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 			return null;
 		}
 		IStorageService service = getStorage().getService();
-		return provider.hasCredentials(service) ? provider.getCredentials(service) : null;
+		//return provider.hasCredentials(service) ? provider.getCredentials(service) : null;
+		return ((StorageService) service).getCredentials();
 	}
 
 	public void activate(BundleContext context, Map<?, ?> properties) {

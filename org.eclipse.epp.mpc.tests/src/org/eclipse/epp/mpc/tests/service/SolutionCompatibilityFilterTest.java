@@ -59,6 +59,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.ComparisonFailure;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -75,6 +76,7 @@ import org.osgi.framework.ServiceRegistration;
 
 @RunWith(Parameterized.class)
 @Category(RemoteTests.class)
+@Ignore("Disabled until test data on marketplace-staging.eclipse.org can be recreated")
 public class SolutionCompatibilityFilterTest {
 	private static final String BASE_URL = "http://marketplace-staging.eclipse.org";
 
