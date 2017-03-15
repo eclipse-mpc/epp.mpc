@@ -40,6 +40,7 @@ import org.eclipse.epp.internal.mpc.core.model.Identifiable;
 import org.eclipse.epp.internal.mpc.core.model.Node;
 import org.eclipse.epp.internal.mpc.core.model.SearchResult;
 import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
+import org.eclipse.epp.internal.mpc.core.service.StorageConfigurer;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
@@ -68,7 +69,10 @@ import org.eclipse.equinox.internal.p2.discovery.model.Icon;
 import org.eclipse.equinox.internal.p2.discovery.model.Overview;
 import org.eclipse.equinox.internal.p2.discovery.model.Tag;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
+import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.userstorage.IStorage;
+import org.eclipse.userstorage.spi.ICredentialsProvider;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -90,6 +94,8 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	private Map<String, IInstallableUnit> featureIUById;
 
 	private List<LoginListener> loginListeners;
+
+	private IShellProvider shellProvider;
 
 	public MarketplaceDiscoveryStrategy(CatalogDescriptor catalogDescriptor) {
 		if (catalogDescriptor == null) {
@@ -197,6 +203,26 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		}
 	}
 
+	protected void applyShellProvider() {
+		IUserFavoritesService userFavoritesService = marketplaceService.getUserFavoritesService();
+		if (userFavoritesService == null) {
+			return;
+		}
+		IMarketplaceStorageService storageService = userFavoritesService.getStorageService();
+		if (storageService == null) {
+			return;
+		}
+		IStorage storage = storageService.getStorage();
+		ICredentialsProvider credentialsProvider = storage.getCredentialsProvider();
+		if (credentialsProvider != null) {
+			try {
+				StorageConfigurer.get().setShellProvider(storage, this.shellProvider);
+			} catch (CoreException e) {
+				//ignore
+			}
+		}
+	}
+
 	public boolean hasUserFavoritesService() {
 		return marketplaceService.getUserFavoritesService() != null;
 	}
@@ -241,6 +267,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 					userFavoritesSupported = true;
 				} else if (hasUserFavoritesService()) {
 					try {
+						applyShellProvider();
 						marketplaceService.userFavorites(result.getNodes(), progress.newChild(favoritesWork));
 						userFavoritesSupported = true;
 					} catch (NotAuthorizedException e1) {
@@ -643,6 +670,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			IUserFavoritesService userFavoritesService = marketplaceService.getUserFavoritesService();
 			if (userFavoritesService != null) {
 				try {
+					applyShellProvider();
 					ISearchResult result;
 					if (promptLogin) {
 						IMarketplaceStorageService storageService = userFavoritesService.getStorageService();
@@ -693,6 +721,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 					return;
 				}
 				try {
+					applyShellProvider();
 					marketplaceService.userFavorites(new ArrayList<INode>(nodes.values()), progress.newChild(500));
 					for (CatalogItem catalogItem : items) {
 						if (catalogItem instanceof MarketplaceNodeCatalogItem) {
@@ -893,5 +922,14 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	protected MarketplaceCatalogSource getCatalogSource() {
 		return source;
+	}
+
+	public void setShellProvider(IShellProvider shellProvider) {
+		this.shellProvider = shellProvider;
+		applyShellProvider();
+	}
+
+	public IShellProvider getShellProvider() {
+		return shellProvider;
 	}
 }

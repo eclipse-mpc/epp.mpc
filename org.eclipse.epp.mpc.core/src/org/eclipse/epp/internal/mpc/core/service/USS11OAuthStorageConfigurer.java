@@ -11,10 +11,12 @@
 package org.eclipse.epp.internal.mpc.core.service;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 import java.net.URI;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.userstorage.IStorage;
 import org.eclipse.userstorage.oauth.EclipseOAuthCredentialsProvider;
 import org.eclipse.userstorage.oauth.OAuthCredentialsProvider;
@@ -54,6 +56,34 @@ class USS11OAuthStorageConfigurer extends StorageConfigurer {
 			return new USS11OAuthStorageConfigurer();
 		}
 
+	}
+
+	@Override
+	public void setShellProvider(IStorage storage, Object value) {
+		ICredentialsProvider credentialsProvider = storage.getCredentialsProvider();
+		if (credentialsProvider instanceof USS11NonInteractiveOAuthCredentialsProvider) {
+			USS11NonInteractiveOAuthCredentialsProvider p = (USS11NonInteractiveOAuthCredentialsProvider) credentialsProvider;
+			credentialsProvider = p.getDelegate();
+		}
+		if (!(credentialsProvider instanceof EclipseOAuthCredentialsProvider)) {
+			return;
+		}
+		Method[] methods = EclipseOAuthCredentialsProvider.class.getMethods();
+		Method shellProviderMethod = null;
+		for (Method method : methods) {
+			if ("setShell".equals(method.getName()) && method.getParameterTypes().length == 1 //$NON-NLS-1$
+					&& (value == null || method.getParameterTypes()[0].isInstance(value))) {
+				shellProviderMethod = method;
+				break;
+			}
+		}
+		if (shellProviderMethod != null) {
+			try {
+				shellProviderMethod.invoke(credentialsProvider, value);
+			} catch (Exception e) {
+				MarketplaceClientCore.error(e);
+			}
+		}
 	}
 
 	@Override

@@ -72,6 +72,10 @@ implements USS11OAuthStorageConfigurer.ToggleInteractive {
 		delegate.setStateCode(stateCode);
 	}
 
+	public OAuthCredentialsProvider getDelegate() {
+		return delegate;
+	}
+
 	public void setInteractive(boolean interactive) {
 		this.interactive = interactive;
 	}

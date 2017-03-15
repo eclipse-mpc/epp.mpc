@@ -113,6 +113,10 @@ public abstract class StorageConfigurer {
 		instance = null;
 	}
 
+	public void setShellProvider(IStorage storage, Object value) {
+		//do nothing
+	}
+
 	public abstract void configure(IStorage storage) throws CoreException;
 
 	public abstract Object setInteractive(IStorage storage, boolean interactive) throws CoreException;
