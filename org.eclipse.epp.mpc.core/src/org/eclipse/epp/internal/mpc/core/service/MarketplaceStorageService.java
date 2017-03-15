@@ -62,6 +62,8 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 
 	private List<LoginListener> loginListeners;
 
+	private EclipseOAuthCredentialsProvider credentialsProvider;
+
 	public URI getServiceUri() {
 		return serviceUri;
 	}
@@ -99,18 +101,9 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 	protected IStorage createStorage() {
 		IStorage storage = getStorageFactory().create(applicationToken,
 				new FileStorageCache.SingleApplication(this.applicationToken));
-		// FIXME: these should be the uss_project_* alternatives
-		//String[] scopes = { "profile", "uss_project_retrieve", "uss_project_update", "uss_project_delete" };
-		String[] scopes = { "profile", "uss_all_retrieve", "uss_all_update", "uss_all_delete" };
-		// FIXME: constants should be baked in at compile-time
-		String oauthClientId = System.getProperty("mpc.oauth.clientId", "@mpc.oauth.clientId@");
-		String oauthClientSecret = System.getProperty("mpc.oauth.clientSecret", "@mpc.oauth.clientSecret@");
-		try {
-			storage.setCredentialsProvider(new EclipseOAuthCredentialsProvider(new URI("https://accounts.eclipse.org/"),
-					oauthClientId, oauthClientSecret, scopes, new URI("http://localhost/")));
-		} catch (URISyntaxException ex) {
-			throw new RuntimeException(ex);
-		}
+		credentialsProvider = new EclipseOAuthCredentialsProvider(new MPCOAuthParameters());
+		credentialsProvider.setInteractive(false);
+		storage.setCredentialsProvider(credentialsProvider);
 		return storage;
 	}
 
@@ -135,17 +128,16 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 	}
 
 	public <T> T runWithLogin(Callable<T> c) throws Exception {
-		final IStorage storage = getStorage();
-		final ICredentialsProvider originalCredentialsProvider = storage.getCredentialsProvider();
-		//storage.setCredentialsProvider(null);
-//		String oldUser = getCurrentUser();
+		String oldUser = getCurrentUser();
+		boolean wasInteractive = credentialsProvider.isInteractive();
+		credentialsProvider.setInteractive(true);
 		try {
 			T result = c.call();
 			return result;
 		} finally {
-//			storage.setCredentialsProvider(originalCredentialsProvider);
-//			String newUser = getCurrentUser();
-			//notifyLoginChanged(oldUser, newUser);
+			credentialsProvider.setInteractive(wasInteractive);
+			String newUser = getCurrentUser();//TODO the OAuth token might change with the user staying the same - this would cause an unnecessary refresh event
+			notifyLoginChanged(oldUser, newUser);
 		}
 	}
 
@@ -188,7 +180,8 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 		if (provider == null) {
 			return null;
 		}
-		return provider.getCredentials(getStorage().getService());
+		IStorageService service = getStorage().getService();
+		return provider.hasCredentials(service) ? provider.getCredentials(service) : null;
 	}
 
 	public void activate(BundleContext context, Map<?, ?> properties) {

@@ -30,21 +30,7 @@
        </activation>
        <properties>
           <test-proxy>-Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -Dhttp.nonProxyHosts=*.eclipse.org</test-proxy>
-       </properties>
-    </profile>
-    <profile>
-       <id>linux-gtk</id>
-       <activation>
-          <os>
-             <name>linux</name>
-          </os>
-          <property>
-             <name>env.SWT_GTK3</name>
-             <value>!0</value>
-          </property>
-       </activation>
-       <properties>
-          <test-browser>-Dorg.eclipse.swt.browser.UseWebKitGTK=true -Dorg.eclipse.swt.browser.DefaultType=WebKit</test-browser>
+          <test-app-args>--launcher.GTK_version 2</test-app-args>
        </properties>
     </profile>
   </profiles>
