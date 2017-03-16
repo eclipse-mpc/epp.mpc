@@ -17,6 +17,8 @@ public class ImportFavoritesWizard extends DiscoveryWizard {
 
 	private final ImportFavoritesPage importFavoritesPage;
 
+	private String initialFavoritesUrl;
+
 	public ImportFavoritesWizard(MarketplaceCatalog catalog, MarketplaceCatalogConfiguration configuration, IMarketplaceWebBrowser browser) {
 		super(catalog, configuration);
 		setWindowTitle("Import Favorites List");
@@ -36,5 +38,13 @@ public class ImportFavoritesWizard extends DiscoveryWizard {
 
 	public ImportFavoritesPage getImportFavoritesPage() {
 		return importFavoritesPage;
+	}
+
+	public void setInitialFavoritesUrl(String initialFavoritesUrl) {
+		this.initialFavoritesUrl = initialFavoritesUrl;
+	}
+
+	public String getInitialFavoritesUrl() {
+		return initialFavoritesUrl;
 	}
 }

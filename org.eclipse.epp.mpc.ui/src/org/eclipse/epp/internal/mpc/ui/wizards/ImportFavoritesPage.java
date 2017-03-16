@@ -28,7 +28,6 @@ import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogPage;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
-import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryWizard;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.osgi.util.NLS;
@@ -95,11 +94,13 @@ public class ImportFavoritesPage extends CatalogPage {
 
 	@Override
 	protected CatalogViewer doCreateViewer(Composite parent) {
-		DiscoveryWizard wizard = getWizard();
-		CatalogViewer viewer = new FavoritesViewer(getCatalog(), this, browser,
+		ImportFavoritesWizard wizard = getWizard();
+		FavoritesViewer viewer = new FavoritesViewer(getCatalog(), this, browser,
 				wizard.getConfiguration());
 		viewer.setMinimumHeight(MINIMUM_HEIGHT);
 		viewer.createControl(parent);
+		String initialFavoritesUrl = wizard.getInitialFavoritesUrl();
+		viewer.setFilterText(initialFavoritesUrl == null ? "" : initialFavoritesUrl); //$NON-NLS-1$
 		return viewer;
 	}
 
@@ -161,5 +162,10 @@ public class ImportFavoritesPage extends CatalogPage {
 			}
 		}
 		return userFavoritesService;
+	}
+
+	@Override
+	public ImportFavoritesWizard getWizard() {
+		return (ImportFavoritesWizard) super.getWizard();
 	}
 }

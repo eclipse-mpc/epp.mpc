@@ -59,6 +59,11 @@ public class FavoritesViewer extends CatalogViewer {
 	}
 
 	@Override
+	public void setFilterText(String newFilter) {
+		super.setFilterText(newFilter);
+	}
+
+	@Override
 	protected StructuredViewer doCreateViewer(Composite container) {
 		StructuredViewer viewer = super.doCreateViewer(container);
 		discoveryResources = new MarketplaceDiscoveryResources(container.getDisplay());
