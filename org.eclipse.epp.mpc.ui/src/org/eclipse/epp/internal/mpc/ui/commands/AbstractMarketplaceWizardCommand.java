@@ -57,9 +57,9 @@ public abstract class AbstractMarketplaceWizardCommand extends AbstractHandler i
 
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		final MarketplaceCatalog catalog = createCatalog();
-		MarketplaceCatalogConfiguration configuration = createConfiguration(catalog);
-		DiscoveryWizard wizard = createWizard(catalog, configuration);
-		openWizardDialog(wizard);
+		MarketplaceCatalogConfiguration configuration = createConfiguration(catalog, event);
+		DiscoveryWizard wizard = createWizard(catalog, configuration, event);
+		openWizardDialog(wizard, event);
 
 		return null;
 	}
@@ -72,7 +72,8 @@ public abstract class AbstractMarketplaceWizardCommand extends AbstractHandler i
 		return catalog;
 	}
 
-	protected MarketplaceCatalogConfiguration createConfiguration(final MarketplaceCatalog catalog) {
+	protected MarketplaceCatalogConfiguration createConfiguration(final MarketplaceCatalog catalog,
+			ExecutionEvent event) {
 		MarketplaceCatalogConfiguration configuration = new MarketplaceCatalogConfiguration();
 		configuration.setVerifyUpdateSiteAvailability(false);
 
@@ -129,15 +130,15 @@ public abstract class AbstractMarketplaceWizardCommand extends AbstractHandler i
 		return configuration;
 	}
 
-	protected void openWizardDialog(DiscoveryWizard wizard) {
-		WizardDialog dialog = createWizardDialog(wizard);
+	protected void openWizardDialog(DiscoveryWizard wizard, ExecutionEvent event) {
+		WizardDialog dialog = createWizardDialog(wizard, event);
 		dialog.open();
 	}
 
-	protected abstract AbstractMarketplaceWizardDialog createWizardDialog(DiscoveryWizard wizard);
+	protected abstract AbstractMarketplaceWizardDialog createWizardDialog(DiscoveryWizard wizard, ExecutionEvent event);
 
 	protected abstract DiscoveryWizard createWizard(final MarketplaceCatalog catalog,
-			MarketplaceCatalogConfiguration configuration);
+			MarketplaceCatalogConfiguration configuration, ExecutionEvent event);
 
 	public void setCatalogDescriptors(List<CatalogDescriptor> catalogDescriptors) {
 		this.catalogDescriptors = catalogDescriptors;

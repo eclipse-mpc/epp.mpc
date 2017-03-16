@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.commands;
 
+import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesDiscoveryStrategy;
@@ -23,16 +24,23 @@ import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryWizard;
 
 public class ImportFavoritesWizardCommand extends AbstractMarketplaceWizardCommand {
 
+	private static final String FAVORITES_URL_PARAMETER = "favoritesUrl"; //$NON-NLS-1$
+
 	private String favoritesUrl;
 
 	@Override
-	protected ImportFavoritesWizardDialog createWizardDialog(DiscoveryWizard wizard) {
+	protected ImportFavoritesWizardDialog createWizardDialog(DiscoveryWizard wizard, ExecutionEvent event) {
 		return new ImportFavoritesWizardDialog(WorkbenchUtil.getShell(), wizard);
 	}
 
 	@Override
 	protected ImportFavoritesWizard createWizard(MarketplaceCatalog catalog,
-			MarketplaceCatalogConfiguration configuration) {
+			MarketplaceCatalogConfiguration configuration, ExecutionEvent event) {
+		String favoritesUrl = event.getParameter(FAVORITES_URL_PARAMETER);
+		if (favoritesUrl == null) {
+			favoritesUrl = this.favoritesUrl;
+		}
+
 		FavoritesCatalog favoritesCatalog = new FavoritesCatalog();
 
 		ImportFavoritesWizard wizard = new ImportFavoritesWizard(favoritesCatalog, configuration, null);

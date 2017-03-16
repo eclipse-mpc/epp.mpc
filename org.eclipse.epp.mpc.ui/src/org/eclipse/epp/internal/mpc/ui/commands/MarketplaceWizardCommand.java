@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.IHandler;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.wizards.AbstractTagFilter;
@@ -40,6 +41,8 @@ import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogFilter;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryWizard;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.handlers.HandlerUtil;
 
 /**
  * @author David Green
@@ -54,8 +57,9 @@ public class MarketplaceWizardCommand extends AbstractMarketplaceWizardCommand i
 	private WizardState wizardDialogState;
 
 	@Override
-	protected MarketplaceCatalogConfiguration createConfiguration(final MarketplaceCatalog catalog) {
-		MarketplaceCatalogConfiguration configuration = super.createConfiguration(catalog);
+	protected MarketplaceCatalogConfiguration createConfiguration(final MarketplaceCatalog catalog,
+			ExecutionEvent event) {
+		MarketplaceCatalogConfiguration configuration = super.createConfiguration(catalog, event);
 		configuration.getFilters().clear();
 
 		final ComboTagFilter marketFilter = new ComboTagFilter() {
@@ -111,13 +115,17 @@ public class MarketplaceWizardCommand extends AbstractMarketplaceWizardCommand i
 	}
 
 	@Override
-	protected MarketplaceWizardDialog createWizardDialog(DiscoveryWizard wizard) {
-		return new MarketplaceWizardDialog(WorkbenchUtil.getShell(), (MarketplaceWizard) wizard);
+	protected MarketplaceWizardDialog createWizardDialog(DiscoveryWizard wizard, ExecutionEvent event) {
+		Shell activeShell = HandlerUtil.getActiveShell(event);
+		if (activeShell == null) {
+			activeShell = WorkbenchUtil.getShell();
+		}
+		return new MarketplaceWizardDialog(activeShell, (MarketplaceWizard) wizard);
 	}
 
 	@Override
 	protected MarketplaceWizard createWizard(final MarketplaceCatalog catalog,
-			MarketplaceCatalogConfiguration configuration) {
+			MarketplaceCatalogConfiguration configuration, ExecutionEvent event) {
 		MarketplaceWizard wizard = new MarketplaceWizard(catalog, configuration);
 		wizard.setInitialState(wizardDialogState);
 		wizard.setWindowTitle(Messages.MarketplaceWizardCommand_eclipseMarketplace);
