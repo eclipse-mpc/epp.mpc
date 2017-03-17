@@ -34,6 +34,7 @@ import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
+import org.eclipse.epp.internal.mpc.ui.commands.ImportFavoritesWizardCommand;
 import org.eclipse.epp.internal.mpc.ui.commands.MarketplaceWizardCommand;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.osgi.util.NLS;
@@ -60,6 +61,8 @@ public abstract class MarketplaceUrlHandler {
 	private static final Pattern CONTENT_URL_PATTERN = Pattern.compile("(?:^|/)content/([^/#?]+)"); //$NON-NLS-1$
 
 	private static final Pattern NODE_URL_PATTERN = Pattern.compile("(?:^|/)node/([^/#?]+)"); //$NON-NLS-1$
+
+	private static final Pattern FAVORITES_URL_PATTERN = Pattern.compile("(?:^|/)user/([^/#?]+)/favorites(/?[#?].*)?$"); //$NON-NLS-1$
 
 	public static class SolutionInstallationInfo {
 
@@ -121,19 +124,24 @@ public abstract class MarketplaceUrlHandler {
 			state = query.get(MPC_STATE);
 		}
 		if (installId != null) {
-			CatalogDescriptor descriptor = CatalogRegistry.getInstance().findCatalogDescriptor(url);
-			if (descriptor == null) {
-				try {
-					descriptor = new CatalogDescriptor(URLUtil.toURL(url), DESCRIPTOR_HINT);
-				} catch (MalformedURLException e) {
-					return null;
-				}
-			}
+			CatalogDescriptor descriptor = findCatalogDescriptor(url, true);
 			SolutionInstallationInfo info = new SolutionInstallationInfo(installId, state, descriptor);
 			info.setRequestUrl(url);
 			return info;
 		}
 		return null;
+	}
+
+	private static CatalogDescriptor findCatalogDescriptor(String url, boolean allowUnknown) {
+		CatalogDescriptor descriptor = CatalogRegistry.getInstance().findCatalogDescriptor(url);
+		if (descriptor == null && allowUnknown) {
+			try {
+				descriptor = new CatalogDescriptor(URLUtil.toURL(url), DESCRIPTOR_HINT);
+			} catch (MalformedURLException e) {
+				return null;
+			}
+		}
+		return descriptor;
 	}
 
 	public static String getMPCState(String url) {
@@ -168,6 +176,10 @@ public abstract class MarketplaceUrlHandler {
 		return url != null && url.contains(MPC_INSTALL);
 	}
 
+	public static boolean isPotentialFavoritesList(String url) {
+		return url != null && FAVORITES_URL_PATTERN.matcher(url).find();
+	}
+
 	public static void triggerInstall(SolutionInstallationInfo info) {
 		if (info.getRequestUrl() != null) {
 			MarketplaceClientUi.getLog().log(
@@ -193,6 +205,20 @@ public abstract class MarketplaceUrlHandler {
 			command.execute(new ExecutionEvent());
 		} catch (ExecutionException e) {
 			IStatus status = MarketplaceClientCore.computeStatus(e, Messages.MarketplaceUrlHandler_cannotOpenMarketplaceWizard);
+			MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
+		}
+	}
+
+	public static void triggerFavorites(String favoritesUrl) {
+		CatalogDescriptor catalogDescriptor = findCatalogDescriptor(favoritesUrl, true);
+		ImportFavoritesWizardCommand command = new ImportFavoritesWizardCommand();
+		command.setSelectedCatalogDescriptor(catalogDescriptor);
+		command.setFavoritesUrl(favoritesUrl);
+		try {
+			command.execute(new ExecutionEvent());
+		} catch (ExecutionException e) {
+			IStatus status = MarketplaceClientCore.computeStatus(e,
+					Messages.MarketplaceUrlHandler_cannotOpenMarketplaceWizard);
 			MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 		}
 	}
