@@ -37,6 +37,7 @@ import org.eclipse.epp.mpc.core.model.ICatalog;
 import org.eclipse.epp.mpc.core.service.ICatalogService;
 import org.eclipse.epp.mpc.core.service.ServiceHelper;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
+import org.eclipse.epp.mpc.ui.IMarketplaceClientConfiguration;
 import org.eclipse.equinox.internal.p2.discovery.DiscoveryCore;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryWizard;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -225,5 +226,10 @@ public abstract class AbstractMarketplaceWizardCommand extends AbstractHandler i
 			}
 		}
 		catalogRegistry.register(descriptor);
+	}
+
+	public void setConfiguration(IMarketplaceClientConfiguration configuration) {
+		setCatalogDescriptors(configuration.getCatalogDescriptors());
+		setSelectedCatalogDescriptor(configuration.getCatalogDescriptor());
 	}
 }

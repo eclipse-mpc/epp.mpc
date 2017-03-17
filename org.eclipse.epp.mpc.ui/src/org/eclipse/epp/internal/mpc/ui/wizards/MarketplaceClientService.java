@@ -17,6 +17,8 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
+import org.eclipse.epp.internal.mpc.ui.commands.AbstractMarketplaceWizardCommand;
+import org.eclipse.epp.internal.mpc.ui.commands.ImportFavoritesWizardCommand;
 import org.eclipse.epp.internal.mpc.ui.commands.MarketplaceWizardCommand;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceWizard.WizardState;
@@ -119,6 +121,13 @@ public class MarketplaceClientService implements IMarketplaceClientService {
 		execute(command);
 	}
 
+	public void openFavoritesImport(IMarketplaceClientConfiguration configuration, String favoritesUrl) {
+		ImportFavoritesWizardCommand command = new ImportFavoritesWizardCommand();
+		command.setConfiguration(configuration);
+		command.setFavoritesUrl(favoritesUrl);
+		execute(command);
+	}
+
 	private void checkInitialState(IMarketplaceClientConfiguration configuration) {
 		if (configuration.getInitialState() == null
 				&& (configuration.getInitialOperations() == null || configuration.getInitialOperations().isEmpty())) {
@@ -126,7 +135,7 @@ public class MarketplaceClientService implements IMarketplaceClientService {
 		}
 	}
 
-	private void execute(MarketplaceWizardCommand command) {
+	private void execute(AbstractMarketplaceWizardCommand command) {
 		try {
 			command.execute(new ExecutionEvent());
 		} catch (ExecutionException e) {

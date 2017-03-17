@@ -34,6 +34,7 @@ import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceWizardDialog;
 import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.ui.IMarketplaceClientConfiguration;
+import org.eclipse.epp.mpc.ui.IMarketplaceClientConfiguration;
 import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.model.Tag;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
@@ -183,10 +184,9 @@ public class MarketplaceWizardCommand extends AbstractMarketplaceWizardCommand i
 	}
 
 	public void setConfiguration(IMarketplaceClientConfiguration configuration) {
-		setCatalogDescriptors(configuration.getCatalogDescriptors());
+	   super.setConfiguration(configuration);
 		setOperations(configuration.getInitialOperations());
 		setWizardState((String) configuration.getInitialState());
-		setSelectedCatalogDescriptor(configuration.getCatalogDescriptor());
 	}
 
 }
