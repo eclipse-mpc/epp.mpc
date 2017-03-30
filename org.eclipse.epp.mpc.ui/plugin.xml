@@ -23,6 +23,10 @@
             class="org.eclipse.epp.internal.mpc.ui.commands.ImportFavoritesWizardCommand"
             commandId="org.eclipse.epp.mpc.ui.command.importFavoritesWizard">
       </handler>
+      <handler
+            class="org.eclipse.epp.internal.mpc.ui.commands.ShowFavoritesCommand"
+            commandId="org.eclipse.epp.mpc.ui.command.showFavorites">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -40,6 +44,11 @@
                name="favoritesUrl"
                optional="true">
          </commandParameter>
+      </command>
+      <command
+            description="%command.favorites.description"
+            id="org.eclipse.epp.mpc.ui.command.showFavorites"
+            name="%command.favorites.name">
       </command>
    </extension>
    <extension
