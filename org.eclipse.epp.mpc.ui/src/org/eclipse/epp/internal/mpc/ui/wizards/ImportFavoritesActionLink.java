@@ -69,12 +69,12 @@ public class ImportFavoritesActionLink extends ActionLink {
 			protected void preDiscovery() {
 				discoveryError = null;
 			}
-			
+
 			@Override
 			protected void handleDiscoveryError(CoreException ex) throws CoreException {
-				discoveryError = importFavoritesPage.handleDiscoveryError(getFavoritesReference(), ex);
+				discoveryError = ImportFavoritesPage.handleDiscoveryError(getFavoritesReference(), ex);
 			}
-			
+
 			@Override
 			protected void postDiscovery() {
 				final String errorMessage = this.discoveryError;
@@ -82,7 +82,9 @@ public class ImportFavoritesActionLink extends ActionLink {
 				importFavoritesPage.setDiscoveryError(errorMessage);
 			}
 		});
-		int result = new ImportFavoritesWizardDialog(wizard.getShell(), importFavoritesWizard).open();
+		ImportFavoritesWizardDialog importWizard = new ImportFavoritesWizardDialog(wizard.getShell(), importFavoritesWizard);
+
+		int result = importWizard.open();
 		if (result == Window.OK) {
 			MarketplacePage catalogPage = wizard.getCatalogPage();
 			catalogPage.setActiveTab(ContentType.FAVORITES);

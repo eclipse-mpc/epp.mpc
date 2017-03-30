@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IPageChangedListener;
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.PageChangedEvent;
@@ -224,6 +226,56 @@ public class AbstractMarketplaceWizardDialog extends WizardDialog {
 
 	public String getCancelButtonLabel(IWizardPage page) {
 		return IDialogConstants.CANCEL_LABEL;
+	}
+
+	@Override
+	protected IDialogSettings getDialogBoundsSettings() {
+		Class<? extends AbstractMarketplaceWizardDialog> dialogClass = getClass();
+		return getDialogBoundsSettings(dialogClass, getParentShell() != null, true);
+	}
+
+	protected static IDialogSettings getDialogBoundsSettings(
+			Class<? extends AbstractMarketplaceWizardDialog> dialogClass, boolean relative, boolean create) {
+		String sectionName = dialogClass.getName() + "_dialogBounds." + (relative ? "relative" : "absolute"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+		IDialogSettings settings = MarketplaceClientUiPlugin.getInstance().getDialogSettings();
+		IDialogSettings section = settings.getSection(sectionName);
+		if (section == null && create) {
+			section = settings.addNewSection(sectionName);
+			IDialogSettings companionSettings = getDialogBoundsSettings(dialogClass, !relative, false);
+			if (companionSettings != null) {
+				copyInitialSize(companionSettings, settings);
+			}
+		}
+		return section;
+	}
+
+	@Override
+	protected int getDialogBoundsStrategy() {
+		return DIALOG_PERSISTLOCATION | DIALOG_PERSISTSIZE;
+	}
+
+	static void copyInitialSize(IDialogSettings sourceSettings, IDialogSettings targetSettings) {
+		copySettings(sourceSettings, targetSettings, "DIALOG_WIDTH"); //$NON-NLS-1$
+		copySettings(sourceSettings, targetSettings, "DIALOG_HEIGHT"); //$NON-NLS-1$
+		copySettings(sourceSettings, targetSettings, "DIALOG_FONT_NAME"); //$NON-NLS-1$
+	}
+
+	static void copyInitialLocation(IDialogSettings sourceSettings, IDialogSettings targetSettings) {
+		copySettings(sourceSettings, targetSettings, "DIALOG_X_ORIGIN"); //$NON-NLS-1$
+		copySettings(sourceSettings, targetSettings, "DIALOG_Y_ORIGIN"); //$NON-NLS-1$
+	}
+
+	static void setInitialLocation(int x, int y, IDialogSettings targetSettings) {
+		targetSettings.put("DIALOG_X_ORIGIN", x); //$NON-NLS-1$
+		targetSettings.put("DIALOG_Y_ORIGIN", y); //$NON-NLS-1$
+	}
+
+	static void copySettings(IDialogSettings sourceSettings, IDialogSettings targetSettings, String key) {
+		String value = sourceSettings.get(key);
+		if (value != null) {
+			targetSettings.put(key, value);
+		}
 	}
 
 }

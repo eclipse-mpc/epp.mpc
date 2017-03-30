@@ -12,6 +12,11 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryWizard;
+import org.eclipse.jface.wizard.IWizardContainer;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
 public class ImportFavoritesWizard extends DiscoveryWizard {
 
@@ -21,7 +26,7 @@ public class ImportFavoritesWizard extends DiscoveryWizard {
 
 	public ImportFavoritesWizard(MarketplaceCatalog catalog, MarketplaceCatalogConfiguration configuration, IMarketplaceWebBrowser browser) {
 		super(catalog, configuration);
-		setWindowTitle("Import Favorites List");
+		setWindowTitle(Messages.ImportFavoritesWizard_title);
 		this.importFavoritesPage = new ImportFavoritesPage(catalog, browser);
 	}
 
@@ -33,7 +38,30 @@ public class ImportFavoritesWizard extends DiscoveryWizard {
 	@Override
 	public boolean performFinish() {
 		importFavoritesPage.performImport();
-		return importFavoritesPage.getErrorMessage() == null;
+		boolean result = importFavoritesPage.getErrorMessage() == null;
+		if (result) {
+			showFavoritesInMarketplace();
+		}
+		return result;
+	}
+
+	private void showFavoritesInMarketplace() {
+		Display display = null;
+		Rectangle bounds = null;
+		IWizardContainer container = getContainer();
+		if (container instanceof WizardDialog) {
+			Shell shell = ((WizardDialog) container).getShell();
+			if (shell != null && !shell.isDisposed()) {
+				bounds = shell.getBounds();
+				display = shell.getDisplay();
+			}
+		}
+		showFavoritesInMarketplace(display, bounds);
+	}
+
+	private void showFavoritesInMarketplace(Display display, Rectangle bounds) {
+		// ignore
+
 	}
 
 	public ImportFavoritesPage getImportFavoritesPage() {

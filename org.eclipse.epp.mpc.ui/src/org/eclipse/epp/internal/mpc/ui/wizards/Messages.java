@@ -115,6 +115,8 @@ class Messages extends NLS {
 
 	public static String ImportFavoritesPage_Description;
 
+	public static String ImportFavoritesWizard_title;
+
 	public static String ImportFavoritesWizardDialog_FinishButtonLabel;
 
 	public static String ImportFavoritesPage_Title;
