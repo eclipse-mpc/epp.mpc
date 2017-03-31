@@ -24,10 +24,14 @@ public class ImportFavoritesWizard extends DiscoveryWizard {
 
 	private String initialFavoritesUrl;
 
-	public ImportFavoritesWizard(MarketplaceCatalog catalog, MarketplaceCatalogConfiguration configuration, IMarketplaceWebBrowser browser) {
+	private final MarketplaceWizard parent;
+
+	public ImportFavoritesWizard(MarketplaceCatalog catalog, MarketplaceCatalogConfiguration configuration,
+			MarketplaceWizard parent) {
 		super(catalog, configuration);
 		setWindowTitle(Messages.ImportFavoritesWizard_title);
-		this.importFavoritesPage = new ImportFavoritesPage(catalog, browser);
+		this.importFavoritesPage = new ImportFavoritesPage(catalog);
+		this.parent = parent;
 	}
 
 	@Override
@@ -50,7 +54,8 @@ public class ImportFavoritesWizard extends DiscoveryWizard {
 		Rectangle bounds = null;
 		IWizardContainer container = getContainer();
 		if (container instanceof WizardDialog) {
-			Shell shell = ((WizardDialog) container).getShell();
+			WizardDialog dialog = (WizardDialog) container;
+			Shell shell = dialog.getShell();
 			if (shell != null && !shell.isDisposed()) {
 				bounds = shell.getBounds();
 				display = shell.getDisplay();

@@ -258,7 +258,7 @@ public abstract class MarketplaceUrlHandler {
 		}
 		String relativeUri = uri.substring(baseUri.length());
 		if (relativeUri.startsWith(DefaultMarketplaceService.API_FAVORITES_URI)) {
-			return handleFavorites(descriptor, relativeUri);
+			return handleTopFavorites(descriptor, relativeUri);
 		} else if (relativeUri.startsWith(DefaultMarketplaceService.API_FEATURED_URI)) {
 			return handleFeatured(descriptor, relativeUri);
 		} else if (relativeUri.startsWith(DefaultMarketplaceService.API_NODE_CONTENT_URI)) {
@@ -440,7 +440,7 @@ public abstract class MarketplaceUrlHandler {
 		return false;
 	}
 
-	protected boolean handleFavorites(CatalogDescriptor descriptor, String url) {
+	protected boolean handleTopFavorites(CatalogDescriptor descriptor, String url) {
 		return false;
 	}
 

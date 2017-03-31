@@ -45,15 +45,11 @@ public class FavoritesViewer extends CatalogViewer {
 
 	private MarketplaceDiscoveryResources discoveryResources;
 
-	private final IMarketplaceWebBrowser browser;
-
 	private final ImportFavoritesPage importFavoritesPage;
 
-	public FavoritesViewer(Catalog catalog, ImportFavoritesPage page, IMarketplaceWebBrowser browser,
-			CatalogConfiguration configuration) {
+	public FavoritesViewer(Catalog catalog, ImportFavoritesPage page, CatalogConfiguration configuration) {
 		super(catalog, page, page.getWizard().getContainer(), configuration);
 		this.importFavoritesPage = page;
-		this.browser = browser;
 		setAutomaticFind(false);
 		setRefreshJobDelay(50L);
 	}
@@ -148,7 +144,7 @@ public class FavoritesViewer extends CatalogViewer {
 	}
 
 	private FavoritesDiscoveryItem createDiscoveryItem(Composite parent, MarketplaceNodeCatalogItem catalogItem) {
-		return new FavoritesDiscoveryItem(parent, SWT.NONE, getResources(), browser, catalogItem, this);
+		return new FavoritesDiscoveryItem(parent, SWT.NONE, getResources(), catalogItem, this);
 	}
 
 	@Override

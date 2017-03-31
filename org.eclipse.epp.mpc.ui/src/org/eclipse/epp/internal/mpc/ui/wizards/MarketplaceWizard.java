@@ -644,7 +644,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		}
 	}
 
-	private String getCatalogUrl() {
+	protected String getCatalogUrl() {
 		CatalogDescriptor catalogDescriptor = getConfiguration().getCatalogDescriptor();
 		URL catalogUrl = catalogDescriptor.getUrl();
 		URI catalogUri;

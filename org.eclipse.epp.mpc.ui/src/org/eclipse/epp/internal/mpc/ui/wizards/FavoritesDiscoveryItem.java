@@ -25,8 +25,8 @@ public class FavoritesDiscoveryItem extends AbstractMarketplaceDiscoveryItem<Mar
 	private Button checkbox;
 
 	public FavoritesDiscoveryItem(Composite parent, int style, MarketplaceDiscoveryResources resources,
-			IMarketplaceWebBrowser browser, MarketplaceNodeCatalogItem connector, FavoritesViewer viewer) {
-		super(parent, style, resources, browser, connector, viewer);
+			MarketplaceNodeCatalogItem connector, FavoritesViewer viewer) {
+		super(parent, style, resources, null, connector, viewer);
 	}
 
 	@Override
@@ -69,9 +69,9 @@ public class FavoritesDiscoveryItem extends AbstractMarketplaceDiscoveryItem<Mar
 		GridData containerLayoutData = (GridData) checkboxContainer.getLayoutData();
 		int xHint = containerLayoutData.widthHint + checkbox.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 		GridDataFactory.createFrom(containerLayoutData)
-				.hint(xHint, containerLayoutData.heightHint)
-				.minSize(xHint, containerLayoutData.minimumHeight)
-				.applyTo(checkboxContainer);
+		.hint(xHint, containerLayoutData.heightHint)
+		.minSize(xHint, containerLayoutData.minimumHeight)
+		.applyTo(checkboxContainer);
 	}
 
 	@Override

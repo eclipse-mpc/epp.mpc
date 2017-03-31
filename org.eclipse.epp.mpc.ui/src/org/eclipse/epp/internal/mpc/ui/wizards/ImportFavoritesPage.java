@@ -38,11 +38,8 @@ import org.eclipse.userstorage.util.ConflictException;
 
 public class ImportFavoritesPage extends CatalogPage {
 
-	private final IMarketplaceWebBrowser browser;
-
-	public ImportFavoritesPage(MarketplaceCatalog catalog, IMarketplaceWebBrowser browser) {
+	public ImportFavoritesPage(MarketplaceCatalog catalog) {
 		super(catalog);
-		this.browser = browser;
 		setTitle(Messages.ImportFavoritesPage_Title);
 		setDescription(Messages.ImportFavoritesPage_Description);
 	}
@@ -95,8 +92,7 @@ public class ImportFavoritesPage extends CatalogPage {
 	@Override
 	protected CatalogViewer doCreateViewer(Composite parent) {
 		ImportFavoritesWizard wizard = getWizard();
-		FavoritesViewer viewer = new FavoritesViewer(getCatalog(), this, browser,
-				wizard.getConfiguration());
+		FavoritesViewer viewer = new FavoritesViewer(getCatalog(), this, wizard.getConfiguration());
 		viewer.setMinimumHeight(MINIMUM_HEIGHT);
 		viewer.createControl(parent);
 		String initialFavoritesUrl = wizard.getInitialFavoritesUrl();

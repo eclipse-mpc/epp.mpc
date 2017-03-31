@@ -97,7 +97,7 @@ class OverviewToolTip extends ToolTip {
 	protected Composite createToolTipContentArea(Event event, final Composite parent) {
 		Shell shell = parent.getShell();
 		setData(Shell.class.getName(), shell);
-		DiscoveryItem.setWidgetId(shell, DiscoveryItem.WIDGET_ID_OVERVIEW);
+		AbstractMarketplaceDiscoveryItem.setWidgetId(shell, DiscoveryItem.WIDGET_ID_OVERVIEW);
 		GridLayoutFactory.fillDefaults().applyTo(parent);
 
 		Color backgroundColor = parent.getDisplay().getSystemColor(SWT.COLOR_WHITE);
@@ -108,7 +108,7 @@ class OverviewToolTip extends ToolTip {
 		if (overview.getScreenshot() != null) {
 			hasImage = true;
 		}
-		final boolean hasLearnMoreLink = overview.getUrl() != null && overview.getUrl().length() > 0;
+		final boolean addLearnMoreLink = browser != null && overview.getUrl() != null && overview.getUrl().length() > 0;
 
 		final int borderWidth = 1;
 		final int heightHint = SCREENSHOT_HEIGHT + (borderWidth * 2);
@@ -119,8 +119,8 @@ class OverviewToolTip extends ToolTip {
 
 		GridDataFactory.fillDefaults().grab(true, true).hint(
 				hasImage ? containerWidthHintWithImage : containerWidthHintWithoutImage, SWT.DEFAULT)
-				.applyTo(
-						container);
+		.applyTo(
+				container);
 
 		GridLayoutFactory.fillDefaults().numColumns((leftImage != null) ? 3 : 2).margins(5, 5).spacing(3, 0).applyTo(
 				container);
@@ -166,7 +166,7 @@ class OverviewToolTip extends ToolTip {
 				+ "} body { margin: 0px; background-color: white;}"; //$NON-NLS-1$
 		summaryLabel.setFont(dialogFont);
 		String html = "<html><style>" + cssStyle + "</style><body>" + TextUtil.cleanInformalHtmlMarkup(summary) //$NON-NLS-1$//$NON-NLS-2$
-				+ "</body></html>"; //$NON-NLS-1$
+		+ "</body></html>"; //$NON-NLS-1$
 		summaryLabel.setText(html);
 		summaryLabel.setBackground(backgroundColor);
 		// instead of opening links in the tooltip, open a new browser window
@@ -186,7 +186,7 @@ class OverviewToolTip extends ToolTip {
 
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).hint(SWT.DEFAULT,
 				hasImage ? SWT.DEFAULT : SCREENSHOT_HEIGHT)
-				.applyTo(summaryLabel);
+		.applyTo(summaryLabel);
 
 		if (hasImage) {
 			final Composite imageContainer = new Composite(container, SWT.BORDER);
@@ -221,9 +221,9 @@ class OverviewToolTip extends ToolTip {
 			// creates a border
 			imageContainer.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));
 		}
-		if (hasLearnMoreLink) {
+		if (addLearnMoreLink) {
 			Link link = new Link(summaryContainer, SWT.NULL);
-			DiscoveryItem.setWidgetId(link, DiscoveryItem.WIDGET_ID_LEARNMORE);
+			AbstractMarketplaceDiscoveryItem.setWidgetId(link, DiscoveryItem.WIDGET_ID_LEARNMORE);
 			GridDataFactory.fillDefaults().grab(false, false).align(SWT.BEGINNING, SWT.CENTER).applyTo(link);
 			link.setText(Messages.OverviewToolTip_learnMoreLink);
 			link.setBackground(backgroundColor);
@@ -302,8 +302,8 @@ class OverviewToolTip extends ToolTip {
 								} catch (SWTException e) {
 									// ignore, probably a bad image format
 									MarketplaceClientUi
-											.error(NLS.bind(Messages.OverviewToolTip_cannotRenderImage_reason,
-													imagePath, e.getMessage()), e);
+									.error(NLS.bind(Messages.OverviewToolTip_cannotRenderImage_reason,
+											imagePath, e.getMessage()), e);
 								}
 							}
 						}
