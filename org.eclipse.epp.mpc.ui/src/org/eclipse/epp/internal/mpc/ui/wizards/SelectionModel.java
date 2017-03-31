@@ -72,9 +72,29 @@ public class SelectionModel {
 	 * @param operation
 	 *            the operation to perform. Providing {@link Operation#NONE} removes the selection
 	 */
-	public void select(CatalogItem item, Operation operation) {
+	public boolean select(CatalogItem item, Operation operation) {
 		boolean changed = false;
-		if (operation == null || Operation.NONE == operation) {
+		Operation sanitizedOperation = operation;
+		if (operation != null && Operation.NONE != operation && item instanceof MarketplaceNodeCatalogItem) {
+			MarketplaceNodeCatalogItem nodeItem = (MarketplaceNodeCatalogItem) item;
+			List<Operation> availableOperations = nodeItem.getAvailableOperations();
+			if (!availableOperations.contains(operation)) {
+				sanitizedOperation = null;
+				switch (operation) {
+				case INSTALL:
+					if (availableOperations.contains(Operation.UPDATE)) {
+						sanitizedOperation = Operation.UPDATE;
+					}
+					break;
+				case UPDATE:
+					if (availableOperations.contains(Operation.INSTALL)) {
+						sanitizedOperation = Operation.UPDATE;
+					}
+					break;
+				}
+			}
+		}
+		if (sanitizedOperation == null || Operation.NONE == sanitizedOperation) {
 			if (itemToOperation.remove(item) != Operation.NONE) {
 				changed = true;
 			}
@@ -88,8 +108,8 @@ public class SelectionModel {
 				}
 			}
 		} else {
-			Operation previous = itemToOperation.put(item, operation);
-			if (previous != operation) {
+			Operation previous = itemToOperation.put(item, sanitizedOperation);
+			if (previous != sanitizedOperation) {
 				changed = true;
 				if (entries != null) {
 					Iterator<CatalogItemEntry> it = entries.iterator();
@@ -99,7 +119,7 @@ public class SelectionModel {
 							it.remove();
 						}
 					}
-					CatalogItemEntry itemEntry = createItemEntry(item, operation);
+					CatalogItemEntry itemEntry = createItemEntry(item, sanitizedOperation);
 					entries.add(itemEntry);
 				}
 			}
@@ -107,6 +127,7 @@ public class SelectionModel {
 		if (changed) {
 			selectionChanged();
 		}
+		return changed;
 	}
 
 	public List<CatalogItemEntry> getCatalogItemEntries() {
@@ -423,6 +444,15 @@ public class SelectionModel {
 
 	public Map<CatalogItem, Operation> getItemToSelectedOperation() {
 		return Collections.unmodifiableMap(itemToOperation);
+	}
+
+	public Map<String, Operation> getItemIdToSelectedOperation() {
+		Map<CatalogItem, Operation> itemToSelectedOperation = getItemToSelectedOperation();
+		Map<String, Operation> itemIdToOperation = new HashMap<String, Operation>(itemToSelectedOperation.size());
+		for (Entry<CatalogItem, Operation> entry : itemToSelectedOperation.entrySet()) {
+			itemIdToOperation.put(entry.getKey().getId(), entry.getValue());
+		}
+		return itemIdToOperation;
 	}
 
 	public void selectionChanged() {

@@ -102,9 +102,7 @@ public class ImportFavoritesPage extends CatalogPage {
 
 	public void performImport() {
 		setErrorMessage(null);
-		IStructuredSelection selection = getViewer().getSelection();
-		@SuppressWarnings("unchecked")
-		List<MarketplaceNodeCatalogItem> importFavorites = selection.toList();
+		List<MarketplaceNodeCatalogItem> importFavorites = getSelection();
 		if (importFavorites.isEmpty()) {
 			return;
 		}
@@ -147,6 +145,13 @@ public class ImportFavoritesPage extends CatalogPage {
 		} catch (InterruptedException e) {
 			//ignore
 		}
+	}
+
+	public List<MarketplaceNodeCatalogItem> getSelection() {
+		IStructuredSelection selection = getViewer().getSelection();
+		@SuppressWarnings("unchecked")
+		List<MarketplaceNodeCatalogItem> importFavorites = selection.toList();
+		return new ArrayList<MarketplaceNodeCatalogItem>(importFavorites);
 	}
 
 	private IUserFavoritesService findUserFavoritesService() {

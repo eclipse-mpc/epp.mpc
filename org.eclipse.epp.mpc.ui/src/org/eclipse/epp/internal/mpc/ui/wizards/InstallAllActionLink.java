@@ -44,8 +44,7 @@ public class InstallAllActionLink extends ActionLink {
 		for (CatalogItem catalogItem : items) {
 			if (catalogItem instanceof MarketplaceNodeCatalogItem) {
 				MarketplaceNodeCatalogItem nodeItem = (MarketplaceNodeCatalogItem) catalogItem;
-				if (selectionModel.getSelectedOperation(nodeItem) != Operation.INSTALL
-						&& nodeItem.getAvailableOperations().contains(Operation.INSTALL)) {
+				if (selectionModel.getSelectedOperation(nodeItem) == null) {
 					selectionModel.select(nodeItem, Operation.INSTALL);
 				}
 			}

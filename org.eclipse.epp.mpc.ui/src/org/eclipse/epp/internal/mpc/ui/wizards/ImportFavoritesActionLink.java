@@ -11,12 +11,14 @@
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
+import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.jface.window.Window;
 
@@ -84,11 +86,16 @@ public class ImportFavoritesActionLink extends ActionLink {
 		});
 		ImportFavoritesWizardDialog importWizard = new ImportFavoritesWizardDialog(wizard.getShell(), importFavoritesWizard);
 
+		Map<String, Operation> oldOperations = wizard.getSelectionModel().getItemIdToSelectedOperation();
 		int result = importWizard.open();
 		if (result == Window.OK) {
 			MarketplacePage catalogPage = wizard.getCatalogPage();
 			catalogPage.setActiveTab(ContentType.FAVORITES);
 			catalogPage.reloadCatalog();
+			Map<String, Operation> newOperations = wizard.getSelectionModel().getItemIdToSelectedOperation();
+			if (!newOperations.equals(oldOperations)) {
+				wizard.getCatalogPage().setPageComplete(!newOperations.isEmpty());
+			}
 		}
 	}
 
