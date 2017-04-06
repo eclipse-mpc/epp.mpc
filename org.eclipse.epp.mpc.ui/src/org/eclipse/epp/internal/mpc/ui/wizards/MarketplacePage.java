@@ -156,6 +156,8 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 
 	private ActionLink selectionLink;
 
+	private ActionLink deselectLink;
+
 	private TabFolder tabFolder;
 
 	private TabItem searchTabItem;
@@ -691,6 +693,8 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 					if (selectionLink != null) {
 						removeActionLink(selectionLink);
 						selectionLink = null;
+						removeActionLink(deselectLink);
+						deselectLink = null;
 					}
 				} else {
 					ActionLink newSelectionLink = createSelectionLink(text);
@@ -698,11 +702,23 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 						updateActionLink(selectionLink, newSelectionLink);
 					} else {
 						addActionLink(0, newSelectionLink);
+						deselectLink = createDeselectionLink();
+						addActionLink(1, deselectLink);
 					}
 					selectionLink = newSelectionLink;
 				}
 			}
 		}
+	}
+
+	private ActionLink createDeselectionLink() {
+		return new ActionLink("clearSelection", "Deselect all", "Clear selected items") {
+
+			@Override
+			public void selected() {
+				deselectionLinkActivated();
+			}
+		};
 	}
 
 	private ActionLink createSelectionLink(String text) {
@@ -719,6 +735,12 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 //		tabFolder.setSelection(searchTabItem);
 //		getViewer().showSelected();
 		setActiveTab(ContentType.SELECTION);
+	}
+
+	protected void deselectionLinkActivated() {
+		SelectionModel selectionModel = getWizard().getSelectionModel();
+		selectionModel.clear();
+		getWizard().updateSelection();
 	}
 
 	@Override
