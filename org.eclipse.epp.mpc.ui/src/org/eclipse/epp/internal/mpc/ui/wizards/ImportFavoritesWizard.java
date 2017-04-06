@@ -21,6 +21,7 @@ import org.eclipse.epp.mpc.ui.IMarketplaceClientService;
 import org.eclipse.epp.mpc.ui.MarketplaceClient;
 import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryWizard;
+import org.eclipse.swt.widgets.Display;
 
 public class ImportFavoritesWizard extends DiscoveryWizard {
 
@@ -82,8 +83,8 @@ public class ImportFavoritesWizard extends DiscoveryWizard {
 	}
 
 	private void openFavoritesInMarketplace(List<MarketplaceNodeCatalogItem> selection) {
-		IMarketplaceClientService clientService = MarketplaceClient.getMarketplaceClientService();
-		IMarketplaceClientConfiguration config = clientService.newConfiguration();
+		final IMarketplaceClientService clientService = MarketplaceClient.getMarketplaceClientService();
+		final IMarketplaceClientConfiguration config = clientService.newConfiguration();
 		MarketplaceCatalogConfiguration catalogConfiguration = getConfiguration();
 		config.setCatalogDescriptors(catalogConfiguration.getCatalogDescriptors());
 		config.setCatalogDescriptor(catalogConfiguration.getCatalogDescriptor());
@@ -91,7 +92,12 @@ public class ImportFavoritesWizard extends DiscoveryWizard {
 		for (MarketplaceNodeCatalogItem item : selection) {
 			initialOperations.put(item.getData().getId(), Operation.INSTALL);
 		}
-		clientService.openFavorites(config);
+		config.setInitialOperations(initialOperations);
+		Display.getCurrent().asyncExec(new Runnable() {
+			public void run() {
+				clientService.openFavorites(config);
+			}
+		});
 	}
 
 	public ImportFavoritesPage getImportFavoritesPage() {
