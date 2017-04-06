@@ -80,6 +80,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.IWizardContainer;
@@ -273,25 +274,34 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				// user canceled
 				throw new CoreException(Status.CANCEL_STATUS);
 			}
-			List<Entry<CatalogItem, Operation>> itemToSelectedOperation = new ArrayList<Entry<CatalogItem, Operation>>(
-					getSelectionModel().getItemToSelectedOperation().entrySet());
-			final List<CatalogItem> noninstallableItems = new ArrayList<CatalogItem>();
-			for (Entry<CatalogItem, Operation> entry : itemToSelectedOperation) {
-				if (entry.getValue() != Operation.NONE) {
-					boolean unavailableInstall = (Boolean.FALSE.equals(entry.getKey().getAvailable()) || entry.getKey()
-							.getSiteUrl() == null)
-							&& (entry.getValue() == Operation.INSTALL || entry.getValue() == Operation.UPDATE);
-					if (unavailableInstall) {
-						getSelectionModel().select(entry.getKey(), Operation.NONE);
-						noninstallableItems.add(entry.getKey());
-					} else {
-						entry.getKey().setSelected(true);
-					}
+		}
+	}
+
+	protected void updateSelection() {
+		List<Entry<CatalogItem, Operation>> itemToSelectedOperation = new ArrayList<Entry<CatalogItem, Operation>>(
+				getSelectionModel().getItemToSelectedOperation().entrySet());
+		final List<CatalogItem> noninstallableItems = new ArrayList<CatalogItem>();
+		for (Entry<CatalogItem, Operation> entry : itemToSelectedOperation) {
+			if (entry.getValue() != Operation.NONE) {
+				boolean unavailableInstall = (Boolean.FALSE.equals(entry.getKey().getAvailable())
+						|| entry.getKey().getSiteUrl() == null)
+						&& (entry.getValue() == Operation.INSTALL || entry.getValue() == Operation.UPDATE);
+				if (unavailableInstall) {
+					getSelectionModel().select(entry.getKey(), Operation.NONE);
+					noninstallableItems.add(entry.getKey());
+				} else {
+					entry.getKey().setSelected(true);
 				}
 			}
-			if (!noninstallableItems.isEmpty()) {
-				notifyNonInstallableItems(noninstallableItems);
-			}
+		}
+		MarketplacePage marketplacePage = getCatalogPage();
+		MarketplaceViewer viewer = marketplacePage == null ? null : marketplacePage.getViewer();
+		if (marketplacePage != null && viewer != null && !viewer.getControl().isDisposed()) {
+			viewer.setSelection(new StructuredSelection(viewer.getCheckedItems()));
+			marketplacePage.setPageComplete(viewer.isComplete());
+		}
+		if (!noninstallableItems.isEmpty()) {
+			notifyNonInstallableItems(noninstallableItems);
 		}
 	}
 

@@ -94,7 +94,7 @@ public class ImportFavoritesActionLink extends ActionLink {
 			catalogPage.reloadCatalog();
 			Map<String, Operation> newOperations = wizard.getSelectionModel().getItemIdToSelectedOperation();
 			if (!newOperations.equals(oldOperations)) {
-				wizard.getCatalogPage().setPageComplete(!newOperations.isEmpty());
+				wizard.updateSelection();
 			}
 		}
 	}
