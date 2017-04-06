@@ -30,7 +30,7 @@ public class ImportFavoritesWizardCommand extends AbstractMarketplaceWizardComma
 
 	@Override
 	protected ImportFavoritesWizardDialog createWizardDialog(DiscoveryWizard wizard, ExecutionEvent event) {
-		return new ImportFavoritesWizardDialog(WorkbenchUtil.getShell(), wizard);
+		return new ImportFavoritesWizardDialog(WorkbenchUtil.getShell(), (ImportFavoritesWizard) wizard);
 	}
 
 	@Override

@@ -90,14 +90,28 @@ public class ImportFavoritesPage extends CatalogPage {
 	}
 
 	@Override
+	protected FavoritesViewer getViewer() {
+		return (FavoritesViewer) super.getViewer();
+	}
+
+	@Override
 	protected CatalogViewer doCreateViewer(Composite parent) {
 		ImportFavoritesWizard wizard = getWizard();
 		FavoritesViewer viewer = new FavoritesViewer(getCatalog(), this, wizard.getConfiguration());
 		viewer.setMinimumHeight(MINIMUM_HEIGHT);
 		viewer.createControl(parent);
 		String initialFavoritesUrl = wizard.getInitialFavoritesUrl();
-		viewer.setFilterText(initialFavoritesUrl == null ? "" : initialFavoritesUrl); //$NON-NLS-1$
+		setFavoritesUrl(viewer, initialFavoritesUrl);
 		return viewer;
+	}
+
+	public void setFavoritesUrl(String url) {
+		FavoritesViewer viewer = getViewer();
+		setFavoritesUrl(viewer, url);
+	}
+
+	private void setFavoritesUrl(FavoritesViewer viewer, String url) {
+		viewer.setFilterText(url == null ? "" : url.trim()); //$NON-NLS-1$
 	}
 
 	public void performImport() {

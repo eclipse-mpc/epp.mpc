@@ -13,6 +13,9 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.util.Arrays;
 
+import org.eclipse.epp.mpc.ui.CatalogDescriptor;
+import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler;
+import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler.SolutionInstallationInfo;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -43,7 +46,19 @@ public class MarketplaceWizardDialog extends AbstractMarketplaceWizardDialog {
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		newShell.setData(this);//make jface dialog accessible for swtbot
-		new MarketplaceDropAdapter().installDropTarget(newShell);
+		new MarketplaceDropAdapter() {
+			@Override
+			protected void proceedInstallation(String url) {
+				SolutionInstallationInfo info = MarketplaceUrlHandler.createSolutionInstallInfo(url);
+				CatalogDescriptor catalogDescriptor = info.getCatalogDescriptor();
+				String installItem = info.getInstallId();
+				//we ignore previous wizard state here, since the wizard is still open...
+				if (installItem != null && installItem.length() > 0) {
+					info.setState(null);
+					getWizard().handleInstallRequest(info, url);
+				}
+			}
+		}.installDropTarget(newShell);
 		final IWorkbenchListener workbenchListener = new IWorkbenchListener() {
 
 			public boolean preShutdown(IWorkbench workbench, boolean forced) {

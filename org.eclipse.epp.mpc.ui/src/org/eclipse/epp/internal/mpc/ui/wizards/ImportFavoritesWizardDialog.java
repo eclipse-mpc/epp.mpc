@@ -11,14 +11,33 @@
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.widgets.Shell;
 
 public class ImportFavoritesWizardDialog extends AbstractMarketplaceWizardDialog {
 
-	public ImportFavoritesWizardDialog(Shell parentShell, IWizard newWizard) {
+	public ImportFavoritesWizardDialog(Shell parentShell, ImportFavoritesWizard newWizard) {
 		super(parentShell, newWizard);
+	}
+
+	@Override
+	protected ImportFavoritesWizard getWizard() {
+		return (ImportFavoritesWizard) super.getWizard();
+	}
+
+	@Override
+	protected void configureShell(Shell newShell) {
+		super.configureShell(newShell);
+		newShell.setData(this);//make jface dialog accessible for swtbot
+		new MarketplaceDropAdapter() {
+			@Override
+			protected void proceedFavorites(String url) {
+				ImportFavoritesWizard wizard = getWizard();
+				wizard.setInitialFavoritesUrl(url);
+				ImportFavoritesPage importPage = wizard.getImportFavoritesPage();
+				importPage.setFavoritesUrl(url);
+			}
+		}.installDropTarget(newShell);
 	}
 
 	@Override

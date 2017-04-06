@@ -10,40 +10,27 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLDecoder;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
-import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
 import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
-import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.browser.ProgressEvent;
 import org.eclipse.swt.browser.ProgressListener;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.statushandlers.StatusManager;
 
 /**
  * @author Carsten Reckord
@@ -214,61 +201,11 @@ public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationLis
 
 	@Override
 	protected boolean handleInstallRequest(final SolutionInstallationInfo installInfo, String url) {
-		final String installId = installInfo.getInstallId();
-		if (installId == null) {
+		if (installInfo.getInstallId() == null) {
 			return false;
 		}
 		final MarketplaceWizard wizard = viewer.getWizard();
-		try {
-			wizard.getContainer().run(true, true, new IRunnableWithProgress() {
-
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					Map<String, Operation> nodeIdToOperation = new HashMap<String, Operation>();
-					try {
-						nodeIdToOperation.put(URLDecoder.decode(installId, UTF_8), Operation.INSTALL);
-					} catch (UnsupportedEncodingException e) {
-						//should be unreachable
-						throw new IllegalStateException();
-					}
-
-					final SelectionModel selectionModel = viewer.getWizard().getSelectionModel();
-					SelectionModelStateSerializer stateSerializer = new SelectionModelStateSerializer(
-							wizard.getCatalog(), selectionModel);
-					stateSerializer.deserialize(installId, nodeIdToOperation, monitor);
-
-					if (selectionModel.getItemToSelectedOperation().size() > 0) {
-						Display display = wizard.getShell().getDisplay();
-						if (!display.isDisposed()) {
-							display.asyncExec(new Runnable() {
-
-								public void run() {
-									MarketplacePage catalogPage = wizard.getCatalogPage();
-									IWizardPage currentPage = wizard.getContainer().getCurrentPage();
-									if (catalogPage == currentPage) {
-										catalogPage.getViewer().setSelection(
-												new StructuredSelection(selectionModel.getSelectedCatalogItems()
-														.toArray()));
-										catalogPage.show(installInfo.getCatalogDescriptor(), ContentType.SELECTION);
-										IWizardPage nextPage = catalogPage.getNextPage();
-										if (nextPage != null && catalogPage.isPageComplete()) {
-											wizard.getContainer().showPage(nextPage);
-										}
-									}
-								}
-							});
-						}
-					}
-				}
-			});
-			return true;
-		} catch (InvocationTargetException e) {
-			IStatus status = MarketplaceClientCore.computeStatus(e, Messages.MarketplaceViewer_unexpectedException);
-			MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
-		} catch (InterruptedException e) {
-			// action canceled, but this still counts as handled
-			return true;
-		}
-		return false;
+		return wizard.handleInstallRequest(installInfo, url);
 	}
 
 	public void completed(ProgressEvent event) {

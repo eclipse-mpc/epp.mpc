@@ -84,12 +84,24 @@ public abstract class MarketplaceUrlHandler {
 			this.catalogDescriptor = catalogDescriptor;
 		}
 
+		public void setInstallId(String installId) {
+			this.installId = installId;
+		}
+
 		public String getInstallId() {
 			return installId;
 		}
 
+		public void setState(String state) {
+			this.state = state;
+		}
+
 		public String getState() {
 			return state;
+		}
+
+		public void setCatalogDescriptor(CatalogDescriptor catalogDescriptor) {
+			this.catalogDescriptor = catalogDescriptor;
 		}
 
 		public CatalogDescriptor getCatalogDescriptor() {
@@ -105,7 +117,7 @@ public abstract class MarketplaceUrlHandler {
 		}
 	}
 
-	protected static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
+	public static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
 
 	private static final String PARAM_SPLIT_REGEX = "&"; //$NON-NLS-1$
 
