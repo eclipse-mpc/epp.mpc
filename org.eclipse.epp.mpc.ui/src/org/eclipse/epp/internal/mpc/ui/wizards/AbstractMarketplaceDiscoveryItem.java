@@ -12,6 +12,8 @@
 
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -33,8 +35,10 @@ import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.AbstractDiscoveryItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
@@ -143,6 +147,8 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 
 	private static Boolean browserAvailable;
 
+	private final PropertyChangeListener propertyChangeListener;
+
 	public AbstractMarketplaceDiscoveryItem(Composite parent, int style, MarketplaceDiscoveryResources resources,
 			IMarketplaceWebBrowser browser, final T connector, CatalogViewer viewer) {
 		super(parent, style, resources, connector);
@@ -154,6 +160,25 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 			@Override
 			public void getName(AccessibleEvent e) {
 				e.result = getNameLabelText();
+			}
+		});
+		propertyChangeListener = new PropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent evt) {
+				if (!isDisposed()) {
+					getDisplay().asyncExec(new Runnable() {
+						public void run() {
+							if (!isDisposed()) {
+								refresh(true);
+							}
+						}
+					});
+				}
+			}
+		};
+		connector.addPropertyChangeListener(propertyChangeListener);
+		this.addDisposeListener(new DisposeListener() {
+			public void widgetDisposed(DisposeEvent e) {
+				connector.removePropertyChangeListener(propertyChangeListener);
 			}
 		});
 	}
@@ -209,6 +234,15 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		.minSize(MAX_IMAGE_WIDTH, MIN_IMAGE_HEIGHT)
 		.span(1, alignIconWithName() ? 4 : 3)
 		.applyTo(checkboxContainer);
+		PixelConverter pixelConverter = new PixelConverter(checkboxContainer);
+		GridLayoutFactory.fillDefaults()
+		.margins(0, 0)
+		.numColumns(1)
+		.equalWidth(false)
+		.spacing(pixelConverter.convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING),
+				pixelConverter.convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING))
+		.applyTo(checkboxContainer);
+
 	}
 
 	protected void createSeparator(Composite parent) {
@@ -344,8 +378,6 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 	}
 
 	protected void createIconControl(Composite checkboxContainer) {
-		GridLayoutFactory.fillDefaults().margins(0, 0).applyTo(checkboxContainer);
-
 		iconLabel = new Label(checkboxContainer, SWT.NONE);
 		setWidgetId(iconLabel, WIDGET_ID_ICON);
 		GridDataFactory.swtDefaults()
@@ -611,6 +643,10 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 
 	@Override
 	protected void refresh() {
+		refresh(true);
+	}
+
+	protected void refresh(boolean updateState) {
 		Color foreground = getForeground();
 
 		nameLabel.setForeground(foreground);
@@ -618,6 +654,13 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		if (installInfoLink != null) {
 			installInfoLink.setForeground(foreground);
 		}
+		if (updateState) {
+			refreshState();
+		}
+	}
+
+	protected void refreshState() {
+		// ignore
 	}
 
 	private void hookRecursively(Control control, Listener listener) {

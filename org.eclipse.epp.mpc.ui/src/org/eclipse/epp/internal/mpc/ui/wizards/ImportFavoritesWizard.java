@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,15 +60,18 @@ public class ImportFavoritesWizard extends DiscoveryWizard {
 		importFavoritesPage.performImport();
 		boolean result = importFavoritesPage.getErrorMessage() == null;
 		if (result) {
-			showFavoritesInMarketplace();
+			showFavoritesInMarketplace(importFavoritesPage.isInstallSelected());
 		}
 		return result;
 	}
 
-	private void showFavoritesInMarketplace() {
+	private void showFavoritesInMarketplace(boolean install) {
 		List<MarketplaceNodeCatalogItem> selection = importFavoritesPage.getSelection();
 		if (selection.isEmpty()) {
 			return;
+		}
+		if (!install) {
+			selection = Collections.emptyList();
 		}
 		if (parent == null) {
 			openFavoritesInMarketplace(selection);

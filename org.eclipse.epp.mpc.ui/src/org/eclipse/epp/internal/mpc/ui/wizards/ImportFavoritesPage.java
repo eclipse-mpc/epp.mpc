@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
 import org.eclipse.epp.internal.mpc.core.service.UserFavoritesService;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
@@ -28,6 +29,7 @@ import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogPage;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.osgi.util.NLS;
@@ -37,6 +39,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.userstorage.util.ConflictException;
 
 public class ImportFavoritesPage extends CatalogPage {
+	private static final String INSTALL_SELECTED_SETTING = "installSelected"; //$NON-NLS-1$
 
 	public ImportFavoritesPage(MarketplaceCatalog catalog) {
 		super(catalog);
@@ -100,9 +103,26 @@ public class ImportFavoritesPage extends CatalogPage {
 		FavoritesViewer viewer = new FavoritesViewer(getCatalog(), this, wizard.getConfiguration());
 		viewer.setMinimumHeight(MINIMUM_HEIGHT);
 		viewer.createControl(parent);
+		boolean installSelected = true;
+		IDialogSettings section = getDialogSettings(false);
+		if (section != null) {
+			installSelected = section.getBoolean(INSTALL_SELECTED_SETTING);
+		}
+		viewer.setInstallSelected(installSelected);
+
 		String initialFavoritesUrl = wizard.getInitialFavoritesUrl();
 		setFavoritesUrl(viewer, initialFavoritesUrl);
 		return viewer;
+	}
+
+	private IDialogSettings getDialogSettings(boolean create) {
+		IDialogSettings dialogSettings = MarketplaceClientUiPlugin.getInstance().getDialogSettings();
+		String sectionName = this.getClass().getName();
+		IDialogSettings section = dialogSettings.getSection(sectionName);
+		if (create && section == null) {
+			section = dialogSettings.addNewSection(sectionName);
+		}
+		return section;
 	}
 
 	public void setFavoritesUrl(String url) {
@@ -116,6 +136,7 @@ public class ImportFavoritesPage extends CatalogPage {
 
 	public void performImport() {
 		setErrorMessage(null);
+		saveInstallSelected();
 		List<MarketplaceNodeCatalogItem> importFavorites = getSelection();
 		if (importFavorites.isEmpty()) {
 			return;
@@ -182,5 +203,24 @@ public class ImportFavoritesPage extends CatalogPage {
 	@Override
 	public ImportFavoritesWizard getWizard() {
 		return (ImportFavoritesWizard) super.getWizard();
+	}
+
+	@Override
+	public void dispose() {
+		saveInstallSelected();
+		super.dispose();
+	}
+
+	public boolean isInstallSelected() {
+		return getViewer().isInstallSelected();
+	}
+
+	private void saveInstallSelected() {
+		FavoritesViewer viewer = getViewer();
+		if (viewer != null) {
+			boolean installSelected = viewer.isInstallSelected();
+			IDialogSettings dialogSettings = getDialogSettings(true);
+			dialogSettings.put(INSTALL_SELECTED_SETTING, installSelected);
+		}
 	}
 }
