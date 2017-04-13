@@ -10,7 +10,7 @@
    <packaging>pom</packaging>
 
    <properties>
-      <tycho.version>0.24.0</tycho.version>
+      <tycho.version>1.0.0</tycho.version>
    </properties>
 
    <modules>
@@ -28,6 +28,11 @@
       </plugins>
       <pluginManagement>
          <plugins>
+            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-resources-plugin</artifactId>
+               <version>3.0.2</version>
+            </plugin>
             <plugin>
                <groupId>org.eclipse.tycho</groupId>
                <artifactId>tycho-maven-plugin</artifactId>
