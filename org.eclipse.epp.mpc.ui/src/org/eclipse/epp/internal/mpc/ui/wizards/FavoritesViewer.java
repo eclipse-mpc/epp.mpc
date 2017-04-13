@@ -43,7 +43,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -107,8 +106,8 @@ public class FavoritesViewer extends CatalogViewer {
 	}
 
 	private void createButtonsForViewerButtonBar(Composite buttonContainer) {
-		selectAllButton = createButton(buttonContainer, IDialogConstants.SELECT_ALL_ID, "Select All");
-		deselectAllButton = createButton(buttonContainer, IDialogConstants.DESELECT_ALL_ID, "Deselect All");
+		selectAllButton = createButton(buttonContainer, IDialogConstants.SELECT_ALL_ID, Messages.FavoritesViewer_SelectAll);
+		deselectAllButton = createButton(buttonContainer, IDialogConstants.DESELECT_ALL_ID, Messages.FavoritesViewer_DeselectAll);
 		addSelectionChangedListener(new ISelectionChangedListener() {
 
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -179,13 +178,7 @@ public class FavoritesViewer extends CatalogViewer {
 	}
 
 	private void setButtonLayoutData(Button button) {
-		GridDataFactory dataFactory = GridDataFactory.defaultsFor(button).align(SWT.END, SWT.CENTER).grab(true, true);
-		int widthHint = pixelConverter.convertHorizontalDLUsToPixels(IDialogConstants.BUTTON_WIDTH);
-		widthHint = Math.min(widthHint, button.getDisplay().getBounds().width / 5);
-		Point maxSize = button.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-		widthHint = Math.min(widthHint, maxSize.x);
-		dataFactory.hint(widthHint, -1);
-		dataFactory.applyTo(button);
+		AbstractMarketplaceDiscoveryItem.createButtonLayoutData(button, pixelConverter).applyTo(button);
 	}
 
 	protected void buttonPressed(int id) {
@@ -207,9 +200,9 @@ public class FavoritesViewer extends CatalogViewer {
 
 	protected void createInstallCheckbox(Composite buttonContainer) {
 		installSelectedCheckbox = new Button(buttonContainer, SWT.CHECK);
-		installSelectedCheckbox.setText("Also select entries for installation");
+		installSelectedCheckbox.setText(Messages.FavoritesViewer_SelectForInstallation);
 		installSelectedCheckbox.setToolTipText(
-				"After importing the selected favorites, mark them for installation in the Marketplace wizard");
+				Messages.FavoritesViewer_SelectForInstallationTooltip);
 		GridDataFactory.defaultsFor(installSelectedCheckbox).applyTo(installSelectedCheckbox);
 
 		installSelectedCheckbox.setSelection(this.installSelected);

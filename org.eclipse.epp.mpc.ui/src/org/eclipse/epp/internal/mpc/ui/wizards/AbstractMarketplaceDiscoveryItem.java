@@ -58,6 +58,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -94,6 +95,8 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 	protected static final int TAGS_MARGIN_TOP = 2;
 
 	protected static final int SEPARATOR_MARGIN_TOP = 8;
+
+	protected static final int BUTTONBAR_MARGIN_TOP = 8;
 
 	protected static final int MAX_IMAGE_HEIGHT = 86;
 
@@ -149,6 +152,8 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 
 	private final PropertyChangeListener propertyChangeListener;
 
+	private PixelConverter pixelConverter;
+
 	public AbstractMarketplaceDiscoveryItem(Composite parent, int style, MarketplaceDiscoveryResources resources,
 			IMarketplaceWebBrowser browser, final T connector, CatalogViewer viewer) {
 		super(parent, style, resources, connector);
@@ -183,6 +188,10 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		});
 	}
 
+	protected PixelConverter getPixelConverter() {
+		return pixelConverter;
+	}
+
 	protected void createContent() {
 		createContent(this);
 		createSeparator(this);
@@ -193,6 +202,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 	}
 
 	protected void createContent(Composite parent) {
+		pixelConverter = new PixelConverter(parent);
 		GridLayoutFactory.swtDefaults()
 		.numColumns(4)
 		.equalWidth(false)
@@ -234,7 +244,6 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		.minSize(MAX_IMAGE_WIDTH, MIN_IMAGE_HEIGHT)
 		.span(1, alignIconWithName() ? 4 : 3)
 		.applyTo(checkboxContainer);
-		PixelConverter pixelConverter = new PixelConverter(checkboxContainer);
 		GridLayoutFactory.fillDefaults()
 		.margins(0, 0)
 		.numColumns(1)
@@ -268,7 +277,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		.span(3, 1)
 		.hint(100, SWT.DEFAULT)
 		.applyTo(description);
-		String descriptionText = connector.getDescription();
+		String descriptionText = getDescriptionText();
 		int maxDescriptionLength = 162;
 		if (descriptionText == null) {
 			descriptionText = ""; //$NON-NLS-1$
@@ -315,6 +324,10 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		createInfoLink(description);
 	}
 
+	protected String getDescriptionText() {
+		return connector.getDescription();
+	}
+
 	protected void createNameLabel(Composite parent) {
 		nameLabel = new Label(parent, SWT.WRAP);
 		setWidgetId(nameLabel, WIDGET_ID_NAME);
@@ -342,6 +355,13 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 	protected abstract void createInstallInfo(Composite parent);
 
 	protected abstract void createSocialButtons(Composite parent);
+
+	protected Label createButtonBarSpacer(Composite parent) {
+		Label spacer = new Label(parent, SWT.NONE);
+		spacer.setText(" ");//$NON-NLS-1$
+		GridDataFactory.fillDefaults().indent(0, BUTTONBAR_MARGIN_TOP).align(SWT.CENTER, SWT.FILL).applyTo(spacer);
+		return spacer;
+	}
 
 	private INode getCatalogItemNode() {
 		Object data = connector.getData();
@@ -383,13 +403,17 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		GridDataFactory.swtDefaults()
 		.align(SWT.CENTER, SWT.BEGINNING).grab(true, true)
 		.applyTo(iconLabel);
-		if (connector.getIcon() != null) {
-			provideIconImage(iconLabel, connector.getSource(), connector.getIcon(), 64, true);
+		if (getIcon() != null) {
+			provideIconImage(iconLabel, connector.getSource(), getIcon(), 64, true);
 		} else {
 			iconLabel.setImage(MarketplaceClientUiPlugin.getInstance()
 					.getImageRegistry()
 					.get(MarketplaceClientUiPlugin.NO_ICON_PROVIDED));
 		}
+	}
+
+	protected Icon getIcon() {
+		return connector.getIcon();
 	}
 
 	private void provideIconImage(final Label iconLabel, AbstractCatalogSource source, Icon icon, int size,
@@ -762,5 +786,20 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 
 	protected CatalogViewer getViewer() {
 		return viewer;
+	}
+
+	static GridDataFactory createButtonLayoutData(Button button, PixelConverter pixelConverter) {
+		GridDataFactory dataFactory = GridDataFactory.defaultsFor(button).align(SWT.END, SWT.CENTER).grab(true, true);
+		int minWidth = pixelConverter.convertHorizontalDLUsToPixels(IDialogConstants.BUTTON_WIDTH);
+		int maxWidth = button.getDisplay().getBounds().width / 5;
+		Point preferredSize = button.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+
+		int widthHint = Math.max(minWidth, preferredSize.x);
+		widthHint = Math.min(widthHint, maxWidth);
+		minWidth = Math.min(preferredSize.x, maxWidth);
+
+		dataFactory.hint(widthHint, SWT.DEFAULT);
+		dataFactory.minSize(minWidth, SWT.DEFAULT);
+		return dataFactory;
 	}
 }

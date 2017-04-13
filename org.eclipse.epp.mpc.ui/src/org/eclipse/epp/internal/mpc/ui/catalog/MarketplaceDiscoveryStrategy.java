@@ -420,12 +420,17 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	}
 
 	public void addCatalogItem(MarketplaceCategory catalogCategory) {
+		CatalogItem catalogItem = createCategoryItem(catalogCategory);
+		items.add(catalogItem);
+	}
+
+	private CatalogItem createCategoryItem(MarketplaceCategory catalogCategory) {
 		CatalogItem catalogItem = new CatalogItem();
 		catalogItem.setSource(source);
 		catalogItem.setData(catalogDescriptor);
 		catalogItem.setId(catalogDescriptor.getUrl().toString());
 		catalogItem.setCategoryId(catalogCategory.getId());
-		items.add(catalogItem);
+		return catalogItem;
 	}
 
 	public UserActionCatalogItem addUserActionItem(MarketplaceCategory catalogCategory, UserAction userAction) {
@@ -450,7 +455,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		catalogItem.setData(data);
 		catalogItem.setId(catalogDescriptor.getUrl().toString() + "#" + userAction.name()); //$NON-NLS-1$
 		catalogItem.setCategoryId(catalogCategory.getId());
-		items.add(catalogItem);
+		items.add(0, catalogItem);
 		return catalogItem;
 	}
 
@@ -682,13 +687,17 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 					} else {
 						result = marketplaceService.userFavorites(progress.newChild(500));
 					}
-					handleSearchResult(catalogCategory, result, progress.newChild(500));
 					if (result.getNodes().isEmpty()) {
+						catalogCategory = addPopularItems(progress.newChild(500));
 						addNoFavoritesItem(catalogCategory);
+					} else {
+						handleSearchResult(catalogCategory, result, progress.newChild(500));
 					}
 				} catch (NotAuthorizedException e) {
+					catalogCategory = addPopularItems(progress.newChild(500));
 					addUserStorageLoginItem(catalogCategory, e.getLocalizedMessage());
 				} catch (UnsupportedOperationException ex) {
+					catalogCategory = addPopularItems(progress.newChild(500));
 					addFavoritesNotSupportedItem(catalogCategory);
 				} catch (Exception ex) {
 					//FIXME we should use the wizard page's status line to show errors, but that's unreachable from here...
@@ -696,11 +705,20 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 					addRetryErrorItem(catalogCategory, ex);
 				}
 			} else {
+				catalogCategory = addPopularItems(progress.newChild(1000));
 				addFavoritesNotSupportedItem(catalogCategory);
 			}
 		} finally {
 			monitor.done();
 		}
+	}
+
+	private MarketplaceCategory addPopularItems(IProgressMonitor monitor) throws CoreException {
+		SubMonitor progress = SubMonitor.convert(monitor, 100);
+		MarketplaceCategory catalogCategory;
+		popular(progress.newChild(99));
+		catalogCategory = findMarketplaceCategory(progress.newChild(1));
+		return catalogCategory;
 	}
 
 	public void refreshUserFavorites(IProgressMonitor monitor) throws CoreException {
@@ -731,10 +749,13 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 						}
 					}
 				} catch (NotAuthorizedException e) {
+					catalogCategory = addPopularItems(progress.newChild(500));
 					addUserStorageLoginItem(catalogCategory, e.getLocalizedMessage());
 				} catch (UnsupportedOperationException ex) {
+					catalogCategory = addPopularItems(progress.newChild(500));
 					addFavoritesNotSupportedItem(catalogCategory);
 				} catch (Exception ex) {
+					//FIXME we should use the wizard page's status line to show errors, but that's unreachable from here...
 					MarketplaceClientCore.error(Messages.MarketplaceDiscoveryStrategy_FavoritesRetrieveError, ex);
 					addRetryErrorItem(catalogCategory, ex);
 				}

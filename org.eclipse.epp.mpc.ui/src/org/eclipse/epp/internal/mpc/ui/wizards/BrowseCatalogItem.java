@@ -12,6 +12,7 @@
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
@@ -75,36 +76,47 @@ public class BrowseCatalogItem extends UserActionViewerItem<CatalogDescriptor> {
 	}
 
 	protected void openMarketplace() {
-		CatalogDescriptor catalogDescriptor = getData();
+		openMarketplace(getData(), getViewer(), browser);
+	}
+
+	protected static void openMarketplace(CatalogDescriptor catalogDescriptor, MarketplaceViewer viewer,
+			IMarketplaceWebBrowser browser) {
 
 		try {
-			URL url = catalogDescriptor.getUrl();
-			try {
-				ContentType contentType = getViewer().getQueryContentType();
-				if (contentType == ContentType.SEARCH) {
-					String queryText = getViewer().getQueryText();
-					ICategory queryCategory = getViewer().getQueryCategory();
-					IMarket queryMarket = getViewer().getQueryMarket();
-					String path = new DefaultMarketplaceService(url).computeRelativeSearchUrl(queryMarket,
-							queryCategory, queryText, false);
-					if (path != null) {
-						url = new URL(url, path);
-					}
-				}
-			} catch (IllegalArgumentException e) {
-				// should never happen
-				MarketplaceClientUi.error(e);
-			} catch (MalformedURLException e) {
-				// should never happen
-				MarketplaceClientUi.error(e);
-			}
-
-			browser.openUrl(url.toURI().toString());
+			String url = getMarketplaceUrl(catalogDescriptor, viewer);
+			browser.openUrl(url);
 		} catch (URISyntaxException e) {
 			String message = String.format(Messages.BrowseCatalogItem_cannotOpenBrowser);
 			IStatus status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, IStatus.ERROR, message, e);
 			MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 		}
+	}
+
+	private static String getMarketplaceUrl(CatalogDescriptor catalogDescriptor, MarketplaceViewer viewer)
+			throws URISyntaxException {
+		URL url = catalogDescriptor.getUrl();
+		try {
+			ContentType contentType = viewer.getQueryContentType();
+			if (contentType == ContentType.SEARCH) {
+				String queryText = viewer.getQueryText();
+				ICategory queryCategory = viewer.getQueryCategory();
+				IMarket queryMarket = viewer.getQueryMarket();
+				String path = new DefaultMarketplaceService(url).computeRelativeSearchUrl(queryMarket, queryCategory,
+						queryText, false);
+				if (path != null) {
+					url = new URL(url, path);
+				}
+			}
+		} catch (IllegalArgumentException e) {
+			// should never happen
+			MarketplaceClientUi.error(e);
+		} catch (MalformedURLException e) {
+			// should never happen
+			MarketplaceClientUi.error(e);
+		}
+
+		URI uri = url.toURI();
+		return uri.toString();
 	}
 
 	@Override

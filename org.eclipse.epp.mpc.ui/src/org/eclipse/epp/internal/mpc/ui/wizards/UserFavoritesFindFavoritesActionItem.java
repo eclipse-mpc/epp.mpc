@@ -11,39 +11,63 @@
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
-import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
-import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryResources;
-import org.eclipse.jface.window.IShellProvider;
-import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.epp.mpc.ui.CatalogDescriptor;
+import org.eclipse.equinox.internal.p2.discovery.model.Icon;
 import org.eclipse.swt.widgets.Composite;
 
-public class UserFavoritesFindFavoritesActionItem extends AbstractUserActionLinksItem {
+public class UserFavoritesFindFavoritesActionItem extends AbstractUserActionItem {
 
-	private static final String BROWSE_ACTION_ID = "browse"; //$NON-NLS-1$
+	private static final int IMPORT_BUTTON_ID = 1;
 
-	public UserFavoritesFindFavoritesActionItem(Composite parent, DiscoveryResources resources,
-			IShellProvider shellProvider, UserActionCatalogItem element, final MarketplacePage marketplacePage) {
-		super(parent, resources, shellProvider, element, marketplacePage.getViewer());
-		createContent(new ImportFavoritesActionLink(marketplacePage),
-				new ActionLink(BROWSE_ACTION_ID,
-						Messages.UserFavoritesFindFavoritesActionItem_browsePopularActionLabel,
-						Messages.UserFavoritesFindFavoritesActionItem_browsePopularTooltip) {
+	private static final int BROWSE_BUTTON_ID = 0;
 
-			@Override
-			public void selected() {
-				MarketplaceWizard wizard = marketplacePage.getWizard();
-				IWizardPage currentPage = wizard.getContainer().getCurrentPage();
-				if (currentPage == marketplacePage
-						&& marketplacePage.getViewer().getContentType() == ContentType.FAVORITES) {
-							marketplacePage.setActiveTab(ContentType.POPULAR);
-				}
-			}
+	private final MarketplaceWizard wizard;
 
-		});
+	private final CatalogDescriptor descriptor;
+
+	public UserFavoritesFindFavoritesActionItem(Composite parent, MarketplaceDiscoveryResources resources,
+			UserActionCatalogItem connector, MarketplacePage page) {
+		super(parent, resources, connector, page.getViewer());
+		this.wizard = page.getWizard();
+		this.descriptor = wizard.getConfiguration().getCatalogDescriptor();
+	}
+
+	@Override
+	protected String getNameLabelText() {
+		return Messages.UserFavoritesFindFavoritesActionItem_title;
 	}
 
 	@Override
 	protected String getDescriptionText() {
 		return Messages.UserFavoritesFindFavoritesActionItem_noFavoritesYetMessage;
+	}
+
+	@Override
+	protected Icon getIcon() {
+		// TODO
+		return null;
+	}
+
+	@Override
+	protected String getSublineText() {
+		return Messages.UserFavoritesFindFavoritesActionItem_subline;
+	}
+
+	@Override
+	protected void createButtons(Composite parent) {
+		createButton(parent, Messages.UserFavoritesFindFavoritesActionItem_BrowseButtonLabel, Messages.UserFavoritesFindFavoritesActionItem_BrowseButtonTooltip,
+				BROWSE_BUTTON_ID);
+		createButton(parent, Messages.UserFavoritesAbstractImportActionItem_importFavoritesActionLabel,
+				Messages.UserFavoritesAbstractImportActionItem_importFavoritesTooltip,
+				IMPORT_BUTTON_ID);
+	}
+
+	@Override
+	protected void buttonPressed(int id) {
+		if (id == BROWSE_BUTTON_ID) {
+			BrowseCatalogItem.openMarketplace(descriptor, (MarketplaceViewer) getViewer(), wizard);
+		} else {
+			ImportFavoritesActionLink.importFavorites(wizard);
+		}
 	}
 }

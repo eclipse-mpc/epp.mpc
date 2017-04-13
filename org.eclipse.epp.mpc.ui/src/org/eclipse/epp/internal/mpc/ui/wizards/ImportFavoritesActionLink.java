@@ -36,19 +36,19 @@ public class ImportFavoritesActionLink extends ActionLink {
 
 	@Override
 	public void selected() {
-		importFavorites();
+		importFavorites(marketplacePage.getWizard());
 	}
 
-	protected void importFavorites() {
-		MarketplaceDiscoveryStrategy marketplaceStrategy = findMarketplaceDiscoveryStrategy();
+	protected static void importFavorites(MarketplaceWizard wizard) {
+		MarketplaceDiscoveryStrategy marketplaceStrategy = findMarketplaceDiscoveryStrategy(wizard);
 		if (marketplaceStrategy != null && marketplaceStrategy.hasUserFavoritesService()) {
-			importFavorites(marketplaceStrategy);
+			importFavorites(wizard, marketplaceStrategy);
 		}
 	}
 
-	protected MarketplaceDiscoveryStrategy findMarketplaceDiscoveryStrategy() {
+	protected static MarketplaceDiscoveryStrategy findMarketplaceDiscoveryStrategy(MarketplaceWizard wizard) {
 		MarketplaceDiscoveryStrategy marketplaceStrategy = null;
-		List<AbstractDiscoveryStrategy> discoveryStrategies = marketplacePage.getCatalog().getDiscoveryStrategies();
+		List<AbstractDiscoveryStrategy> discoveryStrategies = wizard.getCatalog().getDiscoveryStrategies();
 		for (AbstractDiscoveryStrategy strategy : discoveryStrategies) {
 			if (strategy instanceof MarketplaceDiscoveryStrategy) {
 				marketplaceStrategy = (MarketplaceDiscoveryStrategy) strategy;
@@ -58,8 +58,7 @@ public class ImportFavoritesActionLink extends ActionLink {
 		return marketplaceStrategy;
 	}
 
-	protected void importFavorites(MarketplaceDiscoveryStrategy marketplaceStrategy) {
-		MarketplaceWizard wizard = marketplacePage.getWizard();
+	protected static void importFavorites(MarketplaceWizard wizard, MarketplaceDiscoveryStrategy marketplaceStrategy) {
 		FavoritesCatalog favoritesCatalog = new FavoritesCatalog();
 
 		ImportFavoritesWizard importFavoritesWizard = new ImportFavoritesWizard(favoritesCatalog,

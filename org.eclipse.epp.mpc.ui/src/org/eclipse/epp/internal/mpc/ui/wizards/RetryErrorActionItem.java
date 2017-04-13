@@ -13,51 +13,70 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
-import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryResources;
+import org.eclipse.equinox.internal.p2.discovery.model.Icon;
 import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Composite;
 
-public class RetryErrorActionItem extends AbstractUserActionLinksItem {
+public class RetryErrorActionItem extends AbstractUserActionItem {
 
-	private static final String RETRY_ACTION_ID = "retry"; //$NON-NLS-1$
+	private static final int RETRY_ACTION_ID = 1;
 
-	private static final String DETAILS_ACTION_ID = "details"; //$NON-NLS-1$
+	private static final int DETAILS_ACTION_ID = 0;
 
-	private final IStatus error;
+	public RetryErrorActionItem(Composite parent, MarketplaceDiscoveryResources resources,
+			UserActionCatalogItem connector, MarketplaceViewer viewer) {
+		super(parent, resources, connector, viewer);
+	}
 
-	public RetryErrorActionItem(Composite parent, DiscoveryResources resources, IShellProvider shellProvider,
-			UserActionCatalogItem element, MarketplaceViewer viewer) {
-		super(parent, resources, shellProvider, element, viewer);
-		this.error = MarketplaceClientCore.computeStatus((Throwable) element.getData(), null);
-		createContent(new ActionLink(DETAILS_ACTION_ID, Messages.RetryErrorActionItem_showDetailsActionLabel,
-				Messages.RetryErrorActionItem_showDetailsTooltip) {
+	private IStatus getError() {
+		return MarketplaceClientCore.computeStatus((Throwable) connector.getData(), null);
+	}
 
-			@Override
-			public void selected() {
-				showDetails();
-			}
-
-		}, new ActionLink(RETRY_ACTION_ID, Messages.RetryErrorActionItem_retryActionLabel,
-				Messages.RetryErrorActionItem_retryTooltip) {
-
-			@Override
-			public void selected() {
-				retry();
-			}
-
-		});
+	@Override
+	protected String getNameLabelText() {
+		return Messages.UserFavoritesUnsupportedActionItem_unsupportedFavoritesLabel;
 	}
 
 	@Override
 	protected String getDescriptionText() {
+		IStatus error = getError();
 		return NLS.bind(Messages.RetryErrorActionItem_failedToLoadMessage,
 				error.getMessage() == null ? error.getClass().getSimpleName() : error.getMessage());
 	}
 
+	@Override
+	protected Icon getIcon() {
+		// TODO
+		return null;
+	}
+
+	@Override
+	protected String getSublineText() {
+		return Messages.RetryErrorActionItem_subline;
+	}
+
+	@Override
+	protected void createButtons(Composite parent) {
+		createButton(parent, Messages.RetryErrorActionItem_showDetailsActionLabel,
+				Messages.RetryErrorActionItem_showDetailsTooltip, DETAILS_ACTION_ID);
+		createButton(parent, Messages.RetryErrorActionItem_retryActionLabel,
+				Messages.RetryErrorActionItem_retryTooltip, RETRY_ACTION_ID);
+	}
+
+	@Override
+	protected void buttonPressed(int id) {
+		if (id == RETRY_ACTION_ID) {
+			retry();
+		} else {
+			showDetails();
+		}
+	}
+
 	protected void showDetails() {
-		ErrorDialog.openError(getShell(), Messages.RetryErrorActionItem_errorDetailsDialogTitle, getDescriptionText(), error);
+		IStatus error = getError();
+		ErrorDialog.openError(getShell(), Messages.RetryErrorActionItem_errorDetailsDialogTitle, getDescriptionText(),
+				error);
 	}
 
 	protected void retry() {

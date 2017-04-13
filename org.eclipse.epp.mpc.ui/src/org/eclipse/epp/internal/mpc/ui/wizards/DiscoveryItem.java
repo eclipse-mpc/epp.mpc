@@ -66,8 +66,6 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 
 	private static final String FAVORITED_BUTTON_STATE_DATA = "favorited"; //$NON-NLS-1$
 
-	private static final int BUTTONBAR_MARGIN_TOP = 8;
-
 	public static final String WIDGET_ID_INSTALLS = "installs"; //$NON-NLS-1$
 
 	public static final String WIDGET_ID_TAGS = "tags"; //$NON-NLS-1$
@@ -234,10 +232,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 	protected void createSocialButtons(Composite parent) {
 		Integer favorited = getFavoriteCount();
 		if (favorited == null || getCatalogItemUrl() == null) {
-			Label spacer = new Label(this, SWT.NONE);
-			spacer.setText(" ");//$NON-NLS-1$
-
-			GridDataFactory.fillDefaults().indent(0, BUTTONBAR_MARGIN_TOP).align(SWT.CENTER, SWT.FILL).applyTo(spacer);
+			createButtonBarSpacer(parent);
 
 		} else {
 			createFavoriteButton(parent);
@@ -251,9 +246,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 			.align(SWT.BEGINNING, SWT.FILL)
 			.applyTo(shareControl);
 		} else {
-			Label spacer = new Label(this, SWT.NONE);
-			spacer.setText(" ");//$NON-NLS-1$
-			GridDataFactory.fillDefaults().indent(0, BUTTONBAR_MARGIN_TOP).align(SWT.CENTER, SWT.FILL).applyTo(spacer);
+			createButtonBarSpacer(parent);
 		}
 	}
 

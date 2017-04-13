@@ -712,7 +712,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 	}
 
 	private ActionLink createDeselectionLink() {
-		return new ActionLink("clearSelection", "Deselect all", "Clear selected items") {
+		return new ActionLink("clearSelection", Messages.MarketplacePage_DeselectAll, Messages.MarketplacePage_DeselectAllTooltip) { //$NON-NLS-1$
 
 			@Override
 			public void selected() {
@@ -722,7 +722,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 	}
 
 	private ActionLink createSelectionLink(String text) {
-		return new ActionLink("showSelection", text, Messages.MarketplacePage_showSelection) {
+		return new ActionLink("showSelection", text, Messages.MarketplacePage_showSelection) { //$NON-NLS-1$
 
 			@Override
 			public void selected() {
