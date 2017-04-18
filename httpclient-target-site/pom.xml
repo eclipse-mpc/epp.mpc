@@ -3,13 +3,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.eclipse.epp.mpc.apache.httpclient</groupId>
-	<artifactId>org.eclipse.epp.mpc.apache.httpclient.parent</artifactId>
-	<name>HttpClient Wrapper Feature Parent</name>
+   <groupId>org.eclipse.epp.mpc.apache.httpclient</groupId>
+   <artifactId>org.eclipse.epp.mpc.apache.httpclient.parent</artifactId>
+   <name>HttpClient Wrapper Feature Parent</name>
    <version>1.0.0-SNAPSHOT</version>
-	<packaging>pom</packaging>
+   <packaging>pom</packaging>
 
-	<properties>
+   <properties>
       <tycho.version>0.24.0</tycho.version>
    </properties>
 
@@ -19,13 +19,13 @@
       <module>org.eclipse.epp.mpc.apache.httpclient.site</module>
    </modules>
 
-	<build>
-		<plugins>
+   <build>
+      <plugins>
          <plugin>
             <groupId>org.eclipse.tycho</groupId>
             <artifactId>tycho-maven-plugin</artifactId>
          </plugin>
-		</plugins>
+      </plugins>
       <pluginManagement>
          <plugins>
             <plugin>
@@ -41,26 +41,26 @@
                <configuration>
                   <resolver>p2</resolver>
                   <target>
-						<artifact>
-							<groupId>org.eclipse.epp.mpc.apache.httpclient</groupId>
-							<artifactId>httpclient-target</artifactId>
-							<version>1.0.0-SNAPSHOT</version>
-						</artifact>
-					</target>
-          <environments>
-            <environment>
-              <os>*</os>
-              <ws>*</ws>
-              <arch>*</arch>
-            </environment>
-            <environment>
-              <!-- This is needed to make the build work properly with 
-                   our (osgi.os=win32) platform filter -->
-              <os>win32</os>
-              <ws>*</ws>
-              <arch>*</arch>
-            </environment>
-          </environments>
+                     <artifact>
+                        <groupId>org.eclipse.epp.mpc.apache.httpclient</groupId>
+                        <artifactId>httpclient-target</artifactId>
+                        <version>1.0.0-SNAPSHOT</version>
+                     </artifact>
+                  </target>
+                  <environments>
+                     <environment>
+                        <os>*</os>
+                        <ws>*</ws>
+                        <arch>*</arch>
+                     </environment>
+                     <environment>
+                        <!-- This is needed to make the build work properly with
+                           the (osgi.os=win32) platform filter in httpclient.win -->
+                        <os>win32</os>
+                        <ws>*</ws>
+                        <arch>*</arch>
+                     </environment>
+                  </environments>
                </configuration>
             </plugin>
             <plugin>
@@ -106,5 +106,5 @@
             </plugin>
          </plugins>
       </pluginManagement>
-	</build>
+   </build>
 </project>

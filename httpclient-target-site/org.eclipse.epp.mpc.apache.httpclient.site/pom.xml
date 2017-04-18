@@ -4,28 +4,52 @@
 	<modelVersion>4.0.0</modelVersion>
 
    <parent>
-   	<groupId>org.eclipse.epp.mpc.apache.httpclient</groupId>
-   	<artifactId>org.eclipse.epp.mpc.apache.httpclient.parent</artifactId>
+      <groupId>org.eclipse.epp.mpc.apache.httpclient</groupId>
+      <artifactId>org.eclipse.epp.mpc.apache.httpclient.parent</artifactId>
       <version>1.0.0-SNAPSHOT</version>
    </parent>
-   
-	<name>HttpClient Feature Site</name>
-	<artifactId>org.eclipse.epp.mpc.apache.httpclient.site</artifactId>
-	<packaging>eclipse-repository</packaging>
 
-	<properties>
-		<qualifier>${project.unqualifiedVersion}</qualifier>
+   <name>HttpClient Feature Site</name>
+   <artifactId>org.eclipse.epp.mpc.apache.httpclient.site</artifactId>
+   <packaging>eclipse-repository</packaging>
+
+   <properties>
+      <qualifier>${project.unqualifiedVersion}</qualifier>
    </properties>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>tycho-p2-repository-plugin</artifactId>
-				<configuration>
-					<includeAllDependencies>false</includeAllDependencies>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+   <build>
+      <plugins>
+         <plugin>
+            <artifactId>maven-resources-plugin</artifactId>
+            <executions>
+               <execution>
+                  <id>copy-promotion</id>
+                  <phase>process-resources</phase>
+                  <goals>
+                     <goal>copy-resources</goal>
+                  </goals>
+                  <configuration>
+                     <outputDirectory>${project.build.directory}</outputDirectory>
+                     <resources>
+                        <resource>
+                           <directory>${basedir}</directory>
+                           <includes>
+                              <include>promote/*</include>
+                           </includes>
+                           <filtering>true</filtering>
+                        </resource>
+                     </resources>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
+         <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>tycho-p2-repository-plugin</artifactId>
+            <configuration>
+               <includeAllDependencies>false</includeAllDependencies>
+            </configuration>
+         </plugin>
+      </plugins>
+   </build>
 </project>
