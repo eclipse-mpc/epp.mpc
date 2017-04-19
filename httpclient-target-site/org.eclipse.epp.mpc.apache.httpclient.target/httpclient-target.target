@@ -2,18 +2,19 @@
 <?pde version="3.8"?><target name="HttpClient Target Platform" sequenceNumber="7">
 <locations>
 <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.apache.httpcomponents.httpclient" version="4.5.2.v20170210-0925"/>
 <unit id="org.apache.httpcomponents.httpcore" version="4.4.6.v20170210-0925"/>
+<unit id="org.apache.httpcomponents.httpcore.source" version="4.4.6.v20170210-0925"/>
+<unit id="org.apache.httpcomponents.httpclient" version="4.5.2.v20170210-0925"/>
+<unit id="org.apache.httpcomponents.httpclient.source" version="4.5.2.v20170210-0925"/>
 <unit id="org.apache.httpcomponents.httpclient.win" version="4.5.2.v20170410-1149"/>
+<unit id="org.apache.httpcomponents.httpclient.win.source" version="4.5.2.v20170410-1149"/>
 <unit id="com.sun.jna" version="4.1.0.v20170410-1117"/>
+<unit id="com.sun.jna.source" version="4.1.0.v20170410-1117"/>
 <unit id="com.sun.jna.platform" version="4.1.0.v20170410-1117"/>
+<unit id="com.sun.jna.platform.source" version="4.1.0.v20170410-1117"/>
 <unit id="org.apache.commons.codec" version="0.0.0"/>
 <unit id="org.apache.commons.logging" version="0.0.0"/>
 <repository location="http://download.eclipse.org/tools/orbit/downloads/drops/I20170411114559/repository/"/>
-</location>
-<location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.license.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/cbi/updates/license"/>
 </location>
 </locations>
 </target>
