@@ -1,0 +1,38 @@
+# Debugging options for the org.eclipse.epp.mpc.core plugin.
+
+org.eclipse.epp.mpc.core/debug=false
+
+# Fake values for client environment detection
+org.eclipse.epp.mpc.core/client/fakeVersion=false
+org.eclipse.epp.mpc.core/client/client=org.eclipse.epp.mpc.core
+org.eclipse.epp.mpc.core/client/client.version=
+org.eclipse.epp.mpc.core/client/os=
+org.eclipse.epp.mpc.core/client/ws=
+org.eclipse.epp.mpc.core/client/java.version=
+org.eclipse.epp.mpc.core/client/product=
+org.eclipse.epp.mpc.core/client/product.version=
+org.eclipse.epp.mpc.core/client/runtime.version=
+org.eclipse.epp.mpc.core/client/platform.version=
+
+# Mars: 
+#org.eclipse.epp.mpc.core/client/product=epp.package.java
+#org.eclipse.epp.mpc.core/client/product.version=4.5.0.20150326-0704
+#org.eclipse.epp.mpc.core/client/runtime.version=3.8.0.v20120521-2346
+#org.eclipse.epp.mpc.core/client/platform.version=4.5.0.v20150203-1300
+
+# Luna:
+#org.eclipse.epp.mpc.core/client/product=epp.package.java
+#org.eclipse.epp.mpc.core/client/product.version=4.4.0.20140612-0500
+#org.eclipse.epp.mpc.core/client/runtime.version=3.10.0.v20140318-22146
+#org.eclipse.epp.mpc.core/client/platform.version=4.4.0.v20140606-1215
+
+# Kepler:
+#org.eclipse.epp.mpc.core/client/product=epp.package.java
+#org.eclipse.epp.mpc.core/client/product.version=2.0.0.20130613-0530
+#org.eclipse.epp.mpc.core/client/runtime.version=3.9.0.v20130326-1255
+#org.eclipse.epp.mpc.core/client/platform.version=4.3.0.v20130605-2000
+
+# Juno:
+#org.eclipse.epp.mpc.core/client/product=epp.package.java
+#org.eclipse.epp.mpc.core/client/product.version=1.5.0.20120131-1544
+#org.eclipse.epp.mpc.core/client/runtime.version=3.8.0.v20120521-2346

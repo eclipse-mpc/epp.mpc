@@ -43,11 +43,17 @@ public class ChainedCredentialsProvider implements CredentialsProvider {
 		second.clear();
 	}
 
-	CredentialsProvider getFirst() {
+	/**
+	 * @noreference For test purposes only. This method is not intended to be referenced by clients.
+	 */
+	public CredentialsProvider getFirst() {
 		return first;
 	}
 
-	CredentialsProvider getSecond() {
+	/**
+	 * @noreference For test purposes only. This method is not intended to be referenced by clients.
+	 */
+	public CredentialsProvider getSecond() {
 		return second;
 	}
 }

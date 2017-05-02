@@ -14,41 +14,26 @@ import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.net.URI;
-import java.text.MessageFormat;
-import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.client.fluent.Response;
-import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.ProxyAuthenticationStrategy;
-import org.apache.http.impl.client.TargetAuthenticationStrategy;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProduct;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
-import org.eclipse.epp.internal.mpc.core.ServiceLocator;
-import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
+import org.eclipse.epp.internal.mpc.core.util.UserAgentUtil;
 import org.eclipse.epp.mpc.core.service.ITransport;
 import org.eclipse.epp.mpc.core.service.ServiceUnavailableException;
-import org.eclipse.userstorage.internal.StorageProperties;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.Version;
 
 @SuppressWarnings({ "restriction" })
 public class HttpClientTransport implements ITransport {
@@ -57,152 +42,57 @@ public class HttpClientTransport implements ITransport {
 
 	public static final String USER_AGENT_PROPERTY = HttpClientTransport.class.getPackage().getName() + ".userAgent"; //$NON-NLS-1$
 
-	private static final HttpClientConnectionManager CONNMGR;
+	/**
+	 * Maximum time between response packets before the socket closes
+	 */
+	public static final int DEFAULT_READ_TIMEOUT = (int) TimeUnit.SECONDS.toMillis(30);
 
-	private final HttpClient client = createClient(CONNMGR,
-			new DefaultCredentialsProviderInterceptor(new SystemCredentialsProvider()),
-			new CacheCredentialsInterceptor(), SynchronizedCredentialsProviderInterceptor.INSTANCE);
+	/**
+	 * Maximum time to establish connection with server
+	 */
+	public static final int DEFAULT_CONNECT_TIMEOUT = (int) TimeUnit.SECONDS.toMillis(10);
 
-	private final CookieStore cookieStore = new org.apache.http.impl.client.BasicCookieStore();
+	/**
+	 * Maximum time to wait for an available connection from the connection manager
+	 */
+	public static final int DEFAULT_CONNECTION_REQUEST_TIMEOUT = (int) TimeUnit.SECONDS.toMillis(30);
 
-	private final Executor executor = Executor.newInstance(client).cookieStore(cookieStore);
+	public static final String READ_TIMEOUT_PROPERTY = HttpClientTransport.class.getPackage().getName()
+			+ ".readTimeout"; //$NON-NLS-1$
+
+	public static final String CONNECT_TIMEOUT_PROPERTY = HttpClientTransport.class.getPackage().getName()
+			+ ".connectTimeout"; //$NON-NLS-1$
+
+	public static final String CONNECTION_REQUEST_TIMEOUT_PROPERTY = HttpClientTransport.class.getPackage().getName()
+			+ ".connectionRequestTimeout"; //$NON-NLS-1$
 
 	static {
-		USER_AGENT = initUserAgent();
-		CONNMGR = initConnectionManager();
+		USER_AGENT = UserAgentUtil.computeUserAgent();
 	}
 
-	private static HttpClientConnectionManager initConnectionManager() {
-		boolean accessible = false;
-		HttpClientConnectionManager connectionManager = null;
-		Field connectionManagerField = null;
-		try {
-			connectionManagerField = Executor.class.getDeclaredField("CONNMGR"); //$NON-NLS-1$
-			accessible = connectionManagerField.isAccessible();
-			connectionManagerField.setAccessible(true);
-			connectionManager = (HttpClientConnectionManager) connectionManagerField.get(null);
-		} catch (Throwable t) {
-		} finally {
-			if (connectionManagerField != null && !accessible) {
-				try {
-					connectionManagerField.setAccessible(false);
-				} catch (SecurityException e) {
-				}
-			}
-		}
-		return connectionManager;
+	private final HttpClient client;
+
+	private final Executor executor;
+
+	public HttpClientTransport() {
+		HttpClientFactory httpClientFactory = new HttpClientFactory();
+		client = httpClientFactory.build();
+		executor = httpClientFactory.getExecutor();
 	}
 
-	private static String initUserAgent() {
-		Bundle mpcCoreBundle = FrameworkUtil.getBundle(HttpClientTransport.class);
-		BundleContext context = mpcCoreBundle.getBundleContext();
-
-		String version = getAgentVersion(mpcCoreBundle);
-		String java = getAgentJava(context);
-		String os = getAgentOS(context);
-		String language = getProperty(context, "osgi.nl", "unknownLanguage");//$NON-NLS-1$//$NON-NLS-2$
-		String agentDetail = getAgentDetail(context);
-
-		String userAgent = MessageFormat.format("mpc/{0} (Java {1}; {2}; {3}) {4}", //$NON-NLS-1$
-				/*{0}*/version, /*{1}*/java, /*{2}*/os, /*{3}*/language, /*{4}*/agentDetail);
-		return userAgent;
+	public HttpClient getClient() {
+		return client;
 	}
 
-	private static String getAgentVersion(Bundle bundle) {
-		String version;
-		Version mpcCoreVersion = bundle.getVersion();
-		version = MessageFormat.format("{0}.{1}.{2}", mpcCoreVersion.getMajor(), mpcCoreVersion.getMinor(), //$NON-NLS-1$
-				mpcCoreVersion.getMicro());
-		return version;
+	public Executor getExecutor() {
+		return executor;
 	}
-
-	private static String getAgentJava(BundleContext context) {
-		String java;
-		String javaSpec = getProperty(context, "java.runtime.version", "unknownJava"); //$NON-NLS-1$ //$NON-NLS-2$
-		String javaVendor = getProperty(context, "java.vendor", "unknownJavaVendor");//$NON-NLS-1$//$NON-NLS-2$
-		java = MessageFormat.format("{0} {1}", javaSpec, javaVendor); //$NON-NLS-1$
-		return java;
-	}
-
-	private static String getAgentOS(BundleContext context) {
-		String os;
-		String osName = getProperty(context, "org.osgi.framework.os.name", "unknownOS"); //$NON-NLS-1$ //$NON-NLS-2$
-		String osVersion = getProperty(context, "org.osgi.framework.os.version", "unknownOSVersion"); //$NON-NLS-1$ //$NON-NLS-2$
-		String osArch = getProperty(context, "org.osgi.framework.processor", "unknownArch");//$NON-NLS-1$//$NON-NLS-2$
-		os = MessageFormat.format("{0} {1} {2}", osName, osVersion, osArch); //$NON-NLS-1$
-		return os;
-	}
-
-	private static String getAgentDetail(BundleContext context) {
-		String agentDetail;
-		agentDetail = getProperty(context, USER_AGENT_PROPERTY, null);
-		if (agentDetail == null) {
-			String productId = getProperty(context, "eclipse.product", null); //$NON-NLS-1$
-			String productVersion = getProperty(context, "eclipse.buildId", null); //$NON-NLS-1$
-			String appId = getProperty(context, "eclipse.application", null); //$NON-NLS-1$
-			if (productId == null || productVersion == null) {
-				Map<String, String> defaultRequestMetaParameters = ServiceLocator
-						.computeDefaultRequestMetaParameters();
-				productId = getProperty(defaultRequestMetaParameters, DefaultMarketplaceService.META_PARAM_PRODUCT,
-						"unknownProduct"); //$NON-NLS-1$
-				productVersion = getProperty(defaultRequestMetaParameters,
-						DefaultMarketplaceService.META_PARAM_PRODUCT_VERSION, "unknownBuildId"); //$NON-NLS-1$
-			}
-			if (appId == null) {
-				IProduct product = Platform.getProduct();
-				if (product != null) {
-					appId = product.getApplication();
-				}
-				if (appId == null) {
-					appId = "unknownApp"; //$NON-NLS-1$
-				}
-			}
-			agentDetail = MessageFormat.format("{0}/{1} ({2})", productId, productVersion, appId); //$NON-NLS-1$
-		}
-		return agentDetail;
-	}
-
-	private static String getProperty(BundleContext context, String key, String defaultValue) {
-		String value = context.getProperty(key);
-		if (value != null) {
-			return value;
-		}
-		return defaultValue;
-	}
-
-	private static String getProperty(Map<?, String> properties, Object key, String defaultValue) {
-		String value = properties.get(key);
-		if (value != null) {
-			return value;
-		}
-		return defaultValue;
-	}
-
-	private static HttpClient createClient(HttpClientConnectionManager connectionManager,
-			HttpContextInterceptor... interceptors) {
-		HttpClientBuilder builder;
-		if (connectionManager == null) {
-			builder = HttpClientBuilder.create().setMaxConnPerRoute(100).setMaxConnTotal(200);
-		} else {
-			builder = HttpClientBuilder.create().setConnectionManager(connectionManager);
-		}
-		builder.setTargetAuthenticationStrategy(
-				new CacheCredentialsAuthenticationStrategy.Target(TargetAuthenticationStrategy.INSTANCE));
-		builder.setProxyAuthenticationStrategy(
-				new CacheCredentialsAuthenticationStrategy.Proxy(ProxyAuthenticationStrategy.INSTANCE));
-		builder.setUserAgent(USER_AGENT);
-		return new ExecutorClientWrapper(builder.build(), interceptors);
-	}
-
 	protected Response execute(Request request, URI uri) throws ClientProtocolException, IOException {
 		return HttpClientProxyUtil.proxyAuthentication(executor, uri).execute(request);
 	}
 
 	protected Request configureRequest(Request request, URI uri) {
-		return request.viaProxy(HttpClientProxyUtil.getProxyHost(uri))
-				.staleConnectionCheck(true)
-				.connectTimeout(StorageProperties.getProperty(StorageProperties.CONNECT_TIMEOUT, 120000))
-				.socketTimeout(StorageProperties.getProperty(StorageProperties.SOCKET_TIMEOUT, 120000));
+		return request.viaProxy(HttpClientProxyUtil.getProxyHost(uri));
 	}
 
 	public InputStream stream(URI location, IProgressMonitor monitor)

@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.transport.httpclient;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.protocol.HttpContext;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.HttpClientBuilder;
 
-public interface HttpContextInterceptor {
+public interface HttpClientCustomizer {
+	HttpClientBuilder customizeBuilder(HttpClientBuilder builder);
 
-	public HttpContext intercept(HttpClient client, HttpContext context);
+	CredentialsProvider customizeCredentialsProvider(CredentialsProvider credentialsProvider);
 }

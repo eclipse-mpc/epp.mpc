@@ -35,10 +35,3 @@ Import-Package: org.eclipse.ecf.core;version="3.0.0",
  org.eclipse.ecf.internal.provider.filetransfer.httpclient4,
  org.eclipse.equinox.security.storage;version="1.0.0",
  org.osgi.service.component
-Export-Package: org.eclipse.epp.mpc.tests;x-internal:=true,
- org.eclipse.epp.mpc.tests.service;x-internal:=true,
- org.eclipse.epp.mpc.tests.service.xml;x-internal:=true,
- org.eclipse.epp.mpc.tests.ui.catalog;x-internal:=true,
- org.eclipse.epp.mpc.tests.ui.wizard;x-internal:=true,
- org.eclipse.epp.mpc.tests.util;x-internal:=true
-

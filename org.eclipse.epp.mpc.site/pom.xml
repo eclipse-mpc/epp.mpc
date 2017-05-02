@@ -1,73 +1,112 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) 2010 The Eclipse Foundation and others.
-    All rights reserved. This program and the accompanying materials
-    are made available under the terms of the Eclipse Public License v1.0
-    which accompanies this distribution, and is available at
-    http://www.eclipse.org/legal/epl-v10.html
-   
-    Contributors:
-    	The Eclipse Foundation - initial API and implementation
- -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.eclipse.epp.mpc</groupId>
-    <artifactId>org.eclipse.epp.mpc-parent</artifactId>
-    <version>1.6.0-SNAPSHOT</version>
-    <relativePath>../org.eclipse.epp.mpc-parent</relativePath>
-  </parent>
-  <artifactId>org.eclipse.epp.mpc.site</artifactId>
-  <packaging>eclipse-repository</packaging>
-  <name>EPP Marketplace Client</name>
+   Copyright (c) 2010 The Eclipse Foundation and others.
+   All rights reserved. This program and the accompanying materials
+   are made available under the terms of the Eclipse Public License v1.0
+   which accompanies this distribution, and is available at
+   http://www.eclipse.org/legal/epl-v10.html
 
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-resources-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy-resources</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
+   Contributors:
+   The Eclipse Foundation - initial API and implementation
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+   <modelVersion>4.0.0</modelVersion>
+   <parent>
+      <groupId>org.eclipse.epp.mpc</groupId>
+      <artifactId>org.eclipse.epp.mpc-parent</artifactId>
+      <version>1.6.0-SNAPSHOT</version>
+      <relativePath>../org.eclipse.epp.mpc-parent</relativePath>
+   </parent>
+   <artifactId>org.eclipse.epp.mpc.site</artifactId>
+   <packaging>eclipse-repository</packaging>
+   <name>EPP Marketplace Client</name>
+
+   <build>
+      <plugins>
+         <plugin>
+            <artifactId>maven-resources-plugin</artifactId>
+            <executions>
+               <execution>
+                  <id>copy-resources</id>
+                  <phase>process-resources</phase>
+                  <goals>
+                     <goal>copy-resources</goal>
+                  </goals>
+                  <configuration>
+                     <outputDirectory>${project.build.directory}/repository</outputDirectory>
+                     <resources>
+                        <resource>
+                           <directory>${basedir}/resources</directory>
+                        </resource>
+                     </resources>
+                  </configuration>
+               </execution>
+               <execution>
+                  <id>copy-promotion</id>
+                  <phase>process-resources</phase>
+                  <goals>
+                     <goal>copy-resources</goal>
+                  </goals>
+                  <configuration>
+                     <outputDirectory>${project.build.directory}</outputDirectory>
+                     <resources>
+                        <resource>
+                           <directory>${basedir}</directory>
+                           <includes>
+                              <include>promote/*</include>
+                           </includes>
+                           <filtering>true</filtering>
+                        </resource>
+                     </resources>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
+         <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>tycho-p2-repository-plugin</artifactId>
             <configuration>
-              <outputDirectory>${project.build.directory}/repository</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>${basedir}</directory>
-                  <includes>
-                    <include>index.html</include>
-                    <include>web/*</include>
-                  </includes>
-                </resource>
-              </resources>
+               <includeAllDependencies>false</includeAllDependencies>
+               <compress>false</compress>
             </configuration>
-          </execution>
-          <execution>
-            <id>copy-promotion</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>${basedir}</directory>
-                  <includes>
-                    <include>promote/*</include>
-                  </includes>
-                  <filtering>true</filtering>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
+         </plugin>
+         <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>1.8</version>
+            <executions>
+               <execution>
+                  <id>repository-reference</id>
+                  <phase>package</phase>
+                  <configuration>
+                     <target>
+                        <ant antfile="build.xml" target="process-repository">
+                           <property name="repository.archive" value="${project.build.directory}/${project.artifactId}-${project.version}.zip" />
+                        </ant>
+                     </target>
+                  </configuration>
+                  <goals>
+                     <goal>run</goal>
+                  </goals>
+               </execution>
+            </executions>
+            <dependencies>
+               <dependency>
+                  <groupId>com.oopsconsultancy</groupId>
+                  <artifactId>xmltask</artifactId>
+                  <version>1.16</version>
+               </dependency>
+               <dependency>
+                  <groupId>org.apache.ant</groupId>
+                  <artifactId>ant-compress</artifactId>
+                  <version>1.4</version>
+               </dependency>
+               <dependency>
+                  <groupId>org.apache.commons</groupId>
+                  <artifactId>commons-compress</artifactId>
+                  <version>1.7</version>
+               </dependency>
+            </dependencies>
+         </plugin>
+      </plugins>
+   </build>
 </project>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="prepare-update-site" basedir="." default="process-repository" xmlns:comp="antlib:org.apache.ant.compress">
+  <property name="repository" value="${basedir}/target/repository" />
+  <property name="contentxml" value="${repository}/content.xml" />
+  <property name="p2contentxml" value="${basedir}/target/p2content.xml" />
+
+  <taskdef name="xmltask" classname="com.oopsconsultancy.xmltask.ant.XmlTask"  />
+
+  <property name="uss-update-site" value="http://download.eclipse.org/usssdk/updates" />
+  <property name="uss-update-site-name" value="User Storage SDK" />
+  <property name="uss-legacy-update-site" value="http://download.eclipse.org/oomph/uss/updates/latest" />
+  <property name="uss-legacy-update-site-name" value="User Storage SDK 1.0 (legacy)" />
+
+  <property name="uncategorized-category" value="no.category" />
+
+  <target name="repository-reference">
+    <xmltask source="${contentxml}" dest="${contentxml}" encoding="UTF-8">
+      <insert path="/repository">
+        <![CDATA[ 
+		  <references size='4'>
+            <repository name='${uss-update-site-name}' uri='${uss-update-site}' url='${uss-update-site}' type='0' options='1'/>
+            <repository name='${uss-update-site-name}' uri='${uss-update-site}' url='${uss-update-site}' type='1' options='1'/>
+            <repository name='${uss-legacy-update-site-name}' uri='${uss-legacy-update-site}' url='${uss-legacy-update-site}' type='0' options='1'/>
+            <repository name='${uss-legacy-update-site-name}' uri='${uss-legacy-update-site}' url='${uss-legacy-update-site}' type='1' options='1'/>
+     	  </references>
+		  ]]> 
+	  </insert>
+    </xmltask>
+	<echo>repository-reference was added to ${contentxml}</echo>
+  </target>
+
+  <target name="remove-uncategorized-category">
+    <xmltask source="${p2contentxml}" dest="${p2contentxml}" encoding="UTF-8">
+     <remove path="/units/unit[contains(@id, '.${uncategorized-category}')]"/>
+    </xmltask>
+    <xmltask source="${contentxml}" dest="${contentxml}" encoding="UTF-8">
+     <remove path="/repository/units/unit[contains(@id, '.${uncategorized-category}')]"/>
+    </xmltask>
+  </target>
+
+  <target name="compress-repository-files">
+     <jar basedir="${repository}" destfile="${repository}/content.jar" includes="content.xml" filesonly="true" compress="true" level="9"/>
+     <jar basedir="${repository}" destfile="${repository}/artifacts.jar" includes="artifacts.xml" filesonly="true" compress="true" level="9"/>
+     <comp:xz src="${repository}/content.xml" destfile="${repository}/content.xml.xz"/>
+     <comp:xz src="${repository}/artifacts.xml" destfile="${repository}/artifacts.xml.xz"/>
+     <replace file="${repository}/p2.index">
+        <replacefilter token="metadata.repository.factory.order=content.xml" value="metadata.repository.factory.order=content.xml.xz,content.xml"/>
+        <replacefilter token="artifact.repository.factory.order=artifacts.xml" value="artifact.repository.factory.order=artifacts.xml.xz,artifacts.xml"/>
+     </replace>
+     <move todir="${repository}/..">
+        <fileset dir="${repository}" includes="content.xml,artifacts.xml"/>
+     </move>
+  </target>
+
+  <condition property="repository.archive.exists">
+     <and>
+        <isset property="repository.archive"/>
+        <available file="${repository.archive}"/>
+     </and>
+  </condition>
+  <target name="update-repository-archive" if="repository.archive.exists">
+     <move file="${repository.archive}" tofile="${repository.archive}.tmp"/>
+     <zip destfile="${repository.archive}" update="true" keepcompression="true">
+        <fileset dir="${repository}" includes="content.jar,content.xml.xz,artifacts.jar,artifacts.xml.xz,p2.index"/>
+        <zipfileset src="${repository.archive}.tmp" excludes="content.xml,artifacts.xml,p2.index"/>
+     </zip>
+     <delete file="${repository.archive}.tmp"/>
+  </target>
+  
+  <target name="process-repository" depends="repository-reference,remove-uncategorized-category,compress-repository-files,update-repository-archive"/>
+</project>

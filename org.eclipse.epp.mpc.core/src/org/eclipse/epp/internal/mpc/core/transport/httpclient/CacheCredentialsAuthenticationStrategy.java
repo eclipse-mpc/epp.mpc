@@ -29,7 +29,7 @@ import org.apache.http.protocol.HttpContext;
 
 abstract class CacheCredentialsAuthenticationStrategy implements AuthenticationStrategy {
 
-	public static final String CREDENTIALS_CACHE_ATTRIBUTE = CacheCredentialsInterceptor.class.getName()
+	public static final String CREDENTIALS_CACHE_ATTRIBUTE = CacheCredentialsAuthenticationStrategy.class.getName()
 			+ ".credentialsCache";
 
 	static class Target extends CacheCredentialsAuthenticationStrategy {

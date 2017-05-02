@@ -21,38 +21,94 @@ import java.lang.reflect.Constructor;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Dictionary;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.http.ConnectionClosedException;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpException;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.AuthSchemes;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.client.fluent.Response;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.config.Lookup;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCorePlugin;
+import org.eclipse.epp.internal.mpc.core.transport.httpclient.ChainedCredentialsProvider;
+import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientCustomizer;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientTransport;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientTransportFactory;
+import org.eclipse.epp.internal.mpc.core.transport.httpclient.SynchronizedCredentialsProvider;
 import org.eclipse.epp.internal.mpc.core.util.FallbackTransportFactory;
+import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
 import org.eclipse.epp.internal.mpc.core.util.TransportFactory;
 import org.eclipse.epp.mpc.core.service.ITransport;
 import org.eclipse.epp.mpc.core.service.ITransportFactory;
 import org.eclipse.epp.mpc.core.service.ServiceHelper;
 import org.eclipse.epp.mpc.core.service.ServiceUnavailableException;
+import org.eclipse.epp.mpc.tests.LambdaMatchers;
 import org.hamcrest.CoreMatchers;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentConstants;
 
 public class TransportFactoryTest {
+
+	private static class AbortRequestCustomizer implements HttpClientCustomizer {
+		private HttpContext interceptedContext;
+
+		private HttpRequest interceptedRequest;
+
+		@Override
+		public CredentialsProvider customizeCredentialsProvider(CredentialsProvider credentialsProvider) {
+			return null;
+		}
+
+		@Override
+		public HttpClientBuilder customizeBuilder(HttpClientBuilder builder) {
+			return builder.addInterceptorLast(new HttpRequestInterceptor() {
+
+				@Override
+				public void process(HttpRequest request, HttpContext context) throws HttpException, IOException {
+					interceptedRequest = request;
+					interceptedContext = context;
+					throw new ConnectionClosedException("Aborting test request before execution");
+				}
+			}).disableAutomaticRetries();
+		}
+
+		public HttpRequest getInterceptedRequest() {
+			return interceptedRequest;
+		}
+
+		public HttpContext getInterceptedContext() {
+			return interceptedContext;
+		}
+	}
 
 	@Before
 	public void clearTransportFilters() {
@@ -218,6 +274,107 @@ public class TransportFactoryTest {
 	}
 
 	@Test
+	public void testHttpClientCustomizer() throws Exception {
+		final HttpClientCustomizer customizer = Mockito.mock(HttpClientCustomizer.class);
+		Mockito.when(customizer.customizeBuilder(Matchers.any())).thenAnswer(new Answer<HttpClientBuilder>() {
+			public HttpClientBuilder answer(InvocationOnMock invocation) {
+				HttpClientBuilder builder = (HttpClientBuilder)invocation.getArguments()[0];
+				return builder == null ? null : builder.addInterceptorFirst(new HttpRequestInterceptor() {
+
+					@Override
+					public void process(HttpRequest request, HttpContext context) throws HttpException, IOException {
+						request.addHeader("X-Customizer-Test", "true");
+					}
+				});
+			}
+		});
+		Mockito.when(customizer.customizeCredentialsProvider(Matchers.any())).thenReturn(null);
+
+		HttpRequest request = interceptRequest(customizer).getInterceptedRequest();
+
+		Mockito.verify(customizer).customizeBuilder(Matchers.any());
+		Mockito.verify(customizer).customizeCredentialsProvider(Matchers.any());
+
+		assertThat(request.getFirstHeader("X-Customizer-Test"), LambdaMatchers.<Header, String> map(x -> x == null
+				? null : x.getValue())
+				.matches("true"));
+	}
+
+	private static HttpClientTransport createClient(HttpClientCustomizer... customizers) {
+		if (customizers == null || customizers.length == 0) {
+			return new HttpClientTransport();
+		}
+
+		List<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		for (int i = 0; i < customizers.length; i++) {
+			HttpClientCustomizer customizer = customizers[i];
+			Dictionary<String, Object> serviceProperties = ServiceUtil.serviceName(
+					"org.eclipse.epp.mpc.core.transport.http.test.customizer." + i, ServiceUtil.serviceRanking(1000 + i,
+							null));
+			ServiceRegistration<?> registration = FrameworkUtil.getBundle(HttpClientCustomizer.class).getBundleContext()
+					.registerService(HttpClientCustomizer.class, customizer, serviceProperties);
+			registrations.add(registration);
+		}
+		HttpClientTransport httpClientTransport;
+		try
+		{
+			httpClientTransport = new HttpClientTransport();
+		}
+		finally
+		{
+			for (ServiceRegistration<?> registration : registrations) {
+				registration.unregister();
+			}
+		}
+		return httpClientTransport;
+	}
+
+
+	@Test
+	public void testHttpClientTransportWin32Support() throws Exception {
+		BundleContext bundleContext = FrameworkUtil.getBundle(TransportFactory.class).getBundleContext();
+		Assume.assumeThat(bundleContext.getProperty("osgi.os"), is("win32"));
+		HttpContext context = interceptRequest().getInterceptedContext();
+
+		Lookup<?> authRegistry = (Lookup<?>) context.getAttribute(HttpClientContext.AUTHSCHEME_REGISTRY);
+		CredentialsProvider credentialsProvider = (CredentialsProvider) context.getAttribute(
+				HttpClientContext.CREDS_PROVIDER);
+
+		assertNotNull(authRegistry);
+		Object ntlmFactory = authRegistry.lookup(AuthSchemes.NTLM);
+		assertNotNull(ntlmFactory);
+		assertEquals("org.apache.http.impl.auth.win.WindowsNTLMSchemeFactory", ntlmFactory.getClass().getName());
+
+		assertNotNull(credentialsProvider);
+		List<CredentialsProvider> nestedProviders = listCredentialsProviders(credentialsProvider);
+		assertThat(nestedProviders, hasItem(LambdaMatchers.map(x -> x.getClass().getName()).matches(
+				"org.apache.http.impl.auth.win.WindowsCredentialsProvider")));
+	}
+
+	private static AbortRequestCustomizer interceptRequest(HttpClientCustomizer... customizers) throws Exception {
+		AbortRequestCustomizer abortRequestCustomizer = new AbortRequestCustomizer();
+		HttpClientCustomizer[] mergedCustomizers;
+		if (customizers == null || customizers.length == 0) {
+			mergedCustomizers = new HttpClientCustomizer[] { abortRequestCustomizer };
+		} else {
+			mergedCustomizers = new HttpClientCustomizer[customizers.length + 1];
+			System.arraycopy(customizers, 0, mergedCustomizers, 0, customizers.length);
+			mergedCustomizers[customizers.length] = abortRequestCustomizer;
+		}
+
+		HttpClientTransport httpClientTransport = createClient(mergedCustomizers);
+		HttpClient client = httpClientTransport.getClient();
+		HttpContext context = new BasicHttpContext();
+		try {
+			client.execute(new HttpGet("http://localhost/test"), context);
+			fail("Expected request execution to fail");
+		} catch (ConnectionClosedException ex) {
+			//ignore expected exception
+		}
+		return abortRequestCustomizer;
+	}
+
+	@Test
 	public void testECFContributorPropertiesUnchanged() {
 		assertEquals("org.eclipse.ecf.provider.filetransfer.excludeContributors",
 				org.eclipse.ecf.internal.provider.filetransfer.Activator.PLUGIN_EXCLUDED_SYS_PROP_NAME);
@@ -250,5 +407,23 @@ public class TransportFactoryTest {
 			return transportServiceName;
 		}
 		return null;
+	}
+
+	private static List<CredentialsProvider> listCredentialsProviders(CredentialsProvider provider) {
+		ArrayList<CredentialsProvider> providers = new ArrayList<CredentialsProvider>();
+		doListCredentialsProviders(provider, providers);
+		return providers;
+	}
+
+	private static void doListCredentialsProviders(CredentialsProvider provider, List<CredentialsProvider> providers) {
+		providers.add(provider);
+		if (provider instanceof SynchronizedCredentialsProvider) {
+			SynchronizedCredentialsProvider synced = (SynchronizedCredentialsProvider) provider;
+			doListCredentialsProviders(synced.getDelegate(), providers);
+		} else if (provider instanceof ChainedCredentialsProvider) {
+			ChainedCredentialsProvider chain = (ChainedCredentialsProvider) provider;
+			doListCredentialsProviders(chain.getFirst(), providers);
+			doListCredentialsProviders(chain.getSecond(), providers);
+		}
 	}
 }

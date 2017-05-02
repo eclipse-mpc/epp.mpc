@@ -1,22 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-  <description url="EPP Marketplace Client">
-    The EPP Marketplace Client provides access to the Eclipse Marketplace solution catalog.
-  </description>
-  <feature url="features/org.eclipse.epp.mpc_0.0.0.qualifier.jar" id="org.eclipse.epp.mpc" version="0.0.0" patch="true">
-    <category name="EPP Marketplace Client"/>
-  </feature>
-  <feature url="features/org.eclipse.epp.mpc.source_0.0.0.qualifier.jar" id="org.eclipse.epp.mpc.source" version="0.0.0" patch="true">
-    <category name="EPP Marketplace Cliend Sources"/>
-  </feature>
-  <category-def name="EPP Marketplace Client" label="EPP Marketplace Client">
-    <description>
-      EPP Marketplace Client
-    </description>
-  </category-def>
-  <category-def name="EPP Marketplace Client Sources" label="EPP Marketplace Client Sources">
-    <description>
-      EPP Marketplace Client Sources
-    </description>
-  </category-def>
+   <description url="EPP Marketplace Client">
+      The EPP Marketplace Client provides access to the Eclipse Marketplace solution catalog.
+   </description>
+   <feature id="org.eclipse.epp.mpc" version="0.0.0">
+      <category name="EPP Marketplace Client"/>
+   </feature>
+   <feature id="org.eclipse.epp.mpc.source" version="0.0.0">
+      <category name="no.category"/>
+   </feature>
+   <feature id="org.eclipse.epp.mpc.dependencies" version="0.0.0">
+      <category name="no.category"/>
+   </feature>
+   <feature id="org.eclipse.epp.mpc.dependencies.source" version="0.0.0">
+      <category name="no.category"/>
+   </feature>
+   <category-def name="EPP Marketplace Client" label="EPP Marketplace Client">
+      <description>
+         EPP Marketplace Client
+      </description>
+   </category-def>
+   <category-def name="no.category" label="No Category">
+      <description>
+         Category for uncategorized items - will be removed during build
+      </description>
+   </category-def>
 </site>

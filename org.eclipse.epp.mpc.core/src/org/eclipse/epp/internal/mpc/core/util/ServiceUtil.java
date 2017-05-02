@@ -25,6 +25,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.ComponentConstants;
 
 /**
  * @author Carsten Reckord
@@ -69,14 +70,34 @@ public class ServiceUtil {
 	}
 
 	/**
-	 * Get a URL from a property map for the given key. If no entry exists for the key,
-	 * or the value is not a string or it can't be parsed into an URL, the default value
-	 * is returned.
+	 * Set the provided component name on a dictionary for an OSGi service registration. If the dictionary is null, a
+	 * new one will be created and returned.
 	 *
-	 * @param properties the map to extract a URL from
-	 * @param key the key to search under
-	 * @param defaultValue the default value returned if the entry does not exist or can't
-	 * 	be converted to a URL
+	 * @param priority
+	 *            the service priority
+	 * @param dict
+	 *            the dictionary to change or null
+	 * @return the provided dictionary, or a new one if the provided was null, containing a service ranking entry
+	 * @see ComponentConstants#COMPONENT_NAME
+	 */
+	public static Dictionary<String, Object> serviceName(String name, Dictionary<String, Object> dict) {
+		if (dict == null) {
+			dict = new Hashtable<String, Object>();
+		}
+		dict.put(ComponentConstants.COMPONENT_NAME, name);
+		return dict;
+	}
+
+	/**
+	 * Get a URL from a property map for the given key. If no entry exists for the key, or the value is not a string or
+	 * it can't be parsed into an URL, the default value is returned.
+	 *
+	 * @param properties
+	 *            the map to extract a URL from
+	 * @param key
+	 *            the key to search under
+	 * @param defaultValue
+	 *            the default value returned if the entry does not exist or can't be converted to a URL
 	 * @return an URL matching the string value found in the map under the given key, or the default value.
 	 */
 	public static URL getUrl(Map<?, ?> properties, String key, URL defaultValue) {

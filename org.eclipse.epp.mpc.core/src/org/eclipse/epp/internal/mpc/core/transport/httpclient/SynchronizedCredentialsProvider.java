@@ -60,7 +60,10 @@ public class SynchronizedCredentialsProvider implements CredentialsProvider {
 		}
 	}
 
-	CredentialsProvider getDelegate() {
+	/**
+	 * @noreference For test purposes only. This method is not intended to be referenced by clients.
+	 */
+	public CredentialsProvider getDelegate() {
 		return delegate;
 	}
 
