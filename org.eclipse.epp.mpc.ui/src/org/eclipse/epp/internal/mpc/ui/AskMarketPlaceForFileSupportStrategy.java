@@ -34,7 +34,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.ide.IUnassociatedEditorStrategy;
-import org.eclipse.ui.internal.ide.SystemEditorOrTextEditorStrategy;
+import org.eclipse.ui.internal.ide.registry.SystemEditorOrTextEditorStrategy;
 import org.eclipse.ui.internal.registry.EditorRegistry;
 import org.eclipse.ui.internal.registry.FileEditorMapping;
 import org.eclipse.ui.progress.UIJob;
