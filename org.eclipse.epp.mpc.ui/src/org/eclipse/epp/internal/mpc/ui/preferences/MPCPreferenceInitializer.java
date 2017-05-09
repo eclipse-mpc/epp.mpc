@@ -12,7 +12,7 @@ package org.eclipse.epp.internal.mpc.ui.preferences;
 
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
-import org.eclipse.epp.internal.mpc.ui.MissingNatureDetector;
+import org.eclipse.epp.internal.mpc.ui.discovery.MissingNatureDetector;
 
 public class MPCPreferenceInitializer extends AbstractPreferenceInitializer {
 

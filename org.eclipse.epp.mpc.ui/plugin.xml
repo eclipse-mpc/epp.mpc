@@ -66,13 +66,13 @@
          point="org.eclipse.ui.startup">
       <startup class="org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceDropAdapter"/>
       <startup
-            class="org.eclipse.epp.internal.mpc.ui.MissingNatureDetector">
+            class="org.eclipse.epp.internal.mpc.ui.discovery.MissingNatureDetector">
       </startup>
    </extension>
       <extension
          point="org.eclipse.ui.ide.unassociatedEditorStrategy">
       <strategy
-            class="org.eclipse.epp.internal.mpc.ui.AskMarketPlaceForFileSupportStrategy"
+            class="org.eclipse.epp.internal.mpc.ui.discovery.AskMarketplaceForFileSupportStrategy"
             id="org.eclipse.epp.internal.mpc.ui.askMarketPlace"
             label="%unassociatedStrategy.label"
             interactive="true">

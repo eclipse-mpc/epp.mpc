@@ -12,7 +12,7 @@ package org.eclipse.epp.internal.mpc.ui.preferences;
 
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.Messages;
-import org.eclipse.epp.internal.mpc.ui.MissingNatureDetector;
+import org.eclipse.epp.internal.mpc.ui.discovery.MissingNatureDetector;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.swt.SWT;

@@ -8,8 +8,9 @@
  * Contributors:
  *     Mickael Istria (Red Hat Inc.)
  *******************************************************************************/
-package org.eclipse.epp.internal.mpc.ui;
+package org.eclipse.epp.internal.mpc.ui.discovery;
 
+import org.eclipse.epp.internal.mpc.ui.Messages;
 import org.eclipse.equinox.internal.p2.ui.discovery.DiscoveryImages;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -34,7 +35,7 @@ import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.internal.ide.IDEWorkbenchPlugin;
 
-public class MarketplaceOrAssociateDialog extends TitleAreaDialog {
+public class ShowFileSupportProposalsDialog extends TitleAreaDialog {
 
 	private final String fileExtensionLabel;
 
@@ -50,7 +51,7 @@ public class MarketplaceOrAssociateDialog extends TitleAreaDialog {
 
 	private Image wizban;
 
-	protected MarketplaceOrAssociateDialog(Shell shell, String fileExtensionLabel, IEditorDescriptor currentEditor) {
+	protected ShowFileSupportProposalsDialog(Shell shell, String fileExtensionLabel, IEditorDescriptor currentEditor) {
 		super(shell);
 		this.fileExtensionLabel = fileExtensionLabel;
 		this.currentEditor = currentEditor;
