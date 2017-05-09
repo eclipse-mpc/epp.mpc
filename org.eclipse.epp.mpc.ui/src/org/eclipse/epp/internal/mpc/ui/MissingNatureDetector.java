@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -76,77 +75,13 @@ public class MissingNatureDetector implements IStartup, IPropertyChangeListener 
 
 	public static final String ENABLEMENT_PROPERTY = "org.eclipse.epp.mpc.naturelookup"; //$NON-NLS-1$
 
-	private static final class CollectMissingNaturesVisitor implements IResourceDeltaVisitor {
-		private final Set<String> missingNatures = new HashSet<String>();
+	private static final class ShowCandidatesJob extends UIJob {
+		private final Map<String, Collection<INode>> candidates;
 
-		public boolean visit(IResourceDelta delta) throws CoreException {
-			if (delta.getResource().getType() == IResource.PROJECT
-					|| delta.getResource().getType() == IResource.ROOT) {
-				return true;
-			}
-			if (delta.getResource().getType() == IResource.FILE
-					&& IProjectDescription.DESCRIPTION_FILE_NAME
-					.equals(delta.getResource().getName())) {
-				if (delta.getKind() == IResourceDelta.ADDED
-						|| delta.getKind() == IResourceDelta.CHANGED) {
-					IProject project = delta.getResource().getProject();
-					for (String natureId : project.getDescription().getNatureIds()) {
-						if (project.getWorkspace().getNatureDescriptor(natureId) == null) {
-							this.missingNatures.add(natureId);
-						}
-					}
-				}
-			}
-			return false;
+		ShowCandidatesJob(Map<String, Collection<INode>> candidates) {
+			super(PlatformUI.getWorkbench().getDisplay(), Messages.MissingNatureDetector_Desc);
+			this.candidates = candidates;
 		}
-
-		public Set<String> getMissingNatures() {
-			return this.missingNatures;
-		}
-	}
-
-	private static final class LookupByNatureJob extends Job {
-		private final String natureId;
-
-		private List<? extends INode> nodes;
-
-		private LookupByNatureJob(String natureId) {
-			super(NLS.bind(Messages.MissingNatureDetector_jobName, natureId));
-			this.natureId = natureId;
-		}
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			BundleContext bundleContext = MarketplaceClientUiPlugin.getBundleContext();
-			ServiceReference<IMarketplaceServiceLocator> locatorReference = bundleContext
-					.getServiceReference(IMarketplaceServiceLocator.class);
-			IMarketplaceServiceLocator locator = bundleContext.getService(locatorReference);
-			IMarketplaceService marketplaceService = locator.getDefaultMarketplaceService();
-			String fileExtensionTag = "nature_" + natureId; //$NON-NLS-1$]
-			try {
-				ISearchResult searchResult = marketplaceService.tagged(fileExtensionTag, monitor);
-				nodes = searchResult.getNodes();
-			} catch (CoreException ex) {
-				IStatus status = new Status(IStatus.ERROR,
-						MarketplaceClientUiPlugin.getInstance().getBundle().getSymbolicName(), ex.getMessage(), ex);
-				MarketplaceClientUiPlugin.getInstance().getLog().log(status);
-				// Do not return this status as it would show an error
-				return Status.CANCEL_STATUS;
-			}
-			return Status.OK_STATUS;
-		}
-
-		public Collection<INode> getCandidates() {
-			return (List<INode>) this.nodes;
-		}
-	}
-
-	private final JobGroup allJobs = new JobGroup(Messages.MissingNatureDetector_Title, 3, 0);
-
-	private final Map<String, LookupByNatureJob> lookupJobs = new HashMap<String, LookupByNatureJob>();
-
-	private final UIJob showCandidatesJob = new UIJob(PlatformUI.getWorkbench().getDisplay(),
-			Messages.MissingNatureDetector_Desc) {
 
 		@Override
 		public IStatus runInUIThread(IProgressMonitor monitor) {
@@ -177,12 +112,7 @@ public class MissingNatureDetector implements IStartup, IPropertyChangeListener 
 					Label label = new Label(res, SWT.WRAP);
 					StringBuilder message = new StringBuilder(Messages.MissingNatureDetector_Message);
 					message.append("\n\n"); //$NON-NLS-1$
-					SortedSet<String> relevantNatures = new TreeSet<String>();
-					for (Entry<String, LookupByNatureJob> entry : lookupJobs.entrySet()) {
-						if (entry.getValue().getCandidates() != null && !entry.getValue().getCandidates().isEmpty()) {
-							relevantNatures.add(entry.getKey());
-						}
-					}
+					SortedSet<String> relevantNatures = new TreeSet<String>(candidates.keySet());
 					for (String natureId : relevantNatures) {
 						message.append("- "); //$NON-NLS-1$
 						message.append(natureId);
@@ -197,9 +127,7 @@ public class MissingNatureDetector implements IStartup, IPropertyChangeListener 
 							PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(getShell(),
 									ProjectNaturesPreferencePage.ID, null, null);
 							pref.setBlockOnOpen(false);
-							if (pref != null) {
-								pref.open();
-							}
+							pref.open();
 						}
 					});
 					return res;
@@ -226,13 +154,85 @@ public class MissingNatureDetector implements IStartup, IPropertyChangeListener 
 			IMarketplaceClientService marketplaceClientService = MarketplaceClient.getMarketplaceClientService();
 			IMarketplaceClientConfiguration config = marketplaceClientService.newConfiguration();
 			Set<INode> allNodes = new HashSet<INode>();
-			for (LookupByNatureJob job : lookupJobs.values()) {
-				allNodes.addAll(job.getCandidates());
+			for (Collection<INode> candidateNodes : candidates.values()) {
+				allNodes.addAll(candidateNodes);
 			}
 			marketplaceClientService.open(config, allNodes);
 			return Status.OK_STATUS;
 		}
-	};
+	}
+
+	private static final class CollectMissingNaturesVisitor implements IResourceDeltaVisitor {
+		private final Set<String> missingNatures = new HashSet<String>();
+
+		public boolean visit(IResourceDelta delta) throws CoreException {
+			if (delta.getResource().getType() == IResource.PROJECT || delta.getResource().getType() == IResource.ROOT) {
+				return true;
+			}
+			if (delta.getResource().getType() == IResource.FILE
+					&& IProjectDescription.DESCRIPTION_FILE_NAME.equals(delta.getResource().getName())) {
+				if (delta.getKind() == IResourceDelta.ADDED || delta.getKind() == IResourceDelta.CHANGED) {
+					IProject project = delta.getResource().getProject();
+					for (String natureId : project.getDescription().getNatureIds()) {
+						if (project.getWorkspace().getNatureDescriptor(natureId) == null) {
+							this.missingNatures.add(natureId);
+						}
+					}
+				}
+			}
+			return false;
+		}
+
+		public Set<String> getMissingNatures() {
+			return this.missingNatures;
+		}
+	}
+
+	private static final class LookupByNatureJob extends Job {
+		private final String natureId;
+
+		private List<? extends INode> nodes;
+
+		LookupByNatureJob(String natureId) {
+			super(NLS.bind(Messages.MissingNatureDetector_jobName, natureId));
+			this.natureId = natureId;
+		}
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			BundleContext bundleContext = MarketplaceClientUiPlugin.getBundleContext();
+			ServiceReference<IMarketplaceServiceLocator> locatorReference = bundleContext
+					.getServiceReference(IMarketplaceServiceLocator.class);
+			IMarketplaceServiceLocator locator = bundleContext.getService(locatorReference);
+			IMarketplaceService marketplaceService = locator.getDefaultMarketplaceService();
+			String fileExtensionTag = "nature_" + natureId; //$NON-NLS-1$]
+			try {
+				ISearchResult searchResult = marketplaceService.tagged(fileExtensionTag, monitor);
+				nodes = searchResult.getNodes();
+			} catch (CoreException ex) {
+				IStatus status = new Status(IStatus.ERROR,
+						MarketplaceClientUiPlugin.getInstance().getBundle().getSymbolicName(), ex.getMessage(), ex);
+				MarketplaceClientUiPlugin.getInstance().getLog().log(status);
+				// Do not return this status as it would show an error
+				return Status.CANCEL_STATUS;
+			}
+			return Status.OK_STATUS;
+		}
+
+		public Collection<INode> getCandidates() {
+			return (List<INode>) this.nodes;
+		}
+
+		public String getNatureId() {
+			return natureId;
+		}
+	}
+
+	private final JobGroup allJobs = new JobGroup(Messages.MissingNatureDetector_Title, 3, 0);
+
+	private final Set<String> detectedNatures = new HashSet<String>();
+
+	private final Set<LookupByNatureJob> lookupJobs = new HashSet<LookupByNatureJob>();
 
 	private final IResourceChangeListener projectOpenListener = new IResourceChangeListener() {
 		public void resourceChanged(IResourceChangeEvent event) {
@@ -257,40 +257,46 @@ public class MissingNatureDetector implements IStartup, IPropertyChangeListener 
 	};
 
 	private void triggerNatureLookup(final String natureId) {
-		LookupByNatureJob mpcJob = null;
 		synchronized (lookupJobs) {
-			if (lookupJobs.containsKey(natureId)) {
+			if (detectedNatures.contains(natureId)) {
 				return;
 			} else {
-				mpcJob = new LookupByNatureJob(natureId);
-				lookupJobs.put(natureId, mpcJob);
+				LookupByNatureJob mpcJob = new LookupByNatureJob(natureId);
+				mpcJob.setSystem(false);
+				mpcJob.setUser(false);
+				mpcJob.setJobGroup(allJobs);
+				mpcJob.addJobChangeListener(new JobChangeAdapter() {
+					@Override
+					public void done(IJobChangeEvent event) {
+						showProposalsIfReady();
+					}
+				});
+				lookupJobs.add(mpcJob);
+				//schedule() needs to happen inside synchronized(...).
+				//Otherwise it's not guaranteed that allJobs.getActiveJobs() will consider it,
+				//and we might end up with processing unfinished jobs in showProposalsIfReady()
+				mpcJob.schedule();
 			}
 		}
-		mpcJob.setSystem(false);
-		mpcJob.setUser(false);
-		mpcJob.setJobGroup(allJobs);
-		mpcJob.addJobChangeListener(new JobChangeAdapter() {
-			@Override
-			public void done(IJobChangeEvent event) {
-				showProposalsIfReady();
-			}
-		});
-		lookupJobs.put(natureId, mpcJob);
-		mpcJob.schedule();
-	}
-
-	protected boolean hasCandidates() {
-		for (LookupByNatureJob job : this.lookupJobs.values()) {
-			if (!job.getCandidates().isEmpty()) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private void showProposalsIfReady() {
-		if (allJobs.getActiveJobs().isEmpty() && hasCandidates() && showCandidatesJob.getState() == Job.NONE) {
-			showCandidatesJob.schedule();
+		Map<String, Collection<INode>> candidates;
+		synchronized (lookupJobs) {
+			if (!allJobs.getActiveJobs().isEmpty()) {
+				return;
+			}
+			candidates = new HashMap<String, Collection<INode>>();
+			for (LookupByNatureJob lookupJob : lookupJobs) {
+				Collection<INode> entryCandidates = lookupJob.getCandidates();
+				if (entryCandidates != null && !entryCandidates.isEmpty()) {
+					candidates.put(lookupJob.getNatureId(), entryCandidates);
+				}
+			}
+			lookupJobs.clear();
+		}
+		if (!candidates.isEmpty()) {
+			new ShowCandidatesJob(candidates).schedule();
 		}
 	}
 
