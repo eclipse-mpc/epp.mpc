@@ -36,6 +36,7 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotLink;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotStyledText;
 import org.hamcrest.Matcher;
+import org.junit.Assume;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -95,6 +96,7 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 	@Test
 	public void testShowSelected() {
 		SWTBotLink link = selectToInstall(3);
+		checkSkipForGtk3();
 		link.click();
 		//wait for the action to be processed
 		bot.waitUntil(new DefaultCondition() {
@@ -107,6 +109,23 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 				return "Not getting expected selection";
 			}
 		}, 10000);
+	}
+
+	private static void checkSkipForGtk3() {
+		String gtkVersion = System.getProperty("org.eclipse.swt.internal.gtk.version");
+		if (gtkVersion == null) {
+			if ("linux".equalsIgnoreCase(System.getProperty("osgi.os"))) {
+				System.err.println("Running on Linux without GTK");
+			}
+			return;
+		}
+		String runGtk3Tests = System.getProperty("org.eclipse.epp.mpc.tests.gtk3");
+		if (runGtk3Tests != null && Boolean.parseBoolean(runGtk3Tests)) {
+			return;//Tests explicitly requested on GTK3
+		}
+		System.out.println("Running on GTK version " + gtkVersion);
+		Assume.assumeTrue("Skipping test on GTK3, see bug 511551 - GTK version is " + gtkVersion, //
+				gtkVersion.startsWith("2."));
 	}
 
 	//TODO conditional on embedded browser availability

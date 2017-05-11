@@ -15,7 +15,6 @@
     <test-suite>org.eclipse.epp.mpc.tests.AllTests</test-suite>
     <test-args>-ea</test-args>
     <test-proxy></test-proxy>
-    <test-browser></test-browser>
     <test-app-args></test-app-args>
   </properties>
 
@@ -30,27 +29,49 @@
        </activation>
        <properties>
           <test-proxy>-Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -Dhttp.nonProxyHosts=*.eclipse.org</test-proxy>
-          <test-app-args>--launcher.GTK_version 2</test-app-args>
        </properties>
+       <build>
+         <pluginManagement>
+            <plugins>
+               <plugin>
+                 <groupId>org.eclipse.tycho</groupId>
+                 <artifactId>tycho-surefire-plugin</artifactId>
+                 <configuration>
+                    <environmentVariables>
+                       <SWT_GTK3>0</SWT_GTK3>
+                    </environmentVariables>
+                 </configuration>
+               </plugin>
+            </plugins>
+         </pluginManagement>
+       </build>
     </profile>
   </profiles>
 
   <build>
+    <pluginManagement>
+       <plugins>
+          <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>tycho-surefire-plugin</artifactId>
+            <configuration>
+              <useUIHarness>true</useUIHarness>
+              <useUIThread>false</useUIThread>
+              <forkedProcessTimeoutInSeconds>1500</forkedProcessTimeoutInSeconds>
+              <product>org.eclipse.sdk.ide</product>
+              <application>org.eclipse.ui.ide.workbench</application>
+              <testSuite>org.eclipse.epp.mpc.tests</testSuite>
+              <testClass>${test-suite}</testClass>
+              <argLine>-Xmx256m -XX:MaxPermSize=128m -Djava.io.tmpdir=${project.build.directory} ${test-args} ${test-proxy} ${test-browser}</argLine>
+              <appArgLine>${test-app-args}</appArgLine>
+            </configuration>
+          </plugin>
+       </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-surefire-plugin</artifactId>
-        <configuration>
-          <useUIHarness>true</useUIHarness>
-          <useUIThread>false</useUIThread>
-          <forkedProcessTimeoutInSeconds>1500</forkedProcessTimeoutInSeconds>
-          <product>org.eclipse.sdk.ide</product>
-          <application>org.eclipse.ui.ide.workbench</application>
-          <testSuite>org.eclipse.epp.mpc.tests</testSuite>
-          <testClass>${test-suite}</testClass>
-          <argLine>-Xmx256m -XX:MaxPermSize=128m -Djava.io.tmpdir=${project.build.directory} ${test-args} ${test-proxy} ${test-browser}</argLine>
-          <appArgLine>${test-app-args}</appArgLine>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
