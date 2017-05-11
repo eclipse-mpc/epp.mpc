@@ -68,6 +68,7 @@
             <configuration>
                <includeAllDependencies>false</includeAllDependencies>
                <compress>false</compress>
+               <xzCompress>false</xzCompress>
             </configuration>
          </plugin>
          <plugin>
