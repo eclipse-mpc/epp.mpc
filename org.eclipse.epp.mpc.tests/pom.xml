@@ -62,7 +62,7 @@
               <application>org.eclipse.ui.ide.workbench</application>
               <testSuite>org.eclipse.epp.mpc.tests</testSuite>
               <testClass>${test-suite}</testClass>
-              <argLine>-Xmx256m -XX:MaxPermSize=128m -Djava.io.tmpdir=${project.build.directory} ${test-args} ${test-proxy} ${test-browser}</argLine>
+              <argLine>-Xmx256m -XX:MaxPermSize=128m -Djava.io.tmpdir=${project.build.directory} ${test-args} ${test-proxy}</argLine>
               <appArgLine>${test-app-args}</appArgLine>
             </configuration>
           </plugin>
