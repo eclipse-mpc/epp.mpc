@@ -92,9 +92,9 @@
             </executions>
             <dependencies>
                <dependency>
-                  <groupId>com.oopsconsultancy</groupId>
-                  <artifactId>xmltask</artifactId>
-                  <version>1.16</version>
+                  <groupId>xalan</groupId>
+                  <artifactId>xalan</artifactId>
+                  <version>2.7.2</version>
                </dependency>
                <dependency>
                   <groupId>org.apache.ant</groupId>

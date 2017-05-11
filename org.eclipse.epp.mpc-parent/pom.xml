@@ -384,10 +384,23 @@
       <pluginRepository>
          <id>eclipse-maven-releases</id>
          <url>https://repo.eclipse.org/content/repositories/releases/</url>
+         <releases>
+            <enabled>true</enabled>
+         </releases>
          <snapshots>
             <enabled>false</enabled>
          </snapshots>
       </pluginRepository>
+      <pluginRepository>
+         <id>tycho-snapshots</id>
+         <url>https://repo.eclipse.org/content/repositories/tycho-snapshots/</url>
+         <releases>
+            <enabled>false</enabled>
+         </releases>
+         <snapshots>
+            <enabled>true</enabled>
+         </snapshots>
+      </pluginRepository>      
    </pluginRepositories>
 
 </project>

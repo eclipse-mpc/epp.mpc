@@ -3,39 +3,22 @@
   <property name="repository" value="${basedir}/target/repository" />
   <property name="contentxml" value="${repository}/content.xml" />
   <property name="p2contentxml" value="${basedir}/target/p2content.xml" />
+  <property name="stylesheet" value="${basedir}/p2content.xslt" />
+  
+  <macrodef name="transform">
+     <attribute name="file"/>
+     <attribute name="stylesheet"/>
+     <sequential>
+        <copy file="@{file}" tofile="@{file}.orig"/>
+        <xslt style="@{stylesheet}" in="@{file}" out="@{file}.tmp"/>
+        <move file="@{file}.tmp" tofile="@{file}"/>
+        <delete file="@{file}.orig"/>
+     </sequential>
+  </macrodef>
 
-  <taskdef name="xmltask" classname="com.oopsconsultancy.xmltask.ant.XmlTask"  />
-
-  <property name="uss-update-site" value="http://download.eclipse.org/usssdk/updates" />
-  <property name="uss-update-site-name" value="User Storage SDK" />
-  <property name="uss-legacy-update-site" value="http://download.eclipse.org/oomph/uss/updates/latest" />
-  <property name="uss-legacy-update-site-name" value="User Storage SDK 1.0 (legacy)" />
-
-  <property name="uncategorized-category" value="no.category" />
-
-  <target name="repository-reference">
-    <xmltask source="${contentxml}" dest="${contentxml}" encoding="UTF-8">
-      <insert path="/repository">
-        <![CDATA[ 
-		  <references size='4'>
-            <repository name='${uss-update-site-name}' uri='${uss-update-site}' url='${uss-update-site}' type='0' options='1'/>
-            <repository name='${uss-update-site-name}' uri='${uss-update-site}' url='${uss-update-site}' type='1' options='1'/>
-            <repository name='${uss-legacy-update-site-name}' uri='${uss-legacy-update-site}' url='${uss-legacy-update-site}' type='0' options='1'/>
-            <repository name='${uss-legacy-update-site-name}' uri='${uss-legacy-update-site}' url='${uss-legacy-update-site}' type='1' options='1'/>
-     	  </references>
-		  ]]> 
-	  </insert>
-    </xmltask>
-	<echo>repository-reference was added to ${contentxml}</echo>
-  </target>
-
-  <target name="remove-uncategorized-category">
-    <xmltask source="${p2contentxml}" dest="${p2contentxml}" encoding="UTF-8">
-     <remove path="/units/unit[contains(@id, '.${uncategorized-category}')]"/>
-    </xmltask>
-    <xmltask source="${contentxml}" dest="${contentxml}" encoding="UTF-8">
-     <remove path="/repository/units/unit[contains(@id, '.${uncategorized-category}')]"/>
-    </xmltask>
+  <target name="transform-repository-xml">
+     <transform file="${contentxml}" stylesheet="${stylesheet}"/>
+     <transform file="${p2contentxml}" stylesheet="${stylesheet}"/>
   </target>
 
   <target name="compress-repository-files">
@@ -67,5 +50,5 @@
      <delete file="${repository.archive}.tmp"/>
   </target>
   
-  <target name="process-repository" depends="repository-reference,remove-uncategorized-category,compress-repository-files,update-repository-archive"/>
+  <target name="process-repository" depends="transform-repository-xml,compress-repository-files,update-repository-archive"/>
 </project>
