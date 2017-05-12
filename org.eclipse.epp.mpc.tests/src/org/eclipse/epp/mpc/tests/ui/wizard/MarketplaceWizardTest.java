@@ -201,7 +201,7 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 		SWTBotButton favorite = bot.buttonWithId(AbstractMarketplaceDiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_RATING);
 		bot.sleep(5000);
 		favorite.click();
-		SWTBotShell login = bot.shell("Eclipse User Storage Service");
+		SWTBotShell login = bot.shell("Authorizing with Eclipse.org");
 		login.bot().button("Cancel").click();
 		//TODO test something useful - we'd need a proper login on the server to do this...
 		//better to get started with some server mocking in the ui tests...

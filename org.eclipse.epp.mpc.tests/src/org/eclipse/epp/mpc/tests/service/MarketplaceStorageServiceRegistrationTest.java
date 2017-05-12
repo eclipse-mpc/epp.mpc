@@ -12,30 +12,21 @@ package org.eclipse.epp.mpc.tests.service;
 
 import static org.junit.Assert.*;
 
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.epp.internal.mpc.core.ServiceLocator;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
-import org.eclipse.epp.internal.mpc.core.service.StorageConfigurer;
 import org.eclipse.epp.mpc.core.service.IMarketplaceStorageService;
 import org.eclipse.epp.mpc.core.service.ServiceHelper;
-import org.eclipse.epp.mpc.tests.util.PropertyStub;
-import org.eclipse.userstorage.IStorage;
 import org.eclipse.userstorage.IStorageService;
 import org.eclipse.userstorage.IStorageService.Dynamic;
 import org.eclipse.userstorage.internal.StorageService;
-import org.eclipse.userstorage.spi.ICredentialsProvider;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExternalResource;
-import org.mockito.Matchers;
-import org.mockito.Mockito;
 
 public class MarketplaceStorageServiceRegistrationTest {
 
@@ -99,11 +90,6 @@ public class MarketplaceStorageServiceRegistrationTest {
 		serviceLocator = (ServiceLocator) ServiceHelper.getMarketplaceServiceLocator();
 		storageServices.cleanup("https://api-test.example.org/");
 		storageServices.cleanup("https://api-test.example.org");
-	}
-
-	@After
-	public void cleanUp() {
-		setCustomConfigurers((String[]) null);
 	}
 
 	@Test
@@ -187,78 +173,5 @@ public class MarketplaceStorageServiceRegistrationTest {
 
 		withoutSlash = IStorageService.Registry.INSTANCE.getService(URI.create("https://api.eclipse.org"));
 		assertNull(withoutSlash);
-	}
-
-	@Test
-	public void testDefaultConfigurer() throws Exception {
-		testConfigurer((String[]) null);
-	}
-
-	@Test
-	public void testUSS10Configurer() throws Exception {
-		//"org.eclipse.epp.internal.mpc.core.service.USS11ExtendedOAuthStorageConfigurer$Factory"
-		//"org.eclipse.epp.internal.mpc.core.service.USS11OAuthStorageConfigurer$Factory"
-		//"org.eclipse.epp.internal.mpc.core.service.USS10StorageConfigurer$Factory"
-		testConfigurer("org.eclipse.epp.internal.mpc.core.service.USS10StorageConfigurer$Factory");
-	}
-
-	@Test
-	public void testUSS11Configurer() throws Exception {
-		testConfigurer("org.eclipse.epp.internal.mpc.core.service.USS11OAuthStorageConfigurer$Factory");
-	}
-
-	@Test
-	public void testUSS11ExtendedConfigurer() throws Exception {
-		testConfigurer("org.eclipse.epp.internal.mpc.core.service.USS11ExtendedOAuthStorageConfigurer$Factory");
-	}
-
-	protected void testConfigurer(String... factories) throws CoreException {
-		setCustomConfigurers(factories);
-		StorageConfigurer configurer = StorageConfigurer.get();//FIXME this might return the fallback configurer
-		assertNotNull(configurer);
-		IStorage storageMock = Mockito.mock(IStorage.class);
-		PropertyStub.mock(storageMock, ICredentialsProvider.class, storageMock.getCredentialsProvider())
-		.setCredentialsProvider(Matchers.any());
-
-		configurer.configure(storageMock);
-		configurer.setInteractive(storageMock, false);
-		assertNotNull(storageMock.getCredentialsProvider());
-		assertFalse(isInteractive(storageMock.getCredentialsProvider()));
-		configurer.setInteractive(storageMock, true);
-		assertTrue(isInteractive(storageMock.getCredentialsProvider()));
-	}
-
-	private static void setCustomConfigurers(String... factories) {
-		if (factories == null || (factories.length == 1 && factories[0] == null)) {
-			System.getProperties().remove(StorageConfigurer.PROP_FACTORIES);
-		} else if (factories.length == 0) {
-			System.setProperty(StorageConfigurer.PROP_FACTORIES, "");
-		} else {
-			StringBuilder b = new StringBuilder();
-			for (int i = 0; i < factories.length; i++) {
-				if (i > 0) {
-					b.append(" ");
-				}
-				b.append(factories[i]);
-			}
-			System.setProperty(StorageConfigurer.PROP_FACTORIES, b.toString());
-		}
-		StorageConfigurer.unset();
-	}
-
-	private static boolean isInteractive(ICredentialsProvider credentialsProvider) {
-		if (credentialsProvider == null) {
-			return true;
-		}
-		if (credentialsProvider.getClass() == ICredentialsProvider.CANCEL.getClass()) {
-			return false;
-		}
-		try {
-			Method method = credentialsProvider.getClass().getMethod("isInteractive");
-			method.setAccessible(true);
-			return (boolean) method.invoke(credentialsProvider);
-		} catch (Throwable t) {
-			return false;
-		}
 	}
 }

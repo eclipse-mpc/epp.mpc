@@ -40,7 +40,6 @@ import org.eclipse.epp.internal.mpc.core.model.Identifiable;
 import org.eclipse.epp.internal.mpc.core.model.Node;
 import org.eclipse.epp.internal.mpc.core.model.SearchResult;
 import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
-import org.eclipse.epp.internal.mpc.core.service.StorageConfigurer;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
@@ -72,6 +71,7 @@ import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.userstorage.IStorage;
+import org.eclipse.userstorage.oauth.EclipseOAuthCredentialsProvider;
 import org.eclipse.userstorage.spi.ICredentialsProvider;
 import org.osgi.framework.BundleContext;
 
@@ -214,12 +214,8 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		}
 		IStorage storage = storageService.getStorage();
 		ICredentialsProvider credentialsProvider = storage.getCredentialsProvider();
-		if (credentialsProvider != null) {
-			try {
-				StorageConfigurer.get().setShellProvider(storage, this.shellProvider);
-			} catch (CoreException e) {
-				//ignore
-			}
+		if (credentialsProvider instanceof EclipseOAuthCredentialsProvider) {
+			((EclipseOAuthCredentialsProvider) credentialsProvider).setShell(shellProvider);
 		}
 	}
 
