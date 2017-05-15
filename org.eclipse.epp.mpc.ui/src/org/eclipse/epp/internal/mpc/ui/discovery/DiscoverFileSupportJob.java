@@ -17,12 +17,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.Messages;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorRegistry;
@@ -70,8 +72,11 @@ final class DiscoverFileSupportJob extends Job {
 			ISearchResult searchResult = marketplaceService.tagged(fileExtensionTag, monitor);
 			nodes = searchResult.getNodes();
 		} catch (CoreException ex) {
-			return new Status(IStatus.ERROR,
-					MarketplaceClientUiPlugin.getInstance().getBundle().getSymbolicName(), ex.getMessage(), ex);
+			IStatus status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
+					NLS.bind(Messages.DiscoverFileSupportJob_discoveryFailed, getFileExtensionLabel(fileName)), ex);
+			// Do not return this status as it would show an error, e.g. when the user is currently offline
+			MarketplaceClientUi.getLog().log(status);
+			return Status.CANCEL_STATUS;
 		}
 		if (nodes.isEmpty()) {
 			return Status.OK_STATUS;

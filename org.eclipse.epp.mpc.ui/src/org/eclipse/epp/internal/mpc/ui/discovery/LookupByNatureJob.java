@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.Messages;
 import org.eclipse.epp.mpc.core.model.INode;
@@ -50,9 +51,9 @@ final class LookupByNatureJob extends Job {
 			ISearchResult searchResult = marketplaceService.tagged(fileExtensionTag, monitor);
 			nodes = searchResult.getNodes();
 		} catch (CoreException ex) {
-			IStatus status = new Status(IStatus.ERROR,
-					MarketplaceClientUiPlugin.getInstance().getBundle().getSymbolicName(), ex.getMessage(), ex);
-			MarketplaceClientUiPlugin.getInstance().getLog().log(status);
+			IStatus status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
+					NLS.bind(Messages.LookupByNatureJob_discoveryFailed, natureId), ex);
+			MarketplaceClientUi.getLog().log(status);
 			// Do not return this status as it would show an error
 			return Status.CANCEL_STATUS;
 		}

@@ -33,6 +33,10 @@ public class Messages extends NLS {
 
 	public static String AskMerketplaceForFileSupportStrategy_dialogJobName;
 
+	public static String DiscoverFileSupportJob_discoveryFailed;
+
+	public static String LookupByNatureJob_discoveryFailed;
+
 	/**
 	 * Only kept here to give translations time to move the message to the new bundle without causing warnings.
 	 *
