@@ -42,7 +42,7 @@ public class MissingNatureDetector implements IStartup, IPropertyChangeListener 
 
 	private final Set<String> detectedNatures = new HashSet<String>();
 
-	private final Set<LookupByNatureJob> lookupJobs = new HashSet<LookupByNatureJob>();
+	private final Set<DiscoverNatureSupportJob> lookupJobs = new HashSet<DiscoverNatureSupportJob>();
 
 	private final IResourceChangeListener projectOpenListener = new IResourceChangeListener() {
 		public void resourceChanged(IResourceChangeEvent event) {
@@ -75,7 +75,7 @@ public class MissingNatureDetector implements IStartup, IPropertyChangeListener 
 			if (detectedNatures.contains(natureId)) {
 				return;
 			} else {
-				LookupByNatureJob mpcJob = new LookupByNatureJob(natureId);
+				DiscoverNatureSupportJob mpcJob = new DiscoverNatureSupportJob(natureId);
 				mpcJob.setSystem(false);
 				mpcJob.setUser(false);
 				mpcJob.setJobGroup(allJobs);
@@ -101,7 +101,7 @@ public class MissingNatureDetector implements IStartup, IPropertyChangeListener 
 				return;
 			}
 			candidates = new HashMap<String, Collection<INode>>();
-			for (LookupByNatureJob lookupJob : lookupJobs) {
+			for (DiscoverNatureSupportJob lookupJob : lookupJobs) {
 				Collection<INode> entryCandidates = lookupJob.getCandidates();
 				if (entryCandidates != null && !entryCandidates.isEmpty()) {
 					candidates.put(lookupJob.getNatureId(), entryCandidates);

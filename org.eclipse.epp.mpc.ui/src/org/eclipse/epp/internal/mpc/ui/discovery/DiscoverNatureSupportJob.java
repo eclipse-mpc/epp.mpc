@@ -29,12 +29,12 @@ import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
-final class LookupByNatureJob extends Job {
+final class DiscoverNatureSupportJob extends Job {
 	private final String natureId;
 
 	private List<? extends INode> nodes;
 
-	LookupByNatureJob(String natureId) {
+	DiscoverNatureSupportJob(String natureId) {
 		super(NLS.bind(Messages.MissingNatureDetector_jobName, natureId));
 		this.natureId = natureId;
 	}

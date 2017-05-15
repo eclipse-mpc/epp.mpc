@@ -43,7 +43,7 @@ final class DiscoverFileSupportJob extends Job {
 
 	public DiscoverFileSupportJob(IEditorRegistry editorRegistry, IEditorDescriptor defaultDescriptor,
 			String fileName) {
-		super(Messages.AskMarketPlaceForFileSupportStrategy_jobName);
+		super(NLS.bind(Messages.AskMarketPlaceForFileSupportStrategy_jobName, getFileExtensionLabel(fileName)));
 		this.display = Display.getCurrent();
 		this.editorRegistry = editorRegistry;
 		this.defaultDescriptor = defaultDescriptor;
