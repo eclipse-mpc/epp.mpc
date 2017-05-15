@@ -361,4 +361,27 @@ public class DefaultMarketplaceServiceTest {
 		assertNotNull(url);
 		new URL(url);
 	}
+
+	@Test
+	@org.junit.experimental.categories.Category(RemoteTests.class)
+	public void getNodes() throws CoreException {
+		INode idNode1 = QueryHelper.nodeById("206");//Mylyn
+		INode idNode2 = QueryHelper.nodeById("1139");//Subversive
+		INode idNode3 = QueryHelper.nodeById("252");//M2E
+		INode urlNode = QueryHelper.nodeByUrl("https://marketplace.eclipse.org/content/egit-git-integration-eclipse");
+		List<INode> query = Arrays.asList(idNode1, idNode2, urlNode, idNode3);
+
+		List<INode> result = marketplaceService.getNodes(query, new NullProgressMonitor());
+		assertEquals(query.size(), result.size());
+		for (int i = 0; i < query.size(); i++) {
+			INode queryNode = query.get(i);
+			INode resultNode = query.get(i);
+			if (queryNode.getId() != null) {
+				assertEquals(queryNode.getId(), resultNode.getId());
+			}
+			if (queryNode.getUrl() != null) {
+				assertEquals(queryNode.getUrl(), resultNode.getUrl());
+			}
+		}
+	}
 }

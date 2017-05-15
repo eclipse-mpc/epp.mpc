@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -314,23 +315,95 @@ MarketplaceService {
 	}
 
 	public List<INode> getNodes(Collection<? extends INode> nodes, IProgressMonitor monitor) throws CoreException {
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.DefaultMarketplaceService_getNodesProgress, nodes.size());
 		if (nodes.isEmpty()) {
 			return new ArrayList<INode>();
 		}
-		StringBuilder nodeIds = new StringBuilder();
+		List<INode> nodesById = null;
+		List<INode> nodesByUrl = null;
 		for (INode node : nodes) {
 			if (node.getId() == null) {
-				throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_missingNodeId, node));
+				if (node.getUrl() == null) {
+					throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_invalidNode, node));
+				}
+				if (nodesByUrl == null) {
+					nodesByUrl = new ArrayList<INode>();
+				}
+				nodesByUrl.add(node);
+			} else {
+				if (nodesById == null) {
+					nodesById = new ArrayList<INode>(nodes.size());
+				}
+				nodesById.add(node);
 			}
-			String encodedId = urlEncode(node.getId());
-			if (nodeIds.length() > 0) {
-				nodeIds.append(","); //$NON-NLS-1$
-			}
-			nodeIds.append(encodedId);
 		}
-		Marketplace marketplace = processRequest(API_NODE_URI + '/' + nodeIds + '/' + API_URI_SUFFIX, monitor);
-		List<Node> resultNodes = marketplace.getNode();
-		return new ArrayList<INode>(resultNodes);
+		Map<INode, INode> resolvedNodeMapping = new HashMap<INode, INode>(nodes.size());
+		if (nodesById != null) {
+			getNodesById(nodesById, resolvedNodeMapping, progress.newChild(nodesById.size()));
+		}
+		if (nodesByUrl != null) {
+			getNodesByUrl(nodesByUrl, resolvedNodeMapping, progress.newChild(nodesByUrl.size()));
+		}
+
+		List<INode> resultNodes = new ArrayList<INode>(nodes.size());
+		for (INode inputNode : nodes) {
+			INode resolvedNode = resolvedNodeMapping.get(inputNode);
+			if (resolvedNode != null) {
+				resultNodes.add(resolvedNode);
+			} else {
+				String query;
+				if (inputNode.getId() != null) {
+					query = inputNode.getId();
+				} else {
+					query = inputNode.getUrl();
+				}
+				throw new CoreException(
+						createErrorStatus(Messages.DefaultMarketplaceService_nodeNotFound, query));
+			}
+		}
+
+		return resultNodes;
+	}
+
+	private void getNodesById(Collection<? extends INode> nodes, Map<INode, INode> resolvedNodeMapping,
+			IProgressMonitor monitor) throws CoreException {
+		StringBuilder nodeIdQuery = new StringBuilder();
+		Map<String, INode> nodeIds = new HashMap<String, INode>(nodes.size());
+		for (INode node : nodes) {
+			if (node.getId() == null) {
+				continue;
+			}
+			nodeIds.put(node.getId(), node);
+			String encodedId = urlEncode(node.getId());
+			if (nodeIdQuery.length() > 0) {
+				nodeIdQuery.append(","); //$NON-NLS-1$
+			}
+			nodeIdQuery.append(encodedId);
+		}
+		Marketplace marketplace = processRequest(API_NODE_URI + '/' + nodeIdQuery + '/' + API_URI_SUFFIX, monitor);
+		List<Node> resolvedNodes = marketplace.getNode();
+		for (Node node : resolvedNodes) {
+			INode inputNode = nodeIds.get(node.getId());
+			if (inputNode != null) {
+				resolvedNodeMapping.put(inputNode, node);
+			} else {
+				throw new CoreException(
+						createErrorStatus(Messages.DefaultMarketplaceService_unexpectedResponse, nodeIdQuery));
+			}
+		}
+	}
+
+	private void getNodesByUrl(Collection<? extends INode> nodes, Map<INode, INode> resolvedNodeMapping,
+			IProgressMonitor monitor) throws CoreException {
+		SubMonitor progress = SubMonitor.convert(monitor, nodes.size());
+		int remaining = nodes.size();
+		for (INode node : nodes) {
+			if (node.getId() == null && node.getUrl() != null) {
+				Node resolvedNode = getNode(node, progress.newChild(1));
+				resolvedNodeMapping.put(node, resolvedNode);
+			}
+			progress.setWorkRemaining(--remaining);
+		}
 	}
 
 	public SearchResult search(IMarket market, ICategory category, String queryText, IProgressMonitor monitor)

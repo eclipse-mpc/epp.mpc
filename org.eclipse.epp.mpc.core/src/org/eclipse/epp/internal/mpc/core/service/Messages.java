@@ -29,7 +29,13 @@ class Messages extends NLS {
 	public static String DefaultMarketplaceService_FavoritesUpdate;
 
 
+	public static String DefaultMarketplaceService_getNodesProgress;
+
+
 	public static String DefaultMarketplaceService_invalidLocation;
+
+
+	public static String DefaultMarketplaceService_invalidNode;
 
 	public static String DefaultMarketplaceService_marketNotFound;
 

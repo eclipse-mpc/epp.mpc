@@ -9,7 +9,7 @@
 
    <groupId>org.eclipse.epp.mpc</groupId>
    <artifactId>org.eclipse.epp.mpc-parent</artifactId>
-   <version>1.6.0-SNAPSHOT</version>
+   <version>1.5.4-SNAPSHOT</version>
    <packaging>pom</packaging>
 
    <properties>
@@ -86,9 +86,9 @@
    <profiles>
       <!-- target platform profiles -->
       <profile>
-         <id>oxygen</id>
+         <id>neon</id>
          <properties>
-            <target-platform>oxygen</target-platform>
+            <target-platform>neon</target-platform>
          </properties>
       </profile>
       <profile>
