@@ -38,7 +38,7 @@ public class MissingNatureDetector implements IStartup, IPropertyChangeListener 
 
 	public static final String ENABLEMENT_PROPERTY = "org.eclipse.epp.mpc.naturelookup"; //$NON-NLS-1$
 
-	private final JobGroup allJobs = new JobGroup(Messages.MissingNatureDetector_Title, 3, 0);
+	private JobGroup allJobs;
 
 	private final Set<String> detectedNatures = new HashSet<String>();
 
@@ -65,6 +65,10 @@ public class MissingNatureDetector implements IStartup, IPropertyChangeListener 
 			}
 		}
 	};
+
+	public MissingNatureDetector() {
+		super();
+	}
 
 	private void triggerNatureLookup(final String natureId) {
 		synchronized (lookupJobs) {
@@ -111,13 +115,13 @@ public class MissingNatureDetector implements IStartup, IPropertyChangeListener 
 	}
 
 	public void earlyStartup() {
+		allJobs = new JobGroup(Messages.MissingNatureDetector_Title, 3, 0);
 		IPreferenceStore preferenceStore = MarketplaceClientUiPlugin.getInstance().getPreferenceStore();
 		preferenceStore.addPropertyChangeListener(this);
 		boolean preferenceValue = preferenceStore.getBoolean(ENABLEMENT_PROPERTY);
 		if (preferenceValue) {
 			ResourcesPlugin.getWorkspace().addResourceChangeListener(projectOpenListener);
 		}
-
 	}
 
 	public void propertyChange(PropertyChangeEvent event) {
