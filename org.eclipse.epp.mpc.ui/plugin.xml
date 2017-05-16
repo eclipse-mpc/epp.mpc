@@ -73,6 +73,17 @@
                tooltip="%command.open.tooltip">
          </command>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.eclipse.userstorage.accounts?after=actions">
+         <command
+               commandId="org.eclipse.epp.mpc.ui.command.showFavorites"
+               icon="icons/marketplace16.png"
+               label="%command.account.favorites.label"
+               style="push"
+               tooltip="%command.account.favorites.tooltip">
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.intro.configExtension">
