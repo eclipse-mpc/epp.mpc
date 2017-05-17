@@ -32,6 +32,7 @@ public abstract class AbstractUserActionItem extends AbstractMarketplaceDiscover
 			UserActionCatalogItem connector, CatalogViewer viewer) {
 		super(parent, SWT.NONE, resources, null, connector, viewer);
 		//TODO we need a better color definition for this...
+		//see https://bugs.eclipse.org/bugs/show_bug.cgi?id=516804
 		setBackground(viewer.getControl().getDisplay().getSystemColor(SWT.COLOR_TITLE_BACKGROUND_GRADIENT));
 	}
 

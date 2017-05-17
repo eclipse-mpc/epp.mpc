@@ -36,7 +36,7 @@ public class UserFavoritesUnsupportedActionItem extends AbstractUserActionItem {
 
 	@Override
 	protected Icon getIcon() {
-		// TODO
+		// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=516804
 		return null;
 	}
 
