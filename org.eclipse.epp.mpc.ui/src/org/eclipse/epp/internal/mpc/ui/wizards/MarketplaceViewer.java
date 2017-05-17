@@ -311,6 +311,15 @@ public class MarketplaceViewer extends CatalogViewer {
 			if (discoveryStrategy instanceof MarketplaceDiscoveryStrategy) {
 				MarketplaceDiscoveryStrategy marketplaceDiscoveryStrategy = (MarketplaceDiscoveryStrategy) discoveryStrategy;
 				marketplaceDiscoveryStrategy.addLoginListener(loginListener);
+				for (CatalogCategory catalogCategory : catalog.getCategories()) {
+					if (catalogCategory instanceof MarketplaceCategory) {
+						MarketplaceCategory marketplaceCategory = (MarketplaceCategory) catalogCategory;
+						if (marketplaceCategory.getContents() == Contents.FEATURED
+								&& getWizard().shouldShowOpenFavoritesBanner()) {
+							marketplaceDiscoveryStrategy.addOpenFavoritesItem(marketplaceCategory);
+						}
+					}
+				}
 			}
 		}
 		runUpdate(new Runnable() {
@@ -398,6 +407,9 @@ public class MarketplaceViewer extends CatalogViewer {
 			return new UserFavoritesSignInActionItem(parent, getResources(), catalogItem, this);
 		case RETRY_ERROR:
 			return new RetryErrorActionItem(parent, getResources(), catalogItem, this);
+		case OPEN_FAVORITES:
+			getWizard().didShowOpenFavoritesBanner();
+			return new OpenFavoritesNotificationItem(parent, getResources(), catalogItem, getWizard().getCatalogPage());
 		}
 		return null;
 	}

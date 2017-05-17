@@ -80,6 +80,8 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 
 	public static final String NO_ICON_PROVIDED_CATALOG = "NO_ICON_PROVIDED_CATALOG"; //$NON-NLS-1$
 
+	public static final String DEFAULT_MARKETPLACE_ICON = "DEFAULT_MARKETPLACE_ICON"; //$NON-NLS-1$
+
 	public static final String ITEM_ICON_STAR = "ITEM_ICON_STAR"; //$NON-NLS-1$
 
 	public static final String ITEM_ICON_STAR_SELECTED = "ITEM_ICON_STAR_SELECTED"; //$NON-NLS-1$
@@ -160,6 +162,8 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 				"icons/noiconprovided.png")); //$NON-NLS-1$
 		imageRegistry.put(NO_ICON_PROVIDED_CATALOG,
 				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/noiconprovided32.png")); //$NON-NLS-1$
+		imageRegistry.put(DEFAULT_MARKETPLACE_ICON,
+				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/marketplace_banner.png")); //$NON-NLS-1$
 		imageRegistry.put(IU_ICON, imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/iu_obj.gif")); //$NON-NLS-1$
 		imageRegistry.put(IU_ICON_UPDATE, imageDescriptorFromPlugin(getBundle().getSymbolicName(),
 				"icons/iu_update_obj.gif")); //$NON-NLS-1$

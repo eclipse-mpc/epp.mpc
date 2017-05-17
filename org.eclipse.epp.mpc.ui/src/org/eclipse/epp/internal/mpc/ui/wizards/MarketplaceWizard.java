@@ -43,6 +43,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.preferences.ConfigurationScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.model.News;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
@@ -103,6 +105,7 @@ import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.internal.browser.WorkbenchBrowserSupport;
 import org.eclipse.ui.statushandlers.StatusManager;
+import org.osgi.service.prefs.BackingStoreException;
 
 /**
  * A wizard for interacting with a marketplace service.
@@ -111,6 +114,10 @@ import org.eclipse.ui.statushandlers.StatusManager;
  * @author Carsten Reckord
  */
 public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile, IMarketplaceWebBrowser {
+
+	private static final String WELCOME_TRIGGER_ID = "welcome"; //$NON-NLS-1$
+
+	private static final String OPEN_FAVORITES_NOTIFICATION_PREFERENCE = "showOpenFavoritesNotification"; //$NON-NLS-1$
 
 	private static final String PREF_DEFAULT_CATALOG = CatalogDescriptor.class.getSimpleName();
 
@@ -204,9 +211,13 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	private boolean withRemediation;
 
+	private String trigger;
+
 	private String errorMessage;
 
 	private WizardState initialState;
+
+	private boolean openFavoritesBannerShown;
 
 	public String getErrorMessage() {
 		return errorMessage;
@@ -1025,6 +1036,39 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		return false;
 	}
 
+	protected boolean shouldShowOpenFavoritesBanner() {
+		if (openFavoritesBannerShown) {
+			return false;
+		}
+		if (alwaysShowForTrigger()) {
+			return true;
+		}
+		boolean show = isFirstTimeInInstallation();
+		return show;
+	}
+
+	protected boolean isFirstTimeInInstallation() {
+		return ConfigurationScope.INSTANCE.getNode(MarketplaceClientUi.BUNDLE_ID)
+				.getBoolean(OPEN_FAVORITES_NOTIFICATION_PREFERENCE, true);
+	}
+
+	protected boolean alwaysShowForTrigger() {
+		return trigger != null && WELCOME_TRIGGER_ID.equals(trigger);
+	}
+
+	protected void didShowOpenFavoritesBanner() {
+		openFavoritesBannerShown = true;
+		IEclipsePreferences node = ConfigurationScope.INSTANCE.getNode(MarketplaceClientUi.BUNDLE_ID);
+		if (node.getBoolean(OPEN_FAVORITES_NOTIFICATION_PREFERENCE, true)) {
+			node.putBoolean(OPEN_FAVORITES_NOTIFICATION_PREFERENCE, false);
+			try {
+				node.flush();
+			} catch (BackingStoreException e) {
+				MarketplaceClientUi.error(e);
+			}
+		}
+	}
+
 	public Object suspendWizard() {
 		String catalogUrl = getCatalogUrl();
 		String key = appendWizardState(catalogUrl);
@@ -1038,6 +1082,14 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	public WizardState getInitialState() {
 		return initialState;
+	}
+
+	public String getTrigger() {
+		return trigger;
+	}
+
+	public void setTrigger(String trigger) {
+		this.trigger = trigger;
 	}
 
 	public static void resumeWizard(Display display, Object state, boolean proceedWithInstall) {

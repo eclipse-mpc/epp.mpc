@@ -76,6 +76,8 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
  */
 public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<T> {
 
+	protected static final String REGISTRY_SCHEME = "registry:"; //$NON-NLS-1$
+
 	private static final String FILE_EXTENSION_TAG_PREFIX = "fileExtension_"; //$NON-NLS-1$
 
 	private static final String ELLIPSIS = new String("\u2026"); //$NON-NLS-1$
@@ -234,7 +236,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		createInstallButtons(parent);
 	}
 
-	private void createIconContainer(Composite parent) {
+	protected void createIconContainer(Composite parent) {
 		checkboxContainer = new Composite(parent, SWT.NONE);
 		GridDataFactory.swtDefaults()
 		.indent(0, DESCRIPTION_MARGIN_TOP)
@@ -421,39 +423,46 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		if (iconLabel == null) {
 			return;
 		}
-		String iconPath = getResources().getIconPath(icon, size, fallback);
-		getResources().setImage(
-				new ImageReceiver() {
+		ImageReceiver receiver = new ImageReceiver() {
 
-					public void setImage(Image image) {
-						if (image == null || image.isDisposed() || iconLabel.isDisposed()) {
-							return;
-						}
-						try {
-							Rectangle bounds = image.getBounds();
-							if (bounds.width < 0.8 * MAX_IMAGE_WIDTH || bounds.width > MAX_IMAGE_WIDTH
-									|| bounds.height > MAX_IMAGE_HEIGHT) {
-								final Image scaledImage = Util.scaleImage(image, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT);
-								image = scaledImage;
-								iconLabel.addDisposeListener(new DisposeListener() {
-									public void widgetDisposed(DisposeEvent e) {
-										scaledImage.dispose();
-									}
-								});
+			public void setImage(Image image) {
+				if (image == null || image.isDisposed() || iconLabel.isDisposed()) {
+					return;
+				}
+				try {
+					Rectangle bounds = image.getBounds();
+					if (bounds.width < 0.8 * MAX_IMAGE_WIDTH || bounds.width > MAX_IMAGE_WIDTH
+							|| bounds.height > MAX_IMAGE_HEIGHT) {
+						final Image scaledImage = Util.scaleImage(image, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT);
+						image = scaledImage;
+						iconLabel.addDisposeListener(new DisposeListener() {
+							public void widgetDisposed(DisposeEvent e) {
+								scaledImage.dispose();
 							}
-							iconLabel.setImage(image);
-						} catch (SWTException e) {
-							// ignore, probably a bad image format
+						});
+					}
+					iconLabel.setImage(image);
+				} catch (SWTException e) {
+					// ignore, probably a bad image format
 //							MarketplaceClientUi.error(NLS.bind(Messages.DiscoveryItem_cannotRenderImage_reason, connector.getIcon()
 //									.getImage32(), e.getMessage()), e);
-						}
-					}
-				},
-				source,
-				iconPath,
-				MarketplaceClientUiPlugin.getInstance()
-				.getImageRegistry()
-				.get(MarketplaceClientUiPlugin.NO_ICON_PROVIDED));
+				}
+			}
+		};
+		String iconPath = getResources().getIconPath(icon, size, fallback);
+		if (iconPath.startsWith(REGISTRY_SCHEME)) {
+			String key = iconPath.substring(REGISTRY_SCHEME.length());
+			Image image = MarketplaceClientUiPlugin.getInstance().getImageRegistry().get(key);
+			receiver.setImage(image);
+		} else {
+			getResources().setImage(
+					receiver,
+					source,
+					iconPath,
+					MarketplaceClientUiPlugin.getInstance()
+					.getImageRegistry()
+					.get(MarketplaceClientUiPlugin.NO_ICON_PROVIDED));
+		}
 	}
 
 	public MarketplaceDiscoveryResources getResources() {

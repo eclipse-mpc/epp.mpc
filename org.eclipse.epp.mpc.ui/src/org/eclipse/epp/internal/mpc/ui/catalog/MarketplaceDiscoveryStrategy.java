@@ -788,6 +788,10 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		addUserActionItem(catalogCategory, UserAction.RETRY_ERROR, ex);
 	}
 
+	public void addOpenFavoritesItem(MarketplaceCategory catalogCategory) {
+		addUserActionItem(catalogCategory, UserAction.OPEN_FAVORITES);
+	}
+
 	public void installed(IProgressMonitor monitor) throws CoreException {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_findingInstalled,
 				1000);

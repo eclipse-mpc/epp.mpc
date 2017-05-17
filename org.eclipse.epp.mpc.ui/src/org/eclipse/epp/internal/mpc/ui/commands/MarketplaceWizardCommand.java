@@ -34,7 +34,6 @@ import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceWizardDialog;
 import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.ui.IMarketplaceClientConfiguration;
-import org.eclipse.epp.mpc.ui.IMarketplaceClientConfiguration;
 import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.model.Tag;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
@@ -50,6 +49,8 @@ import org.eclipse.ui.handlers.HandlerUtil;
  * @author Carsten Reckord
  */
 public class MarketplaceWizardCommand extends AbstractMarketplaceWizardCommand implements IHandler {
+
+	private static final String TRIGGER_PARAMETER = "trigger"; //$NON-NLS-1$
 
 	private String wizardState;
 
@@ -130,6 +131,8 @@ public class MarketplaceWizardCommand extends AbstractMarketplaceWizardCommand i
 		MarketplaceWizard wizard = new MarketplaceWizard(catalog, configuration);
 		wizard.setInitialState(wizardDialogState);
 		wizard.setWindowTitle(Messages.MarketplaceWizardCommand_eclipseMarketplace);
+		String trigger = event.getParameter(TRIGGER_PARAMETER);
+		wizard.setTrigger(trigger);
 		return wizard;
 	}
 
@@ -183,8 +186,9 @@ public class MarketplaceWizardCommand extends AbstractMarketplaceWizardCommand i
 		this.operations = operationByNodeId;
 	}
 
+	@Override
 	public void setConfiguration(IMarketplaceClientConfiguration configuration) {
-	   super.setConfiguration(configuration);
+		super.setConfiguration(configuration);
 		setOperations(configuration.getInitialOperations());
 		setWizardState((String) configuration.getInitialState());
 	}

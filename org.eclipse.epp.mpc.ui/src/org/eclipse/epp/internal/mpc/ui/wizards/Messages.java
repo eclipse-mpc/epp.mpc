@@ -244,6 +244,12 @@ class Messages extends NLS {
 
 	public static String NewsViewer_No_news;
 
+	public static String OpenFavoritesNotificationItem_description;
+
+	public static String OpenFavoritesNotificationItem_InstallButtonLabel;
+
+	public static String OpenFavoritesNotificationItem_title;
+
 	public static String Operation_install;
 
 	public static String Operation_uninstall;

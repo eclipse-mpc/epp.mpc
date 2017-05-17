@@ -38,6 +38,11 @@
             description="%command.open.description"
             id="org.eclipse.epp.mpc.ui.command.showMarketplaceWizard"
             name="%command.open.name">
+         <commandParameter
+               id="trigger"
+               name="trigger"
+               optional="true">
+         </commandParameter>
       </command>
       <command
             description="%command.importFavorites.description"
