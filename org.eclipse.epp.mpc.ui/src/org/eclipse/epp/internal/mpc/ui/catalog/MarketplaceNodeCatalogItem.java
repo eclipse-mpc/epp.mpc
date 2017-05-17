@@ -277,6 +277,15 @@ public class MarketplaceNodeCatalogItem extends CatalogItem {
 	}
 
 	@Override
+	public void setSelected(boolean selected) {
+		boolean wasSelected = isSelected();
+		if (wasSelected != selected) {
+			super.setSelected(selected);
+			firePropertyChange("selected", wasSelected, selected); //$NON-NLS-1$
+		}
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;

@@ -11,12 +11,14 @@
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
+import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.jface.window.Window;
 
@@ -34,19 +36,19 @@ public class ImportFavoritesActionLink extends ActionLink {
 
 	@Override
 	public void selected() {
-		importFavorites();
+		importFavorites(marketplacePage.getWizard());
 	}
 
-	protected void importFavorites() {
-		MarketplaceDiscoveryStrategy marketplaceStrategy = findMarketplaceDiscoveryStrategy();
+	protected static void importFavorites(MarketplaceWizard wizard) {
+		MarketplaceDiscoveryStrategy marketplaceStrategy = findMarketplaceDiscoveryStrategy(wizard);
 		if (marketplaceStrategy != null && marketplaceStrategy.hasUserFavoritesService()) {
-			importFavorites(marketplaceStrategy);
+			importFavorites(wizard, marketplaceStrategy);
 		}
 	}
 
-	protected MarketplaceDiscoveryStrategy findMarketplaceDiscoveryStrategy() {
+	protected static MarketplaceDiscoveryStrategy findMarketplaceDiscoveryStrategy(MarketplaceWizard wizard) {
 		MarketplaceDiscoveryStrategy marketplaceStrategy = null;
-		List<AbstractDiscoveryStrategy> discoveryStrategies = marketplacePage.getCatalog().getDiscoveryStrategies();
+		List<AbstractDiscoveryStrategy> discoveryStrategies = wizard.getCatalog().getDiscoveryStrategies();
 		for (AbstractDiscoveryStrategy strategy : discoveryStrategies) {
 			if (strategy instanceof MarketplaceDiscoveryStrategy) {
 				marketplaceStrategy = (MarketplaceDiscoveryStrategy) strategy;
@@ -56,8 +58,7 @@ public class ImportFavoritesActionLink extends ActionLink {
 		return marketplaceStrategy;
 	}
 
-	protected void importFavorites(MarketplaceDiscoveryStrategy marketplaceStrategy) {
-		MarketplaceWizard wizard = marketplacePage.getWizard();
+	protected static void importFavorites(MarketplaceWizard wizard, MarketplaceDiscoveryStrategy marketplaceStrategy) {
 		FavoritesCatalog favoritesCatalog = new FavoritesCatalog();
 
 		ImportFavoritesWizard importFavoritesWizard = new ImportFavoritesWizard(favoritesCatalog,
@@ -69,12 +70,12 @@ public class ImportFavoritesActionLink extends ActionLink {
 			protected void preDiscovery() {
 				discoveryError = null;
 			}
-			
+
 			@Override
 			protected void handleDiscoveryError(CoreException ex) throws CoreException {
-				discoveryError = importFavoritesPage.handleDiscoveryError(getFavoritesReference(), ex);
+				discoveryError = ImportFavoritesPage.handleDiscoveryError(getFavoritesReference(), ex);
 			}
-			
+
 			@Override
 			protected void postDiscovery() {
 				final String errorMessage = this.discoveryError;
@@ -82,11 +83,18 @@ public class ImportFavoritesActionLink extends ActionLink {
 				importFavoritesPage.setDiscoveryError(errorMessage);
 			}
 		});
-		int result = new ImportFavoritesWizardDialog(wizard.getShell(), importFavoritesWizard).open();
+		ImportFavoritesWizardDialog importWizard = new ImportFavoritesWizardDialog(wizard.getShell(), importFavoritesWizard);
+
+		Map<String, Operation> oldOperations = wizard.getSelectionModel().getItemIdToSelectedOperation();
+		int result = importWizard.open();
 		if (result == Window.OK) {
 			MarketplacePage catalogPage = wizard.getCatalogPage();
 			catalogPage.setActiveTab(ContentType.FAVORITES);
 			catalogPage.reloadCatalog();
+			Map<String, Operation> newOperations = wizard.getSelectionModel().getItemIdToSelectedOperation();
+			if (!newOperations.equals(oldOperations)) {
+				wizard.updateSelection();
+			}
 		}
 	}
 

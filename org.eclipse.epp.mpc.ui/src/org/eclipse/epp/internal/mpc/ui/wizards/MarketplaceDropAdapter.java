@@ -169,6 +169,10 @@ public class MarketplaceDropAdapter implements IStartup {
 		}
 	}
 
+	protected void proceedFavorites(String url) {
+		MarketplaceUrlHandler.triggerFavorites(url);
+	}
+
 	private class MarketplaceDropTargetListener extends DropTargetAdapter {
 
 		@Override
@@ -228,7 +232,11 @@ public class MarketplaceDropAdapter implements IStartup {
 						return !isDrop;
 					}
 					final String url = getUrl(e.data);
-					if (!MarketplaceUrlHandler.isPotentialSolution(url)) {
+					if (MarketplaceUrlHandler.isPotentialSolution(url)) {
+						return true;
+					} else if (MarketplaceUrlHandler.isPotentialFavoritesList(url)) {
+						return true;
+					} else {
 						traceInvalidEventData(e);
 						return false;
 					}
@@ -270,13 +278,22 @@ public class MarketplaceDropAdapter implements IStartup {
 				return;
 			}
 			final String url = getUrl(event.data);
-			//http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=1640500
 			if (MarketplaceUrlHandler.isPotentialSolution(url)) {
+				//http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=1640500
 				DropTarget source = (DropTarget) event.getSource();
 				Display display = source.getDisplay();
 				display.asyncExec(new Runnable() {
 					public void run() {
 						proceedInstallation(url);
+					}
+				});
+			} else if (MarketplaceUrlHandler.isPotentialFavoritesList(url)) {
+				//https://marketplace.eclipse.org/user/xxx/favorites
+				DropTarget source = (DropTarget) event.getSource();
+				Display display = source.getDisplay();
+				display.asyncExec(new Runnable() {
+					public void run() {
+						proceedFavorites(url);
 					}
 				});
 			} else {

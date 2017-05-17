@@ -19,13 +19,45 @@
             class="org.eclipse.epp.internal.mpc.ui.commands.MarketplaceWizardCommand"
             commandId="org.eclipse.epp.mpc.ui.command.showMarketplaceWizard">
       </handler>
+      <handler
+            class="org.eclipse.epp.internal.mpc.ui.commands.ImportFavoritesWizardCommand"
+            commandId="org.eclipse.epp.mpc.ui.command.importFavoritesWizard">
+      </handler>
+      <handler
+            class="org.eclipse.epp.internal.mpc.ui.commands.ShowFavoritesCommand"
+            commandId="org.eclipse.epp.mpc.ui.command.showFavorites">
+      </handler>
+      <handler
+            class="org.eclipse.epp.internal.mpc.ui.commands.ShowInstalledSolutionsCommand"
+            commandId="org.eclipse.epp.mpc.ui.command.showInstalled">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
       <command
-            description="%command.description"
+            description="%command.open.description"
             id="org.eclipse.epp.mpc.ui.command.showMarketplaceWizard"
-            name="%command.name">
+            name="%command.open.name">
+      </command>
+      <command
+            description="%command.importFavorites.description"
+            id="org.eclipse.epp.mpc.ui.command.importFavoritesWizard"
+            name="%command.importFavorites.name">
+         <commandParameter
+               id="favoritesUrl"
+               name="favoritesUrl"
+               optional="true">
+         </commandParameter>
+      </command>
+      <command
+            description="%command.favorites.description"
+            id="org.eclipse.epp.mpc.ui.command.showFavorites"
+            name="%command.favorites.name">
+      </command>
+      <command
+            description="%command.installed.description"
+            id="org.eclipse.epp.mpc.ui.command.showInstalled"
+            name="%command.installed.name">
       </command>
    </extension>
    <extension
@@ -36,9 +68,9 @@
          <command
                commandId="org.eclipse.epp.mpc.ui.command.showMarketplaceWizard"
                icon="icons/marketplace16.png"
-               label="%command.label"
+               label="%command.open.label"
                style="push"
-               tooltip="%command.tooltip">
+               tooltip="%command.open.tooltip">
          </command>
       </menuContribution>
    </extension>

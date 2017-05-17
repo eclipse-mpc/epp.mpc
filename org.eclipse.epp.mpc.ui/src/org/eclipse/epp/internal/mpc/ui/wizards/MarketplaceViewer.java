@@ -116,8 +116,16 @@ public class MarketplaceViewer extends CatalogViewer {
 				for (CatalogCategory category : getCatalog().getCategories()) {
 					if (category instanceof MarketplaceCategory) {
 						MarketplaceCategory marketplaceCategory = (MarketplaceCategory) category;
-						if (marketplaceCategory.getContents() == Contents.FEATURED) {
-							items.add(0, category);
+						int pos = 0;
+						for(int i=0;i < items.size(); i++) {
+							if (!(items.get(i) instanceof UserActionCatalogItem)) {
+								pos=i;
+								break;
+							}
+						}
+						if (marketplaceCategory.getContents() == Contents.FEATURED
+								|| (pos > 0 && pos < items.size() - 1)) {
+							items.add(pos, category);
 						}
 					}
 				}
@@ -356,6 +364,8 @@ public class MarketplaceViewer extends CatalogViewer {
 			MarketplaceCategory category = (MarketplaceCategory) element;
 			if (category.getContents() == Contents.FEATURED) {
 				category.setName(Messages.MarketplaceViewer_featured);
+			} else if (category.getContents() == Contents.POPULAR) {
+				category.setName(Messages.MarketplaceViewer_PopularBannerTitle);
 			} else {
 				throw new IllegalStateException();
 			}
@@ -373,21 +383,21 @@ public class MarketplaceViewer extends CatalogViewer {
 				(MarketplaceCategory) catalogItem.getCategory(), catalogDescriptor, this);
 	}
 
-	private UserActionViewerItem<?> createUserActionViewerItem(UserActionCatalogItem catalogItem, Composite parent) {
+	private ControlListItem<?> createUserActionViewerItem(UserActionCatalogItem catalogItem, Composite parent) {
 		UserAction userAction = catalogItem.getUserAction();
 		switch (userAction) {
 		case BROWSE:
 			return createBrowseItem(catalogItem, parent);
 		case CREATE_FAVORITES:
-			return new UserFavoritesFindFavoritesActionItem(parent, getResources(), shellProvider, catalogItem,
+			return new UserFavoritesFindFavoritesActionItem(parent, getResources(), catalogItem,
 					getWizard().getCatalogPage());
 		case FAVORITES_UNSUPPORTED:
-			return new UserFavoritesUnsupportedActionItem(parent, getResources(), shellProvider, catalogItem,
+			return new UserFavoritesUnsupportedActionItem(parent, getResources(), catalogItem,
 					getWizard().getCatalogPage());
 		case LOGIN:
-			return new UserFavoritesLoginActionItem(parent, getResources(), shellProvider, catalogItem, this);
+			return new UserFavoritesSignInActionItem(parent, getResources(), catalogItem, this);
 		case RETRY_ERROR:
-			return new RetryErrorActionItem(parent, getResources(), shellProvider, catalogItem, this);
+			return new RetryErrorActionItem(parent, getResources(), catalogItem, this);
 		}
 		return null;
 	}

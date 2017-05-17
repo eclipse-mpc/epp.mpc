@@ -11,28 +11,47 @@
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
-import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryResources;
-import org.eclipse.jface.window.IShellProvider;
+import org.eclipse.equinox.internal.p2.discovery.model.Icon;
 import org.eclipse.swt.widgets.Composite;
 
-public class UserFavoritesUnsupportedActionItem extends UserActionViewerItem<UserActionCatalogItem> {
+public class UserFavoritesUnsupportedActionItem extends AbstractUserActionItem {
 
 	private final MarketplacePage marketplacePage;
 
-	public UserFavoritesUnsupportedActionItem(Composite parent, DiscoveryResources resources,
-			IShellProvider shellProvider, UserActionCatalogItem element, MarketplacePage marketplacePage) {
-		super(parent, resources, shellProvider, element, marketplacePage.getViewer());
+	public UserFavoritesUnsupportedActionItem(Composite parent, MarketplaceDiscoveryResources resources,
+			UserActionCatalogItem connector, MarketplacePage marketplacePage) {
+		super(parent, resources, connector, marketplacePage.getViewer());
 		this.marketplacePage = marketplacePage;
-		createContent();
 	}
 
 	@Override
-	protected String getLinkText() {
+	protected String getNameLabelText() {
 		return Messages.UserFavoritesUnsupportedActionItem_unsupportedFavoritesLabel;
 	}
 
 	@Override
-	protected void actionPerformed(Object data) {
+	protected String getDescriptionText() {
+		return Messages.UserFavoritesUnsupportedActionItem_Body;
+	}
+
+	@Override
+	protected Icon getIcon() {
+		// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=516804
+		return null;
+	}
+
+	@Override
+	protected String getSublineText() {
+		return Messages.UserFavoritesUnsupportedActionItem_Subline;
+	}
+
+	@Override
+	protected void createButtons(Composite parent) {
+		createButton(parent, Messages.UserFavoritesUnsupportedActionItem_GoBackButtonLabel, null, 0);
+	}
+
+	@Override
+	protected void buttonPressed(int id) {
 		marketplacePage.setPreviouslyActiveTab();
 	}
 }

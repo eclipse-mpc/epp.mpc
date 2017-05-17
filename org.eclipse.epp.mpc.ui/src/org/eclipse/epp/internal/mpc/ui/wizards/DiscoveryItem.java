@@ -12,8 +12,6 @@
 
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.concurrent.Callable;
@@ -46,8 +44,6 @@ import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -66,12 +62,9 @@ import org.eclipse.userstorage.util.ConflictException;
  * @author David Green
  * @author Carsten Reckord
  */
-public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDiscoveryItem<T>
-implements PropertyChangeListener {
+public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDiscoveryItem<T> {
 
 	private static final String FAVORITED_BUTTON_STATE_DATA = "favorited"; //$NON-NLS-1$
-
-	private static final int BUTTONBAR_MARGIN_TOP = 8;
 
 	public static final String WIDGET_ID_INSTALLS = "installs"; //$NON-NLS-1$
 
@@ -103,12 +96,6 @@ implements PropertyChangeListener {
 			IMarketplaceWebBrowser browser,
 			final T connector, MarketplaceViewer viewer) {
 		super(parent, style, resources, browser, connector, viewer);
-		connector.addPropertyChangeListener(this);
-		this.addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent e) {
-				connector.removePropertyChangeListener(DiscoveryItem.this);
-			}
-		});
 	}
 
 	@Override
@@ -245,10 +232,7 @@ implements PropertyChangeListener {
 	protected void createSocialButtons(Composite parent) {
 		Integer favorited = getFavoriteCount();
 		if (favorited == null || getCatalogItemUrl() == null) {
-			Label spacer = new Label(this, SWT.NONE);
-			spacer.setText(" ");//$NON-NLS-1$
-
-			GridDataFactory.fillDefaults().indent(0, BUTTONBAR_MARGIN_TOP).align(SWT.CENTER, SWT.FILL).applyTo(spacer);
+			createButtonBarSpacer(parent);
 
 		} else {
 			createFavoriteButton(parent);
@@ -262,9 +246,7 @@ implements PropertyChangeListener {
 			.align(SWT.BEGINNING, SWT.FILL)
 			.applyTo(shareControl);
 		} else {
-			Label spacer = new Label(this, SWT.NONE);
-			spacer.setText(" ");//$NON-NLS-1$
-			GridDataFactory.fillDefaults().indent(0, BUTTONBAR_MARGIN_TOP).align(SWT.CENTER, SWT.FILL).applyTo(spacer);
+			createButtonBarSpacer(parent);
 		}
 	}
 
@@ -489,29 +471,17 @@ implements PropertyChangeListener {
 		return getViewer().getSelectionModel().getSelectedOperation(getData());
 	}
 
-	public void propertyChange(PropertyChangeEvent evt) {
-		if (!isDisposed()) {
-			getDisplay().asyncExec(new Runnable() {
-				public void run() {
-					if (!isDisposed()) {
-						refresh(true);
-					}
-				}
-			});
-		}
+	@Override
+	protected void refresh(boolean updateState) {
+		super.refresh(updateState);
+		refreshFavoriteButton();
 	}
 
 	@Override
-	protected void refresh() {
-		refresh(true);
-	}
-
-	protected void refresh(boolean updateState) {
-		super.refresh();
-		if (updateState && buttonController != null) {
+	protected void refreshState() {
+		if (buttonController != null) {
 			buttonController.refresh();
 		}
-		refreshFavoriteButton();
 	}
 
 	@Override

@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import static org.eclipse.epp.mpc.ui.MarketplaceUrlHandler.UTF_8;
+
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -61,6 +63,7 @@ import org.eclipse.epp.mpc.core.model.INews;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler;
+import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler.SolutionInstallationInfo;
 import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
@@ -80,6 +83,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.IWizardContainer;
@@ -273,25 +277,34 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				// user canceled
 				throw new CoreException(Status.CANCEL_STATUS);
 			}
-			List<Entry<CatalogItem, Operation>> itemToSelectedOperation = new ArrayList<Entry<CatalogItem, Operation>>(
-					getSelectionModel().getItemToSelectedOperation().entrySet());
-			final List<CatalogItem> noninstallableItems = new ArrayList<CatalogItem>();
-			for (Entry<CatalogItem, Operation> entry : itemToSelectedOperation) {
-				if (entry.getValue() != Operation.NONE) {
-					boolean unavailableInstall = (Boolean.FALSE.equals(entry.getKey().getAvailable()) || entry.getKey()
-							.getSiteUrl() == null)
-							&& (entry.getValue() == Operation.INSTALL || entry.getValue() == Operation.UPDATE);
-					if (unavailableInstall) {
-						getSelectionModel().select(entry.getKey(), Operation.NONE);
-						noninstallableItems.add(entry.getKey());
-					} else {
-						entry.getKey().setSelected(true);
-					}
+		}
+	}
+
+	protected void updateSelection() {
+		List<Entry<CatalogItem, Operation>> itemToSelectedOperation = new ArrayList<Entry<CatalogItem, Operation>>(
+				getSelectionModel().getItemToSelectedOperation().entrySet());
+		final List<CatalogItem> noninstallableItems = new ArrayList<CatalogItem>();
+		for (Entry<CatalogItem, Operation> entry : itemToSelectedOperation) {
+			if (entry.getValue() != Operation.NONE) {
+				boolean unavailableInstall = (Boolean.FALSE.equals(entry.getKey().getAvailable())
+						|| entry.getKey().getSiteUrl() == null)
+						&& (entry.getValue() == Operation.INSTALL || entry.getValue() == Operation.UPDATE);
+				if (unavailableInstall) {
+					getSelectionModel().select(entry.getKey(), Operation.NONE);
+					noninstallableItems.add(entry.getKey());
+				} else {
+					entry.getKey().setSelected(true);
 				}
 			}
-			if (!noninstallableItems.isEmpty()) {
-				notifyNonInstallableItems(noninstallableItems);
-			}
+		}
+		MarketplacePage marketplacePage = getCatalogPage();
+		MarketplaceViewer viewer = marketplacePage == null ? null : marketplacePage.getViewer();
+		if (marketplacePage != null && viewer != null && !viewer.getControl().isDisposed()) {
+			viewer.setSelection(new StructuredSelection(viewer.getCheckedItems()));
+			marketplacePage.setPageComplete(viewer.isComplete());
+		}
+		if (!noninstallableItems.isEmpty()) {
+			notifyNonInstallableItems(noninstallableItems);
 		}
 	}
 
@@ -644,7 +657,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		}
 	}
 
-	private String getCatalogUrl() {
+	protected String getCatalogUrl() {
 		CatalogDescriptor catalogDescriptor = getConfiguration().getCatalogDescriptor();
 		URL catalogUrl = catalogDescriptor.getUrl();
 		URI catalogUri;
@@ -947,6 +960,69 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			news = CatalogRegistry.getInstance().getCatalogNews(catalogDescriptor);
 		}
 		CatalogRegistry.getInstance().addCatalogNews(catalogDescriptor, news);
+	}
+
+	protected boolean handleInstallRequest(final SolutionInstallationInfo installInfo, String url) {
+		final String installId = installInfo.getInstallId();
+		if (installId == null) {
+			return false;
+		}
+		try {
+			getContainer().run(true, true, new IRunnableWithProgress() {
+
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					Map<String, Operation> nodeIdToOperation = new HashMap<String, Operation>();
+					nodeIdToOperation.putAll(getSelectionModel().getItemIdToSelectedOperation());
+					try {
+						nodeIdToOperation.put(URLDecoder.decode(installId, UTF_8), Operation.INSTALL);
+					} catch (UnsupportedEncodingException e) {
+						//should be unreachable
+						throw new IllegalStateException();
+					}
+
+					final SelectionModel selectionModel = getSelectionModel();
+					MarketplacePage catalogPage = getCatalogPage();
+					IStatus showingDescriptor = catalogPage.showMarketplace(installInfo.getCatalogDescriptor());
+					if (!showingDescriptor.isOK()) {
+						return;
+					}
+
+					SelectionModelStateSerializer stateSerializer = new SelectionModelStateSerializer(
+							getCatalog(), selectionModel);
+					stateSerializer.deserialize(installInfo.getState(), nodeIdToOperation, monitor);
+
+					if (selectionModel.getItemToSelectedOperation().size() > 0) {
+						Display display = getShell().getDisplay();
+						if (!display.isDisposed()) {
+							display.asyncExec(new Runnable() {
+
+								public void run() {
+									MarketplacePage catalogPage = getCatalogPage();
+									IWizardPage currentPage = getContainer().getCurrentPage();
+									if (catalogPage == currentPage) {
+										catalogPage.getViewer().setSelection(new StructuredSelection(
+												selectionModel.getSelectedCatalogItems().toArray()));
+										catalogPage.show(installInfo.getCatalogDescriptor(), ContentType.SELECTION);
+										IWizardPage nextPage = catalogPage.getNextPage();
+										if (nextPage != null && catalogPage.isPageComplete()) {
+											getContainer().showPage(nextPage);
+										}
+									}
+								}
+							});
+						}
+					}
+				}
+			});
+			return true;
+		} catch (InvocationTargetException e) {
+			IStatus status = MarketplaceClientCore.computeStatus(e, Messages.MarketplaceViewer_unexpectedException);
+			MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
+		} catch (InterruptedException e) {
+			// action canceled, but this still counts as handled
+			return true;
+		}
+		return false;
 	}
 
 	public Object suspendWizard() {

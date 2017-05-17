@@ -10,17 +10,44 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
+import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
+import org.eclipse.epp.mpc.ui.IMarketplaceClientConfiguration;
+import org.eclipse.epp.mpc.ui.IMarketplaceClientService;
+import org.eclipse.epp.mpc.ui.MarketplaceClient;
+import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryWizard;
+import org.eclipse.swt.widgets.Display;
 
 public class ImportFavoritesWizard extends DiscoveryWizard {
 
 	private final ImportFavoritesPage importFavoritesPage;
 
-	public ImportFavoritesWizard(MarketplaceCatalog catalog, MarketplaceCatalogConfiguration configuration, IMarketplaceWebBrowser browser) {
+	private String initialFavoritesUrl;
+
+	private final MarketplaceWizard parent;
+
+	public ImportFavoritesWizard(MarketplaceCatalog catalog, MarketplaceCatalogConfiguration configuration,
+			MarketplaceWizard parent) {
 		super(catalog, configuration);
-		setWindowTitle("Import Favorites List");
-		this.importFavoritesPage = new ImportFavoritesPage(catalog, browser);
+		setWindowTitle(Messages.ImportFavoritesWizard_title);
+		this.importFavoritesPage = new ImportFavoritesPage(catalog);
+		this.parent = parent;
+	}
+
+	@Override
+	public MarketplaceCatalogConfiguration getConfiguration() {
+		return (MarketplaceCatalogConfiguration) super.getConfiguration();
+	}
+
+	@Override
+	public MarketplaceCatalog getCatalog() {
+		return (MarketplaceCatalog) super.getCatalog();
 	}
 
 	@Override
@@ -31,10 +58,61 @@ public class ImportFavoritesWizard extends DiscoveryWizard {
 	@Override
 	public boolean performFinish() {
 		importFavoritesPage.performImport();
-		return importFavoritesPage.getErrorMessage() == null;
+		boolean result = importFavoritesPage.getErrorMessage() == null;
+		if (result) {
+			showFavoritesInMarketplace(importFavoritesPage.isInstallSelected());
+		}
+		return result;
+	}
+
+	private void showFavoritesInMarketplace(boolean install) {
+		List<MarketplaceNodeCatalogItem> selection = importFavoritesPage.getSelection();
+		if (selection.isEmpty()) {
+			return;
+		}
+		if (!install) {
+			selection = Collections.emptyList();
+		}
+		if (parent == null) {
+			openFavoritesInMarketplace(selection);
+		} else {
+			selectForInstallation(selection);
+		}
+	}
+
+	private void selectForInstallation(List<MarketplaceNodeCatalogItem> selection) {
+		for (MarketplaceNodeCatalogItem item : selection) {
+			parent.getSelectionModel().select(item, Operation.INSTALL);
+		}
+	}
+
+	private void openFavoritesInMarketplace(List<MarketplaceNodeCatalogItem> selection) {
+		final IMarketplaceClientService clientService = MarketplaceClient.getMarketplaceClientService();
+		final IMarketplaceClientConfiguration config = clientService.newConfiguration();
+		MarketplaceCatalogConfiguration catalogConfiguration = getConfiguration();
+		config.setCatalogDescriptors(catalogConfiguration.getCatalogDescriptors());
+		config.setCatalogDescriptor(catalogConfiguration.getCatalogDescriptor());
+		Map<String, Operation> initialOperations = new HashMap<String, Operation>();
+		for (MarketplaceNodeCatalogItem item : selection) {
+			initialOperations.put(item.getData().getId(), Operation.INSTALL);
+		}
+		config.setInitialOperations(initialOperations);
+		Display.getCurrent().asyncExec(new Runnable() {
+			public void run() {
+				clientService.openFavorites(config);
+			}
+		});
 	}
 
 	public ImportFavoritesPage getImportFavoritesPage() {
 		return importFavoritesPage;
+	}
+
+	public void setInitialFavoritesUrl(String initialFavoritesUrl) {
+		this.initialFavoritesUrl = initialFavoritesUrl;
+	}
+
+	public String getInitialFavoritesUrl() {
+		return initialFavoritesUrl;
 	}
 }

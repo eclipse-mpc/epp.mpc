@@ -116,6 +116,8 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 
 	private ActionLink selectionLink;
 
+	private ActionLink deselectLink;
+
 	private TabFolder tabFolder;
 
 	private TabItem searchTabItem;
@@ -651,6 +653,8 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 					if (selectionLink != null) {
 						removeActionLink(selectionLink);
 						selectionLink = null;
+						removeActionLink(deselectLink);
+						deselectLink = null;
 					}
 				} else {
 					ActionLink newSelectionLink = createSelectionLink(text);
@@ -658,6 +662,8 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 						updateActionLink(selectionLink, newSelectionLink);
 					} else {
 						addActionLink(0, newSelectionLink);
+						deselectLink = createDeselectionLink();
+						addActionLink(1, deselectLink);
 					}
 					selectionLink = newSelectionLink;
 				}
@@ -665,8 +671,18 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		}
 	}
 
+	private ActionLink createDeselectionLink() {
+		return new ActionLink("clearSelection", Messages.MarketplacePage_DeselectAll, Messages.MarketplacePage_DeselectAllTooltip) { //$NON-NLS-1$
+
+			@Override
+			public void selected() {
+				deselectionLinkActivated();
+			}
+		};
+	}
+
 	private ActionLink createSelectionLink(String text) {
-		return new ActionLink("showSelection", text, Messages.MarketplacePage_showSelection) {
+		return new ActionLink("showSelection", text, Messages.MarketplacePage_showSelection) { //$NON-NLS-1$
 
 			@Override
 			public void selected() {
@@ -679,6 +695,12 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 //		tabFolder.setSelection(searchTabItem);
 //		getViewer().showSelected();
 		setActiveTab(ContentType.SELECTION);
+	}
+
+	protected void deselectionLinkActivated() {
+		SelectionModel selectionModel = getWizard().getSelectionModel();
+		selectionModel.clear();
+		getWizard().updateSelection();
 	}
 
 	@Override

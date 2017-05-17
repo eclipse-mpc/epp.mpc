@@ -44,8 +44,7 @@ public class InstallAllActionLink extends ActionLink {
 		for (CatalogItem catalogItem : items) {
 			if (catalogItem instanceof MarketplaceNodeCatalogItem) {
 				MarketplaceNodeCatalogItem nodeItem = (MarketplaceNodeCatalogItem) catalogItem;
-				if (selectionModel.getSelectedOperation(nodeItem) != Operation.INSTALL
-						&& nodeItem.getAvailableOperations().contains(Operation.INSTALL)) {
+				if (selectionModel.getSelectedOperation(nodeItem) == Operation.NONE) {
 					selectionModel.select(nodeItem, Operation.INSTALL);
 				}
 			}
@@ -53,5 +52,8 @@ public class InstallAllActionLink extends ActionLink {
 		//viewer.getCheckedItems() is based on the SelectionModel state, so it already has the
 		//updated selection. Just let the viewer synchronize its remaining selection state with it.
 		viewer.setSelection(new StructuredSelection(viewer.getCheckedItems()));
+		if (!viewer.getSelection().isEmpty()) {
+			marketplacePage.showNextPage();
+		}
 	}
 }

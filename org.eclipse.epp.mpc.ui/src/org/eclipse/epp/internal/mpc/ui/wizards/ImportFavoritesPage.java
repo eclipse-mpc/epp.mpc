@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
 import org.eclipse.epp.internal.mpc.core.service.UserFavoritesService;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
@@ -28,7 +29,7 @@ import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogPage;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
-import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryWizard;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.osgi.util.NLS;
@@ -38,12 +39,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.userstorage.util.ConflictException;
 
 public class ImportFavoritesPage extends CatalogPage {
+	private static final String INSTALL_SELECTED_SETTING = "installSelected"; //$NON-NLS-1$
 
-	private final IMarketplaceWebBrowser browser;
-
-	public ImportFavoritesPage(MarketplaceCatalog catalog, IMarketplaceWebBrowser browser) {
+	public ImportFavoritesPage(MarketplaceCatalog catalog) {
 		super(catalog);
-		this.browser = browser;
 		setTitle(Messages.ImportFavoritesPage_Title);
 		setDescription(Messages.ImportFavoritesPage_Description);
 	}
@@ -94,20 +93,51 @@ public class ImportFavoritesPage extends CatalogPage {
 	}
 
 	@Override
+	protected FavoritesViewer getViewer() {
+		return (FavoritesViewer) super.getViewer();
+	}
+
+	@Override
 	protected CatalogViewer doCreateViewer(Composite parent) {
-		DiscoveryWizard wizard = getWizard();
-		CatalogViewer viewer = new FavoritesViewer(getCatalog(), this, browser,
-				wizard.getConfiguration());
+		ImportFavoritesWizard wizard = getWizard();
+		FavoritesViewer viewer = new FavoritesViewer(getCatalog(), this, wizard.getConfiguration());
 		viewer.setMinimumHeight(MINIMUM_HEIGHT);
 		viewer.createControl(parent);
+		boolean installSelected = true;
+		IDialogSettings section = getDialogSettings(false);
+		if (section != null) {
+			installSelected = section.getBoolean(INSTALL_SELECTED_SETTING);
+		}
+		viewer.setInstallSelected(installSelected);
+
+		String initialFavoritesUrl = wizard.getInitialFavoritesUrl();
+		setFavoritesUrl(viewer, initialFavoritesUrl);
 		return viewer;
+	}
+
+	private IDialogSettings getDialogSettings(boolean create) {
+		IDialogSettings dialogSettings = MarketplaceClientUiPlugin.getInstance().getDialogSettings();
+		String sectionName = this.getClass().getName();
+		IDialogSettings section = dialogSettings.getSection(sectionName);
+		if (create && section == null) {
+			section = dialogSettings.addNewSection(sectionName);
+		}
+		return section;
+	}
+
+	public void setFavoritesUrl(String url) {
+		FavoritesViewer viewer = getViewer();
+		setFavoritesUrl(viewer, url);
+	}
+
+	private void setFavoritesUrl(FavoritesViewer viewer, String url) {
+		viewer.setFilterText(url == null ? "" : url.trim()); //$NON-NLS-1$
 	}
 
 	public void performImport() {
 		setErrorMessage(null);
-		IStructuredSelection selection = getViewer().getSelection();
-		@SuppressWarnings("unchecked")
-		List<MarketplaceNodeCatalogItem> importFavorites = selection.toList();
+		saveInstallSelected();
+		List<MarketplaceNodeCatalogItem> importFavorites = getSelection();
 		if (importFavorites.isEmpty()) {
 			return;
 		}
@@ -152,6 +182,13 @@ public class ImportFavoritesPage extends CatalogPage {
 		}
 	}
 
+	public List<MarketplaceNodeCatalogItem> getSelection() {
+		IStructuredSelection selection = getViewer().getSelection();
+		@SuppressWarnings("unchecked")
+		List<MarketplaceNodeCatalogItem> importFavorites = selection.toList();
+		return new ArrayList<MarketplaceNodeCatalogItem>(importFavorites);
+	}
+
 	private IUserFavoritesService findUserFavoritesService() {
 		IUserFavoritesService userFavoritesService = null;
 		for (AbstractDiscoveryStrategy strategy : getCatalog().getDiscoveryStrategies()) {
@@ -161,5 +198,29 @@ public class ImportFavoritesPage extends CatalogPage {
 			}
 		}
 		return userFavoritesService;
+	}
+
+	@Override
+	public ImportFavoritesWizard getWizard() {
+		return (ImportFavoritesWizard) super.getWizard();
+	}
+
+	@Override
+	public void dispose() {
+		saveInstallSelected();
+		super.dispose();
+	}
+
+	public boolean isInstallSelected() {
+		return getViewer().isInstallSelected();
+	}
+
+	private void saveInstallSelected() {
+		FavoritesViewer viewer = getViewer();
+		if (viewer != null) {
+			boolean installSelected = viewer.isInstallSelected();
+			IDialogSettings dialogSettings = getDialogSettings(true);
+			dialogSettings.put(INSTALL_SELECTED_SETTING, installSelected);
+		}
 	}
 }

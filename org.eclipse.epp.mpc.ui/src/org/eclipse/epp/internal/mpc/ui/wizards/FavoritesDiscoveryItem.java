@@ -10,13 +10,17 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
 import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
@@ -25,8 +29,8 @@ public class FavoritesDiscoveryItem extends AbstractMarketplaceDiscoveryItem<Mar
 	private Button checkbox;
 
 	public FavoritesDiscoveryItem(Composite parent, int style, MarketplaceDiscoveryResources resources,
-			IMarketplaceWebBrowser browser, MarketplaceNodeCatalogItem connector, FavoritesViewer viewer) {
-		super(parent, style, resources, browser, connector, viewer);
+			MarketplaceNodeCatalogItem connector, FavoritesViewer viewer) {
+		super(parent, style, resources, null, connector, viewer);
 	}
 
 	@Override
@@ -47,6 +51,7 @@ public class FavoritesDiscoveryItem extends AbstractMarketplaceDiscoveryItem<Mar
 
 	@Override
 	protected void createIconControl(Composite checkboxContainer) {
+		((GridLayout) checkboxContainer.getLayout()).numColumns++;
 		checkbox = new Button(checkboxContainer, SWT.CHECK | SWT.INHERIT_FORCE);
 		checkbox.setSelection(connector.isSelected());
 		checkbox.setText(""); //$NON-NLS-1$
@@ -62,16 +67,44 @@ public class FavoritesDiscoveryItem extends AbstractMarketplaceDiscoveryItem<Mar
 				widgetSelected(e);
 			}
 		});
+		connector.addPropertyChangeListener(new PropertyChangeListener() {
+
+			public void propertyChange(PropertyChangeEvent evt) {
+				if ("selected".equals(evt.getPropertyName())) { //$NON-NLS-1$
+					final Button checkbox = FavoritesDiscoveryItem.this.checkbox;
+
+					if (checkbox == null || checkbox.isDisposed()) {
+						return;
+					}
+					final boolean selected = Boolean.TRUE.equals(evt.getNewValue());
+					try {
+						checkbox.getDisplay().syncExec(new Runnable() {
+
+							public void run() {
+								if (checkbox == null || checkbox.isDisposed()) {
+									return;
+								}
+								checkbox.setSelection(selected);
+							}
+
+						});
+					} catch (SWTException ex) {
+						//disposed - ignore
+					}
+				}
+			}
+		});
 		GridDataFactory.swtDefaults().align(SWT.CENTER, SWT.CENTER).applyTo(checkbox);
 		super.createIconControl(checkboxContainer);
 
-		GridLayoutFactory.fillDefaults().spacing(1, 1).margins(0, 0).numColumns(2).applyTo(checkboxContainer);
+		GridLayout containerLayout = ((GridLayout) checkboxContainer.getLayout());
 		GridData containerLayoutData = (GridData) checkboxContainer.getLayoutData();
-		int xHint = containerLayoutData.widthHint + checkbox.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+		int xHint = containerLayoutData.widthHint + checkbox.computeSize(SWT.DEFAULT, SWT.DEFAULT).x
+				+ containerLayout.horizontalSpacing;
 		GridDataFactory.createFrom(containerLayoutData)
-				.hint(xHint, containerLayoutData.heightHint)
-				.minSize(xHint, containerLayoutData.minimumHeight)
-				.applyTo(checkboxContainer);
+		.hint(xHint, containerLayoutData.heightHint)
+		.minSize(xHint, containerLayoutData.minimumHeight)
+		.applyTo(checkboxContainer);
 	}
 
 	@Override

@@ -73,9 +73,17 @@ class Messages extends NLS {
 
 	public static String DiscoveryItem_UnnamedSolution;
 
+	public static String FavoritesViewer_DeselectAll;
+
 	public static String FavoritesViewer_searchInputDescription;
 
 	public static String FavoritesViewer_searchLabel;
+
+	public static String FavoritesViewer_SelectAll;
+
+	public static String FavoritesViewer_SelectForInstallation;
+
+	public static String FavoritesViewer_SelectForInstallationTooltip;
 
 	public static String FeatureSelectionWizardPage_confirmSelectedFeatures;
 
@@ -114,6 +122,8 @@ class Messages extends NLS {
 	public static String ImportFavoritesPage_conflictErrorMessage;
 
 	public static String ImportFavoritesPage_Description;
+
+	public static String ImportFavoritesWizard_title;
 
 	public static String ImportFavoritesWizardDialog_FinishButtonLabel;
 
@@ -156,6 +166,10 @@ class Messages extends NLS {
 
 	public static String MarketplacePage_DefaultNewsTitle;
 
+	public static String MarketplacePage_DeselectAll;
+
+	public static String MarketplacePage_DeselectAllTooltip;
+
 	public static String MarketplacePage_discardPendingSolutions;
 
 	public static String MarketplacePage_eclipseMarketplaceSolutions;
@@ -193,6 +207,8 @@ class Messages extends NLS {
 	public static String MarketplaceViewer_featured;
 
 	public static String MarketplaceViewer_go;
+
+	public static String MarketplaceViewer_PopularBannerTitle;
 
 	public static String MarketplaceViewer_unexpectedException;
 
@@ -262,6 +278,8 @@ class Messages extends NLS {
 
 	public static String RetryErrorActionItem_showDetailsTooltip;
 
+	public static String RetryErrorActionItem_subline;
+
 	public static String RetryErrorActionItem_unsupportedLinkMessage;
 
 	public static String SelectionModel_cannotInstallRemoveConcurrently;
@@ -303,19 +321,39 @@ class Messages extends NLS {
 	public static String UserFavoritesAbstractImportActionItem_importFavoritesActionLabel;
 
 	public static String UserFavoritesAbstractImportActionItem_importFavoritesTooltip;
+	public static String UserFavoritesFindFavoritesActionItem_BrowseButtonLabel;
+
+	public static String UserFavoritesFindFavoritesActionItem_BrowseButtonTooltip;
+
 	public static String UserFavoritesFindFavoritesActionItem_browsePopularActionLabel;
 
 	public static String UserFavoritesFindFavoritesActionItem_browsePopularTooltip;
 
 	public static String UserFavoritesFindFavoritesActionItem_noFavoritesYetMessage;
 
+	public static String UserFavoritesFindFavoritesActionItem_subline;
+
+	public static String UserFavoritesFindFavoritesActionItem_title;
+
 	public static String UserFavoritesInstallAllActionItem_installAllActionLabel;
 
 	public static String UserFavoritesInstallAllActionItem_installAllTooltip;
 
-	public static String UserFavoritesLoginActionItem_logInActionLabel;
+	public static String UserFavoritesSignInActionItem_SignInButtonText;
 
-	public static String UserFavoritesLoginActionItem_retryLoginLabel;
+	public static String UserFavoritesSignInActionItem_SignInDescription;
+
+	public static String UserFavoritesSignInActionItem_subline;
+
+	public static String SignInUserActionItem_signInActionLabel;
+
+	public static String SignInUserActionItem_retryLoginLabel;
+
+	public static String UserFavoritesUnsupportedActionItem_Body;
+
+	public static String UserFavoritesUnsupportedActionItem_GoBackButtonLabel;
+
+	public static String UserFavoritesUnsupportedActionItem_Subline;
 
 	public static String UserFavoritesUnsupportedActionItem_unsupportedFavoritesLabel;
 	static {
