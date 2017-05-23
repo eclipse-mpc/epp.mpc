@@ -24,9 +24,8 @@ final class CollectMissingNaturesVisitor implements IResourceDeltaVisitor {
 	private final Set<String> missingNatures = new HashSet<String>();
 
 	public boolean visit(IResourceDelta delta) throws CoreException {
-		if (delta.getResource().getType() == IResource.ROOT || (delta.getResource().getType() == IResource.PROJECT
-				&& ((IProject) delta.getResource()).isAccessible())) {
-			return true;
+		if (delta.getResource().getType() == IResource.ROOT || delta.getResource().getType() == IResource.PROJECT) {
+			return delta.getResource().isAccessible();
 		}
 		if (delta.getResource().getType() == IResource.FILE
 				&& IProjectDescription.DESCRIPTION_FILE_NAME
