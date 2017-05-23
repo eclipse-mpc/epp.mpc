@@ -14,7 +14,7 @@
 <unit id="com.sun.jna.platform.source" version="4.1.0.v20170410-1117"/>
 <unit id="org.apache.commons.codec" version="0.0.0"/>
 <unit id="org.apache.commons.logging" version="0.0.0"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/I20170411114559/repository/"/>
+<repository location="http://download.eclipse.org/tools/orbit/downloads/latest-S"/>
 </location>
 </locations>
 </target>
