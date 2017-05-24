@@ -82,6 +82,12 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 
 	public static final String DEFAULT_MARKETPLACE_ICON = "DEFAULT_MARKETPLACE_ICON"; //$NON-NLS-1$
 
+	public static final String ACTION_ICON_FAVORITES = "ACTION_ICON_FAVORITES"; //$NON-NLS-1$
+
+	public static final String ACTION_ICON_LOGIN = "ACTION_ICON_LOGIN"; //$NON-NLS-1$
+
+	public static final String ACTION_ICON_WARNING = "ACTION_ICON_WARNING"; //$NON-NLS-1$
+
 	public static final String ITEM_ICON_STAR = "ITEM_ICON_STAR"; //$NON-NLS-1$
 
 	public static final String ITEM_ICON_STAR_SELECTED = "ITEM_ICON_STAR_SELECTED"; //$NON-NLS-1$
@@ -189,6 +195,12 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 		imageRegistry.put(ITEM_ICON_STAR_SELECTED,
 				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/star-selected.png")); //$NON-NLS-1$
 		imageRegistry.put(ITEM_ICON_SHARE, imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/share.png")); //$NON-NLS-1$
+		imageRegistry.put(ACTION_ICON_FAVORITES,
+				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/action-item-favorites.png")); //$NON-NLS-1$
+		imageRegistry.put(ACTION_ICON_LOGIN,
+				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/action-item-login.png")); //$NON-NLS-1$
+		imageRegistry.put(ACTION_ICON_WARNING,
+				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/action-item-warning.png")); //$NON-NLS-1$
 		return imageRegistry;
 	}
 

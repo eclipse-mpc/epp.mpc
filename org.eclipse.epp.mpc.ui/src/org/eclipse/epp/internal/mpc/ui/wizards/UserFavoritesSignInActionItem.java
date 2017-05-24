@@ -11,6 +11,7 @@
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
 import org.eclipse.equinox.internal.p2.discovery.model.Icon;
@@ -44,8 +45,8 @@ public class UserFavoritesSignInActionItem extends AbstractUserActionItem {
 
 	@Override
 	protected Icon getIcon() {
-		// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=516804
-		return null;
+		String path = REGISTRY_SCHEME + MarketplaceClientUiPlugin.ACTION_ICON_LOGIN;
+		return createIcon(path);
 	}
 
 	@Override

@@ -34,12 +34,7 @@ public class OpenFavoritesNotificationItem extends AbstractUserActionItem {
 	@Override
 	protected Icon getIcon() {
 		String path = REGISTRY_SCHEME + MarketplaceClientUiPlugin.DEFAULT_MARKETPLACE_ICON;
-		Icon icon = new Icon();
-		icon.setImage128(path);
-		icon.setImage64(path);
-		icon.setImage32(path);
-		icon.setImage16(path);
-		return icon;
+		return createIcon(path);
 	}
 
 	@Override

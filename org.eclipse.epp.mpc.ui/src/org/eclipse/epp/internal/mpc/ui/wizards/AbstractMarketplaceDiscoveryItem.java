@@ -811,4 +811,14 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		dataFactory.minSize(minWidth, SWT.DEFAULT);
 		return dataFactory;
 	}
+
+	protected static Icon createIcon(String path) {
+		Icon icon = new Icon();
+		icon.setImage128(path);
+		icon.setImage64(path);
+		icon.setImage32(path);
+		icon.setImage16(path);
+		return icon;
+	}
+
 }
