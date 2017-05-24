@@ -64,8 +64,16 @@ public class URLUtil {
 		}
 	}
 
-	public static String encode(String url) throws URISyntaxException {
-		return toURI(url).toString();
+	public static String encode(String value) {
+		if (value == null) {
+			return null;
+		}
+		try {
+			return URLEncoder.encode(value, "UTF-8"); //$NON-NLS-1$
+		} catch (UnsupportedEncodingException e) {
+			// should not happen anyways
+			throw new RuntimeException(e);
+		}
 	}
 
 	private static String encodeQuery(String query) {

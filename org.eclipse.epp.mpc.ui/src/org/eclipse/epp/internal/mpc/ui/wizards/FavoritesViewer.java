@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.epp.internal.mpc.ui.catalog.FavoriteListCatalogItem;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
@@ -294,13 +295,20 @@ public class FavoritesViewer extends CatalogViewer {
 	}
 
 	@Override
+	protected CatalogContentProvider doCreateContentProvider() {
+		return new MarketplaceViewer.MarketplaceCatalogContentProvider();
+	}
+
+	@Override
 	protected ControlListItem<?> doCreateViewerItem(Composite parent, Object element) {
 		if (element instanceof MarketplaceNodeCatalogItem) {
 			//marketplace entry
 			FavoritesDiscoveryItem discoveryItem = createDiscoveryItem(parent, (MarketplaceNodeCatalogItem) element);
 			return discoveryItem;
 		} else if (element instanceof UserActionCatalogItem) {
-			return new InfoViewerItem(parent, getResources(), shellProvider, (UserActionCatalogItem) element, this);
+			return new DiscoverFavoritesUserActionItem(parent, getResources(), (UserActionCatalogItem) element, this);
+		} else if (element instanceof FavoriteListCatalogItem) {
+			return new FavoriteListDiscoveryItem(parent, discoveryResources, (FavoriteListCatalogItem) element, this);
 		}
 		return super.doCreateViewerItem(parent, element);
 	}
@@ -351,5 +359,10 @@ public class FavoritesViewer extends CatalogViewer {
 
 	public boolean isInstallSelected() {
 		return installSelected;
+	}
+
+	public void setFavoritesUrl(String url) {
+		setFilterText(url);
+		filterTextChanged();
 	}
 }

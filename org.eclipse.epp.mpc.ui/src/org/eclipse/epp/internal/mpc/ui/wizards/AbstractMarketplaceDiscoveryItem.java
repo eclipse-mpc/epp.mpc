@@ -134,7 +134,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 
 	private Composite checkboxContainer;
 
-	protected final CatalogItem connector;
+	protected final T connector;
 
 	private StyledText description;
 
@@ -683,7 +683,9 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		Color foreground = getForeground();
 
 		nameLabel.setForeground(foreground);
-		description.setForeground(foreground);
+		if (description != null) {
+			description.setForeground(foreground);
+		}
 		if (installInfoLink != null) {
 			installInfoLink.setForeground(foreground);
 		}

@@ -18,6 +18,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
+import org.eclipse.epp.mpc.core.model.IFavoriteList;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.userstorage.util.ConflictException;
 import org.eclipse.userstorage.util.NoServiceException;
@@ -47,5 +48,7 @@ public interface IUserFavoritesService {
 	List<String> getFavoriteIds(URI user, IProgressMonitor monitor) throws IOException;
 
 	List<INode> getFavorites(URI user, IProgressMonitor monitor) throws IOException;
+
+	List<IFavoriteList> getRandomFavoriteLists(IProgressMonitor monitor) throws IOException;
 
 }

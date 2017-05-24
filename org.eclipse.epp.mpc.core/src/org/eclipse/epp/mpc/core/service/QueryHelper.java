@@ -12,10 +12,12 @@
 package org.eclipse.epp.mpc.core.service;
 
 import org.eclipse.epp.internal.mpc.core.model.Category;
+import org.eclipse.epp.internal.mpc.core.model.FavoriteList;
 import org.eclipse.epp.internal.mpc.core.model.Identifiable;
 import org.eclipse.epp.internal.mpc.core.model.Market;
 import org.eclipse.epp.internal.mpc.core.model.Node;
 import org.eclipse.epp.mpc.core.model.ICategory;
+import org.eclipse.epp.mpc.core.model.IFavoriteList;
 import org.eclipse.epp.mpc.core.model.IIdentifiable;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INode;
@@ -91,6 +93,14 @@ public class QueryHelper {
 	 */
 	public static IMarket marketByName(String name) {
 		return withName(new Market(), name);
+	}
+
+	public static IFavoriteList favoritesByUserId(String userId) {
+		return withId(new FavoriteList(), userId);
+	}
+
+	public static IFavoriteList favoritesByUrl(String url) {
+		return withUrl(new FavoriteList(), url);
 	}
 
 	private static <T extends Identifiable> T withId(T identifiable, String id) {

@@ -50,4 +50,6 @@ public interface IMarketplaceStorageService {
 
 	void removeLoginListener(LoginListener listener);
 
+	String getMarketplaceBaseUri();
+
 }

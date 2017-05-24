@@ -31,6 +31,7 @@ import org.eclipse.epp.internal.mpc.core.model.Node;
 import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.mpc.core.model.ICategory;
+import org.eclipse.epp.mpc.core.model.IFavoriteList;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INews;
 import org.eclipse.epp.mpc.core.model.INode;
@@ -412,6 +413,10 @@ public class CachingMarketplaceService implements IMarketplaceService {
 	@Deprecated
 	public ISearchResult favorites(IProgressMonitor monitor) throws CoreException {
 		return topFavorites(monitor);
+	}
+
+	public List<IFavoriteList> userFavoriteLists(IProgressMonitor monitor) throws CoreException {
+		return delegate.userFavoriteLists(monitor);
 	}
 
 	public ISearchResult userFavorites(IProgressMonitor monitor) throws CoreException, NotAuthorizedException {

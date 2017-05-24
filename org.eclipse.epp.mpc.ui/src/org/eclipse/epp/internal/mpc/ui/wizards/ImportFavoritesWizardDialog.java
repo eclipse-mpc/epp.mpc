@@ -37,6 +37,16 @@ public class ImportFavoritesWizardDialog extends AbstractMarketplaceWizardDialog
 				ImportFavoritesPage importPage = wizard.getImportFavoritesPage();
 				importPage.setFavoritesUrl(url);
 			}
+
+			@Override
+			protected boolean acceptSolutionUrl(String url) {
+				return false;
+			}
+
+			@Override
+			protected boolean acceptFavoritesListUrl(String url) {
+				return true;
+			}
 		}.installDropTarget(newShell);
 	}
 

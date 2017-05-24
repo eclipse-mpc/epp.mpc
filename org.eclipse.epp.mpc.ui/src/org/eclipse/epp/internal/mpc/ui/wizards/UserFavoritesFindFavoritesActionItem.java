@@ -68,7 +68,7 @@ public class UserFavoritesFindFavoritesActionItem extends AbstractUserActionItem
 		if (id == BROWSE_BUTTON_ID) {
 			BrowseCatalogItem.openMarketplace(descriptor, (MarketplaceViewer) getViewer(), wizard);
 		} else {
-			ImportFavoritesActionLink.importFavorites(wizard);
+			wizard.importFavorites(null);
 		}
 	}
 }

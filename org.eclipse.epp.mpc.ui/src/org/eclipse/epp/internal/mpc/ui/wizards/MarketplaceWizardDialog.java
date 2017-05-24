@@ -58,6 +58,11 @@ public class MarketplaceWizardDialog extends AbstractMarketplaceWizardDialog {
 					getWizard().handleInstallRequest(info, url);
 				}
 			}
+
+			@Override
+			protected void proceedFavorites(String url) {
+				getWizard().importFavorites(url);
+			}
 		}.installDropTarget(newShell);
 		final IWorkbenchListener workbenchListener = new IWorkbenchListener() {
 

@@ -52,6 +52,7 @@ import org.eclipse.epp.internal.mpc.core.util.HttpUtil;
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.mpc.core.model.ICategory;
+import org.eclipse.epp.mpc.core.model.IFavoriteList;
 import org.eclipse.epp.mpc.core.model.IIdentifiable;
 import org.eclipse.epp.mpc.core.model.IIus;
 import org.eclipse.epp.mpc.core.model.IMarket;
@@ -568,6 +569,19 @@ MarketplaceService {
 	public SearchResult topFavorites(IProgressMonitor monitor) throws CoreException {
 		Marketplace marketplace = processRequest(API_FAVORITES_URI + '/' + API_URI_SUFFIX, monitor);
 		return createSearchResult(marketplace.getFavorites());
+	}
+
+	public List<IFavoriteList> userFavoriteLists(IProgressMonitor monitor) throws CoreException {
+		IUserFavoritesService userFavoritesService = getUserFavoritesService();
+		if (userFavoritesService == null) {
+			throw new UnsupportedOperationException();
+		}
+		try {
+			return userFavoritesService.getRandomFavoriteLists(monitor);
+		} catch (Exception e) {
+			throw new CoreException(MarketplaceClientCore.computeStatus(e,
+					Messages.DefaultMarketplaceService_FavoritesErrorRetrieving));
+		}
 	}
 
 	public ISearchResult userFavorites(IProgressMonitor monitor) throws CoreException, NotAuthorizedException {

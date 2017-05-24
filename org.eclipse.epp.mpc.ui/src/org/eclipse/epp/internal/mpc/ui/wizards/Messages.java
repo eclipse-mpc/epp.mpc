@@ -33,6 +33,8 @@ class Messages extends NLS {
 
 	public static String CatalogSwitcher_retrieveMetaData;
 
+	public static String DiscoverFavoritesUserActionItem_subline;
+
 	public static String DiscoveryItem_AlreadyInstalled;
 
 	public static String DiscoveryItem_byProviderLicense;

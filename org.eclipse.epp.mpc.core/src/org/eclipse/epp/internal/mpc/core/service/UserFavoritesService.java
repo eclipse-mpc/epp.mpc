@@ -39,10 +39,15 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.epp.internal.mpc.core.model.FavoriteList;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.RequestTemplate;
+import org.eclipse.epp.internal.mpc.core.util.URLUtil;
+import org.eclipse.epp.mpc.core.model.IFavoriteList;
 import org.eclipse.epp.mpc.core.model.INode;
+import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.epp.mpc.core.service.QueryHelper;
+import org.eclipse.epp.mpc.core.service.ServiceHelper;
 import org.eclipse.userstorage.IBlob;
 import org.eclipse.userstorage.internal.Session;
 import org.eclipse.userstorage.internal.util.IOUtil;
@@ -55,13 +60,55 @@ import org.eclipse.userstorage.util.ProtocolException;
 @SuppressWarnings("restriction")
 public class UserFavoritesService extends AbstractDataStorageService implements IUserFavoritesService {
 
+	private static final String MARKETPLACE_USER_FAVORITES_ENDPOINT = "user/%s/favorites"; //$NON-NLS-1$
+
+	private static final String RANDOM_FAVORITE_LISTS_ENDPOINT = "marketplace/favorites/random"; //$NON-NLS-1$
+
 	private static final int MALFORMED_CONTENT_ERROR_CODE = 499;
 
-	private static final Pattern JSON_CONTENT_ID_PATTERN = Pattern
-			.compile("\\{[^\\}]*\"content_id\"\\s*:\\s*\"([^\"]*)\"[^\\}]*\\}"); //$NON-NLS-1$
+	private static final String TEMPLATE_VARIABLE = "%s"; //$NON-NLS-1$
+
+	/**
+	 * Matches a single object/dict in a list, returning its body (i.e. without the braces) in its first match group.
+	 * This only supports dicts with simple attributes. Nested dicts will result in wrong matches.
+	 */
+	private static final String JSON_LIST_OBJECTS_REGEX = "\\{([^\\{\\}]+)\\}"; //$NON-NLS-1$
+
+	private static final Pattern JSON_LIST_OBJECTS_PATTERN = Pattern.compile(JSON_LIST_OBJECTS_REGEX,
+			Pattern.MULTILINE);
+
+	/**
+	 * Returns the body of the list value for the attribute with the given name, e.g. for <code>
+	 *    {"users":[{...},{...}], "count"="2"}
+	 * </code> and the name "users" it will return "{...},{...}" in its first match group.
+	 */
+	private static final String JSON_ATTRIBUTE_OBJECT_LIST_REGEX = "\\{(?:.*,)?\\s*\"" + TEMPLATE_VARIABLE //$NON-NLS-1$
+			+ "\"\\s*:\\s*\\[((?:\\s*" + JSON_LIST_OBJECTS_REGEX + "\\s*,?\\s*)*)\\],.*\\}"; //$NON-NLS-1$ //$NON-NLS-2$
+
+	/**
+	 * Matches a single string attribute in a dict. Returns the matched attribute name in the first match group and the
+	 * attribute value in the second.
+	 */
+	private static final String JSON_ATTRIBUTE_REGEX = "(?:[,\\{]|^)\\s*\"(" + TEMPLATE_VARIABLE //$NON-NLS-1$
+			+ ")\"\\s*:\\s*\"([^\"]*)\"\\s*(?:,|$)"; //$NON-NLS-1$
 
 	private static final Pattern JSON_MPC_FAVORITES_PATTERN = Pattern
-			.compile("\\{\\s*\"mpc_favorites\"\\s*:\\s*\\[((?:\\s*\\{[^\\{\\}]+\\}\\s*,?\\s*)*)\\],.*\\}"); //$NON-NLS-1$
+			.compile(String.format(JSON_ATTRIBUTE_OBJECT_LIST_REGEX, "mpc_favorites"), Pattern.MULTILINE); //$NON-NLS-1$
+
+	private static final Pattern JSON_FAVORITE_LISTS_PATTERN = Pattern
+			.compile(String.format(JSON_ATTRIBUTE_OBJECT_LIST_REGEX, "users"), Pattern.MULTILINE); //$NON-NLS-1$
+
+	private static final Pattern JSON_USER_ID_ATTRIBUTE_PATTERN = Pattern
+			.compile(String.format(JSON_ATTRIBUTE_REGEX, "id|user_?id|user|name"), Pattern.MULTILINE); //$NON-NLS-1$
+
+	private static final Pattern JSON_OWNER_ATTRIBUTE_PATTERN = Pattern
+			.compile(String.format(JSON_ATTRIBUTE_REGEX, "owner|owner_?name"), Pattern.MULTILINE); //$NON-NLS-1$
+
+	private static final Pattern JSON_NAME_ATTRIBUTE_PATTERN = Pattern
+			.compile(String.format(JSON_ATTRIBUTE_REGEX, "name|description|list_?name"), Pattern.MULTILINE); //$NON-NLS-1$
+
+	private static final Pattern JSON_CONTENT_ID_ATTRIBUTE_PATTERN = Pattern
+			.compile(String.format(JSON_ATTRIBUTE_REGEX, "content_id"), Pattern.MULTILINE); //$NON-NLS-1$
 
 	private static final Pattern USER_MAIL_PATTERN = Pattern.compile(".+\\@.+"); //$NON-NLS-1$
 
@@ -136,6 +183,88 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		return favoriteNodes;
 	}
 
+	public List<IFavoriteList> getRandomFavoriteLists(IProgressMonitor monitor) throws IOException {
+		URI serviceUri = getStorageService().getServiceUri();
+		final URI randomFavoritesUri = serviceUri.resolve(RANDOM_FAVORITE_LISTS_ENDPOINT);
+		return new AbstractJSONListRequest<IFavoriteList>(randomFavoritesUri, JSON_FAVORITE_LISTS_PATTERN) {
+
+			@Override
+			protected IFavoriteList parseListElement(String entryBody) {
+				String id = findFavoritesListId(entryBody);
+				if (id == null) {
+					return null;
+				}
+				String owner = findFavoritesListOwner(entryBody);
+				if (owner == null) {
+					owner = id;
+				}
+				String label = findFavoritesListLabel(entryBody);
+				if (label != null && (label.equals(id) || label.equals(owner))) {
+					label = null;
+				}
+				String favoritesListUrl = getFavoritesListUrl(id);
+				if (favoritesListUrl == null) {
+					return null;
+				}
+				IFavoriteList favoritesByUserId = QueryHelper.favoritesByUserId(id);
+				((FavoriteList) favoritesByUserId).setOwner(owner);
+				((FavoriteList) favoritesByUserId).setName(label);
+				((FavoriteList) favoritesByUserId).setUrl(favoritesListUrl);
+				return favoritesByUserId;
+			}
+
+		}.execute(randomFavoritesUri);
+	}
+
+	private String getFavoritesListUrl(String id) {
+		String marketplaceBaseUri = getMarketplaceBaseUri();
+		String path = String.format(MARKETPLACE_USER_FAVORITES_ENDPOINT, URLUtil.encode(id));
+		return URLUtil.appendPath(marketplaceBaseUri, path);
+	}
+
+	private String getMarketplaceBaseUri() {
+		String marketplaceBaseUri = getStorageService().getMarketplaceBaseUri();
+		if (marketplaceBaseUri != null) {
+			return marketplaceBaseUri;
+		}
+		IMarketplaceService defaultMarketplaceService = ServiceHelper.getMarketplaceServiceLocator()
+				.getDefaultMarketplaceService();
+		if (defaultMarketplaceService != null) {
+			return defaultMarketplaceService.getBaseUrl().toString();
+		}
+		return DefaultMarketplaceService.DEFAULT_SERVICE_LOCATION;
+	}
+
+	protected String findFavoritesListOwner(String entryBody) {
+		return findFavoritesNameOrId(entryBody, JSON_OWNER_ATTRIBUTE_PATTERN);
+	}
+
+	private String findFavoritesListLabel(String entryBody) {
+		return findFavoritesNameOrId(entryBody, JSON_NAME_ATTRIBUTE_PATTERN);
+	}
+
+	private String findFavoritesListId(String entryBody) {
+		return findFavoritesNameOrId(entryBody, JSON_USER_ID_ATTRIBUTE_PATTERN);
+	}
+
+	private String findFavoritesNameOrId(String entryBody, Pattern pattern) {
+		String result = null;
+		Matcher matcher = pattern.matcher(entryBody);
+		while (matcher.find()) {
+			String name = matcher.group(1);
+			String value = matcher.group(2);
+			if ("name".equals(name)) { //$NON-NLS-1$
+				//remember, but try to find a better match
+				if (result == null) {
+					result = value;
+				}
+			} else {
+				return value;
+			}
+		}
+		return result;
+	}
+
 	private static List<INode> toNodes(Collection<String> favoriteIds) {
 		List<INode> favoriteNodes = new ArrayList<INode>(favoriteIds.size());
 		for (String nodeId : favoriteIds) {
@@ -155,8 +284,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 	}
 
 	public void setFavorites(Collection<? extends INode> nodes, IProgressMonitor monitor)
-			throws NoServiceException, ConflictException, NotAuthorizedException, IllegalStateException, IOException
-	{
+			throws NoServiceException, ConflictException, NotAuthorizedException, IllegalStateException, IOException {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.UserFavoritesService_SettingUserFavorites, 1000);
 		String favoritesData = createFavoritesBlobData(nodes);
 		try {
@@ -308,40 +436,17 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 	public List<String> getFavoriteIds(final URI uri, IProgressMonitor monitor) throws IOException {
 		validateURI(uri);
 		try {
-			return new RequestTemplate<List<String>>() {
+			return new AbstractJSONListRequest<String>(uri, JSON_MPC_FAVORITES_PATTERN) {
 
 				@Override
-				protected Request configureRequest(Request request, URI uri) {
-					return super.configureRequest(request, uri).setHeader(HttpHeaders.USER_AGENT, Session.USER_AGENT_ID)
-							.addHeader(HttpHeaders.CONTENT_TYPE, Session.APPLICATION_JSON) //
-							.addHeader(HttpHeaders.ACCEPT, Session.APPLICATION_JSON);
-				}
-
-				@Override
-				protected List<String> handleResponseStream(InputStream content) throws IOException {
-					List<String> favoriteIds = new ArrayList<String>();
-					String body = read(content);
-					body = body.trim();
-					if (!"".equals(body)) { //$NON-NLS-1$
-						Matcher matcher = JSON_MPC_FAVORITES_PATTERN.matcher(body);
-						if (matcher.find()) {
-							String favorites = matcher.group(1);
-							Matcher contentIdMatcher = JSON_CONTENT_ID_PATTERN.matcher(favorites);
-							while (contentIdMatcher.find()) {
-								String id = contentIdMatcher.group(1);
-								favoriteIds.add(id);
-							}
-						} else {
-							throw malformedContentException(uri, body);
-						}
+				protected String parseListElement(String listElement) {
+					Matcher contentIdMatcher = JSON_CONTENT_ID_ATTRIBUTE_PATTERN.matcher(listElement);
+					if (contentIdMatcher.find()) {
+						return contentIdMatcher.group(2);
 					}
-					return favoriteIds;
+					return null;
 				}
 
-				@Override
-				protected Request createRequest(URI uri) {
-					return Request.Get(uri);
-				}
 			}.execute(uri);
 		} catch (FileNotFoundException e) {
 			return new ArrayList<String>();
@@ -444,5 +549,58 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 			}
 		}
 		return false;
+	}
+
+	private static abstract class AbstractJSONListRequest<T> extends RequestTemplate<List<T>> {
+		private final URI uri;
+
+		private final Pattern listAttributePattern;
+
+		private AbstractJSONListRequest(URI uri, Pattern listAttributePattern) {
+			this.uri = uri;
+			this.listAttributePattern = listAttributePattern;
+		}
+
+		@Override
+		protected Request configureRequest(Request request, URI uri) {
+			return super.configureRequest(request, uri).setHeader(HttpHeaders.USER_AGENT, Session.USER_AGENT_ID)
+					.addHeader(HttpHeaders.CONTENT_TYPE, Session.APPLICATION_JSON) //
+					.addHeader(HttpHeaders.ACCEPT, Session.APPLICATION_JSON);
+		}
+
+		@Override
+		protected List<T> handleResponseStream(InputStream content) throws IOException {
+			String body = read(content);
+			body = body.trim();
+			return handleBody(uri, body);
+		}
+
+		protected List<T> handleBody(final URI uri, String body) throws ProtocolException {
+			List<T> favoriteIds = new ArrayList<T>();
+			if (!"".equals(body)) { //$NON-NLS-1$
+				Matcher matcher = listAttributePattern.matcher(body);
+				if (matcher.find()) {
+					String listBody = matcher.group(1);
+					Matcher entryMatcher = JSON_LIST_OBJECTS_PATTERN.matcher(listBody);
+					while (entryMatcher.find()) {
+						String listElement = entryMatcher.group(1);
+						T parsedElement = parseListElement(listElement);
+						if (parsedElement != null) {
+							favoriteIds.add(parsedElement);
+						}
+					}
+				} else {
+					throw malformedContentException(uri, body);
+				}
+			}
+			return favoriteIds;
+		}
+
+		protected abstract T parseListElement(String listElement);
+
+		@Override
+		protected Request createRequest(URI uri) {
+			return Request.Get(uri);
+		}
 	}
 }

@@ -1,0 +1,40 @@
+/*******************************************************************************
+ * Copyright (c) 2010 The Eclipse Foundation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     The Eclipse Foundation - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.epp.internal.mpc.core.model;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.epp.mpc.core.model.IFavoriteList;
+import org.eclipse.epp.mpc.core.model.INode;
+
+public class FavoriteList extends Identifiable implements IFavoriteList {
+
+	private List<INode> nodes = new ArrayList<INode>();
+
+	private String owner;
+
+	public String getOwner() {
+		return owner == null ? getId() : owner;
+	}
+
+	public void setOwner(String owner) {
+		this.owner = owner;
+	}
+
+	public List<INode> getNodes() {
+		return nodes;
+	}
+
+	public void setNodes(List<INode> nodes) {
+		this.nodes = nodes;
+	}
+}

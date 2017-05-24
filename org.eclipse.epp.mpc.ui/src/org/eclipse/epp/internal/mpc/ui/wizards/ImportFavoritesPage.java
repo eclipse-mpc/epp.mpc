@@ -131,7 +131,7 @@ public class ImportFavoritesPage extends CatalogPage {
 	}
 
 	private void setFavoritesUrl(FavoritesViewer viewer, String url) {
-		viewer.setFilterText(url == null ? "" : url.trim()); //$NON-NLS-1$
+		viewer.setFavoritesUrl(url == null ? "" : url.trim()); //$NON-NLS-1$
 	}
 
 	public void performImport() {

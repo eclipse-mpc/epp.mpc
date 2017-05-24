@@ -24,6 +24,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
+import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.epp.mpc.core.service.IMarketplaceStorageService;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.StorageException;
@@ -54,6 +55,8 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 
 	private URI serviceUri;
 
+	private String marketplaceBaseUri;
+
 	private StorageFactory storageFactory;
 
 	private IStorage storage;
@@ -63,6 +66,18 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 	private List<LoginListener> loginListeners;
 
 	private EclipseOAuthCredentialsProvider credentialsProvider;
+
+	public MarketplaceStorageService() {
+		System.out.println();
+	}
+
+	public String getMarketplaceBaseUri() {
+		return marketplaceBaseUri;
+	}
+
+	public void setMarketplaceBaseUri(String marketplaceBaseUri) {
+		this.marketplaceBaseUri = marketplaceBaseUri;
+	}
 
 	public URI getServiceUri() {
 		return serviceUri;
@@ -194,6 +209,11 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 		}
 		String applicationToken = getProperty(properties, APPLICATION_TOKEN_PROPERTY, DEFAULT_APPLICATION_TOKEN);
 		this.applicationToken = applicationToken;
+
+		Object marketplaceBaseUri = ServiceUtil.getOverridablePropertyValue(properties, IMarketplaceService.BASE_URL);
+		if (marketplaceBaseUri != null) {
+			this.marketplaceBaseUri = marketplaceBaseUri.toString();
+		}
 	}
 
 	private IStorageService registerStorageService(URI serviceUri, String serviceName) {

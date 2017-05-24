@@ -173,6 +173,14 @@ public class MarketplaceDropAdapter implements IStartup {
 		MarketplaceUrlHandler.triggerFavorites(url);
 	}
 
+	protected boolean acceptSolutionUrl(final String url) {
+		return MarketplaceUrlHandler.isPotentialSolution(url);
+	}
+
+	protected boolean acceptFavoritesListUrl(final String url) {
+		return MarketplaceUrlHandler.isPotentialFavoritesList(url);
+	}
+
 	private class MarketplaceDropTargetListener extends DropTargetAdapter {
 
 		@Override
@@ -232,9 +240,9 @@ public class MarketplaceDropAdapter implements IStartup {
 						return !isDrop;
 					}
 					final String url = getUrl(e.data);
-					if (MarketplaceUrlHandler.isPotentialSolution(url)) {
+					if (acceptSolutionUrl(url)) {
 						return true;
-					} else if (MarketplaceUrlHandler.isPotentialFavoritesList(url)) {
+					} else if (acceptFavoritesListUrl(url)) {
 						return true;
 					} else {
 						traceInvalidEventData(e);
@@ -278,7 +286,7 @@ public class MarketplaceDropAdapter implements IStartup {
 				return;
 			}
 			final String url = getUrl(event.data);
-			if (MarketplaceUrlHandler.isPotentialSolution(url)) {
+			if (acceptSolutionUrl(url)) {
 				//http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=1640500
 				DropTarget source = (DropTarget) event.getSource();
 				Display display = source.getDisplay();
@@ -287,7 +295,7 @@ public class MarketplaceDropAdapter implements IStartup {
 						proceedInstallation(url);
 					}
 				});
-			} else if (MarketplaceUrlHandler.isPotentialFavoritesList(url)) {
+			} else if (acceptFavoritesListUrl(url)) {
 				//https://marketplace.eclipse.org/user/xxx/favorites
 				DropTarget source = (DropTarget) event.getSource();
 				Display display = source.getDisplay();

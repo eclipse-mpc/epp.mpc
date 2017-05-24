@@ -15,11 +15,19 @@ import org.eclipse.osgi.util.NLS;
 class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.epp.internal.mpc.ui.catalog.messages"; //$NON-NLS-1$
 
+	public static String FavoriteListCatalogItem_defaultListName;
+
 	public static String FavoritesDiscoveryStrategy_enterFavoritesUrlMessage;
+
+	public static String FavoritesDiscoveryStrategy_enterFavoritesUrlTitle;
+
+	public static String FavoritesDiscoveryStrategy_favoritesCategoryTitle;
 
 	public static String FavoritesDiscoveryStrategy_invalidUrl;
 
 	public static String FavoritesDiscoveryStrategy_noFavoritesMessage;
+
+	public static String FavoritesDiscoveryStrategy_noFavoritesTitle;
 
 	public static String MarketplaceCatalog_addedNullEntry;
 

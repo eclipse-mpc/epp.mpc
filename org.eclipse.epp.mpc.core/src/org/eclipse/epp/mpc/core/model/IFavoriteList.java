@@ -8,21 +8,12 @@
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.epp.internal.mpc.ui.catalog;
+package org.eclipse.epp.mpc.core.model;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
+import java.util.List;
 
-public class FavoritesCatalog extends MarketplaceCatalog {
+public interface IFavoriteList extends IIdentifiable {
+	String getOwner();
 
-	@Override
-	public synchronized IStatus performDiscovery(IProgressMonitor monitor) {
-		return super.performDiscovery(monitor);
-	}
-
-	@Override
-	public IStatus checkForUpdates(IProgressMonitor monitor) {
-		return Status.OK_STATUS;
-	}
+	List<INode> getNodes();
 }

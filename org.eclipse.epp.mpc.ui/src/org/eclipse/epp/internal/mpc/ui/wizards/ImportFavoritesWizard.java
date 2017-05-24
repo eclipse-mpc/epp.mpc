@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
+import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
 import org.eclipse.epp.mpc.ui.IMarketplaceClientConfiguration;
 import org.eclipse.epp.mpc.ui.IMarketplaceClientService;
 import org.eclipse.epp.mpc.ui.MarketplaceClient;
@@ -81,9 +82,14 @@ public class ImportFavoritesWizard extends DiscoveryWizard {
 	}
 
 	private void selectForInstallation(List<MarketplaceNodeCatalogItem> selection) {
+		MarketplacePage catalogPage = parent.getCatalogPage();
+		if (catalogPage.getActiveTab() != ContentType.FAVORITES) {
+			catalogPage.setActiveTab(ContentType.FAVORITES);
+		}
 		for (MarketplaceNodeCatalogItem item : selection) {
 			parent.getSelectionModel().select(item, Operation.INSTALL);
 		}
+		parent.getContainer().showPage(catalogPage);
 	}
 
 	private void openFavoritesInMarketplace(List<MarketplaceNodeCatalogItem> selection) {
