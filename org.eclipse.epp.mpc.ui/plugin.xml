@@ -168,4 +168,13 @@
                label="%keyword.discovery">
          </keyword>
       </extension>
+      <extension
+            point="org.eclipse.userstorage.oauth.clients">
+         <client
+               authURI="https://accounts.eclipse.org/"
+               icon="icons/marketplace16.png"
+               id="org.eclipse.epp.mpc.oauth"
+               name="Eclipse Marketplace">
+         </client>
+      </extension>
 </plugin>
