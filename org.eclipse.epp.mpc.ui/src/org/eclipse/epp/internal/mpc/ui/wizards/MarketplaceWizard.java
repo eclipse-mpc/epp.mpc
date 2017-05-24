@@ -288,6 +288,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				// user canceled
 				throw new CoreException(Status.CANCEL_STATUS);
 			}
+			updateSelection();
 		}
 	}
 
