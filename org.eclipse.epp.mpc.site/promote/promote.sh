@@ -17,11 +17,13 @@ fi
 
 echo Promoting $VERSION.$QUALIFIER to $DST
 
+umask 0002
 mkdir -p $DST/
 unzip -d $DST/ $SRC
 cp $SRC $DST/$DIST-$VERSION.$QUALIFIER.zip
 
-chmod g+w -R $DST
+chmod g+rwX -R $DST
+chmod g+rwx $ARCHIVE $ARCHIVE/$VERSION || true
 
 cd $(dirname $0)
 BASE=$(pwd)
