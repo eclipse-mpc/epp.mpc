@@ -282,6 +282,7 @@ public class NewsViewer {
 							Browser browser = getBrowser();
 							if (!browser.isDisposed()) {
 								browser.stop();
+								browser.removeProgressListener(ProgressRunnable.this);
 							}
 						}
 					}

@@ -37,7 +37,7 @@ import org.eclipse.swt.browser.ProgressListener;
  */
 public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationListener, ProgressListener {
 
-	private final Set<String> documentLinks = new HashSet<String>();
+	private Set<String> documentLinks = null;
 
 	private final NewsViewer viewer;
 
@@ -72,15 +72,16 @@ public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationLis
 					MarketplaceClientUi.log(IStatus.WARNING,
 							"Failed to process link targets on news page. Some links might not open in external browser.", //$NON-NLS-1$
 							ex);
-					documentLinks.clear();
+					NewsUrlHandler.this.documentLinks = null;
 				}
 				// Remember document links for navigation handling since we
 				// don't want to deal with URLs from dynamic loading events
 				if (links != null) {
-					documentLinks.clear();
+					Set<String> documentLinks = new HashSet<String>();
 					for (Object link : links) {
 						documentLinks.add(link.toString());
 					}
+					NewsUrlHandler.this.documentLinks = documentLinks;
 				}
 			}
 
@@ -109,7 +110,7 @@ public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationLis
 				"about:blank".equals(newLocation) || "about:blank".equals(currentLocation)) { //$NON-NLS-1$//$NON-NLS-2$
 			return false;
 		}
-		if (!documentLinks.isEmpty() && !documentLinks.contains(newLocation)) {
+		if (documentLinks == null || !documentLinks.contains(newLocation)) {
 			return false;
 		}
 		return !isSameLocation(currentLocation, newLocation);
