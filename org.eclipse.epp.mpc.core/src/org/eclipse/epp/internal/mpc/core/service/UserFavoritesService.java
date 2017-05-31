@@ -99,13 +99,13 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 			.compile(String.format(JSON_ATTRIBUTE_OBJECT_LIST_REGEX, "users"), Pattern.MULTILINE); //$NON-NLS-1$
 
 	private static final Pattern JSON_USER_ID_ATTRIBUTE_PATTERN = Pattern
-			.compile(String.format(JSON_ATTRIBUTE_REGEX, "id|user_?id|user|name"), Pattern.MULTILINE); //$NON-NLS-1$
+			.compile(String.format(JSON_ATTRIBUTE_REGEX, "name"), Pattern.MULTILINE); //$NON-NLS-1$
 
 	private static final Pattern JSON_OWNER_ATTRIBUTE_PATTERN = Pattern
-			.compile(String.format(JSON_ATTRIBUTE_REGEX, "owner|owner_?name"), Pattern.MULTILINE); //$NON-NLS-1$
+			.compile(String.format(JSON_ATTRIBUTE_REGEX, "(?:full_)?name"), Pattern.MULTILINE); //$NON-NLS-1$
 
 	private static final Pattern JSON_NAME_ATTRIBUTE_PATTERN = Pattern
-			.compile(String.format(JSON_ATTRIBUTE_REGEX, "name|description|list_?name"), Pattern.MULTILINE); //$NON-NLS-1$
+			.compile(String.format(JSON_ATTRIBUTE_REGEX, "mpc_list_name"), Pattern.MULTILINE); //$NON-NLS-1$
 
 	private static final Pattern JSON_CONTENT_ID_ATTRIBUTE_PATTERN = Pattern
 			.compile(String.format(JSON_ATTRIBUTE_REGEX, "content_id"), Pattern.MULTILINE); //$NON-NLS-1$
