@@ -62,7 +62,8 @@ public abstract class MarketplaceUrlHandler {
 
 	private static final Pattern NODE_URL_PATTERN = Pattern.compile("(?:^|/)node/([^/#?]+)"); //$NON-NLS-1$
 
-	private static final Pattern FAVORITES_URL_PATTERN = Pattern.compile("(?:^|/)user/([^/#?]+)/favorites(/?[#?].*)?$"); //$NON-NLS-1$
+	private static final Pattern FAVORITES_URL_PATTERN = Pattern
+			.compile("(?:^|/)user/([^/#?]+)(/favorites)?([/#?].*)?$"); //$NON-NLS-1$
 
 	public static class SolutionInstallationInfo {
 
