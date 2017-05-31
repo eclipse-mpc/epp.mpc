@@ -13,6 +13,7 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -276,15 +277,38 @@ public class FavoritesViewer extends CatalogViewer {
 
 	@Override
 	protected void modifySelection(CatalogItem connector, boolean selected) {
-		super.modifySelection(connector, selected);
+		//bug 517559 - make sure we don't add elements to the selection twice
+		if (selected && connector != null) {
+			List<CatalogItem> checkedItems = getCheckedItems();
+			boolean alreadyChecked = checkedItems.contains(connector);
+			if (alreadyChecked && ((!connector.isSelected() || !getSelection().toList().contains(connector)))) {
+				//something is off - we recreate the selection state for the element completely...
+				super.modifySelection(connector, false);
+				super.modifySelection(connector, true);
+			} // else skip - this wouldn't change anything...
+		} else {
+			super.modifySelection(connector, selected);
+		}
+	}
+
+	@Override
+	public void setSelection(IStructuredSelection selection) {
+		//bug 517559 - make sure we don't add elements to the selection twice
+		if (selection.isEmpty() || (getSelection().isEmpty() && getCheckedItems().isEmpty())) {
+			super.setSelection(selection);
+		} else {
+			super.setSelection(StructuredSelection.EMPTY);
+			super.setSelection(selection);
+		}
 	}
 
 	@Override
 	public void updateCatalog() {
-		List<CatalogItem> checkedItems = getCheckedItems();
-		for (CatalogItem catalogItem : checkedItems) {
-			modifySelection(catalogItem, false);
-		}
+		//Clear selection both here and in catalogUpdated()...
+		//If something goes wrong, we won't reach catalogUpdated(),
+		//so clear early. But do it there as well, since it can
+		//be triggered from other pathes...
+		setSelection(StructuredSelection.EMPTY);
 		super.updateCatalog();
 		updateButtonState(getSelection());
 	}
@@ -345,11 +369,16 @@ public class FavoritesViewer extends CatalogViewer {
 
 	@Override
 	protected void catalogUpdated(boolean wasCancelled, boolean wasError) {
-		super.catalogUpdated(wasCancelled, wasError);
 		List<CatalogItem> items = getCatalog().getItems();
+		Set<CatalogItem> selectedItems = new LinkedHashSet<CatalogItem>();
 		for (CatalogItem catalogItem : items) {
-			modifySelection(catalogItem, catalogItem.isSelected());
+			if (catalogItem.isSelected()) {
+				selectedItems.add(catalogItem);
+			}
 		}
+		setSelection(StructuredSelection.EMPTY);
+		super.catalogUpdated(wasCancelled, wasError);
+		setSelection(new StructuredSelection(new ArrayList<CatalogItem>(selectedItems)));
 	}
 
 	public void setInstallSelected(boolean install) {
