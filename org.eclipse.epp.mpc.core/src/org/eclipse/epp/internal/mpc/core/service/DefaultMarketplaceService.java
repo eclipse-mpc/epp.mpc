@@ -36,6 +36,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
@@ -347,6 +348,7 @@ MarketplaceService {
 		}
 
 		List<INode> resultNodes = new ArrayList<INode>(nodes.size());
+		MultiStatus missingNodes = null;
 		for (INode inputNode : nodes) {
 			INode resolvedNode = resolvedNodeMapping.get(inputNode);
 			if (resolvedNode != null) {
@@ -358,11 +360,18 @@ MarketplaceService {
 				} else {
 					query = inputNode.getUrl();
 				}
-				throw new CoreException(
-						createErrorStatus(Messages.DefaultMarketplaceService_nodeNotFound, query));
+				IStatus missingNodeDetailStatus = createStatus(IStatus.INFO,
+						Messages.DefaultMarketplaceService_nodeNotFound, query);
+				if (missingNodes == null) {
+					missingNodes = new MultiStatus(MarketplaceClientCore.BUNDLE_ID, 0,
+							"Some entries could not be found on the Marketplace", null);
+				}
+				missingNodes.add(missingNodeDetailStatus);
 			}
 		}
-
+		if (missingNodes != null) {
+			MarketplaceClientCore.getLog().log(missingNodes);
+		}
 		return resultNodes;
 	}
 

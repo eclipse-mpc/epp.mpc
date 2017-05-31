@@ -85,7 +85,8 @@ public interface IMarketplaceService {
 	INode getNode(INode node, IProgressMonitor monitor) throws CoreException;
 
 	/**
-	 * Get a list of nodes by their ids
+	 * Get a list of nodes by their ids. Only existing nodes are returned. Nodes not found on the server will be
+	 * discarded in the result list.
 	 *
 	 * @param nodes
 	 *            the nodes which must all have an {@link INode#getId() id}.
