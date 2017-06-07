@@ -86,8 +86,8 @@ public abstract class AbstractSimpleDiscoveryItem<T extends CatalogItem> extends
 	}
 
 	@Override
-	protected void createProviderLabel(Composite parent) {
-		createSublineLabel(parent);
+	protected StyledText createProviderLabel(Composite parent) {
+		return createSublineLabel(parent);
 	}
 
 	protected StyledText createSublineLabel(Composite parent) {

@@ -88,7 +88,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 
 	protected static final String INFO_HREF = "info"; //$NON-NLS-1$
 
-	private static final String PROVIDER_PLACEHOLDER = "@PROVIDER@"; //$NON-NLS-1$
+	protected static final String PROVIDER_PLACEHOLDER = "@PROVIDER@"; //$NON-NLS-1$
 
 	protected static final int DESCRIPTION_MARGIN_LEFT = 8;
 
@@ -410,8 +410,12 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		} else {
 			iconLabel.setImage(MarketplaceClientUiPlugin.getInstance()
 					.getImageRegistry()
-					.get(MarketplaceClientUiPlugin.NO_ICON_PROVIDED));
+					.get(getDefaultIconResourceId()));
 		}
+	}
+
+	protected String getDefaultIconResourceId() {
+		return MarketplaceClientUiPlugin.NO_ICON_PROVIDED;
 	}
 
 	protected Icon getIcon() {
@@ -461,7 +465,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 					iconPath,
 					MarketplaceClientUiPlugin.getInstance()
 					.getImageRegistry()
-					.get(MarketplaceClientUiPlugin.NO_ICON_PROVIDED));
+							.get(getDefaultIconResourceId()));
 		}
 	}
 
@@ -489,7 +493,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		return browserAvailable;
 	}
 
-	protected void createProviderLabel(Composite parent) {
+	protected StyledText createProviderLabel(Composite parent) {
 		StyledText providerLink = StyledTextHelper.createStyledTextLabel(parent);
 		//Link providerLink = new Link(parent, SWT.NONE);
 		setWidgetId(providerLink, WIDGET_ID_PROVIDER);
@@ -504,11 +508,29 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		// always disabled color to make it less prominent
 		providerLink.setForeground(resources.getColorDisabled());
 
-		providerLink.setText(NLS.bind(Messages.DiscoveryItem_byProviderLicense, PROVIDER_PLACEHOLDER,
+		String labelTemplate = Messages.DiscoveryItem_byProviderLicense;
+		String providerName = connector.getProvider();
+		LinkListener listener = new LinkListener() {
+
+			@Override
+			protected void selected(Object href, TypedEvent e) {
+				String searchTerm = href.toString();
+				if (searchTerm.contains(" ")) { //$NON-NLS-1$
+					searchTerm = "\"" + searchTerm + "\""; //$NON-NLS-1$//$NON-NLS-2$
+				}
+				searchForProvider(searchTerm);
+			}
+		};
+		configureProviderLink(providerLink, labelTemplate, providerName, null, listener);
+		return providerLink;
+	}
+
+	protected void configureProviderLink(StyledText providerLink, String labelTemplate, String providerName,
+			String providerHref, LinkListener listener) {
+		providerLink.setText(NLS.bind(labelTemplate, PROVIDER_PLACEHOLDER,
 				connector.getLicense()));
 		int providerPos = providerLink.getText().indexOf(PROVIDER_PLACEHOLDER);
 		if (providerPos != -1) {
-			String providerName = connector.getProvider();
 			StyleRange range = new StyleRange(0, 0, providerLink.getForeground(), null, SWT.NONE);
 			if (providerName == null) {
 				providerName = Messages.DiscoveryItem_UnknownProvider;
@@ -516,22 +538,13 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 			} else {
 				range.underline = true;
 				range.underlineStyle = SWT.UNDERLINE_LINK;
-				LinkListener listener = new LinkListener() {
-
-					@Override
-					protected void selected(Object href, TypedEvent e) {
-						String searchTerm = href.toString();
-						if (searchTerm.contains(" ")) { //$NON-NLS-1$
-							searchTerm = "\"" + searchTerm + "\""; //$NON-NLS-1$//$NON-NLS-2$
-						}
-						searchForProvider(searchTerm);
-					}
-				};
-				listener.register(providerLink);
+				if (listener != null) {
+					listener.register(providerLink);
+				}
 			}
 			range.start = providerPos;
 			range.length = providerName.length();
-			range.data = providerName;
+			range.data = providerHref == null ? providerName : providerHref;
 			providerLink.replaceTextRange(providerPos, PROVIDER_PLACEHOLDER.length(), providerName);
 			providerLink.replaceStyleRanges(providerPos, range.length, new StyleRange[] { range });
 		}

@@ -15,6 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpEntity;
@@ -130,12 +131,12 @@ public class HttpClientTransport implements ITransport {
 				HttpResponse returnResponse = response.returnResponse();
 				HttpEntity entity = returnResponse.getEntity();
 				StatusLine statusLine = returnResponse.getStatusLine();
-				handleResponseStatus(statusLine.getStatusCode(), statusLine.getReasonPhrase(), entity);
+				handleResponseStatus(statusLine.getStatusCode(), statusLine.getReasonPhrase());
 				return handleResponseEntity(entity);
 			}
 
 			@Override
-			protected InputStream handleResponseStream(InputStream content) throws IOException {
+			protected InputStream handleResponseStream(InputStream content, Charset charset) throws IOException {
 				return content;
 			}
 

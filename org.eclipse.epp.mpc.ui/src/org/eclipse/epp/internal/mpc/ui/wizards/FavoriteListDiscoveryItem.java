@@ -13,11 +13,19 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoriteListCatalogItem;
 import org.eclipse.equinox.internal.p2.discovery.model.Icon;
+import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.TypedEvent;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 public class FavoriteListDiscoveryItem extends AbstractSimpleDiscoveryItem<FavoriteListCatalogItem> {
+	private static final Icon DEFAULT_LIST_ICON = createIcon(
+			REGISTRY_SCHEME + MarketplaceClientUiPlugin.FAVORITES_LIST_ICON);
+
 	public FavoriteListDiscoveryItem(Composite parent, MarketplaceDiscoveryResources resources,
 			FavoriteListCatalogItem connector, FavoritesViewer viewer) {
 		super(parent, SWT.NONE, resources, null, connector, viewer);
@@ -30,8 +38,16 @@ public class FavoriteListDiscoveryItem extends AbstractSimpleDiscoveryItem<Favor
 
 	@Override
 	protected Icon getIcon() {
-		String path = REGISTRY_SCHEME + MarketplaceClientUiPlugin.FAVORITES_LIST_ICON;
-		return createIcon(path);
+		Icon icon = connector.getIcon();
+		if (icon != null) {
+			return icon;
+		}
+		return DEFAULT_LIST_ICON;
+	}
+
+	@Override
+	protected String getDefaultIconResourceId() {
+		return MarketplaceClientUiPlugin.FAVORITES_LIST_ICON;
 	}
 
 	@Override
@@ -58,5 +74,23 @@ public class FavoriteListDiscoveryItem extends AbstractSimpleDiscoveryItem<Favor
 	@Override
 	protected void buttonPressed(int id) {
 		getViewer().setFavoritesUrl(connector.getFavoriteList().getUrl());
+	}
+
+	@Override
+	protected StyledText createSublineLabel(Composite parent) {
+		StyledText subline = super.createSublineLabel(parent);
+		if (connector.getOwnerProfileUrl() != null) {
+			StyleRange range = new StyleRange(0, subline.getText().length(), subline.getForeground(), null, SWT.NONE);
+			subline.setStyleRange(range);//reset styling
+			configureProviderLink(subline, "by {0}", connector.getOwner(), connector.getOwnerProfileUrl(),
+					new LinkListener() {
+
+				@Override
+				protected void selected(Object href, TypedEvent event) {
+					WorkbenchUtil.openUrl((String) href, IWorkbenchBrowserSupport.AS_EXTERNAL);
+				}
+			});
+		}
+		return subline;
 	}
 }

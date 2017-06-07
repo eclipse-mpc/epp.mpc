@@ -17,6 +17,8 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,6 +41,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.model.FavoriteList;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.RequestTemplate;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
@@ -48,6 +51,7 @@ import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.epp.mpc.core.service.QueryHelper;
 import org.eclipse.epp.mpc.core.service.ServiceHelper;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.userstorage.IBlob;
 import org.eclipse.userstorage.internal.Session;
 import org.eclipse.userstorage.internal.util.IOUtil;
@@ -89,8 +93,8 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 	 * Matches a single string attribute in a dict. Returns the matched attribute name in the first match group and the
 	 * attribute value in the second.
 	 */
-	private static final String JSON_ATTRIBUTE_REGEX = "(?:[,\\{]|^)\\s*\"(" + TEMPLATE_VARIABLE //$NON-NLS-1$
-			+ ")\"\\s*:\\s*\"([^\"]*)\"\\s*(?:,|$)"; //$NON-NLS-1$
+	private static final String JSON_ATTRIBUTE_REGEX = "(?<=[,\\{]|^)\\s*\"(" + TEMPLATE_VARIABLE //$NON-NLS-1$
+			+ ")\"\\s*:\\s*\"([^\"]*)\"\\s*(?=[,\\}]|$)"; //$NON-NLS-1$
 
 	private static final Pattern JSON_MPC_FAVORITES_PATTERN = Pattern
 			.compile(String.format(JSON_ATTRIBUTE_OBJECT_LIST_REGEX, "mpc_favorites"), Pattern.MULTILINE); //$NON-NLS-1$
@@ -110,13 +114,14 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 	private static final Pattern JSON_CONTENT_ID_ATTRIBUTE_PATTERN = Pattern
 			.compile(String.format(JSON_ATTRIBUTE_REGEX, "content_id"), Pattern.MULTILINE); //$NON-NLS-1$
 
-	private static final Pattern USER_MAIL_PATTERN = Pattern.compile(".+\\@.+"); //$NON-NLS-1$
+	private static final Pattern JSON_LIST_URL_ATTRIBUTE_PATTERN = Pattern
+			.compile(String.format(JSON_ATTRIBUTE_REGEX, "html_mpc_favorites_url"), Pattern.MULTILINE); //$NON-NLS-1$
 
-	private static final String FAVORITES_API__ENDPOINT = "/api/mpc_favorites?{0}={1}"; //$NON-NLS-1$
+	private static final Pattern JSON_OWNER_ICON_ATTRIBUTE_PATTERN = Pattern
+			.compile(String.format(JSON_ATTRIBUTE_REGEX, "picture"), Pattern.MULTILINE); //$NON-NLS-1$
 
-	private static final String FAVORITES_API__USER_MAIL = "mail"; //$NON-NLS-1$
-
-	private static final String FAVORITES_API__USER_NAME = "name"; //$NON-NLS-1$
+	private static final Pattern JSON_OWNER_PROFILE_URL_ATTRIBUTE_PATTERN = Pattern
+			.compile(String.format(JSON_ATTRIBUTE_REGEX, "html_profile_url"), Pattern.MULTILINE); //$NON-NLS-1$
 
 	private static final String KEY = "mpc_favorites"; //$NON-NLS-1$
 
@@ -202,22 +207,54 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 				if (label != null && (label.equals(id) || label.equals(owner))) {
 					label = null;
 				}
-				String favoritesListUrl = getFavoritesListUrl(id);
+				String favoritesListUrl = getFavoritesListUrl(entryBody, id);
 				if (favoritesListUrl == null) {
 					return null;
 				}
+				String icon = getAttribute(JSON_OWNER_ICON_ATTRIBUTE_PATTERN, null, entryBody);
+				String profileUrl = getAttribute(JSON_OWNER_PROFILE_URL_ATTRIBUTE_PATTERN, null, entryBody);
 				IFavoriteList favoritesByUserId = QueryHelper.favoritesByUserId(id);
 				((FavoriteList) favoritesByUserId).setOwner(owner);
+				((FavoriteList) favoritesByUserId).setOwnerProfileUrl(profileUrl);
 				((FavoriteList) favoritesByUserId).setName(label);
 				((FavoriteList) favoritesByUserId).setUrl(favoritesListUrl);
+				((FavoriteList) favoritesByUserId).setIcon(icon);
 				return favoritesByUserId;
 			}
 
 		}.execute(randomFavoritesUri);
 	}
 
-	private String getFavoritesListUrl(String id) {
+	private static String getAttribute(Pattern attributePattern, String attributeName, String entryBody) {
+		Matcher matcher = attributePattern.matcher(entryBody);
+		while (matcher.find()) {
+			String matchedName = matcher.group(1);
+			if (attributeName == null || attributeName.equals(matchedName)) {
+				return matcher.group(2);
+			}
+		}
+		return null;
+	}
+
+	private String getFavoritesListUrl(String entryBody, String id) {
 		String marketplaceBaseUri = getMarketplaceBaseUri();
+		String explicitUrl = getAttribute(JSON_LIST_URL_ATTRIBUTE_PATTERN, null, entryBody);
+		if (explicitUrl != null && explicitUrl.trim().length() > 0) {
+			try {
+				//Check that it's a valid URL
+				URL url = URLUtil.toURL(explicitUrl);
+				URI uri = url.toURI();
+				if (!uri.isAbsolute()) {
+					uri = new URI(marketplaceBaseUri).resolve(uri);
+				}
+				return uri.toURL().toString();
+			} catch (Exception ex) {
+				MarketplaceClientCore
+				.error(NLS.bind("Invalid list URL {0} for favorites list {1} - falling back to default URL",
+						explicitUrl, id),
+						ex);
+			}
+		}
 		String path = String.format(MARKETPLACE_USER_FAVORITES_ENDPOINT, URLUtil.encode(id));
 		return URLUtil.appendPath(marketplaceBaseUri, path);
 	}
@@ -235,19 +272,19 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		return DefaultMarketplaceService.DEFAULT_SERVICE_LOCATION;
 	}
 
-	protected String findFavoritesListOwner(String entryBody) {
+	private static String findFavoritesListOwner(String entryBody) {
 		return findFavoritesNameOrId(entryBody, JSON_OWNER_ATTRIBUTE_PATTERN);
 	}
 
-	private String findFavoritesListLabel(String entryBody) {
+	private static String findFavoritesListLabel(String entryBody) {
 		return findFavoritesNameOrId(entryBody, JSON_NAME_ATTRIBUTE_PATTERN);
 	}
 
-	private String findFavoritesListId(String entryBody) {
+	private static String findFavoritesListId(String entryBody) {
 		return findFavoritesNameOrId(entryBody, JSON_USER_ID_ATTRIBUTE_PATTERN);
 	}
 
-	private String findFavoritesNameOrId(String entryBody, Pattern pattern) {
+	private static String findFavoritesNameOrId(String entryBody, Pattern pattern) {
 		String result = null;
 		Matcher matcher = pattern.matcher(entryBody);
 		while (matcher.find()) {
@@ -453,22 +490,6 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		}
 	}
 
-	private static String read(InputStream in) throws IOException {
-		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			IOUtil.copy(in, baos);
-			return StringUtil.fromUTF(baos.toByteArray());
-		} catch (RuntimeException ex) {
-			Throwable cause = ex.getCause();
-			if (cause instanceof IOException) {
-				throw (IOException) cause;
-			}
-			throw ex;
-		} finally {
-			IOUtil.close(in);
-		}
-	}
-
 	private static ProtocolException malformedContentException(final URI endpoint, String body) {
 		return new ProtocolException("GET", endpoint, "1.1", MALFORMED_CONTENT_ERROR_CODE, //$NON-NLS-1$ //$NON-NLS-2$
 				"Malformed response content: " + body); //$NON-NLS-1$
@@ -569,10 +590,31 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		}
 
 		@Override
-		protected List<T> handleResponseStream(InputStream content) throws IOException {
-			String body = read(content);
+		protected List<T> handleResponseStream(InputStream content, Charset charset) throws IOException {
+			String body = read(content, charset);
 			body = body.trim();
 			return handleBody(uri, body);
+		}
+
+		private static String read(InputStream in, Charset charset) throws IOException {
+			try {
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				IOUtil.copy(in, baos);
+				byte[] bytes = baos.toByteArray();
+				if (bytes == null) {
+					return StringUtil.EMPTY;
+				}
+
+				return new String(bytes, charset == null ? StringUtil.UTF8 : charset.name());
+			} catch (RuntimeException ex) {
+				Throwable cause = ex.getCause();
+				if (cause instanceof IOException) {
+					throw (IOException) cause;
+				}
+				throw ex;
+			} finally {
+				IOUtil.close(in);
+			}
 		}
 
 		protected List<T> handleBody(final URI uri, String body) throws ProtocolException {

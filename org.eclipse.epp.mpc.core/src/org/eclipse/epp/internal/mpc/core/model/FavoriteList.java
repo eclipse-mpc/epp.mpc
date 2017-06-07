@@ -22,12 +22,32 @@ public class FavoriteList extends Identifiable implements IFavoriteList {
 
 	private String owner;
 
+	private String ownerProfileUrl;
+
+	private String icon;
+
 	public String getOwner() {
 		return owner == null ? getId() : owner;
 	}
 
 	public void setOwner(String owner) {
 		this.owner = owner;
+	}
+
+	public String getOwnerProfileUrl() {
+		return ownerProfileUrl;
+	}
+
+	public void setOwnerProfileUrl(String ownerProfileUrl) {
+		this.ownerProfileUrl = ownerProfileUrl;
+	}
+
+	public String getIcon() {
+		return icon;
+	}
+
+	public void setIcon(String icon) {
+		this.icon = icon;
 	}
 
 	public List<INode> getNodes() {

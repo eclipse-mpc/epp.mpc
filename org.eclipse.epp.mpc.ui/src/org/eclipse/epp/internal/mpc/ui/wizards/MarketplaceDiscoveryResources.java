@@ -128,8 +128,7 @@ public class MarketplaceDiscoveryResources extends DiscoveryResources {
 			}
 			if (image != null) {
 				receiver.setImage(image);
-			}
-			if (fallbackImage != null) {
+			} else if (fallbackImage != null) {
 				receiver.setImage(fallbackImage);
 			}
 			new Job(Messages.MarketplaceDiscoveryResources_retrievingImage) {

@@ -461,6 +461,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		icon.setImage32(node.getImage());
 		icon.setImage48(node.getImage());
 		icon.setImage64(node.getImage());
+		icon.setImage128(node.getImage());
 		catalogItem.setIcon(icon);
 	}
 

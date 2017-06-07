@@ -15,5 +15,9 @@ import java.util.List;
 public interface IFavoriteList extends IIdentifiable {
 	String getOwner();
 
+	String getOwnerProfileUrl();
+
+	String getIcon();
+
 	List<INode> getNodes();
 }

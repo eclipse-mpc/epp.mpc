@@ -50,7 +50,15 @@ public class FavoriteListCatalogItem extends CatalogItem {
 		return getFavoriteList().getUrl();
 	}
 
+	public String getOwnerProfileUrl() {
+		return getFavoriteList().getOwnerProfileUrl();
+	}
+
 	public String getOwner() {
+		String provider = getProvider();
+		if (provider != null) {
+			return provider;
+		}
 		return getFavoriteList().getOwner();
 	}
 }

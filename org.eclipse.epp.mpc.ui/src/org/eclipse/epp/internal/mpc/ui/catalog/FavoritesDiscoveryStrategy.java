@@ -30,6 +30,7 @@ import org.eclipse.epp.mpc.core.model.ISearchResult;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
+import org.eclipse.equinox.internal.p2.discovery.model.Icon;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.osgi.util.NLS;
 
@@ -145,6 +146,7 @@ public class FavoritesDiscoveryStrategy extends MarketplaceDiscoveryStrategy {
 		}
 		catalogCategory.setContents(Contents.FAVORITE_LISTS);
 		catalogCategory.setName(Messages.FavoritesDiscoveryStrategy_favoritesCategoryTitle);
+		MarketplaceCatalogSource source = this.getCatalogSource();
 		int maxCount = Math.min(userFavoriteLists.size(), 5);
 		for (int i = 0; i < maxCount; i++) {
 			IFavoriteList favoriteList = userFavoriteLists.get(i);
@@ -152,8 +154,27 @@ public class FavoritesDiscoveryStrategy extends MarketplaceDiscoveryStrategy {
 			item.setFavoriteList(favoriteList);
 			item.setId(favoriteList.getId());
 			item.setName(favoriteList.getName());
+			item.setProvider(favoriteList.getOwner());
+
+			String iconUrl = favoriteList.getIcon();
+			if (iconUrl != null) {
+				if (!source.getResourceProvider().containsResource(iconUrl)) {
+					cacheResource(source.getResourceProvider(), item, iconUrl);
+				}
+				createIcon(item, favoriteList);
+			}
 			addItem(catalogCategory, item);
 		}
+	}
+
+	private static void createIcon(CatalogItem catalogItem, final IFavoriteList list) {
+		Icon icon = new Icon();
+		// don't know the size
+		icon.setImage32(list.getIcon());
+		icon.setImage48(list.getIcon());
+		icon.setImage64(list.getIcon());
+		icon.setImage128(list.getIcon());
+		catalogItem.setIcon(icon);
 	}
 
 	private void addEmptyInfoItem(CatalogCategory catalogCategory) {
