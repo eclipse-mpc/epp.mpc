@@ -37,7 +37,7 @@ final class CollectMissingNaturesVisitor implements IResourceDeltaVisitor {
 					return false;
 				}
 				for (String natureId : project.getDescription().getNatureIds()) {
-					if (project.getWorkspace().getNatureDescriptor(natureId) == null) {
+					if (true || project.getWorkspace().getNatureDescriptor(natureId) == null) {
 						this.missingNatures.add(natureId);
 					}
 				}

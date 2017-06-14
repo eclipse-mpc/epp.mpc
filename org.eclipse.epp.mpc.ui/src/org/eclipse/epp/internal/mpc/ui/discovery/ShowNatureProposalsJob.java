@@ -24,7 +24,6 @@ import org.eclipse.epp.mpc.ui.IMarketplaceClientConfiguration;
 import org.eclipse.epp.mpc.ui.IMarketplaceClientService;
 import org.eclipse.epp.mpc.ui.MarketplaceClient;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.UIJob;
 
@@ -38,18 +37,21 @@ final class ShowNatureProposalsJob extends UIJob {
 
 	@Override
 	public IStatus runInUIThread(IProgressMonitor monitor) {
-		TitleAreaDialog dialog = new ShowNatureProposalsDialog(
+		ShowNatureProposalsDialog dialog = new ShowNatureProposalsDialog(
 				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), candidates);
 		if (dialog.open() == IDialogConstants.CANCEL_ID) {
 			return Status.CANCEL_STATUS;
 		}
+		Set<String> natureIds = dialog.getSelectedNatures();
 		IMarketplaceClientService marketplaceClientService = MarketplaceClient.getMarketplaceClientService();
 		IMarketplaceClientConfiguration config = marketplaceClientService.newConfiguration();
 		Set<INode> allNodes = new HashSet<INode>();
-		for (Collection<INode> candidateNodes : candidates.values()) {
-			allNodes.addAll(candidateNodes);
+		for (String natureId : natureIds) {
+			allNodes.addAll(candidates.get(natureId));
 		}
-		marketplaceClientService.open(config, allNodes);
+		if (!allNodes.isEmpty()) {
+			marketplaceClientService.open(config, allNodes);
+		}
 		return Status.OK_STATUS;
 	}
 }
