@@ -124,4 +124,12 @@ public class URLUtil {
 			return path;
 		}
 	}
+
+	public static String setScheme(String url, String scheme) {
+		int schemeSeparator = url.indexOf(":"); //$NON-NLS-1$
+		if (schemeSeparator == -1) {
+			throw new IllegalArgumentException();
+		}
+		return scheme + url.substring(schemeSeparator);
+	}
 }

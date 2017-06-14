@@ -123,6 +123,9 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 	private static final Pattern JSON_OWNER_PROFILE_URL_ATTRIBUTE_PATTERN = Pattern
 			.compile(String.format(JSON_ATTRIBUTE_REGEX, "html_profile_url"), Pattern.MULTILINE); //$NON-NLS-1$
 
+	public static final Pattern FAVORITES_URL_PATTERN = Pattern
+			.compile("(?:^|/)user/([^/#?]+)(/favorites)?([/#?].*)?$"); //$NON-NLS-1$
+
 	private static final String KEY = "mpc_favorites"; //$NON-NLS-1$
 
 	private static final int RETRY_COUNT = 3;
@@ -238,6 +241,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 
 	private String getFavoritesListUrl(String entryBody, String id) {
 		String marketplaceBaseUri = getMarketplaceBaseUri();
+		//We use the HTML URL shown in the web frontend instead of the API URL, because that's what's advertised
 		String explicitUrl = getAttribute(JSON_LIST_URL_ATTRIBUTE_PATTERN, null, entryBody);
 		if (explicitUrl != null && explicitUrl.trim().length() > 0) {
 			try {
@@ -459,7 +463,24 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		return toNodes(nodeIds);
 	}
 
-	public static void validateURI(URI uri) {
+	private URI normalizeURI(URI uri) {
+		validateUri(uri);
+		String marketplaceBaseUri = getMarketplaceBaseUri();
+		marketplaceBaseUri = URLUtil.appendPath(marketplaceBaseUri, ""); //$NON-NLS-1$
+		marketplaceBaseUri = URLUtil.setScheme(marketplaceBaseUri, uri.getScheme());
+		if (!uri.toString().startsWith(marketplaceBaseUri)) {
+			return uri;
+		}
+		Matcher matcher = FAVORITES_URL_PATTERN.matcher(uri.toString());
+		if (matcher.find()) {
+			String name = matcher.group(1);
+			return getStorageService().getServiceUri()
+					.resolve("marketplace/favorites/?name=" + URLUtil.urlEncode(name));
+		}
+		return uri;
+	}
+
+	public static void validateUri(URI uri) {
 		if ("".equals(uri.toString()) //$NON-NLS-1$
 				|| ((uri.getHost() == null || "".equals(uri.getHost())) //$NON-NLS-1$
 						&& (uri.getScheme() != null && uri.getScheme().toLowerCase().startsWith("http"))) //$NON-NLS-1$
@@ -471,9 +492,9 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 	}
 
 	public List<String> getFavoriteIds(final URI uri, IProgressMonitor monitor) throws IOException {
-		validateURI(uri);
+		URI normalizedUri = normalizeURI(uri);
 		try {
-			return new AbstractJSONListRequest<String>(uri, JSON_MPC_FAVORITES_PATTERN) {
+			return new AbstractJSONListRequest<String>(normalizedUri, JSON_MPC_FAVORITES_PATTERN) {
 
 				@Override
 				protected String parseListElement(String listElement) {

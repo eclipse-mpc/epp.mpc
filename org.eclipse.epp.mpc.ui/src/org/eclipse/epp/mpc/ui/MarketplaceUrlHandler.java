@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.model.Node;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
+import org.eclipse.epp.internal.mpc.core.service.UserFavoritesService;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
@@ -62,8 +63,10 @@ public abstract class MarketplaceUrlHandler {
 
 	private static final Pattern NODE_URL_PATTERN = Pattern.compile("(?:^|/)node/([^/#?]+)"); //$NON-NLS-1$
 
-	private static final Pattern FAVORITES_URL_PATTERN = Pattern
-			.compile("(?:^|/)user/([^/#?]+)(/favorites)?([/#?].*)?$"); //$NON-NLS-1$
+	private static final Pattern FAVORITES_URL_PATTERN = UserFavoritesService.FAVORITES_URL_PATTERN;
+
+	private static final Pattern FAVORITES_API_URL_PATTERN = Pattern
+			.compile("(?:^|/)marketplace/favorites/?(?:\\?(?:[^#]*&)name=.*)?$"); //$NON-NLS-1$
 
 	public static class SolutionInstallationInfo {
 
@@ -190,7 +193,8 @@ public abstract class MarketplaceUrlHandler {
 	}
 
 	public static boolean isPotentialFavoritesList(String url) {
-		return url != null && FAVORITES_URL_PATTERN.matcher(url).find();
+		return url != null
+				&& (FAVORITES_URL_PATTERN.matcher(url).find() || FAVORITES_API_URL_PATTERN.matcher(url).find());
 	}
 
 	public static void triggerInstall(SolutionInstallationInfo info) {
