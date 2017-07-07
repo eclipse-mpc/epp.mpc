@@ -119,6 +119,16 @@ public interface IMarketplaceService {
 	ISearchResult tagged(String tag, IProgressMonitor monitor) throws CoreException;
 
 	/**
+	 * Find nodes in the marketplace tagged with the given tags. Only nodes having an exact (case-insensitie) match for
+	 * at least one of the given tags will be returned.
+	 *
+	 * @param tags
+	 *            free-form tags
+	 * @return the search result
+	 */
+	ISearchResult tagged(List<String> tags, IProgressMonitor monitor) throws CoreException;
+
+	/**
 	 * Find featured nodes in the marketplace
 	 *
 	 * @return the search result

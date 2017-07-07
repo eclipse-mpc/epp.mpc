@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -282,6 +283,11 @@ public class CachingMarketplaceService implements IMarketplaceService {
 				return delegate.tagged(tag, monitor);
 			}
 		});
+	}
+
+	public ISearchResult tagged(List<String> tags, IProgressMonitor monitor) throws CoreException {
+		String combinedTags = tags.stream().collect(Collectors.joining(",")); //$NON-NLS-1$
+		return tagged(combinedTags, monitor);
 	}
 
 	private ISearchResult performSearch(IProgressMonitor monitor, String key, SearchOperation searchOperation)

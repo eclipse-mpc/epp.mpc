@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat Inc.
+ * Copyright (c) 2017 Red Hat Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  * 	Mickael Istria (Red Hat Inc.) - initial implementation
+ *  Lucas Bullen (Red Hat Inc.) -	Bug 517818: retain same functionality post fix
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.discovery;
 
@@ -67,8 +68,9 @@ final class ShowFileSupportProposalsJob extends UIJob {
 				IMarketplaceClientConfiguration config = marketplaceClientService.newConfiguration();
 				marketplaceClientService.open(config, new LinkedHashSet<INode>(nodes));
 			} else if (dialog.isAssociateToExtension()) {
-				String fileExtension = DiscoverFileSupportJob.getFileExtension(fileName);
-				IFileEditorMapping newMapping = createDefaultDescriptorMapping(fileExtension);
+				List<String> fileExtensions = DiscoverFileSupportJob.getFileExtensions(fileName);
+				IFileEditorMapping newMapping = createDefaultDescriptorMapping(
+						fileExtensions.get(fileExtensions.size() - 1));
 				addEditorMapping(newMapping);
 			}
 			return Status.OK_STATUS;
