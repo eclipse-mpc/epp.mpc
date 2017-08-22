@@ -58,7 +58,15 @@ public abstract class AbstractMarketplaceWizardCommand extends AbstractHandler i
 
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		final MarketplaceCatalog catalog = createCatalog();
+		if (catalog == null)
+		{
+			return null;//errors have already been logged, just return
+		}
 		MarketplaceCatalogConfiguration configuration = createConfiguration(catalog, event);
+		if (configuration == null)
+		{
+			return null;//errors have already been logged, just return
+		}
 		DiscoveryWizard wizard = createWizard(catalog, configuration, event);
 		openWizardDialog(wizard, event);
 
