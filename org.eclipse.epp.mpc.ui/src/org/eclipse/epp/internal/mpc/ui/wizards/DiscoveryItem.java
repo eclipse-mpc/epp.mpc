@@ -116,6 +116,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 
 		int numColumns = 1;
 		boolean installed = connector.isInstalled();
+		final String url = getCatalogItemNode().getUrl();
 		if (installed && getViewer().getContentType() != ContentType.INSTALLED
 				&& getViewer().getContentType() != ContentType.SELECTION) {
 			Button alreadyInstalledButton = new Button(composite, SWT.PUSH | SWT.BOLD);
@@ -156,7 +157,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 			.applyTo(button);
 
 			buttonController = new ItemButtonController(getViewer(), this, dropDown);
-		} else if (browser != null) {
+		} else if (browser != null && url != null && !"".equals(url.trim())) { //$NON-NLS-1$
 			installInfoLink = StyledTextHelper.createStyledTextLabel(composite);
 			setWidgetId(installInfoLink, WIDGET_ID_LEARNMORE);
 			installInfoLink.setToolTipText(Messages.DiscoveryItem_installInstructionsTooltip);
@@ -165,7 +166,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 			new LinkListener() {
 				@Override
 				protected void selected(Object href, TypedEvent e) {
-					browser.openUrl(getCatalogItemNode().getUrl());
+					browser.openUrl(url);
 				}
 			}.register(installInfoLink);
 			GridDataFactory.swtDefaults().align(SWT.TRAIL, SWT.CENTER).grab(false, true).applyTo(installInfoLink);
