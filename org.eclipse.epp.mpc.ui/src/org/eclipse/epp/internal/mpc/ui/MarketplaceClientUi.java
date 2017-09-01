@@ -186,6 +186,10 @@ public class MarketplaceClientUi {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(control, "org.eclipse.epp.mpc.help.ui.userGuide"); //$NON-NLS-1$
 	}
 
+	public static void handle(Throwable t, final int style) {
+		handle(new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, t.getLocalizedMessage(), t), style);
+	}
+
 	public static void handle(final IStatus status, final int style) {
 		if (PlatformUI.isWorkbenchRunning()) {
 			IWorkbench workbench = PlatformUI.getWorkbench();
