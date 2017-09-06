@@ -62,6 +62,9 @@ public class MarketplaceWizardCommand extends AbstractMarketplaceWizardCommand i
 	protected MarketplaceCatalogConfiguration createConfiguration(final MarketplaceCatalog catalog,
 			ExecutionEvent event) {
 		MarketplaceCatalogConfiguration configuration = super.createConfiguration(catalog, event);
+		if (configuration == null) {
+			return null;//errors have already been logged, just return
+		}
 		configuration.getFilters().clear();
 
 		final ComboTagFilter marketFilter = new ComboTagFilter() {
