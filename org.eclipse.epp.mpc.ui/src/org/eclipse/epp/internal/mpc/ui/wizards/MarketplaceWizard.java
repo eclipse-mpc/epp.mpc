@@ -435,11 +435,12 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			}
 		}
 		if (page == featureSelectionWizardPage || (page == catalogPage && skipFeatureSelection)) {
+			IWizardContainer container = getContainer();
 			if (nextpressed && profileChangeOperation != null
 					&& profileChangeOperation instanceof RemediationOperation) {
 
 				try {
-					getContainer().run(true, false, new IRunnableWithProgress() {
+					container.run(true, false, new IRunnableWithProgress() {
 						public void run(IProgressMonitor monitor) {
 							((RemediationOperation) profileChangeOperation).setCurrentRemedy(featureSelectionWizardPage.getRemediationGroup()
 									.getCurrentRemedy());
@@ -492,8 +493,8 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			if (nextPage == null && page == catalogPage) {
 				nextPage = featureSelectionWizardPage;
 			}
-			if (operationUpdated && nextPage == getContainer().getCurrentPage()) {
-				getContainer().updateButtons();
+			if (operationUpdated && nextPage == container.getCurrentPage()) {
+				container.updateButtons();
 			}
 			return nextPage;
 		}
