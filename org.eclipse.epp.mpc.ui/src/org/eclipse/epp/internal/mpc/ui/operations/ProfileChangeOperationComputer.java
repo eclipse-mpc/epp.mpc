@@ -189,9 +189,8 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 					throw new UnsupportedOperationException(operationType.name());
 				}
 				if (withRemediation && operation != null && operation.getResolutionResult().getSeverity() == IStatus.ERROR) {
-					RemediationOperation remediationOperation = new RemediationOperation(ProvisioningUI.getDefaultUI()
-							.getSession(), operation.getProfileChangeRequest());
-					remediationOperation.resolveModal(monitor.newChild(500));
+					RemediationOperation remediationOperation = resolveRemediation(monitor.newChild(500), operation,
+							repositories);
 					if (remediationOperation.getResolutionResult() == Status.OK_STATUS) {
 						errorMessage = operation.getResolutionDetails();
 						operation = remediationOperation;
@@ -280,7 +279,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 			public ProfileChangeOperation create(List<IInstallableUnit> ius) throws CoreException {
 				return provisioningUI.getInstallOperation(ius, null);
 			}
-		}, ius, repositories);
+		}, this.resolutionStrategy, ius, repositories);
 	}
 
 	private ProfileChangeOperation resolveUninstall(IProgressMonitor monitor, final IInstallableUnit[] ius,
@@ -289,7 +288,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 			public ProfileChangeOperation create(List<IInstallableUnit> ius) throws CoreException {
 				return provisioningUI.getUninstallOperation(ius, null);
 			}
-		}, ius, repositories);
+		}, this.resolutionStrategy, ius, repositories);
 	}
 
 	private ProfileChangeOperation resolveUpdate(IProgressMonitor monitor, final IInstallableUnit[] ius,
@@ -298,7 +297,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 			public ProfileChangeOperation create(List<IInstallableUnit> ius) throws CoreException {
 				return provisioningUI.getUpdateOperation(ius, null);
 			}
-		}, ius, repositories);
+		}, this.resolutionStrategy, ius, repositories);
 	}
 
 	private ProfileChangeOperation resolveChange(IProgressMonitor monitor, IInstallableUnit[] ius,
@@ -319,11 +318,21 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 				operation.add(uninstallOperation).add(installOperation);
 				return operation;
 			}
-		}, ius, repositories);
+		}, this.resolutionStrategy, ius, repositories);
+	}
+
+	private RemediationOperation resolveRemediation(IProgressMonitor monitor, final ProfileChangeOperation operation,
+			URI[] repositories) throws CoreException {
+		return (RemediationOperation) resolve(monitor, new ProfileChangeOperationFactory() {
+			public RemediationOperation create(List<IInstallableUnit> ius) throws CoreException {
+				return new RemediationOperation(ProvisioningUI.getDefaultUI().getSession(),
+						operation.getProfileChangeRequest());
+			}
+		}, ResolutionStrategy.ALL_REPOSITORIES, new IInstallableUnit[0], repositories);
 	}
 
 	private ProfileChangeOperation resolve(IProgressMonitor monitor, ProfileChangeOperationFactory operationFactory,
-			IInstallableUnit[] ius, URI[] repositories) throws CoreException {
+			ResolutionStrategy resolutionStrategy, IInstallableUnit[] ius, URI[] repositories) throws CoreException {
 		List<IInstallableUnit> installableUnits = Arrays.asList(ius);
 		List<ResolutionStrategy> strategies = new ArrayList<ProfileChangeOperationComputer.ResolutionStrategy>(2);
 		switch (resolutionStrategy) {
@@ -342,17 +351,15 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 
 		ProfileChangeOperation operation = null;
 		final int workPerStrategy = 1000;
-		SubMonitor subMonitor = SubMonitor.convert(monitor, strategies.size() * workPerStrategy + workPerStrategy);
+		SubMonitor subMonitor = SubMonitor.convert(monitor, strategies.size() * workPerStrategy);
 		Set<URI> previousRepositoryLocations = null;
 		for (ResolutionStrategy strategy : strategies) {
 			Set<URI> repositoryLocations = new HashSet<URI>(Arrays.asList(repositories));
-			if (strategy == ResolutionStrategy.SELECTED_REPOSITORIES) {
-				repositoryLocations.addAll(Arrays.asList(repositories));
-			}
+			repositoryLocations.addAll(Arrays.asList(repositories));
 			if (dependenciesRepository != null) {
 				repositoryLocations.add(dependenciesRepository);
 			}
-			if (strategy == ResolutionStrategy.ALL_REPOSITORIES && !repositoryLocations.isEmpty()) {
+			if (strategy == ResolutionStrategy.ALL_REPOSITORIES) {
 				repositoryLocations.addAll(Arrays.asList(knownRepositories));
 			}
 			if (repositoryLocations.equals(previousRepositoryLocations)) {
