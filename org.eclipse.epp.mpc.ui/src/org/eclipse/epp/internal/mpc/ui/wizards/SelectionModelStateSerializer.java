@@ -18,6 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
 import org.eclipse.epp.mpc.core.model.INode;
@@ -84,6 +85,8 @@ public class SelectionModelStateSerializer {
 	 */
 	public void deserialize(String state, Map<String, Operation> operationByNodeExtras, IProgressMonitor monitor) {
 
+		SubMonitor progress = SubMonitor.convert(monitor, 1000);
+
 		Map<String, Operation> operationByNodeId = new HashMap<String, Operation>();
 		if (state != null && state.length() > 0) {
 			Pattern pattern = Pattern.compile("([^\\s=]+)=(\\S+)"); //$NON-NLS-1$
@@ -101,7 +104,8 @@ public class SelectionModelStateSerializer {
 			operationByNodeId.putAll(operationByNodeExtras);
 		}
 		if (!operationByNodeId.isEmpty()) {
-			catalog.performQuery(monitor, operationByNodeId.keySet());
+			catalog.performQuery(progress.newChild(500), operationByNodeId.keySet());
+			catalog.checkForUpdates(progress.newChild(500));
 			for (CatalogItem item : catalog.getItems()) {
 				if (item instanceof MarketplaceNodeCatalogItem) {
 					MarketplaceNodeCatalogItem nodeItem = (MarketplaceNodeCatalogItem) item;

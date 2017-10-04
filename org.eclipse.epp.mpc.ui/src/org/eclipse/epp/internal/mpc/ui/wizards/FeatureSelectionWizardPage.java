@@ -15,8 +15,10 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -42,6 +44,7 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.TreeColumnLayout;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -381,6 +384,8 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 
 	private void updateFeatures() {
 		SelectionModel selectionModel = getWizard().getSelectionModel();
+		checkForUpdates();
+
 		Set<CatalogItem> allSelectionCatalogItems = selectionModel.getItemToSelectedOperation().keySet();
 		Set<CatalogItem> selectedCatalogItems = selectionModel.getSelectedCatalogItems();
 		if (allSelectionCatalogItems.isEmpty() || selectedCatalogItems.isEmpty()) {
@@ -410,16 +415,7 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 		try {
 			getContainer().run(true, true, operation);
 		} catch (InvocationTargetException e) {
-			// we only log here since any error will also be displayed when resolving the provisioning operation.
-			int statusFlags = StatusManager.LOG;
-			IStatus status;
-			if (e.getCause() instanceof ProvisionException) {
-				status = ((ProvisionException) e.getCause()).getStatus();
-			} else {
-				status = MarketplaceClientCore.computeStatus(e, Messages.FeatureSelectionWizardPage_unexpectedException_verifyingFeatures);
-				statusFlags |= StatusManager.BLOCK | StatusManager.SHOW;
-			}
-			MarketplaceClientUi.handle(status, statusFlags);
+			handleFeatureUpdateError(e);
 		} catch (InterruptedException e) {
 			// canceled
 		} finally {
@@ -431,6 +427,49 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 			refreshState();
 		}
 		//maybeUpdateProfileChangeOperation();
+	}
+
+	private void handleFeatureUpdateError(InvocationTargetException e) {
+		// we only log here since any error will also be displayed when resolving the provisioning operation.
+		int statusFlags = StatusManager.LOG;
+		IStatus status;
+		if (e.getCause() instanceof ProvisionException) {
+			status = ((ProvisionException) e.getCause()).getStatus();
+		} else {
+			status = MarketplaceClientCore.computeStatus(e,
+					Messages.FeatureSelectionWizardPage_unexpectedException_verifyingFeatures);
+			statusFlags |= StatusManager.BLOCK | StatusManager.SHOW;
+		}
+		MarketplaceClientUi.handle(status, statusFlags);
+	}
+
+	/**
+	 * Force an update check on all selected catalog items - the more general update check at the catalog level won't
+	 * check for feature updates on entries not considered installed (e.g. because a required item is missing), which
+	 * can interfere with correct initialization of the state per feature here.
+	 */
+	private void checkForUpdates() {
+		SelectionModel selectionModel = getWizard().getSelectionModel();
+		final Set<CatalogItem> updateCheck = new HashSet<CatalogItem>();
+		for (Entry<CatalogItem, Operation> entry : selectionModel.getItemToSelectedOperation().entrySet()) {
+			if (!entry.getKey().isInstalled() && entry.getValue() != Operation.UNINSTALL) {
+				updateCheck.add(entry.getKey());
+			}
+		}
+		if (!updateCheck.isEmpty()) {
+			try {
+				getContainer().run(true, true, new IRunnableWithProgress() {
+					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+						getWizard().getCatalog().checkForUpdates(updateCheck, true, monitor);
+					}
+				});
+			} catch (InvocationTargetException e) {
+				handleFeatureUpdateError(e);
+			} catch (InterruptedException e) {
+				//cancelled
+			}
+			computeCheckedViewerState();
+		}
 	}
 
 	private boolean isActivePage() {

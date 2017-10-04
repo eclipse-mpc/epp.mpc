@@ -15,6 +15,7 @@ package org.eclipse.epp.internal.mpc.ui.catalog;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -177,11 +178,15 @@ public class MarketplaceCatalog extends Catalog {
 	}
 
 	public IStatus checkForUpdates(final IProgressMonitor monitor) {
+		return checkForUpdates(getItems(), false, monitor);
+	}
+
+	public IStatus checkForUpdates(Collection<CatalogItem> items, boolean force, IProgressMonitor monitor) {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceCatalog_checkingForUpdates, 10000000);
 		try {
 			Map<String, IInstallableUnit> installedIUs = calculateInstalledIUs(progress.newChild(100000));
 			List<MarketplaceNodeCatalogItem> updateCheckNeeded = new ArrayList<MarketplaceNodeCatalogItem>();
-			for (CatalogItem item : getItems()) {
+			for (CatalogItem item : items) {
 				if (monitor.isCanceled()) {
 					return Status.CANCEL_STATUS;
 				}
@@ -189,7 +194,7 @@ public class MarketplaceCatalog extends Catalog {
 					continue;
 				}
 				MarketplaceNodeCatalogItem catalogItem = (MarketplaceNodeCatalogItem) item;
-				if (catalogItem.isInstalled()) {
+				if (force || catalogItem.isInstalled()) {
 					if (setUpdatesAvailable(installedIUs, catalogItem)) {
 						updateCheckNeeded.add(catalogItem);
 					}
@@ -345,6 +350,9 @@ public class MarketplaceCatalog extends Catalog {
 		boolean needOnlineCheck = false;
 		List<MarketplaceNodeInstallableUnitItem> installableUnitItems = item.getInstallableUnitItems();
 		for (MarketplaceNodeInstallableUnitItem iuItem : installableUnitItems) {
+			if (Boolean.FALSE.equals(iuItem.getInstalled())) {
+				continue;
+			}
 			String key = createRepositoryIuKey(item.getSiteUrl(), iuItem.getId());
 			Version availableVersion = repositoryIuVersionById.get(key);
 			iuItem.setUpdateAvailable(false);

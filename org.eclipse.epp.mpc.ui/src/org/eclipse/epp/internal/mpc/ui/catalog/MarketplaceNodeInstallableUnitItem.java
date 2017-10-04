@@ -101,7 +101,7 @@ public class MarketplaceNodeInstallableUnitItem extends AbstractCatalogItem {
 	}
 
 	public boolean isDefaultSelected() {
-		return (defaultSelected == null && (optional == null || Boolean.FALSE.equals(optional)))
-				|| (defaultSelected != null && Boolean.TRUE.equals(defaultSelected));
+		return Boolean.FALSE.equals(optional) || (defaultSelected == null && optional == null)
+				|| Boolean.TRUE.equals(defaultSelected);
 	}
 }
