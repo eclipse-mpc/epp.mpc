@@ -435,11 +435,12 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			}
 		}
 		if (page == featureSelectionWizardPage || (page == catalogPage && skipFeatureSelection)) {
+			IWizardContainer container = getContainer();
 			if (nextpressed && profileChangeOperation != null
 					&& profileChangeOperation instanceof RemediationOperation) {
 
 				try {
-					getContainer().run(true, false, new IRunnableWithProgress() {
+					container.run(true, false, new IRunnableWithProgress() {
 						public void run(IProgressMonitor monitor) {
 							((RemediationOperation) profileChangeOperation).setCurrentRemedy(featureSelectionWizardPage.getRemediationGroup()
 									.getCurrentRemedy());
@@ -492,8 +493,8 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			if (nextPage == null && page == catalogPage) {
 				nextPage = featureSelectionWizardPage;
 			}
-			if (operationUpdated && nextPage == getContainer().getCurrentPage()) {
-				getContainer().updateButtons();
+			if (operationUpdated && nextPage == container.getCurrentPage()) {
+				container.updateButtons();
 			}
 			return nextPage;
 		}
@@ -983,52 +984,51 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			return false;
 		}
 		try {
+			final MarketplacePage catalogPage = getCatalogPage();
+			IStatus showingDescriptor = catalogPage.showMarketplace(installInfo.getCatalogDescriptor());
+			if (!showingDescriptor.isOK()) {
+				return true;
+			}
+			final SelectionModel selectionModel = getSelectionModel();
+			final Map<String, Operation> nodeIdToOperation = new HashMap<String, Operation>();
+			nodeIdToOperation.putAll(getSelectionModel().getItemIdToSelectedOperation());
+			try {
+				nodeIdToOperation.put(URLDecoder.decode(installId, UTF_8), Operation.INSTALL);
+			} catch (UnsupportedEncodingException e) {
+				//should be unreachable
+				throw new IllegalStateException();
+			}
+
 			getContainer().run(true, true, new IRunnableWithProgress() {
 
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					Map<String, Operation> nodeIdToOperation = new HashMap<String, Operation>();
-					nodeIdToOperation.putAll(getSelectionModel().getItemIdToSelectedOperation());
-					try {
-						nodeIdToOperation.put(URLDecoder.decode(installId, UTF_8), Operation.INSTALL);
-					} catch (UnsupportedEncodingException e) {
-						//should be unreachable
-						throw new IllegalStateException();
-					}
-
-					final SelectionModel selectionModel = getSelectionModel();
-					MarketplacePage catalogPage = getCatalogPage();
-					IStatus showingDescriptor = catalogPage.showMarketplace(installInfo.getCatalogDescriptor());
-					if (!showingDescriptor.isOK()) {
-						return;
-					}
-
 					SelectionModelStateSerializer stateSerializer = new SelectionModelStateSerializer(
 							getCatalog(), selectionModel);
 					stateSerializer.deserialize(installInfo.getState(), nodeIdToOperation, monitor);
-
-					if (selectionModel.getItemToSelectedOperation().size() > 0) {
-						Display display = getShell().getDisplay();
-						if (!display.isDisposed()) {
-							display.asyncExec(new Runnable() {
-
-								public void run() {
-									MarketplacePage catalogPage = getCatalogPage();
-									IWizardPage currentPage = getContainer().getCurrentPage();
-									if (catalogPage == currentPage) {
-										catalogPage.getViewer().setSelection(new StructuredSelection(
-												selectionModel.getSelectedCatalogItems().toArray()));
-										catalogPage.show(installInfo.getCatalogDescriptor(), ContentType.SELECTION);
-										IWizardPage nextPage = catalogPage.getNextPage();
-										if (nextPage != null && catalogPage.isPageComplete()) {
-											getContainer().showPage(nextPage);
-										}
-									}
-								}
-							});
-						}
-					}
 				}
 			});
+
+			if (selectionModel.getItemToSelectedOperation().size() > 0) {
+				Display display = getShell().getDisplay();
+				if (!display.isDisposed()) {
+					display.asyncExec(new Runnable() {
+
+						public void run() {
+							MarketplacePage catalogPage = getCatalogPage();
+							IWizardPage currentPage = getContainer().getCurrentPage();
+							if (catalogPage == currentPage) {
+								catalogPage.getViewer().setSelection(
+										new StructuredSelection(selectionModel.getSelectedCatalogItems().toArray()));
+								catalogPage.show(installInfo.getCatalogDescriptor(), ContentType.SELECTION);
+								IWizardPage nextPage = catalogPage.getNextPage();
+								if (nextPage != null && catalogPage.isPageComplete()) {
+									getContainer().showPage(nextPage);
+								}
+							}
+						}
+					});
+				}
+			}
 			return true;
 		} catch (InvocationTargetException e) {
 			IStatus status = MarketplaceClientCore.computeStatus(e, Messages.MarketplaceViewer_unexpectedException);

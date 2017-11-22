@@ -10,14 +10,19 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
 import org.eclipse.equinox.internal.p2.discovery.model.Icon;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.statushandlers.StatusManager;
 
 public class UserFavoritesSignInActionItem extends AbstractUserActionItem {
 
@@ -63,7 +68,18 @@ public class UserFavoritesSignInActionItem extends AbstractUserActionItem {
 	protected void buttonPressed(int id) {
 		MarketplaceViewer viewer = (MarketplaceViewer) getViewer();
 		final MarketplaceCatalog catalog = viewer.getCatalog();
-		catalog.userFavorites(true, new NullProgressMonitor());
+		try {
+			viewer.getWizard().getContainer().run(true, true, new IRunnableWithProgress() {
+
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					catalog.userFavorites(true, monitor);
+				}
+			});
+		} catch (InvocationTargetException e) {
+			MarketplaceClientUi.handle(e.getCause(), StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
+		} catch (InterruptedException e) {
+			//ignore
+		}
 		viewer.updateContents();
 	}
 }
