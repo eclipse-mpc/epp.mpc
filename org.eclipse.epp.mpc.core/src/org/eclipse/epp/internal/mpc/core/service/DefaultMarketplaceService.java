@@ -364,7 +364,7 @@ MarketplaceService {
 						Messages.DefaultMarketplaceService_nodeNotFound, query);
 				if (missingNodes == null) {
 					missingNodes = new MultiStatus(MarketplaceClientCore.BUNDLE_ID, 0,
-							"Some entries could not be found on the Marketplace", null);
+							"Some entries could not be found on the Marketplace", null); //$NON-NLS-1$
 				}
 				missingNodes.add(missingNodeDetailStatus);
 			}
@@ -533,6 +533,17 @@ MarketplaceService {
 
 	public SearchResult tagged(String tag, IProgressMonitor monitor) throws CoreException {
 		return processSearchRequest(API_FREETAGGING_URI + URLUtil.urlEncode(tag) + '/' + API_URI_SUFFIX, tag, monitor);
+	}
+
+	public SearchResult tagged(List<String> tags, IProgressMonitor monitor) throws CoreException {
+		StringBuilder combinedTags = new StringBuilder();
+		for (String tag : tags) {
+			if (combinedTags.length() > 0) {
+				combinedTags.append(","); //$NON-NLS-1$
+			}
+			combinedTags.append(tag);
+		}
+		return tagged(combinedTags.toString(), monitor);
 	}
 
 	public SearchResult featured(IProgressMonitor monitor) throws CoreException {

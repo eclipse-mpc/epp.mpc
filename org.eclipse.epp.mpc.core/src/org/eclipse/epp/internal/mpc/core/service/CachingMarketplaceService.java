@@ -284,6 +284,18 @@ public class CachingMarketplaceService implements IMarketplaceService {
 		});
 	}
 
+	public ISearchResult tagged(List<String> tags, IProgressMonitor monitor) throws CoreException {
+		StringBuilder combinedTags = new StringBuilder();
+		for (String tag : tags) {
+			if (combinedTags.length()>0)
+			 {
+				combinedTags.append(","); //$NON-NLS-1$
+			}
+			combinedTags.append(tag);
+		}
+		return tagged(combinedTags.toString(), monitor);
+	}
+
 	private ISearchResult performSearch(IProgressMonitor monitor, String key, SearchOperation searchOperation)
 			throws CoreException {
 		ISearchResult result = null;
