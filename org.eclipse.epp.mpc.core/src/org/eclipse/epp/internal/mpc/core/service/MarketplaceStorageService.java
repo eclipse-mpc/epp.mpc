@@ -67,10 +67,6 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 
 	private EclipseOAuthCredentialsProvider credentialsProvider;
 
-	public MarketplaceStorageService() {
-		System.out.println();
-	}
-
 	public String getMarketplaceBaseUri() {
 		return marketplaceBaseUri;
 	}

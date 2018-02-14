@@ -127,7 +127,13 @@ public class MissingNatureDetector implements IStartup, IPropertyChangeListener 
 	public void propertyChange(PropertyChangeEvent event) {
 		if (ENABLEMENT_PROPERTY.equals(event.getProperty())) {
 			IWorkspace workspace = ResourcesPlugin.getWorkspace();
-			if ((Boolean) event.getNewValue()) {
+			boolean enabled;
+			if (event.getNewValue() instanceof String) {
+				enabled = Boolean.parseBoolean((String) event.getNewValue());
+			} else {
+				enabled = Boolean.TRUE.equals(event.getNewValue());
+			}
+			if (enabled) {
 				workspace.addResourceChangeListener(this.projectOpenListener);
 			} else {
 				workspace.removeResourceChangeListener(this.projectOpenListener);

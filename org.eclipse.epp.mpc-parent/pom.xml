@@ -92,6 +92,12 @@
          </properties>
       </profile>
       <profile>
+         <id>photon</id>
+         <properties>
+            <target-platform>photon</target-platform>
+         </properties>
+      </profile>
+      <profile>
          <id>staging</id>
          <activation>
             <activeByDefault>true</activeByDefault>

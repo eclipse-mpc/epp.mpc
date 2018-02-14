@@ -24,6 +24,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 
@@ -58,8 +59,15 @@ public class CatalogToolTip extends GradientToolTip {
 	}
 
 	private void createDescription(Composite parent) {
+		// Compute width hint for description label
+		// width hint = icon width + label width + margin between them
+		Control icon = parent.getChildren()[0];
+		int iconWidth = icon.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+		Control label = parent.getChildren()[1];
+		int labelWidth = label.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+		int wHint = iconWidth + 5 + labelWidth;
 		Label descriptionLabel = new Label(parent, SWT.WRAP);
-		GridDataFactory.fillDefaults().grab(true, false).span(2, 1).hint(100, SWT.DEFAULT).applyTo(descriptionLabel);
+		GridDataFactory.fillDefaults().grab(true, false).span(2, 1).hint(wHint, SWT.DEFAULT).applyTo(descriptionLabel);
 		descriptionLabel.setBackground(null);
 		String description = catalogDescriptor.getDescription() == null ? "" : TextUtil.escapeText(catalogDescriptor.getDescription()); //$NON-NLS-1$
 		descriptionLabel.setText(description);

@@ -31,6 +31,20 @@ class Messages extends NLS {
 
 	public static String TransportFactory_NoLegacyTransportFactoriesError;
 
+	public static String TransportFactory_ServiceErrorAppliedFilter;
+
+	public static String TransportFactory_ServiceErrorDetails;
+
+	public static String TransportFactory_ServiceErrorFilteredService;
+
+	public static String TransportFactory_ServiceErrorNoneAvailable;
+
+	public static String TransportFactory_ServiceErrorNotFound;
+
+	public static String TransportFactory_ServiceErrorServiceReference;
+
+	public static String TransportFactory_ServiceErrorUnregistered;
+
 	public static String TransportFactory_transportAvailabilityError;
 	static {
 		// initialize resource bundle

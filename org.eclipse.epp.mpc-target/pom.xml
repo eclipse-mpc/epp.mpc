@@ -30,6 +30,11 @@
                            <classifier>oxygen</classifier>
                         </artifact>
                         <artifact>
+                           <file>photon.target</file>
+                           <type>target</type>
+                           <classifier>photon</classifier>
+                        </artifact>
+                        <artifact>
                            <file>staging.target</file>
                            <type>target</type>
                            <classifier>staging</classifier>

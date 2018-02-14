@@ -27,6 +27,7 @@ import org.apache.http.NoHttpResponseException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCorePlugin;
@@ -110,6 +111,7 @@ public abstract class TransportFactory implements ITransportFactory {
 			return delegate;
 		}
 
+		@Override
 		public org.eclipse.epp.mpc.core.service.ITransport getTransport() {
 			return delegate.getTransport();
 		}
@@ -161,7 +163,7 @@ public abstract class TransportFactory implements ITransportFactory {
 	}
 
 	public static class LegacyTransportFactoryTrackerCustomizer
-			implements ServiceTrackerCustomizer<ITransportFactory, TransportFactory> {
+	implements ServiceTrackerCustomizer<ITransportFactory, TransportFactory> {
 		private final BundleContext context;
 
 		private final Map<ServiceReference<ITransportFactory>, TransportFactory> trackedServices = new HashMap<ServiceReference<ITransportFactory>, TransportFactory>();
@@ -170,6 +172,7 @@ public abstract class TransportFactory implements ITransportFactory {
 			this.context = context;
 		}
 
+		@Override
 		public TransportFactory addingService(ServiceReference<ITransportFactory> reference) {
 			Object legacyProperty = reference.getProperty(TransportFactory.LEGACY_TRANSPORT_KEY);
 			if (!Boolean.parseBoolean(String.valueOf(legacyProperty))) {
@@ -190,10 +193,12 @@ public abstract class TransportFactory implements ITransportFactory {
 			return null;
 		}
 
+		@Override
 		public void modifiedService(ServiceReference<ITransportFactory> reference, TransportFactory service) {
 			// ignore
 		}
 
+		@Override
 		public void removedService(ServiceReference<ITransportFactory> reference, TransportFactory service) {
 			trackedServices.remove(reference);
 		}
@@ -229,7 +234,44 @@ public abstract class TransportFactory implements ITransportFactory {
 				}
 			}
 		}
-		throw new IllegalStateException();
+		IStatus serviceError = diagnoseTransportServiceRegistration(context, serviceReference);
+		throw new IllegalStateException(new CoreException(serviceError));
+	}
+
+	private static IStatus diagnoseTransportServiceRegistration(BundleContext context,
+			ServiceReference<ITransportFactory> serviceReference) {
+		MultiStatus serviceError = null;
+		if (serviceReference != null) {
+			serviceError = new MultiStatus(MarketplaceClientCore.BUNDLE_ID, 0,
+					Messages.TransportFactory_ServiceErrorUnregistered, null);
+			serviceError.add(new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID,
+					Messages.TransportFactory_ServiceErrorServiceReference + serviceReference));
+		} else {
+			serviceError = new MultiStatus(MarketplaceClientCore.BUNDLE_ID, 0,
+					Messages.TransportFactory_ServiceErrorNotFound, null);
+			try {
+				Collection<ServiceReference<ITransportFactory>> allServiceReferences = context
+						.getServiceReferences(ITransportFactory.class, null);
+				if (allServiceReferences.isEmpty()) {
+					serviceError.add(new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID,
+							Messages.TransportFactory_ServiceErrorNoneAvailable));
+				} else {
+					String filter = computeDisabledTransportsFilter();
+					serviceError.add(new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID,
+							Messages.TransportFactory_ServiceErrorAppliedFilter + filter));
+				}
+				for (ServiceReference<ITransportFactory> availableReference : allServiceReferences) {
+					serviceError.add(new Status(IStatus.INFO, MarketplaceClientCore.BUNDLE_ID,
+							Messages.TransportFactory_ServiceErrorFilteredService + availableReference.toString()));
+				}
+			} catch (InvalidSyntaxException e) {
+				//Unreachable
+				serviceError.add(
+						new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID,
+								Messages.TransportFactory_ServiceErrorDetails, e));
+			}
+		}
+		return serviceError;
 	}
 
 	public static ServiceReference<ITransportFactory> getTransportServiceReference(BundleContext context) {
@@ -275,10 +317,12 @@ public abstract class TransportFactory implements ITransportFactory {
 		return factories;
 	}
 
+	@Override
 	@SuppressWarnings("deprecation")
 	public ITransport getTransport() {
 		return new ITransport() {
 
+			@Override
 			public InputStream stream(URI location, IProgressMonitor monitor) throws FileNotFoundException,
 			org.eclipse.epp.mpc.core.service.ServiceUnavailableException, CoreException {
 				try {
