@@ -99,9 +99,13 @@ public class ProxyHelper {
 			return null;
 		}
 		final IProxyData[] proxyData = proxyService.select(uri);
-		if (proxyData != null && proxyData.length > 0 && proxyData[0] != null) {
-			final IProxyData pd = proxyData[0];
-			return pd;
+		if (proxyData == null) {
+			return null;
+		}
+		for (IProxyData pd : proxyData) {
+			if (pd != null && pd.getHost() != null) {
+				return pd;
+			}
 		}
 		return null;
 	}
