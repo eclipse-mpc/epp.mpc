@@ -111,7 +111,6 @@ public abstract class TransportFactory implements ITransportFactory {
 			return delegate;
 		}
 
-		@Override
 		public org.eclipse.epp.mpc.core.service.ITransport getTransport() {
 			return delegate.getTransport();
 		}
@@ -172,7 +171,6 @@ public abstract class TransportFactory implements ITransportFactory {
 			this.context = context;
 		}
 
-		@Override
 		public TransportFactory addingService(ServiceReference<ITransportFactory> reference) {
 			Object legacyProperty = reference.getProperty(TransportFactory.LEGACY_TRANSPORT_KEY);
 			if (!Boolean.parseBoolean(String.valueOf(legacyProperty))) {
@@ -193,12 +191,10 @@ public abstract class TransportFactory implements ITransportFactory {
 			return null;
 		}
 
-		@Override
 		public void modifiedService(ServiceReference<ITransportFactory> reference, TransportFactory service) {
 			// ignore
 		}
 
-		@Override
 		public void removedService(ServiceReference<ITransportFactory> reference, TransportFactory service) {
 			trackedServices.remove(reference);
 		}
@@ -317,12 +313,10 @@ public abstract class TransportFactory implements ITransportFactory {
 		return factories;
 	}
 
-	@Override
 	@SuppressWarnings("deprecation")
 	public ITransport getTransport() {
 		return new ITransport() {
 
-			@Override
 			public InputStream stream(URI location, IProgressMonitor monitor) throws FileNotFoundException,
 			org.eclipse.epp.mpc.core.service.ServiceUnavailableException, CoreException {
 				try {
