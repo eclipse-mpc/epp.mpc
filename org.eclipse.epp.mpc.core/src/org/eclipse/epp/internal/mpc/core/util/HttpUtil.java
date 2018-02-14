@@ -40,7 +40,7 @@ public class HttpUtil {
 	public static void configureProxy(HttpClient client, String url) {
 		final IProxyData proxyData = ProxyHelper.getProxyData(url);
 		if (proxyData != null && !IProxyData.SOCKS_PROXY_TYPE.equals(proxyData.getType())) {
-			HttpHost proxy = new HttpHost(proxyData.getHost(), proxyData.getPort(), proxyData.getType().toLowerCase());
+			HttpHost proxy = new HttpHost(proxyData.getHost(), proxyData.getPort());
 			client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
 
 			if (proxyData.isRequiresAuthentication()) {
