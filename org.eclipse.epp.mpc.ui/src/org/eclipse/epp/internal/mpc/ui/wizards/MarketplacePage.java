@@ -552,7 +552,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 			createNewsTab();
 		}
 		if (news.getShortTitle() != null && news.getShortTitle().length() > 0) {
-			String title = news.getShortTitle();
+			String title = news.getShortTitle().replace("&", "&&"); //$NON-NLS-1$//$NON-NLS-2$
 			String tooltip = title;
 			if (title.length() > 40) {
 				tooltip = title;
