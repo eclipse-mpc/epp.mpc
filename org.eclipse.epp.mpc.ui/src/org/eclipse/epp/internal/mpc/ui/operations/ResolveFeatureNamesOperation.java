@@ -30,9 +30,9 @@ import org.eclipse.equinox.p2.repository.metadata.IMetadataRepository;
  */
 public class ResolveFeatureNamesOperation extends AbstractProvisioningOperation {
 
-	private final Set<FeatureDescriptor> featureDescriptors = new HashSet<FeatureDescriptor>();
+	private final Set<FeatureDescriptor> featureDescriptors = new HashSet<>();
 
-	private final Set<FeatureDescriptor> unresolvedFeatureDescriptors = new HashSet<FeatureDescriptor>();
+	private final Set<FeatureDescriptor> unresolvedFeatureDescriptors = new HashSet<>();
 
 	public ResolveFeatureNamesOperation(List<CatalogItem> installableConnectors) {
 		super(installableConnectors);
@@ -46,7 +46,7 @@ public class ResolveFeatureNamesOperation extends AbstractProvisioningOperation 
 			try {
 				List<IMetadataRepository> repositories = addRepositories(monitor.newChild(50));
 				List<IInstallableUnit> installableUnits = queryInstallableUnits(monitor.newChild(50), repositories);
-				Set<String> resolvedFeatureIds = new HashSet<String>();
+				Set<String> resolvedFeatureIds = new HashSet<>();
 				for (IInstallableUnit iu : installableUnits) {
 					FeatureDescriptor descriptor = new FeatureDescriptor(iu);
 					resolvedFeatureIds.add(descriptor.getId());

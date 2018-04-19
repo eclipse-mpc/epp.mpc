@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,7 +58,7 @@ public class MarketplaceNodeCatalogItem extends CatalogItem {
 
 	private Boolean userFavorite;
 
-	private List<MarketplaceNodeInstallableUnitItem> installableUnitItems = new ArrayList<MarketplaceNodeInstallableUnitItem>();
+	private List<MarketplaceNodeInstallableUnitItem> installableUnitItems = new ArrayList<>();
 
 	private transient PropertyChangeSupport propertyChangeSupport;
 
@@ -102,7 +102,7 @@ public class MarketplaceNodeCatalogItem extends CatalogItem {
 
 	private void updateInstallableUnitItems() {
 		List<IIu> iuElements = getData().getIus().getIuElements();
-		List<MarketplaceNodeInstallableUnitItem> installableUnitItems = new ArrayList<MarketplaceNodeInstallableUnitItem>();
+		List<MarketplaceNodeInstallableUnitItem> installableUnitItems = new ArrayList<>();
 		for (String iuId : installableUnits) {
 			MarketplaceNodeInstallableUnitItem iuItem = getInstallableUnitItem(iuId);
 			if (iuItem == null) {
@@ -133,8 +133,7 @@ public class MarketplaceNodeCatalogItem extends CatalogItem {
 	}
 
 	public void setInstallableUnitItems(List<MarketplaceNodeInstallableUnitItem> installableUnitItems) {
-		doSetInstallableUnitItems(new ArrayList<MarketplaceNodeInstallableUnitItem>(
-				installableUnitItems));
+		doSetInstallableUnitItems(new ArrayList<>(installableUnitItems));
 		updateInstallableUnits();
 	}
 
@@ -231,7 +230,7 @@ public class MarketplaceNodeCatalogItem extends CatalogItem {
 	}
 
 	public List<Operation> getAvailableOperations() {
-		List<Operation> available = new ArrayList<Operation>();
+		List<Operation> available = new ArrayList<>();
 		if (!getInstallableUnits().isEmpty()) {
 			if (isInstalled()) {
 				if (maybeUpdateAvailable()) {

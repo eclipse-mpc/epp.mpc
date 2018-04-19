@@ -73,7 +73,7 @@ final class DiscoverFileSupportJob extends Job {
 
 	private IStatus run(IMarketplaceService marketplaceService, IProgressMonitor monitor) {
 		final List<String> fileExtensions = getFileExtensions(fileName);
-		final List<String> fileExtensionTags = new ArrayList<String>();
+		final List<String> fileExtensionTags = new ArrayList<>();
 
 		for (String string : fileExtensions) {
 			fileExtensionTags.add(getFileExtensionTag(string));
@@ -119,7 +119,7 @@ final class DiscoverFileSupportJob extends Job {
 		Collections.sort(fileExtensionTags, (s1, s2) -> (s2.length() - s2.replace(".", "").length())
 				- (s1.length() - s1.replace(".", "").length()));
 
-		Map<String, List<INode>> nodesByTags = new HashMap<String, List<INode>>();
+		Map<String, List<INode>> nodesByTags = new HashMap<>();
 		for (INode iNode : nodes) {
 			for (ITag nodeTag : iNode.getTags().getTags()) {
 				boolean foundTag = false;
@@ -128,7 +128,7 @@ final class DiscoverFileSupportJob extends Job {
 						if (nodesByTags.containsKey(tag)) {
 							nodesByTags.get(tag).add(iNode);
 						} else {
-							List<INode> newNodeList = new ArrayList<INode>();
+							List<INode> newNodeList = new ArrayList<>();
 							newNodeList.add(iNode);
 							nodesByTags.put(tag, newNodeList);
 						}
@@ -141,7 +141,7 @@ final class DiscoverFileSupportJob extends Job {
 				}
 			}
 		}
-		List<INode> ordered = new ArrayList<INode>();
+		List<INode> ordered = new ArrayList<>();
 		for (String tag : fileExtensionTags) {
 			if (nodesByTags.containsKey(tag)) {
 				ordered.addAll(nodesByTags.get(tag));
@@ -167,7 +167,7 @@ final class DiscoverFileSupportJob extends Job {
 	 *         eg "file.tar.gz" returns ["file.tar.gz", "tar.gz", "gz"]
 	 */
 	static List<String> getFileExtensions(String fileName) {
-		List<String> extensions = new ArrayList<String>();
+		List<String> extensions = new ArrayList<>();
 		while (fileName.length() > 0) {
 			extensions.add(fileName);
 			if (fileName.indexOf('.') == -1) {

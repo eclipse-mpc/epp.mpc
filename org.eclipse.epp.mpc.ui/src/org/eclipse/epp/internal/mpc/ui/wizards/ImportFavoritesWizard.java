@@ -98,7 +98,7 @@ public class ImportFavoritesWizard extends DiscoveryWizard {
 		MarketplaceCatalogConfiguration catalogConfiguration = getConfiguration();
 		config.setCatalogDescriptors(catalogConfiguration.getCatalogDescriptors());
 		config.setCatalogDescriptor(catalogConfiguration.getCatalogDescriptor());
-		Map<String, Operation> initialOperations = new HashMap<String, Operation>();
+		Map<String, Operation> initialOperations = new HashMap<>();
 		for (MarketplaceNodeCatalogItem item : selection) {
 			initialOperations.put(item.getData().getId(), Operation.INSTALL);
 		}

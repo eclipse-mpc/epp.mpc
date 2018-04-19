@@ -63,7 +63,7 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 
 	private final ImageRegistry imageRegistry = new ImageRegistry();
 
-	private final List<ISelectionChangedListener> listeners = new LinkedList<ISelectionChangedListener>();
+	private final List<ISelectionChangedListener> listeners = new LinkedList<>();
 
 	private CatalogDescriptor selection;
 
@@ -114,7 +114,7 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 	private void createHeader(Composite parent) {
 		CatalogCategory fakeCategory = new CatalogCategory();
 		fakeCategory.setName(Messages.CatalogSwitcher_Header);
-		CategoryItem<CatalogCategory> header = new CategoryItem<CatalogCategory>(parent, SWT.NONE,
+		CategoryItem<CatalogCategory> header = new CategoryItem<>(parent, SWT.NONE,
 				new DiscoveryResources(parent.getDisplay()), fakeCategory);
 		MarketplaceViewer.setSeparatorVisible(header, false);
 		MarketplaceViewer.fixLayout(header);

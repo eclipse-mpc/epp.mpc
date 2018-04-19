@@ -158,7 +158,7 @@ public abstract class AbstractMarketplaceWizardCommand extends AbstractHandler i
 
 	public IStatus installRemoteCatalogs() {
 		try {
-			final AtomicReference<List<? extends ICatalog>> result = new AtomicReference<List<? extends ICatalog>>();
+			final AtomicReference<List<? extends ICatalog>> result = new AtomicReference<>();
 
 			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(monitor -> {
 				try {

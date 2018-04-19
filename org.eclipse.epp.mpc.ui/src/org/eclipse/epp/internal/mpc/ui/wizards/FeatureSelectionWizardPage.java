@@ -183,7 +183,7 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 			List<FeatureEntry> filtered;
 			switch (selectedOperation) {
 			case INSTALL:
-				filtered = new ArrayList<SelectionModel.FeatureEntry>();
+				filtered = new ArrayList<>();
 				for (FeatureEntry featureEntry : children) {
 					if (!featureEntry.isInstalled() || featureEntry.hasUpdateAvailable()) {//FIXME show installed features as disabled
 						filtered.add(featureEntry);
@@ -191,7 +191,7 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 				}
 				return filtered;
 			case UPDATE:
-				filtered = new ArrayList<SelectionModel.FeatureEntry>();
+				filtered = new ArrayList<>();
 				for (FeatureEntry featureEntry : children) {
 					if (featureEntry.hasUpdateAvailable()) {
 						filtered.add(featureEntry);
@@ -199,7 +199,7 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 				}
 				return filtered;
 			case UNINSTALL:
-				filtered = new ArrayList<SelectionModel.FeatureEntry>();
+				filtered = new ArrayList<>();
 				for (FeatureEntry featureEntry : children) {
 					if (featureEntry.isInstalled()) {
 						filtered.add(featureEntry);
@@ -390,7 +390,7 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 			return;
 		}
 		viewer.setInput(selectionModel);
-		ResolveFeatureNamesOperation operation = new ResolveFeatureNamesOperation(new ArrayList<CatalogItem>(
+		ResolveFeatureNamesOperation operation = new ResolveFeatureNamesOperation(new ArrayList<>(
 				allSelectionCatalogItems)) {
 
 			Display display = getControl().getDisplay();
@@ -552,7 +552,7 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 	}
 
 	private void updateSelectionModel(Set<FeatureDescriptor> featureDescriptors) {
-		Map<String, FeatureDescriptor> descriptorById = new HashMap<String, FeatureDescriptor>();
+		Map<String, FeatureDescriptor> descriptorById = new HashMap<>();
 		for (FeatureDescriptor fd : featureDescriptors) {
 			descriptorById.put(fd.getId(), fd);
 		}
@@ -569,8 +569,8 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 
 	public void computeCheckedViewerState() {
 		// compute which ones should be checked. (update scenario where only part of a feature is installed)
-		List<Object> checkedElements = new ArrayList<Object>();
-		List<Object> grayCheckedElements = new ArrayList<Object>();
+		List<Object> checkedElements = new ArrayList<>();
+		List<Object> grayCheckedElements = new ArrayList<>();
 		for (CatalogItemEntry entry : getWizard().getSelectionModel().getCatalogItemEntries()) {
 			int childCheckCount = 0;
 			boolean childGrayed = false;

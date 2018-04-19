@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,9 +57,9 @@ public class MarketplaceInfo {
 
 	private static final String PERSISTENT_FILE = MarketplaceInfo.class.getSimpleName() + ".xml"; //$NON-NLS-1$
 
-	private Map<String, List<String>> nodeKeyToIU = new HashMap<String, List<String>>();
+	private Map<String, List<String>> nodeKeyToIU = new HashMap<>();
 
-	private Map<String, List<String>> iuToNodeKey = new HashMap<String, List<String>>();
+	private Map<String, List<String>> iuToNodeKey = new HashMap<>();
 
 	public MarketplaceInfo() {
 	}
@@ -99,7 +99,7 @@ public class MarketplaceInfo {
 	 */
 	@Deprecated
 	public synchronized Set<INode> computeInstalledNodes(URL repositoryUrl, Set<String> installedIus) {
-		Set<INode> nodes = new HashSet<INode>();
+		Set<INode> nodes = new HashSet<>();
 
 		String keyPrefix = computeUrlKey(repositoryUrl) + '#';
 		for (Map.Entry<String, List<String>> entry : nodeKeyToIU.entrySet()) {
@@ -128,7 +128,7 @@ public class MarketplaceInfo {
 	 * @return a set of node ids, or an empty set if there are no known installed nodes
 	 */
 	public synchronized Set<INode> computeInstalledNodes(URL repositoryUrl, Map<String, IInstallableUnit> installedIus) {
-		Set<INode> nodes = new HashSet<INode>();
+		Set<INode> nodes = new HashSet<>();
 
 		String keyPrefix = computeUrlKey(repositoryUrl) + '#';
 		for (Map.Entry<String, List<String>> entry : nodeKeyToIU.entrySet()) {
@@ -193,7 +193,7 @@ public class MarketplaceInfo {
 	public boolean computeInstalled(Set<String> installedFeatures, INode node) {
 		if (node.getIus() != null && !node.getIus().getIuElements().isEmpty()) {
 			boolean all = true;
-			Set<String> ius = new HashSet<String>();
+			Set<String> ius = new HashSet<>();
 			for (IIu iu : node.getIus().getIuElements()) {
 				if (!iu.isOptional()) {
 					ius.add(iu.getId());
@@ -247,8 +247,8 @@ public class MarketplaceInfo {
 	public synchronized void map(URL marketUrl, INode node) {
 		String itemKey = computeItemKey(marketUrl, node);
 		if (node.getIus() != null && !node.getIus().getIuElements().isEmpty()) {
-			List<String> ius = new ArrayList<String>();
-			Set<String> uniqueIus = new HashSet<String>();
+			List<String> ius = new ArrayList<>();
+			Set<String> uniqueIus = new HashSet<>();
 			List<IIu> iuElements = node.getIus().getIuElements();
 			for (IIu iIu : iuElements) {
 				if (uniqueIus.add(iIu.getId())) {
@@ -263,7 +263,7 @@ public class MarketplaceInfo {
 						catalogNodes.add(itemKey);
 					}
 				} else {
-					catalogNodes = new ArrayList<String>(1);
+					catalogNodes = new ArrayList<>(1);
 					catalogNodes.add(itemKey);
 					iuToNodeKey.put(iu, catalogNodes);
 				}

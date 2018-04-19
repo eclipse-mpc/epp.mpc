@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,7 +45,7 @@ final class ShowNatureProposalsJob extends UIJob {
 		Set<String> natureIds = dialog.getSelectedNatures();
 		IMarketplaceClientService marketplaceClientService = MarketplaceClient.getMarketplaceClientService();
 		IMarketplaceClientConfiguration config = marketplaceClientService.newConfiguration();
-		Set<INode> allNodes = new HashSet<INode>();
+		Set<INode> allNodes = new HashSet<>();
 		for (String natureId : natureIds) {
 			allNodes.addAll(candidates.get(natureId));
 		}

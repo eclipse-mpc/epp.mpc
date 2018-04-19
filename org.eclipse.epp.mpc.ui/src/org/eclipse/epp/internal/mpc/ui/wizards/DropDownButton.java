@@ -231,7 +231,7 @@ public class DropDownButton {
 	private DropDownSelectionListenerWrapper findWrapper(final SelectionListener listener) {
 		DropDownSelectionListenerWrapper wrapper = null;
 		if (selectionListenerWrappers == null) {
-			selectionListenerWrappers = new ArrayList<DropDownButton.DropDownSelectionListenerWrapper>();
+			selectionListenerWrappers = new ArrayList<>();
 		}
 		for (DropDownSelectionListenerWrapper existingWrapper : selectionListenerWrappers) {
 			if (existingWrapper.getDelegate() == listener) {

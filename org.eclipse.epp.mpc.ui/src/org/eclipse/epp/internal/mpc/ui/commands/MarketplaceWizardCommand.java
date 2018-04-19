@@ -68,7 +68,7 @@ public class MarketplaceWizardCommand extends AbstractMarketplaceWizardCommand i
 		final ComboTagFilter marketFilter = new ComboTagFilter() {
 			@Override
 			public void catalogUpdated(boolean wasCancelled) {
-				List<Tag> choices = new ArrayList<Tag>();
+				List<Tag> choices = new ArrayList<>();
 				List<IMarket> markets = catalog.getMarkets();
 				for (IMarket market : markets) {
 					Tag marketTag = new Tag(IMarket.class, market.getId(), market.getName());
@@ -136,10 +136,10 @@ public class MarketplaceWizardCommand extends AbstractMarketplaceWizardCommand i
 	}
 
 	private void updateCategoryChoices(final ComboTagFilter marketCategoryTagFilter, final ComboTagFilter marketFilter) {
-		Set<Tag> newChoices = new HashSet<Tag>();
-		List<Tag> choices = new ArrayList<Tag>();
+		Set<Tag> newChoices = new HashSet<>();
+		List<Tag> choices = new ArrayList<>();
 
-		Set<IMarket> selectedMarkets = new HashSet<IMarket>();
+		Set<IMarket> selectedMarkets = new HashSet<>();
 		for (Tag marketTag : marketFilter.getSelected()) {
 			selectedMarkets.add((IMarket) marketTag.getData());
 		}

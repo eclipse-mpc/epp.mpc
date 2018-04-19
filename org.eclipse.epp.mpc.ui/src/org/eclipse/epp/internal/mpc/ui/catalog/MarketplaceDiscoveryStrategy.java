@@ -181,7 +181,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		IUserFavoritesService favoritesService = marketplaceService.getUserFavoritesService();
 		if (favoritesService != null) {
 			if (loginListeners == null) {
-				loginListeners = new CopyOnWriteArrayList<LoginListener>();
+				loginListeners = new CopyOnWriteArrayList<>();
 			}
 			if (!loginListeners.contains(loginListener)) {
 				loginListeners.add(loginListener);
@@ -294,7 +294,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 						catalogItem.setUserFavorite(userFavoritesSupported ? node.getUserFavorite() : null);
 						IIus ius = node.getIus();
 						if (ius != null) {
-							List<MarketplaceNodeInstallableUnitItem> installableUnitItems = new ArrayList<MarketplaceNodeInstallableUnitItem>();
+							List<MarketplaceNodeInstallableUnitItem> installableUnitItems = new ArrayList<>();
 							for (IIu iu : ius.getIuElements()) {
 								MarketplaceNodeInstallableUnitItem iuItem = new MarketplaceNodeInstallableUnitItem();
 								iuItem.init(iu);
@@ -720,7 +720,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory(progress.newChild(1));
 			List<CatalogItem> items = catalogCategory.getItems();
 			if (hasUserFavoritesService()) {
-				Map<String, INode> nodes = new HashMap<String, INode>();
+				Map<String, INode> nodes = new HashMap<>();
 				for (CatalogItem item : items) {
 					Object data = item.getData();
 					if (data instanceof INode) {
@@ -733,7 +733,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 				}
 				try {
 					applyShellProvider();
-					marketplaceService.userFavorites(new ArrayList<INode>(nodes.values()), progress.newChild(500));
+					marketplaceService.userFavorites(new ArrayList<>(nodes.values()), progress.newChild(500));
 					for (CatalogItem catalogItem : items) {
 						if (catalogItem instanceof MarketplaceNodeCatalogItem) {
 							MarketplaceNodeCatalogItem nodeItem = (MarketplaceNodeCatalogItem) catalogItem;
@@ -825,7 +825,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	}
 
 	public void performQuery(IProgressMonitor monitor, Set<String> nodeIds) throws CoreException {
-		Set<INode> nodes = new HashSet<INode>();
+		Set<INode> nodes = new HashSet<>();
 		for (String nodeId : nodeIds) {
 			Node node = new Node();
 			node.setId(nodeId);
@@ -915,14 +915,14 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		SubMonitor progress = SubMonitor.convert(monitor,
 				Messages.MarketplaceDiscoveryStrategy_sendingErrorNotification, 100);
 		try {
-			Set<Node> nodes = new HashSet<Node>();
+			Set<Node> nodes = new HashSet<>();
 			for (CatalogItem item : items) {
 				Object data = item.getData();
 				if (data instanceof INode) {
 					nodes.add((Node) data);
 				}
 			}
-			Set<String> iuIdsAndVersions = new HashSet<String>();
+			Set<String> iuIdsAndVersions = new HashSet<>();
 			for (IInstallableUnit iu : operationIUs) {
 				String id = iu.getId();
 				String version = iu.getVersion() == null ? null : iu.getVersion().toString();

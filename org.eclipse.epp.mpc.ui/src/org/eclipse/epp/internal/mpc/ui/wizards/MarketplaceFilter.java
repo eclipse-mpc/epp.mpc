@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,7 +32,7 @@ import org.eclipse.swt.widgets.Composite;
 public abstract class MarketplaceFilter extends CatalogFilter {
 	private Catalog catalog;
 
-	private final List<IPropertyChangeListener> listeners = new CopyOnWriteArrayList<IPropertyChangeListener>();
+	private final List<IPropertyChangeListener> listeners = new CopyOnWriteArrayList<>();
 
 	public Catalog getCatalog() {
 		return catalog;

@@ -134,7 +134,7 @@ public class MarketplaceClientUi {
 	}
 
 	public static Map<String, IInstallableUnit> computeInstalledIUsById(IProgressMonitor monitor) {
-		Map<String, IInstallableUnit> iUs = new HashMap<String, IInstallableUnit>();
+		Map<String, IInstallableUnit> iUs = new HashMap<>();
 		BundleContext bundleContext = MarketplaceClientUi.getBundleContext();
 		ServiceReference<IProvisioningAgent> serviceReference = bundleContext.getServiceReference(IProvisioningAgent.class);
 		if (serviceReference != null) {
@@ -160,7 +160,7 @@ public class MarketplaceClientUi {
 
 	public static Set<String> computeInstalledFeatures(IProgressMonitor monitor) {
 		Map<String, IInstallableUnit> iusById = computeInstalledIUsById(monitor);
-		Set<String> features = new HashSet<String>(iusById.keySet());
+		Set<String> features = new HashSet<>(iusById.keySet());
 
 		if (features.isEmpty()) {
 			// probably a self-hosted environment

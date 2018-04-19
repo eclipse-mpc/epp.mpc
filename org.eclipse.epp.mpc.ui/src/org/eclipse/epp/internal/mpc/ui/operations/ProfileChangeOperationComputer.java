@@ -145,7 +145,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 		if (resolutionStrategy == null) {
 			throw new IllegalArgumentException();
 		}
-		this.featureEntries = new ArrayList<FeatureEntry>(featureEntries);
+		this.featureEntries = new ArrayList<>(featureEntries);
 		this.operationType = operationType;
 		this.resolutionStrategy = resolutionStrategy;
 		this.dependenciesRepository = dependenciesRepository;
@@ -253,7 +253,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 	}
 
 	private IInstallableUnit[] computeInstalledIus(IInstallableUnit[] ius) {
-		List<IInstallableUnit> installedIus = new ArrayList<IInstallableUnit>(ius.length);
+		List<IInstallableUnit> installedIus = new ArrayList<>(ius.length);
 		Map<String, IInstallableUnit> iUsById = MarketplaceClientUi.computeInstalledIUsById(new NullProgressMonitor());
 
 		for (IInstallableUnit iu : ius) {
@@ -312,7 +312,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 	private ProfileChangeOperation resolve(IProgressMonitor monitor, ProfileChangeOperationFactory operationFactory,
 			IInstallableUnit[] ius, URI[] repositories) throws CoreException {
 		List<IInstallableUnit> installableUnits = Arrays.asList(ius);
-		List<ResolutionStrategy> strategies = new ArrayList<ProfileChangeOperationComputer.ResolutionStrategy>(2);
+		List<ResolutionStrategy> strategies = new ArrayList<>(2);
 		switch (resolutionStrategy) {
 		case FALLBACK_STRATEGY:
 			strategies.add(ResolutionStrategy.SELECTED_REPOSITORIES);
@@ -332,7 +332,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 		SubMonitor subMonitor = SubMonitor.convert(monitor, strategies.size() * workPerStrategy + workPerStrategy);
 		Set<URI> previousRepositoryLocations = null;
 		for (ResolutionStrategy strategy : strategies) {
-			Set<URI> repositoryLocations = new HashSet<URI>(Arrays.asList(repositories));
+			Set<URI> repositoryLocations = new HashSet<>(Arrays.asList(repositories));
 			if (strategy == ResolutionStrategy.SELECTED_REPOSITORIES) {
 				repositoryLocations.addAll(Arrays.asList(repositories));
 			}
@@ -392,7 +392,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 		try {
 			// calculate installed ius
 			Map<String, IInstallableUnit> installedIUs = MarketplaceClientUi.computeInstalledIUsById(monitor);
-			List<IInstallableUnit> installableUnits = new ArrayList<IInstallableUnit>(installedIUs.values());
+			List<IInstallableUnit> installableUnits = new ArrayList<>(installedIUs.values());
 
 			pruneNonUninstall(installableUnits);
 
@@ -432,7 +432,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 	}
 
 	private void pruneNonInstall(List<IInstallableUnit> installableUnits) {
-		Set<String> installableFeatureIds = new HashSet<String>();
+		Set<String> installableFeatureIds = new HashSet<>();
 		for (FeatureEntry featureEntry : featureEntries) {
 			Operation operation = featureEntry.computeChangeOperation();
 			if (operation == Operation.INSTALL || operation == Operation.UPDATE) {
@@ -449,7 +449,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 	}
 
 	private void pruneNonUninstall(List<IInstallableUnit> installableUnits) {
-		Set<String> installableFeatureIds = new HashSet<String>();
+		Set<String> installableFeatureIds = new HashSet<>();
 		for (FeatureEntry featureEntry : featureEntries) {
 			if (featureEntry.computeChangeOperation() == Operation.UNINSTALL) {
 				installableFeatureIds.add(featureEntry.getFeatureDescriptor().getId());
@@ -471,12 +471,12 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 	 */
 	private void checkForUnavailable(final List<IInstallableUnit> installableUnits) throws CoreException {
 		// at least one selected connector could not be found in a repository
-		Set<String> foundIds = new HashSet<String>();
+		Set<String> foundIds = new HashSet<>();
 		for (IInstallableUnit unit : installableUnits) {
 			foundIds.add(unit.getId());
 		}
 
-		Set<String> installFeatureIds = new HashSet<String>();
+		Set<String> installFeatureIds = new HashSet<>();
 		for (FeatureEntry entry : featureEntries) {
 			Operation operation = entry.computeChangeOperation();
 			if (operation == Operation.INSTALL || operation == Operation.UPDATE) {

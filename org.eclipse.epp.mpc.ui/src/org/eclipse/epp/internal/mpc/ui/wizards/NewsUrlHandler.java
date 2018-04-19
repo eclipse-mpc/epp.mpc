@@ -77,7 +77,7 @@ public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationLis
 			// Remember document links for navigation handling since we
 			// don't want to deal with URLs from dynamic loading events
 			if (links != null) {
-				Set<String> documentLinks = new HashSet<String>();
+				Set<String> documentLinks = new HashSet<>();
 				for (Object link : links) {
 					documentLinks.add(link.toString());
 				}

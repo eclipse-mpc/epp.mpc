@@ -60,7 +60,7 @@ public class ResourceProvider {
 		private final FutureTask<URL> delegate;
 
 		ResourceFuture(final File dir, final String resourceName) {
-			delegate = new FutureTask<URL>(() -> {
+			delegate = new FutureTask<>(() -> {
 				if (input == null) {
 					throw new IllegalStateException();
 				}
@@ -191,7 +191,7 @@ public class ResourceProvider {
 
 	private File dir;
 
-	private final Map<String, ResourceFuture> resources = new ConcurrentHashMap<String, ResourceFuture>();
+	private final Map<String, ResourceFuture> resources = new ConcurrentHashMap<>();
 
 	public synchronized void init() throws IOException {
 		if (dir != null) {

@@ -61,7 +61,7 @@ import org.eclipse.osgi.util.NLS;
  */
 public class MarketplaceCatalog extends Catalog {
 
-	private final Map<String, Version> repositoryIuVersionById = new HashMap<String, Version>();
+	private final Map<String, Version> repositoryIuVersionById = new HashMap<>();
 
 	private INews news;
 
@@ -137,7 +137,7 @@ public class MarketplaceCatalog extends Catalog {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceCatalog_checkingForUpdates, 10000000);
 		try {
 			Map<String, IInstallableUnit> installedIUs = calculateInstalledIUs(progress.newChild(100000));
-			List<MarketplaceNodeCatalogItem> updateCheckNeeded = new ArrayList<MarketplaceNodeCatalogItem>();
+			List<MarketplaceNodeCatalogItem> updateCheckNeeded = new ArrayList<>();
 			for (CatalogItem item : getItems()) {
 				if (monitor.isCanceled()) {
 					return Status.CANCEL_STATUS;
@@ -163,7 +163,7 @@ public class MarketplaceCatalog extends Catalog {
 	}
 
 	private Map<String, IInstallableUnit> calculateInstalledIUs(IProgressMonitor monitor) {
-		Map<String, IInstallableUnit> installedIUs = new HashMap<String, IInstallableUnit>();
+		Map<String, IInstallableUnit> installedIUs = new HashMap<>();
 		List<AbstractDiscoveryStrategy> discoveryStrategies = getDiscoveryStrategies();
 		SubMonitor progress = SubMonitor.convert(monitor, discoveryStrategies.size() * 1000);
 		for (AbstractDiscoveryStrategy discoveryStrategy : discoveryStrategies) {
@@ -183,7 +183,7 @@ public class MarketplaceCatalog extends Catalog {
 
 	protected IStatus checkForUpdates(List<MarketplaceNodeCatalogItem> updateCheckNeeded,
 			final Map<String, IInstallableUnit> installedIUs, final IProgressMonitor monitor) {
-		Map<URI, List<MarketplaceNodeCatalogItem>> installedCatalogItemsByUpdateUri = new HashMap<URI, List<MarketplaceNodeCatalogItem>>();
+		Map<URI, List<MarketplaceNodeCatalogItem>> installedCatalogItemsByUpdateUri = new HashMap<>();
 
 		for (MarketplaceNodeCatalogItem catalogItem : updateCheckNeeded) {
 			INode node = catalogItem.getData();
@@ -196,7 +196,7 @@ public class MarketplaceCatalog extends Catalog {
 				URI uri = new URI(updateurl);
 				List<MarketplaceNodeCatalogItem> catalogItemsThisSite = installedCatalogItemsByUpdateUri.get(uri);
 				if (catalogItemsThisSite == null) {
-					catalogItemsThisSite = new ArrayList<MarketplaceNodeCatalogItem>();
+					catalogItemsThisSite = new ArrayList<>();
 					installedCatalogItemsByUpdateUri.put(uri, catalogItemsThisSite);
 				}
 				catalogItemsThisSite.add(catalogItem);
@@ -239,7 +239,7 @@ public class MarketplaceCatalog extends Catalog {
 						IQueryResult<IInstallableUnit> result = repository.query(query, pm);
 
 						// compute highest version for all available IUs.
-						Map<String, Version> repositoryIuVersionById = new HashMap<String, Version>();
+						Map<String, Version> repositoryIuVersionById = new HashMap<>();
 						for (IInstallableUnit iu : result) {
 							String key1 = createRepositoryIuKey(uri.toString(), iu.getId());
 							Version version = iu.getVersion();
@@ -366,10 +366,10 @@ public class MarketplaceCatalog extends Catalog {
 		}
 
 		// reset, keeping no items but the same tags, categories and certifications
-		List<CatalogItem> items = new ArrayList<CatalogItem>();
-		List<CatalogCategory> categories = new ArrayList<CatalogCategory>(getCategories());
-		List<Certification> certifications = new ArrayList<Certification>(getCertifications());
-		List<Tag> tags = new ArrayList<Tag>(getTags());
+		List<CatalogItem> items = new ArrayList<>();
+		List<CatalogCategory> categories = new ArrayList<>(getCategories());
+		List<Certification> certifications = new ArrayList<>(getCertifications());
+		List<Tag> tags = new ArrayList<>(getTags());
 		if (!refresh) {
 			for (CatalogCategory catalogCategory : categories) {
 				catalogCategory.getItems().clear();
@@ -511,7 +511,7 @@ public class MarketplaceCatalog extends Catalog {
 	}
 
 	public List<IMarket> getMarkets() {
-		List<IMarket> markets = new ArrayList<IMarket>();
+		List<IMarket> markets = new ArrayList<>();
 		for (CatalogCategory category : getCategories()) {
 			if (category instanceof MarketplaceCategory) {
 				MarketplaceCategory marketplaceCategory = (MarketplaceCategory) category;

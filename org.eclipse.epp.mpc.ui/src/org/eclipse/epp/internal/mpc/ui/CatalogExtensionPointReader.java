@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,7 @@ import org.eclipse.osgi.util.NLS;
 
 /**
  * Read catalog descriptors from the <tt>org.eclipse.epp.mpc.ui.catalog</tt> extension point.
- * 
+ *
  * @author David Green
  */
 class CatalogExtensionPointReader {
@@ -35,7 +35,7 @@ class CatalogExtensionPointReader {
 		if (extensionPoint == null) {
 			throw new IllegalStateException();
 		}
-		List<CatalogDescriptor> descriptors = new ArrayList<CatalogDescriptor>();
+		List<CatalogDescriptor> descriptors = new ArrayList<>();
 		for (IConfigurationElement element : extensionPoint.getConfigurationElements()) {
 			if (element.getName().equals("catalog")) { //$NON-NLS-1$
 				try {

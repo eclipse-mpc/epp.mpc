@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,9 +38,9 @@ public class CatalogRegistry {
 		return instance;
 	}
 
-	private final List<CatalogDescriptor> catalogDescriptors = new CopyOnWriteArrayList<CatalogDescriptor>();
+	private final List<CatalogDescriptor> catalogDescriptors = new CopyOnWriteArrayList<>();
 
-	private final Map<String, INews> catalogNews = new HashMap<String, INews>();
+	private final Map<String, INews> catalogNews = new HashMap<>();
 
 	public CatalogRegistry() {
 		catalogDescriptors.addAll(new CatalogExtensionPointReader().getCatalogDescriptors());

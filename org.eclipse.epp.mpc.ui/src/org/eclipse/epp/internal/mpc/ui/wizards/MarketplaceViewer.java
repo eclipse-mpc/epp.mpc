@@ -109,7 +109,7 @@ public class MarketplaceViewer extends CatalogViewer {
 		public Object[] getElements(Object inputElement) {
 			if (getCatalog() != null) {
 				// don't provide any categories unless it's featured
-				List<Object> items = new ArrayList<Object>(getCatalog().getItems());
+				List<Object> items = new ArrayList<>(getCatalog().getItems());
 				for (CatalogCategory category : getCatalog().getCategories()) {
 					if (category instanceof MarketplaceCategory) {
 						MarketplaceCategory marketplaceCategory = (MarketplaceCategory) category;
@@ -209,7 +209,7 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	private QueryData queryData = new QueryData();
 
-	private final Map<ContentType, QueryData> tabQueries = new HashMap<MarketplaceViewer.ContentType, MarketplaceViewer.QueryData>();
+	private final Map<ContentType, QueryData> tabQueries = new HashMap<>();
 
 	private ContentType queryContentType;
 
@@ -219,7 +219,7 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	private final MarketplaceWizard wizard;
 
-	private final List<IPropertyChangeListener> listeners = new LinkedList<IPropertyChangeListener>();
+	private final List<IPropertyChangeListener> listeners = new LinkedList<>();
 
 	private IDiscoveryItemFactory discoveryItemFactory;
 
@@ -407,8 +407,7 @@ public class MarketplaceViewer extends CatalogViewer {
 			return discoveryItemFactory.createDiscoveryItem(catalogItem, this, parent, getResources(), shellProvider,
 					browser);
 		}
-		return new DiscoveryItem<CatalogItem>(parent, SWT.NONE, getResources(), browser, catalogItem,
-				this);
+		return new DiscoveryItem<>(parent, SWT.NONE, getResources(), browser, catalogItem, this);
 	}
 
 	public void show(Set<? extends INode> nodes) {
@@ -594,7 +593,7 @@ public class MarketplaceViewer extends CatalogViewer {
 					result[0] = getCatalog().userFavorites(false, monitor);
 					break;
 				case SELECTION:
-					Set<String> nodeIds = new HashSet<String>();
+					Set<String> nodeIds = new HashSet<>();
 					for (CatalogItem item : getSelectionModel().getItemToSelectedOperation().keySet()) {
 						nodeIds.add(((INode) item.getData()).getId());
 					}
@@ -956,7 +955,7 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	@Override
 	public List<CatalogItem> getCheckedItems() {
-		List<CatalogItem> items = new ArrayList<CatalogItem>();
+		List<CatalogItem> items = new ArrayList<>();
 		for (Entry<CatalogItem, Operation> entry : getSelectionModel().getItemToSelectedOperation().entrySet()) {
 			if (entry.getValue() != Operation.NONE) {
 				items.add(entry.getKey());

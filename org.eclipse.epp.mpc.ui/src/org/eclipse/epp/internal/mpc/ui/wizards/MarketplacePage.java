@@ -148,9 +148,9 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 
 	private ContentType previousContentType;
 
-	private final List<ActionLink> actionLinks = new ArrayList<ActionLink>();
+	private final List<ActionLink> actionLinks = new ArrayList<>();
 
-	private final Map<String, ActionLink> actions = new HashMap<String, ActionLink>();
+	private final Map<String, ActionLink> actions = new HashMap<>();
 
 	public MarketplacePage(MarketplaceCatalog catalog, MarketplaceCatalogConfiguration configuration) {
 		super(catalog);

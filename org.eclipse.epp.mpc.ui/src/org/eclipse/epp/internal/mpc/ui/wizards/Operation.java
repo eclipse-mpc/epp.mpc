@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -92,7 +92,7 @@ public enum Operation {
 		if (operations == null) {
 			return null;
 		}
-		Map<T, Operation> mappedOperations = new LinkedHashMap<T, Operation>();
+		Map<T, Operation> mappedOperations = new LinkedHashMap<>();
 		Set<Map.Entry<T, org.eclipse.epp.mpc.ui.Operation>> entrySet = operations.entrySet();
 		for (Map.Entry<T, org.eclipse.epp.mpc.ui.Operation> entry : entrySet) {
 			mappedOperations.put(entry.getKey(), map(entry.getValue()));
@@ -104,7 +104,7 @@ public enum Operation {
 		if (operations == null) {
 			return null;
 		}
-		Map<T, org.eclipse.epp.mpc.ui.Operation> mappedOperations = new LinkedHashMap<T, org.eclipse.epp.mpc.ui.Operation>();
+		Map<T, org.eclipse.epp.mpc.ui.Operation> mappedOperations = new LinkedHashMap<>();
 		Set<Map.Entry<T, Operation>> entrySet = operations.entrySet();
 		for (Map.Entry<T, Operation> entry : entrySet) {
 			mappedOperations.put(entry.getKey(), entry.getValue() == null ? null : entry.getValue().getOperation());

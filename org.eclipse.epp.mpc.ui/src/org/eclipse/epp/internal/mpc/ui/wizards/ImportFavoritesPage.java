@@ -140,7 +140,7 @@ public class ImportFavoritesPage extends CatalogPage {
 		if (userFavoritesService == null) {
 			return;
 		}
-		final List<INode> importNodes = new ArrayList<INode>();
+		final List<INode> importNodes = new ArrayList<>();
 		for (MarketplaceNodeCatalogItem item : importFavorites) {
 			importNodes.add(item.getData());
 		}
@@ -175,7 +175,7 @@ public class ImportFavoritesPage extends CatalogPage {
 		IStructuredSelection selection = getViewer().getSelection();
 		@SuppressWarnings("unchecked")
 		List<MarketplaceNodeCatalogItem> importFavorites = selection.toList();
-		return new ArrayList<MarketplaceNodeCatalogItem>(importFavorites);
+		return new ArrayList<>(importFavorites);
 	}
 
 	private IUserFavoritesService findUserFavoritesService() {

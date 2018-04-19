@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 The Eclipse Foundation and others.
+ * Copyright (c) 2011, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -175,7 +175,7 @@ public abstract class MarketplaceUrlHandler {
 		if (query == null) {
 			return null;
 		}
-		Map<String, String> values = new LinkedHashMap<String, String>();
+		Map<String, String> values = new LinkedHashMap<>();
 		String[] params = query.split(PARAM_SPLIT_REGEX);
 		for (String param : params) {
 			String[] keyValue = param.split(EQUALS_REGEX);
@@ -212,7 +212,7 @@ public abstract class MarketplaceUrlHandler {
 			if (mpcState != null) {
 				command.setWizardState(URLDecoder.decode(mpcState, UTF_8));
 			}
-			Map<String, Operation> nodeToOperation = new HashMap<String, Operation>();
+			Map<String, Operation> nodeToOperation = new HashMap<>();
 			nodeToOperation.put(URLDecoder.decode(installId, UTF_8), Operation.INSTALL);
 			command.setOperations(nodeToOperation);
 		} catch (UnsupportedEncodingException e1) {
@@ -315,7 +315,7 @@ public abstract class MarketplaceUrlHandler {
 
 	private boolean handleSolrSearch(CatalogDescriptor descriptor, String url) {
 		try {
-			Map<String, String> params = new HashMap<String, String>();
+			Map<String, String> params = new HashMap<>();
 			String searchString = parseSearchQuery(descriptor, url, params);
 			return handleSearch(descriptor, url, searchString, params);
 		} catch (MalformedURLException e) {
@@ -329,7 +329,7 @@ public abstract class MarketplaceUrlHandler {
 
 	private boolean handleSiteSearch(CatalogDescriptor descriptor, String url) {
 		try {
-			Map<String, String> params = new HashMap<String, String>();
+			Map<String, String> params = new HashMap<>();
 			String searchString = parseSearchQuery(descriptor, url, params);
 
 			// convert queries of this format

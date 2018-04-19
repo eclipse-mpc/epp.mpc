@@ -52,7 +52,7 @@ final class ShowNatureProposalsDialog extends TitleAreaDialog {
 	ShowNatureProposalsDialog(Shell parentShell, Map<String, Collection<INode>> candidates) {
 		super(parentShell);
 		this.candidates = candidates;
-		this.selectedNatures = new LinkedHashSet<String>(candidates.keySet());
+		this.selectedNatures = new LinkedHashSet<>(candidates.keySet());
 	}
 
 	@Override

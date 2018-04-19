@@ -119,12 +119,11 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 		instance = this;
 		super.start(context);
 		MarketplaceClientUiPlugin.bundleContext = context;
-		clientServiceTracker = new ServiceTracker<IMarketplaceClientService, IMarketplaceClientService>(context,
-				IMarketplaceClientService.class, null);
+		clientServiceTracker = new ServiceTracker<>(context, IMarketplaceClientService.class, null);
 		clientServiceTracker.open();
 		resourceProvider = new ResourceProvider();
 
-		Hashtable<String, String> props = new Hashtable<String, String>(2);
+		Hashtable<String, String> props = new Hashtable<>(2);
 		props.put(org.eclipse.osgi.service.debug.DebugOptions.LISTENER_SYMBOLICNAME, MarketplaceClientUi.BUNDLE_ID);
 		context.registerService(DebugOptionsListener.class.getName(), (DebugOptionsListener) options -> {
 			DebugTrace debugTrace = null;

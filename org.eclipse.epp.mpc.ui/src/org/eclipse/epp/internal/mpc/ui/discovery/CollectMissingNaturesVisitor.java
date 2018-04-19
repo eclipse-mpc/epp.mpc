@@ -21,7 +21,7 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.runtime.CoreException;
 
 final class CollectMissingNaturesVisitor implements IResourceDeltaVisitor {
-	private final Set<String> missingNatures = new HashSet<String>();
+	private final Set<String> missingNatures = new HashSet<>();
 
 	@Override
 	public boolean visit(IResourceDelta delta) throws CoreException {

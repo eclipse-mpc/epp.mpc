@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,7 +52,7 @@ public abstract class AbstractProvisioningOperation implements IRunnableWithProg
 		if (installableConnectors == null || installableConnectors.isEmpty()) {
 			throw new IllegalArgumentException();
 		}
-		this.items = new ArrayList<CatalogItem>(installableConnectors);
+		this.items = new ArrayList<>(installableConnectors);
 		this.provisioningUI = ProvisioningUI.getDefaultUI();
 	}
 
@@ -61,12 +61,12 @@ public abstract class AbstractProvisioningOperation implements IRunnableWithProg
 		// tell p2 that it's okay to use these repositories
 		ProvisioningSession session = ProvisioningUI.getDefaultUI().getSession();
 		RepositoryTracker repositoryTracker = ProvisioningUI.getDefaultUI().getRepositoryTracker();
-		repositoryLocations = new HashSet<URI>();
+		repositoryLocations = new HashSet<>();
 		if (addedRepositoryLocations == null) {
-			addedRepositoryLocations = new HashSet<URI>();
+			addedRepositoryLocations = new HashSet<>();
 		}
 
-		Set<URI> knownRepositories = new HashSet<URI>(Arrays.asList(repositoryTracker.getKnownRepositories(session)));
+		Set<URI> knownRepositories = new HashSet<>(Arrays.asList(repositoryTracker.getKnownRepositories(session)));
 
 		monitor.setWorkRemaining(items.size() * 5);
 		for (CatalogItem descriptor : items) {
@@ -83,7 +83,7 @@ public abstract class AbstractProvisioningOperation implements IRunnableWithProg
 		}
 
 		// fetch meta-data for these repositories
-		ArrayList<IMetadataRepository> repositories = new ArrayList<IMetadataRepository>();
+		ArrayList<IMetadataRepository> repositories = new ArrayList<>();
 		monitor.setWorkRemaining(repositories.size());
 		IMetadataRepositoryManager manager = (IMetadataRepositoryManager) session.getProvisioningAgent().getService(
 				IMetadataRepositoryManager.SERVICE_NAME);
@@ -103,7 +103,7 @@ public abstract class AbstractProvisioningOperation implements IRunnableWithProg
 	 */
 	protected List<IInstallableUnit> queryInstallableUnits(SubMonitor monitor, List<IMetadataRepository> repositories)
 			throws URISyntaxException {
-		final List<IInstallableUnit> installableUnits = new ArrayList<IInstallableUnit>();
+		final List<IInstallableUnit> installableUnits = new ArrayList<>();
 
 		monitor.setWorkRemaining(repositories.size());
 		for (final IMetadataRepository repository : repositories) {
@@ -124,7 +124,7 @@ public abstract class AbstractProvisioningOperation implements IRunnableWithProg
 	}
 
 	private Set<String> getDescriptorIds(final IMetadataRepository repository) throws URISyntaxException {
-		final Set<String> installableUnitIdsThisRepository = new HashSet<String>();
+		final Set<String> installableUnitIdsThisRepository = new HashSet<>();
 		// determine all installable units for this repository
 		for (CatalogItem descriptor : items) {
 			if (descriptor.getSiteUrl() != null
@@ -136,7 +136,7 @@ public abstract class AbstractProvisioningOperation implements IRunnableWithProg
 	}
 
 	protected Set<String> getFeatureIds(CatalogItem descriptor) {
-		Set<String> featureIds = new HashSet<String>();
+		Set<String> featureIds = new HashSet<>();
 		for (String id : descriptor.getInstallableUnits()) {
 			if (!id.endsWith(P2_FEATURE_GROUP_SUFFIX)) {
 				id += P2_FEATURE_GROUP_SUFFIX;

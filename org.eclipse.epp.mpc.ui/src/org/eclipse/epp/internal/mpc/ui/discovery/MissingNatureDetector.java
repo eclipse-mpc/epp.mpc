@@ -39,9 +39,9 @@ public class MissingNatureDetector implements IStartup, IPropertyChangeListener 
 
 	private JobGroup allJobs;
 
-	private final Set<String> detectedNatures = new HashSet<String>();
+	private final Set<String> detectedNatures = new HashSet<>();
 
-	private final Set<DiscoverNatureSupportJob> lookupJobs = new HashSet<DiscoverNatureSupportJob>();
+	private final Set<DiscoverNatureSupportJob> lookupJobs = new HashSet<>();
 
 	private final IResourceChangeListener projectOpenListener = event -> {
 		if (event.getDelta() == null) {
@@ -99,7 +99,7 @@ public class MissingNatureDetector implements IStartup, IPropertyChangeListener 
 			if (!allJobs.getActiveJobs().isEmpty()) {
 				return;
 			}
-			candidates = new HashMap<String, Collection<INode>>();
+			candidates = new HashMap<>();
 			for (DiscoverNatureSupportJob lookupJob : lookupJobs) {
 				Collection<INode> entryCandidates = lookupJob.getCandidates();
 				if (entryCandidates != null && !entryCandidates.isEmpty()) {

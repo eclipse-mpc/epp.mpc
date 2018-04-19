@@ -243,7 +243,7 @@ class ItemButtonController {
 			break;
 		}
 		if (availableOperations.size() > 1) {
-			selectableStates = new ArrayList<ButtonState>(availableOperations.size() - 1);
+			selectableStates = new ArrayList<>(availableOperations.size() - 1);
 			for (Operation operation : availableOperations) {
 				if (operation != primaryOperation) {
 					ButtonState selectableState = ButtonState.forOperation(operation);

@@ -28,7 +28,7 @@ import org.eclipse.osgi.util.NLS;
  * @author David Green
  */
 public class MarketplaceCatalogConfiguration extends CatalogConfiguration implements IMarketplaceClientConfiguration {
-	private List<CatalogDescriptor> catalogDescriptors = new ArrayList<CatalogDescriptor>();
+	private List<CatalogDescriptor> catalogDescriptors = new ArrayList<>();
 
 	private CatalogDescriptor catalogDescriptor;
 
@@ -109,7 +109,7 @@ public class MarketplaceCatalogConfiguration extends CatalogConfiguration implem
 
 	@Override
 	public void setInitialOperations(Map<String, Operation> initialOperations) {
-		this.initialOperations = new LinkedHashMap<String, Operation>(initialOperations);
+		this.initialOperations = new LinkedHashMap<>(initialOperations);
 	}
 
 	/**

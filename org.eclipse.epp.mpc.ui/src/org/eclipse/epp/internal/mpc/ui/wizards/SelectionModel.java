@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,7 +40,7 @@ import org.eclipse.osgi.util.NLS;
  */
 public class SelectionModel {
 
-	private final Map<CatalogItem, Operation> itemToOperation = new HashMap<CatalogItem, Operation>();
+	private final Map<CatalogItem, Operation> itemToOperation = new HashMap<>();
 
 	private List<CatalogItemEntry> entries;
 
@@ -132,7 +132,7 @@ public class SelectionModel {
 
 	public List<CatalogItemEntry> getCatalogItemEntries() {
 		if (entries == null) {
-			List<CatalogItemEntry> entries = new ArrayList<CatalogItemEntry>();
+			List<CatalogItemEntry> entries = new ArrayList<>();
 
 			for (Entry<CatalogItem, Operation> entry : itemToOperation.entrySet()) {
 				CatalogItem item = entry.getKey();
@@ -162,7 +162,7 @@ public class SelectionModel {
 	}
 
 	private void computeChildren(CatalogItemEntry itemEntry) {
-		List<FeatureEntry> children = new ArrayList<FeatureEntry>();
+		List<FeatureEntry> children = new ArrayList<>();
 		List<MarketplaceNodeInstallableUnitItem> iuItems = ((MarketplaceNodeCatalogItem) itemEntry.getItem()).getInstallableUnitItems();
 		if (iuItems != null) {
 			for (MarketplaceNodeInstallableUnitItem iuItem : iuItems) {
@@ -434,7 +434,7 @@ public class SelectionModel {
 	 */
 	@Deprecated
 	public Map<CatalogItem, org.eclipse.epp.internal.mpc.ui.wizards.Operation> getItemToOperation() {
-		Map<CatalogItem, org.eclipse.epp.internal.mpc.ui.wizards.Operation> itemToOperation = new HashMap<CatalogItem, org.eclipse.epp.internal.mpc.ui.wizards.Operation>();
+		Map<CatalogItem, org.eclipse.epp.internal.mpc.ui.wizards.Operation> itemToOperation = new HashMap<>();
 		Set<Entry<CatalogItem, Operation>> entrySet = this.itemToOperation.entrySet();
 		for (Entry<CatalogItem, Operation> entry : entrySet) {
 			itemToOperation.put(entry.getKey(), org.eclipse.epp.internal.mpc.ui.wizards.Operation.map(entry.getValue()));
@@ -448,7 +448,7 @@ public class SelectionModel {
 
 	public Map<String, Operation> getItemIdToSelectedOperation() {
 		Map<CatalogItem, Operation> itemToSelectedOperation = getItemToSelectedOperation();
-		Map<String, Operation> itemIdToOperation = new HashMap<String, Operation>(itemToSelectedOperation.size());
+		Map<String, Operation> itemIdToOperation = new HashMap<>(itemToSelectedOperation.size());
 		for (Entry<CatalogItem, Operation> entry : itemToSelectedOperation.entrySet()) {
 			itemIdToOperation.put(entry.getKey().getId(), entry.getValue());
 		}
@@ -461,7 +461,7 @@ public class SelectionModel {
 	}
 
 	public Map<FeatureEntry, Operation> getFeatureEntryToOperation(boolean includeNone, boolean verify) {
-		Map<FeatureEntry, Operation> featureEntries = new HashMap<FeatureEntry, Operation>();
+		Map<FeatureEntry, Operation> featureEntries = new HashMap<>();
 		for (CatalogItemEntry entry : getCatalogItemEntries()) {
 			for (FeatureEntry featureEntry : entry.getChildren()) {
 				Operation operation = featureEntry.computeChangeOperation();
@@ -494,7 +494,7 @@ public class SelectionModel {
 	 */
 	@Deprecated
 	public Set<FeatureDescriptor> getSelectedFeatureDescriptors() {
-		Set<FeatureDescriptor> featureDescriptors = new HashSet<FeatureDescriptor>();
+		Set<FeatureDescriptor> featureDescriptors = new HashSet<>();
 		Set<FeatureEntry> selectedFeatureEntries = getSelectedFeatureEntries();
 		for (FeatureEntry featureEntry : selectedFeatureEntries) {
 			featureDescriptors.add(featureEntry.getFeatureDescriptor());
@@ -506,7 +506,7 @@ public class SelectionModel {
 	 * Get all catalog items that have at least one feature selected
 	 */
 	public Set<CatalogItem> getSelectedCatalogItems() {
-		Set<CatalogItem> items = new HashSet<CatalogItem>();
+		Set<CatalogItem> items = new HashSet<>();
 		for (CatalogItemEntry entry : getCatalogItemEntries()) {
 			if (entry.getSelectedOperation() == Operation.NONE) {
 				continue;
@@ -620,14 +620,14 @@ public class SelectionModel {
 
 	private Map<Operation, List<CatalogItem>> computeOperationToItem() {
 		Map<CatalogItem, Operation> itemToOperation = getItemToSelectedOperation();
-		Map<Operation, List<CatalogItem>> catalogItemByOperation = new HashMap<Operation, List<CatalogItem>>();
+		Map<Operation, List<CatalogItem>> catalogItemByOperation = new HashMap<>();
 		for (Map.Entry<CatalogItem, Operation> entry : itemToOperation.entrySet()) {
 			if (entry.getValue() == Operation.NONE) {
 				continue;
 			}
 			List<CatalogItem> list = catalogItemByOperation.get(entry.getValue());
 			if (list == null) {
-				list = new ArrayList<CatalogItem>();
+				list = new ArrayList<>();
 				catalogItemByOperation.put(entry.getValue(), list);
 			}
 			list.add(entry.getKey());

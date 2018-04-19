@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,7 @@ import org.eclipse.equinox.internal.p2.discovery.model.Tag;
 
 /**
  * An abstract implementation of a filter that operates on {@link Tag tags}.
- * 
+ *
  * @author David Green
  * @see Tag
  */
@@ -33,7 +33,7 @@ public abstract class AbstractTagFilter extends MarketplaceFilter {
 
 	private List<Tag> choices;
 
-	private final Set<Tag> selected = new HashSet<Tag>();
+	private final Set<Tag> selected = new HashSet<>();
 
 	private boolean selectAllOnNoSelection;
 
@@ -49,7 +49,7 @@ public abstract class AbstractTagFilter extends MarketplaceFilter {
 
 	/**
 	 * subclasses may override to determine how tagging is detected
-	 * 
+	 *
 	 * @return true if and only if the given item has one of the selected tags.
 	 */
 	protected boolean hasSelectedTag(CatalogItem item) {

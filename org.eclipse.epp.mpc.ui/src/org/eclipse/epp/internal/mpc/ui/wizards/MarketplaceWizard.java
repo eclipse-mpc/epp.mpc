@@ -291,9 +291,9 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 	}
 
 	protected void updateSelection() {
-		List<Entry<CatalogItem, Operation>> itemToSelectedOperation = new ArrayList<Entry<CatalogItem, Operation>>(
+		List<Entry<CatalogItem, Operation>> itemToSelectedOperation = new ArrayList<>(
 				getSelectionModel().getItemToSelectedOperation().entrySet());
-		final List<CatalogItem> noninstallableItems = new ArrayList<CatalogItem>();
+		final List<CatalogItem> noninstallableItems = new ArrayList<>();
 		for (Entry<CatalogItem, Operation> entry : itemToSelectedOperation) {
 			if (entry.getValue() != Operation.NONE) {
 				boolean unavailableInstall = (Boolean.FALSE.equals(entry.getKey().getAvailable())
@@ -648,7 +648,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				IWebBrowser browser = PlatformUI.getWorkbench()
 						.getBrowserSupport()
 						.createBrowser(style, browserId,
-						catalogDescriptor.getLabel(), catalogDescriptor.getDescription());
+								catalogDescriptor.getLabel(), catalogDescriptor.getDescription());
 				final String originalUrl = url;
 				url = appendWizardState(url);
 				browser.openURL(new URL(url)); // ORDER DEPENDENCY //don't encode/validate URL - browser can be quite lenient
@@ -826,7 +826,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 						Job job = new Job(Messages.MarketplaceWizard_errorNotificationJob) {
 							IStatus r = result;
 
-							Set<CatalogItem> items = new HashSet<CatalogItem>(itemToOperation.keySet());
+							Set<CatalogItem> items = new HashSet<>(itemToOperation.keySet());
 
 							IInstallableUnit[] ius = operationIUs;
 
@@ -881,11 +881,11 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 	}
 
 	private Set<CatalogItem> computeNewInstallCatalogItems() {
-		Set<CatalogItem> items = new HashSet<CatalogItem>();
-		Map<CatalogItem, Collection<String>> iusByCatalogItem = new HashMap<CatalogItem, Collection<String>>();
+		Set<CatalogItem> items = new HashSet<>();
+		Map<CatalogItem, Collection<String>> iusByCatalogItem = new HashMap<>();
 		for (CatalogItemEntry entry : getSelectionModel().getCatalogItemEntries()) {
 			List<FeatureEntry> features = entry.getChildren();
-			Collection<String> featureIds = new ArrayList<String>(features.size());
+			Collection<String> featureIds = new ArrayList<>(features.size());
 			for (FeatureEntry feature : features) {
 				if (feature.computeChangeOperation() == Operation.INSTALL) {
 					featureIds.add(feature.getFeatureDescriptor().getId());
@@ -983,7 +983,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				return true;
 			}
 			final SelectionModel selectionModel = getSelectionModel();
-			final Map<String, Operation> nodeIdToOperation = new HashMap<String, Operation>();
+			final Map<String, Operation> nodeIdToOperation = new HashMap<>();
 			nodeIdToOperation.putAll(getSelectionModel().getItemIdToSelectedOperation());
 			try {
 				nodeIdToOperation.put(URLDecoder.decode(installId, UTF_8), Operation.INSTALL);

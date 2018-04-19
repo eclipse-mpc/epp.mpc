@@ -140,7 +140,7 @@ public class FavoritesViewer extends CatalogViewer {
 			Object element = items.next();
 			if (element instanceof MarketplaceNodeCatalogItem) {
 				if (selectableItems == null) {
-					selectableItems = new ArrayList<MarketplaceNodeCatalogItem>();
+					selectableItems = new ArrayList<>();
 				}
 				selectableItems.add((MarketplaceNodeCatalogItem) element);
 			}
@@ -357,7 +357,7 @@ public class FavoritesViewer extends CatalogViewer {
 	@Override
 	protected void catalogUpdated(boolean wasCancelled, boolean wasError) {
 		List<CatalogItem> items = getCatalog().getItems();
-		Set<CatalogItem> selectedItems = new LinkedHashSet<CatalogItem>();
+		Set<CatalogItem> selectedItems = new LinkedHashSet<>();
 		for (CatalogItem catalogItem : items) {
 			if (catalogItem.isSelected()) {
 				selectedItems.add(catalogItem);
@@ -365,7 +365,7 @@ public class FavoritesViewer extends CatalogViewer {
 		}
 		setSelection(StructuredSelection.EMPTY);
 		super.catalogUpdated(wasCancelled, wasError);
-		setSelection(new StructuredSelection(new ArrayList<CatalogItem>(selectedItems)));
+		setSelection(new StructuredSelection(new ArrayList<>(selectedItems)));
 	}
 
 	public void setInstallSelected(boolean install) {

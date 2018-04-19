@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,7 +67,7 @@ public class SelectionModelStateSerializer {
 	@Deprecated
 	public void deserialize(IProgressMonitor monitor, String state,
 			Map<String, org.eclipse.epp.internal.mpc.ui.wizards.Operation> operationByNodeIdExtras) {
-		Map<String, Operation> operationByNodeId = new HashMap<String, Operation>();
+		Map<String, Operation> operationByNodeId = new HashMap<>();
 		for (Entry<String, org.eclipse.epp.internal.mpc.ui.wizards.Operation> entry : operationByNodeIdExtras.entrySet()) {
 			org.eclipse.epp.internal.mpc.ui.wizards.Operation op = entry.getValue();
 			operationByNodeId.put(entry.getKey(), op == null ? null : op.getOperation());
@@ -84,7 +84,7 @@ public class SelectionModelStateSerializer {
 	 */
 	public void deserialize(String state, Map<String, Operation> operationByNodeExtras, IProgressMonitor monitor) {
 
-		Map<String, Operation> operationByNodeId = new HashMap<String, Operation>();
+		Map<String, Operation> operationByNodeId = new HashMap<>();
 		if (state != null && state.length() > 0) {
 			Pattern pattern = Pattern.compile("([^\\s=]+)=(\\S+)"); //$NON-NLS-1$
 			Matcher matcher = pattern.matcher(state);
