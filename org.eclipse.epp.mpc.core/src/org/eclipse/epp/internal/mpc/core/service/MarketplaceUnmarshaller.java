@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 The Eclipse Foundation and others.
+ * Copyright (c) 2014, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,6 +43,7 @@ import org.xml.sax.XMLReader;
  */
 public class MarketplaceUnmarshaller implements IMarketplaceUnmarshaller {
 
+	@Override
 	public <T> T unmarshal(InputStream in, Class<T> type, IProgressMonitor monitor) throws IOException,
 	UnmarshalException {
 		if (in == null) {

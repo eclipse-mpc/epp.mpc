@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -140,6 +140,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		return getStorageService().getBlob(KEY);
 	}
 
+	@Override
 	public Integer getFavoriteCount(INode node) {
 		Integer favorited = node.getFavorited();
 		if (favorited == null) {
@@ -156,6 +157,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		return Collections.unmodifiableSet(favorites);
 	}
 
+	@Override
 	public Set<String> getFavoriteIds(IProgressMonitor monitor)
 			throws NoServiceException, NotAuthorizedException, IllegalStateException, IOException {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.DefaultMarketplaceService_FavoritesRetrieve, 1000);
@@ -184,6 +186,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		return favoriteNodes;
 	}
 
+	@Override
 	public List<INode> getFavorites(IProgressMonitor monitor)
 			throws NoServiceException, NotAuthorizedException, IllegalStateException, IOException {
 		Set<String> favoriteIds = getFavoriteIds(monitor);
@@ -191,6 +194,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		return favoriteNodes;
 	}
 
+	@Override
 	public List<IFavoriteList> getRandomFavoriteLists(IProgressMonitor monitor) throws IOException {
 		URI serviceUri = getStorageService().getServiceUri();
 		final URI randomFavoritesUri = serviceUri.resolve(RANDOM_FAVORITE_LISTS_ENDPOINT);
@@ -324,6 +328,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		return favoriteIds;
 	}
 
+	@Override
 	public void setFavorites(Collection<? extends INode> nodes, IProgressMonitor monitor)
 			throws NoServiceException, ConflictException, NotAuthorizedException, IllegalStateException, IOException {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.UserFavoritesService_SettingUserFavorites, 1000);
@@ -405,16 +410,19 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		return builder.toString();
 	}
 
+	@Override
 	public void setFavorite(INode node, boolean favorite, IProgressMonitor monitor)
 			throws NotAuthorizedException, ConflictException, IOException {
 		alterFavorites(Collections.singleton(node), favorite, monitor);
 	}
 
+	@Override
 	public void addFavorites(Collection<? extends INode> nodes, IProgressMonitor monitor)
 			throws NotAuthorizedException, ConflictException, IOException {
 		alterFavorites(nodes, true, monitor);
 	}
 
+	@Override
 	public void removeFavorites(Collection<? extends INode> nodes, IProgressMonitor monitor)
 			throws NotAuthorizedException, ConflictException, IOException {
 		alterFavorites(nodes, false, monitor);
@@ -458,6 +466,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		setFavorites(favorites, progress.newChild(700));
 	}
 
+	@Override
 	public List<INode> getFavorites(URI uri, IProgressMonitor monitor) throws IOException {
 		List<String> nodeIds = getFavoriteIds(uri, monitor);
 		return toNodes(nodeIds);
@@ -491,6 +500,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		}
 	}
 
+	@Override
 	public List<String> getFavoriteIds(final URI uri, IProgressMonitor monitor) throws IOException {
 		URI normalizedUri = normalizeURI(uri);
 		try {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,7 @@ public class Iu implements IIu {
 		this.selected = selected;
 	}
 
+	@Override
 	public String getId() {
 		return id;
 	}
@@ -41,6 +42,7 @@ public class Iu implements IIu {
 		this.id = id;
 	}
 
+	@Override
 	public boolean isOptional() {
 		return optional;
 	}
@@ -49,6 +51,7 @@ public class Iu implements IIu {
 		this.optional = optional;
 	}
 
+	@Override
 	public boolean isSelected() {
 		return selected || !optional;
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ public class SearchResult implements ISearchResult {
 	/**
 	 * The number of matches that matched the query, which may not be equal to the number of nodes returned.
 	 */
+	@Override
 	public Integer getMatchCount() {
 		return matchCount;
 	}
@@ -41,6 +42,7 @@ public class SearchResult implements ISearchResult {
 	/**
 	 * The nodes that were matched by the query
 	 */
+	@Override
 	public List<Node> getNodes() {
 		return nodes;
 	}

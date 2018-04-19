@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,7 @@ public class Ius implements IIus {
 	public Ius() {
 	}
 
+	@Override
 	@Deprecated
 	public List<String> getIu() {
 		List<String> ius = new ArrayList<String>();
@@ -41,6 +42,7 @@ public class Ius implements IIus {
 		this.iuElements = iuElements;
 	}
 
+	@Override
 	public List<IIu> getIuElements() {
 		return iuElements;
 	}

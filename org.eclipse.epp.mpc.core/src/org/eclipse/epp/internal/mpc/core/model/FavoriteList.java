@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ public class FavoriteList extends Identifiable implements IFavoriteList {
 
 	private String icon;
 
+	@Override
 	public String getOwner() {
 		return owner == null ? getId() : owner;
 	}
@@ -34,6 +35,7 @@ public class FavoriteList extends Identifiable implements IFavoriteList {
 		this.owner = owner;
 	}
 
+	@Override
 	public String getOwnerProfileUrl() {
 		return ownerProfileUrl;
 	}
@@ -42,6 +44,7 @@ public class FavoriteList extends Identifiable implements IFavoriteList {
 		this.ownerProfileUrl = ownerProfileUrl;
 	}
 
+	@Override
 	public String getIcon() {
 		return icon;
 	}
@@ -50,6 +53,7 @@ public class FavoriteList extends Identifiable implements IFavoriteList {
 		this.icon = icon;
 	}
 
+	@Override
 	public List<INode> getNodes() {
 		return nodes;
 	}

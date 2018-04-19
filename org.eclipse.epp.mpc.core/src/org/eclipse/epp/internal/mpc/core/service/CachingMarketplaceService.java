@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,6 +59,7 @@ public class CachingMarketplaceService implements IMarketplaceService {
 		return delegate;
 	}
 
+	@Override
 	public List<? extends IMarket> listMarkets(IProgressMonitor monitor) throws CoreException {
 		String marketsKey = "Markets:Markets"; //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
@@ -75,6 +76,7 @@ public class CachingMarketplaceService implements IMarketplaceService {
 		return marketsResult;
 	}
 
+	@Override
 	public IMarket getMarket(IMarket market, IProgressMonitor monitor) throws CoreException {
 		String marketKey = computeMarketKey(market);
 		IMarket marketResult = null;
@@ -106,6 +108,7 @@ public class CachingMarketplaceService implements IMarketplaceService {
 		cache(categoryKey, category);
 	}
 
+	@Override
 	public ICategory getCategory(ICategory category, IProgressMonitor monitor) throws CoreException {
 		String categoryKey = computeCategoryKey(category);
 		ICategory categoryResult = null;
@@ -123,6 +126,7 @@ public class CachingMarketplaceService implements IMarketplaceService {
 		return categoryResult;
 	}
 
+	@Override
 	public INode getNode(INode node, IProgressMonitor monitor) throws CoreException {
 		String nodeKey = computeNodeKey(node);
 		INode nodeResult = null;
@@ -152,6 +156,7 @@ public class CachingMarketplaceService implements IMarketplaceService {
 		}
 	}
 
+	@Override
 	public List<INode> getNodes(Collection<? extends INode> nodes, IProgressMonitor monitor) throws CoreException {
 		Map<INode, INode> resolvedNodes = new LinkedHashMap<INode, INode>();
 		List<INode> unresolvedNodes = new ArrayList<INode>();
@@ -264,27 +269,20 @@ public class CachingMarketplaceService implements IMarketplaceService {
 		public ISearchResult doSearch(IProgressMonitor monitor) throws CoreException;
 	}
 
+	@Override
 	public ISearchResult search(final IMarket market, final ICategory category, final String queryText,
 			IProgressMonitor monitor) throws CoreException {
 		String key = computeSearchKey("search", market, category, queryText); //$NON-NLS-1$
-		return performSearch(monitor, key, new SearchOperation() {
-
-			public ISearchResult doSearch(IProgressMonitor monitor) throws CoreException {
-				return delegate.search(market, category, queryText, monitor);
-			}
-		});
+		return performSearch(monitor, key, monitor1 -> delegate.search(market, category, queryText, monitor1));
 	}
 
+	@Override
 	public ISearchResult tagged(final String tag, IProgressMonitor monitor) throws CoreException {
 		String key = computeSearchKey("tagged", null, null, tag); //$NON-NLS-1$
-		return performSearch(monitor, key, new SearchOperation() {
-
-			public ISearchResult doSearch(IProgressMonitor monitor) throws CoreException {
-				return delegate.tagged(tag, monitor);
-			}
-		});
+		return performSearch(monitor, key, monitor1 -> delegate.tagged(tag, monitor1));
 	}
 
+	@Override
 	public ISearchResult tagged(List<String> tags, IProgressMonitor monitor) throws CoreException {
 		String combinedTags = tags.stream().collect(Collectors.joining(",")); //$NON-NLS-1$
 		return tagged(combinedTags, monitor);
@@ -318,61 +316,44 @@ public class CachingMarketplaceService implements IMarketplaceService {
 				+ ":" + (market == null ? "" : market.getId()) + ":" + (category == null ? "" : category.getId()) + ":" + (queryText == null ? "" : queryText.trim()); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$ //$NON-NLS-6$
 	}
 
+	@Override
 	public URL getBaseUrl() {
 		return delegate.getBaseUrl();
 	}
 
+	@Override
 	public ISearchResult featured(IProgressMonitor monitor) throws CoreException {
 		String key = computeSearchKey("featured", null, null, null); //$NON-NLS-1$
-		return performSearch(monitor, key, new SearchOperation() {
-
-			public ISearchResult doSearch(IProgressMonitor monitor) throws CoreException {
-				return delegate.featured(monitor);
-			}
-		});
+		return performSearch(monitor, key, monitor1 -> delegate.featured(monitor1));
 	}
 
+	@Override
 	public ISearchResult featured(final IMarket market, final ICategory category, IProgressMonitor monitor)
 			throws CoreException {
 		String key = computeSearchKey("featured", market, category, null); //$NON-NLS-1$
-		return performSearch(monitor, key, new SearchOperation() {
-
-			public ISearchResult doSearch(IProgressMonitor monitor) throws CoreException {
-				return delegate.featured(market, category, monitor);
-			}
-		});
+		return performSearch(monitor, key, monitor1 -> delegate.featured(market, category, monitor1));
 	}
 
+	@Override
 	public ISearchResult recent(IProgressMonitor monitor) throws CoreException {
 		String key = computeSearchKey("recent", null, null, null); //$NON-NLS-1$
-		return performSearch(monitor, key, new SearchOperation() {
-
-			public ISearchResult doSearch(IProgressMonitor monitor) throws CoreException {
-				return delegate.recent(monitor);
-			}
-		});
+		return performSearch(monitor, key, monitor1 -> delegate.recent(monitor1));
 	}
 
+	@Override
 	public ISearchResult topFavorites(IProgressMonitor monitor) throws CoreException {
 		String key = computeSearchKey("favorites", null, null, null); //$NON-NLS-1$
-		return performSearch(monitor, key, new SearchOperation() {
-
-			public ISearchResult doSearch(IProgressMonitor monitor) throws CoreException {
-				return delegate.topFavorites(monitor);
-			}
-		});
+		return performSearch(monitor, key, monitor1 -> delegate.topFavorites(monitor1));
 	}
 
+	@Override
 	public ISearchResult popular(IProgressMonitor monitor) throws CoreException {
 		String key = computeSearchKey("popular", null, null, null); //$NON-NLS-1$
-		return performSearch(monitor, key, new SearchOperation() {
-			public ISearchResult doSearch(IProgressMonitor monitor) throws CoreException {
-				return delegate.popular(monitor);
-			}
-		});
+		return performSearch(monitor, key, monitor1 -> delegate.popular(monitor1));
 
 	}
 
+	@Override
 	public ISearchResult related(final List<? extends INode> basedOn, IProgressMonitor monitor) throws CoreException {
 		String searchKey = null;
 		if (basedOn != null && !basedOn.isEmpty()) {
@@ -383,13 +364,10 @@ public class CachingMarketplaceService implements IMarketplaceService {
 			searchKey = searchKeyBldr.substring(0, searchKeyBldr.length() - 1);
 		}
 		String key = computeSearchKey("related", null, null, searchKey); //$NON-NLS-1$
-		return performSearch(monitor, key, new SearchOperation() {
-			public ISearchResult doSearch(IProgressMonitor monitor) throws CoreException {
-				return delegate.related(basedOn, monitor);
-			}
-		});
+		return performSearch(monitor, key, monitor1 -> delegate.related(basedOn, monitor1));
 	}
 
+	@Override
 	public INews news(IProgressMonitor monitor) throws CoreException {
 		String newsKey = "News:News"; //$NON-NLS-1$
 		INews newsResult = getCached(newsKey, INews.class);
@@ -407,39 +385,47 @@ public class CachingMarketplaceService implements IMarketplaceService {
 		reportInstallError(result, nodes, iuIdsAndVersions, resolutionDetails, monitor);
 	}
 
+	@Override
 	public void reportInstallError(IStatus result, Set<? extends INode> nodes, Set<String> iuIdsAndVersions,
 			String resolutionDetails, IProgressMonitor monitor) throws CoreException {
 		delegate.reportInstallError(result, nodes, iuIdsAndVersions, resolutionDetails, monitor);
 	}
 
+	@Override
 	public void reportInstallSuccess(INode node, IProgressMonitor monitor) {
 		delegate.reportInstallSuccess(node, monitor);
 	}
 
+	@Override
 	@Deprecated
 	public ISearchResult favorites(IProgressMonitor monitor) throws CoreException {
 		return topFavorites(monitor);
 	}
 
+	@Override
 	public List<IFavoriteList> userFavoriteLists(IProgressMonitor monitor) throws CoreException {
 		return delegate.userFavoriteLists(monitor);
 	}
 
+	@Override
 	public ISearchResult userFavorites(IProgressMonitor monitor) throws CoreException, NotAuthorizedException {
 		//we don't cache the favorite status, only contents individual nodes, which happens internally...
 		return delegate.userFavorites(monitor);
 	}
 
+	@Override
 	public void userFavorites(List<? extends INode> nodes, IProgressMonitor monitor)
 			throws CoreException, NotAuthorizedException {
 		//we don't cache the favorite status, only contents individual nodes, which happens internally...
 		delegate.userFavorites(nodes, monitor);
 	}
 
+	@Override
 	public IUserFavoritesService getUserFavoritesService() {
 		return delegate.getUserFavoritesService();
 	}
 
+	@Override
 	public ISearchResult userFavorites(URI favoritesUri, IProgressMonitor monitor) throws CoreException {
 		return delegate.userFavorites(favoritesUri, monitor);
 	}

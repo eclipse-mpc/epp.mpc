@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,12 +10,9 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.transport.httpclient;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
@@ -27,7 +24,6 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.ProxyAuthenticationStrategy;
 import org.apache.http.impl.client.TargetAuthenticationStrategy;
-import org.apache.http.protocol.HttpContext;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.userstorage.internal.StorageProperties;
 import org.osgi.framework.BundleContext;
@@ -74,12 +70,8 @@ class HttpClientFactory {
 		credentialsProvider = new ChainedCredentialsProvider(cacheProvider, credentialsProvider);
 		credentialsProvider = new SynchronizedCredentialsProvider(credentialsProvider);
 
-		clientBuilder.addInterceptorFirst(new HttpRequestInterceptor() {
-
-			public void process(HttpRequest request, HttpContext context) throws HttpException, IOException {
-				context.setAttribute(CacheCredentialsAuthenticationStrategy.CREDENTIALS_CACHE_ATTRIBUTE, cacheProvider);
-			}
-		});
+		clientBuilder.addInterceptorFirst((HttpRequestInterceptor) (request, context) -> context
+				.setAttribute(CacheCredentialsAuthenticationStrategy.CREDENTIALS_CACHE_ATTRIBUTE, cacheProvider));
 
 		return credentialsProvider;
 	}

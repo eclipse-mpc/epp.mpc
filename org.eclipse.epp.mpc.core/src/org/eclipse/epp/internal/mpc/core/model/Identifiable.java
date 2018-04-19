@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ public abstract class Identifiable implements IIdentifiable {
 	public Identifiable() {
 	}
 
+	@Override
 	public String getId() {
 		return id;
 	}
@@ -35,6 +36,7 @@ public abstract class Identifiable implements IIdentifiable {
 		this.id = id;
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -43,6 +45,7 @@ public abstract class Identifiable implements IIdentifiable {
 		this.name = name;
 	}
 
+	@Override
 	public String getUrl() {
 		return url;
 	}
@@ -58,6 +61,7 @@ public abstract class Identifiable implements IIdentifiable {
 	 *            the object to compare (can be null)
 	 * @return true if <code>obj</code> has the same {@link #getClass() type} and {@link #getId() id} as this object
 	 */
+	@Override
 	public boolean equalsId(Object obj) {
 		if (this == obj) {
 			return true;
@@ -86,6 +90,7 @@ public abstract class Identifiable implements IIdentifiable {
 	 *            the object to compare (can be null)
 	 * @return true if <code>obj</code> has the same {@link #getClass() type} and {@link #getUrl() url} as this object
 	 */
+	@Override
 	public boolean equalsUrl(Object obj) {
 		if (this == obj) {
 			return true;
@@ -114,6 +119,7 @@ public abstract class Identifiable implements IIdentifiable {
 	 *            the object to compare (can be null)
 	 * @return true if <code>obj</code> has the same {@link #getClass() type} and {@link #getUrl() url} as this object
 	 */
+	@Override
 	public boolean equalsName(Object obj) {
 		if (this == obj) {
 			return true;

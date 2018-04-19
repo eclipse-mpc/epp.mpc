@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,7 +36,6 @@ import org.eclipse.epp.internal.mpc.core.util.UserAgentUtil;
 import org.eclipse.epp.mpc.core.service.ITransport;
 import org.eclipse.epp.mpc.core.service.ServiceUnavailableException;
 
-@SuppressWarnings({ "restriction" })
 public class HttpClientTransport implements ITransport {
 
 	public static final String USER_AGENT;
@@ -96,6 +95,7 @@ public class HttpClientTransport implements ITransport {
 		return request.viaProxy(HttpClientProxyUtil.getProxyHost(uri));
 	}
 
+	@Override
 	public InputStream stream(URI location, IProgressMonitor monitor)
 			throws FileNotFoundException, ServiceUnavailableException, CoreException {
 		try {

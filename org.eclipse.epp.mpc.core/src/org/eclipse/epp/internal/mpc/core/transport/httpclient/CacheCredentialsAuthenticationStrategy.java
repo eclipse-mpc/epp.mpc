@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,20 +62,24 @@ abstract class CacheCredentialsAuthenticationStrategy implements AuthenticationS
 		this.delegate = delegate;
 	}
 
+	@Override
 	public boolean isAuthenticationRequested(HttpHost authhost, HttpResponse response, HttpContext context) {
 		return delegate.isAuthenticationRequested(authhost, response, context);
 	}
 
+	@Override
 	public Map<String, Header> getChallenges(HttpHost authhost, HttpResponse response, HttpContext context)
 			throws MalformedChallengeException {
 		return delegate.getChallenges(authhost, response, context);
 	}
 
+	@Override
 	public Queue<AuthOption> select(Map<String, Header> challenges, HttpHost authhost, HttpResponse response,
 			HttpContext context) throws MalformedChallengeException {
 		return delegate.select(challenges, authhost, response, context);
 	}
 
+	@Override
 	public void authSucceeded(HttpHost authhost, AuthScheme authScheme, HttpContext context) {
 		delegate.authSucceeded(authhost, authScheme, context);
 		if (authScheme != null && authScheme.isComplete()) {
@@ -83,6 +87,7 @@ abstract class CacheCredentialsAuthenticationStrategy implements AuthenticationS
 		}
 	}
 
+	@Override
 	public void authFailed(HttpHost authhost, AuthScheme authScheme, HttpContext context) {
 		delegate.authFailed(authhost, authScheme, context);
 		uncacheCredentials(authhost, authScheme, context);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,7 +22,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.client.fluent.Response;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -104,18 +103,15 @@ public abstract class RequestTemplate<T> {
 	}
 
 	protected T handleResponse(Response response) throws ClientProtocolException, IOException {
-		return response.handleResponse(new ResponseHandler<T>() {
-
-			public T handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
-				HttpEntity entity = null;
-				try {
-					final StatusLine statusLine = response.getStatusLine();
-					entity = response.getEntity();
-					handleResponseStatus(statusLine.getStatusCode(), statusLine.getReasonPhrase());
-					return handleResponseEntity(entity);
-				} finally {
-					closeResponse(response, entity);
-				}
+		return response.handleResponse(response1 -> {
+			HttpEntity entity = null;
+			try {
+				final StatusLine statusLine = response1.getStatusLine();
+				entity = response1.getEntity();
+				handleResponseStatus(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+				return handleResponseEntity(entity);
+			} finally {
+				closeResponse(response1, entity);
 			}
 		});
 	}

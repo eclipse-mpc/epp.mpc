@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,6 +51,7 @@ public class CatalogBranding extends Identifiable implements ICatalogBranding {
 
 	private String favoritesApiKey;
 
+	@Override
 	public String getWizardIcon() {
 		return wizardIcon;
 	}
@@ -59,6 +60,7 @@ public class CatalogBranding extends Identifiable implements ICatalogBranding {
 		this.wizardIcon = wizardIcon;
 	}
 
+	@Override
 	public boolean hasSearchTab() {
 		return hasSearchTab;
 	}
@@ -67,6 +69,7 @@ public class CatalogBranding extends Identifiable implements ICatalogBranding {
 		this.hasSearchTab = hasSearchTab;
 	}
 
+	@Override
 	public String getSearchTabName() {
 		return searchTabName;
 	}
@@ -75,6 +78,7 @@ public class CatalogBranding extends Identifiable implements ICatalogBranding {
 		this.searchTabName = searchTabName;
 	}
 
+	@Override
 	public boolean hasPopularTab() {
 		return hasPopularTab;
 	}
@@ -83,6 +87,7 @@ public class CatalogBranding extends Identifiable implements ICatalogBranding {
 		this.hasPopularTab = hasPopularTab;
 	}
 
+	@Override
 	public String getPopularTabName() {
 		return popularTabName;
 	}
@@ -91,6 +96,7 @@ public class CatalogBranding extends Identifiable implements ICatalogBranding {
 		this.popularTabName = popularTabName;
 	}
 
+	@Override
 	public boolean hasRecentTab() {
 		return hasRecentTab;
 	}
@@ -99,6 +105,7 @@ public class CatalogBranding extends Identifiable implements ICatalogBranding {
 		this.hasRecentTab = hasRecentTab;
 	}
 
+	@Override
 	public String getRecentTabName() {
 		return recentTabName;
 	}
@@ -107,6 +114,7 @@ public class CatalogBranding extends Identifiable implements ICatalogBranding {
 		this.recentTabName = recentTabName;
 	}
 
+	@Override
 	public boolean hasRelatedTab() {
 		return hasRelatedTab;
 	}
@@ -115,6 +123,7 @@ public class CatalogBranding extends Identifiable implements ICatalogBranding {
 		this.hasRelatedTab = hasRelatedTab;
 	}
 
+	@Override
 	public String getRelatedTabName() {
 		return relatedTabName;
 	}
@@ -123,6 +132,7 @@ public class CatalogBranding extends Identifiable implements ICatalogBranding {
 		this.relatedTabName = relatedTabName;
 	}
 
+	@Override
 	public boolean hasFeaturedMarketTab() {
 		return hasFeaturedMarketTab;
 	}
@@ -131,6 +141,7 @@ public class CatalogBranding extends Identifiable implements ICatalogBranding {
 		this.hasFeaturedMarketTab = hasFeaturedMarketTab;
 	}
 
+	@Override
 	public String getFeaturedMarketTabName() {
 		return featuredMarketTabName;
 	}
@@ -139,6 +150,7 @@ public class CatalogBranding extends Identifiable implements ICatalogBranding {
 		this.featuredMarketTabName = featuredMarketTabName;
 	}
 
+	@Override
 	public boolean hasFavoritesTab() {
 		return hasFavoritesTab;
 	}
@@ -147,6 +159,7 @@ public class CatalogBranding extends Identifiable implements ICatalogBranding {
 		this.hasFavoritesTab = hasFavoritesTab;
 	}
 
+	@Override
 	public String getFavoritesTabName() {
 		return favoritesTabName;
 	}
@@ -155,6 +168,7 @@ public class CatalogBranding extends Identifiable implements ICatalogBranding {
 		this.favoritesTabName = favoritesTabName;
 	}
 
+	@Override
 	public String getFavoritesServer() {
 		return favoritesServer;
 	}
@@ -163,6 +177,7 @@ public class CatalogBranding extends Identifiable implements ICatalogBranding {
 		this.favoritesServer = favoritesServer;
 	}
 
+	@Override
 	public String getFavoritesApiKey() {
 		return favoritesApiKey;
 	}
@@ -171,6 +186,7 @@ public class CatalogBranding extends Identifiable implements ICatalogBranding {
 		this.favoritesApiKey = favoritesApiKey;
 	}
 
+	@Override
 	public String getWizardTitle() {
 		return wizardTitle;
 	}

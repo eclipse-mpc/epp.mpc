@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,6 +34,7 @@ public class Catalog extends Identifiable implements ICatalog {
 	public Catalog() {
 	}
 
+	@Override
 	public boolean isSelfContained() {
 		return selfContained;
 	}
@@ -42,6 +43,7 @@ public class Catalog extends Identifiable implements ICatalog {
 		this.selfContained = selfContained;
 	}
 
+	@Override
 	public String getDescription() {
 		return description;
 	}
@@ -50,6 +52,7 @@ public class Catalog extends Identifiable implements ICatalog {
 		this.description = description;
 	}
 
+	@Override
 	public String getImageUrl() {
 		return imageUrl;
 	}
@@ -58,6 +61,7 @@ public class Catalog extends Identifiable implements ICatalog {
 		this.imageUrl = imageUrl;
 	}
 
+	@Override
 	public CatalogBranding getBranding() {
 		return branding;
 	}
@@ -66,6 +70,7 @@ public class Catalog extends Identifiable implements ICatalog {
 		this.branding = branding;
 	}
 
+	@Override
 	public String getDependencyRepository() {
 		return dependencyRepository;
 	}
@@ -74,6 +79,7 @@ public class Catalog extends Identifiable implements ICatalog {
 		this.dependencyRepository = dependencyRepository;
 	}
 
+	@Override
 	public News getNews() {
 		return news;
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -217,11 +216,13 @@ MarketplaceService {
 		return super.getBaseUrl();
 	}
 
+	@Override
 	public List<Market> listMarkets(IProgressMonitor monitor) throws CoreException {
 		Marketplace marketplace = processRequest(API_URI_SUFFIX, monitor);
 		return marketplace.getMarket();
 	}
 
+	@Override
 	public Market getMarket(IMarket market, IProgressMonitor monitor) throws CoreException {
 		if (market.getId() == null && market.getUrl() == null) {
 			throw new IllegalArgumentException();
@@ -248,10 +249,12 @@ MarketplaceService {
 		}
 	}
 
+	@Override
 	public Market getMarket(Market market, IProgressMonitor monitor) throws CoreException {
 		return getMarket((IMarket) market, monitor);
 	}
 
+	@Override
 	public Category getCategory(ICategory category, IProgressMonitor monitor) throws CoreException {
 		SubMonitor progress = SubMonitor.convert(monitor, 200);
 		if (category.getId() != null && category.getUrl() == null) {
@@ -287,10 +290,12 @@ MarketplaceService {
 		return resolvedCategory;
 	}
 
+	@Override
 	public Category getCategory(Category category, IProgressMonitor monitor) throws CoreException {
 		return getCategory((ICategory) category, monitor);
 	}
 
+	@Override
 	public Node getNode(INode node, IProgressMonitor monitor) throws CoreException {
 		Marketplace marketplace;
 		String query;
@@ -313,10 +318,12 @@ MarketplaceService {
 		return resolvedNode;
 	}
 
+	@Override
 	public Node getNode(Node node, IProgressMonitor monitor) throws CoreException {
 		return getNode((INode) node, monitor);
 	}
 
+	@Override
 	public List<INode> getNodes(Collection<? extends INode> nodes, IProgressMonitor monitor) throws CoreException {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.DefaultMarketplaceService_getNodesProgress, nodes.size());
 		if (nodes.isEmpty()) {
@@ -417,12 +424,14 @@ MarketplaceService {
 		}
 	}
 
+	@Override
 	public SearchResult search(IMarket market, ICategory category, String queryText, IProgressMonitor monitor)
 			throws CoreException {
 		String relativeUrl = computeRelativeSearchUrl(market, category, queryText, true);
 		return processSearchRequest(relativeUrl, queryText, monitor);
 	}
 
+	@Override
 	public SearchResult search(Market market, Category category, String queryText, IProgressMonitor monitor)
 			throws CoreException {
 		return search((IMarket) market, (ICategory) category, queryText, monitor);
@@ -532,19 +541,23 @@ MarketplaceService {
 		return result;
 	}
 
+	@Override
 	public SearchResult tagged(String tag, IProgressMonitor monitor) throws CoreException {
 		return processSearchRequest(API_FREETAGGING_URI + URLUtil.urlEncode(tag) + '/' + API_URI_SUFFIX, tag, monitor);
 	}
 
+	@Override
 	public SearchResult tagged(List<String> tags, IProgressMonitor monitor) throws CoreException {
 		String combinedTags = tags.stream().collect(Collectors.joining(",")); //$NON-NLS-1$
 		return tagged(combinedTags, monitor);
 	}
 
+	@Override
 	public SearchResult featured(IProgressMonitor monitor) throws CoreException {
 		return featured(null, null, monitor);
 	}
 
+	@Override
 	public SearchResult featured(IMarket market, ICategory category, IProgressMonitor monitor) throws CoreException {
 		String nodePart = ""; //$NON-NLS-1$
 		if (market != null) {
@@ -564,10 +577,12 @@ MarketplaceService {
 		return createSearchResult(marketplace.getFeatured());
 	}
 
+	@Override
 	public SearchResult featured(IProgressMonitor monitor, Market market, Category category) throws CoreException {
 		return featured(market, category, monitor);
 	}
 
+	@Override
 	public SearchResult recent(IProgressMonitor monitor) throws CoreException {
 		Marketplace marketplace = processRequest(API_RECENT_URI + '/' + API_URI_SUFFIX, monitor);
 		return createSearchResult(marketplace.getRecent());
@@ -576,16 +591,19 @@ MarketplaceService {
 	/**
 	 * @deprecated use {@link #topFavorites(IProgressMonitor)} instead
 	 */
+	@Override
 	@Deprecated
 	public SearchResult favorites(IProgressMonitor monitor) throws CoreException {
 		return topFavorites(monitor);
 	}
 
+	@Override
 	public SearchResult topFavorites(IProgressMonitor monitor) throws CoreException {
 		Marketplace marketplace = processRequest(API_FAVORITES_URI + '/' + API_URI_SUFFIX, monitor);
 		return createSearchResult(marketplace.getFavorites());
 	}
 
+	@Override
 	public List<IFavoriteList> userFavoriteLists(IProgressMonitor monitor) throws CoreException {
 		IUserFavoritesService userFavoritesService = getUserFavoritesService();
 		if (userFavoritesService == null) {
@@ -599,6 +617,7 @@ MarketplaceService {
 		}
 	}
 
+	@Override
 	public ISearchResult userFavorites(IProgressMonitor monitor) throws CoreException, NotAuthorizedException {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.DefaultMarketplaceService_FavoritesRetrieve, 10000);
 		IUserFavoritesService userFavoritesService = getUserFavoritesService();
@@ -617,6 +636,7 @@ MarketplaceService {
 		return resolveFavoriteNodes(favorites, progress.newChild(9000), true);
 	}
 
+	@Override
 	public ISearchResult userFavorites(URI favoritesUri, IProgressMonitor monitor) throws CoreException {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.DefaultMarketplaceService_FavoritesRetrieve, 10000);
 		IUserFavoritesService userFavoritesService = getUserFavoritesService();
@@ -634,6 +654,7 @@ MarketplaceService {
 		return resolveFavoriteNodes(favorites, progress.newChild(9000), false);
 	}
 
+	@Override
 	public void userFavorites(List<? extends INode> nodes, IProgressMonitor monitor)
 			throws NotAuthorizedException, CoreException {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.DefaultMarketplaceService_FavoritesUpdate, 10000);
@@ -678,32 +699,31 @@ MarketplaceService {
 		}
 		if (!filterIncompatible) {
 			//sort the node list so uninstallable nodes come last
-			Collections.sort(resolvedNodes, new Comparator<INode>() {
-
-				public int compare(INode n1, INode n2) {
-					if (n1 == n2) {
-						return 0;
-					}
-					boolean n1Installable = isInstallable(n1);
-					boolean n2Installable = isInstallable(n2);
-					if (n1Installable == n2Installable) {
-						return 0;
-					}
-					if (n1Installable) { // && !n2Installable
-						return -1;
-					}
-					// !n1Installable && n2Installable
-					return 1;
+			Collections.sort(resolvedNodes, (n1, n2) -> {
+				if (n1 == n2) {
+					return 0;
 				}
+				boolean n1Installable = isInstallable(n1);
+				boolean n2Installable = isInstallable(n2);
+				if (n1Installable == n2Installable) {
+					return 0;
+				}
+				if (n1Installable) { // && !n2Installable
+					return -1;
+				}
+				// !n1Installable && n2Installable
+				return 1;
 			});
 		}
 
 		return new ISearchResult() {
 
+			@Override
 			public List<? extends INode> getNodes() {
 				return resolvedNodes;
 			}
 
+			@Override
 			public Integer getMatchCount() {
 				return resolvedNodes.size();
 			}
@@ -715,11 +735,13 @@ MarketplaceService {
 		return ius != null && !ius.getIuElements().isEmpty();
 	}
 
+	@Override
 	public SearchResult popular(IProgressMonitor monitor) throws CoreException {
 		Marketplace marketplace = processRequest(API_POPULAR_URI + '/' + API_URI_SUFFIX, monitor);
 		return createSearchResult(marketplace.getPopular());
 	}
 
+	@Override
 	public SearchResult related(List<? extends INode> basedOn, IProgressMonitor monitor) throws CoreException {
 		String basedOnQuery = ""; //$NON-NLS-1$
 		if (basedOn != null && !basedOn.isEmpty()) {
@@ -749,6 +771,7 @@ MarketplaceService {
 		return result;
 	}
 
+	@Override
 	public News news(IProgressMonitor monitor) throws CoreException {
 		try {
 			Marketplace marketplace = processRequest(API_NEWS_URI + '/' + API_URI_SUFFIX, monitor);
@@ -766,12 +789,14 @@ MarketplaceService {
 	/**
 	 * @deprecated use {@link #reportInstallError(IStatus, Set, Set, String, IProgressMonitor)} instead
 	 */
+	@Override
 	@Deprecated
 	public void reportInstallError(IProgressMonitor monitor, IStatus result, Set<Node> nodes,
 			Set<String> iuIdsAndVersions, String resolutionDetails) throws CoreException {
 		reportInstallError(result, nodes, iuIdsAndVersions, resolutionDetails, monitor);
 	}
 
+	@Override
 	public void reportInstallError(IStatus result, Set<? extends INode> nodes, Set<String> iuIdsAndVersions,
 			String resolutionDetails, IProgressMonitor monitor) throws CoreException {
 		HttpClient client;
@@ -822,6 +847,7 @@ MarketplaceService {
 		}
 	}
 
+	@Override
 	public void reportInstallSuccess(INode node, IProgressMonitor monitor) {
 		String url = node.getUrl();
 		if (!url.endsWith("/")) { //$NON-NLS-1$
@@ -844,6 +870,7 @@ MarketplaceService {
 		}
 	}
 
+	@Override
 	public IUserFavoritesService getUserFavoritesService() {
 		return userFavoritesService;
 	}

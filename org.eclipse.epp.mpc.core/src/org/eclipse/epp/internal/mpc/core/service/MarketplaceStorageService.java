@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,6 +67,7 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 
 	private EclipseOAuthCredentialsProvider credentialsProvider;
 
+	@Override
 	public String getMarketplaceBaseUri() {
 		return marketplaceBaseUri;
 	}
@@ -75,6 +76,7 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 		this.marketplaceBaseUri = marketplaceBaseUri;
 	}
 
+	@Override
 	public URI getServiceUri() {
 		return serviceUri;
 	}
@@ -88,6 +90,7 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 		}
 	}
 
+	@Override
 	public synchronized StorageFactory getStorageFactory() {
 		if (storageFactory == null) {
 			storageFactory = createStorageFactory();
@@ -118,6 +121,7 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 		return storage;
 	}
 
+	@Override
 	public synchronized IStorage getStorage() {
 		if (storage == null) {
 			storage = createStorage();
@@ -129,15 +133,18 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 		this.storage = storage;
 	}
 
+	@Override
 	public IBlob getBlob(String key) {
 		return getStorage().getBlob(key);
 	}
 
+	@Override
 	public String getRegisteredUser() {
 		Credentials credentials = getStorageCredentials();
 		return credentials == null ? null : credentials.getUsername();
 	}
 
+	@Override
 	public <T> T runWithLogin(Callable<T> c) throws Exception {
 		String oldUser = getCurrentUser();
 		boolean wasInteractive = credentialsProvider.isInteractive();
@@ -163,6 +170,7 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 		}
 	}
 
+	@Override
 	public synchronized void addLoginListener(LoginListener listener) {
 		if (loginListeners == null) {
 			loginListeners = new CopyOnWriteArrayList<LoginListener>();
@@ -172,6 +180,7 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 		}
 	}
 
+	@Override
 	public synchronized void removeLoginListener(LoginListener listener) {
 		if (loginListeners != null) {
 			loginListeners.remove(listener);

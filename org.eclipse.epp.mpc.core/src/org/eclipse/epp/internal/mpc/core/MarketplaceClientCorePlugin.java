@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,7 +20,6 @@ import org.eclipse.epp.internal.mpc.core.util.DebugTraceUtil;
 import org.eclipse.epp.internal.mpc.core.util.ProxyHelper;
 import org.eclipse.epp.internal.mpc.core.util.TransportFactory;
 import org.eclipse.epp.mpc.core.service.ITransportFactory;
-import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.debug.DebugOptionsListener;
 import org.eclipse.osgi.service.debug.DebugTrace;
 import org.osgi.framework.Bundle;
@@ -56,6 +55,7 @@ public class MarketplaceClientCorePlugin implements BundleActivator {
 
 	private ServiceHelperImpl serviceHelper;
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		bundle = context.getBundle();
 		instance = this;
@@ -66,23 +66,22 @@ public class MarketplaceClientCorePlugin implements BundleActivator {
 
 		Hashtable<String, String> props = new Hashtable<String, String>(2);
 		props.put(org.eclipse.osgi.service.debug.DebugOptions.LISTENER_SYMBOLICNAME, MarketplaceClientCore.BUNDLE_ID);
-		context.registerService(DebugOptionsListener.class.getName(), new DebugOptionsListener() {
-			public void optionsChanged(DebugOptions options) {
-				DebugTrace debugTrace = null;
-				boolean debug = options.getBooleanOption(MarketplaceClientCore.BUNDLE_ID + DEBUG_OPTION, false);
-				boolean fakeClient = false;
-				if (debug) {
-					debugTrace = options.newDebugTrace(MarketplaceClientCore.BUNDLE_ID);
-					fakeClient = options.getBooleanOption(MarketplaceClientCore.BUNDLE_ID + DEBUG_FAKE_CLIENT_OPTION,
-							false);
-				}
-				DEBUG = debug;
-				DEBUG_FAKE_CLIENT = fakeClient;
-				MarketplaceClientCorePlugin.debugTrace = debugTrace;
+		context.registerService(DebugOptionsListener.class.getName(), (DebugOptionsListener) options -> {
+			DebugTrace debugTrace = null;
+			boolean debug = options.getBooleanOption(MarketplaceClientCore.BUNDLE_ID + DEBUG_OPTION, false);
+			boolean fakeClient = false;
+			if (debug) {
+				debugTrace = options.newDebugTrace(MarketplaceClientCore.BUNDLE_ID);
+				fakeClient = options.getBooleanOption(MarketplaceClientCore.BUNDLE_ID + DEBUG_FAKE_CLIENT_OPTION,
+						false);
 			}
+			DEBUG = debug;
+			DEBUG_FAKE_CLIENT = fakeClient;
+			MarketplaceClientCorePlugin.debugTrace = debugTrace;
 		}, props);
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		serviceHelper.stopTracking(context);
 		serviceHelper = null;

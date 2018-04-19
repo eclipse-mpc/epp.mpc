@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,14 +50,11 @@ public class Unmarshaller extends DefaultHandler {
 		setFeature(parserFactory, "http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false); //$NON-NLS-1$
 		setFeature(parserFactory, "http://apache.org/xml/features/nonvalidating/load-external-dtd", false); //$NON-NLS-1$
 
-		emptyResolver = new EntityResolver() {
-
-			public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-				InputSource emptyInputSource = new InputSource(new StringReader("")); //$NON-NLS-1$
-				emptyInputSource.setPublicId(publicId);
-				emptyInputSource.setSystemId(systemId);
-				return emptyInputSource;
-			}
+		emptyResolver = (publicId, systemId) -> {
+			InputSource emptyInputSource = new InputSource(new StringReader("")); //$NON-NLS-1$
+			emptyInputSource.setPublicId(publicId);
+			emptyInputSource.setSystemId(systemId);
+			return emptyInputSource;
 		};
 	}
 

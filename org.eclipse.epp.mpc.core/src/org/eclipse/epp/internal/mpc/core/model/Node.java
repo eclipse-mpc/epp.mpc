@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,6 +52,7 @@ public class Node extends Identifiable implements INode {
 	/**
 	 * The number of times this node has been favorited.
 	 */
+	@Override
 	public Integer getFavorited() {
 		return favorited;
 	}
@@ -60,6 +61,7 @@ public class Node extends Identifiable implements INode {
 		this.favorited = favorited;
 	}
 
+	@Override
 	public Boolean getUserFavorite() {
 		return userFavorite;
 	}
@@ -71,6 +73,7 @@ public class Node extends Identifiable implements INode {
 	/**
 	 * The number of times this node has been installed.
 	 */
+	@Override
 	public Integer getInstallsTotal() {
 		return installsTotal;
 	}
@@ -82,6 +85,7 @@ public class Node extends Identifiable implements INode {
 	/**
 	 * The number of times this node has been installed recently (last 30 days).
 	 */
+	@Override
 	public Integer getInstallsRecent() {
 		return installsRecent;
 	}
@@ -93,6 +97,7 @@ public class Node extends Identifiable implements INode {
 	/**
 	 * The type of listing, for example 'resource' or 'training'.
 	 */
+	@Override
 	public String getType() {
 		return type;
 	}
@@ -104,6 +109,7 @@ public class Node extends Identifiable implements INode {
 	/**
 	 * the categories of this listing.
 	 */
+	@Override
 	public Categories getCategories() {
 		return categories;
 	}
@@ -112,6 +118,7 @@ public class Node extends Identifiable implements INode {
 		this.categories = categories;
 	}
 
+	@Override
 	public Tags getTags() {
 		return tags;
 	}
@@ -120,6 +127,7 @@ public class Node extends Identifiable implements INode {
 		this.tags = tags;
 	}
 
+	@Override
 	public String getOwner() {
 		return owner;
 	}
@@ -132,6 +140,7 @@ public class Node extends Identifiable implements INode {
 	 * The short description of this listing, may include HTML markup (escaped). Note that the sort description may or
 	 * may not be shorter than the body.
 	 */
+	@Override
 	public String getShortdescription() {
 		return shortdescription;
 	}
@@ -143,6 +152,7 @@ public class Node extends Identifiable implements INode {
 	/**
 	 * The description of this listing, may include HTML markup (escaped).
 	 */
+	@Override
 	public String getBody() {
 		return body;
 	}
@@ -154,6 +164,7 @@ public class Node extends Identifiable implements INode {
 	/**
 	 * The number of seconds since the epoch. See http://us.php.net/manual/en/function.time.php for more details.
 	 */
+	@Override
 	public java.util.Date getCreated() {
 		return created;
 	}
@@ -165,6 +176,7 @@ public class Node extends Identifiable implements INode {
 	/**
 	 * It is the number of seconds since the epoch. See http://us.php.net/manual/en/function.time.php for more details.
 	 */
+	@Override
 	public java.util.Date getChanged() {
 		return changed;
 	}
@@ -173,6 +185,7 @@ public class Node extends Identifiable implements INode {
 		this.changed = changed;
 	}
 
+	@Override
 	public Boolean getFoundationmember() {
 		return foundationmember;
 	}
@@ -181,6 +194,7 @@ public class Node extends Identifiable implements INode {
 		this.foundationmember = foundationmember;
 	}
 
+	@Override
 	public String getHomepageurl() {
 		return homepageurl;
 	}
@@ -189,6 +203,7 @@ public class Node extends Identifiable implements INode {
 		this.homepageurl = homepageurl;
 	}
 
+	@Override
 	public String getImage() {
 		return image;
 	}
@@ -197,6 +212,7 @@ public class Node extends Identifiable implements INode {
 		this.image = image;
 	}
 
+	@Override
 	public String getScreenshot() {
 		return screenshot;
 	}
@@ -205,6 +221,7 @@ public class Node extends Identifiable implements INode {
 		this.screenshot = screenshot;
 	}
 
+	@Override
 	public String getVersion() {
 		return version;
 	}
@@ -213,6 +230,7 @@ public class Node extends Identifiable implements INode {
 		this.version = version;
 	}
 
+	@Override
 	public String getLicense() {
 		return license;
 	}
@@ -221,6 +239,7 @@ public class Node extends Identifiable implements INode {
 		this.license = license;
 	}
 
+	@Override
 	public String getCompanyname() {
 		return companyname;
 	}
@@ -229,6 +248,7 @@ public class Node extends Identifiable implements INode {
 		this.companyname = companyname;
 	}
 
+	@Override
 	public String getStatus() {
 		return status;
 	}
@@ -237,6 +257,7 @@ public class Node extends Identifiable implements INode {
 		this.status = status;
 	}
 
+	@Override
 	public String getEclipseversion() {
 		return eclipseversion;
 	}
@@ -245,6 +266,7 @@ public class Node extends Identifiable implements INode {
 		this.eclipseversion = eclipseversion;
 	}
 
+	@Override
 	public String getSupporturl() {
 		return supporturl;
 	}
@@ -253,6 +275,7 @@ public class Node extends Identifiable implements INode {
 		this.supporturl = supporturl;
 	}
 
+	@Override
 	public String getUpdateurl() {
 		return updateurl;
 	}
@@ -261,6 +284,7 @@ public class Node extends Identifiable implements INode {
 		this.updateurl = updateurl;
 	}
 
+	@Override
 	public Ius getIus() {
 		return ius;
 	}
@@ -269,6 +293,7 @@ public class Node extends Identifiable implements INode {
 		this.ius = ius;
 	}
 
+	@Override
 	public Platforms getPlatforms() {
 		return platforms;
 	}

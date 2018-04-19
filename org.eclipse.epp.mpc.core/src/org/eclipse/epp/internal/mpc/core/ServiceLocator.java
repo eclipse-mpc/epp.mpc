@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,6 +64,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 			this.binding = binding;
 		}
 
+		@Override
 		public void apply(ServiceReference<T> reference) {
 			ServiceRegistration<T> registration = getDynamicServiceInstance(reference);
 			if (registration != null) {
@@ -123,10 +124,12 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		return getDefaultMarketplaceService();
 	}
 
+	@Override
 	public IMarketplaceService getDefaultMarketplaceService() {
 		return getMarketplaceService(defaultMarketplaceUrl.toExternalForm());
 	}
 
+	@Override
 	public synchronized IMarketplaceService getMarketplaceService(String baseUrl) {
 		IMarketplaceService service = getService(marketplaceServiceTracker, baseUrl);
 		if (service != null) {
@@ -193,18 +196,22 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		return service;
 	}
 
+	@Override
 	public IMarketplaceStorageService getStorageService(String marketplaceUrl) {
 		return getService(storageServiceTracker, marketplaceUrl);
 	}
 
+	@Override
 	public IMarketplaceStorageService getDefaultStorageService() {
 		return getStorageService(defaultMarketplaceUrl.toExternalForm());
 	}
 
+	@Override
 	public IUserFavoritesService getFavoritesService(String marketplaceUrl) {
 		return getService(favoritesServiceTracker, marketplaceUrl);
 	}
 
+	@Override
 	public IUserFavoritesService getDefaultFavoritesService() {
 		return getFavoritesService(defaultMarketplaceUrl.toExternalForm());
 	}
@@ -268,6 +275,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 				IMarketplaceStorageService.class,
 				new ServiceTrackerCustomizer<IMarketplaceStorageService, IMarketplaceStorageService>() {
 
+			@Override
 			public IMarketplaceStorageService addingService(
 					ServiceReference<IMarketplaceStorageService> reference) {
 				IMarketplaceStorageService service = storageServiceTracker.addingService(reference);
@@ -279,6 +287,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 				return service;
 			}
 
+			@Override
 			public void modifiedService(ServiceReference<IMarketplaceStorageService> reference,
 					IMarketplaceStorageService service) {
 				Object marketplaceUrl = ServiceUtil.getOverridablePropertyValue(reference,
@@ -290,6 +299,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 				}
 			}
 
+			@Override
 			public void removedService(ServiceReference<IMarketplaceStorageService> reference,
 					IMarketplaceStorageService service) {
 				unbindFromUserFavoritesServices(reference, service);
@@ -300,10 +310,12 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		favoritesServiceTracker = new ServiceTracker<IUserFavoritesService, IUserFavoritesService>(context,
 				IUserFavoritesService.class,
 				new ServiceTrackerCustomizer<IUserFavoritesService, IUserFavoritesService>() {
+			@Override
 			public IUserFavoritesService addingService(ServiceReference<IUserFavoritesService> reference) {
 				return ServiceUtil.getService(reference);
 			}
 
+			@Override
 			public void modifiedService(ServiceReference<IUserFavoritesService> reference,
 					IUserFavoritesService service) {
 				if (!(service instanceof UserFavoritesService)) {
@@ -320,6 +332,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 				}
 			}
 
+			@Override
 			public void removedService(ServiceReference<IUserFavoritesService> reference,
 					IUserFavoritesService service) {
 				// ignore
@@ -464,6 +477,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		}
 	}
 
+	@Override
 	public synchronized ICatalogService getCatalogService() {
 		if (catalogServiceTracker != null) {
 			ICatalogService registeredService = catalogServiceTracker.getService();
