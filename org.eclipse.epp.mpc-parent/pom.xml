@@ -4,7 +4,7 @@
    <modelVersion>4.0.0</modelVersion>
 
    <prerequisites>
-      <maven>3.1.1</maven>
+      <maven>3.3.1</maven>
    </prerequisites>
 
    <groupId>org.eclipse.epp.mpc</groupId>
@@ -21,7 +21,7 @@
       <enforced.java.version>[1.8.0,)</enforced.java.version>
       <java-jdk>SYSTEM</java-jdk>
 
-      <tycho-version>1.0.0</tycho-version>
+      <tycho-version>1.1.0</tycho-version>
       <tycho-extras-version>${tycho-version}</tycho-extras-version>
 
       <qualifier-format>'v'yyyyMMdd-HHmm</qualifier-format>
@@ -161,7 +161,7 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-compiler-plugin</artifactId>
-               <version>3.6.1</version>
+               <version>3.7.0</version>
                <configuration>
                   <source>${java-version}</source>
                   <target>${java-version}</target>
@@ -181,7 +181,7 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-enforcer-plugin</artifactId>
-               <version>1.4.1</version>
+               <version>3.0.0-M1</version>
                <executions>
                   <execution>
                      <id>enforce-java</id>
@@ -320,7 +320,7 @@
             <plugin>
                <groupId>org.eclipse.cbi.maven.plugins</groupId>
                <artifactId>eclipse-jarsigner-plugin</artifactId>
-               <version>1.1.3</version>
+               <version>1.1.5</version>
             </plugin>
 
             <plugin>
@@ -335,7 +335,7 @@
             <plugin>
                <groupId>org.codehaus.mojo</groupId>
                <artifactId>findbugs-maven-plugin</artifactId>
-               <version>3.0.4</version>
+               <version>3.0.5</version>
                <configuration>
                   <findbugsXmlOutput>true</findbugsXmlOutput>
                   <failOnError>false</failOnError>
@@ -359,7 +359,7 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-pmd-plugin</artifactId>
-               <version>3.7</version>
+               <version>3.9.0</version>
                <configuration>
                   <sourceEncoding>utf-8</sourceEncoding>
                   <minimumTokens>100</minimumTokens>
