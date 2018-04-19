@@ -224,7 +224,7 @@ public class FavoritesViewer extends CatalogViewer {
 			discoveryResources = null;
 		});
 		super.getResources().dispose();
-		viewer.setSorter(null);
+		viewer.setComparator(null);
 		return viewer;
 	}
 

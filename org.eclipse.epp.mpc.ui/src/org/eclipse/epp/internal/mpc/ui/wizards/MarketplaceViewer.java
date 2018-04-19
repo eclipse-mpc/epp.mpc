@@ -656,9 +656,9 @@ public class MarketplaceViewer extends CatalogViewer {
 	private void updateViewer(final String queryText) {
 		runUpdate(() -> {
 			if (contentType == ContentType.INSTALLED) {
-				getViewer().setSorter(new MarketplaceViewerSorter());
+				getViewer().setComparator(new MarketplaceViewerSorter());
 			} else {
-				getViewer().setSorter(null);
+				getViewer().setComparator(null);
 			}
 
 			MarketplaceViewer.super.doFind(queryText);
@@ -873,7 +873,7 @@ public class MarketplaceViewer extends CatalogViewer {
 		viewer.getControl().addDisposeListener(e -> discoveryResources.dispose());
 		super.getResources().dispose();
 
-		viewer.setSorter(null);
+		viewer.setComparator(null);
 		if (serviceReference != null) {
 			final ServiceReference<IDiscoveryItemFactory> ref = serviceReference;
 			viewer.getControl().addDisposeListener(e -> bundleContext.ungetService(ref));
