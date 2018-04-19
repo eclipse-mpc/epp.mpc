@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,7 +63,6 @@ import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CategoryItem;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -72,8 +71,6 @@ import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
@@ -234,18 +231,14 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	private final LoginListener loginListener = new LoginListener() {
 
+		@Override
 		public void loginChanged(final String oldUser, final String newUser) {
 			final Control control = MarketplaceViewer.this.getControl();
 			if (control != null && !control.isDisposed()) {
 				Display display = control.getDisplay();
 				Display current = Display.getCurrent();
 				if (current == null || current != display) {
-					display.syncExec(new Runnable() {
-
-						public void run() {
-							loginChanged(oldUser, newUser);
-						}
-					});
+					display.syncExec(() -> loginChanged(oldUser, newUser));
 					return;
 				}
 				refreshFavorites();
@@ -269,11 +262,9 @@ public class MarketplaceViewer extends CatalogViewer {
 			if (filter instanceof MarketplaceFilter) {
 				MarketplaceFilter marketplaceFilter = (MarketplaceFilter) filter;
 				marketplaceFilter.createControl(parent);
-				marketplaceFilter.addPropertyChangeListener(new IPropertyChangeListener() {
-					public void propertyChange(PropertyChangeEvent event) {
-						if (AbstractTagFilter.PROP_SELECTED.equals(event.getProperty())) {
-							doQuery();
-						}
+				marketplaceFilter.addPropertyChangeListener(event -> {
+					if (AbstractTagFilter.PROP_SELECTED.equals(event.getProperty())) {
+						doQuery();
 					}
 				});
 			}
@@ -322,18 +313,15 @@ public class MarketplaceViewer extends CatalogViewer {
 				}
 			}
 		}
-		runUpdate(new Runnable() {
+		runUpdate(() -> {
+			MarketplaceViewer.super.catalogUpdated(wasCancelled, wasError);
 
-			public void run() {
-				MarketplaceViewer.super.catalogUpdated(wasCancelled, wasError);
-
-				for (CatalogFilter filter : getConfiguration().getFilters()) {
-					if (filter instanceof MarketplaceFilter) {
-						((MarketplaceFilter) filter).catalogUpdated(wasCancelled);
-					}
+			for (CatalogFilter filter : getConfiguration().getFilters()) {
+				if (filter instanceof MarketplaceFilter) {
+					((MarketplaceFilter) filter).catalogUpdated(wasCancelled);
 				}
-				setFilters(queryData);
 			}
+			setFilters(queryData);
 		});
 	}
 
@@ -441,11 +429,7 @@ public class MarketplaceViewer extends CatalogViewer {
 		setFilters(queryData);
 		this.queryData = queryData;
 
-		updateContent(contentType, new Runnable() {
-			public void run() {
-				doQuery(queryData, null);
-			}
-		});
+		updateContent(contentType, () -> doQuery(queryData, null));
 	}
 
 	private void setFilters(QueryData queryData) {
@@ -490,11 +474,7 @@ public class MarketplaceViewer extends CatalogViewer {
 	}
 
 	public void reload() {
-		updateContent(this.contentType, new Runnable() {
-			public void run() {
-				doQuery();
-			}
-		});
+		updateContent(this.contentType, () -> doQuery());
 	}
 
 	private IStatus doQuery() {
@@ -547,13 +527,11 @@ public class MarketplaceViewer extends CatalogViewer {
 	 *            the tag to search for
 	 */
 	public void doQueryForTag(final String tag) {
-		updateContent(ContentType.SEARCH, new Runnable() {
-			public void run() {
-				queryData = new QueryData();
-				queryData.queryText = QUERY_TAG_KEYWORD + tag;
-				setFilters(queryData);
-				doQuery();
-			}
+		updateContent(ContentType.SEARCH, () -> {
+			queryData = new QueryData();
+			queryData.queryText = QUERY_TAG_KEYWORD + tag;
+			setFilters(queryData);
+			doQuery();
 		});
 	}
 
@@ -578,11 +556,7 @@ public class MarketplaceViewer extends CatalogViewer {
 		IStatus status;
 		try {
 			final IStatus[] result = new IStatus[1];
-			context.run(true, true, new IRunnableWithProgress() {
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					result[0] = getCatalog().refreshUserFavorites(monitor);
-				}
-			});
+			context.run(true, true, monitor -> result[0] = getCatalog().refreshUserFavorites(monitor));
 			status = result[0];
 		} catch (InvocationTargetException e) {
 			status = computeStatus(e, Messages.MarketplaceViewer_unexpectedException);
@@ -602,58 +576,52 @@ public class MarketplaceViewer extends CatalogViewer {
 			final ContentType queryType = contentType;
 			queryContentType = queryType;
 			final IStatus[] result = new IStatus[1];
-			context.run(true, true, new IRunnableWithProgress() {
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					switch (queryType) {
-					case POPULAR:
-						result[0] = getCatalog().popular(monitor);
-						break;
-					case RECENT:
-						result[0] = getCatalog().recent(monitor);
-						break;
-					case RELATED:
-						result[0] = getCatalog().related(monitor);
-						break;
-					case INSTALLED:
-						result[0] = getCatalog().installed(monitor);
-						break;
-					case FAVORITES:
-						result[0] = getCatalog().userFavorites(false, monitor);
-						break;
-					case SELECTION:
-						Set<String> nodeIds = new HashSet<String>();
-						for (CatalogItem item : getSelectionModel().getItemToSelectedOperation().keySet()) {
-							nodeIds.add(((INode) item.getData()).getId());
-						}
-						result[0] = getCatalog().performQuery(monitor, nodeIds);
-						break;
-					case SEARCH:
-					case FEATURED_MARKET:
-					default:
-						if (nodes != null && !nodes.isEmpty()) {
-							result[0] = getCatalog().performNodeQuery(monitor, nodes);
-						} else if (queryData.queryText != null && queryData.queryText.length() > 0) {
-							String tag = getTagQuery(queryData.queryText);
-							if (tag != null) {
-								result[0] = getCatalog().tagged(tag, monitor);
-							} else {
-								result[0] = getCatalog().performQuery(queryData.queryMarket, queryData.queryCategory,
-										queryData.queryText, monitor);
-							}
+			context.run(true, true, monitor -> {
+				switch (queryType) {
+				case POPULAR:
+					result[0] = getCatalog().popular(monitor);
+					break;
+				case RECENT:
+					result[0] = getCatalog().recent(monitor);
+					break;
+				case RELATED:
+					result[0] = getCatalog().related(monitor);
+					break;
+				case INSTALLED:
+					result[0] = getCatalog().installed(monitor);
+					break;
+				case FAVORITES:
+					result[0] = getCatalog().userFavorites(false, monitor);
+					break;
+				case SELECTION:
+					Set<String> nodeIds = new HashSet<String>();
+					for (CatalogItem item : getSelectionModel().getItemToSelectedOperation().keySet()) {
+						nodeIds.add(((INode) item.getData()).getId());
+					}
+					result[0] = getCatalog().performQuery(monitor, nodeIds);
+					break;
+				case SEARCH:
+				case FEATURED_MARKET:
+				default:
+					if (nodes != null && !nodes.isEmpty()) {
+						result[0] = getCatalog().performNodeQuery(monitor, nodes);
+					} else if (queryData.queryText != null && queryData.queryText.length() > 0) {
+						String tag = getTagQuery(queryData.queryText);
+						if (tag != null) {
+							result[0] = getCatalog().tagged(tag, monitor);
 						} else {
-							result[0] = getCatalog().featured(monitor, queryData.queryMarket, queryData.queryCategory);
+							result[0] = getCatalog().performQuery(queryData.queryMarket, queryData.queryCategory,
+									queryData.queryText, monitor);
 						}
-						break;
+					} else {
+						result[0] = getCatalog().featured(monitor, queryData.queryMarket, queryData.queryCategory);
 					}
-					if (!monitor.isCanceled() && result[0] != null && result[0].getSeverity() != IStatus.CANCEL) {
-						getCatalog().checkForUpdates(monitor);
-					}
-					MarketplaceViewer.this.getControl().getDisplay().syncExec(new Runnable() {
-						public void run() {
-							updateViewer(queryData.queryText);
-						}
-					});
+					break;
 				}
+				if (!monitor.isCanceled() && result[0] != null && result[0].getSeverity() != IStatus.CANCEL) {
+					getCatalog().checkForUpdates(monitor);
+				}
+				MarketplaceViewer.this.getControl().getDisplay().syncExec(() -> updateViewer(queryData.queryText));
 			});
 
 			if (result[0] != null && !result[0].isOK() && result[0].getSeverity() != IStatus.CANCEL) {
@@ -686,19 +654,16 @@ public class MarketplaceViewer extends CatalogViewer {
 	}
 
 	private void updateViewer(final String queryText) {
-		runUpdate(new Runnable() {
-
-			public void run() {
-				if (contentType == ContentType.INSTALLED) {
-					getViewer().setSorter(new MarketplaceViewerSorter());
-				} else {
-					getViewer().setSorter(null);
-				}
-
-				MarketplaceViewer.super.doFind(queryText);
-				// bug 305274: scrollbars don't always appear after switching tabs, so we re-do the layout
-				getViewer().getControl().getParent().layout(true, true);
+		runUpdate(() -> {
+			if (contentType == ContentType.INSTALLED) {
+				getViewer().setSorter(new MarketplaceViewerSorter());
+			} else {
+				getViewer().setSorter(null);
 			}
+
+			MarketplaceViewer.super.doFind(queryText);
+			// bug 305274: scrollbars don't always appear after switching tabs, so we re-do the layout
+			getViewer().getControl().getParent().layout(true, true);
 		});
 	}
 
@@ -724,12 +689,9 @@ public class MarketplaceViewer extends CatalogViewer {
 		contentType = ContentType.SELECTION;
 		queryData = new QueryData();
 		findText = null;
-		runUpdate(new Runnable() {
-
-			public void run() {
-				setHeaderVisible(true);
-				doQuery(new QueryData(null, null, findText), null);
-			}
+		runUpdate(() -> {
+			setHeaderVisible(true);
+			doQuery(new QueryData(null, null, findText), null);
 		});
 		contentType = ContentType.SEARCH;
 	}
@@ -765,12 +727,10 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	private void doSetContentType(final ContentType contentType) {
 		final ContentType oldContentType = this.contentType;
-		updateContent(contentType, new Runnable() {
-			public void run() {
-				IStatus status = doQuery();
-				if (status.getSeverity() == IStatus.CANCEL || status.getSeverity() >= IStatus.ERROR) {
-					setContentType(oldContentType);
-				}
+		updateContent(contentType, () -> {
+			IStatus status = doQuery();
+			if (status.getSeverity() == IStatus.CANCEL || status.getSeverity() >= IStatus.ERROR) {
+				setContentType(oldContentType);
 			}
 		});
 	}
@@ -841,13 +801,10 @@ public class MarketplaceViewer extends CatalogViewer {
 				setFilters(newQueryData);
 			}
 		}
-		runUpdate(new Runnable() {
-
-			public void run() {
-				fireContentTypeChange(oldContentType, contentType);
-				setHeaderVisible(hasQuery);
-				queryCall.run();
-			}
+		runUpdate(() -> {
+			fireContentTypeChange(oldContentType, contentType);
+			setHeaderVisible(hasQuery);
+			queryCall.run();
 		});
 	}
 
@@ -873,20 +830,17 @@ public class MarketplaceViewer extends CatalogViewer {
 	@Override
 	public void setHeaderVisible(final boolean visible) {
 		if (visible != isHeaderVisible()) {
-			runUpdate(new Runnable() {
-
-				public void run() {
-					if (!visible) {
-						filters = getViewer().getFilters();
-						getViewer().resetFilters();
-					} else {
-						if (filters != null) {
-							getViewer().setFilters(filters);
-							filters = null;
-						}
+			runUpdate(() -> {
+				if (!visible) {
+					filters = getViewer().getFilters();
+					getViewer().resetFilters();
+				} else {
+					if (filters != null) {
+						getViewer().setFilters(filters);
+						filters = null;
 					}
-					MarketplaceViewer.super.setHeaderVisible(visible);
 				}
+				MarketplaceViewer.super.setHeaderVisible(visible);
 			});
 		}
 	}
@@ -916,21 +870,13 @@ public class MarketplaceViewer extends CatalogViewer {
 		}
 		StructuredViewer viewer = super.doCreateViewer(container);
 		discoveryResources = new MarketplaceDiscoveryResources(container.getDisplay());
-		viewer.getControl().addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent e) {
-				discoveryResources.dispose();
-			}
-		});
+		viewer.getControl().addDisposeListener(e -> discoveryResources.dispose());
 		super.getResources().dispose();
 
 		viewer.setSorter(null);
 		if (serviceReference != null) {
 			final ServiceReference<IDiscoveryItemFactory> ref = serviceReference;
-			viewer.getControl().addDisposeListener(new DisposeListener() {
-				public void widgetDisposed(DisposeEvent e) {
-					bundleContext.ungetService(ref);
-				}
-			});
+			viewer.getControl().addDisposeListener(e -> bundleContext.ungetService(ref));
 		}
 		return viewer;
 	}
@@ -1069,12 +1015,7 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	@Override
 	public void refresh() {
-		runUpdate(new Runnable() {
-
-			public void run() {
-				MarketplaceViewer.super.refresh();
-			}
-		});
+		runUpdate(() -> MarketplaceViewer.super.refresh());
 	}
 
 	protected static void fixLayout(CategoryItem<?> categoryItem) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,7 +22,6 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
@@ -40,7 +39,6 @@ import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.epp.mpc.ui.IMarketplaceClientConfiguration;
 import org.eclipse.equinox.internal.p2.discovery.DiscoveryCore;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryWizard;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.PlatformUI;
@@ -56,6 +54,7 @@ public abstract class AbstractMarketplaceWizardCommand extends AbstractHandler i
 
 	private CatalogDescriptor selectedCatalogDescriptor;
 
+	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		final MarketplaceCatalog catalog = createCatalog();
 		if (catalog == null)
@@ -161,19 +160,16 @@ public abstract class AbstractMarketplaceWizardCommand extends AbstractHandler i
 		try {
 			final AtomicReference<List<? extends ICatalog>> result = new AtomicReference<List<? extends ICatalog>>();
 
-			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress() {
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					try {
-						ICatalogService catalogService = ServiceHelper.getMarketplaceServiceLocator()
-								.getCatalogService();
-						final List<? extends ICatalog> catalogs = catalogService.listCatalogs(monitor);
-						result.set(catalogs);
-					} catch (CoreException e) {
-						if (e.getStatus().getSeverity() == IStatus.CANCEL) {
-							throw new InterruptedException();
-						}
-						throw new InvocationTargetException(e);
+			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(monitor -> {
+				try {
+					ICatalogService catalogService = ServiceHelper.getMarketplaceServiceLocator().getCatalogService();
+					final List<? extends ICatalog> catalogs = catalogService.listCatalogs(monitor);
+					result.set(catalogs);
+				} catch (CoreException e) {
+					if (e.getStatus().getSeverity() == IStatus.CANCEL) {
+						throw new InterruptedException();
 					}
+					throw new InvocationTargetException(e);
 				}
 			});
 

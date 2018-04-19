@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Red Hat Inc.
+ * Copyright (c) 2017, 2018 Red Hat Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,6 @@ package org.eclipse.epp.internal.mpc.ui.discovery;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,11 +116,8 @@ final class DiscoverFileSupportJob extends Job {
 	private static List<? extends INode> orderNodesByTagSubExtensionCount(List<? extends INode> nodes,
 			List<String> fileExtensionTags) {
 
-		Collections.sort(fileExtensionTags, new Comparator<String>() {
-			public int compare(String s1, String s2) {
-				return (s2.length() - s2.replace(".", "").length()) - (s1.length() - s1.replace(".", "").length()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			}
-		});
+		Collections.sort(fileExtensionTags, (s1, s2) -> (s2.length() - s2.replace(".", "").length())
+				- (s1.length() - s1.replace(".", "").length()));
 
 		Map<String, List<INode>> nodesByTags = new HashMap<String, List<INode>>();
 		for (INode iNode : nodes) {

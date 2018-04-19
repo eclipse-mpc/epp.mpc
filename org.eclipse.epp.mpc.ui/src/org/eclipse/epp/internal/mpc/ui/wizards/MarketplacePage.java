@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,6 @@ import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.model.CatalogBranding;
@@ -54,10 +53,7 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -200,6 +196,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		tabFolder.setSelection(searchTabItem);
 
 		tabFolder.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (e.item.isDisposed()) {
 					return;
@@ -207,6 +204,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 				setActiveTab((TabItem) e.item);
 			}
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				widgetSelected(e);
 			}
@@ -216,6 +214,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 			contentListLinks = new Link(pageContent, SWT.NULL);//TODO id
 			contentListLinks.setToolTipText(Messages.MarketplacePage_showSelection);
 			contentListLinks.addSelectionListener(new SelectionListener() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					String actionId = e.text;
 					ActionLink actionLink = actions.get(actionId);
@@ -224,6 +223,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 					}
 				}
 
+				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
 					widgetSelected(e);
 				}
@@ -242,6 +242,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 
 			private int previousSelectionSize = 0;
 
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				if (!isCurrentPage()) {
 					return;
@@ -261,12 +262,9 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 				previousSelectionSize = newSelectionSize;
 			}
 		});
-		getViewer().addPropertyChangeListener(new IPropertyChangeListener() {
-
-			public void propertyChange(PropertyChangeEvent event) {
-				if (event.getProperty().equals(MarketplaceViewer.CONTENT_TYPE_PROPERTY) && event.getNewValue() != null) {
-					setActiveTab((ContentType) event.getNewValue());
-				}
+		getViewer().addPropertyChangeListener(event -> {
+			if (event.getProperty().equals(MarketplaceViewer.CONTENT_TYPE_PROPERTY) && event.getNewValue() != null) {
+				setActiveTab((ContentType) event.getNewValue());
 			}
 		});
 		setControl(pageContent);
@@ -379,11 +377,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 				if (currentTabItem != newsTabItem) {
 					tabFolder.setSelection(newsTabItem);
 					// required for Mac to not switch back to first tab
-					getControl().getDisplay().asyncExec(new Runnable() {
-						public void run() {
-							tabFolder.setSelection(newsTabItem);
-						}
-					});
+					getControl().getDisplay().asyncExec(() -> tabFolder.setSelection(newsTabItem));
 				}
 			}
 			return;
@@ -594,12 +588,10 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		composite.setLayout(new FillLayout());
 
 		final CatalogSwitcher switcher = new CatalogSwitcher(composite, SWT.BORDER, configuration);
-		switcher.addSelectionChangedListener(new ISelectionChangedListener() {
-
-			public void selectionChanged(SelectionChangedEvent event) {
-				CatalogDescriptor descriptor = (CatalogDescriptor) ((IStructuredSelection) event.getSelection()).getFirstElement();
-				showMarketplace(descriptor);
-			}
+		switcher.addSelectionChangedListener(event -> {
+			CatalogDescriptor descriptor = (CatalogDescriptor) ((IStructuredSelection) event.getSelection())
+					.getFirstElement();
+			showMarketplace(descriptor);
 		});
 		CatalogDescriptor selectedDescriptor = configuration.getCatalogDescriptor();
 		if (selectedDescriptor != null) {
@@ -730,11 +722,9 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 	protected void doUpdateCatalog() {
 		if (!updated) {
 			updated = true;
-			Display.getCurrent().asyncExec(new Runnable() {
-				public void run() {
-					if (!getControl().isDisposed() && isCurrentPage()) {
-						safeUpdateCatalog();
-					}
+			Display.getCurrent().asyncExec(() -> {
+				if (!getControl().isDisposed() && isCurrentPage()) {
+					safeUpdateCatalog();
 				}
 			});
 		}
@@ -891,20 +881,19 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 			.getResourceProvider()
 			.provideResource(new ResourceReceiver<ImageDescriptor>() {
 
+				@Override
 				public ImageDescriptor processResource(URL resource) {
 					return ImageDescriptor.createFromURL(resource);
 				}
 
+				@Override
 				public void setResource(final ImageDescriptor resource) {
-					display.asyncExec(new Runnable() {
-
-						public void run() {
-							try {
-								setImageDescriptor(resource);
-							} catch (SWTException ex) {
-								// broken image
-								setImageDescriptor(defaultWizardIconDescriptor);
-							}
+					display.asyncExec(() -> {
+						try {
+							setImageDescriptor(resource);
+						} catch (SWTException ex) {
+							// broken image
+							setImageDescriptor(defaultWizardIconDescriptor);
 						}
 					});
 				}
@@ -1014,15 +1003,12 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 
 	private void updateCatalog() {
 		try {
-			getContainer().run(false, true, new IRunnableWithProgress() {
-
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					if (getViewer().getControl().isDisposed()) {
-						return;
-					}
-					getWizard().initializeCatalog();
-					safeUpdateCatalog();
+			getContainer().run(false, true, monitor -> {
+				if (getViewer().getControl().isDisposed()) {
+					return;
 				}
+				getWizard().initializeCatalog();
+				safeUpdateCatalog();
 			});
 		} catch (InvocationTargetException e) {
 			MarketplaceClientUi.error(e.getCause());
@@ -1159,10 +1145,12 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		getViewer().reload();
 	}
 
+	@Override
 	public String getNextButtonLabel() {
 		return Messages.MarketplaceWizardDialog_Install_Now;
 	}
 
+	@Override
 	public String getBackButtonLabel() {
 		return null;
 	}

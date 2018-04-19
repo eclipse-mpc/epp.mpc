@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,19 +32,13 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -110,12 +104,9 @@ public class FavoritesViewer extends CatalogViewer {
 	private void createButtonsForViewerButtonBar(Composite buttonContainer) {
 		selectAllButton = createButton(buttonContainer, IDialogConstants.SELECT_ALL_ID, Messages.FavoritesViewer_SelectAll);
 		deselectAllButton = createButton(buttonContainer, IDialogConstants.DESELECT_ALL_ID, Messages.FavoritesViewer_DeselectAll);
-		addSelectionChangedListener(new ISelectionChangedListener() {
-
-			public void selectionChanged(SelectionChangedEvent event) {
-				IStructuredSelection selection = event.getStructuredSelection();
-				updateButtonState(selection);
-			}
+		addSelectionChangedListener(event -> {
+			IStructuredSelection selection = event.getStructuredSelection();
+			updateButtonState(selection);
 		});
 	}
 
@@ -166,10 +157,12 @@ public class FavoritesViewer extends CatalogViewer {
 		button.setData(Integer.valueOf(id));
 		button.addSelectionListener(new SelectionListener() {
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				buttonPressed(((Integer) e.widget.getData()).intValue());
 			}
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// ignore
 
@@ -226,11 +219,9 @@ public class FavoritesViewer extends CatalogViewer {
 	protected StructuredViewer doCreateViewer(Composite container) {
 		StructuredViewer viewer = super.doCreateViewer(container);
 		discoveryResources = new MarketplaceDiscoveryResources(container.getDisplay());
-		viewer.getControl().addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent e) {
-				discoveryResources.dispose();
-				discoveryResources = null;
-			}
+		viewer.getControl().addDisposeListener(e -> {
+			discoveryResources.dispose();
+			discoveryResources = null;
 		});
 		super.getResources().dispose();
 		viewer.setSorter(null);
@@ -263,13 +254,9 @@ public class FavoritesViewer extends CatalogViewer {
 		}
 		if (searchField != null) {
 			searchField.setMessage(Messages.FavoritesViewer_searchInputDescription);
-			searchField.addVerifyListener(new VerifyListener() {
-
-				public void verifyText(VerifyEvent e) {
-					if (e.keyCode == 0 && e.start == 0 && e.end == searchField.getText().length()
-							&& e.text.length() > 0) {
-						filterTextChanged();
-					}
+			searchField.addVerifyListener(e -> {
+				if (e.keyCode == 0 && e.start == 0 && e.end == searchField.getText().length() && e.text.length() > 0) {
+					filterTextChanged();
 				}
 			});
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,75 +71,40 @@ public class MarketplaceCatalog extends Catalog {
 
 	public IStatus performQuery(final IMarket market, final ICategory category, final String queryText,
 			IProgressMonitor monitor) {
-		return performDiscovery(new DiscoveryOperation() {
-			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
-				strategy.performQuery(market, category, queryText, monitor);
-			}
-		}, false, monitor);
+		return performDiscovery((strategy, monitor1) -> strategy.performQuery(market, category, queryText, monitor1),
+				false, monitor);
 	}
 
 	public IStatus tagged(final String tag, IProgressMonitor monitor) {
-		return performDiscovery(new DiscoveryOperation() {
-			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
-				strategy.tagged(tag, monitor);
-			}
-		}, false, monitor);
+		return performDiscovery((strategy, monitor1) -> strategy.tagged(tag, monitor1), false, monitor);
 	}
 
 	public IStatus related(IProgressMonitor monitor) {
-		return performDiscovery(new DiscoveryOperation() {
-			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
-				strategy.related(monitor);
-			}
-		}, false, monitor);
+		return performDiscovery((strategy, monitor1) -> strategy.related(monitor1), false, monitor);
 	}
 
 	public IStatus recent(IProgressMonitor monitor) {
-		return performDiscovery(new DiscoveryOperation() {
-			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
-				strategy.recent(monitor);
-			}
-		}, false, monitor);
+		return performDiscovery((strategy, monitor1) -> strategy.recent(monitor1), false, monitor);
 	}
 
 	public IStatus popular(IProgressMonitor monitor) {
-		return performDiscovery(new DiscoveryOperation() {
-			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
-				strategy.popular(monitor);
-			}
-		}, false, monitor);
+		return performDiscovery((strategy, monitor1) -> strategy.popular(monitor1), false, monitor);
 	}
 
 	public IStatus featured(IProgressMonitor monitor, final IMarket market, final ICategory category) {
-		return performDiscovery(new DiscoveryOperation() {
-			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
-				strategy.featured(monitor, market, category);
-			}
-		}, false, monitor);
+		return performDiscovery((strategy, monitor1) -> strategy.featured(monitor1, market, category), false, monitor);
 	}
 
 	public IStatus installed(IProgressMonitor monitor) {
-		return performDiscovery(new DiscoveryOperation() {
-			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
-				strategy.installed(monitor);
-			}
-		}, false, monitor);
+		return performDiscovery((strategy, monitor1) -> strategy.installed(monitor1), false, monitor);
 	}
 
 	public IStatus userFavorites(final boolean login, IProgressMonitor monitor) {
-		return performDiscovery(new DiscoveryOperation() {
-			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
-				strategy.userFavorites(login, monitor);
-			}
-		}, false, monitor);
+		return performDiscovery((strategy, monitor1) -> strategy.userFavorites(login, monitor1), false, monitor);
 	}
 
 	public IStatus refreshUserFavorites(IProgressMonitor monitor) {
-		return performDiscovery(new DiscoveryOperation() {
-			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
-				strategy.refreshUserFavorites(monitor);
-			}
-		}, true, monitor);
+		return performDiscovery((strategy, monitor1) -> strategy.refreshUserFavorites(monitor1), true, monitor);
 	}
 
 	/**
@@ -152,11 +117,7 @@ public class MarketplaceCatalog extends Catalog {
 	 * @return
 	 */
 	public IStatus performQuery(IProgressMonitor monitor, final Set<String> nodeIds) {
-		return performDiscovery(new DiscoveryOperation() {
-			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
-				strategy.performQuery(monitor, nodeIds);
-			}
-		}, false, monitor);
+		return performDiscovery((strategy, monitor1) -> strategy.performQuery(monitor1, nodeIds), false, monitor);
 	}
 
 	/**
@@ -169,11 +130,7 @@ public class MarketplaceCatalog extends Catalog {
 	 * @return
 	 */
 	public IStatus performNodeQuery(IProgressMonitor monitor, final Set<? extends INode> nodes) {
-		return performDiscovery(new DiscoveryOperation() {
-			public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException {
-				strategy.performNodeQuery(monitor, nodes);
-			}
-		}, false, monitor);
+		return performDiscovery((strategy, monitor1) -> strategy.performNodeQuery(monitor1, nodes), false, monitor);
 	}
 
 	public IStatus checkForUpdates(final IProgressMonitor monitor) {
@@ -265,63 +222,59 @@ public class MarketplaceCatalog extends Catalog {
 			for (Map.Entry<URI, List<MarketplaceNodeCatalogItem>> entry : installedCatalogItemsByUpdateUri.entrySet()) {
 				final URI uri = entry.getKey();
 				final List<MarketplaceNodeCatalogItem> catalogItemsThisSite = entry.getValue();
-				executor.submit(new Runnable() {
-					public void run() {
-						ProvisioningSession session = ProvisioningUI.getDefaultUI().getSession();
-						IMetadataRepositoryManager manager = (IMetadataRepositoryManager) session.getProvisioningAgent()
-								.getService(IMetadataRepositoryManager.SERVICE_NAME);
-						try {
-							for (MarketplaceNodeCatalogItem item : catalogItemsThisSite) {
-								if (Boolean.TRUE.equals(item.getAvailable())) {
-									item.setAvailable(null);
-								}
+				executor.submit(() -> {
+					ProvisioningSession session = ProvisioningUI.getDefaultUI().getSession();
+					IMetadataRepositoryManager manager = (IMetadataRepositoryManager) session.getProvisioningAgent()
+							.getService(IMetadataRepositoryManager.SERVICE_NAME);
+					try {
+						for (MarketplaceNodeCatalogItem item1 : catalogItemsThisSite) {
+							if (Boolean.TRUE.equals(item1.getAvailable())) {
+								item1.setAvailable(null);
 							}
-							IMetadataRepository repository = manager.loadRepository(uri, pm);
-							IQuery<IInstallableUnit> query = QueryUtil.createMatchQuery( //
-									"id ~= /*.feature.group/ && " + //$NON-NLS-1$
-									"properties['org.eclipse.equinox.p2.type.group'] == true ");//$NON-NLS-1$
-							IQueryResult<IInstallableUnit> result = repository.query(query, pm);
-
-							// compute highest version for all available IUs.
-							Map<String, Version> repositoryIuVersionById = new HashMap<String, Version>();
-							for (IInstallableUnit iu : result) {
-								String key = createRepositoryIuKey(uri.toString(), iu.getId());
-								Version version = iu.getVersion();
-								Version priorVersion = repositoryIuVersionById.put(key, version);
-								if (priorVersion != null && priorVersion.compareTo(version) > 0) {
-									repositoryIuVersionById.put(key, priorVersion);
-								}
-							}
-
-							for (MarketplaceNodeCatalogItem item : catalogItemsThisSite) {
-								List<MarketplaceNodeInstallableUnitItem> installableUnitItems = item.getInstallableUnitItems();
-								for (MarketplaceNodeInstallableUnitItem iuItem : installableUnitItems) {
-									String key = createRepositoryIuKey(uri.toString(), iuItem.getId());
-									Version availableVersion = repositoryIuVersionById.get(key);
-									MarketplaceCatalog.this.repositoryIuVersionById.put(key, availableVersion);
-									if (availableVersion != null) {
-										item.setAvailable(true);
-									}
-								}
-							}
-							for (MarketplaceNodeCatalogItem item : catalogItemsThisSite) {
-								setUpdatesAvailable(installedIUs, item);
-							}
-
-						} catch (ProvisionException e) {
-							MultiStatus errorStatus = new MultiStatus(MarketplaceClientUi.BUNDLE_ID, IStatus.WARNING,
-									NLS.bind(
-											Messages.MarketplaceCatalog_ErrorReadingRepository,
-											uri),
-									e);
-							for (MarketplaceNodeCatalogItem item : catalogItemsThisSite) {
-								item.setAvailable(false);
-								errorStatus.add(MarketplaceClientUi.newStatus(IStatus.INFO, item.getName()));
-							}
-							MarketplaceClientUi.getLog().log(errorStatus);
-						} catch (OperationCanceledException e) {
-							// nothing to do
 						}
+						IMetadataRepository repository = manager.loadRepository(uri, pm);
+						IQuery<IInstallableUnit> query = QueryUtil.createMatchQuery( //
+								"id ~= /*.feature.group/ && " + //$NON-NLS-1$
+								"properties['org.eclipse.equinox.p2.type.group'] == true ");//$NON-NLS-1$
+						IQueryResult<IInstallableUnit> result = repository.query(query, pm);
+
+						// compute highest version for all available IUs.
+						Map<String, Version> repositoryIuVersionById = new HashMap<String, Version>();
+						for (IInstallableUnit iu : result) {
+							String key1 = createRepositoryIuKey(uri.toString(), iu.getId());
+							Version version = iu.getVersion();
+							Version priorVersion = repositoryIuVersionById.put(key1, version);
+							if (priorVersion != null && priorVersion.compareTo(version) > 0) {
+								repositoryIuVersionById.put(key1, priorVersion);
+							}
+						}
+
+						for (MarketplaceNodeCatalogItem item2 : catalogItemsThisSite) {
+							List<MarketplaceNodeInstallableUnitItem> installableUnitItems = item2
+									.getInstallableUnitItems();
+							for (MarketplaceNodeInstallableUnitItem iuItem : installableUnitItems) {
+								String key2 = createRepositoryIuKey(uri.toString(), iuItem.getId());
+								Version availableVersion = repositoryIuVersionById.get(key2);
+								MarketplaceCatalog.this.repositoryIuVersionById.put(key2, availableVersion);
+								if (availableVersion != null) {
+									item2.setAvailable(true);
+								}
+							}
+						}
+						for (MarketplaceNodeCatalogItem item3 : catalogItemsThisSite) {
+							setUpdatesAvailable(installedIUs, item3);
+						}
+
+					} catch (ProvisionException e1) {
+						MultiStatus errorStatus = new MultiStatus(MarketplaceClientUi.BUNDLE_ID, IStatus.WARNING,
+								NLS.bind(Messages.MarketplaceCatalog_ErrorReadingRepository, uri), e1);
+						for (MarketplaceNodeCatalogItem item4 : catalogItemsThisSite) {
+							item4.setAvailable(false);
+							errorStatus.add(MarketplaceClientUi.newStatus(IStatus.INFO, item4.getName()));
+						}
+						MarketplaceClientUi.getLog().log(errorStatus);
+					} catch (OperationCanceledException e2) {
+						// nothing to do
 					}
 				});
 			}

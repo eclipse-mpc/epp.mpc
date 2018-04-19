@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,10 +31,12 @@ import org.eclipse.ui.statushandlers.StatusManager;
 
 public class MarketplaceClientService implements IMarketplaceClientService {
 
+	@Override
 	public IMarketplaceClientConfiguration newConfiguration() {
 		return new MarketplaceCatalogConfiguration();
 	}
 
+	@Override
 	public void open(IMarketplaceClientConfiguration configuration) {
 		MarketplaceWizardCommand command = new MarketplaceWizardCommand();
 		command.setConfiguration(configuration);
@@ -55,6 +57,7 @@ public class MarketplaceClientService implements IMarketplaceClientService {
 		}
 	}
 
+	@Override
 	public void openSelected(IMarketplaceClientConfiguration configuration) {
 		checkInitialState(configuration);
 		MarketplaceWizardCommand command = new MarketplaceWizardCommand();
@@ -66,6 +69,7 @@ public class MarketplaceClientService implements IMarketplaceClientService {
 		execute(command);
 	}
 
+	@Override
 	public void openInstalled(IMarketplaceClientConfiguration configuration) {
 		MarketplaceWizardCommand command = new MarketplaceWizardCommand();
 		command.setConfiguration(configuration);
@@ -76,6 +80,7 @@ public class MarketplaceClientService implements IMarketplaceClientService {
 		execute(command);
 	}
 
+	@Override
 	public void openSearch(IMarketplaceClientConfiguration configuration, IMarket market, ICategory category,
 			String query) {
 		MarketplaceWizardCommand command = new MarketplaceWizardCommand();
@@ -90,6 +95,7 @@ public class MarketplaceClientService implements IMarketplaceClientService {
 		execute(command);
 	}
 
+	@Override
 	public void open(IMarketplaceClientConfiguration configuration, Set<INode> nodes) {
 		MarketplaceWizardCommand command = new MarketplaceWizardCommand();
 		command.setConfiguration(configuration);
@@ -101,6 +107,7 @@ public class MarketplaceClientService implements IMarketplaceClientService {
 		execute(command);
 	}
 
+	@Override
 	public void openProvisioning(IMarketplaceClientConfiguration configuration) {
 		checkInitialState(configuration);
 		MarketplaceWizardCommand command = new MarketplaceWizardCommand();
@@ -111,6 +118,7 @@ public class MarketplaceClientService implements IMarketplaceClientService {
 		execute(command);
 	}
 
+	@Override
 	public void openFavorites(IMarketplaceClientConfiguration configuration) {
 		MarketplaceWizardCommand command = new MarketplaceWizardCommand();
 		command.setConfiguration(configuration);
@@ -121,6 +129,7 @@ public class MarketplaceClientService implements IMarketplaceClientService {
 		execute(command);
 	}
 
+	@Override
 	public void openFavoritesImport(IMarketplaceClientConfiguration configuration, String favoritesUrl) {
 		ImportFavoritesWizardCommand command = new ImportFavoritesWizardCommand();
 		command.setConfiguration(configuration);

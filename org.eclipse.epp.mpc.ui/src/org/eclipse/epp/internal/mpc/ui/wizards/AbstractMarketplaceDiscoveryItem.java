@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 Tasktop Technologies and others.
+ * Copyright (c) 2010,, 2018 Tasktop Technologies and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,11 +12,9 @@
 
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
@@ -49,8 +47,6 @@ import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.TypedEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
@@ -169,25 +165,17 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 				e.result = getNameLabelText();
 			}
 		});
-		propertyChangeListener = new PropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent evt) {
-				if (!isDisposed()) {
-					getDisplay().asyncExec(new Runnable() {
-						public void run() {
-							if (!isDisposed()) {
-								refresh(true);
-							}
-						}
-					});
-				}
+		propertyChangeListener = evt -> {
+			if (!isDisposed()) {
+				getDisplay().asyncExec(() -> {
+					if (!isDisposed()) {
+						refresh(true);
+					}
+				});
 			}
 		};
 		connector.addPropertyChangeListener(propertyChangeListener);
-		this.addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent e) {
-				connector.removePropertyChangeListener(propertyChangeListener);
-			}
-		});
+		this.addDisposeListener(e -> connector.removePropertyChangeListener(propertyChangeListener));
 	}
 
 	protected PixelConverter getPixelConverter() {
@@ -427,30 +415,23 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		if (iconLabel == null) {
 			return;
 		}
-		ImageReceiver receiver = new ImageReceiver() {
-
-			public void setImage(Image image) {
-				if (image == null || image.isDisposed() || iconLabel.isDisposed()) {
-					return;
+		ImageReceiver receiver = image -> {
+			if (image == null || image.isDisposed() || iconLabel.isDisposed()) {
+				return;
+			}
+			try {
+				Rectangle bounds = image.getBounds();
+				if (bounds.width < 0.8 * MAX_IMAGE_WIDTH || bounds.width > MAX_IMAGE_WIDTH
+						|| bounds.height > MAX_IMAGE_HEIGHT) {
+					final Image scaledImage = Util.scaleImage(image, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT);
+					image = scaledImage;
+					iconLabel.addDisposeListener(e -> scaledImage.dispose());
 				}
-				try {
-					Rectangle bounds = image.getBounds();
-					if (bounds.width < 0.8 * MAX_IMAGE_WIDTH || bounds.width > MAX_IMAGE_WIDTH
-							|| bounds.height > MAX_IMAGE_HEIGHT) {
-						final Image scaledImage = Util.scaleImage(image, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT);
-						image = scaledImage;
-						iconLabel.addDisposeListener(new DisposeListener() {
-							public void widgetDisposed(DisposeEvent e) {
-								scaledImage.dispose();
-							}
-						});
-					}
-					iconLabel.setImage(image);
-				} catch (SWTException e) {
-					// ignore, probably a bad image format
+				iconLabel.setImage(image);
+			} catch (SWTException e) {
+				// ignore, probably a bad image format
 //							MarketplaceClientUi.error(NLS.bind(Messages.DiscoveryItem_cannotRenderImage_reason, connector.getIcon()
 //									.getImage32(), e.getMessage()), e);
-				}
 			}
 		};
 		String iconPath = getResources().getIconPath(icon, size, fallback);
@@ -465,7 +446,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 					iconPath,
 					MarketplaceClientUiPlugin.getInstance()
 					.getImageRegistry()
-							.get(getDefaultIconResourceId()));
+					.get(getDefaultIconResourceId()));
 		}
 	}
 
@@ -574,23 +555,20 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		}
 		tags = new ArrayList<ITag>(tags);
 		//sort list so that technical tags are at the end
-		Collections.sort(tags, new Comparator<ITag>() {
-
-			public int compare(ITag o1, ITag o2) {
-				if (o1 == o2) {
-					return 0;
-				}
-				if (o1.getName().startsWith(FILE_EXTENSION_TAG_PREFIX)) {
-					if (o2.getName().startsWith(FILE_EXTENSION_TAG_PREFIX)) {
-						return 0;
-					}
-					return 1;
-				}
-				if (o2.getName().startsWith(FILE_EXTENSION_TAG_PREFIX)) {
-					return -1;
-				}
+		Collections.sort(tags, (o1, o2) -> {
+			if (o1 == o2) {
 				return 0;
 			}
+			if (o1.getName().startsWith(FILE_EXTENSION_TAG_PREFIX)) {
+				if (o2.getName().startsWith(FILE_EXTENSION_TAG_PREFIX)) {
+					return 0;
+				}
+				return 1;
+			}
+			if (o2.getName().startsWith(FILE_EXTENSION_TAG_PREFIX)) {
+				return -1;
+			}
+			return 0;
 		});
 
 		boolean needsEllipsis = tags.size() > MAX_SHOWN_TAGS;
@@ -733,11 +711,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		hookTooltip(toolTip, tipActivator, exitControl);
 
 		if (image != null) {
-			Listener listener = new Listener() {
-				public void handleEvent(Event event) {
-					toolTip.show(titleControl);
-				}
-			};
+			Listener listener = event -> toolTip.show(titleControl);
 			tipActivator.addListener(SWT.MouseHover, listener);
 		}
 
@@ -753,11 +727,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 				}
 			}.register(link);
 		} else {
-			Listener selectionListener = new Listener() {
-				public void handleEvent(Event event) {
-					toolTip.show(titleControl);
-				}
-			};
+			Listener selectionListener = event -> toolTip.show(titleControl);
 			tipActivator.addListener(SWT.Selection, selectionListener);
 		}
 	}
@@ -766,43 +736,37 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		if (toolTip == null) {
 			return;
 		}
-		Listener listener = new Listener() {
-			public void handleEvent(Event event) {
-				toolTip.hide();
-			}
-		};
+		Listener listener = event -> toolTip.hide();
 		tipActivator.addListener(SWT.Dispose, listener);
 		tipActivator.addListener(SWT.MouseWheel, listener);
-		Listener exitListener = new Listener() {
-			public void handleEvent(Event event) {
-				switch (event.type) {
-				case SWT.MouseWheel:
-					toolTip.hide();
-					break;
-				case SWT.MouseExit:
-					/*
-					 * Check if the mouse exit happened because we move over the tooltip
-					 */
-					Rectangle containerBounds = exitControl.getBounds();
-					Point displayLocation = exitControl.getParent().toDisplay(containerBounds.x, containerBounds.y);
-					containerBounds.x = displayLocation.x;
-					containerBounds.y = displayLocation.y;
-					//be a bit relaxed about this - there's a small gap between control and tooltip
-					containerBounds.height += 3;
-					Point cursorLocation = Display.getCurrent().getCursorLocation();
-					if (containerBounds.contains(cursorLocation)) {
-						break;
-					}
-					Shell tipShell = (Shell) toolTip.getData(Shell.class.getName());
-					if (tipShell != null && !tipShell.isDisposed()) {
-						Rectangle tipBounds = tipShell.getBounds();
-						if (tipBounds.contains(cursorLocation)) {
-							break;
-						}
-					}
-					toolTip.hide();
+		Listener exitListener = event -> {
+			switch (event.type) {
+			case SWT.MouseWheel:
+				toolTip.hide();
+				break;
+			case SWT.MouseExit:
+				/*
+				 * Check if the mouse exit happened because we move over the tooltip
+				 */
+				Rectangle containerBounds = exitControl.getBounds();
+				Point displayLocation = exitControl.getParent().toDisplay(containerBounds.x, containerBounds.y);
+				containerBounds.x = displayLocation.x;
+				containerBounds.y = displayLocation.y;
+				//be a bit relaxed about this - there's a small gap between control and tooltip
+				containerBounds.height += 3;
+				Point cursorLocation = Display.getCurrent().getCursorLocation();
+				if (containerBounds.contains(cursorLocation)) {
 					break;
 				}
+				Shell tipShell = (Shell) toolTip.getData(Shell.class.getName());
+				if (tipShell != null && !tipShell.isDisposed()) {
+					Rectangle tipBounds = tipShell.getBounds();
+					if (tipBounds.contains(cursorLocation)) {
+						break;
+					}
+				}
+				toolTip.hide();
+				break;
 			}
 		};
 		hookRecursively(exitControl, exitListener);

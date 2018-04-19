@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat Inc. and others.
+ * Copyright (c) 2016, 2018 Red Hat Inc. and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -44,25 +43,25 @@ public class MissingNatureDetector implements IStartup, IPropertyChangeListener 
 
 	private final Set<DiscoverNatureSupportJob> lookupJobs = new HashSet<DiscoverNatureSupportJob>();
 
-	private final IResourceChangeListener projectOpenListener = new IResourceChangeListener() {
-		public void resourceChanged(IResourceChangeEvent event) {
-			if (event.getDelta() == null) {
-				return;
+	private final IResourceChangeListener projectOpenListener = event -> {
+		if (event.getDelta() == null) {
+			return;
+		}
+		try {
+			CollectMissingNaturesVisitor visitor = new CollectMissingNaturesVisitor();
+			event.getDelta().accept(visitor);
+			for (String natureId : visitor.getMissingNatures()) {
+				triggerNatureLookup(natureId);
 			}
-			try {
-				CollectMissingNaturesVisitor visitor = new CollectMissingNaturesVisitor();
-				event.getDelta().accept(visitor);
-				for (String natureId : visitor.getMissingNatures()) {
-					triggerNatureLookup(natureId);
-				}
-				if (!visitor.getMissingNatures().isEmpty()) {
-					showProposalsIfReady();
-				}
-			} catch (CoreException e) {
-				MarketplaceClientUiPlugin.getInstance().getLog().log(
-						new Status(IStatus.ERROR, MarketplaceClientUiPlugin.getInstance().getBundle().getSymbolicName(),
-								e.getLocalizedMessage(), e));
+			if (!visitor.getMissingNatures().isEmpty()) {
+				showProposalsIfReady();
 			}
+		} catch (CoreException e) {
+			MarketplaceClientUiPlugin.getInstance()
+			.getLog()
+			.log(new Status(IStatus.ERROR,
+					MarketplaceClientUiPlugin.getInstance().getBundle().getSymbolicName(),
+					e.getLocalizedMessage(), e));
 		}
 	};
 
@@ -114,6 +113,7 @@ public class MissingNatureDetector implements IStartup, IPropertyChangeListener 
 		}
 	}
 
+	@Override
 	public void earlyStartup() {
 		allJobs = new JobGroup(Messages.MissingNatureDetector_Title, 3, 0);
 		IPreferenceStore preferenceStore = MarketplaceClientUiPlugin.getInstance().getPreferenceStore();
@@ -124,6 +124,7 @@ public class MissingNatureDetector implements IStartup, IPropertyChangeListener 
 		}
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		if (ENABLEMENT_PROPERTY.equals(event.getProperty())) {
 			IWorkspace workspace = ResourcesPlugin.getWorkspace();

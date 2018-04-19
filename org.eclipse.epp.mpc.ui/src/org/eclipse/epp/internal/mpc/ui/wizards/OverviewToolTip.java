@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2010 Tasktop Technologies and others.
+ * Copyright (c) 2009, 2018 Tasktop Technologies and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,8 +36,6 @@ import org.eclipse.swt.SWTException;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionEvent;
@@ -171,6 +169,7 @@ class OverviewToolTip extends ToolTip {
 		summaryLabel.setBackground(backgroundColor);
 		// instead of opening links in the tooltip, open a new browser window
 		summaryLabel.addLocationListener(new LocationListener() {
+			@Override
 			public void changing(LocationEvent event) {
 				if (event.location.equals("about:blank")) { //$NON-NLS-1$
 					return;
@@ -180,6 +179,7 @@ class OverviewToolTip extends ToolTip {
 				WorkbenchUtil.openUrl(event.location, IWorkbenchBrowserSupport.AS_EXTERNAL);
 			}
 
+			@Override
 			public void changed(LocationEvent event) {
 			}
 		});
@@ -205,11 +205,7 @@ class OverviewToolTip extends ToolTip {
 
 			final Cursor handCursor = new Cursor(imageLabel.getDisplay(), SWT.CURSOR_HAND);
 			imageLabel.setCursor(handCursor);
-			imageLabel.addDisposeListener(new DisposeListener() {
-				public void widgetDisposed(DisposeEvent e) {
-					handCursor.dispose();
-				}
-			});
+			imageLabel.addDisposeListener(e -> handCursor.dispose());
 			imageLabel.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseDown(MouseEvent e) {
@@ -229,11 +225,13 @@ class OverviewToolTip extends ToolTip {
 			link.setBackground(backgroundColor);
 			link.setToolTipText(NLS.bind(Messages.OverviewToolTip_openUrlInBrowser, overview.getUrl()));
 			link.addSelectionListener(new SelectionListener() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					OverviewToolTip.this.hide();
 					browser.openUrl(overview.getUrl());
 				}
 
+				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
 					widgetSelected(e);
 				}
@@ -249,11 +247,9 @@ class OverviewToolTip extends ToolTip {
 		}
 		// hack: cause the tooltip to gain focus so that we can capture the escape key
 		//       this must be done async since the tooltip is not yet visible.
-		Display.getCurrent().asyncExec(new Runnable() {
-			public void run() {
-				if (!parent.isDisposed()) {
-					parent.setFocus();
-				}
+		Display.getCurrent().asyncExec(() -> {
+			if (!parent.isDisposed()) {
+				parent.setFocus();
 			}
 		});
 		return container;
@@ -269,42 +265,36 @@ class OverviewToolTip extends ToolTip {
 		MarketplaceDiscoveryStrategy.cacheResource(resourceProvider, overview.getItem(), imagePath);
 		resourceProvider.provideResource(new ResourceReceiver<ImageDescriptor>() {
 
+			@Override
 			public ImageDescriptor processResource(URL resource) {
 				return ImageDescriptor.createFromURL(resource);
 			}
 
+			@Override
 			public void setResource(final ImageDescriptor resource) {
 				if (resource != null && imageLabel != null && !imageLabel.isDisposed()) {
-					imageLabel.getDisplay().asyncExec(new Runnable() {
-
-						public void run() {
-							if (!imageLabel.isDisposed()) {
-								try {
-									Image image = resource.createImage();
-									if (image != null) {
-										Rectangle imageBounds = image.getBounds();
-										if (imageBounds.width > SCREENSHOT_WIDTH
-												|| imageBounds.height > SCREENSHOT_HEIGHT) {
-											final Image scaledImage = Util.scaleImage(image, SCREENSHOT_WIDTH,
-													SCREENSHOT_HEIGHT);
-											Image originalImage = image;
-											image = scaledImage;
-											originalImage.dispose();
-										}
-										final Image fimage = image;
-										imageLabel.addDisposeListener(new DisposeListener() {
-											public void widgetDisposed(DisposeEvent e) {
-												fimage.dispose();
-											}
-										});
-										imageLabel.setImage(image);
+					imageLabel.getDisplay().asyncExec(() -> {
+						if (!imageLabel.isDisposed()) {
+							try {
+								Image image = resource.createImage();
+								if (image != null) {
+									Rectangle imageBounds = image.getBounds();
+									if (imageBounds.width > SCREENSHOT_WIDTH
+											|| imageBounds.height > SCREENSHOT_HEIGHT) {
+										final Image scaledImage = Util.scaleImage(image, SCREENSHOT_WIDTH,
+												SCREENSHOT_HEIGHT);
+										Image originalImage = image;
+										image = scaledImage;
+										originalImage.dispose();
 									}
-								} catch (SWTException e) {
-									// ignore, probably a bad image format
-									MarketplaceClientUi
-									.error(NLS.bind(Messages.OverviewToolTip_cannotRenderImage_reason,
-											imagePath, e.getMessage()), e);
+									final Image fimage = image;
+									imageLabel.addDisposeListener(e -> fimage.dispose());
+									imageLabel.setImage(image);
 								}
+							} catch (SWTException e) {
+								// ignore, probably a bad image format
+								MarketplaceClientUi.error(NLS.bind(Messages.OverviewToolTip_cannotRenderImage_reason,
+										imagePath, e.getMessage()), e);
 							}
 						}
 					});

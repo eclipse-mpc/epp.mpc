@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,6 +46,7 @@ public class DropDownButton {
 
 		Color black;
 
+		@Override
 		public void paintControl(PaintEvent e) {
 
 			if (shadowColor == null) {
@@ -263,11 +264,13 @@ public class DropDownButton {
 			return delegate;
 		}
 
+		@Override
 		public void widgetSelected(SelectionEvent e) {
 			setArrowDetail(e);
 			delegate.widgetSelected(e);
 		}
 
+		@Override
 		public void widgetDefaultSelected(SelectionEvent e) {
 			setArrowDetail(e);
 			delegate.widgetDefaultSelected(e);

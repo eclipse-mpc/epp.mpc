@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -162,6 +162,7 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 				if (image != null && !label.isDisposed()) { // recheck - getCatalogIcon can take a bit if it needs to download the image...
 					label.getDisplay().asyncExec(new Runnable() {
 
+						@Override
 						public void run() {
 							if (!label.isDisposed() && !image.isDisposed()) {
 								label.setImage(image);
@@ -214,18 +215,22 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 		super.dispose();
 	}
 
+	@Override
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
 		listeners.add(listener);
 	}
 
+	@Override
 	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
 		listeners.remove(listener);
 	}
 
+	@Override
 	public ISelection getSelection() {
 		return new StructuredSelection(selection);
 	}
 
+	@Override
 	public void setSelection(ISelection newSelection) {
 		if (newSelection instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection = (IStructuredSelection) newSelection;

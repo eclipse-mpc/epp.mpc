@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.IDecoration;
-import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.debug.DebugOptionsListener;
 import org.eclipse.osgi.service.debug.DebugTrace;
 import org.eclipse.swt.graphics.Image;
@@ -127,16 +126,14 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 
 		Hashtable<String, String> props = new Hashtable<String, String>(2);
 		props.put(org.eclipse.osgi.service.debug.DebugOptions.LISTENER_SYMBOLICNAME, MarketplaceClientUi.BUNDLE_ID);
-		context.registerService(DebugOptionsListener.class.getName(), new DebugOptionsListener() {
-			public void optionsChanged(DebugOptions options) {
-				DebugTrace debugTrace = null;
-				boolean debug = options.getBooleanOption(MarketplaceClientUi.BUNDLE_ID + DEBUG_OPTION, false);
-				if (debug) {
-					debugTrace = options.newDebugTrace(MarketplaceClientUi.BUNDLE_ID);
-				}
-				DEBUG = debug;
-				MarketplaceClientUiPlugin.debugTrace = debugTrace;
+		context.registerService(DebugOptionsListener.class.getName(), (DebugOptionsListener) options -> {
+			DebugTrace debugTrace = null;
+			boolean debug = options.getBooleanOption(MarketplaceClientUi.BUNDLE_ID + DEBUG_OPTION, false);
+			if (debug) {
+				debugTrace = options.newDebugTrace(MarketplaceClientUi.BUNDLE_ID);
 			}
+			DEBUG = debug;
+			MarketplaceClientUiPlugin.debugTrace = debugTrace;
 		}, props);
 	}
 

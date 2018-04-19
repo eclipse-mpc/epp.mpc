@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,49 +45,48 @@ public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationLis
 		this.viewer = viewer;
 	}
 
+	@Override
 	public void changed(LocationEvent event) {
 		updatePageLinks();
 	}
 
 	private void updatePageLinks() {
-		viewer.getControl().getDisplay().asyncExec(new Runnable() {
-
-			public void run() {
-				// Links should open in external browser.
-				// Since explicit HREF targets interfere with that,
-				// we'll just remove them.
-				Object[] links = null;
-				try {
-					links = (Object[]) viewer.getBrowser().evaluate( //
-							"return (function() {" + //$NON-NLS-1$
-							"   var links = document.links;" + //$NON-NLS-1$
-							"   var hrefs = Array();" + //$NON-NLS-1$
-							"   for (var i=0; i<links.length; i++) {" + //$NON-NLS-1$
-							"      links[i].target='_self';" + //$NON-NLS-1$
-							"      hrefs[i]=links[i].href;" + //$NON-NLS-1$
-							"   };" + //$NON-NLS-1$
-							"   return hrefs;" + //$NON-NLS-1$
-							"})();"); //$NON-NLS-1$
-				} catch (SWTException ex) {
-					MarketplaceClientUi.log(IStatus.WARNING,
-							"Failed to process link targets on news page. Some links might not open in external browser.", //$NON-NLS-1$
-							ex);
-					NewsUrlHandler.this.documentLinks = null;
-				}
-				// Remember document links for navigation handling since we
-				// don't want to deal with URLs from dynamic loading events
-				if (links != null) {
-					Set<String> documentLinks = new HashSet<String>();
-					for (Object link : links) {
-						documentLinks.add(link.toString());
-					}
-					NewsUrlHandler.this.documentLinks = documentLinks;
-				}
+		viewer.getControl().getDisplay().asyncExec(() -> {
+			// Links should open in external browser.
+			// Since explicit HREF targets interfere with that,
+			// we'll just remove them.
+			Object[] links = null;
+			try {
+				links = (Object[]) viewer.getBrowser()
+						.evaluate( //
+								"return (function() {" + //$NON-NLS-1$
+								"   var links = document.links;" + //$NON-NLS-1$
+								"   var hrefs = Array();" + //$NON-NLS-1$
+								"   for (var i=0; i<links.length; i++) {" + //$NON-NLS-1$
+								"      links[i].target='_self';" + //$NON-NLS-1$
+								"      hrefs[i]=links[i].href;" + //$NON-NLS-1$
+								"   };" + //$NON-NLS-1$
+								"   return hrefs;" + //$NON-NLS-1$
+								"})();"); //$NON-NLS-1$
+			} catch (SWTException ex) {
+				MarketplaceClientUi.log(IStatus.WARNING,
+						"Failed to process link targets on news page. Some links might not open in external browser.", //$NON-NLS-1$
+						ex);
+				NewsUrlHandler.this.documentLinks = null;
 			}
-
+			// Remember document links for navigation handling since we
+			// don't want to deal with URLs from dynamic loading events
+			if (links != null) {
+				Set<String> documentLinks = new HashSet<String>();
+				for (Object link : links) {
+					documentLinks.add(link.toString());
+				}
+				NewsUrlHandler.this.documentLinks = documentLinks;
+			}
 		});
 	}
 
+	@Override
 	public void changing(LocationEvent event) {
 		if (!event.doit) {
 			return;
@@ -209,10 +208,12 @@ public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationLis
 		return wizard.handleInstallRequest(installInfo, url);
 	}
 
+	@Override
 	public void completed(ProgressEvent event) {
 		updatePageLinks();
 	}
 
+	@Override
 	public void changed(ProgressEvent event) {
 		// ignore
 	}

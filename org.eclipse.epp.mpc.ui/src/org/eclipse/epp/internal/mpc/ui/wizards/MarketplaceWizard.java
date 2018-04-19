@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2013 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -84,7 +84,6 @@ import org.eclipse.equinox.p2.ui.ProvisioningUI;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -278,13 +277,10 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		initializeCatalog();
 		if (getConfiguration().getInitialState() != null || getConfiguration().getInitialOperations() != null) {
 			try {
-				getContainer().run(true, true, new IRunnableWithProgress() {
-					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						new SelectionModelStateSerializer(getCatalog(), getSelectionModel()).deserialize(
+				getContainer().run(true, true,
+						monitor -> new SelectionModelStateSerializer(getCatalog(), getSelectionModel()).deserialize(
 								getConfiguration().getInitialState(), getConfiguration().getInitialOperations(),
-								monitor);
-					}
-				});
+								monitor));
 			} catch (InvocationTargetException e) {
 				throw new CoreException(MarketplaceClientCore.computeStatus(e, Messages.MarketplaceViewer_unexpectedException));
 			} catch (InterruptedException e) {
@@ -366,12 +362,15 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			private IStructuredContentProvider createContentProvider() {
 				return new IStructuredContentProvider() {
 
+					@Override
 					public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 					}
 
+					@Override
 					public void dispose() {
 					}
 
+					@Override
 					public Object[] getElements(Object inputElement) {
 						return ((List<?>) inputElement).toArray();
 					}
@@ -440,12 +439,10 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 					&& profileChangeOperation instanceof RemediationOperation) {
 
 				try {
-					container.run(true, false, new IRunnableWithProgress() {
-						public void run(IProgressMonitor monitor) {
-							((RemediationOperation) profileChangeOperation).setCurrentRemedy(featureSelectionWizardPage.getRemediationGroup()
-									.getCurrentRemedy());
-							profileChangeOperation.resolveModal(monitor);
-						}
+					container.run(true, false, monitor -> {
+						((RemediationOperation) profileChangeOperation)
+						.setCurrentRemedy(featureSelectionWizardPage.getRemediationGroup().getCurrentRemedy());
+						profileChangeOperation.resolveModal(monitor);
 					});
 				} catch (InterruptedException e) {
 					// Nothing to report if thread was interrupted
@@ -614,16 +611,13 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		return (MarketplacePage) super.getCatalogPage();
 	}
 
+	@Override
 	public synchronized Set<String> getInstalledFeatures() {
 		if (installedFeatures == null) {
 			try {
 				if (Display.getCurrent() != null) {
-					getContainer().run(true, false, new IRunnableWithProgress() {
-						public void run(IProgressMonitor monitor) throws InvocationTargetException,
-						InterruptedException {
-							installedFeatures = MarketplaceClientUi.computeInstalledFeatures(monitor);
-						}
-					});
+					getContainer().run(true, false,
+							monitor -> installedFeatures = MarketplaceClientUi.computeInstalledFeatures(monitor));
 				} else {
 					installedFeatures = MarketplaceClientUi.computeInstalledFeatures(new NullProgressMonitor());
 				}
@@ -642,6 +636,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		return selectionModel;
 	}
 
+	@Override
 	public void openUrl(String url) {
 		String catalogUrl = getCatalogUrl();
 		if (WorkbenchBrowserSupport.getInstance().isInternalWebBrowserAvailable()
@@ -950,16 +945,13 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			// try requesting news from marketplace
 			try {
 				final INews[] result = new INews[1];
-				getContainer().run(true, true, new IRunnableWithProgress() {
-
-					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						IStatus status = getCatalog().performNewsDiscovery(monitor);
-						if (!status.isOK() && status.getSeverity() != IStatus.CANCEL) {
-							// don't bother user with missing news
-							MarketplaceClientUi.handle(status, StatusManager.LOG);
-						}
-						result[0] = getCatalog().getNews();
+				getContainer().run(true, true, monitor -> {
+					IStatus status = getCatalog().performNewsDiscovery(monitor);
+					if (!status.isOK() && status.getSeverity() != IStatus.CANCEL) {
+						// don't bother user with missing news
+						MarketplaceClientUi.handle(status, StatusManager.LOG);
 					}
+					result[0] = getCatalog().getNews();
 				});
 				if (result[0] != null) {
 					news = result[0];
@@ -999,31 +991,26 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				throw new IllegalStateException();
 			}
 
-			getContainer().run(true, true, new IRunnableWithProgress() {
-
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					SelectionModelStateSerializer stateSerializer = new SelectionModelStateSerializer(
-							getCatalog(), selectionModel);
-					stateSerializer.deserialize(installInfo.getState(), nodeIdToOperation, monitor);
-				}
+			getContainer().run(true, true, monitor -> {
+				SelectionModelStateSerializer stateSerializer = new SelectionModelStateSerializer(getCatalog(),
+						selectionModel);
+				stateSerializer.deserialize(installInfo.getState(), nodeIdToOperation, monitor);
 			});
 
 			if (selectionModel.getItemToSelectedOperation().size() > 0) {
 				Display display = getShell().getDisplay();
 				if (!display.isDisposed()) {
-					display.asyncExec(new Runnable() {
-
-						public void run() {
-							MarketplacePage catalogPage = getCatalogPage();
-							IWizardPage currentPage = getContainer().getCurrentPage();
-							if (catalogPage == currentPage) {
-								catalogPage.getViewer().setSelection(
-										new StructuredSelection(selectionModel.getSelectedCatalogItems().toArray()));
-								catalogPage.show(installInfo.getCatalogDescriptor(), ContentType.SELECTION);
-								IWizardPage nextPage = catalogPage.getNextPage();
-								if (nextPage != null && catalogPage.isPageComplete()) {
-									getContainer().showPage(nextPage);
-								}
+					display.asyncExec(() -> {
+						MarketplacePage catalogPage1 = getCatalogPage();
+						IWizardPage currentPage = getContainer().getCurrentPage();
+						if (catalogPage1 == currentPage) {
+							catalogPage1.getViewer()
+							.setSelection(new StructuredSelection(
+									selectionModel.getSelectedCatalogItems().toArray()));
+							catalogPage1.show(installInfo.getCatalogDescriptor(), ContentType.SELECTION);
+							IWizardPage nextPage = catalogPage1.getNextPage();
+							if (nextPage != null && catalogPage1.isPageComplete()) {
+								getContainer().showPage(nextPage);
 							}
 						}
 					});
@@ -1187,16 +1174,13 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				command.setWizardDialogState(wizardState);
 			}
 		}
-		display.asyncExec(new Runnable() {
-
-			public void run() {
-				try {
-					command.execute(new ExecutionEvent());
-				} catch (ExecutionException e) {
-					IStatus status = MarketplaceClientCore.computeStatus(e, Messages.MarketplaceBrowserIntegration_cannotOpenMarketplaceWizard);
-					MarketplaceClientUi.handle(status,
-							StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
-				}
+		display.asyncExec(() -> {
+			try {
+				command.execute(new ExecutionEvent());
+			} catch (ExecutionException e) {
+				IStatus status = MarketplaceClientCore.computeStatus(e,
+						Messages.MarketplaceBrowserIntegration_cannotOpenMarketplaceWizard);
+				MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			}
 		});
 	}

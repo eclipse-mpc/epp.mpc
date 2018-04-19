@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,7 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
@@ -30,7 +28,6 @@ import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogPage;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Composite;
@@ -51,13 +48,11 @@ public class ImportFavoritesPage extends CatalogPage {
 		Shell shell = getShell();
 		Control pageControl = getControl();
 		if (shell != null && !shell.isDisposed() && pageControl != null && !pageControl.isDisposed()) {
-			shell.getDisplay().asyncExec(new Runnable() {
-				public void run() {
-					Shell shell = getShell();
-					Control pageControl = getControl();
-					if (shell != null && !shell.isDisposed() && pageControl != null && !pageControl.isDisposed()) {
-						setErrorMessage(error);
-					}
+			shell.getDisplay().asyncExec(() -> {
+				Shell shell1 = getShell();
+				Control pageControl1 = getControl();
+				if (shell1 != null && !shell1.isDisposed() && pageControl1 != null && !pageControl1.isDisposed()) {
+					setErrorMessage(error);
 				}
 			});
 		}
@@ -150,26 +145,20 @@ public class ImportFavoritesPage extends CatalogPage {
 			importNodes.add(item.getData());
 		}
 		try {
-			getContainer().run(true, false, new IRunnableWithProgress() {
-
-				public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					try {
-						userFavoritesService.getStorageService().runWithLogin(new Callable<Void>() {
-							public Void call() throws Exception {
-								try {
-									userFavoritesService.addFavorites(importNodes, monitor);
-								} catch (NotAuthorizedException e) {
-									setErrorMessage(Messages.ImportFavoritesPage_unauthorizedErrorMessage);
-								} catch (ConflictException e) {
-									setErrorMessage(
-											Messages.ImportFavoritesPage_conflictErrorMessage);
-								}
-								return null;
-							}
-						});
-					} catch (Exception e) {
-						throw new InvocationTargetException(e);
-					}
+			getContainer().run(true, false, monitor -> {
+				try {
+					userFavoritesService.getStorageService().runWithLogin(() -> {
+						try {
+							userFavoritesService.addFavorites(importNodes, monitor);
+						} catch (NotAuthorizedException e1) {
+							setErrorMessage(Messages.ImportFavoritesPage_unauthorizedErrorMessage);
+						} catch (ConflictException e2) {
+							setErrorMessage(Messages.ImportFavoritesPage_conflictErrorMessage);
+						}
+						return null;
+					});
+				} catch (Exception e) {
+					throw new InvocationTargetException(e);
 				}
 			});
 		} catch (InvocationTargetException e) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.Control;
 
 /**
  * A tag filter that presents choices as checkboxes.
- * 
+ *
  * @author David Green
  */
 public class CheckboxTagFilter extends AbstractTagFilter {
@@ -53,10 +53,12 @@ public class CheckboxTagFilter extends AbstractTagFilter {
 				checkbox.setSelection(getSelected().contains(choice));
 				checkbox.setText(choice.getLabel());
 				checkbox.addSelectionListener(new SelectionListener() {
+					@Override
 					public void widgetDefaultSelected(SelectionEvent e) {
 						widgetSelected(e);
 					}
 
+					@Override
 					public void widgetSelected(SelectionEvent e) {
 						boolean selection = checkbox.getSelection();
 						if (selection) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,9 +9,6 @@
  *     The Eclipse Foundation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -58,39 +55,34 @@ public class FavoritesDiscoveryItem extends AbstractMarketplaceDiscoveryItem<Mar
 		checkbox.setData("connectorId", connector.getId()); //$NON-NLS-1$
 		checkbox.addSelectionListener(new SelectionListener() {
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				boolean selected = checkbox.getSelection();
 				getViewer().modifySelection(connector, selected);
 			}
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				widgetSelected(e);
 			}
 		});
-		connector.addPropertyChangeListener(new PropertyChangeListener() {
+		connector.addPropertyChangeListener(evt -> {
+			if ("selected".equals(evt.getPropertyName())) { //$NON-NLS-1$
+				final Button checkbox = FavoritesDiscoveryItem.this.checkbox;
 
-			public void propertyChange(PropertyChangeEvent evt) {
-				if ("selected".equals(evt.getPropertyName())) { //$NON-NLS-1$
-					final Button checkbox = FavoritesDiscoveryItem.this.checkbox;
-
-					if (checkbox == null || checkbox.isDisposed()) {
-						return;
-					}
-					final boolean selected = Boolean.TRUE.equals(evt.getNewValue());
-					try {
-						checkbox.getDisplay().syncExec(new Runnable() {
-
-							public void run() {
-								if (checkbox == null || checkbox.isDisposed()) {
-									return;
-								}
-								checkbox.setSelection(selected);
-							}
-
-						});
-					} catch (SWTException ex) {
-						//disposed - ignore
-					}
+				if (checkbox == null || checkbox.isDisposed()) {
+					return;
+				}
+				final boolean selected = Boolean.TRUE.equals(evt.getNewValue());
+				try {
+					checkbox.getDisplay().syncExec(() -> {
+						if (checkbox == null || checkbox.isDisposed()) {
+							return;
+						}
+						checkbox.setSelection(selected);
+					});
+				} catch (SWTException ex) {
+					//disposed - ignore
 				}
 			}
 		});

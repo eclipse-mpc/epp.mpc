@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2013 Tasktop Technologies and others.
+ * Copyright (c) 2009, 2018 Tasktop Technologies and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -152,6 +152,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 		this.withRemediation = withRemediation;
 	}
 
+	@Override
 	public void run(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
 		try {
 			boolean hasInstall = hasInstall();
@@ -276,49 +277,35 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 
 	private ProfileChangeOperation resolveInstall(IProgressMonitor monitor, final IInstallableUnit[] ius,
 			URI[] repositories) throws CoreException {
-		return resolve(monitor, new ProfileChangeOperationFactory() {
-			public ProfileChangeOperation create(List<IInstallableUnit> ius) throws CoreException {
-				return provisioningUI.getInstallOperation(ius, null);
-			}
-		}, ius, repositories);
+		return resolve(monitor, ius1 -> provisioningUI.getInstallOperation(ius1, null), ius, repositories);
 	}
 
 	private ProfileChangeOperation resolveUninstall(IProgressMonitor monitor, final IInstallableUnit[] ius,
 			URI[] repositories) throws CoreException {
-		return resolve(monitor, new ProfileChangeOperationFactory() {
-			public ProfileChangeOperation create(List<IInstallableUnit> ius) throws CoreException {
-				return provisioningUI.getUninstallOperation(ius, null);
-			}
-		}, ius, repositories);
+		return resolve(monitor, ius1 -> provisioningUI.getUninstallOperation(ius1, null), ius, repositories);
 	}
 
 	private ProfileChangeOperation resolveUpdate(IProgressMonitor monitor, final IInstallableUnit[] ius,
 			URI[] repositories) throws CoreException {
-		return resolve(monitor, new ProfileChangeOperationFactory() {
-			public ProfileChangeOperation create(List<IInstallableUnit> ius) throws CoreException {
-				return provisioningUI.getUpdateOperation(ius, null);
-			}
-		}, ius, repositories);
+		return resolve(monitor, ius1 -> provisioningUI.getUpdateOperation(ius1, null), ius, repositories);
 	}
 
 	private ProfileChangeOperation resolveChange(IProgressMonitor monitor, IInstallableUnit[] ius,
 			final IInstallableUnit[] uninstallIUs, URI[] repositories) throws CoreException {
-		return resolve(monitor, new ProfileChangeOperationFactory() {
-			public ProfileChangeOperation create(List<IInstallableUnit> ius) throws CoreException {
-				InstallOperation installOperation = provisioningUI.getInstallOperation(ius, null);
-				UninstallOperation uninstallOperation = provisioningUI.getUninstallOperation(
-						Arrays.asList(uninstallIUs), null);
-				CompositeProfileChangeOperation operation = new CompositeProfileChangeOperation(
-						provisioningUI.getSession());
-				operation.setProfileId(provisioningUI.getProfileId());
+		return resolve(monitor, ius1 -> {
+			InstallOperation installOperation = provisioningUI.getInstallOperation(ius1, null);
+			UninstallOperation uninstallOperation = provisioningUI.getUninstallOperation(Arrays.asList(uninstallIUs),
+					null);
+			CompositeProfileChangeOperation operation = new CompositeProfileChangeOperation(
+					provisioningUI.getSession());
+			operation.setProfileId(provisioningUI.getProfileId());
 
-				ProvisioningContext provisioningContext = installOperation.getProvisioningContext();
-				operation.setProvisioningContext(provisioningContext);
-				uninstallOperation.setProvisioningContext(provisioningContext);
+			ProvisioningContext provisioningContext = installOperation.getProvisioningContext();
+			operation.setProvisioningContext(provisioningContext);
+			uninstallOperation.setProvisioningContext(provisioningContext);
 
-				operation.add(uninstallOperation).add(installOperation);
-				return operation;
-			}
+			operation.add(uninstallOperation).add(installOperation);
+			return operation;
 		}, ius, repositories);
 	}
 
@@ -529,14 +516,11 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 			// instead of aborting here we ask the user if they wish to proceed anyways
 			final boolean[] okayToProceed = new boolean[1];
 			final String finalMessage = message;
-			Display.getDefault().syncExec(new Runnable() {
-				public void run() {
-					okayToProceed[0] = MessageDialog.openQuestion(WorkbenchUtil.getShell(),
-							Messages.ProvisioningOperation_proceedQuestion, NLS.bind(
-									Messages.ProvisioningOperation_unavailableSolutions_proceedQuestion,
-									new Object[] { finalMessage }));
-				}
-			});
+			Display.getDefault()
+			.syncExec(() -> okayToProceed[0] = MessageDialog.openQuestion(WorkbenchUtil.getShell(),
+					Messages.ProvisioningOperation_proceedQuestion,
+					NLS.bind(Messages.ProvisioningOperation_unavailableSolutions_proceedQuestion,
+							new Object[] { finalMessage })));
 			if (!okayToProceed[0]) {
 				throw new CoreException(new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
 						Messages.ProvisioningOperation_unavailableSolutions, detailedMessage), null));

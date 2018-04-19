@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,18 +59,17 @@ class ProvisioningJobListener extends JobChangeAdapter {
 						if (item instanceof MarketplaceNodeCatalogItem) {
 							final MarketplaceNodeCatalogItem nodeItem = (MarketplaceNodeCatalogItem) item;
 
-							taskManager.submit(new Runnable() {
-								public void run() {
-									INode node = nodeItem.getData();
-									URL marketplaceUrl = nodeItem.getMarketplaceUrl();
-									IMarketplaceService marketplaceService = ServiceHelper.getMarketplaceServiceLocator().getMarketplaceService(marketplaceUrl.toString());
-									marketplaceService.reportInstallSuccess(node, new NullProgressMonitor() {
-										@Override
-										public boolean isCanceled() {
-											return monitor.isCanceled();
-										}
-									});
-								}
+							taskManager.submit(() -> {
+								INode node = nodeItem.getData();
+								URL marketplaceUrl = nodeItem.getMarketplaceUrl();
+								IMarketplaceService marketplaceService = ServiceHelper.getMarketplaceServiceLocator()
+										.getMarketplaceService(marketplaceUrl.toString());
+								marketplaceService.reportInstallSuccess(node, new NullProgressMonitor() {
+									@Override
+									public boolean isCanceled() {
+										return monitor.isCanceled();
+									}
+								});
 							});
 						}
 					}

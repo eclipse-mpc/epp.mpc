@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,7 @@ import org.eclipse.equinox.p2.repository.metadata.IMetadataRepository;
 
 /**
  * Resolve the user-visible names of features from their symbolic names.
- * 
+ *
  * @author David Green
  */
 public class ResolveFeatureNamesOperation extends AbstractProvisioningOperation {
@@ -38,6 +38,7 @@ public class ResolveFeatureNamesOperation extends AbstractProvisioningOperation 
 		super(installableConnectors);
 	}
 
+	@Override
 	public void run(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
 		try {
 			SubMonitor monitor = SubMonitor.convert(progressMonitor,

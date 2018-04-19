@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import org.eclipse.ui.statushandlers.StatusManager;
  */
 public class WelcomeIntroAction implements IViewActionDelegate {
 
+	@Override
 	public void run(IAction action) {
 		try {
 			MarketplaceClient.openMarketplaceWizard(null);
@@ -37,10 +38,12 @@ public class WelcomeIntroAction implements IViewActionDelegate {
 		}
 	}
 
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		// nothing to do
 	}
 
+	@Override
 	public void init(IViewPart view) {
 		// nothing to do.
 	}

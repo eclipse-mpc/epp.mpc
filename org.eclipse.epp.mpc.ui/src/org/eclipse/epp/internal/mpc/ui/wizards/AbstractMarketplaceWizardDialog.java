@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,7 @@ public class AbstractMarketplaceWizardDialog extends WizardDialog {
 
 		private Boolean forward;
 
+		@Override
 		public void pageChanged(PageChangedEvent event) {
 			if (forward != null) {
 				boolean isForward = forward;
@@ -44,6 +45,7 @@ public class AbstractMarketplaceWizardDialog extends WizardDialog {
 			}
 		}
 
+		@Override
 		public void handlePageChanging(PageChangingEvent event) {
 			Object currentPage = event.getCurrentPage();
 			if (event.doit && forward != null && currentPage instanceof IWizardPageAction) {

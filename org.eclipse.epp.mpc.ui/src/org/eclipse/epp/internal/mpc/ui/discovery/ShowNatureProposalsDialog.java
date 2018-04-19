@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,9 +25,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.LayoutConstants;
 import org.eclipse.jface.preference.PreferenceDialog;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
@@ -84,24 +82,18 @@ final class ShowNatureProposalsDialog extends TitleAreaDialog {
 
 		naturesCheckList = CheckboxTableViewer.newCheckList(res,
 				SWT.MULTI | SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
-		naturesCheckList.setContentProvider(new IStructuredContentProvider() {
-			public Object[] getElements(Object inputElement) {
-				return ((Set<?>) inputElement).toArray();
-			}
-		});
+		naturesCheckList
+		.setContentProvider((IStructuredContentProvider) inputElement -> ((Set<?>) inputElement).toArray());
 		naturesCheckList.setComparator(new ViewerComparator());
 		naturesCheckList.setInput(candidates.keySet());
 		naturesCheckList.setAllChecked(true);
 		GridDataFactory.fillDefaults().applyTo(naturesCheckList.getControl());
-		naturesCheckList.addCheckStateListener(new ICheckStateListener() {
-
-			public void checkStateChanged(CheckStateChangedEvent event) {
-				Button okButton = getButton(IDialogConstants.OK_ID);
-				if (okButton != null) {
-					okButton.setEnabled(canComplete());
-				}
-				updateSelectedNatures();
+		naturesCheckList.addCheckStateListener(event -> {
+			Button okButton = getButton(IDialogConstants.OK_ID);
+			if (okButton != null) {
+				okButton.setEnabled(canComplete());
 			}
+			updateSelectedNatures();
 		});
 
 		Link preferencesLink = new Link(res, SWT.NONE);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,7 @@ abstract class LinkListener implements MouseListener, SelectionListener {
 		styledText.removeMouseListener(this);
 	}
 
+	@Override
 	public void widgetSelected(SelectionEvent e) {
 		StyledText link = (StyledText) e.getSource();
 		if (link.getSelectionCount() != 0) {
@@ -40,17 +41,21 @@ abstract class LinkListener implements MouseListener, SelectionListener {
 		}
 	}
 
+	@Override
 	public void widgetDefaultSelected(SelectionEvent e) {
 	}
 
+	@Override
 	public void mouseDoubleClick(MouseEvent e) {
 	}
 
+	@Override
 	public void mouseDown(MouseEvent e) {
 		StyledText link = (StyledText) e.getSource();
 		active = (e.button == 1) && link.getSelectionCount() == 0;
 	}
 
+	@Override
 	public void mouseUp(MouseEvent e) {
 		if (!active) {
 			return;

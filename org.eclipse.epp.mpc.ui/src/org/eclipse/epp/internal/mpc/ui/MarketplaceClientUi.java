@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -196,26 +196,24 @@ public class MarketplaceClientUi {
 			if (workbench != null) {
 				final Display workbenchDisplay = workbench.getDisplay();
 				if (!workbenchDisplay.isDisposed()) {
-					Runnable logRunnable = new Runnable() {
-						public void run() {
-							if (!workbenchDisplay.isDisposed() && PlatformUI.isWorkbenchRunning()) {
-								IWorkbench workbench = PlatformUI.getWorkbench();
-								if (workbench != null) {
-									try {
-										StatusManager.getManager().handle(status, style);
-										return;
-									} catch (Exception ex) {
-										// Display might get disposed during call to handle due to workspace shutdown or similar.
-										// In that case, just log...
-									}
+					Runnable logRunnable = () -> {
+						if (!workbenchDisplay.isDisposed() && PlatformUI.isWorkbenchRunning()) {
+							IWorkbench workbench1 = PlatformUI.getWorkbench();
+							if (workbench1 != null) {
+								try {
+									StatusManager.getManager().handle(status, style);
+									return;
+								} catch (Exception ex) {
+									// Display might get disposed during call to handle due to workspace shutdown or similar.
+									// In that case, just log...
 								}
 							}
-							ILog log = getLog();
-							if (log != null) {
-								log.log(status);
-							} else {
-								System.out.println(status);
-							}
+						}
+						ILog log = getLog();
+						if (log != null) {
+							log.log(status);
+						} else {
+							System.out.println(status);
 						}
 					};
 					if (runIn(workbenchDisplay, logRunnable)) {

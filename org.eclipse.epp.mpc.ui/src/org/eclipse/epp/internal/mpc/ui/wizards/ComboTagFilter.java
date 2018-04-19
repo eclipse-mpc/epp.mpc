@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,7 @@ public class ComboTagFilter extends AbstractTagFilter {
 		combo = new Combo(parent, SWT.READ_ONLY | SWT.DROP_DOWN);
 		combo.setData(this);
 		listener = new SelectionListener() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				int selectionIndex = combo.getSelectionIndex();
 				if (selectionIndex > 0) {
@@ -54,6 +55,7 @@ public class ComboTagFilter extends AbstractTagFilter {
 				}
 			}
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				widgetSelected(e);
 			}

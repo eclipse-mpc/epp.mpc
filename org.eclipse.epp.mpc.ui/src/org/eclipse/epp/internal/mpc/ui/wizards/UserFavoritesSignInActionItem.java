@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,14 +12,12 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
 import org.eclipse.equinox.internal.p2.discovery.model.Icon;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.statushandlers.StatusManager;
@@ -69,12 +67,7 @@ public class UserFavoritesSignInActionItem extends AbstractUserActionItem {
 		MarketplaceViewer viewer = (MarketplaceViewer) getViewer();
 		final MarketplaceCatalog catalog = viewer.getCatalog();
 		try {
-			viewer.getWizard().getContainer().run(true, true, new IRunnableWithProgress() {
-
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					catalog.userFavorites(true, monitor);
-				}
-			});
+			viewer.getWizard().getContainer().run(true, true, monitor -> catalog.userFavorites(true, monitor));
 		} catch (InvocationTargetException e) {
 			MarketplaceClientUi.handle(e.getCause(), StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 		} catch (InterruptedException e) {

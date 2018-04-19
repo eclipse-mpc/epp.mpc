@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -146,12 +146,10 @@ public class MarketplaceDiscoveryResources extends DiscoveryResources {
 							if (imagePath != null && imagePath.length() > 0) {
 								final URL resource = discoverySource.getResource(imagePath);
 								if (resource != null) {
-									display.asyncExec(new Runnable() {
-										public void run() {
-											final Image image = safeCreateImage(imagePath, resource);
-											if (image != null) {
-												receiver.setImage(image);
-											}
+									display.asyncExec(() -> {
+										final Image image1 = safeCreateImage(imagePath, resource);
+										if (image1 != null) {
+											receiver.setImage(image1);
 										}
 									});
 								}

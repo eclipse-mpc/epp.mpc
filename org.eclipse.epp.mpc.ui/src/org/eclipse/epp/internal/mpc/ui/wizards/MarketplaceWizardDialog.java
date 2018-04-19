@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,10 +20,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.TraverseEvent;
-import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchListener;
@@ -66,6 +62,7 @@ public class MarketplaceWizardDialog extends AbstractMarketplaceWizardDialog {
 		}.installDropTarget(newShell);
 		final IWorkbenchListener workbenchListener = new IWorkbenchListener() {
 
+			@Override
 			public boolean preShutdown(IWorkbench workbench, boolean forced) {
 				MarketplaceWizardDialog wizardDialog = MarketplaceWizardDialog.this;
 				Shell wizardShell = wizardDialog.getShell();
@@ -139,27 +136,20 @@ public class MarketplaceWizardDialog extends AbstractMarketplaceWizardDialog {
 				return activeShell;
 			}
 
+			@Override
 			public void postShutdown(IWorkbench workbench) {
 			}
 		};
 		PlatformUI.getWorkbench().addWorkbenchListener(workbenchListener);
-		newShell.addDisposeListener(new DisposeListener() {
-
-			public void widgetDisposed(DisposeEvent e) {
-				PlatformUI.getWorkbench().removeWorkbenchListener(workbenchListener);
-			}
-		});
+		newShell.addDisposeListener(e -> PlatformUI.getWorkbench().removeWorkbenchListener(workbenchListener));
 
 		if (newShell.getParent() == null) {
 			//bug 500379 - root shells don't handle escape traversal by default
-			newShell.addTraverseListener(new TraverseListener() {
-
-				public void keyTraversed(TraverseEvent e) {
-					if (e.keyCode == SWT.ESC) {
-						Shell shell = (Shell) e.widget;
-						if (shell != null && !shell.isDisposed() && shell.isVisible() && shell.isEnabled()) {
-							shell.close();
-						}
+			newShell.addTraverseListener(e -> {
+				if (e.keyCode == SWT.ESC) {
+					Shell shell = (Shell) e.widget;
+					if (shell != null && !shell.isDisposed() && shell.isVisible() && shell.isEnabled()) {
+						shell.close();
 					}
 				}
 			});

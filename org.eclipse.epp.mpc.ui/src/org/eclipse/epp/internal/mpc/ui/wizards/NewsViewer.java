@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -93,10 +93,12 @@ public class NewsViewer {
 		link.setEnabled(false);
 		link.addSelectionListener(new SelectionListener() {
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				WorkbenchUtil.openUrl(e.text, IWorkbenchBrowserSupport.AS_EXTERNAL);
 			}
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				widgetSelected(e);
 			}
@@ -107,6 +109,7 @@ public class NewsViewer {
 		copyMenuItem.setText(Messages.NewsViewer_Copy_Link_Address);
 		copyMenuItem.addSelectionListener(new SelectionListener() {
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Clipboard clipboard = new Clipboard(link.getDisplay());
 				String data = (String) link.getData("href"); //$NON-NLS-1$
@@ -114,6 +117,7 @@ public class NewsViewer {
 				clipboard.dispose();
 			}
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				widgetSelected(e);
 			}
@@ -250,6 +254,7 @@ public class NewsViewer {
 
 		private boolean running = false;
 
+		@Override
 		public void completed(ProgressEvent event) {
 			if (running) {
 				running = false;
@@ -257,6 +262,7 @@ public class NewsViewer {
 			}
 		}
 
+		@Override
 		public void changed(ProgressEvent event) {
 			if (event.total == 0) {
 				return;
@@ -265,34 +271,31 @@ public class NewsViewer {
 				running = true;
 				current = event.current;
 				total = event.total;
-				Display.getCurrent().asyncExec(new Runnable() {
+				Display.getCurrent().asyncExec(() -> {
+					try {
+						IWizardContainer container = wizard.getContainer();
+						if (container != null) {
+							wizard.getContainer().run(true, true, ProgressRunnable.this);
+						}
+					} catch (InvocationTargetException e1) {
 
-					public void run() {
-						try {
-							IWizardContainer container = wizard.getContainer();
-							if (container != null) {
-								wizard.getContainer().run(true, true, ProgressRunnable.this);
-							}
-						} catch (InvocationTargetException e) {
-
-						} catch (InterruptedException e) {
-							// cancelled by the user
-						} finally {
-							completed(null);
-							Browser browser = getBrowser();
-							if (!browser.isDisposed()) {
-								browser.stop();
-								browser.removeProgressListener(ProgressRunnable.this);
-							}
+					} catch (InterruptedException e2) {
+						// cancelled by the user
+					} finally {
+						completed(null);
+						Browser browser = getBrowser();
+						if (!browser.isDisposed()) {
+							browser.stop();
+							browser.removeProgressListener(ProgressRunnable.this);
 						}
 					}
-
 				});
 			} else {
 				progress(event.current, event.total);
 			}
 		}
 
+		@Override
 		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 			final SubMonitor progress = SubMonitor.convert(monitor, Messages.NewsViewer_Loading, total);
 			if (current > 0) {

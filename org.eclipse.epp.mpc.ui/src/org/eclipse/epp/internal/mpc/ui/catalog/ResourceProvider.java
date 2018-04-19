@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -61,70 +60,72 @@ public class ResourceProvider {
 		private final FutureTask<URL> delegate;
 
 		ResourceFuture(final File dir, final String resourceName) {
-			delegate = new FutureTask<URL>(new Callable<URL>() {
-
-				public URL call() throws Exception {
-					if (input == null) {
-						throw new IllegalStateException();
-					}
-					String filenameHint = resourceName;
-					if (filenameHint.lastIndexOf('/') != -1) {
-						filenameHint = filenameHint.substring(filenameHint.lastIndexOf('/') + 1);
-					}
-					filenameHint = filenameHint.replaceAll("[^a-zA-Z0-9\\.]", "_"); //$NON-NLS-1$ //$NON-NLS-2$
-					if (filenameHint.length() > 32) {
-						String hash = Integer.toHexString(filenameHint.hashCode());
-						filenameHint = filenameHint.substring(0, 6) + "_" //$NON-NLS-1$
-								+ hash + "_" //$NON-NLS-1$
-								+ filenameHint.substring(filenameHint.length() - (32 - hash.length() - 1 - 6 - 1));
-					}
-					final File outputFile = createTempFile(dir, filenameHint);
-					outputFile.deleteOnExit();
-
-					URL outputURL;
-					try {
-						outputURL = outputFile.toURI().toURL();
-					} catch (MalformedURLException e) {
-						MarketplaceClientUi.error(e);
-						return null;
-					}
-					BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(outputFile));
-					boolean success = false;
-					try {
-						InputStream buffered = new BufferedInputStream(input);
-						int i;
-						while ((i = buffered.read()) != -1) {
-							output.write(i);
-						}
-						success = true;
-					} finally {
-						output.close();
-						if (!success || !outputFile.exists()) {
-							outputFile.delete();
-							outputURL = null;
-						}
-					}
-					return outputURL;
+			delegate = new FutureTask<URL>(() -> {
+				if (input == null) {
+					throw new IllegalStateException();
 				}
+				String filenameHint = resourceName;
+				if (filenameHint.lastIndexOf('/') != -1) {
+					filenameHint = filenameHint.substring(filenameHint.lastIndexOf('/') + 1);
+				}
+				filenameHint = filenameHint.replaceAll("[^a-zA-Z0-9\\.]", "_"); //$NON-NLS-1$ //$NON-NLS-2$
+				if (filenameHint.length() > 32) {
+					String hash = Integer.toHexString(filenameHint.hashCode());
+					filenameHint = filenameHint.substring(0, 6) + "_" //$NON-NLS-1$
+							+ hash + "_" //$NON-NLS-1$
+							+ filenameHint.substring(filenameHint.length() - (32 - hash.length() - 1 - 6 - 1));
+				}
+				final File outputFile = createTempFile(dir, filenameHint);
+				outputFile.deleteOnExit();
+
+				URL outputURL;
+				try {
+					outputURL = outputFile.toURI().toURL();
+				} catch (MalformedURLException e) {
+					MarketplaceClientUi.error(e);
+					return null;
+				}
+				BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(outputFile));
+				boolean success = false;
+				try {
+					InputStream buffered = new BufferedInputStream(input);
+					int i;
+					while ((i = buffered.read()) != -1) {
+						output.write(i);
+					}
+					success = true;
+				} finally {
+					output.close();
+					if (!success || !outputFile.exists()) {
+						outputFile.delete();
+						outputURL = null;
+					}
+				}
+				return outputURL;
 			});
 		}
 
+		@Override
 		public boolean cancel(boolean mayInterruptIfRunning) {
 			return delegate.cancel(mayInterruptIfRunning);
 		}
 
+		@Override
 		public boolean isCancelled() {
 			return delegate.isCancelled();
 		}
 
+		@Override
 		public boolean isDone() {
 			return delegate.isDone();
 		}
 
+		@Override
 		public URL get() throws InterruptedException, ExecutionException {
 			return delegate.get();
 		}
 
+		@Override
 		public URL get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 			return delegate.get(timeout, unit);
 		}

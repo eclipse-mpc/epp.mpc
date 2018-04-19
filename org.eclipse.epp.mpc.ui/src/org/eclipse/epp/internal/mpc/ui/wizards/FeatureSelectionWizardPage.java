@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2013 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,13 +42,11 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.TreeColumnLayout;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TreeViewerColumn;
@@ -72,6 +70,7 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 
 	private static class LabelProvider extends ColumnLabelProvider implements IStyledLabelProvider {
 
+		@Override
 		public StyledString getStyledText(Object element) {
 			StyledString styledString = new StyledString();
 			String text = getText(element);
@@ -157,14 +156,17 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 
 		private Object input;
 
+		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			input = newInput;
 		}
 
+		@Override
 		public void dispose() {
 			// nothing to do
 		}
 
+		@Override
 		public Object[] getElements(Object inputElement) {
 			if (inputElement == input && input != null) {
 				return ((SelectionModel) input).getCatalogItemEntries().toArray();
@@ -212,10 +214,12 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 			}
 		}
 
+		@Override
 		public boolean hasChildren(Object element) {
 			return element == input || element instanceof CatalogItemEntry;
 		}
 
+		@Override
 		public Object getParent(Object element) {
 			if (element instanceof FeatureEntry) {
 				return ((FeatureEntry) element).getParent();
@@ -223,6 +227,7 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 			return input;
 		}
 
+		@Override
 		public Object[] getChildren(Object parentElement) {
 			return getElements(parentElement);
 		}
@@ -255,6 +260,7 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 		return (MarketplaceWizard) super.getWizard();
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		container = new Composite(parent, SWT.NONE);
 		switchResultLayout = new StackLayout();
@@ -306,20 +312,18 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 		});
 		viewer.setContentProvider(new ContentProvider());
 		viewer.setInput(getWizard().getSelectionModel());
-		viewer.addCheckStateListener(new ICheckStateListener() {
-			public void checkStateChanged(CheckStateChangedEvent event) {
-				boolean checked = event.getChecked();
-				if (event.getElement() instanceof CatalogItemEntry) {
-					CatalogItemEntry entry = (CatalogItemEntry) event.getElement();
-					for (FeatureEntry child : entry.getChildren()) {
-						child.setChecked(checked);
-					}
-				} else if (event.getElement() instanceof FeatureEntry) {
-					FeatureEntry featureEntry = (FeatureEntry) event.getElement();
-					featureEntry.setChecked(checked);
+		viewer.addCheckStateListener(event -> {
+			boolean checked = event.getChecked();
+			if (event.getElement() instanceof CatalogItemEntry) {
+				CatalogItemEntry entry = (CatalogItemEntry) event.getElement();
+				for (FeatureEntry child : entry.getChildren()) {
+					child.setChecked(checked);
 				}
-				refreshState();
+			} else if (event.getElement() instanceof FeatureEntry) {
+				FeatureEntry featureEntry = (FeatureEntry) event.getElement();
+				featureEntry.setChecked(checked);
 			}
+			refreshState();
 		});
 
 		column = new TreeViewerColumn(viewer, SWT.NONE);
@@ -348,27 +352,25 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 		super.setVisible(visible);
 		if (visible) {
 			refreshState();
-			Display.getCurrent().asyncExec(new Runnable() {
-				public void run() {
+			Display.getCurrent().asyncExec(() -> {
+				if (!isCurrentPage()) {
+					return;
+				}
+				if (getWizard().wantInitializeInitialSelection()) {
+					try {
+						getWizard().initializeInitialSelection();
+					} catch (CoreException e) {
+						boolean wasCancelled = e.getStatus().getSeverity() == IStatus.CANCEL;
+						if (!wasCancelled) {
+							MarketplaceClientUi.handle(e.getStatus(),
+									StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
+						}
+					}
 					if (!isCurrentPage()) {
 						return;
 					}
-					if (getWizard().wantInitializeInitialSelection()) {
-						try {
-							getWizard().initializeInitialSelection();
-						} catch (CoreException e) {
-							boolean wasCancelled = e.getStatus().getSeverity() == IStatus.CANCEL;
-							if (!wasCancelled) {
-								MarketplaceClientUi.handle(e.getStatus(),
-										StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
-							}
-						}
-						if (!isCurrentPage()) {
-							return;
-						}
-					}
-					updateFeatures();
 				}
+				updateFeatures();
 			});
 		}
 	}
@@ -397,11 +399,9 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 			public void run(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
 				super.run(progressMonitor);
 				if (!display.isDisposed() && isActivePage()) {
-					display.asyncExec(new Runnable() {
-						public void run() {
-							if (isActivePage()) {
-								updateFeatureDescriptors(getFeatureDescriptors(), getUnresolvedFeatureDescriptors());
-							}
+					display.asyncExec(() -> {
+						if (isActivePage()) {
+							updateFeatureDescriptors(getFeatureDescriptors(), getUnresolvedFeatureDescriptors());
 						}
 					});
 				}
@@ -627,10 +627,12 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 		return switchResultLayout.topControl != defaultComposite;
 	}
 
+	@Override
 	public String getNextButtonLabel() {
 		return Messages.MarketplaceWizardDialog_Confirm;
 	}
 
+	@Override
 	public String getBackButtonLabel() {
 		return Messages.MarketplaceWizardDialog_Install_More;
 	}

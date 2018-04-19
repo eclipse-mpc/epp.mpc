@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,22 +62,27 @@ public class MarketplaceCatalogConfiguration extends CatalogConfiguration implem
 		this.initialContentType = initialContentType;
 	}
 
+	@Override
 	public List<CatalogDescriptor> getCatalogDescriptors() {
 		return catalogDescriptors;
 	}
 
+	@Override
 	public void setCatalogDescriptors(List<CatalogDescriptor> catalogDescriptors) {
 		this.catalogDescriptors = catalogDescriptors;
 	}
 
+	@Override
 	public CatalogDescriptor getCatalogDescriptor() {
 		return catalogDescriptor;
 	}
 
+	@Override
 	public void setCatalogDescriptor(CatalogDescriptor catalogDescriptor) {
 		this.catalogDescriptor = catalogDescriptor;
 	}
 
+	@Override
 	public void setInitialState(Object state) {
 		if (state == null || state instanceof String) {
 			String stateString = (String) state;
@@ -92,14 +97,17 @@ public class MarketplaceCatalogConfiguration extends CatalogConfiguration implem
 		this.initialState = initialState;
 	}
 
+	@Override
 	public String getInitialState() {
 		return initialState;
 	}
 
+	@Override
 	public Map<String, Operation> getInitialOperations() {
 		return initialOperations == null ? null : Collections.unmodifiableMap(initialOperations);
 	}
 
+	@Override
 	public void setInitialOperations(Map<String, Operation> initialOperations) {
 		this.initialOperations = new LinkedHashMap<String, Operation>(initialOperations);
 	}

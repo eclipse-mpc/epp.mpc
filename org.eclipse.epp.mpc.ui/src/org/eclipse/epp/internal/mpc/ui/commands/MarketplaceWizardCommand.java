@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,6 @@ package org.eclipse.epp.internal.mpc.ui.commands;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +39,6 @@ import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogFilter;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryWizard;
 import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 
@@ -96,12 +94,10 @@ public class MarketplaceWizardCommand extends AbstractMarketplaceWizardCommand i
 		marketCategoryTagFilter.setTagClassification(ICategory.class);
 		marketCategoryTagFilter.setChoices(new ArrayList<Tag>());
 
-		final IPropertyChangeListener marketListener = new IPropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent event) {
-				final String property = event.getProperty();
-				if (AbstractTagFilter.PROP_SELECTED.equals(property)) {
-					updateCategoryChoices(marketCategoryTagFilter, marketFilter);
-				}
+		final IPropertyChangeListener marketListener = event1 -> {
+			final String property = event1.getProperty();
+			if (AbstractTagFilter.PROP_SELECTED.equals(property)) {
+				updateCategoryChoices(marketCategoryTagFilter, marketFilter);
 			}
 		};
 		marketFilter.addPropertyChangeListener(marketListener);
@@ -161,11 +157,7 @@ public class MarketplaceWizardCommand extends AbstractMarketplaceWizardCommand i
 				}
 			}
 		}
-		Collections.sort(choices, new Comparator<Tag>() {
-			public int compare(Tag o1, Tag o2) {
-				return o1.getLabel().compareTo(o2.getLabel());
-			}
-		});
+		Collections.sort(choices, (o1, o2) -> o1.getLabel().compareTo(o2.getLabel()));
 		marketCategoryTagFilter.setChoices(choices);
 	}
 

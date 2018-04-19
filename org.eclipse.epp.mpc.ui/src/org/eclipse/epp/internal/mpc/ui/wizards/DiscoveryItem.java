@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 Tasktop Technologies and others.
+ * Copyright (c) 2010, 2018 Tasktop Technologies and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,9 +14,7 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
-import java.util.concurrent.Callable;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
@@ -34,7 +32,6 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.RowLayoutFactory;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.operation.ModalContext;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.osgi.util.NLS;
@@ -132,6 +129,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 			.grab(false, true)
 			.applyTo(alreadyInstalledButton);
 			alreadyInstalledButton.addSelectionListener(new SelectionListener() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					//show installed tab
 					getViewer().setContentType(ContentType.INSTALLED);
@@ -139,6 +137,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 					getViewer().reveal(DiscoveryItem.this);
 				}
 
+				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
 					widgetSelected(e);
 				}
@@ -300,12 +299,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 			return;
 		}
 		if (Display.getCurrent() != this.getDisplay()) {
-			this.getDisplay().asyncExec(new Runnable() {
-
-				public void run() {
-					refreshFavoriteButton();
-				}
-			});
+			this.getDisplay().asyncExec(() -> refreshFavoriteButton());
 			return;
 		}
 		boolean favorited = isFavorited();
@@ -370,31 +364,22 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 		if (node != null && userFavoritesService != null) {
 			final boolean newFavorited = !isFavorited();
 			final Throwable[] error = new Throwable[] { null };
-			BusyIndicator.showWhile(getDisplay(), new Runnable() {
-
-				public void run() {
-					try {
-						ModalContext.run(new IRunnableWithProgress() {
-
-							public void run(final IProgressMonitor monitor)
-									throws InvocationTargetException, InterruptedException {
-								try {
-									userFavoritesService.getStorageService().runWithLogin(new Callable<Void>() {
-										public Void call() throws Exception {
-											userFavoritesService.setFavorite(node, newFavorited, monitor);
-											return null;
-										}
-									});
-								} catch (Exception e) {
-									error[0] = e;
-								}
-							}
-						}, true, new NullProgressMonitor(), getDisplay());
-					} catch (InvocationTargetException e) {
-						error[0] = e.getCause();
-					} catch (InterruptedException e) {
-						error[0] = e;
-					}
+			BusyIndicator.showWhile(getDisplay(), () -> {
+				try {
+					ModalContext.run(monitor -> {
+						try {
+							userFavoritesService.getStorageService().runWithLogin(() -> {
+								userFavoritesService.setFavorite(node, newFavorited, monitor);
+								return null;
+							});
+						} catch (Exception e) {
+							error[0] = e;
+						}
+					}, true, new NullProgressMonitor(), getDisplay());
+				} catch (InvocationTargetException e1) {
+					error[0] = e1.getCause();
+				} catch (InterruptedException e2) {
+					error[0] = e2;
 				}
 			});
 			Throwable e = error[0];

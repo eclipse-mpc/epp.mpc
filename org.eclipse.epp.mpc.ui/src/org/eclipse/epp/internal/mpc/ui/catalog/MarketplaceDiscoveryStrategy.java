@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,6 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -676,11 +675,8 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 					ISearchResult result;
 					if (promptLogin) {
 						IMarketplaceStorageService storageService = userFavoritesService.getStorageService();
-						result = storageService.runWithLogin(new Callable<ISearchResult>() {
-							public ISearchResult call() throws Exception {
-								return marketplaceService.userFavorites(progress.newChild(500));
-							}
-						});
+						result = storageService
+								.runWithLogin(() -> marketplaceService.userFavorites(progress.newChild(500)));
 					} else {
 						result = marketplaceService.userFavorites(progress.newChild(500));
 					}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2014 The Eclipse Foundation and others.
+ * Copyright (c) 2011, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,6 +67,7 @@ public class MarketplaceDropAdapter implements IStartup {
 
 	private Transfer[] transferAgents;
 
+	@Override
 	public void earlyStartup() {
 		UIJob registerJob = new UIJob(Display.getDefault(), Messages.MarketplaceDropAdapter_0) {
 			{
@@ -290,20 +291,12 @@ public class MarketplaceDropAdapter implements IStartup {
 				//http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=1640500
 				DropTarget source = (DropTarget) event.getSource();
 				Display display = source.getDisplay();
-				display.asyncExec(new Runnable() {
-					public void run() {
-						proceedInstallation(url);
-					}
-				});
+				display.asyncExec(() -> proceedInstallation(url));
 			} else if (acceptFavoritesListUrl(url)) {
 				//https://marketplace.eclipse.org/user/xxx/favorites
 				DropTarget source = (DropTarget) event.getSource();
 				Display display = source.getDisplay();
-				display.asyncExec(new Runnable() {
-					public void run() {
-						proceedFavorites(url);
-					}
-				});
+				display.asyncExec(() -> proceedFavorites(url));
 			} else {
 				traceInvalidEventData(event);
 			}
@@ -403,20 +396,25 @@ public class MarketplaceDropAdapter implements IStartup {
 
 	private class WorkbenchListener implements IPartListener2, IPageListener, IPerspectiveListener, IWindowListener {
 
+		@Override
 		public void perspectiveActivated(IWorkbenchPage page, IPerspectiveDescriptor perspective) {
 			pageChanged(page);
 		}
 
+		@Override
 		public void perspectiveChanged(IWorkbenchPage page, IPerspectiveDescriptor perspective, String changeId) {
 		}
 
+		@Override
 		public void pageActivated(IWorkbenchPage page) {
 			pageChanged(page);
 		}
 
+		@Override
 		public void pageClosed(IWorkbenchPage page) {
 		}
 
+		@Override
 		public void pageOpened(IWorkbenchPage page) {
 			pageChanged(page);
 		}
@@ -429,6 +427,7 @@ public class MarketplaceDropAdapter implements IStartup {
 			windowChanged(workbenchWindow);
 		}
 
+		@Override
 		public void windowActivated(IWorkbenchWindow window) {
 			windowChanged(window);
 		}
@@ -441,12 +440,15 @@ public class MarketplaceDropAdapter implements IStartup {
 			runUpdate(shell);
 		}
 
+		@Override
 		public void windowDeactivated(IWorkbenchWindow window) {
 		}
 
+		@Override
 		public void windowClosed(IWorkbenchWindow window) {
 		}
 
+		@Override
 		public void windowOpened(IWorkbenchWindow window) {
 			hookWindow(window);
 		}
@@ -462,33 +464,41 @@ public class MarketplaceDropAdapter implements IStartup {
 			windowChanged(window);
 		}
 
+		@Override
 		public void partOpened(IWorkbenchPartReference partRef) {
 			partUpdate(partRef);
 		}
 
+		@Override
 		public void partActivated(IWorkbenchPartReference partRef) {
 			partUpdate(partRef);
 		}
 
+		@Override
 		public void partBroughtToTop(IWorkbenchPartReference partRef) {
 			partUpdate(partRef);
 		}
 
+		@Override
 		public void partVisible(IWorkbenchPartReference partRef) {
 		}
 
+		@Override
 		public void partClosed(IWorkbenchPartReference partRef) {
 			partUpdate(partRef);
 		}
 
+		@Override
 		public void partDeactivated(IWorkbenchPartReference partRef) {
 			partUpdate(partRef);
 		}
 
+		@Override
 		public void partHidden(IWorkbenchPartReference partRef) {
 			partUpdate(partRef);
 		}
 
+		@Override
 		public void partInputChanged(IWorkbenchPartReference partRef) {
 		}
 
@@ -509,12 +519,9 @@ public class MarketplaceDropAdapter implements IStartup {
 				return;
 			}
 			try {
-				display.asyncExec(new Runnable() {
-
-					public void run() {
-						if (!shell.isDisposed()) {
-							installDropTarget(shell);
-						}
+				display.asyncExec(() -> {
+					if (!shell.isDisposed()) {
+						installDropTarget(shell);
 					}
 				});
 			} catch (SWTException ex) {
