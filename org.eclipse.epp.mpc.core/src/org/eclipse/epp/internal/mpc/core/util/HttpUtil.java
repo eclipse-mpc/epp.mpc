@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,11 +13,12 @@ package org.eclipse.epp.internal.mpc.core.util;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
-import org.apache.http.conn.params.ConnRoutePNames;
-import org.apache.http.impl.client.AbstractHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 
@@ -27,26 +28,27 @@ import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 public class HttpUtil {
 
 	public static HttpClient createHttpClient(String baseUri) {
-		HttpClient client = new DefaultHttpClient();
-		client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, MarketplaceClientCore.BUNDLE_ID);
+		HttpClientBuilder hcBuilder = HttpClients.custom();
+		hcBuilder.setUserAgent(MarketplaceClientCore.BUNDLE_ID);
 
 		if (baseUri != null) {
-			configureProxy(client, baseUri);
+			configureProxy(hcBuilder, baseUri);
 		}
 
-		return client;
+		return hcBuilder.build();
 	}
 
-	public static void configureProxy(HttpClient client, String url) {
+	public static void configureProxy(HttpClientBuilder hcBuilder, String url) {
 		final IProxyData proxyData = ProxyHelper.getProxyData(url);
 		if (proxyData != null && !IProxyData.SOCKS_PROXY_TYPE.equals(proxyData.getType())) {
 			HttpHost proxy = new HttpHost(proxyData.getHost(), proxyData.getPort());
-			client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
-
+			DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxy);
+			hcBuilder.setRoutePlanner(routePlanner);
 			if (proxyData.isRequiresAuthentication()) {
-				((AbstractHttpClient) client).getCredentialsProvider().setCredentials(
-						new AuthScope(proxyData.getHost(), proxyData.getPort()),
+				CredentialsProvider provider = new BasicCredentialsProvider();
+				provider.setCredentials(new AuthScope(proxyData.getHost(), proxyData.getPort()),
 						new UsernamePasswordCredentials(proxyData.getUserId(), proxyData.getPassword()));
+				hcBuilder.setDefaultCredentialsProvider(provider);
 			}
 		}
 	}
