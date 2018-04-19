@@ -20,7 +20,8 @@ import org.eclipse.epp.mpc.core.model.ICategory;
 public class Category extends Identifiable implements ICategory {
 
 	protected Integer count;
-	protected java.util.List<Node> node = new java.util.ArrayList<Node>();
+
+	protected java.util.List<Node> node = new java.util.ArrayList<>();
 
 	public Category() {
 	}

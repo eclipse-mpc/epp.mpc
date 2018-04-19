@@ -46,7 +46,7 @@ public class FallbackTransportFactory implements ITransportFactory {
 			this.fallbackTransport = fallbackTransport;
 		}
 
-		private final Set<String> reportedProblems = new HashSet<String>();
+		private final Set<String> reportedProblems = new HashSet<>();
 
 		private int connectionAttempts;
 

@@ -28,7 +28,7 @@ class CacheCredentialsProvider implements CredentialsProvider {
 	 */
 	public CacheCredentialsProvider() {
 		super();
-		this.credentials = new HashMap<AuthScope, Credentials>();
+		this.credentials = new HashMap<>();
 	}
 
 	public synchronized void removeCredentials(final AuthScope authscope) {

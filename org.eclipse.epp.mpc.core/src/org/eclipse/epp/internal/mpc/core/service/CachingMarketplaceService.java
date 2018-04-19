@@ -44,9 +44,9 @@ public class CachingMarketplaceService implements IMarketplaceService {
 
 	private final IMarketplaceService delegate;
 
-	private final Map<String, Reference<Object>> cache = new LinkedHashMap<String, Reference<Object>>();
+	private final Map<String, Reference<Object>> cache = new LinkedHashMap<>();
 
-	private final ReferenceQueue<Object> cacheReferenceQueue = new ReferenceQueue<Object>();
+	private final ReferenceQueue<Object> cacheReferenceQueue = new ReferenceQueue<>();
 
 	public CachingMarketplaceService(IMarketplaceService delegate) {
 		if (delegate == null) {
@@ -158,8 +158,8 @@ public class CachingMarketplaceService implements IMarketplaceService {
 
 	@Override
 	public List<INode> getNodes(Collection<? extends INode> nodes, IProgressMonitor monitor) throws CoreException {
-		Map<INode, INode> resolvedNodes = new LinkedHashMap<INode, INode>();
-		List<INode> unresolvedNodes = new ArrayList<INode>();
+		Map<INode, INode> resolvedNodes = new LinkedHashMap<>();
+		List<INode> unresolvedNodes = new ArrayList<>();
 		for (INode node : nodes) {
 			if (!mapCachedNode(node, resolvedNodes)) {
 				unresolvedNodes.add(node);
@@ -174,7 +174,7 @@ public class CachingMarketplaceService implements IMarketplaceService {
 				mapCachedNode(node, resolvedNodes);
 			}
 		}
-		List<INode> result = new ArrayList<INode>(nodes.size());
+		List<INode> result = new ArrayList<>(nodes.size());
 		for (INode node : nodes) {
 			INode resolvedNode = resolvedNodes.get(node);
 			if (resolvedNode != null) {
@@ -198,7 +198,7 @@ public class CachingMarketplaceService implements IMarketplaceService {
 
 	private void cache(String key, Object value) {
 		if (key != null) {
-			cache.put(key, new SoftReference<Object>(value, cacheReferenceQueue));
+			cache.put(key, new SoftReference<>(value, cacheReferenceQueue));
 		}
 	}
 

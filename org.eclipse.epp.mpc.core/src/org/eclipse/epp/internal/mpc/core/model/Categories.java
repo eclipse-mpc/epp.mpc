@@ -19,7 +19,7 @@ import org.eclipse.epp.mpc.core.model.ICategories;
  */
 public class Categories implements ICategories {
 
-	protected java.util.List<Category> category = new java.util.ArrayList<Category>();
+	protected java.util.List<Category> category = new java.util.ArrayList<>();
 
 	public Categories() {
 	}

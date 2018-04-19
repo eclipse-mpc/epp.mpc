@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 The Eclipse Foundation and others.
+ * Copyright (c) 2014, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,18 +41,18 @@ public class ServiceHelperImpl extends ServiceHelper {
 
 	void startTracking(final BundleContext context) {
 		this.context = context;
-		locatorServiceTracker = new ServiceTracker<IMarketplaceServiceLocator, IMarketplaceServiceLocator>(context,
+		locatorServiceTracker = new ServiceTracker<>(context,
 				IMarketplaceServiceLocator.class, null);
 		locatorServiceTracker.open(true);
 
-		transportFactoryTracker = new ServiceTracker<ITransportFactory, ITransportFactory>(context,
+		transportFactoryTracker = new ServiceTracker<>(context,
 				ITransportFactory.class, null);
 		transportFactoryTracker.open(true);
 
 		legacyTransportFactoryTracker = new TransportFactory.LegacyTransportFactoryTracker(context);
 		legacyTransportFactoryTracker.open(true);
 
-		unmarshallerTracker = new ServiceTracker<IMarketplaceUnmarshaller, IMarketplaceUnmarshaller>(context,
+		unmarshallerTracker = new ServiceTracker<>(context,
 				IMarketplaceUnmarshaller.class, null);
 		unmarshallerTracker.open(true);
 	}

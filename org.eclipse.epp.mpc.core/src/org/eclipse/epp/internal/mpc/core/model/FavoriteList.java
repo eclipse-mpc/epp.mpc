@@ -18,7 +18,7 @@ import org.eclipse.epp.mpc.core.model.INode;
 
 public class FavoriteList extends Identifiable implements IFavoriteList {
 
-	private List<INode> nodes = new ArrayList<INode>();
+	private List<INode> nodes = new ArrayList<>();
 
 	private String owner;
 

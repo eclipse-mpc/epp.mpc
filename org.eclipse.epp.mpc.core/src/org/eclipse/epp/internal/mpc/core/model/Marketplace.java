@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,9 +15,11 @@ package org.eclipse.epp.internal.mpc.core.model;
  */
 public class Marketplace {
 
-	protected java.util.List<Market> market = new java.util.ArrayList<Market>();
-	protected java.util.List<Category> category = new java.util.ArrayList<Category>();
-	protected java.util.List<Node> node = new java.util.ArrayList<Node>();
+	protected java.util.List<Market> market = new java.util.ArrayList<>();
+
+	protected java.util.List<Category> category = new java.util.ArrayList<>();
+
+	protected java.util.List<Node> node = new java.util.ArrayList<>();
 	protected Featured featured;
 	protected Search search;
 	protected Favorites favorites;

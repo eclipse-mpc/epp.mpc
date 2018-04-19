@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 The Eclipse Foundation and others.
+ * Copyright (c) 2014, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,7 +43,7 @@ public class ServiceUtil {
 	 */
 	public static Dictionary<String, Object> serviceRanking(int priority, Dictionary<String, Object> dict) {
 		if (dict == null) {
-			dict = new Hashtable<String, Object>();
+			dict = new Hashtable<>();
 		}
 		dict.put(Constants.SERVICE_RANKING, priority);
 		return dict;
@@ -82,7 +82,7 @@ public class ServiceUtil {
 	 */
 	public static Dictionary<String, Object> serviceName(String name, Dictionary<String, Object> dict) {
 		if (dict == null) {
-			dict = new Hashtable<String, Object>();
+			dict = new Hashtable<>();
 		}
 		dict.put(ComponentConstants.COMPONENT_NAME, name);
 		return dict;
@@ -156,7 +156,7 @@ public class ServiceUtil {
 	}
 
 	public static Dictionary<String, Object> getProperties(ServiceReference<?> serviceReference) {
-		Hashtable<String, Object> properties = new Hashtable<String, Object>();
+		Hashtable<String, Object> properties = new Hashtable<>();
 		String[] propertyKeys = serviceReference.getPropertyKeys();
 		for (String key : propertyKeys) {
 			Object value = serviceReference.getProperty(key);

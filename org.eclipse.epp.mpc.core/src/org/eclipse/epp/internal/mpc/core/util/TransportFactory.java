@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -82,7 +82,7 @@ public abstract class TransportFactory implements ITransportFactory {
 		if (excludeContributors != null && excludeContributors.contains(ECF_HTTPCLIENT4_TRANSPORT_ID)) {
 			disabledTransportsStr += "," + HTTP_TRANSPORT_WRAPPER_ID + "," + HTTP_TRANSPORT_FACTORY_ID; //$NON-NLS-1$//$NON-NLS-2$
 		}
-		Set<String> disabledTransports = new HashSet<String>();
+		Set<String> disabledTransports = new HashSet<>();
 		StringBuilder bldr = new StringBuilder("(&"); //$NON-NLS-1$
 		for (String transportName : disabledTransportsStr.split(",")) { //$NON-NLS-1$
 			transportName = transportName.trim();
@@ -166,7 +166,7 @@ public abstract class TransportFactory implements ITransportFactory {
 	implements ServiceTrackerCustomizer<ITransportFactory, TransportFactory> {
 		private final BundleContext context;
 
-		private final Map<ServiceReference<ITransportFactory>, TransportFactory> trackedServices = new HashMap<ServiceReference<ITransportFactory>, TransportFactory>();
+		private final Map<ServiceReference<ITransportFactory>, TransportFactory> trackedServices = new HashMap<>();
 
 		private LegacyTransportFactoryTrackerCustomizer(BundleContext context) {
 			this.context = context;
@@ -295,7 +295,7 @@ public abstract class TransportFactory implements ITransportFactory {
 	}
 
 	public static List<ITransportFactory> listAvailableFactories() {
-		List<ITransportFactory> factories = new ArrayList<ITransportFactory>();
+		List<ITransportFactory> factories = new ArrayList<>();
 		for (String factoryClass : factoryClasses) {
 			TransportFactory factory;
 			try {

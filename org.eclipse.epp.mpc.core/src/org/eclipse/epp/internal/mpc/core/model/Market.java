@@ -19,7 +19,7 @@ import org.eclipse.epp.mpc.core.model.IMarket;
  */
 public class Market extends Identifiable implements IMarket {
 
-	protected java.util.List<Category> category = new java.util.ArrayList<Category>();
+	protected java.util.List<Category> category = new java.util.ArrayList<>();
 
 	public Market() {
 	}

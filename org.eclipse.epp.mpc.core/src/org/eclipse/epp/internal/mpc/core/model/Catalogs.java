@@ -18,7 +18,7 @@ import org.eclipse.epp.mpc.core.model.ICatalogs;
  */
 public class Catalogs implements ICatalogs {
 
-	protected java.util.List<Catalog> catalogs = new java.util.ArrayList<Catalog>();
+	protected java.util.List<Catalog> catalogs = new java.util.ArrayList<>();
 
 	public Catalogs() {
 	}

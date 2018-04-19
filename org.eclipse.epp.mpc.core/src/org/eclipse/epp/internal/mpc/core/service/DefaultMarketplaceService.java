@@ -327,7 +327,7 @@ MarketplaceService {
 	public List<INode> getNodes(Collection<? extends INode> nodes, IProgressMonitor monitor) throws CoreException {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.DefaultMarketplaceService_getNodesProgress, nodes.size());
 		if (nodes.isEmpty()) {
-			return new ArrayList<INode>();
+			return new ArrayList<>();
 		}
 		List<INode> nodesById = null;
 		List<INode> nodesByUrl = null;
@@ -337,17 +337,17 @@ MarketplaceService {
 					throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_invalidNode, node));
 				}
 				if (nodesByUrl == null) {
-					nodesByUrl = new ArrayList<INode>();
+					nodesByUrl = new ArrayList<>();
 				}
 				nodesByUrl.add(node);
 			} else {
 				if (nodesById == null) {
-					nodesById = new ArrayList<INode>(nodes.size());
+					nodesById = new ArrayList<>(nodes.size());
 				}
 				nodesById.add(node);
 			}
 		}
-		Map<INode, INode> resolvedNodeMapping = new HashMap<INode, INode>(nodes.size());
+		Map<INode, INode> resolvedNodeMapping = new HashMap<>(nodes.size());
 		if (nodesById != null) {
 			getNodesById(nodesById, resolvedNodeMapping, progress.newChild(nodesById.size()));
 		}
@@ -355,7 +355,7 @@ MarketplaceService {
 			getNodesByUrl(nodesByUrl, resolvedNodeMapping, progress.newChild(nodesByUrl.size()));
 		}
 
-		List<INode> resultNodes = new ArrayList<INode>(nodes.size());
+		List<INode> resultNodes = new ArrayList<>(nodes.size());
 		MultiStatus missingNodes = null;
 		for (INode inputNode : nodes) {
 			INode resolvedNode = resolvedNodeMapping.get(inputNode);
@@ -386,7 +386,7 @@ MarketplaceService {
 	private void getNodesById(Collection<? extends INode> nodes, Map<INode, INode> resolvedNodeMapping,
 			IProgressMonitor monitor) throws CoreException {
 		StringBuilder nodeIdQuery = new StringBuilder();
-		Map<String, INode> nodeIds = new HashMap<String, INode>(nodes.size());
+		Map<String, INode> nodeIds = new HashMap<>(nodes.size());
 		for (INode node : nodes) {
 			if (node.getId() == null) {
 				continue;
@@ -813,7 +813,7 @@ MarketplaceService {
 			throw new IllegalStateException(e);
 		}
 		try {
-			List<NameValuePair> parameters = new ArrayList<NameValuePair>();
+			List<NameValuePair> parameters = new ArrayList<>();
 
 			Map<String, String> requestMetaParameters = getRequestMetaParameters();
 			for (Map.Entry<String, String> metaParam : requestMetaParameters.entrySet()) {

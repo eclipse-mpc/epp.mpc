@@ -93,7 +93,7 @@ public class Unmarshaller extends DefaultHandler {
 	}
 
 
-	private final Map<String,UnmarshalContentHandler> elementNameToUnmarshalContentHandler = new HashMap<String, UnmarshalContentHandler>();
+	private final Map<String, UnmarshalContentHandler> elementNameToUnmarshalContentHandler = new HashMap<>();
 	{
 		elementNameToUnmarshalContentHandler.put("marketplace", new MarketplaceContentHandler()); //$NON-NLS-1$
 		elementNameToUnmarshalContentHandler.put("market", new MarketContentHandler()); //$NON-NLS-1$

@@ -18,7 +18,7 @@ import org.eclipse.epp.mpc.core.model.ITags;
  */
 public class Tags implements ITags {
 
-	protected java.util.List<Tag> tags = new java.util.ArrayList<Tag>();
+	protected java.util.List<Tag> tags = new java.util.ArrayList<>();
 
 	public Tags() {
 	}

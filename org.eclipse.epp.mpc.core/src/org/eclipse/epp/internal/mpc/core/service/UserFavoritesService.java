@@ -132,9 +132,9 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 
 	private static final String SEPARATOR = ","; //$NON-NLS-1$
 
-	private final Map<String, Integer> favoritesCorrections = new HashMap<String, Integer>();
+	private final Map<String, Integer> favoritesCorrections = new HashMap<>();
 
-	private final Set<String> favorites = new HashSet<String>();
+	private final Set<String> favorites = new HashSet<>();
 
 	protected IBlob getFavoritesBlob() {
 		return getStorageService().getBlob(KEY);
@@ -172,7 +172,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 			return result;
 		} catch (NotFoundException ex) {
 			//the user does not yet have favorites
-			return new LinkedHashSet<String>();
+			return new LinkedHashSet<>();
 		} catch (OperationCanceledException ex) {
 			throw processProtocolException(ex);
 		} catch (ProtocolException ex) {
@@ -311,7 +311,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 	}
 
 	private static List<INode> toNodes(Collection<String> favoriteIds) {
-		List<INode> favoriteNodes = new ArrayList<INode>(favoriteIds.size());
+		List<INode> favoriteNodes = new ArrayList<>(favoriteIds.size());
 		for (String nodeId : favoriteIds) {
 			INode node = QueryHelper.nodeById(nodeId);
 			favoriteNodes.add(node);
@@ -320,7 +320,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 	}
 
 	protected Set<String> parseFavoritesBlobData(String favoritesData) {
-		Set<String> favoriteIds = new LinkedHashSet<String>();
+		Set<String> favoriteIds = new LinkedHashSet<>();
 		for (StringTokenizer tokenizer = new StringTokenizer(favoritesData, SEPARATOR); tokenizer.hasMoreTokens();) {
 			String nodeId = tokenizer.nextToken();
 			favoriteIds.add(nodeId);
@@ -347,7 +347,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		}
 		synchronized (this) {
 			SubMonitor notifyNewProgress = SubMonitor.convert(progress.newChild(50), nodes.size());
-			Set<String> newFavorites = new HashSet<String>();
+			Set<String> newFavorites = new HashSet<>();
 			for (INode node : nodes) {
 				String id = node.getId();
 				if (newFavorites.add(id)) {
@@ -392,7 +392,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		if (nodes.isEmpty()) {
 			return null;
 		}
-		List<String> nodeIds = new ArrayList<String>(nodes.size());
+		List<String> nodeIds = new ArrayList<>(nodes.size());
 		for (INode node : nodes) {
 			nodeIds.add(node.getId());
 		}
@@ -517,7 +517,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 
 			}.execute(uri);
 		} catch (FileNotFoundException e) {
-			return new ArrayList<String>();
+			return new ArrayList<>();
 		}
 	}
 
@@ -649,7 +649,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		}
 
 		protected List<T> handleBody(final URI uri, String body) throws ProtocolException {
-			List<T> favoriteIds = new ArrayList<T>();
+			List<T> favoriteIds = new ArrayList<>();
 			if (!"".equals(body)) { //$NON-NLS-1$
 				Matcher matcher = listAttributePattern.matcher(body);
 				if (matcher.find()) {

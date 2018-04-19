@@ -23,7 +23,7 @@ import org.eclipse.epp.mpc.core.model.IIus;
  */
 public class Ius implements IIus {
 
-	protected List<IIu> iuElements = new ArrayList<IIu>();
+	protected List<IIu> iuElements = new ArrayList<>();
 
 	public Ius() {
 	}
@@ -31,7 +31,7 @@ public class Ius implements IIus {
 	@Override
 	@Deprecated
 	public List<String> getIu() {
-		List<String> ius = new ArrayList<String>();
+		List<String> ius = new ArrayList<>();
 		for (IIu iu : iuElements) {
 			ius.add(iu.getId());
 		}

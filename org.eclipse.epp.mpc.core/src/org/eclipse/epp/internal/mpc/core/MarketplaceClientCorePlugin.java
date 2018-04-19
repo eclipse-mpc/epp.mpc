@@ -64,7 +64,7 @@ public class MarketplaceClientCorePlugin implements BundleActivator {
 		serviceHelper = new ServiceHelperImpl();
 		serviceHelper.startTracking(context);
 
-		Hashtable<String, String> props = new Hashtable<String, String>(2);
+		Hashtable<String, String> props = new Hashtable<>(2);
 		props.put(org.eclipse.osgi.service.debug.DebugOptions.LISTENER_SYMBOLICNAME, MarketplaceClientCore.BUNDLE_ID);
 		context.registerService(DebugOptionsListener.class.getName(), (DebugOptionsListener) options -> {
 			DebugTrace debugTrace = null;
@@ -92,7 +92,7 @@ public class MarketplaceClientCorePlugin implements BundleActivator {
 	}
 
 	private void registerServices(BundleContext context) throws InvalidSyntaxException {
-		List<ServiceRegistration<?>> serviceRegistrations = new ArrayList<ServiceRegistration<?>>();
+		List<ServiceRegistration<?>> serviceRegistrations = new ArrayList<>();
 		this.serviceRegistrations = serviceRegistrations;
 
 		List<ITransportFactory> factories = TransportFactory.listAvailableFactories();//highest-prio factory comes first
@@ -128,7 +128,7 @@ public class MarketplaceClientCorePlugin implements BundleActivator {
 		}
 		int prio = maxLegacyPriority;//prio counts down from 0 in steps of 100
 		for (ITransportFactory factory : factories) {
-			Hashtable<String, Object> properties = new Hashtable<String, Object>();
+			Hashtable<String, Object> properties = new Hashtable<>();
 			properties.put(Constants.SERVICE_RANKING, prio);
 			properties.put(ComponentConstants.COMPONENT_NAME, "legacy:" + factory.getClass().getName());
 			properties.put(TransportFactory.LEGACY_TRANSPORT_KEY, true);

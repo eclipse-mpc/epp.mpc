@@ -19,7 +19,7 @@ import org.eclipse.epp.mpc.core.model.IPlatforms;
  */
 public class Platforms implements IPlatforms {
 
-	protected java.util.List<String> platform = new java.util.ArrayList<String>();
+	protected java.util.List<String> platform = new java.util.ArrayList<>();
 
 	public Platforms() {
 	}

@@ -109,7 +109,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 
 	private URL defaultMarketplaceUrl;
 
-	private final List<ServiceRegistration<?>> dynamicServiceRegistrations = new ArrayList<ServiceRegistration<?>>();
+	private final List<ServiceRegistration<?>> dynamicServiceRegistrations = new ArrayList<>();
 
 	public ServiceLocator() {
 		defaultMarketplaceUrl = DefaultMarketplaceService.DEFAULT_SERVICE_URL;
@@ -148,7 +148,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 			Dictionary<String, Object> properties) {
 		if (baseUrl != null) {
 			if (properties == null) {
-				properties = new Hashtable<String, Object>(1);
+				properties = new Hashtable<>(1);
 			}
 			properties.put(IMarketplaceService.BASE_URL, baseUrl);
 		}
@@ -231,7 +231,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 	public IMarketplaceStorageService registerStorageService(String marketplaceBaseUrl, String apiServerUrl,
 			String apiKey) {
 		MarketplaceStorageService marketplaceStorageService = new MarketplaceStorageService();
-		Hashtable<String, Object> config = new Hashtable<String, Object>();
+		Hashtable<String, Object> config = new Hashtable<>();
 		config.put(IMarketplaceStorageService.STORAGE_SERVICE_URL_PROPERTY, apiServerUrl);
 		if (apiKey != null) {
 			config.put(IMarketplaceStorageService.APPLICATION_TOKEN_PROPERTY, apiKey);
@@ -263,15 +263,15 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 			this.defaultMarketplaceUrl = marketplaceUrl;
 		} //else the default value from the constructor is used
 
-		marketplaceServiceTracker = new ServiceTracker<IMarketplaceService, IMarketplaceService>(context,
+		marketplaceServiceTracker = new ServiceTracker<>(context,
 				IMarketplaceService.class, null);
 		marketplaceServiceTracker.open(true);
 
-		catalogServiceTracker = new ServiceTracker<ICatalogService, ICatalogService>(context, ICatalogService.class,
+		catalogServiceTracker = new ServiceTracker<>(context, ICatalogService.class,
 				null);
 		catalogServiceTracker.open(true);
 
-		storageServiceTracker = new ServiceTracker<IMarketplaceStorageService, IMarketplaceStorageService>(context,
+		storageServiceTracker = new ServiceTracker<>(context,
 				IMarketplaceStorageService.class,
 				new ServiceTrackerCustomizer<IMarketplaceStorageService, IMarketplaceStorageService>() {
 
@@ -307,7 +307,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		});
 		storageServiceTracker.open(true);
 
-		favoritesServiceTracker = new ServiceTracker<IUserFavoritesService, IUserFavoritesService>(context,
+		favoritesServiceTracker = new ServiceTracker<>(context,
 				IUserFavoritesService.class,
 				new ServiceTrackerCustomizer<IUserFavoritesService, IUserFavoritesService>() {
 			@Override
@@ -546,7 +546,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 	}
 
 	public static Map<String, String> computeDefaultRequestMetaParameters() {
-		Map<String, String> requestMetaParameters = new LinkedHashMap<String, String>();
+		Map<String, String> requestMetaParameters = new LinkedHashMap<>();
 		BundleContext bundleContext = FrameworkUtil.getBundle(MarketplaceClientCore.class).getBundleContext();
 
 		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_CLIENT,

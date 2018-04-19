@@ -106,7 +106,7 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 		if (serviceUri == null) {
 			return StorageFactory.DEFAULT;
 		}
-		Map<String, String> settingsMap = new HashMap<String, String>();
+		Map<String, String> settingsMap = new HashMap<>();
 		settingsMap.put(applicationToken, serviceUri.toString());
 		ISettings storageFactorySettings = new Settings.MemorySettings(settingsMap);
 		return new StorageFactory(storageFactorySettings);
@@ -173,7 +173,7 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 	@Override
 	public synchronized void addLoginListener(LoginListener listener) {
 		if (loginListeners == null) {
-			loginListeners = new CopyOnWriteArrayList<LoginListener>();
+			loginListeners = new CopyOnWriteArrayList<>();
 		}
 		if (!loginListeners.contains(listener)) {
 			loginListeners.add(listener);
@@ -272,8 +272,8 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 
 	private static void copySecurePreferences(ISecurePreferences source, ISecurePreferences target)
 			throws StorageException, IOException {
-		Set<String> sourceKeys = new HashSet<String>(Arrays.asList(source.keys()));
-		Set<String> targetKeys = new HashSet<String>(Arrays.asList(target.keys()));
+		Set<String> sourceKeys = new HashSet<>(Arrays.asList(source.keys()));
+		Set<String> targetKeys = new HashSet<>(Arrays.asList(target.keys()));
 		boolean changed = false;
 		for (String key : MIGRATE_SECURE_STORAGE_KEYS) {
 			if (sourceKeys.contains(key) && !targetKeys.contains(key)) {
