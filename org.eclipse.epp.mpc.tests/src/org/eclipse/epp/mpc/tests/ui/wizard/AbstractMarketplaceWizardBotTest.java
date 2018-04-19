@@ -181,7 +181,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 	protected void launchMarketplaceWizard() {
 		final MarketplaceWizardCommand marketplaceWizardCommand = new MarketplaceWizardCommand();
 		WizardState wizardState = new WizardState();
-		wizardState.setContent(new LinkedHashSet<INode>(Arrays.asList(TEST_NODES)));
+		wizardState.setContent(new LinkedHashSet<>(Arrays.asList(TEST_NODES)));
 		wizardState.setProceedWithInstallation(false);
 		marketplaceWizardCommand.setWizardDialogState(wizardState);
 
@@ -215,7 +215,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 
 	protected void closeWizard() {
 		String problem = null;
-		List<Exception> exceptions = new ArrayList<Exception>();
+		List<Exception> exceptions = new ArrayList<>();
 		SWTBotShell mpcShell;
 		try {
 			//check if dialog is still open
@@ -461,7 +461,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 
 	protected List<StyleRange> findLinks(final SWTBotStyledText styledText) {
 		StyleRange[] ranges = findStyleRanges(styledText);
-		List<StyleRange> links = new ArrayList<StyleRange>();
+		List<StyleRange> links = new ArrayList<>();
 		for (StyleRange range : ranges) {
 			if (range.underline == true && range.underlineStyle == SWT.UNDERLINE_LINK) {
 				links.add(range);

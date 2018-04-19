@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,11 @@
 package org.eclipse.epp.mpc.tests.service;
 
 import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -337,7 +341,7 @@ public class DefaultMarketplaceServiceTest {
 		assertTrue(result.getMatchCount() >= result.getNodes().size() - promotedCount);
 		assertTrue(result.getNodes().size() > 0);
 
-		Set<String> ids = new HashSet<String>();
+		Set<String> ids = new HashSet<>();
 		for (INode node : result.getNodes()) {
 			assertNotNull(node.getId());
 			assertTrue(ids.add(node.getId()));

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,13 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.service;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assume.*;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -291,7 +296,7 @@ public class SolutionCompatibilityFilterTest {
 
 	@Parameters(name = "{index}__{0}__with__{1}_{2}")
 	public static Iterable<Object[]> data() {
-		List<Object[]> data = new ArrayList<Object[]>();
+		List<Object[]> data = new ArrayList<>();
 		checkSolutionReleaseBounds(data, Solution.JUNO);
 		checkSolutionReleaseBounds(data, Solution.KEPLER);
 		checkSolutionReleaseBounds(data, Solution.LUNA);
@@ -430,8 +435,8 @@ public class SolutionCompatibilityFilterTest {
 					if (features == null && objects[5] == null) {
 						return;
 					}
-					Set<String> allFeatures = new HashSet<String>(Arrays.asList(features));
-					Set<String> allDataFeatures = new HashSet<String>(Arrays.asList((String[]) objects[5]));
+					Set<String> allFeatures = new HashSet<>(Arrays.asList(features));
+					Set<String> allDataFeatures = new HashSet<>(Arrays.asList((String[]) objects[5]));
 					if (allFeatures.equals(allDataFeatures)) {
 						return;
 					}
@@ -529,7 +534,7 @@ public class SolutionCompatibilityFilterTest {
 	}
 
 	private static Object[] flatten(Object... values) {
-		List<Object> flattened = new ArrayList<Object>();
+		List<Object> flattened = new ArrayList<>();
 		for (Object object : values) {
 			flatten(flattened, object);
 		}
@@ -894,7 +899,7 @@ public class SolutionCompatibilityFilterTest {
 		assertTrue("Total search result count {1} has to be at least the number of returned nodes {2}", result
 				.getMatchCount() >= result.getNodes().size(), result.getMatchCount(), result.getNodes().size());
 
-		Set<String> ids = new HashSet<String>();
+		Set<String> ids = new HashSet<>();
 		for (INode node : result.getNodes()) {
 			assertNotNull("Search result node {1} without id", node.getId(), node);
 			assertTrue("Duplicate search result node {1}", ids.add(node.getId()), node);
@@ -933,7 +938,7 @@ public class SolutionCompatibilityFilterTest {
 			assertEquals("Node {2} has wrong update site", site, node.getUpdateurl(), node);
 		}
 		if (features != null) {
-			Set<String> allIUs = new HashSet<String>();
+			Set<String> allIUs = new HashSet<>();
 			for (IIu iu : iuElements) {
 				allIUs.add(iu.getId());
 			}

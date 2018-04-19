@@ -123,8 +123,8 @@ public class TransportFactoryTest {
 		Collection<ServiceReference<ITransportFactory>> serviceReferences = context.getServiceReferences(
 				ITransportFactory.class, null);
 		assertFalse(serviceReferences.isEmpty());
-		List<Class<?>> registeredFactoryTypes = new ArrayList<Class<?>>();
-		Set<ITransportFactory> registeredFactories = new LinkedHashSet<ITransportFactory>();
+		List<Class<?>> registeredFactoryTypes = new ArrayList<>();
+		Set<ITransportFactory> registeredFactories = new LinkedHashSet<>();
 		for (ServiceReference<ITransportFactory> serviceReference : serviceReferences) {
 			try {
 				ITransportFactory service = context.getService(serviceReference);
@@ -167,8 +167,8 @@ public class TransportFactoryTest {
 		legacyTransportFactoryTracker.open();
 		try {
 			Object[] services = legacyTransportFactoryTracker.getServices();
-			List<Class<?>> registeredFactoryTypes = new ArrayList<Class<?>>();
-			Set<Object> registeredFactories = new LinkedHashSet<Object>();
+			List<Class<?>> registeredFactoryTypes = new ArrayList<>();
+			Set<Object> registeredFactories = new LinkedHashSet<>();
 			for (Object service : services) {
 				assertNotNull(service);
 				assertThat(service, instanceOf(TransportFactory.class));
@@ -300,7 +300,7 @@ public class TransportFactoryTest {
 			return new HttpClientTransport();
 		}
 
-		List<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
+		List<ServiceRegistration<?>> registrations = new ArrayList<>();
 		for (int i = 0; i < customizers.length; i++) {
 			HttpClientCustomizer customizer = customizers[i];
 			Dictionary<String, Object> serviceProperties = ServiceUtil.serviceName(
@@ -405,7 +405,7 @@ public class TransportFactoryTest {
 	}
 
 	private static List<CredentialsProvider> listCredentialsProviders(CredentialsProvider provider) {
-		ArrayList<CredentialsProvider> providers = new ArrayList<CredentialsProvider>();
+		ArrayList<CredentialsProvider> providers = new ArrayList<>();
 		doListCredentialsProviders(provider, providers);
 		return providers;
 	}

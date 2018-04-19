@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,12 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.net.URI;
 import java.util.LinkedHashSet;
@@ -31,7 +36,7 @@ import org.junit.rules.ExternalResource;
 public class MarketplaceStorageServiceRegistrationTest {
 
 	public static class TemporaryStorageServices extends ExternalResource {
-		private final Set<URI> temporaryStorageServiceUris = new LinkedHashSet<URI>();
+		private final Set<URI> temporaryStorageServiceUris = new LinkedHashSet<>();
 
 		public IStorageService create(String name, String uri) {
 			URI _uri = URI.create(uri);

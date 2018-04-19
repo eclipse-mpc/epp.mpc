@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,10 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui.catalog;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -59,10 +62,10 @@ public class MarketplaceCatalogTest {
 
 	@Before
 	public void setUp() throws Exception {
-		installedNodes = new HashSet<INode>();
-		updateAvailable = new HashSet<INode>();
-		checkedForUpdate = new HashSet<INode>();
-		discoveryNodes = new ArrayList<Node>();
+		installedNodes = new HashSet<>();
+		updateAvailable = new HashSet<>();
+		checkedForUpdate = new HashSet<>();
+		discoveryNodes = new ArrayList<>();
 
 		setupNodes();
 		setupCatalog();
@@ -116,7 +119,7 @@ public class MarketplaceCatalogTest {
 
 			@Override
 			protected synchronized Map<String, IInstallableUnit> computeInstalledIUs(IProgressMonitor monitor) {
-				Map<String, IInstallableUnit> installedIus = new HashMap<String, IInstallableUnit>();
+				Map<String, IInstallableUnit> installedIus = new HashMap<>();
 				for (INode node : installedNodes) {
 					IIus ius = node.getIus();
 					if (ius != null) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,10 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui.catalog;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.net.URI;
 import java.net.URL;
@@ -97,7 +100,7 @@ public class MarketplaceInfoTest {
 
 		assertEquals(1, catalogRegistry.getNodeKeyToIU().size());
 
-		Map<String, IInstallableUnit> installedIus = new HashMap<String, IInstallableUnit>();
+		Map<String, IInstallableUnit> installedIus = new HashMap<>();
 		addIU(installedIus, "com.foo.bar");
 
 		Set<? extends INode> installedCatalogNodeIds = catalogRegistry.computeInstalledNodes(item.getMarketplaceUrl(),
@@ -128,7 +131,7 @@ public class MarketplaceInfoTest {
 		assertTrue(item.getInstallableUnits().size() > 1);
 		assertEquals(0, catalogRegistry.getNodeKeyToIU().size());
 
-		Map<String, IInstallableUnit> installedIus = new HashMap<String, IInstallableUnit>();
+		Map<String, IInstallableUnit> installedIus = new HashMap<>();
 		InstallableUnit mainIu = addIU(installedIus, item.getInstallableUnits().get(0));
 
 		Set<? extends INode> installedCatalogNodeIds = catalogRegistry.computeInstalledNodes(item.getMarketplaceUrl(),
@@ -167,7 +170,7 @@ public class MarketplaceInfoTest {
 
 		assertEquals(1, catalogRegistry.getNodeKeyToIU().size());
 
-		Set<String> installedIus = new HashSet<String>();
+		Set<String> installedIus = new HashSet<>();
 		installedIus.add("com.foo.bar");
 
 		boolean isInstalled = catalogRegistry.computeInstalled(installedIus, item.getData());
@@ -195,7 +198,7 @@ public class MarketplaceInfoTest {
 
 		URI updateUri = new URI("http://update.example.org");
 		node.setUpdateurl(updateUri.toString());
-		Set<String> installedIus = new HashSet<String>();
+		Set<String> installedIus = new HashSet<>();
 		installedIus.addAll(item.getInstallableUnits());
 
 		boolean isInstalled = catalogRegistry.computeInstalled(installedIus, Collections.singleton(new URI(

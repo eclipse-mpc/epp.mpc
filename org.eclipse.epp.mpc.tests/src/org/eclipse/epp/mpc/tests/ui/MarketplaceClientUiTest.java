@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,8 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.ConnectException;
@@ -26,7 +27,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.ServiceLocator;
 import org.eclipse.epp.internal.mpc.core.service.DefaultCatalogService;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.commands.MarketplaceWizardCommand;
@@ -50,14 +50,14 @@ public class MarketplaceClientUiTest {
 
 		//Wrapped, unspecified exception - should be unwrapped and reported as-is
 		IStatus status = MarketplaceClientCore.computeStatus(new InvocationTargetException(new RuntimeException(
-		errorMessage)), contextMessage);
+				errorMessage)), contextMessage);
 		String expectedMessage = NLS.bind("{0}: {1}", contextMessage, errorMessage);
 		assertEquals(IStatus.ERROR, status.getSeverity());
 		assertEquals(expectedMessage, status.getMessage());
 
 		//UnknownHostException - should be treated as a hint for broken internet connection
 		status = MarketplaceClientCore.computeStatus(wrapInCoreException(new InvocationTargetException(
-		wrapInCoreException(new UnknownHostException("marketplace.eclipse.org")))), contextMessage);
+				wrapInCoreException(new UnknownHostException("marketplace.eclipse.org")))), contextMessage);
 		expectedMessage = NLS.bind("{0}: {1}", contextMessage, OFFLINE_HINT_TEXT);
 		assertEquals(IStatus.ERROR, status.getSeverity());
 		assertTrue(status.getMessage().startsWith(expectedMessage));
@@ -73,8 +73,8 @@ public class MarketplaceClientUiTest {
 		//Wrapped HTTP 503 in ECF transport - unwrap and report as-is
 		errorMessage = "Service temporarily unavailable";
 		status = MarketplaceClientCore.computeStatus(wrapInCoreException(new InvocationTargetException(new CoreException(
-		new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID, 503, errorMessage,
-				wrapInCoreException(new RuntimeException("Root cause")))))), contextMessage);
+				new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID, 503, errorMessage,
+						wrapInCoreException(new RuntimeException("Root cause")))))), contextMessage);
 		expectedMessage = NLS.bind("{0}: {1}", contextMessage, errorMessage);
 		assertEquals(IStatus.ERROR, status.getSeverity());
 		assertTrue(status.getMessage().startsWith(expectedMessage));

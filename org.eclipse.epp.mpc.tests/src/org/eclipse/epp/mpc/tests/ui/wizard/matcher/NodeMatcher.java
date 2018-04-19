@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,12 +54,12 @@ public class NodeMatcher<T extends Widget> extends AbstractMatcher<T> {
 
 	@Factory
 	public static <T extends Widget> NodeMatcher<T> any() {
-		return new NodeMatcher<T>(IsAnything.anything("Any node"));
+		return new NodeMatcher<>(IsAnything.anything("Any node"));
 	}
 
 	@Factory
 	public static <T extends Widget> NodeMatcher<T> withNode(Matcher<INode> matcher) {
-		return new NodeMatcher<T>(matcher);
+		return new NodeMatcher<>(matcher);
 	}
 
 	@Factory
