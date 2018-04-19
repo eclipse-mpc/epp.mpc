@@ -160,13 +160,9 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 				final Image image = getCatalogIcon(catalogDescriptor);
 				monitor.worked(1);
 				if (image != null && !label.isDisposed()) { // recheck - getCatalogIcon can take a bit if it needs to download the image...
-					label.getDisplay().asyncExec(new Runnable() {
-
-						@Override
-						public void run() {
-							if (!label.isDisposed() && !image.isDisposed()) {
-								label.setImage(image);
-							}
+					label.getDisplay().asyncExec(() -> {
+						if (!label.isDisposed() && !image.isDisposed()) {
+							label.setImage(image);
 						}
 					});
 				}

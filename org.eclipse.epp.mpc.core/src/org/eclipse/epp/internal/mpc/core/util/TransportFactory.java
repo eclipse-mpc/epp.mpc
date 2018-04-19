@@ -320,19 +320,13 @@ public abstract class TransportFactory implements ITransportFactory {
 	@Override
 	@SuppressWarnings("deprecation")
 	public ITransport getTransport() {
-		return new ITransport() {
-
-			@Override
-			public InputStream stream(URI location, IProgressMonitor monitor) throws FileNotFoundException,
-			org.eclipse.epp.mpc.core.service.ServiceUnavailableException, CoreException {
-				try {
-					return invokeStream(location, monitor);
-				} catch (Exception e) {
-					handleStreamExceptions(e);
-				}
-				return null;
+		return (location, monitor) -> {
+			try {
+				return invokeStream(location, monitor);
+			} catch (Exception e) {
+				handleStreamExceptions(e);
 			}
-
+			return null;
 		};
 	}
 
