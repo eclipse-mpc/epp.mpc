@@ -62,7 +62,7 @@ class CacheCredentialsProvider implements CredentialsProvider {
 	}
 
 	private Credentials findBestCredentials(final AuthScope authscope) {
-		Credentials bestMatch = credentials.get(credentials);
+		Credentials bestMatch = credentials.get(authscope);
 		if (bestMatch == null) {
 			// Nope.
 			// Do a full scan
