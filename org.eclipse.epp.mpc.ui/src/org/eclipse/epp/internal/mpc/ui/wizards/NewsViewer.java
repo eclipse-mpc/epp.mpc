@@ -44,8 +44,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
-import org.eclipse.ui.internal.browser.WorkbenchBrowserSupport;
 
 /**
  * @author Carsten Reckord
@@ -131,7 +131,7 @@ public class NewsViewer {
 	protected Control createBrowser(Composite parent) {
 		final Browser browser;
 		try {
-			if (!WorkbenchBrowserSupport.getInstance().isInternalWebBrowserAvailable()) {
+			if (!PlatformUI.getWorkbench().getBrowserSupport().isInternalWebBrowserAvailable()) {
 				return null;
 			}
 			browser = new Browser(parent, SWT.NONE);

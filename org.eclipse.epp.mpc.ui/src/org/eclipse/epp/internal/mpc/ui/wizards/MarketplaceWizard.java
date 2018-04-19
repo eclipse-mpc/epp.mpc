@@ -105,7 +105,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
-import org.eclipse.ui.internal.browser.WorkbenchBrowserSupport;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.service.prefs.BackingStoreException;
 
@@ -639,14 +638,16 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 	@Override
 	public void openUrl(String url) {
 		String catalogUrl = getCatalogUrl();
-		if (WorkbenchBrowserSupport.getInstance().isInternalWebBrowserAvailable()
+		if (PlatformUI.getWorkbench().getBrowserSupport().isInternalWebBrowserAvailable()
 				&& url.toLowerCase().startsWith(catalogUrl.toLowerCase())) {
 			int style = IWorkbenchBrowserSupport.AS_EDITOR | IWorkbenchBrowserSupport.LOCATION_BAR
 					| IWorkbenchBrowserSupport.NAVIGATION_BAR;
 			String browserId = "MPC-" + catalogUrl.replaceAll("[^a-zA-Z0-9_-]", "_"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			try {
 				CatalogDescriptor catalogDescriptor = getConfiguration().getCatalogDescriptor();
-				IWebBrowser browser = WorkbenchBrowserSupport.getInstance().createBrowser(style, browserId,
+				IWebBrowser browser = PlatformUI.getWorkbench()
+						.getBrowserSupport()
+						.createBrowser(style, browserId,
 						catalogDescriptor.getLabel(), catalogDescriptor.getDescription());
 				final String originalUrl = url;
 				url = appendWizardState(url);
