@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,11 +40,7 @@ public class UISuite extends LoggingSuite {
 			super.run(notifier);//we are in an UI Thread already
 		} else {
 			final Display display = PlatformUI.getWorkbench().getDisplay();
-			display.syncExec(new Runnable() {
-				public void run() {
-					doRun(notifier);
-				}
-			});
+			display.syncExec(() -> doRun(notifier));
 		}
 	}
 

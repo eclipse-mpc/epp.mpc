@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,9 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui.wizard;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
 
@@ -70,12 +72,7 @@ public class MarketplaceClientServiceTest extends AbstractMarketplaceWizardBotTe
 	@Test
 	public void testOpenDefault() throws Exception {
 		Display display = PlatformUI.getWorkbench().getDisplay();
-		display.asyncExec(new Runnable() {
-
-			public void run() {
-				service.open(config);
-			}
-		});
+		display.asyncExec(() -> service.open(config));
 
 		initWizardBot();
 		checkSelectedTab("Search");
@@ -83,12 +80,7 @@ public class MarketplaceClientServiceTest extends AbstractMarketplaceWizardBotTe
 
 	@Test
 	public void testOpenInstalled() throws Exception {
-		display.asyncExec(new Runnable() {
-
-			public void run() {
-				service.openInstalled(config);
-			}
-		});
+		display.asyncExec(() -> service.openInstalled(config));
 
 		initWizardBot();
 		checkSelectedTab("Installed");
@@ -97,12 +89,7 @@ public class MarketplaceClientServiceTest extends AbstractMarketplaceWizardBotTe
 
 	@Test
 	public void testOpenNodes() throws Exception {
-		display.asyncExec(new Runnable() {
-
-			public void run() {
-				service.open(config, Collections.singleton(QueryHelper.nodeById(ITEM_ID)));
-			}
-		});
+		display.asyncExec(() -> service.open(config, Collections.singleton(QueryHelper.nodeById(ITEM_ID))));
 
 		initWizardBot();
 		checkSelectedTab("Search");
@@ -114,12 +101,7 @@ public class MarketplaceClientServiceTest extends AbstractMarketplaceWizardBotTe
 		final IMarket toolsMarket = QueryHelper.marketByName("Tools");
 		final ICategory mylynCategory = QueryHelper.categoryByName("Editor");
 
-		display.asyncExec(new Runnable() {
-
-			public void run() {
-				service.openSearch(config, toolsMarket, mylynCategory, "snipmatch");
-			}
-		});
+		display.asyncExec(() -> service.openSearch(config, toolsMarket, mylynCategory, "snipmatch"));
 
 		initWizardBot();
 		checkSelectedTab("Search");
@@ -140,12 +122,7 @@ public class MarketplaceClientServiceTest extends AbstractMarketplaceWizardBotTe
 	public void testOpenWithSelection() throws Exception {
 		config.setInitialOperations(Collections.singletonMap(ITEM_ID, Operation.INSTALL));
 
-		display.asyncExec(new Runnable() {
-
-			public void run() {
-				service.open(config);
-			}
-		});
+		display.asyncExec(() -> service.open(config));
 
 		initWizardBot();
 		checkSelectedTab("Search");
@@ -158,12 +135,7 @@ public class MarketplaceClientServiceTest extends AbstractMarketplaceWizardBotTe
 	public void testOpenSelected() throws Exception {
 		config.setInitialOperations(Collections.singletonMap(ITEM_ID, Operation.INSTALL));
 
-		display.asyncExec(new Runnable() {
-
-			public void run() {
-				service.openSelected(config);
-			}
-		});
+		display.asyncExec(() -> service.openSelected(config));
 
 		initWizardBot();
 		checkSelectedTab("Search");
@@ -176,12 +148,7 @@ public class MarketplaceClientServiceTest extends AbstractMarketplaceWizardBotTe
 	public void testOpenProvisioning() throws Exception {
 		config.setInitialOperations(Collections.singletonMap(ITEM_ID, Operation.INSTALL));
 
-		display.asyncExec(new Runnable() {
-
-			public void run() {
-				service.openProvisioning(config);
-			}
-		});
+		display.asyncExec(() -> service.openProvisioning(config));
 
 		initWizardBot();
 
@@ -199,12 +166,7 @@ public class MarketplaceClientServiceTest extends AbstractMarketplaceWizardBotTe
 
 	@Test
 	public void testOpenFavorites() throws Exception {
-		display.asyncExec(new Runnable() {
-
-			public void run() {
-				service.openFavorites(config);
-			}
-		});
+		display.asyncExec(() -> service.openFavorites(config));
 
 		initWizardBot();
 		checkSelectedTab("Favorites");

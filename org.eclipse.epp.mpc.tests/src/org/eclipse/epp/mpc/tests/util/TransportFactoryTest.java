@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,8 +11,16 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.util;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -29,7 +37,6 @@ import java.util.Set;
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
@@ -68,8 +75,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
@@ -90,14 +95,10 @@ public class TransportFactoryTest {
 
 		@Override
 		public HttpClientBuilder customizeBuilder(HttpClientBuilder builder) {
-			return builder.addInterceptorLast(new HttpRequestInterceptor() {
-
-				@Override
-				public void process(HttpRequest request, HttpContext context) throws HttpException, IOException {
-					interceptedRequest = request;
-					interceptedContext = context;
-					throw new ConnectionClosedException("Aborting test request before execution");
-				}
+			return builder.addInterceptorLast((HttpRequestInterceptor) (request, context) -> {
+				interceptedRequest = request;
+				interceptedContext = context;
+				throw new ConnectionClosedException("Aborting test request before execution");
 			}).disableAutomaticRetries();
 		}
 
@@ -276,17 +277,11 @@ public class TransportFactoryTest {
 	@Test
 	public void testHttpClientCustomizer() throws Exception {
 		final HttpClientCustomizer customizer = Mockito.mock(HttpClientCustomizer.class);
-		Mockito.when(customizer.customizeBuilder(Matchers.any())).thenAnswer(new Answer<HttpClientBuilder>() {
-			public HttpClientBuilder answer(InvocationOnMock invocation) {
-				HttpClientBuilder builder = (HttpClientBuilder)invocation.getArguments()[0];
-				return builder == null ? null : builder.addInterceptorFirst(new HttpRequestInterceptor() {
-
-					@Override
-					public void process(HttpRequest request, HttpContext context) throws HttpException, IOException {
-						request.addHeader("X-Customizer-Test", "true");
-					}
-				});
-			}
+		Mockito.when(customizer.customizeBuilder(Matchers.any())).thenAnswer(invocation -> {
+			HttpClientBuilder builder = (HttpClientBuilder) invocation.getArguments()[0];
+			return builder == null ? null
+					: builder.addInterceptorFirst((HttpRequestInterceptor) (request, context) -> request.addHeader(
+							"X-Customizer-Test", "true"));
 		});
 		Mockito.when(customizer.customizeCredentialsProvider(Matchers.any())).thenReturn(null);
 

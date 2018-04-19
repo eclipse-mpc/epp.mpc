@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,8 +13,16 @@ package org.eclipse.epp.mpc.tests.ui.wizard;
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellIsActive;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
@@ -63,7 +71,6 @@ import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
 import org.eclipse.swtbot.swt.finder.junit.ScreenshotCaptureListener;
 import org.eclipse.swtbot.swt.finder.results.ArrayResult;
 import org.eclipse.swtbot.swt.finder.results.Result;
-import org.eclipse.swtbot.swt.finder.results.VoidResult;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferenceConstants;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.utils.SWTUtils;
@@ -87,7 +94,6 @@ import org.junit.AssumptionViolatedException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestRule;
-import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 import org.junit.runners.model.Statement;
 
@@ -134,31 +140,28 @@ public abstract class AbstractMarketplaceWizardBotTest {
 	}
 
 	@Rule
-	public TestRule screenshotOnFailureRule = new TestRule() {
-
-		public Statement apply(final Statement base, final Description description) {
-			String targetDir = System.getProperty(SWTBotPreferenceConstants.KEY_SCREENSHOTS_DIR);
-			if (targetDir == null && new File("target").isDirectory()) {
-				SWTBotPreferences.SCREENSHOTS_DIR = "target/screenshots";
-			}
-			return new Statement() {
-
-				private final ScreenshotCaptureListener capturer = new ScreenshotCaptureListener();
-
-				@Override
-				public void evaluate() throws Throwable {
-					try {
-						base.evaluate();
-					} catch (Throwable t) {
-						capturer.testFailure(new Failure(description, t));
-						throw t;
-					} finally {
-						tearDownBot();
-					}
-				}
-
-			};
+	public TestRule screenshotOnFailureRule = (base, description) -> {
+		String targetDir = System.getProperty(SWTBotPreferenceConstants.KEY_SCREENSHOTS_DIR);
+		if (targetDir == null && new File("target").isDirectory()) {
+			SWTBotPreferences.SCREENSHOTS_DIR = "target/screenshots";
 		}
+		return new Statement() {
+
+			private final ScreenshotCaptureListener capturer = new ScreenshotCaptureListener();
+
+			@Override
+			public void evaluate() throws Throwable {
+				try {
+					base.evaluate();
+				} catch (Throwable t) {
+					capturer.testFailure(new Failure(description, t));
+					throw t;
+				} finally {
+					tearDownBot();
+				}
+			}
+
+		};
 	};
 
 	@Before
@@ -182,15 +185,12 @@ public abstract class AbstractMarketplaceWizardBotTest {
 		wizardState.setProceedWithInstallation(false);
 		marketplaceWizardCommand.setWizardDialogState(wizardState);
 
-		UIThreadRunnable.asyncExec(new VoidResult() {
-
-			public void run() {
-				try {
-					marketplaceWizardCommand.execute(new ExecutionEvent());
-				} catch (ExecutionException e) {
-					fail("ExecutionException: " + e.getMessage());
-					//otherwise ignore, we'll notice in the test thread when we don't get the wizard dialog in time
-				}
+		UIThreadRunnable.asyncExec(() -> {
+			try {
+				marketplaceWizardCommand.execute(new ExecutionEvent());
+			} catch (ExecutionException e) {
+				fail("ExecutionException: " + e.getMessage());
+				//otherwise ignore, we'll notice in the test thread when we don't get the wizard dialog in time
 			}
 		});
 	}
@@ -287,12 +287,9 @@ public abstract class AbstractMarketplaceWizardBotTest {
 			final Shell shell = mpcShell.widget;
 			if (!shell.isDisposed()) {
 				Display display = shell.getDisplay();
-				display.syncExec(new Runnable() {
-					@Override
-					public void run() {
-						if (!shell.isDisposed()) {
-							shell.dispose();
-						}
+				display.syncExec(() -> {
+					if (!shell.isDisposed()) {
+						shell.dispose();
 					}
 				});
 			}
@@ -418,12 +415,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 	protected void checkSelectedTab(String tabLabel) {
 		SWTBotTabItem searchTab = bot.tabItem(tabLabel);
 		final TabItem tab = searchTab.widget;
-		TabItem[] selection = UIThreadRunnable.syncExec(new ArrayResult<TabItem>() {
-
-			public TabItem[] run() {
-				return tab.getParent().getSelection();
-			}
-		});
+		TabItem[] selection = UIThreadRunnable.syncExec((ArrayResult<TabItem>) () -> tab.getParent().getSelection());
 		assertEquals(1, selection.length);
 		assertSame(tab, selection[0]);
 	}
@@ -480,12 +472,8 @@ public abstract class AbstractMarketplaceWizardBotTest {
 	}
 
 	private StyleRange[] findStyleRanges(final SWTBotStyledText styledText) {
-		StyleRange[] ranges = UIThreadRunnable.syncExec(new ArrayResult<StyleRange>() {
-
-			public StyleRange[] run() {
-				return styledText.widget.getStyleRanges();
-			}
-		});
+		StyleRange[] ranges = UIThreadRunnable.syncExec((ArrayResult<StyleRange>) () -> styledText.widget
+				.getStyleRanges());
 		return ranges;
 	}
 
@@ -613,12 +601,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 	}
 
 	protected MarketplaceWizardDialog getWizardDialog() {
-		return (MarketplaceWizardDialog) UIThreadRunnable.syncExec(new Result<Object>() {
-
-			public Object run() {
-				return wizardShell.widget.getData();
-			}
-		});
+		return (MarketplaceWizardDialog) UIThreadRunnable.syncExec((Result<Object>) () -> wizardShell.widget.getData());
 	}
 
 	protected MarketplaceWizard getWizard() {

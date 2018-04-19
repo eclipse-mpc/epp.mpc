@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,14 +37,11 @@ public class SWTBotClickableStyledText extends SWTBotStyledText {
 	}
 
 	public void click(final int offset) {
-		Point location = UIThreadRunnable.syncExec(new Result<Point>() {
-
-			public Point run() {
-				Point location = widget.getLocationAtOffset(offset);
-				int lineHeight = widget.getLineHeight(offset);
-				location.y += lineHeight / 2;
-				return location;
-			}
+		Point location = UIThreadRunnable.syncExec((Result<Point>) () -> {
+			Point location1 = widget.getLocationAtOffset(offset);
+			int lineHeight = widget.getLineHeight(offset);
+			location1.y += lineHeight / 2;
+			return location1;
 		});
 		click(location.x, location.y, false);
 	}
