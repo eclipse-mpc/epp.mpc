@@ -67,7 +67,7 @@ public class ShareSolutionLink {
 
 	private static Button createShareLink(Composite parent) {
 		final Button share = new Button(parent, SWT.PUSH);
-		DiscoveryItem.setWidgetId(share, DiscoveryItem.WIDGET_ID_SHARE);
+		AbstractMarketplaceDiscoveryItem.setWidgetId(share, DiscoveryItem.WIDGET_ID_SHARE);
 		share.setImage(MarketplaceClientUiPlugin.getInstance()
 				.getImageRegistry()
 				.get(MarketplaceClientUiPlugin.ITEM_ICON_SHARE));

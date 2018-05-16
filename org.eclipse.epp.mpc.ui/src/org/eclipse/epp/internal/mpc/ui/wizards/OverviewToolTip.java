@@ -12,7 +12,9 @@
 
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import java.io.InputStream;
 import java.net.URL;
+import java.util.Scanner;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.Platform;
@@ -22,6 +24,7 @@ import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalogSource;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.ResourceProvider;
 import org.eclipse.epp.internal.mpc.ui.catalog.ResourceProvider.ResourceReceiver;
+import org.eclipse.epp.internal.mpc.ui.css.StyleHelper;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
 import org.eclipse.equinox.internal.p2.discovery.model.Overview;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
@@ -64,6 +67,12 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
  */
 class OverviewToolTip extends ToolTip {
 
+	private static final String CSS_PATH = "overview.css";
+
+	private static final String DEFAULT_THEME_CSS = "body { background-color: white; }";
+
+	private static final String INITIALIZED_FLAG = OverviewToolTip.class.getName() + ".initialized";
+
 	final int SCREENSHOT_HEIGHT = 240;
 
 	final int SCREENSHOT_WIDTH = 320;
@@ -74,19 +83,20 @@ class OverviewToolTip extends ToolTip {
 
 	private final Control parent;
 
-	private final Image leftImage;
-
 	private final IMarketplaceWebBrowser browser;
 
+	private static URL latestThemeCssUrl;
+
+	private static String latestThemeCss;
+
 	public OverviewToolTip(Control control, IMarketplaceWebBrowser browser, MarketplaceCatalogSource source,
-			Overview overview, Image leftImage) {
+			Overview overview) {
 		super(control, ToolTip.RECREATE, true);
 		Assert.isNotNull(source);
 		Assert.isNotNull(overview);
 		this.parent = control;
 		this.source = source;
 		this.overview = overview;
-		this.leftImage = leftImage;
 		this.browser = browser;
 		setHideOnMouseDown(false); // required for links to work
 	}
@@ -95,11 +105,20 @@ class OverviewToolTip extends ToolTip {
 	protected Composite createToolTipContentArea(Event event, final Composite parent) {
 		Shell shell = parent.getShell();
 		setData(Shell.class.getName(), shell);
+		Color backgroundColor = shell.getBackground();
+
+		if (shell.getData(INITIALIZED_FLAG) == null) {
+			shell.setData(INITIALIZED_FLAG, Boolean.TRUE);
+			backgroundColor = shell.getDisplay().getSystemColor(SWT.COLOR_WHITE);
+			shell.setBackground(backgroundColor);
+			new StyleHelper().on(shell).addClasses("ToolTip", "OverviewToolTip"); //$NON-NLS-1$
+		}
+
 		AbstractMarketplaceDiscoveryItem.setWidgetId(shell, DiscoveryItem.WIDGET_ID_OVERVIEW);
 		GridLayoutFactory.fillDefaults().applyTo(parent);
 
-		Color backgroundColor = parent.getDisplay().getSystemColor(SWT.COLOR_WHITE);
 		final Composite container = new Composite(parent, SWT.NULL);
+		container.setBackgroundMode(SWT.INHERIT_DEFAULT);
 		container.setBackground(backgroundColor);
 
 		boolean hasImage = false;
@@ -117,27 +136,15 @@ class OverviewToolTip extends ToolTip {
 
 		GridDataFactory.fillDefaults().grab(true, true).hint(
 				hasImage ? containerWidthHintWithImage : containerWidthHintWithoutImage, SWT.DEFAULT)
-		.applyTo(
-				container);
+		.applyTo(container);
 
-		GridLayoutFactory.fillDefaults().numColumns((leftImage != null) ? 3 : 2).margins(5, 5).spacing(3, 0).applyTo(
+		GridLayoutFactory.fillDefaults().numColumns(2).margins(5, 5).spacing(3, 0).applyTo(
 				container);
-
-		if (leftImage != null) {
-			Label imageLabel = new Label(container, SWT.NONE);
-			imageLabel.setImage(leftImage);
-			imageLabel.setBackground(backgroundColor);
-			int imageWidthHint = leftImage.getBounds().width + 5;
-			GridDataFactory.fillDefaults()
-			.align(SWT.BEGINNING, SWT.BEGINNING)
-			.hint(imageWidthHint, SWT.DEFAULT)
-			.applyTo(imageLabel);
-		}
 
 		String summary = overview.getSummary();
 
 		Composite summaryContainer = new Composite(container, SWT.NULL);
-		summaryContainer.setBackground(backgroundColor);
+		summaryContainer.setBackgroundMode(SWT.INHERIT_DEFAULT);
 		GridLayoutFactory.fillDefaults().applyTo(summaryContainer);
 
 		GridDataFactory gridDataFactory = GridDataFactory.fillDefaults()
@@ -149,20 +156,12 @@ class OverviewToolTip extends ToolTip {
 		gridDataFactory.applyTo(summaryContainer);
 
 		Browser summaryLabel = new Browser(summaryContainer, SWT.NULL);
+		AbstractMarketplaceDiscoveryItem.setWidgetId(summaryLabel,
+				AbstractMarketplaceDiscoveryItem.WIDGET_ID_DESCRIPTION);
 
 		Font dialogFont = JFaceResources.getDialogFont();
-		FontData[] fontData = dialogFont.getFontData();
-		String attr = ""; //$NON-NLS-1$
-		String fontSizeUnitOfMeasure = "pt"; //$NON-NLS-1$
-		if (Platform.OS_MACOSX.equals(Platform.getOS())) {
-			fontSizeUnitOfMeasure = "px"; //$NON-NLS-1$
-		} else if (Platform.OS_WIN32.equals(Platform.getOS())) {
-			attr = "overflow: auto; "; //$NON-NLS-1$
-		}
-		String cssStyle = "body, p, div, *  {" + attr + "font-family:\"" + fontData[0].getName() //$NON-NLS-1$ //$NON-NLS-2$
-				+ "\",Arial,sans-serif !important;font-size:" + fontData[0].getHeight() + fontSizeUnitOfMeasure + " !important;" //$NON-NLS-1$ //$NON-NLS-2$
-				+ "} body { margin: 0px; background-color: white;}"; //$NON-NLS-1$
 		summaryLabel.setFont(dialogFont);
+		String cssStyle = createCssStyle(summaryLabel);
 		String html = "<html><style>" + cssStyle + "</style><body>" + TextUtil.cleanInformalHtmlMarkup(summary) //$NON-NLS-1$//$NON-NLS-2$
 		+ "</body></html>"; //$NON-NLS-1$
 		summaryLabel.setText(html);
@@ -190,12 +189,14 @@ class OverviewToolTip extends ToolTip {
 
 		if (hasImage) {
 			final Composite imageContainer = new Composite(container, SWT.BORDER);
+			imageContainer.setBackgroundMode(SWT.INHERIT_DEFAULT);
 			GridLayoutFactory.fillDefaults().applyTo(imageContainer);
 
 			GridDataFactory.fillDefaults().grab(false, false).align(SWT.CENTER, SWT.BEGINNING).hint(
 					widthHint + (borderWidth * 2), heightHint).applyTo(imageContainer);
 
 			Label imageLabel = new Label(imageContainer, SWT.NULL);
+			AbstractMarketplaceDiscoveryItem.setWidgetId(imageLabel, DiscoveryItem.WIDGET_ID_SCREENSHOT);
 			GridDataFactory.fillDefaults().hint(widthHint, SCREENSHOT_HEIGHT).indent(borderWidth, borderWidth).applyTo(
 					imageLabel);
 			imageLabel.setBackground(backgroundColor);
@@ -253,6 +254,57 @@ class OverviewToolTip extends ToolTip {
 			}
 		});
 		return container;
+	}
+
+	private String createCssStyle(Browser summaryLabel) {
+		String defaultCss = computeDefaultCss(summaryLabel);
+
+		StyleHelper styleHelper = new StyleHelper().on(summaryLabel);
+		String themeCss = loadStylesheet(styleHelper, CSS_PATH);
+		if (themeCss == null) {
+			themeCss = DEFAULT_THEME_CSS;
+		}
+		return defaultCss + " " + themeCss; //$NON-NLS-1$
+	}
+
+	private String loadStylesheet(StyleHelper styleHelper, String cssPath) {
+		URL cssUrl = styleHelper.getCurrentThemeStylesheet(cssPath);
+		if (cssUrl == null) {
+			return null;
+		}
+		if (cssUrl.equals(latestThemeCssUrl)) {
+			return latestThemeCss;
+		}
+		latestThemeCssUrl = cssUrl;
+		latestThemeCss = null;
+		try (InputStream in = cssUrl.openStream(); Scanner s = new Scanner(in).useDelimiter("\\Z")) { //$NON-NLS-1$
+			String themeCss = s.next();
+			themeCss = themeCss.replaceAll("[\\r\\n]+", " ");
+			latestThemeCss = themeCss;
+			return themeCss;
+		} catch (Exception ex) {
+			MarketplaceClientUi.error(ex);
+			return null;
+		}
+	}
+
+	private String computeDefaultCss(Browser summaryLabel) {
+		Font dialogFont = summaryLabel.getFont();
+		FontData[] fontData = dialogFont.getFontData();
+		String attr = ""; //$NON-NLS-1$
+		String fontSizeUnitOfMeasure = "pt"; //$NON-NLS-1$
+		if (Platform.OS_MACOSX.equals(Platform.getOS())) {
+			fontSizeUnitOfMeasure = "px"; //$NON-NLS-1$
+		} else if (Platform.OS_WIN32.equals(Platform.getOS())) {
+			attr = "overflow: auto; "; //$NON-NLS-1$
+		}
+
+		String defaultTextStyle = attr + "font-family:\"" + fontData[0].getName() //$NON-NLS-1$
+				+ "\",Arial,sans-serif !important;font-size:" + fontData[0].getHeight() + fontSizeUnitOfMeasure //$NON-NLS-1$
+				+ " !important;"; //$NON-NLS-1$
+		String defaultBodyStyle = "margin: 0px;"; //$NON-NLS-1$
+		String defaultCss = "*  {" + defaultTextStyle + "} body { " + defaultBodyStyle + "}"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		return defaultCss;
 	}
 
 	@Override
