@@ -20,6 +20,7 @@ import java.util.List;
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalogSource;
+import org.eclipse.epp.internal.mpc.ui.css.StyleHelper;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceDiscoveryResources.ImageReceiver;
 import org.eclipse.epp.mpc.core.model.INode;
@@ -74,6 +75,8 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
  */
 public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> extends AbstractDiscoveryItem<T> {
 
+	protected static final String WIDGET_ID_CSS_PREFIX = "item-"; //$NON-NLS-1$
+
 	protected static final String REGISTRY_SCHEME = "registry:"; //$NON-NLS-1$
 
 	private static final String FILE_EXTENSION_TAG_PREFIX = "fileExtension_"; //$NON-NLS-1$
@@ -110,7 +113,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 
 	public static final String WIDGET_ID_DESCRIPTION = "description"; //$NON-NLS-1$
 
-	public static final String WIDGET_ID_ICON = "description"; //$NON-NLS-1$
+	public static final String WIDGET_ID_ICON = "icon"; //$NON-NLS-1$
 
 	public static final String WIDGET_ID_PROVIDER = "provider"; //$NON-NLS-1$
 
@@ -185,8 +188,26 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 	}
 
 	protected void createContent() {
+		setBackgroundMode(SWT.INHERIT_DEFAULT);
+		String itemClass = getItemClass();
+		String itemId = getItemId();
+		StyleHelper styleHelper = new StyleHelper().on(this);
+		if (itemClass != null) {
+			styleHelper.setClass(itemClass);
+		}
+		if (itemId != null) {
+			styleHelper.setId(itemId);
+		}
 		createContent(this);
 		createSeparator(this);
+	}
+
+	protected String getItemId() {
+		return null;
+	}
+
+	protected String getItemClass() {
+		return getClass().getSimpleName();
 	}
 
 	protected boolean alignIconWithName() {
@@ -228,6 +249,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 
 	protected void createIconContainer(Composite parent) {
 		checkboxContainer = new Composite(parent, SWT.NONE);
+		checkboxContainer.setBackgroundMode(SWT.INHERIT_DEFAULT);
 		GridDataFactory.swtDefaults()
 		.indent(0, DESCRIPTION_MARGIN_TOP)
 		.align(SWT.CENTER, SWT.BEGINNING)
@@ -257,6 +279,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 	}
 
 	static void setWidgetId(Widget widget, String id) {
+		new StyleHelper().on(widget).addClass(WIDGET_ID_CSS_PREFIX + id);
 		widget.setData(WIDGET_ID_KEY, id);
 	}
 
@@ -372,7 +395,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 				String descriptionLink = Messages.DiscoveryItem_More_Info;
 				StyledTextHelper.appendLink(description, descriptionLink, INFO_HREF, SWT.BOLD);
 				hookTooltip(description.getParent(), description, description, description, connector.getSource(),
-						connector.getOverview(), null);
+						connector.getOverview());
 			}
 		} else if (!internalBrowserAvailable && hasOverviewUrl(connector)) {
 			String descriptionLink = Messages.DiscoveryItem_More_Info;
@@ -393,7 +416,8 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		iconLabel = new Label(checkboxContainer, SWT.NONE);
 		setWidgetId(iconLabel, WIDGET_ID_ICON);
 		GridDataFactory.swtDefaults()
-		.align(SWT.CENTER, SWT.BEGINNING).grab(true, true)
+		.align(SWT.CENTER, SWT.BEGINNING)
+		.grab(true, false)
 		.applyTo(iconLabel);
 		if (getIcon() != null) {
 			provideIconImage(iconLabel, connector.getSource(), getIcon(), 64, true);
@@ -517,7 +541,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		.applyTo(providerLink);
 		// always disabled color to make it less prominent
 		providerLink.setForeground(resources.getColorDisabled());
-
+		new StyleHelper().on(providerLink).addClass("disabled");
 		String labelTemplate = Messages.DiscoveryItem_byProviderLicense;
 		String providerName = connector.getProvider();
 		LinkListener listener = new LinkListener() {
@@ -541,7 +565,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 				connector.getLicense()));
 		int providerPos = providerLink.getText().indexOf(PROVIDER_PLACEHOLDER);
 		if (providerPos != -1) {
-			StyleRange range = new StyleRange(0, 0, providerLink.getForeground(), null, SWT.NONE);
+			StyleRange range = StyledTextHelper.createDynamicForegroundRange(providerLink, 0, 0, SWT.NONE);
 			if (providerName == null) {
 				providerName = Messages.DiscoveryItem_UnknownProvider;
 				range.fontStyle = range.fontStyle | SWT.ITALIC;
@@ -636,12 +660,27 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 
 			@Override
 			protected Composite createToolTipContentArea(Event event, Composite parent) {
+				Shell shell = parent.getShell();
+				setData(Shell.class.getName(), shell);
+				Color backgroundColor = shell.getBackground();
+				String initializedFlag = this.getClass().getName() + ".initialized"; //$NON-NLS-1$
+				if (shell.getData(initializedFlag) == null) {
+					shell.setData(initializedFlag, Boolean.TRUE);
+					backgroundColor = shell.getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND);
+					shell.setBackground(backgroundColor);
+					new StyleHelper().on(shell).addClasses("ToolTip", "TagsToolTip"); //$NON-NLS-1$
+				}
 				Composite result = new Composite(parent, SWT.NONE);
-				result.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+				result.setBackgroundMode(SWT.INHERIT_DEFAULT);
+				result.setBackground(backgroundColor);
 				result.setLayout(new GridLayout());
+				StyleHelper helper = new StyleHelper();
+				helper.on(result).setClasses("ToolTip", "TagsToolTip");
+
 				StyledText fullTagLinks = StyledTextHelper.createStyledTextLabel(result);
 				fullTagLinks.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 				fullTagLinks.setForeground(parent.getDisplay().getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+				helper.on(fullTagLinks).setClass("Tags");
 				for (int i = 0; i < MAX_TOTAL_TAGS && i < tags.size(); i++) {
 					ITag tag = tags.get(i);
 					String tagName = tag.getName();
@@ -733,16 +772,16 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 	}
 
 	@Override
-	protected void hookTooltip(final Control parent, final Widget tipActivator, final Control exitControl,
+	protected final void hookTooltip(final Control parent, final Widget tipActivator, final Control exitControl,
 			final Control titleControl, AbstractCatalogSource source, Overview overview, Image image) {
-		final OverviewToolTip toolTip = new OverviewToolTip(parent, browser, (MarketplaceCatalogSource) source,
-				overview, image);
-		hookTooltip(toolTip, tipActivator, exitControl);
+		hookTooltip(parent, tipActivator, exitControl, titleControl, source, overview);
+	}
 
-		if (image != null) {
-			Listener listener = event -> toolTip.show(titleControl);
-			tipActivator.addListener(SWT.MouseHover, listener);
-		}
+	protected void hookTooltip(final Control parent, final Widget tipActivator, final Control exitControl,
+			final Control titleControl, AbstractCatalogSource source, Overview overview) {
+		final OverviewToolTip toolTip = new OverviewToolTip(parent, browser, (MarketplaceCatalogSource) source,
+				overview);
+		hookTooltip(toolTip, tipActivator, exitControl);
 
 		if (tipActivator instanceof StyledText) {
 			StyledText link = (StyledText) tipActivator;

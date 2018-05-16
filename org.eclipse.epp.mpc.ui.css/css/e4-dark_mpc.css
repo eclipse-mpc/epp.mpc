@@ -1,0 +1,34 @@
+.MarketplaceViewer,
+.MarketplaceViewer > *,
+.MarketplaceItem,
+.MarketplaceItem * {
+    background-color: #383C3E;
+    color: #dddddd;
+}
+
+.MarketplaceItem Link {
+    color: #8B9498;
+}
+.MarketplaceItem .disabled {
+    color: #aaaaaa;
+}
+
+.TagsToolTip,
+.TagsToolTip * {
+    background-color: #515658;
+    color: #dddddd;
+}
+
+.NotificationItem,
+.NotificationItem * {
+    background-color: #505F70;
+    color: #9ac9d8;
+}
+
+.CatalogSwitcher,
+.CatalogSwitcher > ScrolledComposite,
+.CatalogSwitcher > ScrolledComposite > *,
+.Catalog {
+    background-color: #383C3E;
+    color: #dddddd;
+}

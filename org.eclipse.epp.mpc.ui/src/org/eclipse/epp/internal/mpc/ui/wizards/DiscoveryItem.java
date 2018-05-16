@@ -24,6 +24,7 @@ import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalogSource;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
+import org.eclipse.epp.internal.mpc.ui.css.StyleHelper;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
@@ -61,6 +62,8 @@ import org.eclipse.userstorage.util.ConflictException;
  */
 public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDiscoveryItem<T> {
 
+	public static final String STYLING_CLASS = "DiscoveryItem"; //$NON-NLS-1$
+
 	private static final String FAVORITED_BUTTON_STATE_DATA = "favorited"; //$NON-NLS-1$
 
 	public static final String WIDGET_ID_INSTALLS = "installs"; //$NON-NLS-1$
@@ -71,13 +74,15 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 
 	public static final String WIDGET_ID_SHARE = "share"; //$NON-NLS-1$
 
-	public static final String WIDGET_ID_LEARNMORE = "learn more"; //$NON-NLS-1$
+	public static final String WIDGET_ID_LEARNMORE = "learn-more"; //$NON-NLS-1$
 
 	public static final String WIDGET_ID_OVERVIEW = "overview"; //$NON-NLS-1$
 
-	public static final String WIDGET_ID_ALREADY_INSTALLED = "already installed"; //$NON-NLS-1$
+	public static final String WIDGET_ID_ALREADY_INSTALLED = "already-installed"; //$NON-NLS-1$
 
 	public static final String WIDGET_ID_ACTION = "action"; //$NON-NLS-1$
+
+	public static final String WIDGET_ID_SCREENSHOT = "screenshot"; //$NON-NLS-1$
 
 	private ItemButtonController buttonController;
 
@@ -93,6 +98,16 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 			IMarketplaceWebBrowser browser,
 			final T connector, MarketplaceViewer viewer) {
 		super(parent, style, resources, browser, connector, viewer);
+	}
+
+	@Override
+	protected String getItemClass() {
+		return STYLING_CLASS;
+	}
+
+	@Override
+	protected String getItemId() {
+		return WIDGET_ID_CSS_PREFIX + connector.getId();
 	}
 
 	@Override
@@ -118,6 +133,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 				&& getViewer().getContentType() != ContentType.SELECTION) {
 			Button alreadyInstalledButton = new Button(composite, SWT.PUSH | SWT.BOLD);
 			setWidgetId(alreadyInstalledButton, WIDGET_ID_ALREADY_INSTALLED);
+			new StyleHelper().on(alreadyInstalledButton).addClass("install-action");
 			alreadyInstalledButton.setText(Messages.DiscoveryItem_AlreadyInstalled);
 			alreadyInstalledButton.setFont(JFaceResources.getFontRegistry().getItalic("")); //$NON-NLS-1$
 			Point preferredSize = alreadyInstalledButton.computeSize(SWT.DEFAULT, SWT.DEFAULT);
@@ -146,6 +162,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 			DropDownButton dropDown = new DropDownButton(composite, SWT.PUSH);
 			Button button = dropDown.getButton();
 			setWidgetId(button, WIDGET_ID_ACTION);
+			new StyleHelper().on(button).addClass("install-action");
 			Point preferredSize = button.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 			int preferredWidth = preferredSize.x + 10;//Give a bit of extra padding for bold or italic font
 

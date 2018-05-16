@@ -16,6 +16,9 @@ import org.eclipse.swt.accessibility.AccessibleControlAdapter;
 import org.eclipse.swt.accessibility.AccessibleControlEvent;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 
 class StyledTextHelper {
@@ -36,14 +39,35 @@ class StyledTextHelper {
 		return styledText;
 	}
 
-	protected static StyleRange appendLink(StyledText styledText, String text, Object href, int style) {
-		StyleRange range = new StyleRange(0, 0, styledText.getForeground(), null, style);
+	protected static StyleRange appendLink(final StyledText styledText, String text, Object href, int style) {
+		StyleRange range = createDynamicForegroundRange(styledText, 0, 0, style);
 		range.underline = true;
 		range.underlineStyle = SWT.UNDERLINE_LINK;
 
 		appendStyled(styledText, text, range);
 		range.data = href;
 
+		return range;
+	}
+
+	protected static StyleRange createDynamicForegroundRange(final StyledText styledText, int start, int length,
+			int style) {
+		final Color currentForeground = styledText.getForeground();
+		final StyleRange range = new StyleRange(start, length, currentForeground, null, style);
+		styledText.addPaintListener(new PaintListener() {
+
+			Color color = currentForeground;
+
+			@Override
+			public void paintControl(PaintEvent e) {
+				if ((color != null && (color.isDisposed() || !color.equals(styledText.getForeground())))
+						|| (color == null && styledText.getForeground() != null)) {
+					color = styledText.getForeground();
+					range.foreground = color;
+					styledText.setStyleRange(range);
+				}
+			}
+		});
 		return range;
 	}
 
