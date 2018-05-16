@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.css.StyleHelper;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CategoryItem;
@@ -72,32 +73,36 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 	public CatalogSwitcher(Composite parent, int style, MarketplaceCatalogConfiguration configuration) {
 		super(parent, style);
 		this.configuration = configuration;
+
 		GridLayoutFactory.fillDefaults().numColumns(1).margins(0, 0).spacing(0, 0).applyTo(this);
+		this.setBackgroundMode(SWT.INHERIT_FORCE);
+		Color listBackground = getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND);
+		setBackground(listBackground);
+
+		StyleHelper styleHelper = new StyleHelper().on(this);
+		styleHelper.setClass("CatalogSwitcher");
+
 		createContents(this);
 	}
 
 	private void createContents(final Composite parent) {
 		createHeader(parent);
 		final ScrolledComposite scrollArea = new ScrolledComposite(parent, SWT.V_SCROLL);
+		scrollArea.setBackgroundMode(SWT.INHERIT_DEFAULT);
 		scrollArea.setLayout(new FillLayout());
-
 		marketplaceArea = new Composite(scrollArea, SWT.NONE);
+		marketplaceArea.setBackgroundMode(SWT.INHERIT_DEFAULT);
+		scrollArea.setContent(marketplaceArea);
 
 		RowLayout layout = new RowLayout(SWT.HORIZONTAL);
 		layout.marginLeft = layout.marginRight = layout.marginTop = layout.marginBottom = layout.marginHeight = layout.marginWidth = 0;
 		marketplaceArea.setLayout(layout);
-
-		Color listBackground = getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND);
-		setBackground(listBackground);
-		marketplaceArea.setBackground(listBackground);
-		scrollArea.setBackground(listBackground);
 
 		List<CatalogDescriptor> catalogDescriptors = configuration.getCatalogDescriptors();
 		for (CatalogDescriptor catalogDescriptor : catalogDescriptors) {
 			createMarketplace(marketplaceArea, catalogDescriptor);
 		}
 
-		scrollArea.setContent(marketplaceArea);
 		scrollArea.setExpandVertical(true);
 		scrollArea.setExpandHorizontal(true);
 		scrollArea.setMinHeight(MIN_SCROLL_HEIGHT);
@@ -118,22 +123,28 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 				new DiscoveryResources(parent.getDisplay()), fakeCategory);
 		MarketplaceViewer.setSeparatorVisible(header, false);
 		MarketplaceViewer.fixLayout(header);
+		new StyleHelper().on(header).setClass("CatalogSwitcherHeader");
 	}
 
 	private void createMarketplace(Composite composite, final CatalogDescriptor catalogDescriptor) {
 		Composite container = new Composite(composite, SWT.NONE);
-		Color listBackground = getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND);
-		container.setBackground(listBackground);
+		container.setBackgroundMode(SWT.INHERIT_DEFAULT);
 		container.setData(catalogDescriptor);
 		GridLayout layout = new GridLayout(1, false);
 		layout.marginHeight = ITEM_MARGIN;
 		layout.marginWidth = ITEM_MARGIN;
 		container.setLayout(layout);
 
+		StyleHelper styleHelper = new StyleHelper().on(container);
+		styleHelper.setClass("Catalog");
+		styleHelper.setId("catalog-" + composite.getChildren().length);
+
 		final Label label = new Label(container, SWT.NONE);
-		label.setBackground(listBackground);
-		retrieveCatalogImage(catalogDescriptor, label);
+		//label.setBackground(container.getBackground());
 		label.setImage(getDefaultCatalogImage());
+		styleHelper.on(label).setClass("CatalogImage");
+
+		retrieveCatalogImage(catalogDescriptor, label);
 		label.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
@@ -243,14 +254,15 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 	private void refreshSelection() {
 		Control[] children = marketplaceArea.getChildren();
 		for (Control control : children) {
-			int color;
+			Color color;
 			if (this.selection == control.getData()) {
-				color = SWT.COLOR_LIST_SELECTION;
+				//TODO support styling with :selected pseudo-class
+				color = getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION);
 			} else {
-				color = SWT.COLOR_WHITE;
+				color = this.getBackground();
 			}
-			control.setBackground(getDisplay().getSystemColor(color));
-			((Composite) control).getChildren()[0].setBackground(getDisplay().getSystemColor(color));
+			control.setBackground(color);
+			((Composite) control).getChildren()[0].setBackground(color);
 		}
 	}
 

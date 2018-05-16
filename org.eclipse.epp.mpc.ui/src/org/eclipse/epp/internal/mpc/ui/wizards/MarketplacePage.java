@@ -590,9 +590,16 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 
 	private void createMarketplaceSwitcher(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
+		composite.setBackgroundMode(SWT.INHERIT_DEFAULT);
 		composite.setLayout(new FillLayout());
+		composite.setData("CSS_SUPPORTS_BORDERS", true);
+		StyleHelper styleHelper = new StyleHelper();
+		styleHelper.on(composite).setId("switcher-parent");
 
-		final CatalogSwitcher switcher = new CatalogSwitcher(composite, SWT.BORDER, configuration);
+		String themeId = styleHelper.getCurrentThemeId();
+		boolean defaultTheme = themeId == null || themeId.contains("e4_default") || themeId.contains("e4_classic");
+		final CatalogSwitcher switcher = new CatalogSwitcher(composite, defaultTheme ? SWT.BORDER : SWT.None,
+				configuration);
 		switcher.addSelectionChangedListener(event -> {
 			CatalogDescriptor descriptor = (CatalogDescriptor) ((IStructuredSelection) event.getSelection())
 					.getFirstElement();
@@ -603,6 +610,8 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 			switcher.setSelection(new StructuredSelection(selectedDescriptor));
 			lastSelection = selectedDescriptor;
 		}
+		styleHelper.on(switcher).setId("MarketplaceSwitcher");
+
 		marketplaceSwitcher = switcher;
 		GridDataFactory.fillDefaults()
 		.align(SWT.FILL, SWT.FILL)
