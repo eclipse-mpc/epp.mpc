@@ -37,6 +37,16 @@ public class FavoriteListDiscoveryItem extends AbstractSimpleDiscoveryItem<Favor
 	}
 
 	@Override
+	protected String getItemClass() {
+		return "FavoriteListItem";
+	}
+
+	@Override
+	protected String getItemId() {
+		return "favorite-" + connector.getId();
+	}
+
+	@Override
 	protected Icon getIcon() {
 		Icon icon = connector.getIcon();
 		if (icon != null) {

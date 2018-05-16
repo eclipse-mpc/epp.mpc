@@ -22,6 +22,7 @@ import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
+import org.eclipse.epp.internal.mpc.ui.css.StyleHelper;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
@@ -90,6 +91,12 @@ public class ImportFavoritesPage extends CatalogPage {
 	@Override
 	protected FavoritesViewer getViewer() {
 		return (FavoritesViewer) super.getViewer();
+	}
+
+	@Override
+	public void createControl(Composite parent) {
+		new StyleHelper().on(parent).setId("ImportFavoritesPage");
+		super.createControl(parent);
 	}
 
 	@Override

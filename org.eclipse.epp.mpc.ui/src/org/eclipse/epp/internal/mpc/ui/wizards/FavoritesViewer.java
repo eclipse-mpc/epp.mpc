@@ -21,8 +21,10 @@ import org.eclipse.epp.internal.mpc.ui.catalog.FavoriteListCatalogItem;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
+import org.eclipse.epp.internal.mpc.ui.css.StyleHelper;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.equinox.internal.p2.discovery.Catalog;
+import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.ControlListItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogConfiguration;
@@ -225,6 +227,7 @@ public class FavoritesViewer extends CatalogViewer {
 		});
 		super.getResources().dispose();
 		viewer.setComparator(null);
+		new StyleHelper().on(viewer.getControl()).setClass("FavoritesViewer");
 		return viewer;
 	}
 
@@ -312,16 +315,22 @@ public class FavoritesViewer extends CatalogViewer {
 
 	@Override
 	protected ControlListItem<?> doCreateViewerItem(Composite parent, Object element) {
+		ControlListItem<?> item;
+		boolean isCategory = false;
 		if (element instanceof MarketplaceNodeCatalogItem) {
 			//marketplace entry
-			FavoritesDiscoveryItem discoveryItem = createDiscoveryItem(parent, (MarketplaceNodeCatalogItem) element);
-			return discoveryItem;
+			item = createDiscoveryItem(parent, (MarketplaceNodeCatalogItem) element);
 		} else if (element instanceof UserActionCatalogItem) {
-			return new DiscoverFavoritesUserActionItem(parent, getResources(), (UserActionCatalogItem) element, this);
+			item = new DiscoverFavoritesUserActionItem(parent, getResources(), (UserActionCatalogItem) element, this);
 		} else if (element instanceof FavoriteListCatalogItem) {
-			return new FavoriteListDiscoveryItem(parent, discoveryResources, (FavoriteListCatalogItem) element, this);
+			item = new FavoriteListDiscoveryItem(parent, discoveryResources, (FavoriteListCatalogItem) element, this);
+		} else {
+			item = super.doCreateViewerItem(parent, element);
+			isCategory = (element instanceof CatalogCategory);
 		}
-		return super.doCreateViewerItem(parent, element);
+		new StyleHelper().on(item).addClasses(isCategory ? "MarketplaceCategory" : "MarketplaceItem", "FavoriteItem");
+
+		return item;
 	}
 
 	private FavoritesDiscoveryItem createDiscoveryItem(Composite parent, MarketplaceNodeCatalogItem catalogItem) {
