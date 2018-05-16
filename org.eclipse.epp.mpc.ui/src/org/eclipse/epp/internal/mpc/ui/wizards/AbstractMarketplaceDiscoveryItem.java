@@ -47,6 +47,8 @@ import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.TypedEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
@@ -415,6 +417,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		if (iconLabel == null) {
 			return;
 		}
+		final Color background = iconLabel.getBackground();
 		ImageReceiver receiver = image -> {
 			if (image == null || image.isDisposed() || iconLabel.isDisposed()) {
 				return;
@@ -423,9 +426,35 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 				Rectangle bounds = image.getBounds();
 				if (bounds.width < 0.8 * MAX_IMAGE_WIDTH || bounds.width > MAX_IMAGE_WIDTH
 						|| bounds.height > MAX_IMAGE_HEIGHT) {
-					final Image scaledImage = Util.scaleImage(image, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT);
-					image = scaledImage;
-					iconLabel.addDisposeListener(e -> scaledImage.dispose());
+					final Image[] scaledImage = new Image[] {
+							Util.scaleImage(image, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT, background) };
+					if (image.getImageData().getTransparencyType() != SWT.TRANSPARENCY_NONE) {
+						//Need to repaint on background color change
+						final Image sourceImage = image;
+						iconLabel.addPaintListener(new PaintListener() {
+
+							Color lastBackground = background;
+
+							@Override
+							public void paintControl(PaintEvent e) {
+								Control control = (Control) e.widget;
+								if ((lastBackground != null && (lastBackground.isDisposed()
+										|| !lastBackground.equals(control.getBackground())))
+										|| (lastBackground == null && control.getBackground() != null)) {
+									lastBackground = control.getBackground();
+									Image newScaledImage = Util.scaleImage(sourceImage, MAX_IMAGE_WIDTH,
+											MAX_IMAGE_HEIGHT, lastBackground);
+									Image oldScaledImage = scaledImage[0];
+									iconLabel.setImage(newScaledImage);
+									if (oldScaledImage != null && !oldScaledImage.isDisposed()) {
+										oldScaledImage.dispose();
+									}
+								}
+							}
+						});
+					}
+					image = scaledImage[0];
+					iconLabel.addDisposeListener(e -> scaledImage[0].dispose());
 				}
 				iconLabel.setImage(image);
 			} catch (SWTException e) {

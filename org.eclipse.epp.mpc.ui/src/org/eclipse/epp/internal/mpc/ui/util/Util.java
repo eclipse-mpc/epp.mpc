@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
@@ -36,6 +37,23 @@ public class Util {
 	 * @return a new image, which must be disposed by the caller.
 	 */
 	public static Image scaleImage(Image image, int maxWidth, int maxHeight) {
+		return scaleImage(image, maxWidth, maxHeight, null);
+	}
+
+	/**
+	 * Scale an image to a size that conforms to the given maximums while maintaining its original aspect ratio.
+	 *
+	 * @param image
+	 *            the image to scale
+	 * @param maxWidth
+	 *            the maximum width of the new image
+	 * @param maxHeight
+	 *            the maximum height of the new image
+	 * @param background
+	 *            background color used in place of transparency
+	 * @return a new image, which must be disposed by the caller.
+	 */
+	public static Image scaleImage(Image image, int maxWidth, int maxHeight, Color background) {
 		// scale the image using native scaling
 		// and maintain aspect ratio
 		Rectangle bounds = image.getBounds();
@@ -62,6 +80,10 @@ public class Util {
 		try {
 			gc.setAntialias(SWT.ON);
 			gc.setInterpolation(SWT.HIGH);
+			if (background != null) {
+				gc.setBackground(background);
+				gc.fillRectangle(0, 0, newWidth, newHeight);
+			}
 			gc.drawImage(image, 0, 0, bounds.width, bounds.height, 0, 0, newWidth, newHeight);
 		} finally {
 			gc.dispose();
