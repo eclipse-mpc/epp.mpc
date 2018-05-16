@@ -20,7 +20,13 @@ public abstract class AbstractUserActionItem extends AbstractSimpleDiscoveryItem
 	public AbstractUserActionItem(Composite parent, MarketplaceDiscoveryResources resources,
 			UserActionCatalogItem connector, CatalogViewer viewer) {
 		super(parent, SWT.NONE, resources, null, connector, viewer);
-		setBackground(viewer.getControl().getDisplay().getSystemColor(SWT.COLOR_TITLE_BACKGROUND_GRADIENT));
+	}
+
+	@Override
+	protected void createContent() {
+		setBackgroundMode(SWT.INHERIT_DEFAULT);
+		setBackground(this.getDisplay().getSystemColor(SWT.COLOR_TITLE_BACKGROUND_GRADIENT));
+		super.createContent();
 	}
 
 	@Override
@@ -28,4 +34,8 @@ public abstract class AbstractUserActionItem extends AbstractSimpleDiscoveryItem
 		// ignore
 	}
 
+	@Override
+	protected String getItemClass() {
+		return "NotificationItem";
+	}
 }

@@ -39,6 +39,7 @@ import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory.Contents;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem.UserAction;
+import org.eclipse.epp.internal.mpc.ui.css.StyleHelper;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceWizard.WizardState;
 import org.eclipse.epp.mpc.core.model.ICatalogBranding;
 import org.eclipse.epp.mpc.core.model.ICategory;
@@ -256,6 +257,7 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	@Override
 	protected void doCreateHeaderControls(Composite parent) {
+		new StyleHelper().on(parent).setClass("MarketplaceSearchHeader");
 		header = parent;
 		final int originalChildCount = parent.getChildren().length;
 		for (CatalogFilter filter : getConfiguration().getFilters()) {
@@ -343,19 +345,21 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	@Override
 	protected ControlListItem<?> doCreateViewerItem(Composite parent, Object element) {
+		ControlListItem<?> item;
+		boolean isCategory = false;
 		if (element instanceof CatalogItem) {
 			CatalogItem catalogItem = (CatalogItem) element;
 			if (catalogItem instanceof UserActionCatalogItem) {
 				//user action link
-				return createUserActionViewerItem((UserActionCatalogItem) catalogItem, parent);
+				item = createUserActionViewerItem((UserActionCatalogItem) catalogItem, parent);
 			} else if (catalogItem.getData() instanceof CatalogDescriptor) {
 				//legacy browse item
-				return createBrowseItem(catalogItem, parent);
+				item = createBrowseItem(catalogItem, parent);
 			} else {
 				//marketplace entry
 				DiscoveryItem<CatalogItem> discoveryItem = createDiscoveryItem(parent, catalogItem);
 				discoveryItem.setSelected(getCheckedItems().contains(catalogItem));
-				return discoveryItem;
+				item = discoveryItem;
 			}
 		} else if (element instanceof MarketplaceCategory) {
 			MarketplaceCategory category = (MarketplaceCategory) element;
@@ -369,9 +373,13 @@ public class MarketplaceViewer extends CatalogViewer {
 			CategoryItem<?> categoryItem = (CategoryItem<?>) super.doCreateViewerItem(parent, element);
 			setSeparatorVisible(categoryItem, false);
 			fixLayout(categoryItem);
-			return categoryItem;
+			item = categoryItem;
+			isCategory = true;
+		} else {
+			item = super.doCreateViewerItem(parent, element);
 		}
-		return super.doCreateViewerItem(parent, element);
+		new StyleHelper().on(item).addClass(isCategory ? "MarketplaceCategory" : "MarketplaceItem");
+		return item;
 	}
 
 	private BrowseCatalogItem createBrowseItem(CatalogItem catalogItem, Composite parent) {
@@ -877,6 +885,7 @@ public class MarketplaceViewer extends CatalogViewer {
 			final ServiceReference<IDiscoveryItemFactory> ref = serviceReference;
 			viewer.getControl().addDisposeListener(e -> bundleContext.ungetService(ref));
 		}
+		new StyleHelper().on(viewer.getControl()).setClass("MarketplaceViewer");
 		return viewer;
 	}
 

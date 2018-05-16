@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import org.eclipse.epp.internal.mpc.ui.css.StyleHelper;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.discovery.model.Icon;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
@@ -108,8 +109,10 @@ public abstract class AbstractSimpleDiscoveryItem<T extends CatalogItem> extends
 		// always disabled color to make it less prominent
 		subline.setForeground(resources.getColorDisabled());
 		subline.setText(sublineText);
-		StyleRange range = new StyleRange(0, subline.getText().length(), subline.getForeground(), null, SWT.ITALIC);
+		StyleRange range = StyledTextHelper.createDynamicForegroundRange(subline, 0, subline.getText().length(),
+				SWT.ITALIC);
 		subline.setStyleRange(range);
+		new StyleHelper().on(subline).setClasses("subline", "disabled");
 		return subline;
 	}
 
@@ -118,6 +121,7 @@ public abstract class AbstractSimpleDiscoveryItem<T extends CatalogItem> extends
 		GridDataFactory.swtDefaults().align(SWT.FILL, SWT.CENTER).grab(true, true).span(1, vSpan).applyTo(spacer);
 
 		Composite buttonContainer = new Composite(parent, SWT.NONE);
+		buttonContainer.setBackgroundMode(SWT.INHERIT_DEFAULT);
 		GridDataFactory.swtDefaults()
 		.indent(0, BUTTONBAR_MARGIN_TOP)
 		.align(SWT.END, SWT.END)
