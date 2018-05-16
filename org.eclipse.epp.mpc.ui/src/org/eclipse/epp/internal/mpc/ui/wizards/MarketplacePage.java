@@ -33,6 +33,7 @@ import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeInstallableUnitItem;
 import org.eclipse.epp.internal.mpc.ui.catalog.ResourceProvider.ResourceReceiver;
+import org.eclipse.epp.internal.mpc.ui.css.StyleHelper;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceWizard.WizardState;
@@ -171,8 +172,11 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		currentBranding = getDefaultBranding();
 		boolean needSwitchMarketplaceControl = configuration.getCatalogDescriptors().size() > 1;
 
+		StyleHelper styleHelper = new StyleHelper();
+
 		Composite pageContent = new Composite(parent, SWT.NULL);
 		GridLayoutFactory.fillDefaults().numColumns(1).spacing(0, 5).applyTo(pageContent);
+		styleHelper.on(pageContent).setId("MarketplacePage");
 
 		tabFolder = new TabFolder(pageContent, SWT.TOP);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tabFolder);
@@ -180,6 +184,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		super.createControl(tabFolder);
 
 		tabContent = getControl();
+		styleHelper.on(tabContent).setId("MarketplaceContent");
 		searchTabItem = createCatalogTab(-1, ContentType.SEARCH, WIDGET_ID_TAB_SEARCH,
 				currentBranding.getSearchTabName());
 		recentTabItem = createCatalogTab(-1, ContentType.RECENT, WIDGET_ID_TAB_RECENT,

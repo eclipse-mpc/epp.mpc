@@ -13,6 +13,7 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.util.Arrays;
 
+import org.eclipse.epp.internal.mpc.ui.css.StyleHelper;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler;
 import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler.SolutionInstallationInfo;
@@ -42,6 +43,8 @@ public class MarketplaceWizardDialog extends AbstractMarketplaceWizardDialog {
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		newShell.setData(this);//make jface dialog accessible for swtbot
+		new StyleHelper().on(newShell).setClass("MarketplaceWizardDialog").setId("MarketplaceWizard");
+
 		new MarketplaceDropAdapter() {
 			@Override
 			protected void proceedInstallation(String url) {
