@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.eclipse.epp.mpc.ui" version="2">
+    <resource path="src/org/eclipse/epp/internal/mpc/ui/catalog/MarketplaceDiscoveryStrategy.java" type="org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy">
+        <filter comment="Report install error as part of the wizard's install operation" id="640712815">
+            <message_arguments>
+                <message_argument value="IMarketplaceService"/>
+                <message_argument value="MarketplaceDiscoveryStrategy"/>
+                <message_argument value="reportInstallError(IStatus, Set&lt;? extends INode&gt;, Set&lt;String&gt;, String, IProgressMonitor)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/eclipse/epp/internal/mpc/ui/wizards/ProvisioningJobListener.java" type="org.eclipse.epp.internal.mpc.ui.wizards.ProvisioningJobListener">
+        <filter comment="report install success as part of the wizard's install operation" id="640712815">
+            <message_arguments>
+                <message_argument value="IMarketplaceService"/>
+                <message_argument value="ProvisioningJobListener"/>
+                <message_argument value="reportInstallSuccess(INode, IProgressMonitor)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>

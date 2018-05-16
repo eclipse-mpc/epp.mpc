@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.6"?>
+<!--
+    Copyright (c) 2018 The Eclipse Foundation and others.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+   
+    Contributors:
+    	Yatta Solutions - initial API and implementation
+ -->
+
+<plugin>
+      <extension
+            point="org.eclipse.e4.ui.css.core.elementProvider">
+         <provider
+               class="org.eclipse.epp.internal.mpc.ui.css.DiscoveryItemElementProvider">
+            <widget
+                  class="org.eclipse.equinox.internal.p2.ui.discovery.util.GradientCanvas">
+            </widget>
+         </provider>
+      </extension>
+      <extension
+            point="org.eclipse.e4.ui.css.core.propertyHandler">
+         <handler
+               adapter="org.eclipse.epp.internal.mpc.ui.css.GradientCanvasElement"
+               handler="org.eclipse.epp.internal.mpc.ui.css.GradientCanvasPropertyHandler">
+            <property-name
+                  name="background-color">
+            </property-name>
+            <property-name
+                  name="background-base-color">
+            </property-name>
+            <property-name
+                  name="h-bottom-keyline-2-color">
+            </property-name>
+            <property-name
+                  name="h-bottom-keyline-1-color">
+            </property-name>
+         </handler>
+      </extension>
+</plugin>
