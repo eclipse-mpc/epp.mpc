@@ -61,7 +61,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
@@ -287,10 +286,12 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		IWizardPage currentPage = container.getCurrentPage();
 		if (currentPage == MarketplacePage.this && currentPage.isPageComplete()) {
 			IWizardPage nextPage = getNextPage();
-			if (nextPage != null && nextPage instanceof WizardPage) {
-				((WizardPage) nextPage).setPageComplete(true);
-				container.showPage(nextPage);
+			if (nextPage != null && nextPage instanceof FeatureSelectionWizardPage) {
+			   //FIXME do we need this at all? Pages should be responsible for their completion
+			   //state themselves...
+				((FeatureSelectionWizardPage) nextPage).setPageComplete(true);
 			}
+			container.showPage(nextPage);
 		}
 	}
 
