@@ -263,6 +263,7 @@ public class FavoritesViewer extends CatalogViewer {
 				}
 			});
 		}
+		MarketplaceViewer.fixFindControlsLayout(parent);
 	}
 
 	@Override

@@ -74,11 +74,14 @@ import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -259,6 +262,7 @@ public class MarketplaceViewer extends CatalogViewer {
 	protected void doCreateHeaderControls(Composite parent) {
 		new StyleHelper().on(parent).setClass("MarketplaceSearchHeader");
 		header = parent;
+		fixFindControlsLayout(parent);
 		final int originalChildCount = parent.getChildren().length;
 		for (CatalogFilter filter : getConfiguration().getFilters()) {
 			if (filter instanceof MarketplaceFilter) {
@@ -284,6 +288,44 @@ public class MarketplaceViewer extends CatalogViewer {
 				doQuery();
 			}
 		});
+	}
+
+	protected static void fixFindControlsLayout(Composite header) {
+		TextSearchControl search = null;
+		for (Control control : header.getChildren()) {
+			if (control instanceof TextSearchControl) {
+				search = (TextSearchControl) control;
+				break;
+			}
+		}
+		if (search == null) {
+			return;
+		}
+		Text text = search.getTextControl();
+		Control[] children = search.getChildren();
+		int textIndex = -1;
+		for (int i = 0; i < children.length; i++) {
+			if (children[i] == text) {
+				textIndex = i;
+				break;
+			}
+		}
+		header.layout(true);
+		Control next = textIndex == -1 || textIndex == children.length - 1 ? null : children[textIndex + 1];
+		int heightHint = search.getClientArea().height;
+		int minHeight = -1;
+		if (next instanceof Label) {
+			Rectangle iconBounds = next.getBounds();
+			Rectangle textBounds = text.getBounds();
+			minHeight = Math.max(iconBounds.height, textBounds.height);
+			minHeight = Math.min(heightHint, minHeight);
+		}
+		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, false);
+		if (minHeight > 0) {
+			gridData.minimumHeight = minHeight;
+		}
+		gridData.heightHint = heightHint;
+		text.setLayoutData(gridData);
 	}
 
 	@Override
