@@ -25,5 +25,6 @@
     <module>org.eclipse.epp.mpc.tests</module>
     <module>org.eclipse.epp.mpc.tests.catalog</module>
     <module>org.eclipse.epp.mpc.ui</module>
+    <module>org.eclipse.epp.mpc.ui.css</module>
   </modules>
 </project>
