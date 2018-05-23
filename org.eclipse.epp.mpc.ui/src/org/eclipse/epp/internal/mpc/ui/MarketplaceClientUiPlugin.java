@@ -188,7 +188,7 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 		}
 
 		imageRegistry.put(NEWS_ICON_UPDATE,
-				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/news_update.gif")); //$NON-NLS-1$
+				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/news_update.png")); //$NON-NLS-1$
 		imageRegistry.put(ITEM_ICON_STAR, imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/star.png")); //$NON-NLS-1$
 		imageRegistry.put(ITEM_ICON_STAR_SELECTED,
 				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/star-selected.png")); //$NON-NLS-1$

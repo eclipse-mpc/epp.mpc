@@ -55,6 +55,7 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.discovery.model.Tag;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.ControlListItem;
+import org.eclipse.equinox.internal.p2.ui.discovery.util.ControlListViewer;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.FilteredViewer;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.GradientCanvas;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.PatternFilter;
@@ -262,6 +263,7 @@ public class MarketplaceViewer extends CatalogViewer {
 	protected void doCreateHeaderControls(Composite parent) {
 		new StyleHelper().on(parent).setClass("MarketplaceSearchHeader");
 		header = parent;
+		header.setBackgroundMode(SWT.INHERIT_DEFAULT);
 		fixFindControlsLayout(parent);
 		final int originalChildCount = parent.getChildren().length;
 		for (CatalogFilter filter : getConfiguration().getFilters()) {
@@ -918,11 +920,28 @@ public class MarketplaceViewer extends CatalogViewer {
 			MarketplaceClientUi.error(ex);
 		}
 		StructuredViewer viewer = super.doCreateViewer(container);
+
+		if (!MarketplaceClientUi.useNativeBorders()) {
+			StructuredViewer superViewer = viewer;
+
+			viewer = new ControlListViewer(container, SWT.NONE) {
+				@Override
+				protected ControlListItem<?> doCreateItem(Composite parent, Object element) {
+					return doCreateViewerItem(parent, element);
+				}
+			};
+			viewer.setContentProvider(superViewer.getContentProvider());
+			viewer.setFilters(superViewer.getFilters());
+
+			superViewer.getControl().dispose();
+		}
+		viewer.setComparator(null);
+
 		discoveryResources = new MarketplaceDiscoveryResources(container.getDisplay());
 		viewer.getControl().addDisposeListener(e -> discoveryResources.dispose());
+
 		super.getResources().dispose();
 
-		viewer.setComparator(null);
 		if (serviceReference != null) {
 			final ServiceReference<IDiscoveryItemFactory> ref = serviceReference;
 			viewer.getControl().addDisposeListener(e -> bundleContext.ungetService(ref));

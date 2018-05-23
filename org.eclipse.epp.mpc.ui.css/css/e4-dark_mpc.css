@@ -1,3 +1,9 @@
+IEclipsePreferences#org-eclipse-epp-mpc-ui:org-eclipse-ui-themes { /* pseudo attribute added to allow contributions to switch between native and CSS borders globally */
+   preferences:
+      'native-borders=false'
+}
+
+
 .MarketplaceViewer,
 .MarketplaceViewer > *,
 .MarketplaceItem,
@@ -28,7 +34,15 @@
 .CatalogSwitcher,
 .CatalogSwitcher > ScrolledComposite,
 .CatalogSwitcher > ScrolledComposite > *,
-.Catalog {
+.Catalog,
+.Catalog > * {
     background-color: #383C3E;
     color: #dddddd;
+}
+
+#MarketplacePage CTabItem:selected,
+#MarketplaceContent,
+.MarketplaceSearchHeader,
+.MarketplaceSearchHeader > Label {
+    background-color: '#org-eclipse-ui-workbench-ACTIVE_TAB_BG_END';
 }

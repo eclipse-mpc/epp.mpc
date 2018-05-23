@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -64,8 +65,11 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -73,8 +77,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Link;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
+import org.eclipse.swt.widgets.Listener;
 
 /**
  * @author Steffen Pingel
@@ -114,25 +117,25 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 
 	private ActionLink deselectLink;
 
-	private TabFolder tabFolder;
+	private CTabFolder tabFolder;
 
-	private TabItem searchTabItem;
+	private CTabItem searchTabItem;
 
-	private TabItem recentTabItem;
+	private CTabItem recentTabItem;
 
-	private TabItem popularTabItem;
+	private CTabItem popularTabItem;
 
-	private TabItem favoritedTabItem;
+	private CTabItem favoritedTabItem;
 
-	private TabItem featuredMarketTabItem;
+	private CTabItem featuredMarketTabItem;
 
-	private TabItem relatedTabItem;
+	private CTabItem relatedTabItem;
 
-	private TabItem newsTabItem;
+	private CTabItem newsTabItem;
 
 	private Control tabContent;
 
-	private TabItem installedTabItem;
+	private CTabItem installedTabItem;
 
 	private NewsViewer newsViewer;
 
@@ -177,13 +180,26 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		GridLayoutFactory.fillDefaults().numColumns(1).spacing(0, 5).applyTo(pageContent);
 		styleHelper.on(pageContent).setId("MarketplacePage");
 
-		tabFolder = new TabFolder(pageContent, SWT.TOP);
+		tabFolder = new CTabFolder(pageContent, SWT.TOP | SWT.BORDER | SWT.FLAT);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tabFolder);
+		setTabFolderAlwaysHighlight(tabFolder);
 
 		super.createControl(tabFolder);
 
 		tabContent = getControl();
 		styleHelper.on(tabContent).setId("MarketplaceContent");
+		final Color selectionBackground = tabFolder.getSelectionBackground();
+		tabContent.setBackground(selectionBackground);
+		tabContent.addPaintListener(e -> {
+			Control control = (Control) e.widget;
+			Color currentSelectionBackground = tabFolder.getSelectionBackground();
+			Color currentBackground = control.getBackground();
+			if (currentBackground != currentSelectionBackground
+					&& !currentBackground.equals(currentSelectionBackground)) {
+				control.setBackground(currentSelectionBackground);
+			}
+		});
+
 		searchTabItem = createCatalogTab(-1, ContentType.SEARCH, WIDGET_ID_TAB_SEARCH,
 				currentBranding.getSearchTabName());
 		recentTabItem = createCatalogTab(-1, ContentType.RECENT, WIDGET_ID_TAB_RECENT,
@@ -199,13 +215,16 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		searchTabItem.setControl(tabContent);
 		tabFolder.setSelection(searchTabItem);
 
+		int defaultTabHeight = tabFolder.getTabHeight();
+		tabFolder.setTabHeight(defaultTabHeight + 4);
+
 		tabFolder.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (e.item.isDisposed()) {
 					return;
 				}
-				setActiveTab((TabItem) e.item);
+				setActiveTab((CTabItem) e.item);
 			}
 
 			@Override
@@ -276,6 +295,35 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 			// bug 473031 - no clue how this can happen during createControl...
 			MarketplaceClientUi.setDefaultHelp(tabContent);
 		}
+		styleHelper.on(pageContent).applyStyles();
+	}
+
+	private static void setTabFolderAlwaysHighlight(final CTabFolder tabFolder) {
+		final Field highlightField;
+		try {
+			highlightField = CTabFolder.class.getDeclaredField("highlight");
+			highlightField.setAccessible(true);
+		} catch (Exception ex) {
+			// ignore - we just won't be able to keep highlight
+			return;
+		}
+		Listener listener = new Listener() {
+
+			@Override
+			public void handleEvent(Event event) {
+				try {
+					Object wasHighlight = highlightField.get(tabFolder);
+					highlightField.set(tabFolder, true);
+					if (!Boolean.TRUE.equals(wasHighlight)) {
+						tabFolder.redraw();
+					}
+				} catch (Exception ex) {
+					// ignore and disable listener to avoid future errors
+					tabFolder.removeListener(SWT.Deactivate, this);
+				}
+			}
+		};
+		tabFolder.addListener(SWT.Deactivate, listener);
 	}
 
 	protected void showNextPage() {
@@ -287,8 +335,8 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		if (currentPage == MarketplacePage.this && currentPage.isPageComplete()) {
 			IWizardPage nextPage = getNextPage();
 			if (nextPage != null && nextPage instanceof FeatureSelectionWizardPage) {
-			   //FIXME do we need this at all? Pages should be responsible for their completion
-			   //state themselves...
+				//FIXME do we need this at all? Pages should be responsible for their completion
+				//state themselves...
 				((FeatureSelectionWizardPage) nextPage).setPageComplete(true);
 			}
 			container.showPage(nextPage);
@@ -363,7 +411,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		return false;
 	}
 
-	private void setActiveTab(TabItem tab) {
+	private void setActiveTab(CTabItem tab) {
 		if (disableTabSelection) {
 			return;
 		}
@@ -379,7 +427,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 			newsViewer.showNews(news);
 			if (wasUpdated) {
 				updateBranding();
-				TabItem currentTabItem = getSelectedTabItem();
+				CTabItem currentTabItem = getSelectedTabItem();
 				if (currentTabItem != newsTabItem) {
 					tabFolder.setSelection(newsTabItem);
 					// required for Mac to not switch back to first tab
@@ -390,7 +438,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		}
 		ContentType currentContentType = getViewer().getContentType();
 		if (currentContentType != null) {
-			TabItem tabItem = getTabItem(currentContentType);
+			CTabItem tabItem = getTabItem(currentContentType);
 			if (tabItem == tab) {
 				setActiveTab(currentContentType);
 				return;
@@ -427,8 +475,8 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 			previousContentType = currentContentType;
 			currentContentType = contentType;
 		}
-		final TabItem tabItem = getTabItem(contentType);
-		TabItem currentTabItem = getSelectedTabItem();
+		final CTabItem tabItem = getTabItem(contentType);
+		CTabItem currentTabItem = getSelectedTabItem();
 		if (currentTabItem != tabItem) {
 			if (currentTabItem.getControl() == tabContent) {
 				currentTabItem.setControl(null);
@@ -463,11 +511,11 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 	}
 
 	public ContentType getActiveTab() {
-		TabItem selectedTabItem = getSelectedTabItem();
+		CTabItem selectedTabItem = getSelectedTabItem();
 		return selectedTabItem == null ? null : getContentType(selectedTabItem);
 	}
 
-	private ContentType getContentType(TabItem tabItem) {
+	private ContentType getContentType(CTabItem tabItem) {
 		if (tabItem != null && !tabItem.isDisposed()) {
 			Object data = tabItem.getData(CONTENT_TYPE_KEY);
 			if (data instanceof ContentType) {
@@ -477,16 +525,16 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		return null;
 	}
 
-	private TabItem getSelectedTabItem() {
+	private CTabItem getSelectedTabItem() {
 		int currentTabIndex = tabFolder.getSelectionIndex();
-		TabItem currentTabItem = null;
+		CTabItem currentTabItem = null;
 		if (currentTabIndex != -1) {
 			currentTabItem = tabFolder.getItem(currentTabIndex);
 		}
 		return currentTabItem;
 	}
 
-	private TabItem getTabItem(ContentType content) {
+	private CTabItem getTabItem(ContentType content) {
 		switch (content) {
 		case INSTALLED:
 			return installedTabItem;
@@ -509,16 +557,16 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		}
 	}
 
-	private TabItem createCatalogTab(int index, ContentType contentType, String widgetId, String label) {
+	private CTabItem createCatalogTab(int index, ContentType contentType, String widgetId, String label) {
 		return createTab(index, contentType, widgetId, label, null);
 	}
 
-	private TabItem createTab(int index, ContentType contentType, String widgetId, String label, Control tabControl) {
-		TabItem tabItem;
+	private CTabItem createTab(int index, ContentType contentType, String widgetId, String label, Control tabControl) {
+		CTabItem tabItem;
 		if (index == -1) {
-			tabItem = new TabItem(tabFolder, SWT.NULL);
+			tabItem = new CTabItem(tabFolder, SWT.NULL);
 		} else {
-			tabItem = new TabItem(tabFolder, SWT.NULL, index);
+			tabItem = new CTabItem(tabFolder, SWT.NULL, index);
 		}
 		tabItem.setData(WIDGET_ID_KEY, widgetId);
 		tabItem.setData(CONTENT_TYPE_KEY, contentType);
@@ -528,7 +576,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 	}
 
 	private void createNewsTab() {
-		newsTabItem = new TabItem(tabFolder, SWT.NULL | SWT.BOLD);
+		newsTabItem = new CTabItem(tabFolder, SWT.NULL | SWT.BOLD);
 		newsTabItem.setText(Messages.MarketplacePage_DefaultNewsTitle);
 		newsTabItem.setData(WIDGET_ID_KEY, WIDGET_ID_TAB_NEWS);
 
@@ -597,9 +645,8 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		StyleHelper styleHelper = new StyleHelper();
 		styleHelper.on(composite).setId("switcher-parent");
 
-		String themeId = styleHelper.getCurrentThemeId();
-		boolean defaultTheme = themeId == null || themeId.contains("e4_default") || themeId.contains("e4_classic");
-		final CatalogSwitcher switcher = new CatalogSwitcher(composite, defaultTheme ? SWT.BORDER : SWT.None,
+		final CatalogSwitcher switcher = new CatalogSwitcher(composite,
+				MarketplaceClientUi.useNativeBorders() ? SWT.BORDER : SWT.None,
 				configuration);
 		switcher.addSelectionChangedListener(event -> {
 			CatalogDescriptor descriptor = (CatalogDescriptor) ((IStructuredSelection) event.getSelection())
@@ -730,6 +777,9 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		MarketplaceViewer viewer = new MarketplaceViewer(getCatalog(), this, getWizard());
 		viewer.setMinimumHeight(MINIMUM_HEIGHT);
 		viewer.createControl(parent);
+		Composite viewerPanel = (Composite) viewer.getControl();
+		viewerPanel.setBackgroundMode(SWT.INHERIT_DEFAULT);
+		GridLayoutFactory.fillDefaults().extendedMargins(2, 2, 2, 2).applyTo(viewerPanel);
 		return viewer;
 	}
 
@@ -833,7 +883,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		}
 		currentBranding = branding;
 
-		TabItem selectedTabItem = getSelectedTabItem();
+		CTabItem selectedTabItem = getSelectedTabItem();
 
 		int tabIndex = 0;
 		boolean hasTab = branding.hasSearchTab();
@@ -886,6 +936,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		if (selectedTabItem == null || selectedTabItem.isDisposed()) {
 			tabFolder.setSelection(0);
 		}
+		tabFolder.setFocus();
 
 		final ImageDescriptor defaultWizardIconDescriptor = DiscoveryImages.BANNER_DISOVERY;
 		if (branding.getWizardIcon() == null) {
@@ -954,7 +1005,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		return false;
 	}
 
-	private TabItem updateTab(TabItem tabItem, ContentType contentType, String widgetId, String tabLabel,
+	private CTabItem updateTab(CTabItem tabItem, ContentType contentType, String widgetId, String tabLabel,
 			boolean hasTab, boolean hadTab,
 			int tabIndex) {
 		if (hasTab) {

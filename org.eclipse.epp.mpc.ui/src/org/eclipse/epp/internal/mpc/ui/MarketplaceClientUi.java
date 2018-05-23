@@ -23,6 +23,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.IPreferencesService;
+import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
 import org.eclipse.equinox.p2.engine.IProfile;
@@ -251,5 +254,11 @@ public class MarketplaceClientUi {
 				throw e;
 			}
 		}
+	}
+
+	public static boolean useNativeBorders() {
+		IPreferencesService service = Platform.getPreferencesService();
+		return service.getBoolean(BUNDLE_ID, "native-borders", true,
+				new IScopeContext[] { InstanceScope.INSTANCE });
 	}
 }

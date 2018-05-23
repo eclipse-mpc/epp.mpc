@@ -177,4 +177,9 @@ public class StyleHelper {
 	public URL getCurrentThemeStylesheet(String path) {
 		return getStylesheet(getCurrentTheme(), path);
 	}
+
+	public StyleHelper applyStyles() {
+		getCSSEngine().applyStyles(widget, true);
+		return this;
+	}
 }
