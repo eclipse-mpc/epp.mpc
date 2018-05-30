@@ -51,3 +51,13 @@ IEclipsePreferences#org-eclipse-epp-mpc-ui:org-eclipse-ui-themes { /* pseudo att
 .MarketplaceSearchHeader > Label {
     background-color: '#org-eclipse-ui-workbench-ACTIVE_TAB_BG_END';
 }
+
+#MarketplacePage CategoryItem,
+#MarketplacePage CategoryItem > GradientCanvas,
+#MarketplacePage CategoryItem > GradientCanvas > Label {
+    /* SWT-BUG workaround: a style for background is not applied on GradientCanvas (CSS engine repaint issue) */
+    background: '#org-eclipse-ui-workbench-ACTIVE_TAB_BG_END';
+    background-image: '#org-eclipse-ui-workbench-ACTIVE_TAB_BG_END';
+    background-color: '#org-eclipse-ui-workbench-ACTIVE_TAB_BG_END';
+    color: #dddddd;
+}
