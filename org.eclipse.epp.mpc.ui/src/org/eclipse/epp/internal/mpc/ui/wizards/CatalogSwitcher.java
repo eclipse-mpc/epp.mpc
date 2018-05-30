@@ -11,21 +11,16 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.css.StyleHelper;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CategoryItem;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryResources;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -33,22 +28,16 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 
 /**
  * @author Benjamin Muskalla
@@ -65,6 +54,8 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 	private final ImageRegistry imageRegistry = new ImageRegistry();
 
 	private final List<ISelectionChangedListener> listeners = new LinkedList<>();
+
+	private final List<CatalogSwitcherItem> items = new LinkedList<>();
 
 	private CatalogDescriptor selection;
 
@@ -98,9 +89,21 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 		layout.marginLeft = layout.marginRight = layout.marginTop = layout.marginBottom = layout.marginHeight = layout.marginWidth = 0;
 		marketplaceArea.setLayout(layout);
 
+		SelectionListener selectionListener = SelectionListener.widgetSelectedAdapter(c -> {
+			Object data = c.data;
+			if (data instanceof CatalogDescriptor) {
+				CatalogDescriptor catalogDescriptor = (CatalogDescriptor) data;
+				this.selection = catalogDescriptor;
+				refreshSelection();
+				fireSelectionChanged();
+			}
+		});
+		items.clear();
 		List<CatalogDescriptor> catalogDescriptors = configuration.getCatalogDescriptors();
 		for (CatalogDescriptor catalogDescriptor : catalogDescriptors) {
-			createMarketplace(marketplaceArea, catalogDescriptor);
+			CatalogSwitcherItem item = createMarketplace(marketplaceArea, catalogDescriptor);
+			item.addSelectionListener(selectionListener);
+			items.add(item);
 		}
 
 		scrollArea.setExpandVertical(true);
@@ -126,64 +129,13 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 		new StyleHelper().on(header).setClass("CatalogSwitcherHeader");
 	}
 
-	private void createMarketplace(Composite composite, final CatalogDescriptor catalogDescriptor) {
-		Composite container = new Composite(composite, SWT.NONE);
-		container.setBackgroundMode(SWT.INHERIT_DEFAULT);
-		container.setData(catalogDescriptor);
-		GridLayout layout = new GridLayout(1, false);
-		layout.marginHeight = ITEM_MARGIN;
-		layout.marginWidth = ITEM_MARGIN;
-		container.setLayout(layout);
+	private CatalogSwitcherItem createMarketplace(Composite composite, final CatalogDescriptor catalogDescriptor) {
+		CatalogSwitcherItem marketplaceItem = new CatalogSwitcherItem(composite, imageRegistry, catalogDescriptor);
 
-		StyleHelper styleHelper = new StyleHelper().on(container);
-		styleHelper.setClass("Catalog");
+		StyleHelper styleHelper = new StyleHelper().on(marketplaceItem);
 		styleHelper.setId("catalog-" + composite.getChildren().length);
 
-		final Label label = new Label(container, SWT.NONE);
-		//label.setBackground(container.getBackground());
-		label.setImage(getDefaultCatalogImage());
-		styleHelper.on(label).setClass("CatalogImage");
-
-		retrieveCatalogImage(catalogDescriptor, label);
-		label.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseUp(MouseEvent e) {
-				selection = catalogDescriptor;
-				refreshSelection();
-				fireSelectionChanged();
-			}
-		});
-		CatalogToolTip.attachCatalogToolTip(label, catalogDescriptor);
-	}
-
-	private void retrieveCatalogImage(final CatalogDescriptor catalogDescriptor, final Label label) {
-		//TODO we could simplify all this using the ResourceManager and/or MarketplaceDiscoveryResources,
-		// if the CatalogDescriptor had the image URL instead of an ImageDescriptor
-		Job job = new Job(Messages.CatalogSwitcher_retrieveMetaData) {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				if (label.isDisposed()) {
-					return Status.OK_STATUS;
-				}
-				monitor.beginTask(
-						NLS.bind(Messages.CatalogSwitcher_downloadCatalogImage, catalogDescriptor.getLabel()), 1);
-				final Image image = getCatalogIcon(catalogDescriptor);
-				monitor.worked(1);
-				if (image != null && !label.isDisposed()) { // recheck - getCatalogIcon can take a bit if it needs to download the image...
-					label.getDisplay().asyncExec(() -> {
-						if (!label.isDisposed() && !image.isDisposed()) {
-							label.setImage(image);
-						}
-					});
-				}
-				monitor.done();
-				return Status.OK_STATUS;
-			}
-		};
-		job.setSystem(true);
-		job.setPriority(Job.DECORATE);
-		job.schedule();
+		return marketplaceItem;
 	}
 
 	private void fireSelectionChanged() {
@@ -191,29 +143,6 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 			SelectionChangedEvent event = new SelectionChangedEvent(this, new StructuredSelection(selection));
 			listener.selectionChanged(event);
 		}
-	}
-
-	private Image getCatalogIcon(final CatalogDescriptor catalogDescriptor) {
-		String key = catalogDescriptor.getUrl().toExternalForm();
-		Image image = imageRegistry.get(key);
-		if (image == null) {
-			ImageDescriptor catalogIcon = catalogDescriptor.getIcon();
-			if (catalogIcon == null) {
-				return getDefaultCatalogImage();
-			}
-			imageRegistry.put(key, catalogIcon);
-			image = imageRegistry.get(key);
-			if (image == null) {
-				return getDefaultCatalogImage();
-			}
-		}
-		return image;
-	}
-
-	private Image getDefaultCatalogImage() {
-		return MarketplaceClientUiPlugin.getInstance()
-				.getImageRegistry()
-				.get(MarketplaceClientUiPlugin.NO_ICON_PROVIDED_CATALOG);
 	}
 
 	@Override
@@ -252,21 +181,29 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 	}
 
 	private void refreshSelection() {
-		Control[] children = marketplaceArea.getChildren();
-		for (Control control : children) {
-			Color color;
-			if (this.selection == control.getData()) {
-				//TODO support styling with :selected pseudo-class
-				color = getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION);
-			} else {
-				color = this.getBackground();
-			}
-			control.setBackground(color);
-			((Composite) control).getChildren()[0].setBackground(color);
+		for (CatalogSwitcherItem item : items) {
+			item.setSelected(this.selection != null && this.selection == item.getCatalogDescriptor());
 		}
+		new StyleHelper().on(this).applyStyles();
 	}
 
 	public int getPreferredHeight() {
 		return MIN_SCROLL_HEIGHT + (2 * getBorderWidth()) + 6;
+	}
+
+	public List<CatalogSwitcherItem> getItems() {
+		return Collections.unmodifiableList(items);
+	}
+
+	public CatalogSwitcherItem getSelectedItem() {
+		if (this.selection == null) {
+			return null;
+		}
+		for (CatalogSwitcherItem item : items) {
+			if (this.selection == item.getCatalogDescriptor()) {
+				return item;
+			}
+		}
+		return null;
 	}
 }

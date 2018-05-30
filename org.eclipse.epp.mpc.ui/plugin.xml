@@ -177,4 +177,13 @@
                name="Eclipse Marketplace">
          </client>
       </extension>
+      <extension
+            point="org.eclipse.e4.ui.css.core.elementProvider">
+         <provider
+               class="org.eclipse.epp.internal.mpc.ui.wizards.css.CatalogSwitcherItemElementProvider">
+            <widget
+                  class="org.eclipse.epp.internal.mpc.ui.wizards.CatalogSwitcherItem">
+            </widget>
+         </provider>
+      </extension>
 </plugin>

@@ -40,6 +40,11 @@ IEclipsePreferences#org-eclipse-epp-mpc-ui:org-eclipse-ui-themes { /* pseudo att
     color: #dddddd;
 }
 
+.Catalog:checked,
+.Catalog:checked > * {
+    background-color: COLOR-LIST-SELECTION;
+}
+
 #MarketplacePage CTabItem:selected,
 #MarketplaceContent,
 .MarketplaceSearchHeader,
