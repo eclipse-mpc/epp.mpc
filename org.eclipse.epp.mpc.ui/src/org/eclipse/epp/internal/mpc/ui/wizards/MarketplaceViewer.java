@@ -37,6 +37,7 @@ import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory.Contents;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
+import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem.UserAction;
 import org.eclipse.epp.internal.mpc.ui.css.StyleHelper;
@@ -343,6 +344,11 @@ public class MarketplaceViewer extends CatalogViewer {
 	@Override
 	protected void catalogUpdated(final boolean wasCancelled, final boolean wasError) {
 		MarketplaceCatalog catalog = getCatalog();
+		List<MarketplaceNodeCatalogItem> availableUpdates = catalog.getAvailableUpdates();
+		String availableUpdatesKey = null;
+		if (availableUpdates != null && !availableUpdates.isEmpty()) {
+			availableUpdatesKey = calculateAvailableUpdatesKey(availableUpdates);
+		}
 		List<AbstractDiscoveryStrategy> discoveryStrategies = catalog.getDiscoveryStrategies();
 		for (AbstractDiscoveryStrategy discoveryStrategy : discoveryStrategies) {
 			if (discoveryStrategy instanceof MarketplaceDiscoveryStrategy) {
@@ -351,7 +357,13 @@ public class MarketplaceViewer extends CatalogViewer {
 				for (CatalogCategory catalogCategory : catalog.getCategories()) {
 					if (catalogCategory instanceof MarketplaceCategory) {
 						MarketplaceCategory marketplaceCategory = (MarketplaceCategory) catalogCategory;
-						if (marketplaceCategory.getContents() == Contents.FEATURED
+						//Don't overdo it - we only add one of these two, with updates having priority
+						//Usually, if you already have installed items (and those have updates), you're probably
+						//beyond needing hints to install your favorites... (and you'll get the chance on the next run anyway)
+						if (availableUpdatesKey != null && marketplaceCategory.getContents() != Contents.INSTALLED
+								&& getWizard().shouldShowUpdateBanner(availableUpdatesKey)) {
+							marketplaceDiscoveryStrategy.addUpdateItem(marketplaceCategory, availableUpdates);
+						} else if (marketplaceCategory.getContents() == Contents.FEATURED
 								&& getWizard().shouldShowOpenFavoritesBanner()) {
 							marketplaceDiscoveryStrategy.addOpenFavoritesItem(marketplaceCategory);
 						}
@@ -369,6 +381,23 @@ public class MarketplaceViewer extends CatalogViewer {
 			}
 			setFilters(queryData);
 		});
+	}
+
+	private String calculateAvailableUpdatesKey(List<MarketplaceNodeCatalogItem> availableUpdates) {
+		List<String> keys = new ArrayList<>(availableUpdates.size());
+		StringBuilder bldr = new StringBuilder();
+		for (MarketplaceNodeCatalogItem item : availableUpdates) {
+			String key = item.getMarketplaceUrl() + "::" + item.getId(); //$NON-NLS-1$
+			keys.add(key);
+		}
+		Collections.sort(keys);
+		for (String key : keys) {
+			if (bldr.length() > 0) {
+				bldr.append(","); //$NON-NLS-1$
+			}
+			bldr.append(key);
+		}
+		return bldr.toString();
 	}
 
 	@Override
@@ -450,6 +479,9 @@ public class MarketplaceViewer extends CatalogViewer {
 		case OPEN_FAVORITES:
 			getWizard().didShowOpenFavoritesBanner();
 			return new OpenFavoritesNotificationItem(parent, getResources(), catalogItem, getWizard().getCatalogPage());
+		case UPDATE:
+			return new InstallUpdatesNotificationItem(parent, getResources(), catalogItem,
+					getWizard().getCatalogPage());
 		}
 		return null;
 	}

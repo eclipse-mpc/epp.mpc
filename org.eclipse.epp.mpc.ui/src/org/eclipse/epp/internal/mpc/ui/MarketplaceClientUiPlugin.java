@@ -87,6 +87,8 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 
 	public static final String ACTION_ICON_WARNING = "ACTION_ICON_WARNING"; //$NON-NLS-1$
 
+	public static final String ACTION_ICON_UPDATE = "ACTION_ICON_UPDATE"; //$NON-NLS-1$
+
 	public static final String FAVORITES_LIST_ICON = "FAVORITES_LIST_ICON"; //$NON-NLS-1$
 
 	public static final String ITEM_ICON_STAR = "ITEM_ICON_STAR"; //$NON-NLS-1$
@@ -199,6 +201,8 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/action-item-login.png")); //$NON-NLS-1$
 		imageRegistry.put(ACTION_ICON_WARNING,
 				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/action-item-warning.png")); //$NON-NLS-1$
+		imageRegistry.put(ACTION_ICON_UPDATE,
+				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/action-item-update.png")); //$NON-NLS-1$
 		imageRegistry.put(FAVORITES_LIST_ICON,
 				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/favorites-list.png")); //$NON-NLS-1$
 		return imageRegistry;

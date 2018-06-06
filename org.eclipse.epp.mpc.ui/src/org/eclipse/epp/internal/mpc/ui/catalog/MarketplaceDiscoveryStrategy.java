@@ -275,96 +275,9 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 					}
 				}
 				for (final INode node : result.getNodes()) {
-					String id = node.getId();
-					try {
-						final MarketplaceNodeCatalogItem catalogItem = new MarketplaceNodeCatalogItem();
-						catalogItem.setMarketplaceUrl(catalogDescriptor.getUrl());
-						catalogItem.setId(id);
-						catalogItem.setName(getCatalogItemName(node));
-						catalogItem.setCategoryId(catalogCategory.getId());
-						ICategories categories = node.getCategories();
-						if (categories != null) {
-							for (ICategory category : categories.getCategory()) {
-								catalogItem.addTag(new Tag(ICategory.class, category.getId(), category.getName()));
-							}
-						}
-						catalogItem.setData(node);
-						catalogItem.setSource(source);
-						catalogItem.setLicense(node.getLicense());
-						catalogItem.setUserFavorite(userFavoritesSupported ? node.getUserFavorite() : null);
-						IIus ius = node.getIus();
-						if (ius != null) {
-							List<MarketplaceNodeInstallableUnitItem> installableUnitItems = new ArrayList<>();
-							for (IIu iu : ius.getIuElements()) {
-								MarketplaceNodeInstallableUnitItem iuItem = new MarketplaceNodeInstallableUnitItem();
-								iuItem.init(iu);
-								installableUnitItems.add(iuItem);
-							}
-							catalogItem.setInstallableUnitItems(installableUnitItems);
-						}
-						if (node.getShortdescription() == null && node.getBody() != null) {
-							// bug 306653 <!--break--> marks the end of the short description.
-							String descriptionText = node.getBody();
-							Matcher matcher = BREAK_PATTERN.matcher(node.getBody());
-							if (matcher.find()) {
-								int start = matcher.start();
-								if (start > 0) {
-									String shortDescriptionText = descriptionText.substring(0, start).trim();
-									if (shortDescriptionText.length() > 0) {
-										descriptionText = shortDescriptionText;
-									}
-								}
-							}
-							catalogItem.setDescription(descriptionText);
-						} else {
-							catalogItem.setDescription(node.getShortdescription());
-						}
-						catalogItem.setProvider(node.getCompanyname());
-						String updateurl = node.getUpdateurl();
-						if (updateurl != null) {
-							try {
-								// trim is important!
-								updateurl = updateurl.trim();
-								URLUtil.toURL(updateurl);
-								catalogItem.setSiteUrl(updateurl);
-							} catch (MalformedURLException e) {
-								// don't use malformed URLs
-							}
-						}
-						if (catalogItem.getInstallableUnits() == null || catalogItem.getInstallableUnits().isEmpty()
-								|| catalogItem.getSiteUrl() == null) {
-							catalogItem.setAvailable(false);
-						}
-						if (node.getImage() != null) {
-							if (!source.getResourceProvider().containsResource(node.getImage())) {
-								cacheResource(source.getResourceProvider(), catalogItem, node.getImage());
-							}
-							createIcon(catalogItem, node);
-						}
-						if (node.getBody() != null || node.getScreenshot() != null) {
-							final Overview overview = new Overview();
-							overview.setItem(catalogItem);
-							overview.setSummary(node.getBody());
-							overview.setUrl(node.getUrl());
-							catalogItem.setOverview(overview);
-
-							if (node.getScreenshot() != null) {
-								if (!source.getResourceProvider().containsResource(node.getScreenshot())) {
-									cacheResource(source.getResourceProvider(), catalogItem, node.getScreenshot());
-								}
-								overview.setScreenshot(node.getScreenshot());
-							}
-						}
-						items.add(catalogItem);
-						marketplaceInfo.map(catalogItem.getMarketplaceUrl(), node);
-						marketplaceInfo.computeInstalled(computeInstalledFeatures(progress.newChild(nodeWork)),
-								catalogItem);
-					} catch (RuntimeException ex) {
-						MarketplaceClientUi.error(
-								NLS.bind(Messages.MarketplaceDiscoveryStrategy_ParseError,
-										node == null ? "null" : id), //$NON-NLS-1$
-								ex);
-					}
+					CatalogItem catalogItem = createCatalogItem(node, catalogCategory.getId(), userFavoritesSupported,
+							progress.newChild(nodeWork));
+					items.add(catalogItem);
 				}
 			} finally {
 				progress.done();
@@ -376,6 +289,102 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 					addCatalogItem(catalogCategory);
 				}
 			}
+		}
+	}
+
+	protected CatalogItem createCatalogItem(final INode node, String categoryId, boolean userFavoritesSupported,
+			IProgressMonitor monitor) {
+		String id = node.getId();
+		try {
+			final MarketplaceNodeCatalogItem catalogItem = new MarketplaceNodeCatalogItem();
+			catalogItem.setMarketplaceUrl(catalogDescriptor.getUrl());
+			catalogItem.setId(id);
+			catalogItem.setName(getCatalogItemName(node));
+			catalogItem.setCategoryId(categoryId);
+			ICategories categories = node.getCategories();
+			if (categories != null) {
+				for (ICategory category : categories.getCategory()) {
+					catalogItem.addTag(new Tag(ICategory.class, category.getId(), category.getName()));
+				}
+			}
+			catalogItem.setData(node);
+			catalogItem.setSource(source);
+			catalogItem.setLicense(node.getLicense());
+			catalogItem.setUserFavorite(userFavoritesSupported ? node.getUserFavorite() : null);
+			IIus ius = node.getIus();
+			if (ius != null) {
+				List<MarketplaceNodeInstallableUnitItem> installableUnitItems = new ArrayList<>();
+				for (IIu iu : ius.getIuElements()) {
+					MarketplaceNodeInstallableUnitItem iuItem = new MarketplaceNodeInstallableUnitItem();
+					iuItem.init(iu);
+					installableUnitItems.add(iuItem);
+				}
+				catalogItem.setInstallableUnitItems(installableUnitItems);
+			}
+			if (node.getShortdescription() == null && node.getBody() != null) {
+				// bug 306653 <!--break--> marks the end of the short description.
+				String descriptionText = node.getBody();
+				Matcher matcher = BREAK_PATTERN.matcher(node.getBody());
+				if (matcher.find()) {
+					int start = matcher.start();
+					if (start > 0) {
+						String shortDescriptionText = descriptionText.substring(0, start).trim();
+						if (shortDescriptionText.length() > 0) {
+							descriptionText = shortDescriptionText;
+						}
+					}
+				}
+				catalogItem.setDescription(descriptionText);
+			} else {
+				catalogItem.setDescription(node.getShortdescription());
+			}
+			catalogItem.setProvider(node.getCompanyname());
+			String updateurl = node.getUpdateurl();
+			if (updateurl != null) {
+				try {
+					// trim is important!
+					updateurl = updateurl.trim();
+					URLUtil.toURL(updateurl);
+					catalogItem.setSiteUrl(updateurl);
+				} catch (MalformedURLException e) {
+					// don't use malformed URLs
+				}
+			}
+			if (catalogItem.getInstallableUnits() == null || catalogItem.getInstallableUnits().isEmpty()
+					|| catalogItem.getSiteUrl() == null) {
+				catalogItem.setAvailable(false);
+			}
+			if (node.getImage() != null) {
+				if (!source.getResourceProvider().containsResource(node.getImage())) {
+					cacheResource(source.getResourceProvider(), catalogItem, node.getImage());
+				}
+				createIcon(catalogItem, node);
+			}
+			if (node.getBody() != null || node.getScreenshot() != null) {
+				final Overview overview = new Overview();
+				overview.setItem(catalogItem);
+				overview.setSummary(node.getBody());
+				overview.setUrl(node.getUrl());
+				catalogItem.setOverview(overview);
+
+				if (node.getScreenshot() != null) {
+					if (!source.getResourceProvider().containsResource(node.getScreenshot())) {
+						cacheResource(source.getResourceProvider(), catalogItem, node.getScreenshot());
+					}
+					overview.setScreenshot(node.getScreenshot());
+				}
+			}
+			marketplaceInfo.map(catalogItem.getMarketplaceUrl(), node);
+			marketplaceInfo.computeInstalled(computeInstalledFeatures(monitor),
+					catalogItem);
+
+			return catalogItem;
+		} catch (RuntimeException ex) {
+			MarketplaceClientUi.error(
+					NLS.bind(Messages.MarketplaceDiscoveryStrategy_ParseError,
+							node == null ? "null" : id), //$NON-NLS-1$
+					ex);
+			return null;
 		}
 	}
 
@@ -783,6 +792,10 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	public void addOpenFavoritesItem(MarketplaceCategory catalogCategory) {
 		addUserActionItem(catalogCategory, UserAction.OPEN_FAVORITES);
+	}
+
+	public void addUpdateItem(MarketplaceCategory catalogCategory, List<MarketplaceNodeCatalogItem> availableUpdates) {
+		addUserActionItem(catalogCategory, UserAction.UPDATE, availableUpdates);
 	}
 
 	public void installed(IProgressMonitor monitor) throws CoreException {

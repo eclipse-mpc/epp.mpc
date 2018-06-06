@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
@@ -42,6 +43,7 @@ import org.eclipse.epp.mpc.core.model.IIu;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.service.QueryHelper;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
+import org.eclipse.osgi.service.datalocation.Location;
 
 /**
  * A means of knowing about how nodes map to IUs and visa versa. Can handle nodes from multiple marketplaces, and does a
@@ -52,6 +54,12 @@ import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 public class MarketplaceInfo {
 
 	public static final String MPC_NODE_IU_PROPERTY = "org.eclipse.epp.mpc.node"; //$NON-NLS-1$
+
+	public static final String MPC_FEATURE_IU = "org.eclipse.epp.mpc.feature.group"; //$NON-NLS-1$
+
+	public static final String MPC_FEATURE_SITE = "http://download.eclipse.org/mpc"; //$NON-NLS-1$
+
+	public static final String MPC_NODE_PATH = "/content/eclipse-marketplace-client"; //$NON-NLS-1$
 
 	private static final String P2_FEATURE_GROUP_SUFFIX = ".feature.group"; //$NON-NLS-1$
 
@@ -142,10 +150,16 @@ public class MarketplaceInfo {
 			}
 		}
 		for (IInstallableUnit iu : installedIus.values()) {
-			String nodeUrl = iu.getProperty(MPC_NODE_IU_PROPERTY);
-			if (nodeUrl != null && nodeUrl.startsWith(repositoryUrl.toString())) {
-				INode node = QueryHelper.nodeByUrl(nodeUrl);
-				nodes.add(node);
+			String nodeUrlsValue = iu.getProperty(MPC_NODE_IU_PROPERTY);
+			if (nodeUrlsValue == null) {
+				continue;
+			}
+			String[] nodeUrls = nodeUrlsValue == null ? null : nodeUrlsValue.split("(\\s*,\\s*|\\s+)"); //$NON-NLS-1$
+			for (String nodeUrl : nodeUrls) {
+				if (nodeUrl.startsWith(repositoryUrl.toString())) {
+					INode node = QueryHelper.nodeByUrl(nodeUrl);
+					nodes.add(node);
+				}
 			}
 		}
 
@@ -296,6 +310,18 @@ public class MarketplaceInfo {
 		}
 	}
 
+	public static boolean isMPCNode(INode item) {
+		if (item.getUpdateurl() != null) {
+			return item.getUpdateurl().startsWith(MPC_FEATURE_SITE);
+		}
+
+		if (item.getUrl() != null) {
+			return item.getUrl().endsWith(MPC_NODE_PATH) || item.getUrl().endsWith(MPC_NODE_PATH + "/"); //$NON-NLS-1$
+		}
+
+		return false;
+	}
+
 	public static MarketplaceInfo getInstance() {
 
 		MarketplaceInfo info = new MarketplaceInfo();
@@ -376,19 +402,54 @@ public class MarketplaceInfo {
 	 * @nooverride This method is not intended to be re-implemented or extended by clients.
 	 */
 	protected RegistryFile createRegistryFile() {
+		List<File> files = new ArrayList<>();
+		File configFile = computeConfigurationAreaRegistryFile();
+		if (configFile != null) {
+			files.add(configFile);
+		}
 		File dataFile = computeBundleRegistryFile();
+		if (dataFile != null) {
+			files.add(dataFile);
+		}
 
 		String userHome = System.getProperty("user.home"); //$NON-NLS-1$
 		File userHomeFile = new File(userHome);
 		if (userHomeFile.exists()) {
-			File configFile = computeUserHomeRegistryFile(userHomeFile);
+			File userConfigFile = computeUserHomeRegistryFile(userHomeFile);
 			File legacyConfigFile = computeLegacyUserHomeRegistryFile(userHomeFile);
-			return dataFile != null ? new RegistryFile(dataFile, configFile, legacyConfigFile)
-					: new RegistryFile(configFile, legacyConfigFile);
+			files.add(userConfigFile);
+			files.add(legacyConfigFile);
 		}
-		return dataFile != null ? new RegistryFile(dataFile) : new RegistryFile();
+		return new RegistryFile(files.toArray(new File[files.size()]));
 	}
 
+	/**
+	 * This method is only protected for testing purposes. Do not override or call directly.
+	 *
+	 * @noreference This method is not intended to be referenced by clients.
+	 * @nooverride This method is not intended to be re-implemented or extended by clients.
+	 */
+	protected File computeConfigurationAreaRegistryFile() {
+		Location configurationLocation = Platform.getConfigurationLocation();
+		URL url = configurationLocation == null ? null : configurationLocation.getURL();
+		if (url == null) {
+			return null;
+		}
+		try {
+			url = FileLocator.resolve(url);
+		} catch (IOException e) {
+			return null;
+		}
+		URI uri = URI.create(url.toExternalForm());
+		if (!"file".equals(uri.getScheme())) {
+			return null;
+		}
+		File configurationArea = new File(uri);
+		File mpcArea = new File(configurationArea, MarketplaceClientUi.BUNDLE_ID);
+
+		File dataFile = new File(mpcArea, PERSISTENT_FILE);
+		return dataFile;
+	}
 
 	/**
 	 * This method is only protected for testing purposes. Do not override or call directly.

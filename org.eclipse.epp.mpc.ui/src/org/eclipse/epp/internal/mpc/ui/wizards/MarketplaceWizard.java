@@ -24,6 +24,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -119,6 +120,8 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 	private static final String WELCOME_TRIGGER_ID = "welcome"; //$NON-NLS-1$
 
 	private static final String OPEN_FAVORITES_NOTIFICATION_PREFERENCE = "showOpenFavoritesNotification"; //$NON-NLS-1$
+
+	private static final String IGNORED_UPDATES_PREFERENCE = "ignoredUpdates"; //$NON-NLS-1$
 
 	private static final String PREF_DEFAULT_CATALOG = CatalogDescriptor.class.getSimpleName();
 
@@ -1119,6 +1122,32 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			if (!newOperations.equals(oldOperations)) {
 				updateSelection();
 			}
+		}
+	}
+
+	public boolean shouldShowUpdateBanner(String availableUpdatesKey) {
+		IEclipsePreferences node = ConfigurationScope.INSTANCE.getNode(MarketplaceClientUi.BUNDLE_ID);
+		String ignoredUpdates = node.get(IGNORED_UPDATES_PREFERENCE, null);
+		if (ignoredUpdates == null) {
+			return true;
+		}
+		if (ignoredUpdates.equals(availableUpdatesKey)) {
+			return false;
+		}
+		String[] ignoredNodes = ignoredUpdates.split(","); //$NON-NLS-1$
+		String[] availableNodes = availableUpdatesKey.split(","); //$NON-NLS-1$
+		Set<String> availableNodesSet = new HashSet<>(Arrays.asList(availableNodes));
+		availableNodesSet.removeAll(Arrays.asList(ignoredNodes));
+		return !availableNodesSet.isEmpty();
+	}
+
+	public void dismissUpdateBanner(String availableUpdatesKey) {
+		IEclipsePreferences node = ConfigurationScope.INSTANCE.getNode(MarketplaceClientUi.BUNDLE_ID);
+		node.put(IGNORED_UPDATES_PREFERENCE, availableUpdatesKey);
+		try {
+			node.flush();
+		} catch (BackingStoreException e) {
+			MarketplaceClientUi.error(e);
 		}
 	}
 

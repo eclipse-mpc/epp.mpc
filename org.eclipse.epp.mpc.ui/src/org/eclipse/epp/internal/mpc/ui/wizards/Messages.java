@@ -135,6 +135,20 @@ class Messages extends NLS {
 
 	public static String ImportFavoritesPage_unknownErrorMessage;
 
+	public static String InstallUpdatesNotificationItem_GeneralUpdateDescription;
+
+	public static String InstallUpdatesNotificationItem_GeneralUpdateHeader;
+
+	public static String InstallUpdatesNotificationItem_MPCUpdateDescription;
+
+	public static String InstallUpdatesNotificationItem_MPCUpdateHeader;
+
+	public static String InstallUpdatesNotificationItem_OtherUpdatesDescription;
+
+	public static String InstallUpdatesNotificationItem_ShowUpdatesAction;
+
+	public static String InstallUpdatesNotificationItem_UpdateNowAction;
+
 	public static String ItemButtonController_change;
 
 	public static String ItemButtonController_changePending;

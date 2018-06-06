@@ -31,11 +31,13 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
+import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory.Contents;
 import org.eclipse.epp.internal.mpc.ui.util.ConcurrentTaskManager;
 import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INews;
 import org.eclipse.epp.mpc.core.model.INode;
+import org.eclipse.epp.mpc.core.model.ISearchResult;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
 import org.eclipse.equinox.internal.p2.discovery.Catalog;
 import org.eclipse.equinox.internal.p2.discovery.DiscoveryCore;
@@ -64,6 +66,8 @@ public class MarketplaceCatalog extends Catalog {
 	private final Map<String, Version> repositoryIuVersionById = new HashMap<>();
 
 	private INews news;
+
+	private List<MarketplaceNodeCatalogItem> availableUpdates = new ArrayList<>();
 
 	private interface DiscoveryOperation {
 		public void run(MarketplaceDiscoveryStrategy strategy, IProgressMonitor monitor) throws CoreException;
@@ -138,7 +142,9 @@ public class MarketplaceCatalog extends Catalog {
 		try {
 			Map<String, IInstallableUnit> installedIUs = calculateInstalledIUs(progress.newChild(100000));
 			List<MarketplaceNodeCatalogItem> updateCheckNeeded = new ArrayList<>();
-			for (CatalogItem item : getItems()) {
+			List<CatalogItem> updateCheckItems = getUpdateCheckItems(progress.newChild(100000));
+			List<MarketplaceNodeCatalogItem> updateableItems = new ArrayList<MarketplaceNodeCatalogItem>();
+			for (CatalogItem item : updateCheckItems) {
 				if (monitor.isCanceled()) {
 					return Status.CANCEL_STATUS;
 				}
@@ -149,16 +155,100 @@ public class MarketplaceCatalog extends Catalog {
 				if (catalogItem.isInstalled()) {
 					if (setUpdatesAvailable(installedIUs, catalogItem)) {
 						updateCheckNeeded.add(catalogItem);
+					} else if (Boolean.TRUE.equals(catalogItem.getUpdateAvailable())) {
+						updateableItems.add(catalogItem);
 					}
 				}
 			}
 			if (!updateCheckNeeded.isEmpty()) {
-				checkForUpdates(updateCheckNeeded, installedIUs, progress.newChild(10000000 - 100000));
+				checkForUpdates(updateCheckNeeded, installedIUs, progress.newChild(10000000 - 200000));
+				for (MarketplaceNodeCatalogItem catalogItem : updateCheckNeeded) {
+					if (Boolean.TRUE.equals(catalogItem.getUpdateAvailable())) {
+						updateableItems.add(catalogItem);
+					}
+				}
 			}
+
+			availableUpdates = updateableItems;
 
 			return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
 		} finally {
 			monitor.done();
+		}
+	}
+
+	private List<CatalogItem> getUpdateCheckItems(IProgressMonitor monitor) {
+		List<CatalogItem> updateCheckItems = getItems();
+
+		//add all locally installed items as well
+		boolean includeInstalled = false;
+		for (CatalogCategory category : getCategories()) {
+			if (category instanceof MarketplaceCategory) {
+				MarketplaceCategory marketplaceCategory = (MarketplaceCategory) category;
+				if (marketplaceCategory.getContents() == Contents.FEATURED) {
+					includeInstalled = true;
+					break;
+				}
+			}
+		}
+		if (!includeInstalled) {
+			return updateCheckItems;
+		}
+
+		updateCheckItems = new ArrayList<>(updateCheckItems);
+		Map<String, CatalogItem> itemsById = new HashMap<>();
+		for (CatalogItem catalogItem : updateCheckItems) {
+			itemsById.put(catalogItem.getId(), catalogItem);
+		}
+		List<AbstractDiscoveryStrategy> discoveryStrategies = getDiscoveryStrategies();
+		SubMonitor progress = SubMonitor.convert(monitor, discoveryStrategies.size() * 1000);
+		for (AbstractDiscoveryStrategy discoveryStrategy : discoveryStrategies) {
+			if (monitor.isCanceled()) {
+				break;
+			}
+			SubMonitor discoveryStrategyProgress = progress.newChild(1000);
+			if (discoveryStrategy instanceof MarketplaceDiscoveryStrategy) {
+				MarketplaceDiscoveryStrategy marketplaceDiscoveryStrategy = (MarketplaceDiscoveryStrategy) discoveryStrategy;
+				try {
+					performUpdateCheckDiscovery(marketplaceDiscoveryStrategy, updateCheckItems, itemsById,
+							discoveryStrategyProgress);
+				} catch (CoreException e) {
+					// TODO Auto-generated catch block WIP
+					e.printStackTrace();
+				}
+			}
+			discoveryStrategyProgress.setWorkRemaining(0);
+		}
+		return updateCheckItems;
+	}
+
+	private void performUpdateCheckDiscovery(MarketplaceDiscoveryStrategy marketplaceDiscoveryStrategy,
+			List<CatalogItem> updateCheckItems, Map<String, CatalogItem> itemsById,
+			SubMonitor discoveryStrategyProgress) throws CoreException {
+		MarketplaceCategory catalogCategory = marketplaceDiscoveryStrategy
+				.findMarketplaceCategory(discoveryStrategyProgress.newChild(1));
+		final Contents realContents = catalogCategory.getContents();
+		try {
+			catalogCategory.setContents(Contents.INSTALLED);
+			ISearchResult installed = marketplaceDiscoveryStrategy
+					.computeInstalled(discoveryStrategyProgress.newChild(499));
+			List<? extends INode> installedNodes = installed.getNodes();
+			if (installedNodes == null || installedNodes.isEmpty()) {
+				return;
+			}
+			SubMonitor itemProgress = discoveryStrategyProgress.newChild(500);
+			itemProgress.setWorkRemaining(installedNodes.size() * 100);
+			for (INode node : installedNodes) {
+				CatalogItem item = marketplaceDiscoveryStrategy.createCatalogItem(node, catalogCategory.getId(), false,
+						itemProgress.newChild(100));
+				if (!itemsById.containsKey(item.getId())) {
+					itemsById.put(item.getId(), item);
+					updateCheckItems.add(item);
+				}
+			}
+			itemProgress.done();
+		} finally {
+			catalogCategory.setContents(realContents);
 		}
 	}
 
@@ -525,9 +615,14 @@ public class MarketplaceCatalog extends Catalog {
 		return markets;
 	}
 
+	public List<MarketplaceNodeCatalogItem> getAvailableUpdates() {
+		return availableUpdates;
+	}
+
 	public void removeItem(CatalogItem item) {
 		getItems().remove(item);
 		getFilteredItems().remove(item);
+		getAvailableUpdates().remove(item);
 		for (CatalogCategory category : getCategories()) {
 			category.getItems().remove(item);
 		}
