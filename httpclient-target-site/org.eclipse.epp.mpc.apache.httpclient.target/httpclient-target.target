@@ -4,10 +4,10 @@
 <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.httpcomponents.httpcore" version="4.4.6.v20170210-0925"/>
 <unit id="org.apache.httpcomponents.httpcore.source" version="4.4.6.v20170210-0925"/>
-<unit id="org.apache.httpcomponents.httpclient" version="4.5.2.v20170210-0925"/>
-<unit id="org.apache.httpcomponents.httpclient.source" version="4.5.2.v20170210-0925"/>
-<unit id="org.apache.httpcomponents.httpclient.win" version="4.5.2.v20170410-1149"/>
-<unit id="org.apache.httpcomponents.httpclient.win.source" version="4.5.2.v20170410-1149"/>
+<unit id="org.apache.httpcomponents.httpclient" version="4.5.2.v20180410-1551"/>
+<unit id="org.apache.httpcomponents.httpclient.source" version="4.5.2.v20180410-1551"/>
+<unit id="org.apache.httpcomponents.httpclient.win" version="4.5.2.v20180410-2006"/>
+<unit id="org.apache.httpcomponents.httpclient.win.source" version="4.5.2.v20180410-2006"/>
 <unit id="com.sun.jna" version="4.1.0.v20170410-1117"/>
 <unit id="com.sun.jna.source" version="4.1.0.v20170410-1117"/>
 <unit id="com.sun.jna.platform" version="4.1.0.v20170410-1117"/>
