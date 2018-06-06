@@ -83,12 +83,14 @@ public class InstallUpdatesNotificationItem extends AbstractUserActionItem {
 
 	@Override
 	protected String getDescriptionText() {
-		if (isMpcSelfUpdate()) {
-			return Messages.InstallUpdatesNotificationItem_MPCUpdateDescription
-					+ (isGeneralUpdate() ? "\n\n" + Messages.InstallUpdatesNotificationItem_OtherUpdatesDescription //$NON-NLS-1$
-							: ""); //$NON-NLS-1$
-		}
-		return Messages.InstallUpdatesNotificationItem_GeneralUpdateDescription;
+		return isMpcSelfUpdate() ? Messages.InstallUpdatesNotificationItem_MPCUpdateDescription
+				: Messages.InstallUpdatesNotificationItem_GeneralUpdateDescription;
+	}
+
+	@Override
+	protected String getSublineText() {
+		return isMpcSelfUpdate() && isGeneralUpdate() ? Messages.InstallUpdatesNotificationItem_OtherUpdatesDescription
+				: null;
 	}
 
 	@Override
