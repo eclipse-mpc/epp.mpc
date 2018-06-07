@@ -123,13 +123,26 @@ public class FallbackTransportFactory implements ITransportFactory {
 				throws FileNotFoundException, ServiceUnavailableException, CoreException {
 			connectionFailures++;
 			if (fallbackTransport != null) {
-				String problemKey = ex.getClass().getName() + ": " + ex.getMessage() + "\n\t" + ex.getStackTrace()[0]; //$NON-NLS-1$ //$NON-NLS-2$
-				if (reportedProblems.add(problemKey)) {
-					MarketplaceClientCore.getLog().log(MarketplaceClientCore.computeStatus(ex,
-							NLS.bind(Messages.FallbackTransportFactory_fallbackStream, primaryTransport,
-									fallbackTransport)));
+				boolean fallbackSucceeded = false;
+				try {
+					InputStream fallbackStream = fallbackTransport.stream(location, monitor);
+					fallbackSucceeded = true;
+					String problemKey = ex.getClass().getName() + ": " + ex.getMessage() + "\n\t" //$NON-NLS-1$//$NON-NLS-2$
+							+ ex.getStackTrace()[0];
+					if (reportedProblems.add(problemKey)) {
+						MarketplaceClientCore.getLog()
+						.log(MarketplaceClientCore.computeStatus(ex,
+								NLS.bind(Messages.FallbackTransportFactory_fallbackStream, primaryTransport,
+										fallbackTransport)));
+					}
+
+					return fallbackStream;
+				} finally {
+					if (!fallbackSucceeded) {
+						//fallback didn't work either - probably something unrelated to transport going on, so don't count this as a transport failure
+						connectionFailures--;
+					}
 				}
-				return fallbackTransport.stream(location, monitor);
 			}
 			return null;
 		}

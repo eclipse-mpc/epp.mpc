@@ -350,11 +350,12 @@ MarketplaceService {
 			}
 		}
 		Map<INode, INode> resolvedNodeMapping = new HashMap<>(nodes.size());
+		Map<INode, CoreException> resolutionErrors = new HashMap<>(2);
 		if (nodesById != null) {
 			getNodesById(nodesById, resolvedNodeMapping, progress.newChild(nodesById.size()));
 		}
 		if (nodesByUrl != null) {
-			getNodesByUrl(nodesByUrl, resolvedNodeMapping, progress.newChild(nodesByUrl.size()));
+			getNodesByUrl(nodesByUrl, resolvedNodeMapping, resolutionErrors, progress.newChild(nodesByUrl.size()));
 		}
 
 		List<INode> resultNodes = new ArrayList<>(nodes.size());
@@ -370,13 +371,15 @@ MarketplaceService {
 				} else {
 					query = inputNode.getUrl();
 				}
-				IStatus missingNodeDetailStatus = createStatus(IStatus.INFO,
-						Messages.DefaultMarketplaceService_nodeNotFound, query);
-				if (missingNodes == null) {
-					missingNodes = new MultiStatus(MarketplaceClientCore.BUNDLE_ID, 0,
-							"Some entries could not be found on the Marketplace", null); //$NON-NLS-1$
-				}
-				missingNodes.add(missingNodeDetailStatus);
+				CoreException error = resolutionErrors.get(inputNode);
+				IStatus missingNodeDetailStatus = error == null
+						? createStatus(IStatus.INFO, Messages.DefaultMarketplaceService_nodeNotFound, query)
+								: createStatus(IStatus.INFO, Messages.DefaultMarketplaceService_nodeNotFound, query, error);
+						if (missingNodes == null) {
+							missingNodes = new MultiStatus(MarketplaceClientCore.BUNDLE_ID, 0,
+									"Some entries could not be found on the Marketplace", null); //$NON-NLS-1$
+						}
+						missingNodes.add(missingNodeDetailStatus);
 			}
 		}
 		if (missingNodes != null) {
@@ -414,13 +417,17 @@ MarketplaceService {
 	}
 
 	private void getNodesByUrl(Collection<? extends INode> nodes, Map<INode, INode> resolvedNodeMapping,
-			IProgressMonitor monitor) throws CoreException {
+			Map<INode, CoreException> resolutionErrors, IProgressMonitor monitor) throws CoreException {
 		SubMonitor progress = SubMonitor.convert(monitor, nodes.size());
 		int remaining = nodes.size();
 		for (INode node : nodes) {
 			if (node.getId() == null && node.getUrl() != null) {
-				Node resolvedNode = getNode(node, progress.newChild(1));
-				resolvedNodeMapping.put(node, resolvedNode);
+				try {
+					Node resolvedNode = getNode(node, progress.newChild(1));
+					resolvedNodeMapping.put(node, resolvedNode);
+				} catch (CoreException ex) {
+					resolutionErrors.put(node, ex);
+				}
 			}
 			progress.setWorkRemaining(--remaining);
 		}

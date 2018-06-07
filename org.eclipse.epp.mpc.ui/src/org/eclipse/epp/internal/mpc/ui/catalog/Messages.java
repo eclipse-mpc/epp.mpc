@@ -49,6 +49,8 @@ class Messages extends NLS {
 
 	public static String MarketplaceCatalog_queryingMarketplace;
 
+	public static String MarketplaceCatalog_UpdateCheckDiscoveryError;
+
 	public static String MarketplaceDiscoveryStrategy_badUri;
 
 	public static String MarketplaceDiscoveryStrategy_catalogCategory;

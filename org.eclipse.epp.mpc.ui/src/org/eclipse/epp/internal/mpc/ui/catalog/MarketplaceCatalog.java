@@ -215,8 +215,7 @@ public class MarketplaceCatalog extends Catalog {
 					performUpdateCheckDiscovery(marketplaceDiscoveryStrategy, updateCheckItems, itemsById,
 							discoveryStrategyProgress);
 				} catch (CoreException e) {
-					// TODO Auto-generated catch block WIP
-					e.printStackTrace();
+					MarketplaceClientUi.log(IStatus.INFO, Messages.MarketplaceCatalog_UpdateCheckDiscoveryError, e);
 				}
 			}
 			discoveryStrategyProgress.setWorkRemaining(0);

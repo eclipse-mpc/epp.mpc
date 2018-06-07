@@ -41,8 +41,11 @@ import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
+import org.eclipse.epp.mpc.core.service.QueryHelper;
 
 public class CachingMarketplaceService implements IMarketplaceService {
+
+	private static final String MISSING_NODE_TYPE = "__MISSING__"; //$NON-NLS-1$
 
 	private final IMarketplaceService delegate;
 
@@ -130,17 +133,7 @@ public class CachingMarketplaceService implements IMarketplaceService {
 
 	@Override
 	public INode getNode(INode node, IProgressMonitor monitor) throws CoreException {
-		String nodeKey = computeNodeKey(node);
-		INode nodeResult = null;
-		if (nodeKey != null) {
-			nodeResult = getCached(nodeKey, INode.class);
-		}
-		if (nodeResult == null) {
-			String nodeUrlKey = computeNodeUrlKey(node);
-			if (nodeUrlKey != null) {
-				nodeResult = getCached(nodeUrlKey, INode.class);
-			}
-		}
+		INode nodeResult = lookupCachedNode(node);
 		if (nodeResult == null) {
 			nodeResult = delegate.getNode(node, monitor);
 			if (nodeResult != null) {
@@ -173,29 +166,64 @@ public class CachingMarketplaceService implements IMarketplaceService {
 				cacheNode(node);
 			}
 			for (INode node : unresolvedNodes) {
-				mapCachedNode(node, resolvedNodes);
+				if (!mapCachedNode(node, resolvedNodes)) {
+					//Cache not-found nodes
+					INode missingNode = createMissingNode(node);
+					if (missingNode != null) {
+						cacheNode(missingNode);
+					}
+				}
 			}
 		}
 		List<INode> result = new ArrayList<>(nodes.size());
 		for (INode node : nodes) {
 			INode resolvedNode = resolvedNodes.get(node);
-			if (resolvedNode != null) {
+			if (resolvedNode != null && !MISSING_NODE_TYPE.equals(resolvedNode.getType())) {
 				result.add(resolvedNode);
 			}
 		}
 		return result;
 	}
 
+	private INode createMissingNode(INode node) {
+		INode missingNode;
+		if (node.getId() != null) {
+			missingNode = QueryHelper.nodeById(node.getId());
+		} else if (node.getUrl() != null) {
+			missingNode = QueryHelper.nodeByUrl(node.getUrl());
+		} else {
+			return null;
+		}
+		((Node) missingNode).setType(MISSING_NODE_TYPE);
+		return missingNode;
+	}
+
 	private boolean mapCachedNode(INode node, Map<INode, INode> resolvedNodes) {
-		String nodeKey = computeNodeKey(node);
-		if (nodeKey != null) {
-			INode nodeResult = getCached(nodeKey, INode.class);
-			if (nodeResult != null) {
-				resolvedNodes.put(node, nodeResult);
-				return true;
-			}
+		INode nodeResult = lookupCachedNode(node);
+		if (nodeResult != null) {
+			resolvedNodes.put(node, nodeResult);
+			return true;
 		}
 		return false;
+	}
+
+	private INode lookupCachedNode(INode node) {
+		INode nodeResult;
+		String nodeKey = computeNodeKey(node);
+		if (nodeKey != null) {
+			nodeResult = getCached(nodeKey, INode.class);
+			if (nodeResult != null) {
+				return nodeResult;
+			}
+		}
+		nodeKey = computeNodeUrlKey(node);
+		if (nodeKey != null) {
+			nodeResult = getCached(nodeKey, INode.class);
+			if (nodeResult != null) {
+				return nodeResult;
+			}
+		}
+		return null;
 	}
 
 	private void cache(String key, Object value) {
