@@ -338,29 +338,34 @@ public class MarketplaceInfo {
 	 * @nooverride This method is not intended to be re-implemented or extended by clients.
 	 */
 	public MarketplaceInfo load() {
-		RegistryFile registryFile = createRegistryFile();
-		File loadFile = registryFile.load();
-		if (loadFile != null && loadFile.canRead()) {
-			synchronized (MarketplaceInfo.class) {
-				try {
-					final InputStream in = new BufferedInputStream(new FileInputStream(loadFile));
+		try {
+			RegistryFile registryFile = createRegistryFile();
+			File loadFile = registryFile.load();
+			if (loadFile != null && loadFile.canRead()) {
+				synchronized (MarketplaceInfo.class) {
 					try {
-						XMLDecoder decoder = new XMLDecoder(in);
-						Object object = decoder.readObject();
-						decoder.close();
-						return (MarketplaceInfo) object;
-					} finally {
-						in.close();
+						final InputStream in = new BufferedInputStream(new FileInputStream(loadFile));
+						try {
+							XMLDecoder decoder = new XMLDecoder(in);
+							Object object = decoder.readObject();
+							decoder.close();
+							return (MarketplaceInfo) object;
+						} finally {
+							in.close();
+						}
+					} catch (Throwable t) {
+						// ignore, fallback
+						IStatus status = new Status(IStatus.WARNING, MarketplaceClientUi.BUNDLE_ID,
+								Messages.MarketplaceInfo_LoadError, t);
+						MarketplaceClientUi.getLog().log(status);
+						//try to delete broken file
+						loadFile.delete();
 					}
-				} catch (Throwable t) {
-					// ignore, fallback
-					IStatus status = new Status(IStatus.WARNING, MarketplaceClientUi.BUNDLE_ID,
-							Messages.MarketplaceInfo_LoadError, t);
-					MarketplaceClientUi.getLog().log(status);
-					//try to delete broken file
-					loadFile.delete();
 				}
 			}
+		} catch (Exception ex) {
+			//Never fail due to this
+			MarketplaceClientUi.error(ex);
 		}
 		return null;
 	}
@@ -391,6 +396,7 @@ public class MarketplaceInfo {
 			}
 		} catch (Throwable t) {
 			// fail safe
+                        MarketplaceClientUi.error(t)
 		}
 	}
 
@@ -434,15 +440,16 @@ public class MarketplaceInfo {
 	protected File computeConfigurationAreaRegistryFile() {
 		Location configurationLocation = Platform.getConfigurationLocation();
 		URL url = configurationLocation == null ? null : configurationLocation.getURL();
+		URI uri;
 		if (url == null) {
 			return null;
 		}
 		try {
 			url = FileLocator.resolve(url);
-		} catch (IOException e) {
+			uri = URLUtil.toURI(url.toExternalForm());
+		} catch (Exception e) {
 			return null;
 		}
-		URI uri = URI.create(url.toExternalForm());
 		if (!"file".equals(uri.getScheme())) {
 			return null;
 		}
