@@ -396,7 +396,7 @@ public class MarketplaceInfo {
 			}
 		} catch (Throwable t) {
 			// fail safe
-                        MarketplaceClientUi.error(t)
+                        MarketplaceClientUi.error(t);
 		}
 	}
 
