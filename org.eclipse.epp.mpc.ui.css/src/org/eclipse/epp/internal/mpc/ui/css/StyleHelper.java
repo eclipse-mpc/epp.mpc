@@ -181,7 +181,10 @@ public class StyleHelper {
 	}
 
 	public StyleHelper applyStyles() {
-		getCSSEngine().applyStyles(widget, true);
+		CSSEngine cssEngine = getCSSEngine();
+		if (cssEngine != null) {
+			cssEngine.applyStyles(widget, true);
+		}
 		return this;
 	}
 }
