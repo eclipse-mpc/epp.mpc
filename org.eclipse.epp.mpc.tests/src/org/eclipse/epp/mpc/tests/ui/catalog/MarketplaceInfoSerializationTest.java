@@ -79,7 +79,6 @@ public class MarketplaceInfoSerializationTest {
 		}
 	}
 
-	private File configurationArea;
 	private File registryLocation;
 	private TestMarketplaceInfo catalogRegistry;
 
