@@ -46,6 +46,11 @@ public class MarketplaceInfoSerializationTest {
 		}
 
 		@Override
+		protected MarketplaceInfo load() {
+			return super.load();
+		}
+
+		@Override
 		protected File computeBundleRegistryFile() {
 			return super.computeBundleRegistryFile();
 		}
@@ -324,7 +329,7 @@ public class MarketplaceInfoSerializationTest {
 	}
 
 	private MarketplaceInfo loadMarketplaceInfo() {
-		MarketplaceInfo cleanInfo = new TestMarketplaceInfo();
+		TestMarketplaceInfo cleanInfo = new TestMarketplaceInfo();
 		assertTrue(cleanInfo.getIuToNodeKey().isEmpty());
 		assertTrue(cleanInfo.getNodeKeyToIU().isEmpty());
 		MarketplaceInfo loaded = cleanInfo.load();

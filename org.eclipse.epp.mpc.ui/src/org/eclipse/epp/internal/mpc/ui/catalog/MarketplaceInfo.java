@@ -332,12 +332,10 @@ public class MarketplaceInfo {
 	}
 
 	/**
-	 * This method is only public for testing purposes. Do not override or call directly.
-	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 * @nooverride This method is not intended to be re-implemented or extended by clients.
 	 */
-	public MarketplaceInfo load() {
+	protected MarketplaceInfo load() {
 		try {
 			RegistryFile registryFile = createRegistryFile();
 			File loadFile = registryFile.load();
