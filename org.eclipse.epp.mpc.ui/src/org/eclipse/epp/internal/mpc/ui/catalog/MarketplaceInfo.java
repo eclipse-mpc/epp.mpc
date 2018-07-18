@@ -343,16 +343,10 @@ public class MarketplaceInfo {
 			File loadFile = registryFile.load();
 			if (loadFile != null && loadFile.canRead()) {
 				synchronized (MarketplaceInfo.class) {
-					try {
-						final InputStream in = new BufferedInputStream(new FileInputStream(loadFile));
-						try {
-							XMLDecoder decoder = new XMLDecoder(in);
-							Object object = decoder.readObject();
-							decoder.close();
-							return (MarketplaceInfo) object;
-						} finally {
-							in.close();
-						}
+					try (InputStream in = new BufferedInputStream(new FileInputStream(loadFile));
+							XMLDecoder decoder = new XMLDecoder(in)) {
+						Object object = decoder.readObject();
+						return (MarketplaceInfo) object;
 					} catch (Throwable t) {
 						// ignore, fallback
 						IStatus status = new Status(IStatus.WARNING, MarketplaceClientUi.BUNDLE_ID,
