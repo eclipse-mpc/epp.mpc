@@ -214,7 +214,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 		try {
 			//check if dialog is still open
 			mpcShell = bot.shell("Eclipse Marketplace");
-		} catch (TimeoutException e) {
+		} catch (WidgetNotFoundException | TimeoutException e) {
 			//no MPC wizard found - maybe a bit strange, but so be it...
 			return;
 		}

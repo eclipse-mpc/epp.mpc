@@ -47,7 +47,12 @@ public class MarketplaceInfoSerializationTest {
 
 		@Override
 		protected File computeBundleRegistryFile() {
-			return null;
+			return super.computeBundleRegistryFile();
+		}
+
+		@Override
+		protected File computeConfigurationAreaRegistryFile() {
+			return super.computeConfigurationAreaRegistryFile();
 		}
 
 		@Override
@@ -61,11 +66,31 @@ public class MarketplaceInfoSerializationTest {
 		}
 	}
 
+	private class TestLegacyMarketplaceInfo extends TestMarketplaceInfo {
+
+		@Override
+		protected File computeConfigurationAreaRegistryFile() {
+			return null;
+		}
+
+		@Override
+		protected File computeBundleRegistryFile() {
+			return null;
+		}
+	}
+
+	private File configurationArea;
 	private File registryLocation;
 	private TestMarketplaceInfo catalogRegistry;
 
 	private TestMarketplaceInfo createReadOnlyBundleMarketplaceInfo() {
 		return new TestMarketplaceInfo() {
+
+			@Override
+			protected File computeConfigurationAreaRegistryFile() {
+				return null;
+			}
+
 			@Override
 			protected RegistryFile createRegistryFile() {
 				return new RegistryFile(super.createRegistryFile()) {
@@ -134,11 +159,12 @@ public class MarketplaceInfoSerializationTest {
 	}
 
 	@Test
-	public void loadFromUserHomeRegistryFile() {
+	public void loadFromUserHomeRegistryFile() throws Exception {
+		createEmptyRegistryFile(getUserHomeRegistryFile());
 		File registryFile = catalogRegistry.computeRegistryFile(false);
 		File saveRegistryFile = catalogRegistry.computeRegistryFile(true);
 		assertEquals(getUserHomeRegistryFile(), registryFile);
-		assertEquals(getUserHomeRegistryFile(), saveRegistryFile);
+		assertEquals(catalogRegistry.computeConfigurationAreaRegistryFile(), saveRegistryFile);
 	}
 
 	@Test
@@ -158,6 +184,7 @@ public class MarketplaceInfoSerializationTest {
 
 	@Test
 	public void saveToUserHomeRegistryFileWithLegacy() throws Exception {
+		catalogRegistry = new TestLegacyMarketplaceInfo();
 		createEmptyRegistryFile(getLegacyUserHomeRegistryFile());
 		File registryFile = catalogRegistry.computeRegistryFile(true);
 		assertEquals(getUserHomeRegistryFile(), registryFile);
@@ -167,6 +194,7 @@ public class MarketplaceInfoSerializationTest {
 
 	@Test
 	public void saveToUserHomeRegistryFileWithCurrentAndLegacy() throws Exception {
+		catalogRegistry = new TestLegacyMarketplaceInfo();
 		createEmptyRegistryFile(getLegacyUserHomeRegistryFile());
 		createEmptyRegistryFile(getUserHomeRegistryFile());
 		File registryFile = catalogRegistry.computeRegistryFile(true);

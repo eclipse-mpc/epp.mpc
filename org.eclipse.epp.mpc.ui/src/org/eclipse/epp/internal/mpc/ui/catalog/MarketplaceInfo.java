@@ -396,7 +396,7 @@ public class MarketplaceInfo {
 			}
 		} catch (Throwable t) {
 			// fail safe
-                        MarketplaceClientUi.error(t);
+			MarketplaceClientUi.error(t);
 		}
 	}
 
@@ -438,26 +438,34 @@ public class MarketplaceInfo {
 	 * @nooverride This method is not intended to be re-implemented or extended by clients.
 	 */
 	protected File computeConfigurationAreaRegistryFile() {
+		File configurationArea = getConfigurationArea();
+		if (configurationArea == null) {
+			return null;
+		}
+		File mpcArea = new File(configurationArea, MarketplaceClientUi.BUNDLE_ID);
+		File dataFile = new File(mpcArea, PERSISTENT_FILE);
+		return dataFile;
+	}
+
+	protected File getConfigurationArea() {
 		Location configurationLocation = Platform.getConfigurationLocation();
 		URL url = configurationLocation == null ? null : configurationLocation.getURL();
-		URI uri;
 		if (url == null) {
 			return null;
 		}
+		File configurationArea;
 		try {
 			url = FileLocator.resolve(url);
-			uri = URLUtil.toURI(url.toExternalForm());
+			if (!"file".equals(url.getProtocol())) { //$NON-NLS-1$
+				return null;
+			}
+			URI uri = new URI("file", null, url.getPath(), url.getQuery(), url.getRef()); //$NON-NLS-1$
+			configurationArea = new File(uri);
 		} catch (Exception e) {
+			MarketplaceClientUi.error(e);
 			return null;
 		}
-		if (!"file".equals(uri.getScheme())) {
-			return null;
-		}
-		File configurationArea = new File(uri);
-		File mpcArea = new File(configurationArea, MarketplaceClientUi.BUNDLE_ID);
-
-		File dataFile = new File(mpcArea, PERSISTENT_FILE);
-		return dataFile;
+		return configurationArea;
 	}
 
 	/**
