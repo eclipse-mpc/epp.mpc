@@ -5,7 +5,7 @@
    <parent>
       <groupId>org.eclipse.epp.mpc</groupId>
       <artifactId>org.eclipse.epp.mpc-parent</artifactId>
-      <version>1.7.1-SNAPSHOT</version>
+      <version>1.7.2-SNAPSHOT</version>
       <relativePath>../org.eclipse.epp.mpc-parent</relativePath>
    </parent>
    <artifactId>org.eclipse.epp.mpc-target</artifactId>
