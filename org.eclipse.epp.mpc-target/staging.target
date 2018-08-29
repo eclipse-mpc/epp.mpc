@@ -14,12 +14,12 @@
 <unit id="org.hamcrest.library" version="0.0.0"/>
 <unit id="org.junit" version="0.0.0"/>
 <unit id="org.mockito" version="0.0.0"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/S20180710163057/repository"/>
+<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/S20180820175350/repository"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.epp.mpc.apache.httpclient.feature.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.epp.mpc.apache.httpclient.feature.source.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/mpc/httpclient/drops/I-builds/201705151519"/>
+<repository location="http://download.eclipse.org/mpc/httpclient/drops/I-builds/201806062225"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.license.feature.group" version="0.0.0"/>
@@ -32,7 +32,7 @@
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.userstorage.sdk.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/usssdk/updates/latest"/>
+<repository location="http://download.eclipse.org/usssdk/drops/release/1.1.0"/>
 </location>
 </locations>
 </target>
