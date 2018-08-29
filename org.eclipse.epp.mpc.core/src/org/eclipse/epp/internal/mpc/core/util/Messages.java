@@ -31,13 +31,25 @@ class Messages extends NLS {
 
 	public static String ServiceUtil_ignoringIncompatibleServiceProperty;
 
+	public static String TransportFactory_available;
+
+	public static String TransportFactory_DefaultService;
+
+	public static String TransportFactory_DefaultTransportUnavailable_UseFallback;
+
+	public static String TransportFactory_FallbackService;
+
+	public static String TransportFactory_LegacyFallbackCreationError;
+
+	public static String TransportFactory_LegacyFallbacksError;
+
 	public static String TransportFactory_NoLegacyTransportFactoriesError;
 
 	public static String TransportFactory_ServiceErrorAppliedFilter;
 
 	public static String TransportFactory_ServiceErrorDetails;
 
-	public static String TransportFactory_ServiceErrorFilteredService;
+	public static String TransportFactory_ServiceErrorRegisteredService;
 
 	public static String TransportFactory_ServiceErrorNoneAvailable;
 
@@ -47,7 +59,13 @@ class Messages extends NLS {
 
 	public static String TransportFactory_ServiceErrorUnregistered;
 
+	public static String TransportFactory_StaticFactoryInfo;
+
 	public static String TransportFactory_transportAvailabilityError;
+
+	public static String TransportFactory_unavailable;
+
+	public static String TransportFactory_UseLegacyFallback;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

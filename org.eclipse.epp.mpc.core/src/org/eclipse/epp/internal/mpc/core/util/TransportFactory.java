@@ -19,6 +19,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +37,7 @@ import org.eclipse.epp.internal.mpc.core.MarketplaceClientCorePlugin;
 import org.eclipse.epp.internal.mpc.core.service.ServiceUnavailableException;
 import org.eclipse.epp.mpc.core.service.ITransportFactory;
 import org.eclipse.epp.mpc.core.service.ServiceHelper;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -72,6 +74,8 @@ public abstract class TransportFactory implements ITransportFactory {
 	private static final String ECF_HTTPCLIENT4_TRANSPORT_ID = "org.eclipse.ecf.provider.filetransfer.httpclient4"; //$NON-NLS-1$
 
 	private static final String ECF_EXCLUDES_PROPERTY = "org.eclipse.ecf.provider.filetransfer.excludeContributors"; //$NON-NLS-1$
+
+	private static String lastFallbackTransport = null;
 
 	public static String computeDisabledTransportsFilter() {
 		BundleContext bundleContext = FrameworkUtil.getBundle(TransportFactory.class).getBundleContext();
@@ -224,79 +228,145 @@ public abstract class TransportFactory implements ITransportFactory {
 	public static org.eclipse.epp.mpc.core.service.ITransport createTransport() {
 		//search for registered factory service
 		BundleContext context = MarketplaceClientCorePlugin.getBundle().getBundleContext();
-		ServiceReference<ITransportFactory> serviceReference = getTransportServiceReference(context);
-		if (serviceReference != null) {
+		Collection<ServiceReference<ITransportFactory>> serviceReferences = getTransportServiceReferences(context);
+
+		MultiStatus serviceError = null;
+		ServiceReference<ITransportFactory> defaultServiceReference = null;
+		for (ServiceReference<ITransportFactory> serviceReference : serviceReferences) {
 			ITransportFactory transportService = context.getService(serviceReference);
 			if (transportService != null) {
 				try {
+					synchronized (TransportFactory.class) {
+						if (serviceError != null) {
+							logTransportServiceFallback(serviceError, defaultServiceReference, serviceReference,
+									transportService);
+						} else {
+							//got our preferred service, reset fallback logging
+							lastFallbackTransport = null;
+						}
+					}
 					return transportService.getTransport();
 				} finally {
-					transportService = null;
 					context.ungetService(serviceReference);
 				}
 			}
+			if (defaultServiceReference == null) {
+				defaultServiceReference = serviceReference;
+			}
+			if (serviceError == null) {
+				serviceError = diagnoseTransportServiceRegistration(context, serviceReference);
+			}
 		}
-		IStatus serviceError = diagnoseTransportServiceRegistration(context, serviceReference);
-		throw new IllegalStateException(new CoreException(serviceError));
+		if (serviceError == null) {
+			serviceError = diagnoseTransportServiceRegistration(context, null);
+		}
+		try {
+			for (ITransportFactory factory : listAvailableFactories()) {
+				try {
+					org.eclipse.epp.mpc.core.service.ITransport transport = factory.getTransport();
+					logTransportServiceFallback(serviceError, defaultServiceReference, null, factory);
+					return transport;
+				} catch (Exception ex) {
+					serviceError.add(new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID,
+							NLS.bind(Messages.TransportFactory_LegacyFallbackCreationError, factory.getClass().getName()), ex));
+				}
+			}
+		} catch (Exception ex) {
+			serviceError.add(new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID,
+					Messages.TransportFactory_LegacyFallbacksError, ex));
+		}
+		//We log and throw, because the exception is lacking details
+		MarketplaceClientCore.getLog().log(serviceError);
+		CoreException coreException = new CoreException(serviceError);
+		throw new IllegalStateException(serviceError.toString(), coreException);
 	}
 
-	private static IStatus diagnoseTransportServiceRegistration(BundleContext context,
+	private static void logTransportServiceFallback(MultiStatus serviceError,
+			ServiceReference<ITransportFactory> defaultServiceReference,
+			ServiceReference<ITransportFactory> serviceReference, ITransportFactory factory) {
+		String transportName = factory.getClass().getName();
+		if (lastFallbackTransport != null && lastFallbackTransport.equals(transportName)) {
+			return;
+		}
+		lastFallbackTransport = transportName;
+		MultiStatus transportFallbackStatus = new MultiStatus(MarketplaceClientCore.BUNDLE_ID, 0,
+				NLS.bind(Messages.TransportFactory_DefaultTransportUnavailable_UseFallback, transportName), null);
+		if (defaultServiceReference != null) {
+			transportFallbackStatus.add(new Status(IStatus.INFO, MarketplaceClientCore.BUNDLE_ID,
+					NLS.bind(Messages.TransportFactory_DefaultService, defaultServiceReference.toString())));
+		}
+		if (serviceReference != null) {
+			transportFallbackStatus.add(new Status(IStatus.INFO, MarketplaceClientCore.BUNDLE_ID,
+					NLS.bind(Messages.TransportFactory_FallbackService, serviceReference.toString())));
+		} else {
+			transportFallbackStatus.add(new Status(IStatus.INFO, MarketplaceClientCore.BUNDLE_ID,
+					NLS.bind(Messages.TransportFactory_UseLegacyFallback, transportName)));
+		}
+		transportFallbackStatus.add(serviceError);
+		MarketplaceClientCore.getLog().log(transportFallbackStatus);
+	}
+
+	private static MultiStatus diagnoseTransportServiceRegistration(BundleContext context,
 			ServiceReference<ITransportFactory> serviceReference) {
 		MultiStatus serviceError = null;
 		if (serviceReference != null) {
 			serviceError = new MultiStatus(MarketplaceClientCore.BUNDLE_ID, 0,
 					Messages.TransportFactory_ServiceErrorUnregistered, null);
 			serviceError.add(new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID,
-					Messages.TransportFactory_ServiceErrorServiceReference + serviceReference));
+					NLS.bind(Messages.TransportFactory_ServiceErrorServiceReference, serviceReference)));
 		} else {
 			serviceError = new MultiStatus(MarketplaceClientCore.BUNDLE_ID, 0,
 					Messages.TransportFactory_ServiceErrorNotFound, null);
-			try {
-				Collection<ServiceReference<ITransportFactory>> allServiceReferences = context
-						.getServiceReferences(ITransportFactory.class, null);
-				if (allServiceReferences.isEmpty()) {
+		}
+		try {
+			Collection<ServiceReference<ITransportFactory>> allServiceReferences = context
+					.getServiceReferences(ITransportFactory.class, null);
+			if (allServiceReferences.isEmpty()) {
+				serviceError.add(new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID,
+						Messages.TransportFactory_ServiceErrorNoneAvailable));
+			} else {
+				String filter = computeDisabledTransportsFilter();
+				if (!"".equals(filter)) { //$NON-NLS-1$
 					serviceError.add(new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID,
-							Messages.TransportFactory_ServiceErrorNoneAvailable));
-				} else {
-					String filter = computeDisabledTransportsFilter();
-					serviceError.add(new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID,
-							Messages.TransportFactory_ServiceErrorAppliedFilter + filter));
+							NLS.bind(Messages.TransportFactory_ServiceErrorAppliedFilter, filter)));
 				}
-				for (ServiceReference<ITransportFactory> availableReference : allServiceReferences) {
-					serviceError.add(new Status(IStatus.INFO, MarketplaceClientCore.BUNDLE_ID,
-							Messages.TransportFactory_ServiceErrorFilteredService + availableReference.toString()));
-				}
-			} catch (InvalidSyntaxException e) {
-				//Unreachable
-				serviceError.add(
-						new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID,
-								Messages.TransportFactory_ServiceErrorDetails, e));
 			}
+			for (ServiceReference<ITransportFactory> availableReference : allServiceReferences) {
+				serviceError.add(new Status(IStatus.INFO, MarketplaceClientCore.BUNDLE_ID,
+						NLS.bind(Messages.TransportFactory_ServiceErrorRegisteredService,
+								availableReference.toString())));
+			}
+			for (ITransportFactory factory : listAvailableFactories(true)) {
+				serviceError.add(new Status(IStatus.INFO, MarketplaceClientCore.BUNDLE_ID,
+						NLS.bind(Messages.TransportFactory_StaticFactoryInfo, factory.getClass().getName(),
+								((TransportFactory) factory).isAvailable() ? Messages.TransportFactory_available : Messages.TransportFactory_unavailable)));
+			}
+		} catch (Exception e) {
+			serviceError.add(new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID,
+					Messages.TransportFactory_ServiceErrorDetails, e));
 		}
 		return serviceError;
 	}
 
-	public static ServiceReference<ITransportFactory> getTransportServiceReference(BundleContext context) {
-		ServiceReference<ITransportFactory> serviceReference = null;
+	public static Collection<ServiceReference<ITransportFactory>> getTransportServiceReferences(BundleContext context) {
 		String disabledTransportsFilter = computeDisabledTransportsFilter();
 		if ("".equals(disabledTransportsFilter)) { //$NON-NLS-1$
-			serviceReference = context.getServiceReference(ITransportFactory.class);
-		} else {
-			try {
-				Collection<ServiceReference<ITransportFactory>> serviceReferences = context
-						.getServiceReferences(ITransportFactory.class, disabledTransportsFilter);
-				if (!serviceReferences.isEmpty()) {
-					serviceReference = serviceReferences.iterator().next();
-				}
-			} catch (InvalidSyntaxException e) {
-				MarketplaceClientCore.error(e);
-				serviceReference = context.getServiceReference(ITransportFactory.class);
-			}
+			disabledTransportsFilter = null;
 		}
-		return serviceReference;
+		try {
+			return context.getServiceReferences(ITransportFactory.class, disabledTransportsFilter);
+		} catch (InvalidSyntaxException e) {
+			MarketplaceClientCore.error(e);
+			ServiceReference<ITransportFactory> serviceReference = context.getServiceReference(ITransportFactory.class);
+			return serviceReference == null ? Collections.emptySet() : Collections.singleton(serviceReference);
+		}
 	}
 
 	public static List<ITransportFactory> listAvailableFactories() {
+		return listAvailableFactories(false);
+	}
+
+	private static List<ITransportFactory> listAvailableFactories(boolean includeUnavailable) {
 		List<ITransportFactory> factories = new ArrayList<>();
 		for (String factoryClass : factoryClasses) {
 			TransportFactory factory;
@@ -308,7 +378,7 @@ public abstract class TransportFactory implements ITransportFactory {
 				continue;
 			}
 			try {
-				if (factory.isAvailable()) {
+				if (includeUnavailable || factory.isAvailable()) {
 					factories.add(factory);
 				}
 			} catch (Throwable t) {

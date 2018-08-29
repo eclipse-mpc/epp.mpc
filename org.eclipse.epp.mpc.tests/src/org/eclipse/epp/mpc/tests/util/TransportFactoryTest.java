@@ -13,16 +13,8 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.util;
 
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -75,7 +67,7 @@ import org.hamcrest.CoreMatchers;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -265,7 +257,7 @@ public class TransportFactoryTest {
 		ITransport secondaryTransport = Mockito.mock(ITransport.class);
 		InputStream expectedResultStream = new ByteArrayInputStream("Secondary transport".getBytes("UTF-8"));
 		Mockito.when(secondaryFactory.getTransport()).thenReturn(secondaryTransport);
-		Mockito.when(secondaryTransport.stream(Matchers.<URI> any(), Matchers.<IProgressMonitor> any())).thenReturn(
+		Mockito.when(secondaryTransport.stream(ArgumentMatchers.<URI> any(), ArgumentMatchers.<IProgressMonitor> any())).thenReturn(
 				expectedResultStream);
 
 		FallbackTransportFactory fallbackTransportFactory = new FallbackTransportFactory();
@@ -279,18 +271,18 @@ public class TransportFactoryTest {
 	@Test
 	public void testHttpClientCustomizer() throws Exception {
 		final HttpClientCustomizer customizer = Mockito.mock(HttpClientCustomizer.class);
-		Mockito.when(customizer.customizeBuilder(Matchers.any())).thenAnswer(invocation -> {
+		Mockito.when(customizer.customizeBuilder(ArgumentMatchers.any())).thenAnswer(invocation -> {
 			HttpClientBuilder builder = (HttpClientBuilder) invocation.getArguments()[0];
 			return builder == null ? null
 					: builder.addInterceptorFirst((HttpRequestInterceptor) (request, context) -> request.addHeader(
 							"X-Customizer-Test", "true"));
 		});
-		Mockito.when(customizer.customizeCredentialsProvider(Matchers.any())).thenReturn(null);
+		Mockito.when(customizer.customizeCredentialsProvider(ArgumentMatchers.any())).thenReturn(null);
 
 		HttpRequest request = interceptRequest(customizer).getInterceptedRequest();
 
-		Mockito.verify(customizer).customizeBuilder(Matchers.any());
-		Mockito.verify(customizer).customizeCredentialsProvider(Matchers.any());
+		Mockito.verify(customizer).customizeBuilder(ArgumentMatchers.any());
+		Mockito.verify(customizer).customizeCredentialsProvider(ArgumentMatchers.any());
 
 		assertThat(request.getFirstHeader("X-Customizer-Test"), LambdaMatchers.<Header, String> map(x -> x == null
 				? null : x.getValue())
@@ -395,9 +387,12 @@ public class TransportFactoryTest {
 
 	private static String getTransportServiceName() {
 		BundleContext bundleContext = FrameworkUtil.getBundle(TransportFactory.class).getBundleContext();
-		ServiceReference<ITransportFactory> transportServiceReference = TransportFactory.getTransportServiceReference(
+		Collection<ServiceReference<ITransportFactory>> transportServiceReferences = TransportFactory
+				.getTransportServiceReferences(
 				bundleContext);
-		if (transportServiceReference != null) {
+		if (!transportServiceReferences.isEmpty()) {
+			ServiceReference<ITransportFactory> transportServiceReference = transportServiceReferences.iterator()
+					.next();
 			String transportServiceName = (String) transportServiceReference.getProperty(
 					ComponentConstants.COMPONENT_NAME);
 			bundleContext.ungetService(transportServiceReference);
