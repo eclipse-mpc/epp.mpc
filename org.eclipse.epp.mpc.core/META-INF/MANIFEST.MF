@@ -22,7 +22,7 @@ Export-Package: org.eclipse.epp.internal.mpc.core;x-friends:="org.eclipse.epp.mp
  org.eclipse.epp.internal.mpc.core.transport.httpclient;x-friends:="org.eclipse.epp.mpc.core.win32",
  org.eclipse.epp.internal.mpc.core.util;x-friends:="org.eclipse.epp.mpc.ui",
  org.eclipse.epp.mpc.core.model,
- org.eclipse.epp.mpc.core.service
+ org.eclipse.epp.mpc.core.service;uses:="org.eclipse.epp.mpc.core.model,org.eclipse.core.runtime,org.eclipse.userstorage,org.apache.http.client.fluent"
 Import-Package: org.apache.http;version="4.4.0",
  org.apache.http.auth;version="4.5.2",
  org.apache.http.client;version="4.5.2",
