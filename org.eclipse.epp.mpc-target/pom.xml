@@ -25,9 +25,9 @@
                   <configuration>
                      <artifacts>
                         <artifact>
-                           <file>photon.target</file>
+                           <file>latest.target</file>
                            <type>target</type>
-                           <classifier>photon</classifier>
+                           <classifier>latest</classifier>
                         </artifact>
                         <artifact>
                            <file>staging.target</file>
