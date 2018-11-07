@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.eclipse.epp.mpc</groupId>
     <artifactId>org.eclipse.epp.mpc-bundle</artifactId>
-    <version>1.7.2-SNAPSHOT</version>
+    <version>1.7.3-SNAPSHOT</version>
     <relativePath>../org.eclipse.epp.mpc-parent/bundle</relativePath>
   </parent>
   <artifactId>org.eclipse.epp.mpc.tests</artifactId>
