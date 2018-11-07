@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -340,26 +341,31 @@ public class MarketplaceInfo {
 			RegistryFile registryFile = createRegistryFile();
 			File loadFile = registryFile.load();
 			if (loadFile != null && loadFile.canRead()) {
-				synchronized (MarketplaceInfo.class) {
-					try (InputStream in = new BufferedInputStream(new FileInputStream(loadFile));
-							XMLDecoder decoder = new XMLDecoder(in)) {
-						Object object = decoder.readObject();
-						return (MarketplaceInfo) object;
-					} catch (Throwable t) {
-						// ignore, fallback
-						IStatus status = new Status(IStatus.WARNING, MarketplaceClientUi.BUNDLE_ID,
-								Messages.MarketplaceInfo_LoadError, t);
-						MarketplaceClientUi.getLog().log(status);
-						//try to delete broken file
-						loadFile.delete();
-					}
-				}
+				return doLoad(loadFile);
 			}
 		} catch (Exception ex) {
 			//Never fail due to this
 			MarketplaceClientUi.error(ex);
 		}
 		return null;
+	}
+
+	protected MarketplaceInfo doLoad(File loadFile) {
+		synchronized (MarketplaceInfo.class) {
+			try (InputStream in = new BufferedInputStream(new FileInputStream(loadFile));
+					XMLDecoder decoder = new XMLDecoder(in)) {
+				Object object = decoder.readObject();
+				return (MarketplaceInfo) object;
+			} catch (Throwable t) {
+				// ignore, fallback
+				IStatus status = new Status(IStatus.WARNING, MarketplaceClientUi.BUNDLE_ID,
+						Messages.MarketplaceInfo_LoadError, t);
+				MarketplaceClientUi.getLog().log(status);
+				//try to delete broken file
+				loadFile.delete();
+				return null;
+			}
+		}
 	}
 
 	public void save() {
@@ -440,7 +446,7 @@ public class MarketplaceInfo {
 	}
 
 	protected File getConfigurationArea() {
-		Location configurationLocation = Platform.getConfigurationLocation();
+		Location configurationLocation = getConfigurationLocation();
 		URL url = configurationLocation == null ? null : configurationLocation.getURL();
 		if (url == null) {
 			return null;
@@ -451,13 +457,40 @@ public class MarketplaceInfo {
 			if (!"file".equals(url.getProtocol())) { //$NON-NLS-1$
 				return null;
 			}
-			URI uri = new URI("file", null, url.getPath(), url.getQuery(), url.getRef()); //$NON-NLS-1$
+			String path = url.getPath();
+			try {
+				path = URLDecoder.decode(path, "UTF-8"); //$NON-NLS-1$
+			} catch (IllegalArgumentException e) {
+				//ignore
+			}
+			String query = url.getQuery();
+			if (query != null) {
+				try {
+					query = URLDecoder.decode(query, "UTF-8"); //$NON-NLS-1$
+				} catch (IllegalArgumentException e) {
+					//ignore
+				}
+			}
+			String ref = url.getRef();
+			if (ref != null) {
+				try {
+					ref = URLDecoder.decode(ref, "UTF-8"); //$NON-NLS-1$
+				} catch (IllegalArgumentException e) {
+					//ignore
+				}
+			}
+			URI uri = new URI("file", null, path, query, ref); //$NON-NLS-1$
 			configurationArea = new File(uri);
 		} catch (Exception e) {
 			MarketplaceClientUi.error(e);
 			return null;
 		}
 		return configurationArea;
+	}
+
+	protected Location getConfigurationLocation() {
+		Location configurationLocation = Platform.getConfigurationLocation();
+		return configurationLocation;
 	}
 
 	/**

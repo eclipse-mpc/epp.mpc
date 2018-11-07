@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -49,6 +50,7 @@ import org.eclipse.equinox.internal.p2.discovery.model.Tag;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogFilter;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.widgets.Button;
@@ -191,7 +193,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 
 	protected void initWizardBot() {
 		bot = new SWTBot();
-		bot.waitUntil(shellIsActive("Eclipse Marketplace"));
+		bot.waitUntil(shellIsActive("Eclipse Marketplace"), TimeUnit.SECONDS.toMillis(10));
 		wizardShell = bot.shell("Eclipse Marketplace");
 		bot = wizardShell.bot();
 		assertNotNull(getWizardDialog());
@@ -407,11 +409,24 @@ public abstract class AbstractMarketplaceWizardBotTest {
 	}
 
 	protected void checkSelectedTab(String tabLabel) {
-		SWTBotCTabItem searchTab = bot.cTabItem(tabLabel);
-		final CTabItem tab = searchTab.widget;
-		CTabItem selection = UIThreadRunnable.syncExec((Result<CTabItem>) () -> tab.getParent().getSelection());
-		assertNotNull(selection);
-		assertSame(tab, selection);
+		try {
+			SWTBotCTabItem searchTab = bot.cTabItem(tabLabel);
+			final CTabItem tab = searchTab.widget;
+			CTabItem selection = UIThreadRunnable.syncExec((Result<CTabItem>) () -> tab.getParent().getSelection());
+			assertNotNull(selection);
+			assertSame(tab, selection);
+		} catch (WidgetNotFoundException e) {
+			SWTBotCTabItem searchTab = bot.cTabItem();
+			final CTabItem tab = searchTab.widget;
+			UIThreadRunnable.syncExec(() -> {
+				CTabFolder folder = tab.getParent();
+				CTabItem[] items = folder.getItems();
+				for (CTabItem cTabItem : items) {
+					System.out.println(cTabItem.getText());
+				}
+			});
+			throw e;
+		}
 	}
 
 	protected void filterMarket(String term) {
