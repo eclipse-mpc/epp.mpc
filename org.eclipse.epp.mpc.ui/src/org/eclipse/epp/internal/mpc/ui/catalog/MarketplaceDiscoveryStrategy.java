@@ -824,10 +824,15 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			Set<INode> catalogNodes = marketplaceInfo.computeInstalledNodes(catalogDescriptor.getUrl(), installedIUs);
 			if (!catalogNodes.isEmpty()) {
 				List<INode> resolvedNodes = marketplaceService.getNodes(catalogNodes, progress.newChild(490));
+				Map<String, INode> uniqueNodes = new HashMap<>();
 				SubMonitor nodeProgress = SubMonitor.convert(progress.newChild(10), resolvedNodes.size());
 				for (INode node : resolvedNodes) {
+					boolean duplicate = node.getId() != null && uniqueNodes.put(node.getId(), node) != null;
+					//previous result on rhs to avoid shortcut behavior
+					duplicate = (node.getUrl() != null && uniqueNodes.put(node.getUrl(), node) != null) || duplicate;
+
 					//compute real installed state based on optional/required state
-					if (marketplaceInfo.computeInstalled(installedIUs.keySet(), node)) {
+					if (!duplicate && marketplaceInfo.computeInstalled(installedIUs.keySet(), node)) {
 						result.getNodes().add((Node) node);
 					}
 					nodeProgress.worked(1);
