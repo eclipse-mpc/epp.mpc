@@ -3,9 +3,7 @@
    <xsl:output method="xml" encoding="utf-8" indent="no"/>
 
    <xsl:param name="uss-update-site-name">User Storage SDK</xsl:param>
-   <xsl:param name="uss-update-site">http://download.eclipse.org/usssdk/updates</xsl:param>
-   <xsl:param name="uss-legacy-update-site-name">User Storage SDK 1.0 (legacy)</xsl:param>
-   <xsl:param name="uss-legacy-update-site">http://download.eclipse.org/oomph/uss/updates/latest</xsl:param>
+   <xsl:param name="uss-update-site">http://download.eclipse.org/usssdk/updates/release/latest</xsl:param>
    <xsl:param name="uncategorized-category">no.category</xsl:param>
    
    <!-- copy everything by default -->
@@ -46,14 +44,6 @@
 </xsl:text>
             <xsl:text>    </xsl:text>
             <repository name='{$uss-update-site-name}' uri='{$uss-update-site}' url='{$uss-update-site}' type='1' options='1'/>
-            <xsl:text>
-</xsl:text>
-            <xsl:text>    </xsl:text>
-            <repository name='{$uss-legacy-update-site-name}' uri='{$uss-legacy-update-site}' url='{$uss-legacy-update-site}' type='0' options='1'/>
-            <xsl:text>
-</xsl:text>
-            <xsl:text>    </xsl:text>
-            <repository name='{$uss-legacy-update-site-name}' uri='{$uss-legacy-update-site}' url='{$uss-legacy-update-site}' type='1' options='1'/>
             <xsl:text>
 </xsl:text>
          <xsl:text>  </xsl:text>
