@@ -15,7 +15,7 @@
 <unit id="org.hamcrest.library" version="0.0.0"/>
 <unit id="org.junit" version="0.0.0"/>
 <unit id="org.mockito" version="0.0.0"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/I20181031064644/repository"/>
+<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20181128170323/repository"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.epp.mpc.apache.httpclient.feature.feature.group" version="0.0.0"/>
