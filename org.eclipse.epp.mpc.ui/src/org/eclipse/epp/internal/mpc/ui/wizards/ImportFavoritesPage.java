@@ -147,7 +147,7 @@ public class ImportFavoritesPage extends CatalogPage {
 		}
 		final IUserFavoritesService userFavoritesService = findUserFavoritesService();
 		if (userFavoritesService == null) {
-			return;
+			throw new UnsupportedOperationException();
 		}
 		final List<INode> importNodes = new ArrayList<>();
 		for (MarketplaceNodeCatalogItem item : importFavorites) {
@@ -193,6 +193,9 @@ public class ImportFavoritesPage extends CatalogPage {
 			if (strategy instanceof FavoritesDiscoveryStrategy) {
 				FavoritesDiscoveryStrategy favoritesStrategy = (FavoritesDiscoveryStrategy) strategy;
 				userFavoritesService = favoritesStrategy.getMarketplaceService().getUserFavoritesService();
+				if (userFavoritesService != null) {
+					break;
+				}
 			}
 		}
 		return userFavoritesService;

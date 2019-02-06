@@ -221,6 +221,7 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 		if (marketplaceBaseUri != null) {
 			this.marketplaceBaseUri = marketplaceBaseUri.toString();
 		}
+		getStorage();//Force storage creation early to catch initialization errors
 	}
 
 	private IStorageService registerStorageService(URI serviceUri, String serviceName) {

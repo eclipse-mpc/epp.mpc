@@ -14,7 +14,7 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 
 public class ImportFavoritesActionLink extends ActionLink {
 
-	private static final String IMPORT_ACTION_ID = "import"; //$NON-NLS-1$
+	public static final String IMPORT_ACTION_ID = "import"; //$NON-NLS-1$
 
 	private final MarketplacePage marketplacePage;
 

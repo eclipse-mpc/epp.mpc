@@ -223,6 +223,9 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		IMarketplaceStorageService storageService = getStorageService(marketplaceBaseUrl);
 		if (storageService == null) {
 			storageService = registerStorageService(marketplaceBaseUrl, apiServerUrl, apiKey);
+			if (storageService == null) {
+				return null;
+			}
 		}
 		UserFavoritesService favoritesService = new UserFavoritesService();
 		favoritesService.bindStorageService(storageService);
@@ -232,19 +235,33 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 
 	public IMarketplaceStorageService registerStorageService(String marketplaceBaseUrl, String apiServerUrl,
 			String apiKey) {
-		MarketplaceStorageService marketplaceStorageService = new MarketplaceStorageService();
+		ServiceRegistration<IMarketplaceStorageService> registration = null;
 		Hashtable<String, Object> config = new Hashtable<>();
 		config.put(IMarketplaceStorageService.STORAGE_SERVICE_URL_PROPERTY, apiServerUrl);
 		if (apiKey != null) {
 			config.put(IMarketplaceStorageService.APPLICATION_TOKEN_PROPERTY, apiKey);
 		}
-		ServiceRegistration<IMarketplaceStorageService> registration = registerService(marketplaceBaseUrl,
-				IMarketplaceStorageService.class, marketplaceStorageService, config);
-		BundleContext bundleContext = ServiceUtil.getBundleContext(registration);
-		if (bundleContext != null) {
-			marketplaceStorageService.activate(bundleContext, config);
+		try {
+			MarketplaceStorageService marketplaceStorageService = new MarketplaceStorageService();
+			registration = registerService(marketplaceBaseUrl,
+					IMarketplaceStorageService.class, marketplaceStorageService, config);
+			BundleContext bundleContext = ServiceUtil.getBundleContext(registration);
+			if (bundleContext != null) {
+				marketplaceStorageService.activate(bundleContext, config);
+			}
+			return marketplaceStorageService;
+		} catch (Exception | NoClassDefFoundError ex) {
+			MarketplaceClientCore.error("Userstorage API failed to initialize", ex);
+			unregisterService(registration);
+			return null;
 		}
-		return marketplaceStorageService;
+	}
+
+	private void unregisterService(ServiceRegistration<?> registration) {
+		if (registration != null) {
+			dynamicServiceRegistrations.remove(registration);
+			registration.unregister();
+		}
 	}
 
 	/**

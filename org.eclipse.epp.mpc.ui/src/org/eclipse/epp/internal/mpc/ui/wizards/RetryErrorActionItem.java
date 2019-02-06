@@ -38,7 +38,7 @@ public class RetryErrorActionItem extends AbstractUserActionItem {
 
 	@Override
 	protected String getNameLabelText() {
-		return Messages.UserFavoritesUnsupportedActionItem_unsupportedFavoritesLabel;
+		return Messages.RetryErrorActionItem_failedToLoadLabel;
 	}
 
 	@Override

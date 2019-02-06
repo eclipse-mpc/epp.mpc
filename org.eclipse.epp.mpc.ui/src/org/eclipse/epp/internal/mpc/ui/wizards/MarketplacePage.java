@@ -649,7 +649,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 
 		final CatalogSwitcher switcher = new CatalogSwitcher(composite,
 				MarketplaceClientUi.useNativeBorders() ? SWT.BORDER : SWT.None,
-				configuration);
+						configuration);
 		switcher.addSelectionChangedListener(event -> {
 			CatalogDescriptor descriptor = (CatalogDescriptor) ((IStructuredSelection) event.getSelection())
 					.getFirstElement();
@@ -891,44 +891,41 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		boolean hasTab = branding.hasSearchTab();
 		searchTabItem = updateTab(searchTabItem, ContentType.SEARCH, WIDGET_ID_TAB_SEARCH, branding.getSearchTabName(),
 				hasTab,
-				oldBranding.hasSearchTab(),
 				tabIndex);
 		if (hasTab) {
 			tabIndex++;
 		}
 		hasTab = hasFeaturedMarketTab(branding);
-		featuredMarketTabItem = updateTab(featuredMarketTabItem, ContentType.SEARCH, WIDGET_ID_TAB_FEATURED_MARKET,
-				branding.getFeaturedMarketTabName(), hasTab, hasFeaturedMarketTab(oldBranding), tabIndex);
+		featuredMarketTabItem = updateTab(featuredMarketTabItem, ContentType.FEATURED_MARKET,
+				WIDGET_ID_TAB_FEATURED_MARKET,
+				branding.getFeaturedMarketTabName(), hasTab, tabIndex);
 		if (hasTab) {
 			tabIndex++;
 		}
 		hasTab = branding.hasRecentTab();
-		recentTabItem = updateTab(recentTabItem, ContentType.SEARCH, WIDGET_ID_TAB_RECENT, branding.getRecentTabName(),
+		recentTabItem = updateTab(recentTabItem, ContentType.RECENT, WIDGET_ID_TAB_RECENT, branding.getRecentTabName(),
 				hasTab,
-				oldBranding.hasRecentTab(),
 				tabIndex);
 		if (hasTab) {
 			tabIndex++;
 		}
 		hasTab = branding.hasPopularTab();
-		popularTabItem = updateTab(popularTabItem, ContentType.SEARCH, WIDGET_ID_TAB_POPULAR,
+		popularTabItem = updateTab(popularTabItem, ContentType.POPULAR, WIDGET_ID_TAB_POPULAR,
 				branding.getPopularTabName(), hasTab,
-				oldBranding.hasPopularTab(),
 				tabIndex);
 		if (hasTab) {
 			tabIndex++;
 		}
 		hasTab = branding.hasRelatedTab();
-		relatedTabItem = updateTab(relatedTabItem, ContentType.SEARCH, WIDGET_ID_TAB_RELATED,
+		relatedTabItem = updateTab(relatedTabItem, ContentType.RELATED, WIDGET_ID_TAB_RELATED,
 				branding.getRelatedTabName(), hasTab,
-				oldBranding.hasRelatedTab(), tabIndex);
+				tabIndex);
 		if (hasTab) {
 			tabIndex++;
 		}
 		hasTab = hasFavoritedTab(branding);
-		favoritedTabItem = updateTab(favoritedTabItem, ContentType.SEARCH, WIDGET_ID_TAB_FAVORITES,
-				getFavoritedTabName(branding), hasTab, hasFavoritedTab(oldBranding),
-				tabIndex);
+		favoritedTabItem = updateTab(favoritedTabItem, ContentType.FAVORITES, WIDGET_ID_TAB_FAVORITES,
+				getFavoritedTabName(branding), hasTab, tabIndex);
 		if (hasTab) {
 			tabIndex++;
 		}
@@ -974,6 +971,10 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		if (branding.hasFavoritesTab()) {
 			return true;
 		}
+		return hasFavoritesService();
+	}
+
+	private boolean hasFavoritesService() {
 		CatalogDescriptor catalogDescriptor = this.configuration.getCatalogDescriptor();
 		if (catalogDescriptor == null) {
 			return false;
@@ -1008,16 +1009,16 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 	}
 
 	private CTabItem updateTab(CTabItem tabItem, ContentType contentType, String widgetId, String tabLabel,
-			boolean hasTab, boolean hadTab,
-			int tabIndex) {
+			boolean hasTab, int tabIndex) {
 		if (hasTab) {
-			if (!hadTab) {
+			if (tabItem == null || tabItem.isDisposed() || getContentType(tabItem) != contentType) {
 				tabItem = createCatalogTab(tabIndex, contentType, widgetId, tabLabel);
 			} else {
 				tabItem.setText(tabLabel);
 			}
 		} else if (tabItem != null && !tabItem.isDisposed()) {
 			tabItem.dispose();
+			tabItem = null;
 		}
 		return tabItem;
 	}
@@ -1142,6 +1143,10 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 				search(configuration.getCatalogDescriptor(), market, category, query);
 			}
 		}
+	}
+
+	protected ActionLink getActionLink(String actionId) {
+		return actions.get(actionId);
 	}
 
 	protected void addActionLink(int pos, ActionLink actionLink) {

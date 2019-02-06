@@ -292,6 +292,8 @@ class Messages extends NLS {
 
 	public static String RetryErrorActionItem_errorDetailsDialogTitle;
 
+	public static String RetryErrorActionItem_failedToLoadLabel;
+
 	public static String RetryErrorActionItem_failedToLoadMessage;
 
 	public static String RetryErrorActionItem_retryActionLabel;

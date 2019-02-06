@@ -472,6 +472,11 @@ public class MarketplaceViewer extends CatalogViewer {
 			return new UserFavoritesFindFavoritesActionItem(parent, getResources(), catalogItem,
 					getWizard().getCatalogPage());
 		case FAVORITES_UNSUPPORTED:
+			MarketplacePage catalogPage = getWizard().getCatalogPage();
+			ActionLink actionLink = catalogPage.getActionLink(ImportFavoritesActionLink.IMPORT_ACTION_ID);
+			if (actionLink != null) {
+				catalogPage.removeActionLink(actionLink);
+			}
 			return new UserFavoritesUnsupportedActionItem(parent, getResources(), catalogItem,
 					getWizard().getCatalogPage());
 		case LOGIN:

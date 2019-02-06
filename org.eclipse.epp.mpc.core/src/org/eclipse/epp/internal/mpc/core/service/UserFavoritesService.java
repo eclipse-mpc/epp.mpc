@@ -162,6 +162,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 	@Override
 	public Set<String> getFavoriteIds(IProgressMonitor monitor)
 			throws NoServiceException, NotAuthorizedException, IllegalStateException, IOException {
+//		throw new IOException("simulates favorites failure");
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.DefaultMarketplaceService_FavoritesRetrieve, 1000);
 		try {
 			String favoritesData = getFavoritesBlob().getContentsUTF();
