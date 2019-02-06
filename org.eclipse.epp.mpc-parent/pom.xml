@@ -9,7 +9,7 @@
 
    <groupId>org.eclipse.epp.mpc</groupId>
    <artifactId>org.eclipse.epp.mpc-parent</artifactId>
-   <version>1.7.3-SNAPSHOT</version>
+   <version>1.7.4-SNAPSHOT</version>
    <packaging>pom</packaging>
 
    <properties>
