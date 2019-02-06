@@ -706,6 +706,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 				} catch (Exception ex) {
 					//FIXME we should use the wizard page's status line to show errors, but that's unreachable from here...
 					MarketplaceClientCore.error(Messages.MarketplaceDiscoveryStrategy_FavoritesRetrieveError, ex);
+					catalogCategory = addPopularItems(progress.newChild(500));
 					addRetryErrorItem(catalogCategory, ex);
 				}
 			} else {
@@ -761,6 +762,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 				} catch (Exception ex) {
 					//FIXME we should use the wizard page's status line to show errors, but that's unreachable from here...
 					MarketplaceClientCore.error(Messages.MarketplaceDiscoveryStrategy_FavoritesRetrieveError, ex);
+					catalogCategory = addPopularItems(progress.newChild(500));
 					addRetryErrorItem(catalogCategory, ex);
 				}
 			} else {
@@ -899,7 +901,12 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_catalogCategory, 10000);
 		try {
-			for (CatalogCategory candidate : getCategories()) {
+			List<CatalogCategory> categories = getCategories();
+			if (categories == null) {
+				categories = new ArrayList<CatalogCategory>();
+				setCategories(categories);
+			}
+			for (CatalogCategory candidate : categories) {
 				if (candidate.getSource() == source) {
 					catalogCategory = (MarketplaceCategory) candidate;
 				}

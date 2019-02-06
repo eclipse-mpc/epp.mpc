@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory.Contents;
@@ -184,12 +183,16 @@ public class MarketplaceCatalog extends Catalog {
 
 		//add all locally installed items as well
 		boolean includeInstalled = false;
-		for (CatalogCategory category : getCategories()) {
-			if (category instanceof MarketplaceCategory) {
-				MarketplaceCategory marketplaceCategory = (MarketplaceCategory) category;
-				if (marketplaceCategory.getContents() == Contents.FEATURED) {
-					includeInstalled = true;
-					break;
+		List<CatalogCategory> categories = getCategories();
+		if (categories != null) {
+			//Might be null if run before discovery
+			for (CatalogCategory category : categories) {
+				if (category instanceof MarketplaceCategory) {
+					MarketplaceCategory marketplaceCategory = (MarketplaceCategory) category;
+					if (marketplaceCategory.getContents() == Contents.FEATURED) {
+						includeInstalled = true;
+						break;
+					}
 				}
 			}
 		}
@@ -197,35 +200,27 @@ public class MarketplaceCatalog extends Catalog {
 			return updateCheckItems;
 		}
 
-		updateCheckItems = new ArrayList<>(updateCheckItems);
+		final List<CatalogItem> finalUpdateCheckItems = new ArrayList<>(updateCheckItems);
+		runDiscoveryOperation((s, m) -> {
+			try {
+				performUpdateCheckDiscovery(s, m);
+			} catch (CoreException e) {
+				MarketplaceClientUi.log(IStatus.INFO, Messages.MarketplaceCatalog_UpdateCheckDiscoveryError, e);
+			}
+		}, finalUpdateCheckItems, categories, getCertifications(), getTags(), monitor);
+		return finalUpdateCheckItems;
+	}
+
+	private void performUpdateCheckDiscovery(MarketplaceDiscoveryStrategy marketplaceDiscoveryStrategy,
+			IProgressMonitor monitor) throws CoreException {
+		SubMonitor discoveryStrategyProgress = SubMonitor.convert(monitor, 1000);
+
+		List<CatalogItem> updateCheckItems = marketplaceDiscoveryStrategy.getItems();
 		Map<String, CatalogItem> itemsById = new HashMap<>();
 		for (CatalogItem catalogItem : updateCheckItems) {
 			itemsById.put(catalogItem.getId(), catalogItem);
 		}
-		List<AbstractDiscoveryStrategy> discoveryStrategies = getDiscoveryStrategies();
-		SubMonitor progress = SubMonitor.convert(monitor, discoveryStrategies.size() * 1000);
-		for (AbstractDiscoveryStrategy discoveryStrategy : discoveryStrategies) {
-			if (monitor.isCanceled()) {
-				break;
-			}
-			SubMonitor discoveryStrategyProgress = progress.newChild(1000);
-			if (discoveryStrategy instanceof MarketplaceDiscoveryStrategy) {
-				MarketplaceDiscoveryStrategy marketplaceDiscoveryStrategy = (MarketplaceDiscoveryStrategy) discoveryStrategy;
-				try {
-					performUpdateCheckDiscovery(marketplaceDiscoveryStrategy, updateCheckItems, itemsById,
-							discoveryStrategyProgress);
-				} catch (CoreException e) {
-					MarketplaceClientUi.log(IStatus.INFO, Messages.MarketplaceCatalog_UpdateCheckDiscoveryError, e);
-				}
-			}
-			discoveryStrategyProgress.setWorkRemaining(0);
-		}
-		return updateCheckItems;
-	}
 
-	private void performUpdateCheckDiscovery(MarketplaceDiscoveryStrategy marketplaceDiscoveryStrategy,
-			List<CatalogItem> updateCheckItems, Map<String, CatalogItem> itemsById,
-			SubMonitor discoveryStrategyProgress) throws CoreException {
 		MarketplaceCategory catalogCategory = marketplaceDiscoveryStrategy
 				.findMarketplaceCategory(discoveryStrategyProgress.newChild(1));
 		final Contents realContents = catalogCategory.getContents();
@@ -450,11 +445,7 @@ public class MarketplaceCatalog extends Catalog {
 	}
 
 	protected IStatus performDiscovery(DiscoveryOperation operation, boolean refresh, IProgressMonitor monitor) {
-		MultiStatus status = new MultiStatus(MarketplaceClientUi.BUNDLE_ID, 0, Messages.MarketplaceCatalog_queryFailed,
-				null);
-		if (getDiscoveryStrategies().isEmpty()) {
-			throw new IllegalStateException();
-		}
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceCatalog_queryingMarketplace, 100);
 
 		// reset, keeping no items but the same tags, categories and certifications
 		List<CatalogItem> items = new ArrayList<>();
@@ -466,14 +457,35 @@ public class MarketplaceCatalog extends Catalog {
 				catalogCategory.getItems().clear();
 			}
 		}
+		progress.worked(1);
 
-		final int totalTicks = 100000;
-		final int discoveryTicks = totalTicks - (totalTicks / 10);
-		monitor.beginTask(Messages.MarketplaceCatalog_queryingMarketplace, totalTicks);
 		try {
-			int strategyTicks = discoveryTicks / getDiscoveryStrategies().size();
+			IStatus status = runDiscoveryOperation(operation, items, categories, certifications, tags,
+					progress.newChild(98));
+			update(categories, items, certifications, tags);
+			progress.worked(1);
+			return status;
+		} finally {
+			progress.done();
+		}
+	}
+
+	private IStatus runDiscoveryOperation(DiscoveryOperation operation, List<CatalogItem> items,
+			List<CatalogCategory> categories, List<Certification> certifications, List<Tag> tags,
+			IProgressMonitor monitor) {
+		MultiStatus status = new MultiStatus(MarketplaceClientUi.BUNDLE_ID, 0, Messages.MarketplaceCatalog_queryFailed,
+				null);
+		if (getDiscoveryStrategies().isEmpty()) {
+			throw new IllegalStateException();
+		}
+
+		final int strategyCount = getDiscoveryStrategies().size();
+		final int strategyTicks = 100;
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceCatalog_queryingMarketplace,
+				strategyTicks * strategyCount);
+		try {
 			for (AbstractDiscoveryStrategy discoveryStrategy : getDiscoveryStrategies()) {
-				if (monitor.isCanceled()) {
+				if (progress.isCanceled()) {
 					status.add(Status.CANCEL_STATUS);
 					break;
 				}
@@ -489,7 +501,7 @@ public class MarketplaceCatalog extends Catalog {
 					discoveryStrategy.setTags(tags);
 					try {
 						MarketplaceDiscoveryStrategy marketplaceStrategy = (MarketplaceDiscoveryStrategy) discoveryStrategy;
-						operation.run(marketplaceStrategy, new SubProgressMonitor(monitor, strategyTicks));
+						operation.run(marketplaceStrategy, progress.newChild(strategyTicks));
 
 					} catch (CoreException e) {
 						IStatus error = MarketplaceClientCore.computeWellknownProblemStatus(e);
@@ -517,8 +529,6 @@ public class MarketplaceCatalog extends Catalog {
 					}
 				}
 			}
-
-			update(categories, items, certifications, tags);
 		} finally {
 			monitor.done();
 		}
