@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
+import org.eclipse.epp.internal.mpc.core.service.xml.StripInvalidXMLCharsReader;
 import org.eclipse.epp.internal.mpc.core.service.xml.Unmarshaller;
 import org.eclipse.epp.mpc.core.service.IMarketplaceUnmarshaller;
 import org.eclipse.epp.mpc.core.service.UnmarshalException;
@@ -60,6 +61,7 @@ public class MarketplaceUnmarshaller implements IMarketplaceUnmarshaller {
 
 		// FIXME how can the charset be determined?
 		Reader reader = new InputStreamReader(bufferedInput, RemoteMarketplaceService.UTF_8);
+		reader = new StripInvalidXMLCharsReader(reader);
 		try {
 			xmlReader.parse(new InputSource(reader));
 		} catch (final SAXException e) {
