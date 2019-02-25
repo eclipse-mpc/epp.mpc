@@ -161,6 +161,9 @@ public class MarketplaceDropAdapter implements IStartup {
 	}
 
 	private DropTarget findDropTarget(Control control) {
+		if (control.isDisposed()) {
+			return null;
+		}
 		Object object = control.getData(DND.DROP_TARGET_KEY);
 		if (object instanceof DropTarget) {
 			return (DropTarget) object;
