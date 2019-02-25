@@ -66,7 +66,7 @@ public class NewsViewer {
 
 	public Control createControl(Composite parent) {
 		control = createBrowser(parent);
-		if (control == null) {
+		if (control == null && !parent.isDisposed()) {
 			control = createNoBrowserPart(parent);
 		}
 		return control;
