@@ -35,6 +35,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.userstorage.util.ConflictException;
 
@@ -154,15 +155,23 @@ public class ImportFavoritesPage extends CatalogPage {
 			importNodes.add(item.getData());
 		}
 		try {
+			Display display = Display.getCurrent();
 			getContainer().run(true, false, monitor -> {
 				try {
 					userFavoritesService.getStorageService().runWithLogin(() -> {
+						String errorMessage = null;
 						try {
 							userFavoritesService.addFavorites(importNodes, monitor);
 						} catch (NotAuthorizedException e1) {
-							setErrorMessage(Messages.ImportFavoritesPage_unauthorizedErrorMessage);
+							errorMessage = Messages.ImportFavoritesPage_unauthorizedErrorMessage;
 						} catch (ConflictException e2) {
-							setErrorMessage(Messages.ImportFavoritesPage_conflictErrorMessage);
+							errorMessage = Messages.ImportFavoritesPage_conflictErrorMessage;
+						}
+						if (errorMessage != null && !display.isDisposed()) {
+							final String finalErrorMessage = errorMessage;
+							display.syncExec(() -> {
+								setErrorMessage(finalErrorMessage);
+							});
 						}
 						return null;
 					});
