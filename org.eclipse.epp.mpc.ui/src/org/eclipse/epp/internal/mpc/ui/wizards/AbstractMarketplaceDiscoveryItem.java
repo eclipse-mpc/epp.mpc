@@ -522,7 +522,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 				Browser browser = new Browser(composite, SWT.NULL);
 				browser.dispose();
 				browserAvailable = true;
-			} catch (SWTError e) {
+			} catch (SWTError | NoClassDefFoundError | Exception e) {
 				browserAvailable = false;
 			}
 		}
