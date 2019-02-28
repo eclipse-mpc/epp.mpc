@@ -22,7 +22,7 @@
       <enforced.java.version>[1.8.0,)</enforced.java.version>
       <java-jdk>SYSTEM</java-jdk>
 
-      <tycho-version>1.2.0</tycho-version>
+      <tycho-version>1.3.0</tycho-version>
       <tycho-extras-version>${tycho-version}</tycho-extras-version>
 
       <qualifier-format>'v'yyyyMMdd-HHmm</qualifier-format>
@@ -162,7 +162,7 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-compiler-plugin</artifactId>
-               <version>3.7.0</version>
+               <version>3.8.0</version>
                <configuration>
                   <source>${java-version}</source>
                   <target>${java-version}</target>
@@ -182,7 +182,7 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-enforcer-plugin</artifactId>
-               <version>3.0.0-M1</version>
+               <version>3.0.0-M2</version>
                <executions>
                   <execution>
                      <id>enforce-java</id>
@@ -317,16 +317,16 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-resources-plugin</artifactId>
-               <version>3.0.2</version>
+               <version>3.1.0</version>
                <configuration>
                   <encoding>ISO-8859-1</encoding>
                </configuration>
             </plugin>
 
             <plugin>
-               <groupId>org.codehaus.mojo</groupId>
-               <artifactId>findbugs-maven-plugin</artifactId>
-               <version>3.0.5</version>
+               <groupId>com.github.spotbugs</groupId>
+               <artifactId>spotbugs-maven-plugin</artifactId>
+               <version>3.1.10</version>
                <configuration>
                   <findbugsXmlOutput>true</findbugsXmlOutput>
                   <failOnError>false</failOnError>
@@ -350,7 +350,7 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-pmd-plugin</artifactId>
-               <version>3.9.0</version>
+               <version>3.11.0</version>
                <configuration>
                   <sourceEncoding>utf-8</sourceEncoding>
                   <minimumTokens>100</minimumTokens>
