@@ -903,7 +903,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		try {
 			List<CatalogCategory> categories = getCategories();
 			if (categories == null) {
-				categories = new ArrayList<CatalogCategory>();
+				categories = new ArrayList<>();
 				setCategories(categories);
 			}
 			for (CatalogCategory candidate : categories) {

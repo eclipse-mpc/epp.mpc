@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2019 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -15,8 +15,16 @@ package org.eclipse.epp.mpc.tests.ui.wizard;
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellIsActive;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
@@ -305,7 +313,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 		}
 	}
 
-	private void dumpThreads() {
+	private static void dumpThreads() {
 		if (!dumpThreadsOnTearDownError) {
 			return;
 		}
@@ -325,7 +333,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 		}
 	}
 
-	private String captureShellScreenshot(SWTBotShell botShell) {
+	private static String captureShellScreenshot(SWTBotShell botShell) {
 		if (botShell.isVisible()) {
 			try {
 				//try to bring to front
@@ -343,7 +351,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 		return "";
 	}
 
-	private String describeShell(SWTBotShell botShell) {
+	private static String describeShell(SWTBotShell botShell) {
 		StringBuilder description = new StringBuilder("    Shell(\"").append(botShell.getText()).append("\")");
 
 		try {
@@ -480,7 +488,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 		return links;
 	}
 
-	private StyleRange[] findStyleRanges(final SWTBotStyledText styledText) {
+	private static StyleRange[] findStyleRanges(final SWTBotStyledText styledText) {
 		StyleRange[] ranges = UIThreadRunnable.syncExec((ArrayResult<StyleRange>) () -> styledText.widget
 				.getStyleRanges());
 		return ranges;
@@ -522,7 +530,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 		checkSelected(filter, choice);
 	}
 
-	private void checkSelected(AbstractTagFilter filter, String selection) {
+	private static void checkSelected(AbstractTagFilter filter, String selection) {
 		Set<Tag> selected = filter.getSelected();
 		if (selection == null) {
 			assertTrue(selected.isEmpty());

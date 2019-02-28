@@ -144,7 +144,7 @@ public class MarketplaceCatalog extends Catalog {
 			Map<String, IInstallableUnit> installedIUs = calculateInstalledIUs(progress.newChild(100000));
 			List<MarketplaceNodeCatalogItem> updateCheckNeeded = new ArrayList<>();
 			List<CatalogItem> updateCheckItems = getUpdateCheckItems(progress.newChild(100000));
-			List<MarketplaceNodeCatalogItem> updateableItems = new ArrayList<MarketplaceNodeCatalogItem>();
+			List<MarketplaceNodeCatalogItem> updateableItems = new ArrayList<>();
 			for (CatalogItem item : updateCheckItems) {
 				if (monitor.isCanceled()) {
 					return Status.CANCEL_STATUS;

@@ -14,7 +14,13 @@
 package org.eclipse.epp.mpc.tests.service.xml;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -143,7 +149,7 @@ public class UnmarshallerTest {
 
 		assertNotNull(node.getCreated());
 		assertEquals(1259955243L, node.getCreated().getTime() / 1000);
-		assertEquals(new Integer(3), node.getFavorited());
+		assertEquals(Integer.valueOf(3), node.getFavorited());
 		assertEquals(Boolean.TRUE, node.getFoundationmember());
 		assertNotNull(node.getChanged());
 		assertEquals(1259964722L, node.getChanged().getTime() / 1000);
@@ -531,7 +537,7 @@ public class UnmarshallerTest {
 		}
 	}
 
-	private IStatus getErrorContentInfo(UnmarshalException e) {
+	private static IStatus getErrorContentInfo(UnmarshalException e) {
 		IStatus status = e.getStatus();
 		assertTrue(status.isMultiStatus());
 		IStatus[] children = status.getChildren();
@@ -540,7 +546,7 @@ public class UnmarshallerTest {
 		return contentChild;
 	}
 
-	private ByteBuffer readResource(String resource, ByteBuffer buffer) throws IOException {
+	private static ByteBuffer readResource(String resource, ByteBuffer buffer) throws IOException {
 		ReadableByteChannel in = Channels.newChannel(getResourceAsStream(resource));
 		if (buffer == null) {
 			buffer = ByteBuffer.allocate(32768);
@@ -560,7 +566,7 @@ public class UnmarshallerTest {
 		return buffer;
 	}
 
-	private InputStream getResourceAsStream(String resource) {
+	private static InputStream getResourceAsStream(String resource) {
 		InputStream in = UnmarshallerTest.class.getResourceAsStream(resource);
 		if (in == null) {
 			throw new IllegalStateException(resource);

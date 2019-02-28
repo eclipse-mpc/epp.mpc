@@ -153,7 +153,7 @@ public class MarketplaceInfoTest {
 		assertEquals(item.getData().getUrl(), installedCatalogNodeIds.iterator().next().getUrl());
 	}
 
-	private InstallableUnit addIU(Map<String, IInstallableUnit> installedIus, String id) {
+	private static InstallableUnit addIU(Map<String, IInstallableUnit> installedIus, String id) {
 		InstallableUnit installableUnit = (InstallableUnit) installedIus.get(id);
 		if (installableUnit == null) {
 			installableUnit = new InstallableUnit();

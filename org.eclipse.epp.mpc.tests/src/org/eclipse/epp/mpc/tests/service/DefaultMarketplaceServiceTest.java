@@ -235,7 +235,7 @@ public class DefaultMarketplaceServiceTest {
 		return result;
 	}
 
-	private ICategory findCategory(IMarket toolsMarket, String categoryName) {
+	private static ICategory findCategory(IMarket toolsMarket, String categoryName) {
 		ICategory namedCategory = null;
 		for (ICategory category : toolsMarket.getCategory()) {
 			if (categoryName.equals(category.getName())) {

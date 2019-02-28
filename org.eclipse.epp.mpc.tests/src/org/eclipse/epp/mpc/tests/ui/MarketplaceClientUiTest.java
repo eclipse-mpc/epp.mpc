@@ -82,7 +82,7 @@ public class MarketplaceClientUiTest {
 		assertTrue(status.getMessage().startsWith(expectedMessage));
 	}
 
-	private Exception wrapInCoreException(Throwable rootCause) {
+	private static Exception wrapInCoreException(Throwable rootCause) {
 		return new CoreException(new Status(IStatus.ERROR, "org.eclipse.epp.mpc.tests", "Nested Core Exception",
 				rootCause));
 	}

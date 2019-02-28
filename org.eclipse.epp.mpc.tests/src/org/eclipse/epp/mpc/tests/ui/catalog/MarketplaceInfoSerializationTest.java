@@ -13,9 +13,18 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui.catalog;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -458,7 +467,7 @@ public class MarketplaceInfoSerializationTest {
 		return registry;
 	}
 
-	private void copyRegistryFile(File target, int percent) throws Exception {
+	private static void copyRegistryFile(File target, int percent) throws Exception {
 		URL registryContent = MarketplaceInfoSerializationTest.class.getResource("MarketplaceInfo.xml");
 		ReadableByteChannel in = null;
 		FileChannel out = null;
@@ -484,7 +493,7 @@ public class MarketplaceInfoSerializationTest {
 		}
 	}
 
-	private void createEmptyRegistryFile(File target) throws IOException {
+	private static void createEmptyRegistryFile(File target) throws IOException {
 		target.getParentFile().mkdirs();
 		assertTrue(target.getParentFile().isDirectory());
 		target.createNewFile();

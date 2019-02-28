@@ -12,13 +12,8 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.service;
 
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.isEmptyOrNullString;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assume.assumeFalse;
-import static org.junit.Assume.assumeTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assume.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -225,12 +220,15 @@ public class SolutionCompatibilityFilterTest {
 
 		private final System[] systems;
 
+		private final boolean installable;
+
 		private Solution(String shortName, EclipseRelease minRelease, EclipseRelease maxRelease, System... systems) {
 			this.id = null;
 			this.shortName = shortName;
 			this.minRelease = minRelease;
 			this.maxRelease = maxRelease;
 			this.systems = systems;
+			this.installable = true;//TODO
 		}
 
 		public String id() {
@@ -250,8 +248,7 @@ public class SolutionCompatibilityFilterTest {
 		}
 
 		public boolean installable() {
-			//TODO
-			return true;
+			return installable;
 		}
 
 		public EclipseRelease minRelease() {

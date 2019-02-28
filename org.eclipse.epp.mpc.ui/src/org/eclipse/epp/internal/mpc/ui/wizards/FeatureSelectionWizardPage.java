@@ -306,7 +306,7 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 				if (i == 0) {
 					i = s1.compareTo(s2);
 					if (i == 0) {
-						i = new Integer(System.identityHashCode(e1)).compareTo(System.identityHashCode(e2));
+						i = Integer.valueOf(System.identityHashCode(e1)).compareTo(System.identityHashCode(e2));
 					}
 				}
 				return i;
