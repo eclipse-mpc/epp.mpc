@@ -814,6 +814,12 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 				return;
 			}
 			throw ex;
+		} catch (IllegalArgumentException ex) {
+			if (getControl().isDisposed()) {
+				//ignore - this happens if the wizard is closed during the update
+				return;
+			}
+			throw ex;
 		}
 	}
 
