@@ -133,9 +133,11 @@ public class MarketplaceDropAdapter implements IStartup {
 			Composite composite = (Composite) child;
 			// Bug 485245 - avoid UI freezes for deeply nested widget trees
 			composite.getDisplay().asyncExec(() -> {
-				Control[] children = composite.getChildren();
-				for (Control control : children) {
-					hookRecursive(control, dropListener);
+				if (!composite.isDisposed()) {
+					Control[] children = composite.getChildren();
+					for (Control control : children) {
+						hookRecursive(control, dropListener);
+					}
 				}
 			});
 		}
