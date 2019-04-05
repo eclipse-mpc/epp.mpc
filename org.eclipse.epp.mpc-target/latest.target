@@ -6,7 +6,7 @@
 <unit id="org.eclipse.equinox.p2.discovery.feature.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.equinox.p2.sdk.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.sdk.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/eclipse/updates/4.10"/>
+<repository location="http://download.eclipse.org/eclipse/updates/4.11"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.hamcrest" version="0.0.0"/>
@@ -14,7 +14,7 @@
 <unit id="org.hamcrest.library" version="0.0.0"/>
 <unit id="org.junit" version="0.0.0"/>
 <unit id="org.mockito" version="0.0.0"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20181128170323/repository"/>
+<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20190226160451/repository"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.epp.mpc.apache.httpclient.feature.feature.group" version="0.0.0"/>
@@ -32,7 +32,7 @@
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.userstorage.sdk.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/usssdk/drops/release/1.1.0"/>
+<repository location="http://download.eclipse.org/usssdk/drops/release/1.2.0"/>
 </location>
 </locations>
 </target>
