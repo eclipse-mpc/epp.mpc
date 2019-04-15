@@ -280,50 +280,39 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		initialSelectionInitialized = true;
 		initializeCatalog();
 		if (getConfiguration().getInitialState() != null || getConfiguration().getInitialOperations() != null) {
+			SelectionModelStateSerializer serializer = new SelectionModelStateSerializer(getCatalog(),
+					getSelectionModel());
 			try {
 				getContainer().run(true, true,
-						monitor -> new SelectionModelStateSerializer(getCatalog(), getSelectionModel()).deserialize(
-								getConfiguration().getInitialState(), getConfiguration().getInitialOperations(),
-								monitor));
+						monitor -> serializer.deserialize(getConfiguration().getInitialState(),
+								getConfiguration().getInitialOperations(), monitor));
 			} catch (InvocationTargetException e) {
 				throw new CoreException(MarketplaceClientCore.computeStatus(e, Messages.MarketplaceViewer_unexpectedException));
 			} catch (InterruptedException e) {
 				// user canceled
 				throw new CoreException(Status.CANCEL_STATUS);
 			}
-			updateSelection();
+			updateSelection(serializer);
 		}
 	}
 
 	protected void updateSelection() {
-		List<Entry<CatalogItem, Operation>> itemToSelectedOperation = new ArrayList<>(
-				getSelectionModel().getItemToSelectedOperation().entrySet());
-		final List<CatalogItem> noninstallableItems = new ArrayList<>();
-		for (Entry<CatalogItem, Operation> entry : itemToSelectedOperation) {
-			if (entry.getValue() != Operation.NONE) {
-				boolean unavailableInstall = (Boolean.FALSE.equals(entry.getKey().getAvailable())
-						|| entry.getKey().getSiteUrl() == null)
-						&& (entry.getValue() == Operation.INSTALL || entry.getValue() == Operation.UPDATE);
-				if (unavailableInstall) {
-					getSelectionModel().select(entry.getKey(), Operation.NONE);
-					noninstallableItems.add(entry.getKey());
-				} else {
-					entry.getKey().setSelected(true);
-				}
-			}
-		}
+		updateSelection(null);
+	}
+
+	private void updateSelection(SelectionModelStateSerializer serializer) {
 		MarketplacePage marketplacePage = getCatalogPage();
 		MarketplaceViewer viewer = marketplacePage == null ? null : marketplacePage.getViewer();
 		if (marketplacePage != null && viewer != null && !viewer.getControl().isDisposed()) {
 			viewer.setSelection(new StructuredSelection(viewer.getCheckedItems()));
 			marketplacePage.setPageComplete(viewer.isComplete());
 		}
-		if (!noninstallableItems.isEmpty()) {
-			notifyNonInstallableItems(noninstallableItems);
+		if (serializer != null && serializer.hasUnavailableItems()) {
+			notifyNonInstallableItems(serializer.getUnavailableItems());
 		}
 	}
 
-	protected void notifyNonInstallableItems(final List<CatalogItem> noninstallableItems) {
+	protected void notifyNonInstallableItems(final List<? extends CatalogItem> noninstallableItems) {
 		MessageDialog dialog = new MessageDialog(getShell(), Messages.MarketplaceWizard_UnableToInstallSolutions, null, Messages.MarketplaceWizard_IncompatibleSolutionsMessage, MessageDialog.ERROR,
 				new String[] { IDialogConstants.OK_LABEL }, 0) {
 			@Override

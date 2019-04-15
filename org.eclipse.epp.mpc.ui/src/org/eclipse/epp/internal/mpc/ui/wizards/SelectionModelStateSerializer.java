@@ -13,7 +13,10 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -36,6 +39,8 @@ public class SelectionModelStateSerializer {
 	private final SelectionModel selectionModel;
 
 	private final MarketplaceCatalog catalog;
+
+	private List<MarketplaceNodeCatalogItem> unavailableItems;
 
 	public SelectionModelStateSerializer(MarketplaceCatalog catalog, SelectionModel selectionModel) {
 		this.catalog = catalog;
@@ -113,10 +118,28 @@ public class SelectionModelStateSerializer {
 							operation = Operation.UPDATE;
 						}
 						selectionModel.select(nodeItem, operation);
+						if (selectionModel.getSelectedOperation(nodeItem) == Operation.NONE) {
+							addUnavailableItem(nodeItem);
+						}
 					}
 				}
 			}
 		}
+	}
+
+	private void addUnavailableItem(MarketplaceNodeCatalogItem nodeItem) {
+		if (unavailableItems == null) {
+			unavailableItems = new ArrayList<MarketplaceNodeCatalogItem>();
+		}
+		unavailableItems.add(nodeItem);
+	}
+
+	public boolean hasUnavailableItems() {
+		return unavailableItems != null && !unavailableItems.isEmpty();
+	}
+
+	public List<MarketplaceNodeCatalogItem> getUnavailableItems() {
+		return unavailableItems == null ? Collections.emptyList() : Collections.unmodifiableList(unavailableItems);
 	}
 
 	/**
