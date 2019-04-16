@@ -986,24 +986,29 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				throw new IllegalStateException();
 			}
 
+			SelectionModelStateSerializer stateSerializer = new SelectionModelStateSerializer(getCatalog(),
+					selectionModel);
 			getContainer().run(true, true, monitor -> {
-				SelectionModelStateSerializer stateSerializer = new SelectionModelStateSerializer(getCatalog(),
-						selectionModel);
 				stateSerializer.deserialize(installInfo.getState(), nodeIdToOperation, monitor);
 			});
 
-			if (selectionModel.getItemToSelectedOperation().size() > 0) {
+			boolean hasAvailableItems = selectionModel.getItemToSelectedOperation().size() > 0;
+			boolean hasUnavailableItems = stateSerializer.hasUnavailableItems();
+			if (hasAvailableItems || hasUnavailableItems) {
 				Display display = getShell().getDisplay();
 				if (!display.isDisposed()) {
 					display.asyncExec(() -> {
+						if (getShell().isDisposed()) {
+							return;
+						}
+
 						MarketplacePage catalogPage1 = getCatalogPage();
 						IWizardPage currentPage = getContainer().getCurrentPage();
-						if (catalogPage1 == currentPage) {
-							catalogPage1.getViewer()
-							.setSelection(new StructuredSelection(
-									selectionModel.getSelectedCatalogItems().toArray()));
+
+						updateSelection(stateSerializer);
+						if (catalogPage1 == currentPage && hasAvailableItems) {
 							catalogPage1.show(installInfo.getCatalogDescriptor(), ContentType.SELECTION);
-							IWizardPage nextPage = catalogPage1.getNextPage();
+							IWizardPage nextPage = getNextPage(catalogPage1);
 							if (nextPage != null && catalogPage1.isPageComplete()) {
 								getContainer().showPage(nextPage);
 							}
