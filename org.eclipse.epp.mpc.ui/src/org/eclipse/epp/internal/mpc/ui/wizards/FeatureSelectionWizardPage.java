@@ -383,7 +383,7 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 		setPageComplete(computePageComplete());
 	}
 
-	private void updateFeatures() {
+	public void updateFeatures() {
 		SelectionModel selectionModel = getWizard().getSelectionModel();
 		Set<CatalogItem> allSelectionCatalogItems = selectionModel.getItemToSelectedOperation().keySet();
 		Set<CatalogItem> selectedCatalogItems = selectionModel.getSelectedCatalogItems();

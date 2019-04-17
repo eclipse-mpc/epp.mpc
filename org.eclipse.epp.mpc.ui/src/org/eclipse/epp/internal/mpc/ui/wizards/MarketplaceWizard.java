@@ -1003,6 +1003,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 						}
 
 						MarketplacePage catalogPage1 = getCatalogPage();
+						FeatureSelectionWizardPage featurePage = getFeatureSelectionWizardPage();
 						IWizardPage currentPage = getContainer().getCurrentPage();
 
 						updateSelection(stateSerializer);
@@ -1010,6 +1011,14 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 							catalogPage1.show(installInfo.getCatalogDescriptor(), ContentType.SELECTION);
 							IWizardPage nextPage = getNextPage(catalogPage1);
 							if (nextPage != null && catalogPage1.isPageComplete()) {
+								getContainer().showPage(nextPage);
+							}
+						} else if (hasAvailableItems) {
+							IWizardPage nextPage = getNextPage(catalogPage);
+							if (nextPage == featurePage && currentPage == featurePage) {
+								featurePage.flipToDefaultComposite();
+								featurePage.updateFeatures();
+							} else {
 								getContainer().showPage(nextPage);
 							}
 						}
