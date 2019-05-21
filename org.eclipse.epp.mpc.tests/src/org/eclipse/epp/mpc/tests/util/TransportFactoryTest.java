@@ -363,14 +363,6 @@ public class TransportFactoryTest {
 		return abortRequestCustomizer;
 	}
 
-	@Test
-	public void testECFContributorPropertiesUnchanged() {
-		assertEquals("org.eclipse.ecf.provider.filetransfer.excludeContributors",
-				org.eclipse.ecf.internal.provider.filetransfer.Activator.PLUGIN_EXCLUDED_SYS_PROP_NAME);
-		assertEquals("org.eclipse.ecf.provider.filetransfer.httpclient4",
-				org.eclipse.ecf.internal.provider.filetransfer.httpclient4.Activator.PLUGIN_ID);
-	}
-
 	private static HttpResponse mockResponse(StatusLine statusLine, HttpEntity entity) {
 		HttpResponse mockResponse = Mockito.mock(HttpResponse.class);
 		Mockito.when(mockResponse.getStatusLine()).thenReturn(statusLine);
