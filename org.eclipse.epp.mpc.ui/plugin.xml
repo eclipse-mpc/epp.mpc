@@ -188,4 +188,12 @@
             </widget>
          </provider>
       </extension>
+      <extension
+            point="org.eclipse.urischeme.uriSchemeHandlers">
+         <uriSchemeHandler
+               class="org.eclipse.epp.mpc.ui.MarketPlaceUirSchemeHandler"
+               uriScheme="eclipse-mpc"
+               uriSchemeDescription="Eclipse Marketplace">
+         </uriSchemeHandler>
+      </extension>
 </plugin>
