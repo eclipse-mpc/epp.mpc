@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project
+   xmlns="http://maven.apache.org/POM/4.0.0"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
    <modelVersion>4.0.0</modelVersion>
 
@@ -9,7 +11,7 @@
 
    <groupId>org.eclipse.epp.mpc</groupId>
    <artifactId>org.eclipse.epp.mpc-parent</artifactId>
-   <version>1.7.7-SNAPSHOT</version>
+   <version>1.8.0-SNAPSHOT</version>
    <packaging>pom</packaging>
 
    <properties>
@@ -17,8 +19,6 @@
       <target-platform>staging</target-platform>
       <java-version>1.8</java-version>
       <java-bree>JavaSE-${java-version}</java-bree>
-      <!-- We need at least 1.8.0 to run the build, even though we're still building with 1.5 source level. 
-           Otherwise some plugin downloads won't work and the test runtime can't start -->
       <enforced.java.version>[1.8.0,)</enforced.java.version>
       <java-jdk>SYSTEM</java-jdk>
 
@@ -29,10 +29,10 @@
 
       <skip-source-check>true</skip-source-check>
       <skip-sign>true</skip-sign>
-      
-      <!-- FIXME skip-pack is currently not supported, because 
-           1) tycho-pack200b-plugin:pack doesn't support it and doing it with profiles is a mess
-           2) pack has moved to the release profile so it won't happen in regular dev/ci builds anyway -->
+
+      <!-- FIXME skip-pack is currently not supported, because
+         1) tycho-pack200b-plugin:pack doesn't support it and doing it with profiles is a mess
+         2) pack has moved to the release profile so it won't happen in regular dev/ci builds anyway -->
       <skip-pack>true</skip-pack>
 
       <tycho.scmUrl>scm:git:https://git.eclipse.org/r/mpc/org.eclipse.epp.mpc</tycho.scmUrl>
@@ -174,8 +174,8 @@
                <version>${tycho-version}</version>
                <configuration>
                   <encoding>UTF-8</encoding>
-				  <useJDK>${java-jdk}</useJDK>
-				  <strictCompilerTarget>true</strictCompilerTarget>
+                  <useJDK>${java-jdk}</useJDK>
+                  <strictCompilerTarget>true</strictCompilerTarget>
                </configuration>
             </plugin>
 
@@ -190,11 +190,11 @@
                         <goal>enforce</goal>
                      </goals>
                      <configuration>
-                       <rules>
-                          <requireJavaVersion>
-                             <version>${enforced.java.version}</version>
-                          </requireJavaVersion>
-                       </rules>
+                        <rules>
+                           <requireJavaVersion>
+                              <version>${enforced.java.version}</version>
+                           </requireJavaVersion>
+                        </rules>
                      </configuration>
                   </execution>
                </executions>
@@ -370,7 +370,7 @@
          </plugins>
       </pluginManagement>
    </build>
-   
+
    <pluginRepositories>
       <pluginRepository>
          <id>eclipse-maven-releases</id>
@@ -391,7 +391,7 @@
          <snapshots>
             <enabled>true</enabled>
          </snapshots>
-      </pluginRepository>      
+      </pluginRepository>
    </pluginRepositories>
 
 </project>

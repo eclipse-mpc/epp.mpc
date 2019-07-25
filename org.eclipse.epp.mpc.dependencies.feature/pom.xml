@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.eclipse.epp.mpc</groupId>
     <artifactId>org.eclipse.epp.mpc-feature</artifactId>
-    <version>1.7.7-SNAPSHOT</version>
+    <version>1.8.0-SNAPSHOT</version>
     <relativePath>../org.eclipse.epp.mpc-parent/feature</relativePath>
   </parent>
   <artifactId>org.eclipse.epp.mpc.dependencies</artifactId>
