@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler;
-import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler.SolutionInstallationInfo;
 import org.eclipse.jface.util.Util;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
@@ -66,6 +65,18 @@ public class MarketplaceDropAdapter implements IStartup {
 	private final DropTargetAdapter dropListener = new MarketplaceDropTargetListener();
 
 	private final WorkbenchListener workbenchListener = new WorkbenchListener();
+
+	private final MarketplaceUrlHandler urlHandler = new MarketplaceUrlHandler() {
+		@Override
+		protected boolean handleInstallRequest(SolutionInstallationInfo installInfo, String url) {
+			return triggerInstall(installInfo);
+		}
+
+		@Override
+		protected boolean handleImportFavoritesRequest(FavoritesDescriptor descriptor) {
+			return triggerFavoritesImport(descriptor);
+		}
+	};
 
 	private Transfer[] transferAgents;
 
@@ -174,14 +185,19 @@ public class MarketplaceDropAdapter implements IStartup {
 	}
 
 	protected void proceedInstallation(String url) {
-		SolutionInstallationInfo info = MarketplaceUrlHandler.createSolutionInstallInfo(url);
-		if (info != null) {
-			MarketplaceUrlHandler.triggerInstall(info);
-		}
+		proceed(url);
 	}
 
 	protected void proceedFavorites(String url) {
-		MarketplaceUrlHandler.triggerFavorites(url);
+		proceed(url);
+	}
+
+	protected void proceed(String url) {
+		urlHandler.handleUri(url);
+	}
+
+	protected boolean acceptUrl(final String url) {
+		return acceptSolutionUrl(url) || acceptFavoritesListUrl(url);
 	}
 
 	protected boolean acceptSolutionUrl(final String url) {
@@ -251,9 +267,7 @@ public class MarketplaceDropAdapter implements IStartup {
 						return !isDrop;
 					}
 					final String url = getUrl(e.data);
-					if (acceptSolutionUrl(url)) {
-						return true;
-					} else if (acceptFavoritesListUrl(url)) {
+					if (acceptUrl(url)) {
 						return true;
 					} else {
 						traceInvalidEventData(e);
@@ -297,16 +311,12 @@ public class MarketplaceDropAdapter implements IStartup {
 				return;
 			}
 			final String url = getUrl(event.data);
-			if (acceptSolutionUrl(url)) {
+			if (acceptUrl(url)) {
 				//http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=1640500
+				//or https://marketplace.eclipse.org/user/xxx/favorites
 				DropTarget source = (DropTarget) event.getSource();
 				Display display = source.getDisplay();
-				display.asyncExec(() -> proceedInstallation(url));
-			} else if (acceptFavoritesListUrl(url)) {
-				//https://marketplace.eclipse.org/user/xxx/favorites
-				DropTarget source = (DropTarget) event.getSource();
-				Display display = source.getDisplay();
-				display.asyncExec(() -> proceedFavorites(url));
+				display.asyncExec(() -> proceed(url));
 			} else {
 				traceInvalidEventData(event);
 			}

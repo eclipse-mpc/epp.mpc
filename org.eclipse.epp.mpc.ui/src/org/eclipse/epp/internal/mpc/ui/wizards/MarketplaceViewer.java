@@ -20,12 +20,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -50,6 +50,7 @@ import org.eclipse.epp.mpc.core.model.IIdentifiable;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.service.IMarketplaceStorageService.LoginListener;
+import org.eclipse.epp.mpc.core.service.QueryHelper;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
@@ -684,11 +685,12 @@ public class MarketplaceViewer extends CatalogViewer {
 					result[0] = getCatalog().userFavorites(false, monitor);
 					break;
 				case SELECTION:
-					Set<String> nodeIds = new HashSet<>();
-					for (CatalogItem item : getSelectionModel().getItemToSelectedOperation().keySet()) {
-						nodeIds.add(((INode) item.getData()).getId());
-					}
-					result[0] = getCatalog().performQuery(monitor, nodeIds);
+					Set<INode> selectedNodesById = getSelectionModel().getItemToSelectedOperation()
+					.keySet()
+					.stream()
+					.map(node -> QueryHelper.nodeById(node.getId()))
+					.collect(Collectors.toSet());
+					result[0] = getCatalog().performNodeQuery(monitor, selectedNodesById);
 					break;
 				case SEARCH:
 				case FEATURED_MARKET:

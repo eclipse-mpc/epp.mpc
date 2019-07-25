@@ -21,8 +21,8 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,12 +33,13 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.model.Node;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
-import org.eclipse.epp.internal.mpc.core.service.UserFavoritesService;
-import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.commands.ImportFavoritesWizardCommand;
 import org.eclipse.epp.internal.mpc.ui.commands.MarketplaceWizardCommand;
+import org.eclipse.epp.internal.mpc.ui.urlhandling.FavoritesUrlHandler;
+import org.eclipse.epp.internal.mpc.ui.urlhandling.MarketplaceUrlUtil;
+import org.eclipse.epp.internal.mpc.ui.urlhandling.SolutionUrlHandler;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.statushandlers.StatusManager;
@@ -65,10 +66,7 @@ public abstract class MarketplaceUrlHandler {
 
 	private static final Pattern NODE_URL_PATTERN = Pattern.compile("(?:^|/)node/([^/#?]+)"); //$NON-NLS-1$
 
-	private static final Pattern FAVORITES_URL_PATTERN = UserFavoritesService.FAVORITES_URL_PATTERN;
-
-	private static final Pattern FAVORITES_API_URL_PATTERN = Pattern
-			.compile("(?:^|/)marketplace/favorites/?(?:\\?(?:[^#]*&)name=.*)?$"); //$NON-NLS-1$
+	public static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
 
 	public static class SolutionInstallationInfo {
 
@@ -83,7 +81,7 @@ public abstract class MarketplaceUrlHandler {
 		public SolutionInstallationInfo() {
 		}
 
-		protected SolutionInstallationInfo(String installId, String state, CatalogDescriptor catalogDescriptor) {
+		public SolutionInstallationInfo(String installId, String state, CatalogDescriptor catalogDescriptor) {
 			super();
 			this.installId = installId;
 			this.state = state;
@@ -123,83 +121,27 @@ public abstract class MarketplaceUrlHandler {
 		}
 	}
 
-	public static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
-
-	private static final String PARAM_SPLIT_REGEX = "&"; //$NON-NLS-1$
-
-	private static final String EQUALS_REGEX = "="; //$NON-NLS-1$
-
-	private static final String MPC_STATE = "mpc_state"; //$NON-NLS-1$
-
-	private static final String MPC_INSTALL = "mpc_install"; //$NON-NLS-1$
-
 	public static SolutionInstallationInfo createSolutionInstallInfo(String url) {
-		String installId = null;
-		String state = null;
-		Map<String, String> query = parseQuery(url);
-		if (query != null) {
-			installId = query.get(MPC_INSTALL);
-			state = query.get(MPC_STATE);
-		}
-		if (installId != null) {
-			CatalogDescriptor descriptor = findCatalogDescriptor(url, true);
-			SolutionInstallationInfo info = new SolutionInstallationInfo(installId, state, descriptor);
-			info.setRequestUrl(url);
-			return info;
-		}
-		return null;
-	}
-
-	private static CatalogDescriptor findCatalogDescriptor(String url, boolean allowUnknown) {
-		CatalogDescriptor descriptor = CatalogRegistry.getInstance().findCatalogDescriptor(url);
-		if (descriptor == null && allowUnknown) {
-			try {
-				descriptor = new CatalogDescriptor(URLUtil.toURL(url), DESCRIPTOR_HINT);
-			} catch (MalformedURLException e) {
-				return null;
-			}
-		}
-		return descriptor;
+		return SolutionUrlHandler.DEFAULT.selectUrlHandler(url).map(handler -> handler.parse(url)).orElse(null);
 	}
 
 	public static String getMPCState(String url) {
-		Map<String, String> query = parseQuery(url);
-		return query == null ? null : query.get(MPC_STATE);
-	}
-
-	private static Map<String, String> parseQuery(String url) {
-		String query;
-		try {
-			query = new URL(url).getQuery();
-		} catch (MalformedURLException e) {
-			return null;
-		}
-		if (query == null) {
-			return null;
-		}
-		Map<String, String> values = new LinkedHashMap<>();
-		String[] params = query.split(PARAM_SPLIT_REGEX);
-		for (String param : params) {
-			String[] keyValue = param.split(EQUALS_REGEX);
-			if (keyValue.length == 2) {
-				String key = keyValue[0];
-				String value = keyValue[1];
-				values.put(key, value);
-			}
-		}
-		return values;
+		return SolutionUrlHandler.DEFAULT.selectUrlHandler(url).map(handler -> handler.getMPCState(url)).orElse(null);
 	}
 
 	public static boolean isPotentialSolution(String url) {
-		return url != null && url.contains(MPC_INSTALL);
+		return SolutionUrlHandler.DEFAULT.selectUrlHandler(url)
+				.map(handler -> handler.isPotentialSolution(url))
+				.orElse(false);
 	}
 
 	public static boolean isPotentialFavoritesList(String url) {
-		return url != null
-				&& (FAVORITES_URL_PATTERN.matcher(url).find() || FAVORITES_API_URL_PATTERN.matcher(url).find());
+		return FavoritesUrlHandler.DEFAULT.selectUrlHandler(url)
+				.map(handler -> handler.isPotentialFavoritesList(url))
+				.orElse(false);
 	}
 
-	public static void triggerInstall(SolutionInstallationInfo info) {
+	public static boolean triggerInstall(SolutionInstallationInfo info) {
 		if (info.getRequestUrl() != null) {
 			MarketplaceClientUi.getLog().log(
 					new Status(IStatus.INFO, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
@@ -222,35 +164,77 @@ public abstract class MarketplaceUrlHandler {
 		}
 		try {
 			command.execute(new ExecutionEvent());
+			return true;
 		} catch (ExecutionException e) {
 			IStatus status = MarketplaceClientCore.computeStatus(e, Messages.MarketplaceUrlHandler_cannotOpenMarketplaceWizard);
 			MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
+			return false;
 		}
 	}
 
-	public static void triggerFavorites(String favoritesUrl) {
-		CatalogDescriptor catalogDescriptor = findCatalogDescriptor(favoritesUrl, true);
-		ImportFavoritesWizardCommand command = new ImportFavoritesWizardCommand();
-		command.setSelectedCatalogDescriptor(catalogDescriptor);
-		command.setFavoritesUrl(favoritesUrl);
+	public static class FavoritesDescriptor {
+
+		private final String favoritesUrl;
+
+		private final CatalogDescriptor catalogDescriptor;
+
+		public FavoritesDescriptor(String favoritesUrl, CatalogDescriptor catalogDescriptor) {
+			super();
+			this.favoritesUrl = favoritesUrl;
+			this.catalogDescriptor = catalogDescriptor;
+		}
+
+		public String getFavoritesUrl() {
+			return favoritesUrl;
+		}
+
+		public CatalogDescriptor getCatalogDescriptor() {
+			return catalogDescriptor;
+		}
+	}
+
+	public static boolean triggerFavorites(String favoritesUrl) {
+		return FavoritesUrlHandler.DEFAULT.selectUrlHandler(favoritesUrl)
+				.map(handler -> handler.parse(favoritesUrl))
+				.map(command -> triggerFavoritesImport(command))
+				.orElse(Boolean.FALSE);
+	}
+
+	protected static boolean triggerFavoritesImport(FavoritesDescriptor descriptor) {
 		try {
+			ImportFavoritesWizardCommand command = new ImportFavoritesWizardCommand();
+			command.setSelectedCatalogDescriptor(descriptor.getCatalogDescriptor());
+			command.setFavoritesUrl(descriptor.getFavoritesUrl());
 			command.execute(new ExecutionEvent());
+			return true;
 		} catch (ExecutionException e) {
 			IStatus status = MarketplaceClientCore.computeStatus(e,
 					Messages.MarketplaceUrlHandler_cannotOpenMarketplaceWizard);
 			MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 		}
+		return false;
 	}
 
-	public boolean handleUri(String uri) {
+	public boolean handleUri(final String uri) {
 		if (isPotentialSolution(uri)) {
 			SolutionInstallationInfo installInfo = createSolutionInstallInfo(uri);
 			if (installInfo != null) {
 				return handleInstallRequest(installInfo, uri);
 			}
 		}
+		if (isPotentialFavoritesList(uri)) {
+			Optional<FavoritesDescriptor> descriptor = FavoritesUrlHandler.DEFAULT.selectUrlHandler(uri)
+					.map(handler -> handler.parse(uri));
+			if (descriptor.isPresent()) {
+				return handleImportFavoritesRequest(descriptor.get());
+			}
+		}
 
-		CatalogDescriptor descriptor = CatalogRegistry.getInstance().findCatalogDescriptor(uri);
+		if (!uri.startsWith("http:") && !uri.startsWith("https:")) { //$NON-NLS-1$ //$NON-NLS-2$
+			return false;
+		}
+
+		CatalogDescriptor descriptor = MarketplaceUrlUtil.findCatalogDescriptor(uri, false);
 		if (descriptor == null) {
 			descriptor = handleUnknownCatalog(uri);
 			if (descriptor == null) {
@@ -269,13 +253,14 @@ public abstract class MarketplaceUrlHandler {
 			throw new IllegalStateException(e);
 		}
 
+		String resolvedUri = uri;
 		if (!uri.startsWith(baseUri)) {
-			uri = resolve(uri, baseUri, descriptor);
-			if (!uri.startsWith(baseUri)) {
+			resolvedUri = resolve(uri, baseUri, descriptor);
+			if (!resolvedUri.startsWith(baseUri)) {
 				return false;
 			}
 		}
-		String relativeUri = uri.substring(baseUri.length());
+		String relativeUri = resolvedUri.substring(baseUri.length());
 		if (relativeUri.startsWith(DefaultMarketplaceService.API_FAVORITES_URI)) {
 			return handleTopFavorites(descriptor, relativeUri);
 		} else if (relativeUri.startsWith(DefaultMarketplaceService.API_FEATURED_URI)) {
@@ -484,4 +469,9 @@ public abstract class MarketplaceUrlHandler {
 	protected boolean handleInstallRequest(SolutionInstallationInfo installInfo, String url) {
 		return false;
 	}
+
+	protected boolean handleImportFavoritesRequest(FavoritesDescriptor descriptor) {
+		return false;
+	}
+
 }

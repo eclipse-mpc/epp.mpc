@@ -126,7 +126,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 			.compile(String.format(JSON_ATTRIBUTE_REGEX, "html_profile_url"), Pattern.MULTILINE); //$NON-NLS-1$
 
 	public static final Pattern FAVORITES_URL_PATTERN = Pattern
-			.compile("(?:^|^https?:.*/)user/([^/#?]+)(/favorites)?([/#?].*)?$"); //$NON-NLS-1$
+			.compile("^(?:https?:.*/)?user/([^/#?]+)(?:/favorites)?(?:[/#?].*)?$"); //$NON-NLS-1$
 
 	private static final String KEY = "mpc_favorites"; //$NON-NLS-1$
 

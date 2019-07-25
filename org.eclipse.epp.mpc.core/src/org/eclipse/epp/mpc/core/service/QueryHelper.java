@@ -31,8 +31,12 @@ import org.eclipse.epp.mpc.core.model.INode;
  * @noextend This interface is not intended to be extended by clients.
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
-public class QueryHelper {
+public final class QueryHelper {
 
+	private QueryHelper() {
+		throw new UnsupportedOperationException();
+	}
+	
 	/**
 	 * @return a node instance that can be used to look up a matching node on
 	 * the marketplace by id.
@@ -47,6 +51,14 @@ public class QueryHelper {
 	 */
 	public static INode nodeByUrl(String url) {
 		return withUrl(new Node(), url);
+	}
+
+	/**
+	 * @return a node instance that can be used to look up a matching node on
+	 * the marketplace by either id or url.
+	 */
+	public static INode nodeByIdAndUrl(String id, String url) {
+		return withUrl(withId(new Node(), id), url);
 	}
 
 	/**

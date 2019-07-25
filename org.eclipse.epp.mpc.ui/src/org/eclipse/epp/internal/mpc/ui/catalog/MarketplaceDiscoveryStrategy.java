@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -41,6 +42,7 @@ import org.eclipse.epp.internal.mpc.core.model.Identifiable;
 import org.eclipse.epp.internal.mpc.core.model.Node;
 import org.eclipse.epp.internal.mpc.core.model.SearchResult;
 import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
+import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
@@ -60,6 +62,7 @@ import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
 import org.eclipse.epp.mpc.core.service.IMarketplaceStorageService;
 import org.eclipse.epp.mpc.core.service.IMarketplaceStorageService.LoginListener;
 import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
+import org.eclipse.epp.mpc.core.service.QueryHelper;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler;
 import org.eclipse.equinox.internal.p2.discovery.AbstractDiscoveryStrategy;
@@ -98,6 +101,8 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	private IShellProvider shellProvider;
 
+	private final String nodeContentUrlPrefix;
+
 	public MarketplaceDiscoveryStrategy(CatalogDescriptor catalogDescriptor) {
 		if (catalogDescriptor == null) {
 			throw new IllegalArgumentException();
@@ -107,6 +112,9 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 		source = new MarketplaceCatalogSource(marketplaceService);
 		marketplaceInfo = MarketplaceInfo.getInstance();
+
+		nodeContentUrlPrefix = marketplaceService.getBaseUrl() + "/" + DefaultMarketplaceService.API_NODE_CONTENT_URI //$NON-NLS-1$
+				+ "/"; //$NON-NLS-1$
 	}
 
 	/**
@@ -847,12 +855,9 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	}
 
 	public void performQuery(IProgressMonitor monitor, Set<String> nodeIds) throws CoreException {
-		Set<INode> nodes = new HashSet<>();
-		for (String nodeId : nodeIds) {
-			Node node = new Node();
-			node.setId(nodeId);
-			nodes.add(node);
-		}
+		Set<INode> nodes = nodeIds.stream()
+				.map(id -> QueryHelper.nodeByIdAndUrl(id, nodeContentUrlPrefix + id))
+				.collect(Collectors.toSet());
 		performNodeQuery(monitor, nodes);
 	}
 

@@ -39,6 +39,7 @@ import org.eclipse.epp.mpc.core.service.ICatalogService;
 import org.eclipse.epp.mpc.core.service.ServiceHelper;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.epp.mpc.ui.IMarketplaceClientConfiguration;
+import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler;
 import org.eclipse.equinox.internal.p2.discovery.DiscoveryCore;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryWizard;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -119,7 +120,7 @@ public abstract class AbstractMarketplaceWizardCommand extends AbstractHandler i
 			configuration.getCatalogDescriptors().addAll(catalogDescriptors);
 		}
 		if (selectedCatalogDescriptor != null) {
-			if (selectedCatalogDescriptor.getLabel().equals("org.eclipse.epp.mpc.descriptorHint")) { //$NON-NLS-1$
+			if (selectedCatalogDescriptor.getLabel().equals(MarketplaceUrlHandler.DESCRIPTOR_HINT)) {
 				CatalogDescriptor resolvedDescriptor = CatalogRegistry.getInstance().findCatalogDescriptor(
 						selectedCatalogDescriptor.getUrl().toExternalForm());
 				if (resolvedDescriptor == null) {

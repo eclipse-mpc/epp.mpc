@@ -334,15 +334,16 @@ MarketplaceService {
 		List<INode> nodesById = null;
 		List<INode> nodesByUrl = null;
 		for (INode node : nodes) {
-			if (node.getId() == null) {
-				if (node.getUrl() == null) {
-					throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_invalidNode, node));
-				}
+			if (node.getId() == null && node.getUrl() == null) {
+				throw new CoreException(createErrorStatus(Messages.DefaultMarketplaceService_invalidNode, node));
+			}
+			if (node.getUrl() != null) {
 				if (nodesByUrl == null) {
 					nodesByUrl = new ArrayList<>();
 				}
 				nodesByUrl.add(node);
-			} else {
+			}
+			if (node.getId() != null) {
 				if (nodesById == null) {
 					nodesById = new ArrayList<>(nodes.size());
 				}
@@ -421,7 +422,7 @@ MarketplaceService {
 		SubMonitor progress = SubMonitor.convert(monitor, nodes.size());
 		int remaining = nodes.size();
 		for (INode node : nodes) {
-			if (node.getId() == null && node.getUrl() != null) {
+			if (node.getUrl() != null && !resolvedNodeMapping.containsKey(node)) {
 				try {
 					Node resolvedNode = getNode(node, progress.newChild(1));
 					resolvedNodeMapping.put(node, resolvedNode);
