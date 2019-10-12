@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2019 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  * Contributors:
  * 	The Eclipse Foundation - initial API and implementation
  * 	Yatta Solutions - bug 314936, bug 398200, bug 432803: public API, bug 413871: performance
+ *  Pierre-Yves B., pyvesdev@gmail.com - Bug 551901: Unspecified organization name displays "by unknown"
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.catalog;
 
@@ -348,7 +349,11 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			} else {
 				catalogItem.setDescription(node.getShortdescription());
 			}
-			catalogItem.setProvider(node.getCompanyname());
+			String provider = node.getCompanyname();
+			if (provider == null || provider.isEmpty()) {
+				provider = node.getOwner();
+			}
+			catalogItem.setProvider(provider);
 			String updateurl = node.getUpdateurl();
 			if (updateurl != null) {
 				try {
