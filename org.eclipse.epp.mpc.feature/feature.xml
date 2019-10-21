@@ -6,7 +6,7 @@
       provider-name="%providerName"
       plugin="org.eclipse.epp.mpc.ui"
       license-feature="org.eclipse.license"
-      license-feature-version="2.0.2">
+      license-feature-version="2.0.1">
 
    <description url="http://www.eclipse.org/epp/mpc/">
       %description
