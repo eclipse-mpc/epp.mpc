@@ -34,9 +34,9 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCorePlugin;
-import org.eclipse.epp.internal.mpc.core.service.ServiceUnavailableException;
 import org.eclipse.epp.mpc.core.service.ITransportFactory;
 import org.eclipse.epp.mpc.core.service.ServiceHelper;
+import org.eclipse.epp.mpc.core.service.ServiceUnavailableException;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -407,7 +407,6 @@ public abstract class TransportFactory implements ITransportFactory {
 
 	protected abstract InputStream invokeStream(URI location, IProgressMonitor monitor) throws Exception;
 
-	@SuppressWarnings("deprecation")
 	protected void handleStreamExceptions(Exception e) throws ServiceUnavailableException, CoreException,
 	FileNotFoundException {
 		if (e instanceof InvocationTargetException) {
@@ -427,7 +426,6 @@ public abstract class TransportFactory implements ITransportFactory {
 	}
 
 
-	@SuppressWarnings("deprecation")
 	protected static void handleServiceUnavailable(CoreException e) throws ServiceUnavailableException {
 		if (e.getStatus().getCode() == 1002) { //failed to read
 			Throwable cause = e.getCause();
