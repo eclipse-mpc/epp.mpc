@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2019 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,8 @@
  * 	Yatta Solutions - bug 432803: public API, bug 413871: performance
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui;
+
+import static org.eclipse.jface.resource.ResourceLocator.imageDescriptorFromBundle;
 
 import java.util.Hashtable;
 
@@ -166,21 +168,22 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 	@Override
 	protected ImageRegistry createImageRegistry() {
 		ImageRegistry imageRegistry = super.createImageRegistry();
-		imageRegistry.put(NO_ICON_PROVIDED, imageDescriptorFromPlugin(getBundle().getSymbolicName(),
-				"icons/noiconprovided.png")); //$NON-NLS-1$
+		imageRegistry.put(NO_ICON_PROVIDED,
+				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/noiconprovided.png") //$NON-NLS-1$
+				.get());
 		imageRegistry.put(NO_ICON_PROVIDED_CATALOG,
-				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/noiconprovided32.png")); //$NON-NLS-1$
+				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/noiconprovided32.png").get()); //$NON-NLS-1$
 		imageRegistry.put(DEFAULT_MARKETPLACE_ICON,
-				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/marketplace_banner.png")); //$NON-NLS-1$
-		imageRegistry.put(IU_ICON, imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/iu_obj.gif")); //$NON-NLS-1$
-		imageRegistry.put(IU_ICON_UPDATE, imageDescriptorFromPlugin(getBundle().getSymbolicName(),
-				"icons/iu_update_obj.gif")); //$NON-NLS-1$
+				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/marketplace_banner.png").get()); //$NON-NLS-1$
+		imageRegistry.put(IU_ICON, imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/iu_obj.gif").get()); //$NON-NLS-1$
+		imageRegistry.put(IU_ICON_UPDATE,
+				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/iu_update_obj.gif").get()); //$NON-NLS-1$
 		imageRegistry.put(IU_ICON_INSTALL,
-				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/iu_install_obj.gif")); //$NON-NLS-1$
+				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/iu_install_obj.gif").get()); //$NON-NLS-1$
 		imageRegistry.put(IU_ICON_UNINSTALL,
-				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/iu_uninstall_obj.gif")); //$NON-NLS-1$
+				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/iu_uninstall_obj.gif").get()); //$NON-NLS-1$
 		imageRegistry.put(IU_ICON_DISABLED,
-				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/iu_disabled_obj.gif")); //$NON-NLS-1$
+				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/iu_disabled_obj.gif").get()); //$NON-NLS-1$
 		{
 			ImageDescriptor errorOverlay = PlatformUI.getWorkbench()
 					.getSharedImages()
@@ -192,21 +195,23 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 		}
 
 		imageRegistry.put(NEWS_ICON_UPDATE,
-				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/news_update.png")); //$NON-NLS-1$
-		imageRegistry.put(ITEM_ICON_STAR, imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/star.png")); //$NON-NLS-1$
+				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/news_update.png").get()); //$NON-NLS-1$
+		imageRegistry.put(ITEM_ICON_STAR,
+				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/star.png").get()); //$NON-NLS-1$
 		imageRegistry.put(ITEM_ICON_STAR_SELECTED,
-				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/star-selected.png")); //$NON-NLS-1$
-		imageRegistry.put(ITEM_ICON_SHARE, imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/share.png")); //$NON-NLS-1$
+				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/star-selected.png").get()); //$NON-NLS-1$
+		imageRegistry.put(ITEM_ICON_SHARE,
+				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/share.png").get()); //$NON-NLS-1$
 		imageRegistry.put(ACTION_ICON_FAVORITES,
-				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/action-item-favorites.png")); //$NON-NLS-1$
+				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/action-item-favorites.png").get()); //$NON-NLS-1$
 		imageRegistry.put(ACTION_ICON_LOGIN,
-				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/action-item-login.png")); //$NON-NLS-1$
+				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/action-item-login.png").get()); //$NON-NLS-1$
 		imageRegistry.put(ACTION_ICON_WARNING,
-				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/action-item-warning.png")); //$NON-NLS-1$
+				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/action-item-warning.png").get()); //$NON-NLS-1$
 		imageRegistry.put(ACTION_ICON_UPDATE,
-				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/action-item-update.png")); //$NON-NLS-1$
+				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/action-item-update.png").get()); //$NON-NLS-1$
 		imageRegistry.put(FAVORITES_LIST_ICON,
-				imageDescriptorFromPlugin(getBundle().getSymbolicName(), "icons/favorites-list.png")); //$NON-NLS-1$
+				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/favorites-list.png").get()); //$NON-NLS-1$
 		return imageRegistry;
 	}
 
