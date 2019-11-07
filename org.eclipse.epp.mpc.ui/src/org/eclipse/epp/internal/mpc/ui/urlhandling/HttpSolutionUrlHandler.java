@@ -15,7 +15,6 @@ package org.eclipse.epp.internal.mpc.ui.urlhandling;
 import java.util.Map;
 
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
-import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler;
 import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler.SolutionInstallationInfo;
 
 public class HttpSolutionUrlHandler implements SolutionUrlHandler {
