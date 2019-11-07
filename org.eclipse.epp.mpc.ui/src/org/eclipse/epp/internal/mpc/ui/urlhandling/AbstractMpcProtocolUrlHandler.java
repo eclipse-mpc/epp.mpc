@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2018, 2019 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,7 @@ public abstract class AbstractMpcProtocolUrlHandler implements UrlHandlerStrateg
 
 	protected static final String PATH_PARAMETERS = "path_parameters"; //$NON-NLS-1$
 
+	@Override
 	public boolean handles(String url) {
 		return url != null && url.startsWith(MarketplaceUriSchemeHandler.ECLIPSE_MPC_SCHEME + ":"); //$NON-NLS-1$
 	}
