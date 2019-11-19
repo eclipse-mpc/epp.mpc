@@ -128,6 +128,8 @@ final class ShowNatureProposalsDialog extends TitleAreaDialog {
 		super.createButtonsForButtonBar(parent);
 		Button okButton = getButton(IDialogConstants.OK_ID);
 		okButton.setText(Messages.MissingNatureDetector_ShowSolutions);
+		// recalculate layout data - fixes #280443
+		setButtonLayoutData(okButton);
 		okButton.setEnabled(canComplete());
 	}
 
