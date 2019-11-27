@@ -13,14 +13,23 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.util;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
@@ -255,7 +264,8 @@ public class TransportFactoryTest {
 		httpClientFactory.setTransport(httpClientTransport);
 		ITransportFactory secondaryFactory = Mockito.mock(ITransportFactory.class);
 		ITransport secondaryTransport = Mockito.mock(ITransport.class);
-		InputStream expectedResultStream = new ByteArrayInputStream("Secondary transport".getBytes("UTF-8"));
+		InputStream expectedResultStream = new ByteArrayInputStream("Secondary transport".getBytes(
+				StandardCharsets.UTF_8));
 		Mockito.when(secondaryFactory.getTransport()).thenReturn(secondaryTransport);
 		Mockito.when(secondaryTransport.stream(ArgumentMatchers.<URI> any(), ArgumentMatchers.<IProgressMonitor> any())).thenReturn(
 				expectedResultStream);
@@ -381,7 +391,7 @@ public class TransportFactoryTest {
 		BundleContext bundleContext = FrameworkUtil.getBundle(TransportFactory.class).getBundleContext();
 		Collection<ServiceReference<ITransportFactory>> transportServiceReferences = TransportFactory
 				.getTransportServiceReferences(
-				bundleContext);
+						bundleContext);
 		if (!transportServiceReferences.isEmpty()) {
 			ServiceReference<ITransportFactory> transportServiceReference = transportServiceReferences.iterator()
 					.next();

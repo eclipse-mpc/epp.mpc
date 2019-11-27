@@ -42,8 +42,6 @@ public class BrowseCatalogItem extends UserActionViewerItem<CatalogDescriptor> {
 
 	private static final String TID = "tid:"; //$NON-NLS-1$
 
-	private static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
-
 	private final MarketplaceCategory category;
 
 	private final IMarketplaceWebBrowser browser;
