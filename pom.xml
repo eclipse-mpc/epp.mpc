@@ -7,7 +7,7 @@
   <parent>
     <artifactId>org.eclipse.epp.mpc-parent</artifactId>
     <groupId>org.eclipse.epp.mpc</groupId>
-    <version>1.8.1-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <relativePath>org.eclipse.epp.mpc-parent</relativePath>
   </parent>
 
@@ -21,6 +21,9 @@
     <module>org.eclipse.epp.mpc.dependencies.feature</module>
     <module>org.eclipse.epp.mpc.feature</module>
     <module>org.eclipse.epp.mpc.help.ui</module>
+    <module>org.eclipse.epp.mpc.rest.api</module>
+    <module>org.eclipse.epp.mpc.rest.client</module>
+    <module>org.eclipse.epp.mpc.rest.client.compatibility</module>
     <module>org.eclipse.epp.mpc.site</module>
     <module>org.eclipse.epp.mpc.tests</module>
     <module>org.eclipse.epp.mpc.tests.catalog</module>

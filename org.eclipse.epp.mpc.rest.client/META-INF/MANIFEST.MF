@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %Bundle-Name
+Bundle-SymbolicName: org.eclipse.epp.mpc.rest.client;singleton:=true
+Bundle-Version: 2.0.0.qualifier
+Bundle-Vendor: %Bundle-Vendor
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
+Bundle-Activator: org.eclipse.epp.mpc.rest.client.internal.MarketplaceRestClientPlugin
+Service-Component: OSGI-INF/services/*.xml
+Automatic-Module-Name: org.eclipse.epp.mpc.rest.client
+Export-Package: org.eclipse.epp.mpc.rest.client
+Import-Package: org.osgi.framework;version="1.9.0"
+Require-Bundle: org.eclipse.epp.mpc.rest.api;bundle-version="2.0.0";visibility:=reexport

@@ -1,0 +1,108 @@
+import org.immutables.value.Value;
+import org.immutables.value.Value.Style.ImplementationVisibility;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlEnumValue;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+{{#description}}
+/**
+ * {{{description}}}
+ */
+{{/description}}
+{{>xmlPojoAnnotation}}{{#discriminator}}{{>typeInfoAnnotation}}{{/discriminator}}
+@Value.Immutable
+@Value.Style(visibility = ImplementationVisibility.PACKAGE)
+public interface {{classname}} {{#parent}}extends {{{parent}}}{{/parent}}{{#serializableModel}}, Serializable{{/serializableModel}} {
+{{#vars}}{{#isEnum}}{{^isContainer}}  {{>enumClass}}{{/isContainer}}{{#isContainer}}{{#mostInnerItems}}
+{{>enumClass}}{{/mostInnerItems}}{{/isContainer}}
+
+{{/isEnum}}{{/vars}}
+{{#vars}}
+
+  /**
+{{#description}}
+   * {{description}}
+{{/description}}
+{{^description}}
+   * Get {{name}}
+{{/description}}
+{{#minimum}}
+   * minimum: {{minimum}}
+{{/minimum}}
+{{#maximum}}
+   * maximum: {{maximum}}
+{{/maximum}}
+   * @return {{name}}
+   */
+{{#withXml}}
+  @XmlElement(name="{{baseName}}"{{#required}}, required = {{required}}{{/required}})
+{{/withXml}}
+  @JsonProperty("{{baseName}}")
+{{#vendorExtensions.extraAnnotation}}
+  {{{vendorExtensions.extraAnnotation}}}
+{{/vendorExtensions.extraAnnotation}}
+{{#useBeanValidation}}
+  {{>beanValidation}}
+{{/useBeanValidation}}
+  public {{{datatypeWithEnum}}} {{getter}}();
+{{^isReadOnly}}
+
+{{^isListContainer}}{{^isMapContainer}}
+  public {{classname}} with{{nameInCamelCase}}({{{datatypeWithEnum}}} {{name}});
+{{/isMapContainer}}{{/isListContainer}}
+{{#isListContainer}}
+//  public {{classname}} with{{nameInCamelCase}}({{{items.datatypeWithEnum}}}... {{name}});
+  public {{classname}} with{{nameInCamelCase}}(Iterable<{{^items.isPrimitiveType}}? extends {{/items.isPrimitiveType}}{{{items.datatypeWithEnum}}}> {{name}});
+{{/isListContainer}}
+{{#isMapContainer}}
+  public {{classname}} with{{nameInCamelCase}}(Map<String, {{^items.isPrimitiveType}}? extends {{/items.isPrimitiveType}}{{{items.datatypeWithEnum}}}> {{name}});
+{{/isMapContainer}}
+{{/isReadOnly}}
+{{/vars}}
+
+  default Builder copy() {
+    return Builder.from(this);
+  }
+
+  public static Builder builder() {
+    return Builder.create();
+  }
+
+  public static interface Builder {{#parent}}extends {{{parent}}}.Builder {{/parent}}{
+
+    public static Builder create() {
+      return /*Immutable{{classname}}.builder();*/null;
+    }
+
+    public static Builder from({{classname}} instance) {
+      return /*Immutable{{classname}}.Builder.from(instance);*/null;
+    }
+
+{{#vars}}
+{{^isReadOnly}}
+{{^isListContainer}}{{^isMapContainer}}
+    public Builder {{name}}({{{datatypeWithEnum}}} {{name}});
+{{/isMapContainer}}{{/isListContainer}}
+{{#isListContainer}}
+    public Builder {{name}}(Iterable<{{^items.isPrimitiveType}}? extends {{/items.isPrimitiveType}}{{{items.datatypeWithEnum}}}> {{name}}Items);
+//    public Builder add{{nameInCamelCase}}({{{items.datatypeWithEnum}}} {{name}}Item);
+//    public Builder add{{nameInCamelCase}}({{{items.datatypeWithEnum}}}... {{name}}Items);
+    public Builder addAll{{nameInCamelCase}}(Iterable<{{^items.isPrimitiveType}}? extends {{/items.isPrimitiveType}}{{{items.datatypeWithEnum}}}> {{name}}Items);
+{{/isListContainer}}
+{{#isMapContainer}}
+    public Builder {{name}}(Map<String, {{^items.isPrimitiveType}}? extends {{/items.isPrimitiveType}}{{{items.datatypeWithEnum}}}> {{name}}Items);
+    public Builder put{{nameInCamelCase}}(String key, {{{items.datatypeWithEnum}}} {{name}}Item);
+    public Builder put{{nameInCamelCase}}(Map.Entry<String, {{^items.isPrimitiveType}}? extends {{/items.isPrimitiveType}}{{{items.datatypeWithEnum}}}> {{name}}Item);
+    public Builder putAll{{nameInCamelCase}}(Map<String, {{^items.isPrimitiveType}}? extends {{/items.isPrimitiveType}}{{{items.datatypeWithEnum}}}> {{name}}Items);
+{{/isMapContainer}}
+{{/isReadOnly}}
+{{/vars}}
+
+    public {{classname}} build();
+  }
+}

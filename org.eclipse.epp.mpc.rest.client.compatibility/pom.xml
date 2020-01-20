@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.eclipse.epp.mpc</groupId>
+    <artifactId>org.eclipse.epp.mpc-bundle</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
+    <relativePath>../org.eclipse.epp.mpc-parent/bundle</relativePath>
+  </parent>
+  <artifactId>org.eclipse.epp.mpc.rest.client.compatibility</artifactId>
+  <packaging>eclipse-plugin</packaging>
+
+   <properties>
+       <org.mapstruct.version>1.3.1.Final</org.mapstruct.version>
+   </properties>
+
+   <build>
+      <plugins>
+         <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>tycho-compiler-plugin</artifactId>
+            <configuration>
+               <extraClasspathElements>
+                  <extraClasspathElement>
+                     <groupId>org.mapstruct</groupId>
+                     <artifactId>mapstruct-processor</artifactId>
+                     <version>${org.mapstruct.version}</version>
+                  </extraClasspathElement>
+               </extraClasspathElements>
+               <compilerArgs>
+                     <compilerArg>
+                         -Amapstruct.suppressGeneratorTimestamp=true
+                     </compilerArg>
+                     <compilerArg>
+                         -Amapstruct.suppressGeneratorVersionInfoComment=true
+                     </compilerArg>
+                     <compilerArg>
+                         -Amapstruct.unmappedTargetPolicy=ERROR
+                     </compilerArg>
+                 </compilerArgs>
+            </configuration>
+         </plugin>
+         <plugin>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>2.10</version>
+            <executions>
+               <execution>
+                  <id>get-libs</id>
+                  <phase>initialize</phase>
+                  <!-- TODO need to move dependencies to Orbit and do proper import in Manifest -->
+                  <goals>
+                     <goal>copy-dependencies</goal>
+                  </goals>
+                  <configuration>
+                     <excludeGroupIds>p2.eclipse-plugin,org.eclipse.epp.mpc</excludeGroupIds>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
+         <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>target-platform-configuration</artifactId>
+            <version>${tycho-version}</version>
+            <configuration>
+               <pomDependencies>consider</pomDependencies>
+            </configuration>
+         </plugin>
+      </plugins>
+   </build>
+
+   <dependencies>
+       <dependency>
+           <groupId>org.mapstruct</groupId>
+           <artifactId>mapstruct</artifactId>
+           <version>${org.mapstruct.version}</version>
+       </dependency>
+       <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>${org.mapstruct.version}</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+       </dependency>
+   </dependencies>
+</project>

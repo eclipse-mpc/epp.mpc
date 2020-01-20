@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.eclipse.epp.mpc.rest.client.compatibility" version="2">
+    <resource path="src/org/eclipse/epp/mpc/rest/client/compatibility/CompatibilityCatalogService.java" type="org.eclipse.epp.mpc.rest.client.compatibility.CompatibilityCatalogService">
+        <filter comment="Internal compatibility implementation" id="574619656">
+            <message_arguments>
+                <message_argument value="ICatalogService"/>
+                <message_argument value="CompatibilityCatalogService"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/eclipse/epp/mpc/rest/client/compatibility/CompatibilityMarketplaceService.java" type="org.eclipse.epp.mpc.rest.client.compatibility.CompatibilityMarketplaceService">
+        <filter comment="Internal compatibility implementation" id="574619656">
+            <message_arguments>
+                <message_argument value="IMarketplaceService"/>
+                <message_argument value="CompatibilityMarketplaceService"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>

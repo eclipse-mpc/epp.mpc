@@ -1,0 +1,896 @@
+---
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Eclipse Marketplace Client API v2
+  license:
+    name: Eclipse Public License - 2.0
+    url: https://www.eclipse.org/legal/epl-2.0/
+  
+servers:
+- url: http://marketplace.eclipse.org/api/v2
+  description: Production endpoint for Eclipse Marketplace API
+tags:
+  - name: Listings
+    description: Definitions for marketplace listings and their versions
+  - name: Catalogs
+    description: Marketplace catalog definitions
+  - name: Categories
+    description: Market categories
+  - name: Installs
+    description: Access to listing install stats
+  - name: Markets
+    description: Information about available markets
+paths:
+  /listings:
+    get:
+      tags:
+        - Listings
+      operationId: get-listings
+      summary: Listing list
+      description: Returns a list of marketplace listings that match the given parameters, filtering out solutions that don't match the filters.
+      parameters:
+        - $ref: "#/components/parameters/platform_version"
+        - $ref: "#/components/parameters/java_version"
+        - $ref: "#/components/parameters/os"
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - name: market_id
+          in: query
+          description: "The ID of the market to search in for listings"
+          required: false
+          schema:
+            $ref: "#/components/schemas/ObjectID"
+        - name: category_id
+          in: query
+          description: "The ID of the category to search in for listings"
+          required: false
+          schema:
+            $ref: "#/components/schemas/ObjectID"
+        - name: license_type
+          in: query
+          description: | 
+            Optional query parameter to filter the results by license type.
+            The result will be a union of all included license types. 
+            Valid values include:
+            
+            * COMMERCIAL 
+            * OPEN_SOURCE 
+            * EPL
+            * EPL 1.0  
+            * EPL 2.0  
+            * GPL  
+          required: false
+          schema:
+            $ref: "#/components/schemas/license_type"
+          style: form
+          explode: true
+        - name: sort
+          in: query
+          description: |
+            Optional query parameter to sort the resulting listings. This sort will be performed based on the field name passed, in either ascending or descending order based on which of ASC or DESC was passed after the field name separated by a space. 
+             
+            At this time, only a subset of whitelisted values are enabled for sorting, and only one of which can be used for sorting at a time. See below for a list of accepted fields.
+            
+            - install_count
+            - install_count_recent
+            - favorite_count
+            - id
+            - name
+            - created
+            - changed
+            
+            This value should be in the format of `fieldname [ASC|DESC]`. For example, `installsrecent DESC`
+          required: false
+          schema:
+            type: string
+        - name: featured
+          in: query
+          description: If set to true, will randomize results based on a random seed and ignore sort clauses.
+          schema: 
+            type: boolean
+        - name: q
+          in: query
+          description: Search term to use when narrowing down results.
+          schema:
+            type: string
+        - name: ids
+          in: query
+          description: Comma-delimited list of listing IDs to retrieve for the call.
+          schema:
+            type: string
+        - name: tags
+          in: query
+          description: Comma-delimited list of tag names to filter results for.
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listings"
+        500:
+          description: Error while retrieving data
+    put:
+      tags:
+        - Listings
+      operationId: put-listing
+      summary: Listing update
+      description: Using the passed listing object, updates, or in the case of new data inserts, are made in the data set to include the new information.
+      requestBody:
+        description: The listing to be updated or inserted into the data set.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Listing"
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+        201:
+          description: Success (no content)
+        500:
+          description: Error while inserting data
+
+  /listings/{listing_id}:
+    parameters:
+      - name: listing_id
+        in: path
+        description: Unique ID of an individual listing
+        required: true
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+      - $ref: "#/components/parameters/platform_version"
+      - $ref: "#/components/parameters/java_version"
+      - $ref: "#/components/parameters/os"
+    get:
+      tags:
+        - Listings
+      operationId: get-listing
+      summary: Listing
+      description: Returns a single listing that has a matching listing ID, filtering out versions that do not match the passed parameters.
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+        404:
+          description: No listing found
+        500:
+          description: Error while retrieving data
+
+  /listings/{listing_id}/installs:
+    parameters:
+      - name: listing_id
+        in: path
+        description: Unique ID of an individual listing
+        required: true
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+      - $ref: "#/components/parameters/platform_version"
+      - $ref: "#/components/parameters/java_version"
+      - $ref: "#/components/parameters/os"
+      - $ref: "#/components/parameters/country"
+      - $ref: "#/components/parameters/page"
+      - $ref: "#/components/parameters/limit"
+    get:
+      tags:
+        - Installs
+      operationId: get-installs
+      summary: Installation list by Listing
+      description: Retrieve install metrics for marketplace a listing by its unique ID. These stats will include available metrics for the last 12 months, as well as the overall install statistics. The parameters that are available for this call act as filters for the statistics, allowing for greater flexibility of analysis of the Installation stats.
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Installs"
+        404:
+          description: No listing found
+
+  /listings/{listing_id}/version/{versionNumber}/installs:
+    parameters:
+      - name: listing_id
+        in: path
+        description: Unique ID of an individual listing
+        required: true
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+      - name: versionNumber
+        in: path
+        description: Numeric ID for the version that is being updated
+        required: true
+        schema:
+          type: number
+          format: float
+          minimum: 0
+    get:
+      tags:
+        - Installs
+      parameters:
+        - $ref: "#/components/parameters/platform_version"
+        - $ref: "#/components/parameters/java_version"
+        - $ref: "#/components/parameters/os"
+        - $ref: "#/components/parameters/country"
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+      operationId: get-installs-for-version
+      description: Retrieve install metrics for the given marketplace listing and version by its unique listing ID and version number. These stats will include available metrics for the last 12 months, as well as the overall install statistics for the version. The parameters that are available for this call act as filters for the statistics, allowing for greater flexibility of analysis of the Installation stats.
+      summary: Installation list by Solution Version
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Installs"
+        404:
+          description: Invalid listing and version combination, no data found
+    post:
+      tags:
+        - Installs
+      operationId: post-install
+      summary: Create Installation
+      description: Add information about an install. (Only accessible via the marketplace client)
+      responses:
+        200:
+          description: Success
+        403:
+          description: Forbidden
+        404:
+          description: Invalid listing and version combination, no data found
+
+  /catalogs:
+    get:
+      tags:
+        - Catalogs
+      operationId: get-catalogs
+      summary: Catalog list
+      description: Retrieves information about the catalogs available in the marketplace.
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Catalogs"
+        500:
+          description: Error while retrieving data
+    put:
+      tags:
+        - Catalogs
+      operationId: put-catalog
+      summary: Catalog update
+      description: Add or update information about a catalog in the marketplace.
+      requestBody:
+        description: The catalog to be updated or inserted into the data set.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Catalog"
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Catalog"
+        201:
+          description: Success (no content)
+        500:
+          description: Error while inserting data
+
+  /catalogs/{catalogId}:
+    parameters:
+      - name: catalogId
+        in: path
+        description: Unique ID of an individual catalog
+        required: true
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+    get:
+      tags:
+        - Catalogs
+      operationId: get-catalog
+      summary: Catalog
+      description: Retrieve information on a single catalog, matching on the catalog ID.
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Catalog"
+        404:
+          description: No catalog found
+        500:
+          description: Error while retrieving data
+
+  /markets:
+    get:
+      tags:
+        - Markets
+      operationId: get-markets
+      summary: Market list
+      description: Retrieves a listing of markets available within the marketplace.
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Markets"
+        500:
+          description: Error while retrieving data
+    put:
+      tags:
+        - Markets
+      operationId: put-market
+      summary: Market update
+      description: Add or update information about a market in the marketplace.
+      requestBody:
+        description: The market to be updated or inserted into the data set.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Market"
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Catalog"
+        201:
+          description: Success (no content)
+        500:
+          description: Error while inserting data
+
+  /markets/{market_id}:
+    parameters:
+      - name: market_id
+        in: path
+        description: Unique ID of an individual market
+        required: true
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+    get:
+      tags:
+        - Markets
+      operationId: get-market
+      summary: Market
+      description: Retrieve a single market within the marketplace, matching on its ID.
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Market"
+        500:
+          description: Error while retrieving data
+          
+  /markets/{market_id}/categories/{category_id}:
+    parameters:
+      - name: market_id
+        in: path
+        description: Unique ID of an individual market
+        required: true
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+      - name: category_id
+        in: path
+        description: Unique ID of an individual category for market
+        required: true
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+      - $ref: "#/components/parameters/page"
+      - $ref: "#/components/parameters/limit"
+    get:
+      tags:
+        - Categories
+      # TODO what do we need this for?
+      operationId: get-market-category
+      summary: Category by Market
+      description: Retrieves a category in context of its market in the marketplace. 
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Market"
+        500:
+          description: Error while retrieving data
+
+  /categories:
+    get:
+      tags:
+        - Categories
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+      operationId: get-categories
+      summary: Category list
+      description: Retrieves a listing of categories available within the marketplace.
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Categories"
+        500:
+          description: Error while retrieving data
+    put:
+      tags:
+        - Categories
+      operationId: put-category
+      summary: Category update
+      description: Add or update information about a category in the marketplace.
+      requestBody:
+        description: The market to be updated or inserted into the data set.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Category"
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+        201:
+          description: Success (no content)
+        500:
+          description: Error while inserting data
+          
+  /categories/{catagoryID}:
+    parameters:
+      - name: catagoryID
+        in: path
+        description: Unique ID of an individual catalog
+        required: true
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+    get:
+      tags:
+        - Categories
+      operationId: get-category
+      summary: Category
+      description: Retrieves a category available within the marketplace, matched on its ID.
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+        404:
+          description: Not found
+        500:
+          description: Error while retrieving data
+
+components:
+  parameters:
+    product:
+      name: product
+      in: query
+      description: The product id of the target Eclipse, e.g. org.eclipse.sdk.ide or epp.package.java
+      required: false
+      schema:
+        type: string
+    platform_version:
+      name: platform_version
+      in: query
+      description: The version of the running product of the target Eclipse, identical to the version of the product's branding plugin
+      required: false
+      schema:
+        $ref: "#/components/schemas/osgiVersion"
+    java_version:
+      name: java_version
+      in: query
+      description: The version of the JRE running the target Eclipse, as returned by the JRE's `System.getProperty("java.version")`
+      required: false
+      schema:
+        type: string
+    os:
+      name: os
+      in: query
+      description: |
+        Operating system of the user.
+
+        Supported values include: 
+        
+        * linux  
+        * win32  
+        * macosx
+      required: false
+      schema:
+        type: string
+    country:
+      name: country
+      in: query
+      description: The users country of origin.
+      required: false
+      schema:
+        type: string
+    page:
+      name: page
+      in: query
+      description: The current page in pagination for results
+      required: false
+      schema:
+        type: integer
+    limit:
+      name: limit
+      in: query
+      description: 'The size of result sets returned (maximum: 50, default: 10)'
+      required: false
+      schema:
+        type: integer
+
+  schemas:
+    Listing:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ObjectID"
+        title:
+          type: string
+          description: Listing Title
+        categories:
+          type: array
+          items: 
+            $ref: "#/components/schemas/Category"
+          description: Array of categories in which this listing appears.
+        tags:
+          type: array
+          items: 
+            $ref: "#/components/schemas/Tag"
+          description: Array of tags that this listing appears.
+        capabilities:
+          type: array
+          items: 
+            $ref: "#/components/schemas/Capability"
+          description: Array of capabilities that the listing provides.
+        authors:
+          description: Individuals involved with the development of the listing
+          type: array
+          items:
+            $ref: "#/components/schemas/Account"
+        favorite_count:
+          type: integer
+          description: Number of times a listing was add to a favorite list.
+        install_count:
+          type: integer
+          description: Install count
+        install_count_recent:
+          type: integer
+          description: Install count for the last month
+        install_ranking:
+          type: string
+          description: Relative install_ranking of the given listing.
+        teaser:
+          type: string
+          description: Listing teaser
+        body:
+          type: string
+          description: Full description
+        created:
+          type: integer
+          description: Timestamp
+        changed:
+          type: integer
+          description: Timestamp
+        foundation_member:
+          type: boolean
+          description: TRUE/FALSE
+        homepage_url:
+          type: string
+          description: Listing URL website
+        logo:
+          type: string
+          description: Logo absolute URL
+        license:
+          type: string
+          description: Listing license
+        organization:
+          type: array
+          description: Organizations involved with the development of the listing
+          items:
+            $ref: "#/components/schemas/Organization"
+        status:
+          type: string
+          description: Release status
+        support_url:
+          type: string
+          description: Support/documentation URL
+        versions:
+          type: array
+          items: 
+            $ref: "#/components/schemas/SolutionVersion"
+
+    Listings:
+      type: array
+      items: 
+        $ref: "#/components/schemas/Listing"
+
+    Account:
+      type: object
+      properties:
+        full_name:
+          type: string
+          description: Real/display name of the account
+        username:
+          type: string
+          description: Eclipse Foundation username for the account
+
+    Capability:
+      type: object
+      description: Classifies a listing as providing support for a specific task in the IDE, such as an editor for a file type, support for a language, etc.
+      properties:
+        namespace:
+          type: string
+          description: Capability namespace, e.g. 'editor.fileExtension' or 'project.nature'
+        value:
+          type: string
+          description: Capability-specific definition, e.g. a file extension or a nature id 
+
+    Organization:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Organization name
+        id:
+          $ref: "#/components/schemas/ObjectID"
+          description: Organizational member ID
+
+    Tag:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ObjectID"
+        title:
+          type: string
+          description: Tag Title
+        url:
+          type: string
+          description: URL to retrieve the tag details.
+
+    Categories:
+      type: array
+      items: 
+        $ref: "#/components/schemas/Category"
+        
+    Category:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ObjectID"
+        title:
+          type: string
+          description: Category title
+        url:
+          type: string
+          description: URL to retrieve the category details.
+        market_ids: 
+          type: array
+          items:
+            $ref: "#/components/schemas/ObjectID"
+
+    Market:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ObjectID"
+        title:
+          type: string
+          description: Listing Title
+        url:
+          type: string
+          description: URL to retrieve the category details.
+        categories:
+          type: array
+          items: 
+            $ref: "#/components/schemas/Category"
+          description: Array of categories that this market makes use of
+
+    Markets:
+      type: array
+      items:
+        $ref: "#/components/schemas/Market"
+        
+    ObjectID:
+      description: Unique identifier for an addressable object in the API.
+      type: integer
+      format: int32
+      minimum: 1           
+
+    Catalogs:
+      type: array
+      items:
+        $ref: "#/components/schemas/Catalog"
+
+    Catalog:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ObjectID"
+        title:
+          type: string
+          description: title of catalog
+        url:
+          type: string
+          description: Url prefix of the marketplace catalog
+        self_contained:
+          type: boolean
+          description: TRUE/FALSE
+        search_enabled:
+          type: boolean
+          description: TRUE/FALSE
+        icon:
+          type: string
+          description: Absolute url
+        description:
+          type: string
+          description: Short description
+        dependencies_repository:
+          type: string
+        tabs:
+          type: array
+          description: List of tabs to be included within a catalog
+          items:
+            $ref: "#/components/schemas/CatalogTab"
+
+    CatalogTab:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Name of the tab to display
+        url:
+          type: string
+          description: URL for default content of the tab
+        type:
+          type: string
+          description: Type of tab, can either be a default tab, a search tab, or an embedded content tab
+          enum:
+            - default
+            - search
+            - embedded
+
+    license_type:
+      type: string
+      enum:
+        - COMMERCIAL # Includes all commercial license types
+        - OPEN_SOURCE # Includes all open source license types
+        - EPL # Includes all versions of EPL
+        - EPL 1.0
+        - EPL 2.0
+        - GPL
+
+    sort_whitelist:
+      type: string
+      enum:
+        - install_count
+        - install_count_recent
+        - favorite_count
+        - id
+        - name
+        - created
+        - changed
+
+    osgiVersion:
+      type: number
+      format: float
+      description: Describes the version of OSGi the given platform is using
+    
+    SolutionVersion:
+      type: object
+      properties:
+        version:
+          type: string
+          description: Version name string
+        update_site_url:
+          type: string
+          description: Update site URL
+        eclipse_versions:
+          type: array
+          description: Eclipse release number (4.5, 4.4...)
+          items:
+            type: string
+        platforms:
+          type: array
+          description: Compatible OS (Windows, Mac, Linux/GTK)
+          items:
+            type: string
+        min_java_version:
+          type: string
+          description: The minimum Java version required to run the given solution
+        feature_ids:
+          type: array
+          description: Describes additional feature packages available for install with the current version
+          items:
+            $ref: "#/components/schemas/Feature"
+
+    Feature:
+      type: object
+      properties:
+        feature_id:
+          type: string
+          description: The ID of the feature for the solution
+        install_state:
+          type: string
+          description: Whether the feature is required, optional, or recommended.
+          enum:
+            - optional
+            - required
+            - optional_selected
+
+    Installs:
+      type: object
+      properties:
+        monthly_stats:
+          type: array
+          minItems: 11
+          items:
+            $ref: "#/components/schemas/InstallStat"
+        install_count_recent:
+          type: number
+          description: The number of installs in the last month for the given resource
+        install_count:
+          type: number
+          description: The number of historic installs for the given resource
+
+    InstallStat:
+      type: object
+      properties:
+        start:
+          type: string
+          format: datetime
+          description: |
+            Start date for the range of counted installs in RFC 3339 format. Example, `1990-12-31T15:59:60-08:00`.
+            
+            More on this standard can be read at https://tools.ietf.org/html/rfc3339.
+        end: 
+          type: string
+          format: datetime
+          description: End date for the range of counted installs
+        count:
+          description: |
+            Number of installs in the given period for the given version in RFC 3339 format. Example, `1990-12-31T15:59:60-08:00`.
+            
+            More on this standard can be read at https://tools.ietf.org/html/rfc3339.
+          type: integer
+          format: int32
+          minimum: 0 

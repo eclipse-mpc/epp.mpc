@@ -1,0 +1,9 @@
+//src/main/mustache/JavaJaxRS/cxf/xmlPojoAnnotation.mustache
+{{#withXml}}
+@XmlAccessorType(XmlAccessType.FIELD)
+{{#hasVars}} @XmlType(name = "{{classname}}", propOrder =
+    { {{#vars}}"{{name}}"{{^-last}}, {{/-last}}{{/vars}}
+}){{/hasVars}}
+{{^hasVars}}@XmlType(name = "{{classname}}"){{/hasVars}}
+{{^parent}}@XmlRootElement(name="{{classname}}"){{/parent}}
+{{/withXml}}
