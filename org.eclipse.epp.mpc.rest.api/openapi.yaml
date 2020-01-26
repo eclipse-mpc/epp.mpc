@@ -30,11 +30,6 @@ paths:
       summary: Listing list
       description: Returns a list of marketplace listings that match the given parameters, filtering out solutions that don't match the filters.
       parameters:
-        - $ref: "#/components/parameters/platform_version"
-        - $ref: "#/components/parameters/java_version"
-        - $ref: "#/components/parameters/os"
-        - $ref: "#/components/parameters/page"
-        - $ref: "#/components/parameters/limit"
         - name: market_id
           in: query
           description: "The ID of the market to search in for listings"
@@ -104,6 +99,11 @@ paths:
           description: Comma-delimited list of tag names to filter results for.
           schema:
             type: string
+        - $ref: "#/components/parameters/platform_version"
+        - $ref: "#/components/parameters/java_version"
+        - $ref: "#/components/parameters/os"
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
       responses:
         200:
           description: Success
