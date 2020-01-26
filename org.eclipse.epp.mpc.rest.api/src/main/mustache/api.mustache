@@ -5,6 +5,7 @@ package {{package}};
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.CompletionStage;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.*;
@@ -60,4 +61,31 @@ public interface {{classname}}  {
     public {{>returnTypes}} {{nickname}}({{#allParams}}{{>queryParams}}{{>pathParams}}{{>headerParams}}{{>bodyParams}}{{>formParams}}{{#hasMore}}, {{/hasMore}}{{/allParams}});
 {{/operation}}
 {{/operations}}
+
+    interface Async  {
+{{#operations}}
+{{#operation}}
+
+        {{#summary}}
+        /**
+         * {{summary}}
+         *
+         {{#notes}}
+         * {{notes}}
+         *
+         {{/notes}}
+         */
+        {{/summary}}
+        @{{httpMethod}}
+        {{#subresourceOperation}}@Path("{{{path}}}"){{/subresourceOperation}}
+{{#hasConsumes}}
+        @Consumes({ {{#consumes}}"{{{mediaType}}}"{{#hasMore}}, {{/hasMore}}{{/consumes}} })
+{{/hasConsumes}}
+{{#hasProduces}}
+        @Produces({ {{#produces}}"{{{mediaType}}}"{{#hasMore}}, {{/hasMore}}{{/produces}} })
+{{/hasProduces}}
+        public CompletionStage<{{>genericsReturnType}}> {{nickname}}({{#allParams}}{{>queryParams}}{{>pathParams}}{{>headerParams}}{{>bodyParams}}{{>formParams}}{{#hasMore}}, {{/hasMore}}{{/allParams}});
+{{/operation}}
+{{/operations}}
+   }
 }
