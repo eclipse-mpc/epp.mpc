@@ -4,14 +4,14 @@
    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.eclipse.epp.mpc</groupId>
-    <artifactId>org.eclipse.epp.mpc-bundle</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
-    <relativePath>../org.eclipse.epp.mpc-parent/bundle</relativePath>
-  </parent>
-  <artifactId>org.eclipse.epp.mpc.rest.api</artifactId>
-  <packaging>eclipse-plugin</packaging>
+   <parent>
+      <groupId>org.eclipse.epp.mpc</groupId>
+      <artifactId>org.eclipse.epp.mpc-bundle</artifactId>
+      <version>2.0.0-SNAPSHOT</version>
+      <relativePath>../org.eclipse.epp.mpc-parent/bundle</relativePath>
+   </parent>
+   <artifactId>org.eclipse.epp.mpc.rest.api</artifactId>
+   <packaging>eclipse-plugin</packaging>
 
    <properties>
       <swagger-core-version>1.5.18</swagger-core-version>
@@ -33,31 +33,11 @@
                   <extraClasspathElement>
                      <groupId>org.immutables</groupId>
                      <artifactId>value</artifactId>
-                     <version>2.7.4</version>
+                     <version>2.8.3</version>
                   </extraClasspathElement>
                </extraClasspathElements>
             </configuration>
          </plugin>
-         <!--
-         <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>wagon-maven-plugin</artifactId>
-            <version>2.0.0</version>
-            <executions>
-               <execution>
-                  <phase>generate-sources</phase>
-                  <goals>
-                     <goal>download-single</goal>
-                  </goals>
-                  <configuration>
-                     <url>https://raw.githubusercontent.com/EclipseFdn/marketplace-rest-api-specs/master/spec</url>
-                     <fromFile>openapi.yaml</fromFile>
-                     <toFile>${project.build.directory}/openapi.yaml</toFile>
-                  </configuration>
-               </execution>
-            </executions>
-         </plugin>
-         -->
          <plugin>
             <groupId>org.openapitools</groupId>
             <artifactId>openapi-generator-maven-plugin</artifactId>
@@ -109,10 +89,6 @@
                            <groupId>org.openapitools</groupId>
                            <artifactId>openapi-generator</artifactId>
                            <version>4.1.1</version>
-                           <!--
-                           <includes>JavaJaxRS/cxf/*</includes>
-                           <excludes>JavaJaxRS/cxf/server</excludes>
-                           -->
                            <outputDirectory>${project.build.directory}/dependency/openapi-generator</outputDirectory>
                         </artifactItem>
                      </artifactItems>
@@ -127,6 +103,22 @@
                   </goals>
                   <configuration>
                      <excludeGroupIds>p2.eclipse-plugin,org.eclipse.epp.mpc</excludeGroupIds>
+                  </configuration>
+               </execution>
+               <execution>
+                  <id>get-annotation-processors</id>
+                  <phase>initialize</phase>
+                  <goals>
+                     <goal>copy</goal>
+                  </goals>
+                  <configuration>
+                     <artifactItems>
+                        <artifactItem>
+                           <groupId>org.immutables</groupId>
+                           <artifactId>value</artifactId>
+                           <version>2.8.3</version>
+                        </artifactItem>
+                     </artifactItems>
                   </configuration>
                </execution>
             </executions>
@@ -202,53 +194,6 @@
                </execution>
             </executions>
          </plugin>
-         <!--
-            <plugin>
-            <groupId>net.revelc.code</groupId>
-            <artifactId>formatter-maven-plugin</artifactId>
-            <version>0.5.2</version>
-            <executions>
-            <execution>
-            <id>format-generated-code</id>
-            <phase>process-sources</phase>
-            <goals>
-            <goal>format</goal>
-            </goals>
-            </execution>
-            </executions>
-            <configuration>
-            <configFile>${basedir}/formatter.xml</configFile>
-            <lineEnding>LF</lineEnding>
-            <directories>
-            <directory>${project.build.directory}/generated-sources/openapi</directory>
-            </directories>
-            </configuration>
-            </plugin>
-         -->
-         <!--
-         <plugin>
-            <groupId>com.coveo</groupId>
-            <artifactId>fmt-maven-plugin</artifactId>
-            <version>2.9</version>
-            <configuration>
-               <sourceDirectory>${project.build.directory}/generated-sources/openapi</sourceDirectory>
-               <lineLength>180</lineLength>
-               <indentSize>3</indentSize>
-               <filesNamePattern>.*\.java</filesNamePattern>
-               <skipSortingImports>false</skipSortingImports>
-               <style>google</style>
-            </configuration>
-            <executions>
-               <execution>
-                  <id>format-generated-code</id>
-                  <phase>process-sources</phase>
-                  <goals>
-                     <goal>format</goal>
-                  </goals>
-               </execution>
-            </executions>
-         </plugin>
-         -->
          <plugin>
             <groupId>org.eclipse.tycho</groupId>
             <artifactId>target-platform-configuration</artifactId>
@@ -261,24 +206,16 @@
    </build>
 
    <dependencies>
-   <!--
-      <dependency>
-         <groupId>org.junit.jupiter</groupId>
-         <artifactId>junit-jupiter-api</artifactId>
-         <version>5.4.2</version>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.junit.jupiter</groupId>
-         <artifactId>junit-jupiter-engine</artifactId>
-         <version>5.4.2</version>
-         <scope>test</scope>
-      </dependency>
--->
       <dependency>
          <groupId>org.immutables</groupId>
          <artifactId>value-annotations</artifactId>
-         <version>2.7.4</version>
+         <version>2.8.3</version>
+         <scope>provided</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.immutables</groupId>
+         <artifactId>value</artifactId>
+         <version>2.8.3</version>
          <scope>provided</scope>
       </dependency>
 
