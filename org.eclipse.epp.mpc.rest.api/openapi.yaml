@@ -57,9 +57,10 @@ paths:
             * GPL  
           required: false
           schema:
-            $ref: "#/components/schemas/license_type"
+            type: array
+            items: 
+              $ref: "#/components/schemas/license_type"
           style: form
-          explode: true
         - name: sort
           in: query
           description: |
@@ -93,12 +94,18 @@ paths:
           in: query
           description: Comma-delimited list of listing IDs to retrieve for the call.
           schema:
-            type: string
+            type: array
+            items:
+              $ref: "#/components/schemas/ObjectID"
+          style: form
         - name: tags
           in: query
           description: Comma-delimited list of tag names to filter results for.
           schema:
-            type: string
+            type: array
+            items: 
+              type: string
+          style: form
         - $ref: "#/components/parameters/platform_version"
         - $ref: "#/components/parameters/java_version"
         - $ref: "#/components/parameters/os"
