@@ -19,7 +19,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.epp.mpc.core.model.ICatalog;
 import org.eclipse.epp.mpc.core.service.ICatalogService;
 import org.eclipse.epp.mpc.rest.api.CatalogsApi;
+import org.eclipse.epp.mpc.rest.client.compatibility.mapping.CatalogMapper;
 import org.eclipse.epp.mpc.rest.model.Catalog;
+import org.mapstruct.factory.Mappers;
 
 public class CompatibilityCatalogService implements ICatalogService {
 
@@ -29,8 +31,8 @@ public class CompatibilityCatalogService implements ICatalogService {
 	@Override
 	public List<? extends ICatalog> listCatalogs(IProgressMonitor monitor) throws CoreException {
 		List<Catalog> catalogs = catalogsEndpoint.getCatalogs();
-		//TODO map Catalog to ICatalog using MapStruct
-		return null;
+		CatalogMapper mapper = Mappers.getMapper(CatalogMapper.class);
+		return mapper.mapAll(catalogs, mapper::toCatalog);
 	}
 
 }
