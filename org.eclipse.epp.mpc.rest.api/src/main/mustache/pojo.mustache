@@ -56,7 +56,7 @@ public interface {{classname}} {{#parent}}extends {{{parent}}}{{/parent}}{{#seri
   public {{classname}} with{{nameInCamelCase}}({{{datatypeWithEnum}}} {{name}});
 {{/isMapContainer}}{{/isListContainer}}
 {{#isListContainer}}
-//  public {{classname}} with{{nameInCamelCase}}({{{items.datatypeWithEnum}}}... {{name}});
+  public {{classname}} with{{nameInCamelCase}}({{#items}}{{>unboxed}}{{/items}}... {{name}});
   public {{classname}} with{{nameInCamelCase}}(Iterable<{{^items.isPrimitiveType}}? extends {{/items.isPrimitiveType}}{{{items.datatypeWithEnum}}}> {{name}});
 {{/isListContainer}}
 {{#isMapContainer}}
@@ -65,7 +65,7 @@ public interface {{classname}} {{#parent}}extends {{{parent}}}{{/parent}}{{#seri
 {{/isReadOnly}}
 {{/vars}}
 
-  default Builder copy() {
+  default Builder toBuilder() {
     return Builder.from(this);
   }
 
@@ -76,11 +76,11 @@ public interface {{classname}} {{#parent}}extends {{{parent}}}{{/parent}}{{#seri
   public static interface Builder {{#parent}}extends {{{parent}}}.Builder {{/parent}}{
 
     public static Builder create() {
-      return /*Immutable{{classname}}.builder();*/null;
+      return Immutable{{classname}}.builder();
     }
 
     public static Builder from({{classname}} instance) {
-      return /*Immutable{{classname}}.Builder.from(instance);*/null;
+      return Immutable{{classname}}.builder().from(instance);
     }
 
 {{#vars}}
@@ -90,8 +90,8 @@ public interface {{classname}} {{#parent}}extends {{{parent}}}{{/parent}}{{#seri
 {{/isMapContainer}}{{/isListContainer}}
 {{#isListContainer}}
     public Builder {{name}}(Iterable<{{^items.isPrimitiveType}}? extends {{/items.isPrimitiveType}}{{{items.datatypeWithEnum}}}> {{name}}Items);
-//    public Builder add{{nameInCamelCase}}({{{items.datatypeWithEnum}}} {{name}}Item);
-//    public Builder add{{nameInCamelCase}}({{{items.datatypeWithEnum}}}... {{name}}Items);
+    public Builder add{{nameInCamelCase}}({{#items}}{{>unboxed}}{{/items}} {{name}}Item);
+    public Builder add{{nameInCamelCase}}({{#items}}{{>unboxed}}{{/items}}... {{name}}Items);
     public Builder addAll{{nameInCamelCase}}(Iterable<{{^items.isPrimitiveType}}? extends {{/items.isPrimitiveType}}{{{items.datatypeWithEnum}}}> {{name}}Items);
 {{/isListContainer}}
 {{#isMapContainer}}

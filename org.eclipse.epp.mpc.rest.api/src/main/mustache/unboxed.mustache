@@ -1,0 +1,22 @@
+{{#isPrimitiveType}}{{!
+   }}{{#isEnum}}{{datatypeWithEnum}}{{/isEnum}}{{!
+   }}{{^isEnum}}{{!
+      }}{{#isByteArray}}{{datatypeWithEnum}}{{/isByteArray}}{{!
+      }}{{^isByteArray}}{{!
+         }}{{#isString}}String{{/isString}}{{!
+         }}{{#isInteger}}int{{/isInteger}}{{!
+         }}{{#isLong}}long{{/isLong}}{{!
+         }}{{#isFloat}}float{{/isFloat}}{{!
+         }}{{#isDouble}}double{{/isDouble}}{{!
+         }}{{#isBinary}}{{datatypeWithEnum}}{{/isBinary}}{{!
+         }}{{#isFile}}{{datatypeWithEnum}}{{/isFile}}{{!
+         }}{{#isBoolean}}boolean{{/isBoolean}}{{!
+         }}{{#isDate}}{{datatypeWithEnum}}{{/isDate}}{{!
+         }}{{#isDateTime}}{{datatypeWithEnum}}{{/isDateTime}}{{!
+         }}{{#isUuid}}{{datatypeWithEnum}}{{/isUuid}}{{!
+         }}{{#isUri}}{{datatypeWithEnum}}{{/isUri}}{{!
+         }}{{#isEmail}}{{datatypeWithEnum}}{{/isEmail}}{{!
+      }}{{/isByteArray}}{{!
+   }}{{/isEnum}}{{!
+}}{{/isPrimitiveType}}{{!
+}}{{^isPrimitiveType}}{{datatypeWithEnum}}{{/isPrimitiveType}}
