@@ -15,11 +15,17 @@ package org.eclipse.epp.mpc.rest.client.compatibility.mapping;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.rest.model.Market;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 
-@Mapper
-public interface IMarketMapper {
+@SuppressWarnings("restriction")
+@Mapper(uses = CategoryMapper.class)
+public abstract class MarketMapper extends AbstractMapper {
 
-	IMarket restToLegacyMarket(Market market);
+	public IMarket toMarket(Market market) {
+		return toMarketInternal(market);
+	}
 
-	Market legacyToRestMarket(IMarket market);
+	@Mappings({ @Mapping(source = "title", target = "name"), @Mapping(source = "categories", target = "category") })
+	abstract org.eclipse.epp.internal.mpc.core.model.Market toMarketInternal(Market market);
 }

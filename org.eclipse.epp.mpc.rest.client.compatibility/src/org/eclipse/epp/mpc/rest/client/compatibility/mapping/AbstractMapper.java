@@ -12,14 +12,17 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.rest.client.compatibility.mapping;
 
-import org.eclipse.epp.mpc.core.model.INode;
-import org.eclipse.epp.mpc.rest.model.Listing;
-import org.mapstruct.Mapper;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-@Mapper(uses = LegacyModelFactory.class)
-public interface IListingMapper {
+public abstract class AbstractMapper {
 
-	public INode restToLegacyListing(Listing listing);
+	public <S, T> List<T> mapAll(List<S> sources, Function<S, T> mappingFunction) {
+		return sources.stream().map(mappingFunction).collect(Collectors.toList());
+	}
 
-	public Listing legacyToRestListing(INode node);
+	public <S, T> T map(S source, Function<S, T> mappingFunction) {
+		return mappingFunction.apply(source);
+	}
 }

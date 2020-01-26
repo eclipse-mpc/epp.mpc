@@ -13,20 +13,28 @@
 package org.eclipse.epp.mpc.rest.client.compatibility.mapping;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.eclipse.epp.mpc.core.model.ICategories;
-import org.eclipse.epp.mpc.core.model.ICategory;
-import org.eclipse.epp.mpc.rest.model.Category;
+import org.eclipse.epp.internal.mpc.core.model.Platforms;
+import org.eclipse.epp.mpc.core.model.IPlatforms;
+import org.eclipse.epp.mpc.rest.model.SolutionVersion;
 import org.mapstruct.Mapper;
 
+@SuppressWarnings("restriction")
 @Mapper
-public interface ICategoryMapper {
+public class PlatformMapper extends AbstractMapper {
 
-	public ICategory restToLegacyCategory(Category category);
+	public IPlatforms toPlatforms(List<SolutionVersion> versions) {
+		return toPlatformsInternal(versions);
+	}
 
-	public Category legacyToRestCategory(ICategory category);
-
-	public ICategories restToLegacyCategories(List<Category> categories);
-
-	public List<Category> legacyToRestCategories(ICategories categories);
+	Platforms toPlatformsInternal(List<SolutionVersion> versions) {
+		List<String> allPlatforms = versions.stream()
+				.flatMap(v -> v.getPlatforms().stream())
+				.distinct()
+				.collect(Collectors.toList());
+		Platforms platforms = new Platforms();
+		platforms.setPlatform(allPlatforms);
+		return platforms;
+	}
 }

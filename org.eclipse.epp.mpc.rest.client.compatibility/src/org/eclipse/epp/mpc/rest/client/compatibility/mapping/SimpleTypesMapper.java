@@ -12,13 +12,17 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.rest.client.compatibility.mapping;
 
-import org.eclipse.epp.internal.mpc.core.model.Node;
-import org.eclipse.epp.mpc.core.model.INode;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
-public class LegacyModelFactory {
+import org.mapstruct.Mapper;
 
-	public INode createNode() {
-		return new Node();
+@Mapper
+public abstract class SimpleTypesMapper extends AbstractMapper {
+
+	public Date toDate(Long epoch) {
+		return epoch == null ? null
+				: new Calendar.Builder().setTimeZone(TimeZone.getDefault()).setInstant(epoch).build().getTime();
 	}
-
 }
