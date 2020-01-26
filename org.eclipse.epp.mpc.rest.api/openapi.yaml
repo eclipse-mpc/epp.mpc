@@ -79,7 +79,7 @@ paths:
             This value should be in the format of `fieldname [ASC|DESC]`. For example, `installsrecent DESC`
           required: false
           schema:
-            type: string
+            $ref: "#/components/schemas/sort_whitelist"
         - name: featured
           in: query
           description: If set to true, will randomize results based on a random seed and ignore sort clauses.
