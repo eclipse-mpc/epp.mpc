@@ -614,9 +614,11 @@ components:
           description: Full description
         created:
           type: integer
+          format: int64
           description: Timestamp
         changed:
           type: integer
+          format: int64
           description: Timestamp
         foundation_member:
           type: boolean
