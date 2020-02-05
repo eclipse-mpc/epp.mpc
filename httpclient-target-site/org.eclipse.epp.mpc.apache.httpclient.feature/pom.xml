@@ -10,7 +10,7 @@
    </parent>
    <artifactId>org.eclipse.epp.mpc.apache.httpclient.feature</artifactId>
    <name>HttpClient Wrapper Feature</name>
-   <version>4.5.6-SNAPSHOT</version>
+   <version>4.5.10-SNAPSHOT</version>
    <packaging>eclipse-feature</packaging>
 
    <build>

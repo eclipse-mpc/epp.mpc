@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.epp.mpc.apache.httpclient.feature"
       label="%featureName"
-      version="4.5.6.qualifier"
+      version="4.5.10.qualifier"
       provider-name="%providerName">
 
    <description>
