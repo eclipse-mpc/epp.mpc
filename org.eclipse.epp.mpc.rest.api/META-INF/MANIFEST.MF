@@ -17,4 +17,5 @@ Bundle-ClassPath: .,
  target/dependency/swagger-jaxrs-1.5.18.jar,
  target/dependency/jackson-annotations-2.9.3.jar,
  target/dependency/jackson-jaxrs-json-provider-2.9.9.jar,
- target/dependency/jackson-module-jaxb-annotations-2.9.9.jar
+ target/dependency/jackson-module-jaxb-annotations-2.9.9.jar,
+ target/dependency/javax.ws.rs-api-2.1.1.jar

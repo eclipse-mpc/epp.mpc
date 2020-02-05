@@ -10,8 +10,14 @@
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.epp.mpc.rest.client;
+package org.eclipse.epp.mpc.rest.client.internal.util;
 
-public interface IMarketplaceRestClientFactory {
-	public <E> E createRestClient(Class<E> endpointClass);
+import java.util.concurrent.Callable;
+
+import org.eclipse.core.runtime.CoreException;
+
+@FunctionalInterface
+public interface CoreCallable<T> extends Callable<T> {
+
+	T call() throws CoreException;
 }

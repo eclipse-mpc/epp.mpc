@@ -10,7 +10,7 @@
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.epp.internal.mpc.core.transport.httpclient;
+package org.eclipse.epp.mpc.rest.client.internal.httpclient;
 
 import java.util.HashMap;
 import java.util.Iterator;

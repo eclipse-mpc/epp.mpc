@@ -48,7 +48,7 @@ import org.eclipse.epp.mpc.rest.client.compatibility.mapping.CatalogMapper;
 import org.eclipse.epp.mpc.rest.client.compatibility.mapping.CategoryMapper;
 import org.eclipse.epp.mpc.rest.client.compatibility.mapping.MarketMapper;
 import org.eclipse.epp.mpc.rest.client.compatibility.mapping.NodeMapper;
-import org.eclipse.epp.mpc.rest.client.compatibility.util.CoreFunctions;
+import org.eclipse.epp.mpc.rest.client.internal.util.CoreFunctions;
 import org.eclipse.epp.mpc.rest.model.Catalog;
 import org.eclipse.epp.mpc.rest.model.Category;
 import org.eclipse.epp.mpc.rest.model.Listing;

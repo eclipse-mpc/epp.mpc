@@ -10,18 +10,17 @@
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.epp.mpc.rest.client.internal;
+package org.eclipse.epp.mpc.rest.client;
 
-import org.eclipse.epp.mpc.rest.client.IMarketplaceRestClientFactory;
+import java.net.URI;
 
-public class MarketplaceRestClientFactoryImpl implements IMarketplaceRestClientFactory {
+import org.eclipse.core.runtime.IProgressMonitor;
 
-	@Override
-	public <E> E createRestClient(Class<E> endpointClass) {
-		// TODO create REST client
-		// - using Resteasy (need to add Resteasy to Orbit)
-		// - based on HttpClient configured for platform (get from mpc.core, move code here, bind as service...)
-		return null;
-	}
+public interface IRestClient<E> {
 
+	URI getBaseUri();
+
+	E call();
+
+	E call(IProgressMonitor monitor);
 }

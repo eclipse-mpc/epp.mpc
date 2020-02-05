@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.eclipse.epp.mpc</groupId>
-    <artifactId>org.eclipse.epp.mpc-bundle</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
-    <relativePath>../org.eclipse.epp.mpc-parent/bundle</relativePath>
-  </parent>
-  <artifactId>org.eclipse.epp.mpc.rest.client</artifactId>
-  <packaging>eclipse-plugin</packaging>
-
+<project
+   xmlns="http://maven.apache.org/POM/4.0.0"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+   <modelVersion>4.0.0</modelVersion>
+   <parent>
+      <groupId>org.eclipse.epp.mpc</groupId>
+      <artifactId>org.eclipse.epp.mpc-bundle</artifactId>
+      <version>2.0.0-SNAPSHOT</version>
+      <relativePath>../org.eclipse.epp.mpc-parent/bundle</relativePath>
+   </parent>
+   <artifactId>org.eclipse.epp.mpc.rest.client.tests</artifactId>
+   <packaging>eclipse-test-plugin</packaging>
 
    <dependencyManagement>
       <dependencies>
@@ -51,7 +51,25 @@
       </dependency>
    </dependencies>
    <build>
+      <pluginManagement>
+         <plugins>
+            <plugin>
+               <groupId>org.eclipse.tycho</groupId>
+               <artifactId>tycho-surefire-plugin</artifactId>
+               <configuration>
+                  <forkedProcessTimeoutInSeconds>1500</forkedProcessTimeoutInSeconds>
+                  <product>org.eclipse.sdk.ide</product>
+                  <application>org.eclipse.ui.ide.workbench</application>
+                  <testSuite>org.eclipse.epp.mpc.rest.client.tests</testSuite>
+               </configuration>
+            </plugin>
+         </plugins>
+      </pluginManagement>
       <plugins>
+         <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>tycho-surefire-plugin</artifactId>
+         </plugin>
          <plugin>
             <groupId>org.eclipse.tycho</groupId>
             <artifactId>target-platform-configuration</artifactId>

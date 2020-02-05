@@ -37,6 +37,8 @@ import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.util.UserAgentUtil;
 import org.eclipse.epp.mpc.core.service.ITransport;
 import org.eclipse.epp.mpc.core.service.ServiceUnavailableException;
+import org.eclipse.epp.mpc.rest.client.internal.httpclient.HttpClientFactory;
+import org.eclipse.epp.mpc.rest.client.internal.httpclient.HttpClientProxyUtil;
 
 public class HttpClientTransport implements ITransport {
 

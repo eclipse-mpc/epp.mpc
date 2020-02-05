@@ -10,20 +10,20 @@
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.epp.mpc.rest.client.compatibility.util;
+package org.eclipse.epp.mpc.rest.client.internal.util;
 
-import java.util.function.Predicate;
+import java.util.function.Function;
 
 import org.eclipse.core.runtime.CoreException;
 
 @FunctionalInterface
-public interface CorePredicate<T> {
-	boolean test(T t) throws CoreException;
+public interface CoreFunction<T, R> {
+	R apply(T t) throws CoreException;
 
-	default Predicate<T> wrap() {
+	default Function<T, R> wrap() {
 		return t -> {
 			try {
-				return test(t);
+				return apply(t);
 			} catch (CoreException ex) {
 				throw new RuntimeCoreException(ex);
 			}

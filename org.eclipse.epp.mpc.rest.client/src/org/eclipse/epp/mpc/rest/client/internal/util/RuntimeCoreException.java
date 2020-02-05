@@ -10,11 +10,12 @@
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.epp.mpc.rest.client.compatibility.util;
+package org.eclipse.epp.mpc.rest.client.internal.util;
 
 import java.util.Objects;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 public class RuntimeCoreException extends RuntimeException {
 
@@ -34,5 +35,19 @@ public class RuntimeCoreException extends RuntimeException {
 
 	public RuntimeCoreException initCause(CoreException cause) {
 		return (RuntimeCoreException) super.initCause(cause);
+	}
+
+	public IStatus getStatus() {
+		return getCause().getStatus();
+	}
+
+	@Override
+	public String getMessage() {
+		return getCause().getMessage();
+	}
+
+	@Override
+	public String getLocalizedMessage() {
+		return getCause().getLocalizedMessage();
 	}
 }
