@@ -45,7 +45,7 @@ public class RemoteMarketplaceService<T> {
 
 	public static final String API_URI_SUFFIX = "api/p"; //$NON-NLS-1$
 
-	protected static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
+	private static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
 
 	private static final int RETRY_COUNT = 3;
 

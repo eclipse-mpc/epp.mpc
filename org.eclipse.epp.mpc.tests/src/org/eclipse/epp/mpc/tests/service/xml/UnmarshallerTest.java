@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.StandardCharsets;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -467,7 +468,7 @@ public class UnmarshallerTest {
 	@Test(expected = UnmarshalException.class)
 	public void invalidLeadingSpace() throws Exception {
 		ByteBuffer buffer = ByteBuffer.allocate(4096);
-		buffer.put("  ".getBytes("UTF-8"));
+		buffer.put("  ".getBytes(StandardCharsets.UTF_8));
 		buffer = readResource("resources/catalogs.xml", buffer);
 		buffer.flip();
 		process(buffer);
@@ -588,7 +589,7 @@ public class UnmarshallerTest {
 	}
 
 	private Object process(String content) throws IOException, UnmarshalException {
-		return process(content.getBytes("UTF-8"));
+		return process(content.getBytes(StandardCharsets.UTF_8));
 	}
 
 	private Object process(ByteBuffer buffer) throws IOException, UnmarshalException {
