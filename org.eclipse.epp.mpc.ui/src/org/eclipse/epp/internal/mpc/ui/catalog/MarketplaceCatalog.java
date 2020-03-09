@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory.Contents;
+import org.eclipse.epp.internal.mpc.ui.operations.RepositoryTransactionHelper;
 import org.eclipse.epp.internal.mpc.ui.util.ConcurrentTaskManager;
 import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IMarket;
@@ -53,6 +54,7 @@ import org.eclipse.equinox.p2.operations.ProvisioningSession;
 import org.eclipse.equinox.p2.query.IQuery;
 import org.eclipse.equinox.p2.query.IQueryResult;
 import org.eclipse.equinox.p2.query.QueryUtil;
+import org.eclipse.equinox.p2.repository.artifact.IArtifactRepositoryManager;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepository;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepositoryManager;
 import org.eclipse.equinox.p2.ui.ProvisioningUI;
@@ -298,7 +300,17 @@ public class MarketplaceCatalog extends Catalog {
 
 		ConcurrentTaskManager executor = new ConcurrentTaskManager(installedCatalogItemsByUpdateUri.size(),
 				Messages.MarketplaceCatalog_checkingForUpdates);
-		try {
+
+		ProvisioningSession session = ProvisioningUI.getDefaultUI().getSession();
+		IMetadataRepositoryManager metadataRepositoryManager = (IMetadataRepositoryManager) session
+				.getProvisioningAgent()
+				.getService(IMetadataRepositoryManager.SERVICE_NAME);
+		IArtifactRepositoryManager artifactRepositoryManager = (IArtifactRepositoryManager) session
+				.getProvisioningAgent()
+				.getService(IArtifactRepositoryManager.SERVICE_NAME);
+
+		try (RepositoryTransactionHelper repositories = new RepositoryTransactionHelper(metadataRepositoryManager,
+				artifactRepositoryManager)) {
 			final IProgressMonitor pm = new NullProgressMonitor() {
 				@Override
 				public boolean isCanceled() {
@@ -308,17 +320,30 @@ public class MarketplaceCatalog extends Catalog {
 			for (Map.Entry<URI, List<MarketplaceNodeCatalogItem>> entry : installedCatalogItemsByUpdateUri.entrySet()) {
 				final URI uri = entry.getKey();
 				final List<MarketplaceNodeCatalogItem> catalogItemsThisSite = entry.getValue();
+
+				//bug 560062 - add both artifact and metadata repo in case something breaks before we can clean up
+				repositories.addRepository(uri);
+
 				executor.submit(() -> {
-					ProvisioningSession session = ProvisioningUI.getDefaultUI().getSession();
-					IMetadataRepositoryManager manager = (IMetadataRepositoryManager) session.getProvisioningAgent()
-							.getService(IMetadataRepositoryManager.SERVICE_NAME);
 					try {
 						for (MarketplaceNodeCatalogItem item1 : catalogItemsThisSite) {
 							if (Boolean.TRUE.equals(item1.getAvailable())) {
 								item1.setAvailable(null);
 							}
 						}
-						IMetadataRepository repository = manager.loadRepository(uri, pm);
+						//bug 560062 - to be safe load the artifact repo as well, even though we don't need it here - and do it first because
+						//it's better to have artifact without meta than the other way around.
+						//see comments in RepositoryTransactionHelper.RepositoryTracker.init() for why we fully load artifact repos as well.
+						//TODO this needs a closer look - can we do without this without retriggering bug 560062? It's a serious performance killer...
+						artifactRepositoryManager.loadRepository(uri, pm);
+						if (pm.isCanceled()) {
+							return;
+						}
+						IMetadataRepository repository = metadataRepositoryManager.loadRepository(uri, pm);
+						if (pm.isCanceled()) {
+							return;
+						}
+
 						IQuery<IInstallableUnit> query = QueryUtil.createMatchQuery( //
 								"id ~= /*.feature.group/ && " + //$NON-NLS-1$
 								"properties['org.eclipse.equinox.p2.type.group'] == true ");//$NON-NLS-1$
