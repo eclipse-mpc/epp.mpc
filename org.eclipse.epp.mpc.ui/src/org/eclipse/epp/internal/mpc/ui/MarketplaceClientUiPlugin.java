@@ -175,15 +175,15 @@ public class MarketplaceClientUiPlugin extends AbstractUIPlugin {
 				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/noiconprovided32.png").get()); //$NON-NLS-1$
 		imageRegistry.put(DEFAULT_MARKETPLACE_ICON,
 				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/marketplace_banner.png").get()); //$NON-NLS-1$
-		imageRegistry.put(IU_ICON, imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/iu_obj.gif").get()); //$NON-NLS-1$
+		imageRegistry.put(IU_ICON, imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/iu_obj.png").get()); //$NON-NLS-1$
 		imageRegistry.put(IU_ICON_UPDATE,
-				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/iu_update_obj.gif").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/iu_update_obj.png").get()); //$NON-NLS-1$
 		imageRegistry.put(IU_ICON_INSTALL,
-				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/iu_install_obj.gif").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/iu_install_obj.png").get()); //$NON-NLS-1$
 		imageRegistry.put(IU_ICON_UNINSTALL,
-				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/iu_uninstall_obj.gif").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/iu_uninstall_obj.png").get()); //$NON-NLS-1$
 		imageRegistry.put(IU_ICON_DISABLED,
-				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/iu_disabled_obj.gif").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/iu_disabled_obj.png").get()); //$NON-NLS-1$
 		{
 			ImageDescriptor errorOverlay = PlatformUI.getWorkbench()
 					.getSharedImages()
