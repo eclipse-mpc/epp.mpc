@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.epp.mpc.rest.model.SolutionVersion;
+import org.eclipse.epp.mpc.rest.model.ListingVersion;
 
 public class SolutionVersionUtil {
 
@@ -26,9 +26,9 @@ public class SolutionVersionUtil {
 
 	private static final Pattern NUMBER_PATTERN = Pattern.compile("\\d+"); //$NON-NLS-1$
 
-	public static Optional<SolutionVersion> newestApplicableVersion(List<SolutionVersion> versions) {
+	public static Optional<ListingVersion> newestApplicableVersion(List<ListingVersion> versions) {
 		//TODO filter by applicable SolutionVersion according to current platform etc
-		return versions.stream().sorted(Comparator.<SolutionVersion, String> comparing(v -> {
+		return versions.stream().sorted(Comparator.<ListingVersion, String> comparing(v -> {
 			Matcher paddingMatcher = NUMBER_PATTERN.matcher(v.getVersion());
 			StringBuffer sb = new StringBuffer();
 			while (paddingMatcher.find()) {

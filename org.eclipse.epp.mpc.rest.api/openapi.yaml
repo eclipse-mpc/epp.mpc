@@ -12,11 +12,15 @@ servers:
   description: Production endpoint for Eclipse Marketplace API
 tags:
   - name: Listings
-    description: Definitions for marketplace listings and their versions
+    description: Definitions for marketplace listings
+  - name: Listing Versions
+    description: Definitions for marketplace listing versions
   - name: Catalogs
     description: Marketplace catalog definitions
   - name: Categories
     description: Market categories
+  - name: Error reports
+    description: Listing error reports
   - name: Installs
     description: Access to listing install stats
   - name: Markets
@@ -125,7 +129,7 @@ paths:
         - Listings
       operationId: put-listing
       summary: Listing update
-      description: Using the passed listing object, updates, or in the case of new data inserts, are made in the data set to include the new information.
+      description: Using the passed listing object, updates, or in the case of new data inserts, are made in the data set to include the new information. User must be authorized to update items to access this endpoint.
       requestBody:
         description: The listing to be updated or inserted into the data set.
         content:
@@ -151,9 +155,7 @@ paths:
         description: Unique ID of an individual listing
         required: true
         schema:
-          type: integer
-          format: int32
-          minimum: 1
+          type: string
       - $ref: "#/components/parameters/platform_version"
       - $ref: "#/components/parameters/java_version"
       - $ref: "#/components/parameters/os"
@@ -174,29 +176,107 @@ paths:
           description: No listing found
         500:
           description: Error while retrieving data
+    delete:
+      tags:
+        - Listings
+      summary: Delete listing
+      description: Deletes a single listing that has a matching ID. User must be authorized to delete items to access this endpoint.
+      responses:
+        200:
+          description: Success
+        403:
+          description: Unauthorized
+          
+  /listing_versions:
+    get:
+      tags:
+        - Listing Versions
+      summary: Listing version list
+      description: Retrieves a list of listing versions available within the marketplace.
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListingVersions"
+        500:
+          description: Error while retrieving data
+    put:
+      tags:
+        - Listing Versions
+      summary: Listing version update
+      description: Add or update information about a listing version in the marketplace. User must be authorized to update items to access this endpoint.
+      requestBody:
+        description: The listing version to be updated or inserted into the data set.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListingVersion"
+      responses:
+        200:
+          description: Success
+        500:
+          description: Error while inserting data
 
-  /listings/{listing_id}/installs:
+  /listing_versions/{version_id}:
+    parameters:
+      - name: version_id
+        in: path
+        description: Unique ID of an individual listing version
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Listing Versions
+      summary: Listing Version
+      description: Retrieve a single listing version within the marketplace, matching on its ID.
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListingVersion"
+        500:
+          description: Error while retrieving data
+    delete:
+      tags:
+        - Listing Versions
+      summary: Delete Listing version
+      description: Deletes a single listing version that has a matching ID. User must be authorized to delete items to access this endpoint.
+      responses:
+        200:
+          description: Success
+        403:
+          description: Unauthorized
+        404:
+          description: No listing version found
+
+
+  /installs/{listing_id}:
     parameters:
       - name: listing_id
         in: path
         description: Unique ID of an individual listing
         required: true
         schema:
-          type: integer
-          format: int32
-          minimum: 1
+          type: string
       - $ref: "#/components/parameters/platform_version"
       - $ref: "#/components/parameters/java_version"
       - $ref: "#/components/parameters/os"
-      - $ref: "#/components/parameters/country"
       - $ref: "#/components/parameters/page"
       - $ref: "#/components/parameters/limit"
     get:
       tags:
         - Installs
       operationId: get-installs
-      summary: Installation list by Listing
-      description: Retrieve install metrics for marketplace a listing by its unique ID. These stats will include available metrics for the last 12 months, as well as the overall install statistics. The parameters that are available for this call act as filters for the statistics, allowing for greater flexibility of analysis of the Installation stats.
+      summary: Installation count by listing ID
+      description: Retrieve count of installs for marketplace a listing by its unique ID. The parameters that are available for this call act as filters for the statistics, allowing for greater flexibility of analysis of the Installation stats.
       responses:
         200:
           description: Success
@@ -206,25 +286,44 @@ paths:
                 $ref: "#/components/schemas/Installs"
         404:
           description: No listing found
-
-  /listings/{listing_id}/version/{versionNumber}/installs:
+          
+  /installs/{listing_id}/metrics:
     parameters:
       - name: listing_id
         in: path
         description: Unique ID of an individual listing
         required: true
         schema:
-          type: integer
-          format: int32
-          minimum: 1
-      - name: versionNumber
+          type: string
+    get:
+      tags:
+        - Installs
+      summary: Install metrics by listing ID
+      description: Retrieve install metrics for a marketplace listing by listing ID.
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Installs"
+        404:
+          description: No listing metrics found
+
+  /installs/{listing_id}/{version_id}:
+    parameters:
+      - name: listing_id
         in: path
-        description: Numeric ID for the version that is being updated
+        description: Unique ID of an individual listing
         required: true
         schema:
-          type: number
-          format: float
-          minimum: 0
+          type: string
+      - name: version_id
+        in: path
+        description: Unique ID for the version that is being updated
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - Installs
@@ -233,11 +332,9 @@ paths:
         - $ref: "#/components/parameters/java_version"
         - $ref: "#/components/parameters/os"
         - $ref: "#/components/parameters/country"
-        - $ref: "#/components/parameters/page"
-        - $ref: "#/components/parameters/limit"
       operationId: get-installs-for-version
-      description: Retrieve install metrics for the given marketplace listing and version by its unique listing ID and version number. These stats will include available metrics for the last 12 months, as well as the overall install statistics for the version. The parameters that are available for this call act as filters for the statistics, allowing for greater flexibility of analysis of the Installation stats.
-      summary: Installation list by Solution Version
+      description: Retrieve number of installs for the given marketplace listing and version by its unique listing ID and version number. The parameters that are available for this call act as filters for the statistics, allowing for greater flexibility of analysis of the Installation stats.
+      summary: Count of installs for given listing version install
       responses:
         200:
           description: Success
@@ -282,7 +379,7 @@ paths:
         - Catalogs
       operationId: put-catalog
       summary: Catalog update
-      description: Add or update information about a catalog in the marketplace.
+      description: Add or update information about a catalog in the marketplace. User must be authorized to update items to access this endpoint.
       requestBody:
         description: The catalog to be updated or inserted into the data set.
         content:
@@ -308,9 +405,7 @@ paths:
         description: Unique ID of an individual catalog
         required: true
         schema:
-          type: integer
-          format: int32
-          minimum: 1
+          type: string
     get:
       tags:
         - Catalogs
@@ -328,6 +423,18 @@ paths:
           description: No catalog found
         500:
           description: Error while retrieving data
+    delete:
+      tags:
+        - Catalogs
+      summary: Delete catalog
+      description: Deletes a single listing that has a matching ID. User must be authorized to delete items to access this endpoint.
+      responses:
+        200:
+          description: Success
+        403:
+          description: Unauthorized
+        404:
+          description: No catalog found
 
   /markets:
     get:
@@ -353,7 +460,7 @@ paths:
         - Markets
       operationId: put-market
       summary: Market update
-      description: Add or update information about a market in the marketplace.
+      description: Add or update information about a market in the marketplace. User must be authorized to update items to access this endpoint.
       requestBody:
         description: The market to be updated or inserted into the data set.
         content:
@@ -363,12 +470,6 @@ paths:
       responses:
         200:
           description: Success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Catalog"
-        201:
-          description: Success (no content)
         500:
           description: Error while inserting data
 
@@ -379,9 +480,7 @@ paths:
         description: Unique ID of an individual market
         required: true
         schema:
-          type: integer
-          format: int32
-          minimum: 1
+          type: string
     get:
       tags:
         - Markets
@@ -397,43 +496,18 @@ paths:
                 $ref: "#/components/schemas/Market"
         500:
           description: Error while retrieving data
-          
-  /markets/{market_id}/categories/{category_id}:
-    parameters:
-      - name: market_id
-        in: path
-        description: Unique ID of an individual market
-        required: true
-        schema:
-          type: integer
-          format: int32
-          minimum: 1
-      - name: category_id
-        in: path
-        description: Unique ID of an individual category for market
-        required: true
-        schema:
-          type: integer
-          format: int32
-          minimum: 1
-      - $ref: "#/components/parameters/page"
-      - $ref: "#/components/parameters/limit"
-    get:
+    delete:
       tags:
-        - Categories
-      # TODO what do we need this for?
-      operationId: get-market-category
-      summary: Category by Market
-      description: Retrieves a category in context of its market in the marketplace. 
+        - Markets
+      summary: Delete Market
+      description: Deletes a single market that has a matching ID. User must be authorized to delete items to access this endpoint.
       responses:
         200:
           description: Success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Market"
-        500:
-          description: Error while retrieving data
+        403:
+          description: Unauthorized
+        404:
+          description: No market found
 
   /categories:
     get:
@@ -459,7 +533,7 @@ paths:
         - Categories
       operationId: put-category
       summary: Category update
-      description: Add or update information about a category in the marketplace.
+      description: Add or update information about a category in the marketplace. User must be authorized to update items to access this endpoint.
       requestBody:
         description: The market to be updated or inserted into the data set.
         content:
@@ -478,16 +552,14 @@ paths:
         500:
           description: Error while inserting data
           
-  /categories/{catagoryID}:
+  /categories/{categoryID}:
     parameters:
-      - name: catagoryID
+      - name: categoryID
         in: path
-        description: Unique ID of an individual catalog
+        description: Unique ID of an individual category
         required: true
         schema:
-          type: integer
-          format: int32
-          minimum: 1
+          type: string
     get:
       tags:
         - Categories
@@ -505,6 +577,96 @@ paths:
           description: Not found
         500:
           description: Error while retrieving data
+    delete:
+      tags:
+        - Categories
+      summary: Delete category
+      description: Deletes a single category that has a matching ID. User must be authorized to delete items to access this endpoint.
+      responses:
+        200:
+          description: Success
+        403:
+          description: Unauthorized
+        404:
+          description: No category found
+          
+  /error_report:
+    get:
+      tags:
+        - Error reports
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+      summary: Error reports list
+      description: Retrieves a list of error reports available within the marketplace.
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReports"
+        500:
+          description: Error while retrieving data
+    put:
+      tags:
+        - Error reports
+      summary: Error reports update
+      description: Add or update information about a error report in the marketplace. User must be authorized to update items to access this endpoint.
+      requestBody:
+        description: The error report to be updated or inserted into the data set.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ErrorReport"
+      responses:
+        200:
+          description: Success
+        201:
+          description: Success (no content)
+        403:
+          description: Not authorized
+        500:
+          description: Error while inserting data
+          
+  /error_report/{errorReportID}:
+    parameters:
+      - name: errorReportID
+        in: path
+        description: Unique ID of an individual error report
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Error reports
+      summary: Error report
+      description: Retrieves an error report available within the marketplace, matched on its ID.
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorReport"
+        404:
+          description: Not found
+        500:
+          description: Error while retrieving data
+    delete:
+      tags:
+        - Error reports
+      summary: Delete error report
+      description: Deletes a single error report that has a matching ID. User must be authorized to delete items to access this endpoint.
+      responses:
+        200:
+          description: Success
+        403:
+          description: Unauthorized
+        404:
+          description: No error report found
+        500:
+          description: Error while removing error report
 
 components:
   parameters:
@@ -578,7 +740,17 @@ components:
           type: array
           items: 
             $ref: "#/components/schemas/Category"
-          description: Array of categories in which this listing appears.
+          description: Array of categories in which this listing appears. This field does not impact categories present in a listing when posting, and is only a reflection of categories set in the 'category_ids' field.
+        market_ids:
+          type: array
+          description: List of IDs of markets this listing should be listed in 
+          items:
+            type: string
+        category_ids:
+          type: array
+          description: List of IDs of categories this listing should be listed in 
+          items:
+            type: string
         tags:
           type: array
           items: 
@@ -629,24 +801,24 @@ components:
         logo:
           type: string
           description: Logo absolute URL
-        license:
+        license_type:
           type: string
           description: Listing license
         organization:
-          type: array
-          description: Organizations involved with the development of the listing
-          items:
-            $ref: "#/components/schemas/Organization"
+          $ref: "#/components/schemas/Organization"
         status:
           type: string
           description: Release status
         support_url:
           type: string
           description: Support/documentation URL
-        versions:
+        screenshots:
           type: array
-          items: 
-            $ref: "#/components/schemas/SolutionVersion"
+          description: List of screenshot URLs showcasing the listing
+          items:
+            type: string
+        versions:
+          $ref: "#/components/schemas/ListingVersions"
 
     Listings:
       type: array
@@ -712,10 +884,6 @@ components:
         url:
           type: string
           description: URL to retrieve the category details.
-        market_ids: 
-          type: array
-          items:
-            $ref: "#/components/schemas/ObjectID"
 
     Market:
       type: object
@@ -727,7 +895,7 @@ components:
           description: Listing Title
         url:
           type: string
-          description: URL to retrieve the category details.
+          description: URL to retrieve the market details.
         categories:
           type: array
           items: 
@@ -741,8 +909,7 @@ components:
         
     ObjectID:
       description: Unique identifier for an addressable object in the API.
-      type: integer
-      format: int32
+      type: string
       minimum: 1           
 
     Catalogs:
@@ -821,12 +988,22 @@ components:
 
     osgiVersion:
       type: number
-      format: float
+      format: float # TODO also use string here?
       description: Describes the version of OSGi the given platform is using
     
-    SolutionVersion:
+    ListingVersions:
+      type: array
+      items:
+        $ref: "#/components/schemas/ListingVersion"
+    
+    ListingVersion:
       type: object
       properties:
+        id:
+          $ref: "#/components/schemas/ObjectID"
+        listing_id:
+          description: The listing ID this solution version represents
+          $ref: "#/components/schemas/ObjectID"
         version:
           type: string
           description: Version name string
@@ -845,13 +1022,78 @@ components:
             type: string
         min_java_version:
           type: string
-          description: The minimum Java version required to run the given solution
+          description: The minimum Java version required to run the given solution. This should be solely the release number (e.g. "7" for Java 7).
         feature_ids:
-          type: array
-          description: Describes additional feature packages available for install with the current version
-          items:
-            $ref: "#/components/schemas/Feature"
+          $ref: "#/components/schemas/FeatureIDs"
 
+    Install:
+      type: object
+      description: Install record for a listing install that tracks environment information as well as which listing and version was installed.
+      properties:
+        id:
+          $ref: "#/components/schemas/ObjectID"
+        installDate:
+          description: Install date for the current record in RFC 3339 format. Example, `1990-12-31T15:59:60-08:00`.
+          type: string
+          format: datetime
+        os:
+          type: string
+          description: The OS detected for the record
+        version:
+          $ref: "#/components/schemas/ObjectID"
+          description: ID of the Listing version that was installed
+        listing_id:
+          $ref: "#/components/schemas/ObjectID"
+          description: ID of the Listing that was installed
+        java_version:
+          type: string
+          description: Detected Java version for this record
+        eclipse_version:
+          type: string
+          description: Eclipse release number (4.5, 4.4...)
+        locale:
+          type: string
+          description: Configured locale of the workspace for the install record
+
+    ErrorReports:
+      type: array
+      items:
+        $ref: "#/components/schemas/ErrorReport"
+
+    ErrorReport:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ObjectID"
+        listing_id:
+          $ref: "#/components/schemas/ObjectID"
+        title:
+          type: string
+          description: Title of the error report
+        body:
+          type: string
+          description: Information about the error.
+        status:
+          type: string
+          description: Status code associated with the error
+        status_message:
+          type: string
+          description: Message from the system concerning the error
+        detailed_message:
+          type: string
+          description: Message concerning how the error occurred from the user.
+        read:
+          type: boolean
+          description: Whether the error report has been read/acknowledged by a listing administrator/author. 
+        feature_ids:
+          $ref: "#/components/schemas/FeatureIDs"
+          
+    FeatureIDs:
+      type: array
+      description: Describes additional feature packages available for install with the current version
+      items:
+        $ref: "#/components/schemas/Feature"
+        
     Feature:
       type: object
       properties:
@@ -869,15 +1111,12 @@ components:
     Installs:
       type: object
       properties:
-        monthly_stats:
+        periods:
           type: array
           minItems: 11
           items:
             $ref: "#/components/schemas/InstallStat"
-        install_count_recent:
-          type: number
-          description: The number of installs in the last month for the given resource
-        install_count:
+        total:
           type: number
           description: The number of historic installs for the given resource
 

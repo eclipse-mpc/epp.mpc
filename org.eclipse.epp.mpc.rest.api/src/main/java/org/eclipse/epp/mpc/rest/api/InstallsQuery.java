@@ -20,19 +20,19 @@ import org.immutables.value.Value.Immutable;
 @Immutable
 public interface InstallsQuery {
 
-	int listingId();
+	String listingId();
 
 	Optional<String> country();
 
-	Optional<Float> version();
+	Optional<String> version();
 
 	Optional<PlatformInfo> platform();
 
-	InstallsQuery withListingId(int id);
+	InstallsQuery withListingId(String id);
 
 	InstallsQuery withCountry(String country);
 
-	InstallsQuery withVersion(float version);
+	InstallsQuery withVersion(String version);
 
 	InstallsQuery withPlatform(PlatformInfo platform);
 
@@ -55,17 +55,17 @@ public interface InstallsQuery {
 			return ImmutableInstallsQuery.builder().from(instance);
 		}
 
-		Builder listingId(int id);
+		Builder listingId(String id);
 
 		Builder country(Optional<String> country);
 
-		Builder version(Optional<Float> version);
+		Builder version(Optional<String> version);
 
 		Builder platform(Optional<? extends PlatformInfo> platform);
 
 		Builder country(String country);
 
-		Builder version(float version);
+		Builder version(String version);
 
 		Builder platform(PlatformInfo platform);
 

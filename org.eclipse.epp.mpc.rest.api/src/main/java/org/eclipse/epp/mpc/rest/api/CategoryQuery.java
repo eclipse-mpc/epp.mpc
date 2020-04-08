@@ -19,13 +19,13 @@ import org.immutables.value.Value.Immutable;
 
 @Immutable
 public interface CategoryQuery {
-	Optional<Integer> marketId();
+	Optional<String> marketId();
 
-	Optional<Integer> categoryId();
+	Optional<String> categoryId();
 
-	CategoryQuery withMarketId(int id);
+	CategoryQuery withMarketId(String id);
 
-	CategoryQuery withCategoryId(int id);
+	CategoryQuery withCategoryId(String id);
 
 	default Builder toBuilder() {
 		return Builder.from(this);
@@ -45,13 +45,13 @@ public interface CategoryQuery {
 			return ImmutableCategoryQuery.builder().from(instance);
 		}
 
-		Builder marketId(Optional<Integer> id);
+		Builder marketId(Optional<String> id);
 
-		Builder categoryId(Optional<Integer> id);
+		Builder categoryId(Optional<String> id);
 
-		Builder marketId(int id);
+		Builder marketId(String id);
 
-		Builder categoryId(int id);
+		Builder categoryId(String id);
 
 		CategoryQuery build();
 	}

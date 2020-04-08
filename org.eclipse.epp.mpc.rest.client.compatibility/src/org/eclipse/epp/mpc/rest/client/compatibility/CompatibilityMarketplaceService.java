@@ -14,7 +14,6 @@ package org.eclipse.epp.mpc.rest.client.compatibility;
 
 import java.net.URI;
 import java.net.URL;
-import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +26,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IFavoriteList;
-import org.eclipse.epp.mpc.core.model.IIdentifiable;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INews;
 import org.eclipse.epp.mpc.core.model.INode;
@@ -48,7 +46,6 @@ import org.eclipse.epp.mpc.rest.client.compatibility.mapping.CatalogMapper;
 import org.eclipse.epp.mpc.rest.client.compatibility.mapping.CategoryMapper;
 import org.eclipse.epp.mpc.rest.client.compatibility.mapping.MarketMapper;
 import org.eclipse.epp.mpc.rest.client.compatibility.mapping.NodeMapper;
-import org.eclipse.epp.mpc.rest.client.compatibility.util.CoreFunctions;
 import org.eclipse.epp.mpc.rest.model.Catalog;
 import org.eclipse.epp.mpc.rest.model.Category;
 import org.eclipse.epp.mpc.rest.model.Listing;
@@ -73,7 +70,7 @@ public class CompatibilityMarketplaceService implements IMarketplaceService {
 			.withDefaultPlatform(platformInfo())
 			.withDefaultPage(pagingInfo());
 
-	private Integer catalogId;
+	private String catalogId;
 
 	private PagingInfo pagingInfo() {
 		// TODO
@@ -107,21 +104,21 @@ public class CompatibilityMarketplaceService implements IMarketplaceService {
 
 	@Override
 	public IMarket getMarket(IMarket market, IProgressMonitor monitor) throws CoreException {
-		Market result = marketsEndpoint.getMarket(mapId(market));
+		Market result = marketsEndpoint.getMarket(market.getId());
 		MarketMapper mapper = Mappers.getMapper(MarketMapper.class);
 		return mapper.toMarket(result);
 	}
 
 	@Override
 	public ICategory getCategory(ICategory category, IProgressMonitor monitor) throws CoreException {
-		Category result = categoriesEndpoint.getCategory(mapId(category));
+		Category result = categoriesEndpoint.getCategory(category.getId());
 		CategoryMapper mapper = Mappers.getMapper(CategoryMapper.class);
 		return mapper.toCategory(result);
 	}
 
 	@Override
 	public INode getNode(INode node, IProgressMonitor monitor) throws CoreException {
-		Listing listing = requestHelper.getListing(listingsEndpoint, mapId(node));
+		Listing listing = requestHelper.getListing(listingsEndpoint, node.getId());
 		NodeMapper nodeMapper = Mappers.getMapper(NodeMapper.class);
 		return nodeMapper.toNode(listing);
 	}
@@ -129,10 +126,10 @@ public class CompatibilityMarketplaceService implements IMarketplaceService {
 	@Override
 	public List<INode> getNodes(Collection<? extends INode> nodes, IProgressMonitor monitor) throws CoreException {
 		//TODO some nodes might be identified by URL instead of id...
-		List<Integer> nodeIds = CoreFunctions.unwrap(() -> nodes.stream()
-				.map(CoreFunctions.wrap(node -> mapId(node)))
+		List<String> nodeIds = nodes.stream()
+				.map(node -> node.getId())
 				.filter(id -> id != null)
-				.collect(Collectors.toList()));
+				.collect(Collectors.toList());
 		ListingQuery query = ListingQuery.builder().addAllIds(nodeIds).build();
 		List<Listing> listings = requestHelper.getListings(listingsEndpoint, query);
 		NodeMapper nodeMapper = Mappers.getMapper(NodeMapper.class);
@@ -143,8 +140,8 @@ public class CompatibilityMarketplaceService implements IMarketplaceService {
 	public ISearchResult search(IMarket market, ICategory category, String queryText, IProgressMonitor monitor)
 			throws CoreException {
 		ListingQuery query = ListingQuery.builder()
-				.marketId(Optional.ofNullable(market).map(CoreFunctions.wrap(id -> mapId(id))))
-				.categoryId(Optional.ofNullable(category).map(CoreFunctions.wrap(id -> mapId(id))))
+				.marketId(Optional.ofNullable(market).map(id -> id.getId()))
+				.categoryId(Optional.ofNullable(category).map(id -> id.getId()))
 				.query(Optional.ofNullable(queryText))
 				.build();
 		return search(query, monitor);
@@ -175,8 +172,8 @@ public class CompatibilityMarketplaceService implements IMarketplaceService {
 	@Override
 	public ISearchResult featured(IMarket market, ICategory category, IProgressMonitor monitor) throws CoreException {
 		ListingQuery query = ListingQuery.builder()
-				.marketId(Optional.ofNullable(market).map(CoreFunctions.wrap(id -> mapId(id))))
-				.categoryId(Optional.ofNullable(category).map(CoreFunctions.wrap(id -> mapId(id))))
+				.marketId(Optional.ofNullable(market).map(id -> id.getId()))
+				.categoryId(Optional.ofNullable(category).map(id -> id.getId()))
 				.build();
 		List<Listing> listings = requestHelper.getListings(listingsEndpoint, query, SortingInfo.featuredInstance());
 		NodeMapper nodeMapper = Mappers.getMapper(NodeMapper.class);
@@ -254,35 +251,7 @@ public class CompatibilityMarketplaceService implements IMarketplaceService {
 
 	@Override
 	public void reportInstallSuccess(INode node, IProgressMonitor monitor) {
-		try {
-			installsEndpoint.postInstall(mapId(node), mapVersion(node));
-		} catch (Exception ex) {
-			// ignore
-		}
-	}
-
-	private Integer mapId(IIdentifiable identifyable) throws CoreException {
-		try {
-			return Integer.parseInt(identifyable.getId());
-		} catch (Exception ex) {
-			throw new CoreException(MarketplaceClientCore.computeStatus(ex, MessageFormat.format(
-					"Malformed Id: Id {0} of element {1} cannot be parsed", identifyable.getId(), identifyable)));
-		}
-	}
-
-	private Float mapVersion(INode node) {
-		String numericVersion = node.getVersion().replaceAll("[^0-9.]", ""); //$NON-NLS-1$//$NON-NLS-2$
-		int firstDot = numericVersion.indexOf('.');
-		if (firstDot != -1) {
-			numericVersion = numericVersion.substring(0, firstDot + 1)
-					+ numericVersion.substring(firstDot + 1).replaceAll("\\.", ""); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		try {
-			return Float.parseFloat(numericVersion);
-		} catch (NumberFormatException ex) {
-			// ignore
-			return null;
-		}
+		installsEndpoint.postInstall(node.getId(), node.getVersion());
 	}
 
 }

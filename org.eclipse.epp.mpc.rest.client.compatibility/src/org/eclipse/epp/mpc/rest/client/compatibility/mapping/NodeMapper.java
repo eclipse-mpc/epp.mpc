@@ -14,6 +14,8 @@ and is available at
 package org.eclipse.epp.mpc.rest.client.compatibility.mapping;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,8 +26,8 @@ import org.eclipse.epp.mpc.core.model.ISearchResult;
 import org.eclipse.epp.mpc.rest.client.compatibility.util.SolutionVersionUtil;
 import org.eclipse.epp.mpc.rest.model.Account;
 import org.eclipse.epp.mpc.rest.model.Listing;
+import org.eclipse.epp.mpc.rest.model.ListingVersion;
 import org.eclipse.epp.mpc.rest.model.Organization;
-import org.eclipse.epp.mpc.rest.model.SolutionVersion;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -63,7 +65,8 @@ public abstract class NodeMapper extends AbstractMapper {
 		@Mapping(constant = "resource", target = "type"),
 		@Mapping(source = "versions", target = "updateurl", qualifiedByName = "NodeUpdateUrl"),
 		@Mapping(ignore = true, target = "userFavorite"),
-		@Mapping(source = "versions", target = "version", qualifiedByName = "NodeVersion") })
+		@Mapping(source = "versions", target = "version", qualifiedByName = "NodeVersion"),
+		@Mapping(source = "licenseType", target = "license") })
 	abstract Node toNodeInternal(Listing listing);
 
 	SearchResult toSearchResultInternal(List<Listing> listings) {
@@ -77,32 +80,32 @@ public abstract class NodeMapper extends AbstractMapper {
 	String authorsAndOrganizationsToOwner(Listing listing) {
 		return Stream
 				.concat(listing.getAuthors().stream().map(Account::getFullName),
-						listing.getOrganization().stream().map(Organization::getName))
+						Stream.of(listing.getOrganization()).filter(Objects::nonNull).map(Organization::getName))
 				.findFirst()
 				.orElse(null);
 	}
 
 	@Named("NodeCompanyName")
 	String organizationsToCompany(Listing listing) {
-		return listing.getOrganization().stream().map(Organization::getName).findFirst().orElse(null);
+		return Optional.ofNullable(listing.getOrganization()).map(Organization::getName).orElse(null);
 	}
 
 	@Named("NodeVersion")
-	String latestSolutionVersion(List<SolutionVersion> versions) {
-		return SolutionVersionUtil.newestApplicableVersion(versions).map(SolutionVersion::getVersion).orElse(null);
+	String latestSolutionVersion(List<ListingVersion> versions) {
+		return SolutionVersionUtil.newestApplicableVersion(versions).map(ListingVersion::getVersion).orElse(null);
 	}
 
 	@Named("NodeEclipseVersions")
-	String latestSolutionVersionEclipseVersions(List<SolutionVersion> versions) {
+	String latestSolutionVersionEclipseVersions(List<ListingVersion> versions) {
 		return SolutionVersionUtil.newestApplicableVersion(versions)
 				.map(sv -> sv.getEclipseVersions().stream().collect(Collectors.joining(","))) //$NON-NLS-1$
 				.orElse(null);
 	}
 
 	@Named("NodeUpdateUrl")
-	String latestSolutionVersionUpdateUrl(List<SolutionVersion> versions) {
+	String latestSolutionVersionUpdateUrl(List<ListingVersion> versions) {
 		return SolutionVersionUtil.newestApplicableVersion(versions)
-				.map(SolutionVersion::getUpdateSiteUrl)
+				.map(ListingVersion::getUpdateSiteUrl)
 				.orElse(null);
 	}
 

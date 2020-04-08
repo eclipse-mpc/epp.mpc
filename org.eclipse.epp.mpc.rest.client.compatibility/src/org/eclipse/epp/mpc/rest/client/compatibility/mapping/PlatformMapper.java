@@ -17,18 +17,18 @@ import java.util.stream.Collectors;
 
 import org.eclipse.epp.internal.mpc.core.model.Platforms;
 import org.eclipse.epp.mpc.core.model.IPlatforms;
-import org.eclipse.epp.mpc.rest.model.SolutionVersion;
+import org.eclipse.epp.mpc.rest.model.ListingVersion;
 import org.mapstruct.Mapper;
 
 @SuppressWarnings("restriction")
 @Mapper
 public class PlatformMapper extends AbstractMapper {
 
-	public IPlatforms toPlatforms(List<SolutionVersion> versions) {
+	public IPlatforms toPlatforms(List<ListingVersion> versions) {
 		return toPlatformsInternal(versions);
 	}
 
-	Platforms toPlatformsInternal(List<SolutionVersion> versions) {
+	Platforms toPlatformsInternal(List<ListingVersion> versions) {
 		List<String> allPlatforms = versions.stream()
 				.flatMap(v -> v.getPlatforms().stream())
 				.distinct()
