@@ -6,7 +6,10 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 
 import org.eclipse.epp.mpc.rest.model.impl.Immutable{{classname}};
 
@@ -17,6 +20,7 @@ import org.eclipse.epp.mpc.rest.model.impl.Immutable{{classname}};
 {{/description}}
 {{>xmlPojoAnnotation}}{{#discriminator}}{{>typeInfoAnnotation}}{{/discriminator}}
 @Immutable
+@JsonDeserialize(builder = {{classname}}.Builder.class)
 public interface {{classname}} {{#parent}}extends {{{parent}}}{{/parent}}{{#serializableModel}}, Serializable{{/serializableModel}} {
 {{#vars}}{{#isEnum}}{{^isContainer}}  {{>enumClass}}{{/isContainer}}{{#isContainer}}{{#mostInnerItems}}
 {{>enumClass}}{{/mostInnerItems}}{{/isContainer}}
@@ -73,8 +77,10 @@ public interface {{classname}} {{#parent}}extends {{{parent}}}{{/parent}}{{#seri
     return Builder.create();
   }
 
+  @JsonPOJOBuilder(withPrefix = "")
   public static interface Builder {{#parent}}extends {{{parent}}}.Builder {{/parent}}{
 
+    @JsonCreator
     public static Builder create() {
       return Immutable{{classname}}.builder();
     }
