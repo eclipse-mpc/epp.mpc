@@ -11,4 +11,45 @@
   </parent>
   <artifactId>org.eclipse.epp.mpc.rest.client</artifactId>
   <packaging>eclipse-plugin</packaging>
+
+   <properties>
+      <resteasy-version>3.8.1.Final</resteasy-version>
+   </properties>
+
+   <build>
+      <plugins>
+         <plugin>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>2.10</version>
+            <executions>
+               <execution>
+                  <id>get-libs</id>
+                  <phase>initialize</phase>
+                  <!-- TODO need to move dependencies to Orbit and do proper import in Manifest -->
+                  <goals>
+                     <goal>copy-dependencies</goal>
+                  </goals>
+                  <configuration>
+                     <excludeGroupIds>p2.eclipse-plugin,org.eclipse.epp.mpc</excludeGroupIds>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
+      </plugins>
+   </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-jackson2-provider</artifactId>
+      <scope>compile</scope>
+      <version>${resteasy-version}</version>
+     </dependency>
+    <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-client</artifactId>
+      <scope>compile</scope>
+      <version>${resteasy-version}</version>
+    </dependency>
+  </dependencies>
 </project>

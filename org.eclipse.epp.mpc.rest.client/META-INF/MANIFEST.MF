@@ -11,4 +11,9 @@ Service-Component: OSGI-INF/services/*.xml
 Automatic-Module-Name: org.eclipse.epp.mpc.rest.client
 Export-Package: org.eclipse.epp.mpc.rest.client
 Import-Package: org.osgi.framework;version="1.9.0"
-Require-Bundle: org.eclipse.epp.mpc.rest.api;bundle-version="2.0.0";visibility:=reexport
+Require-Bundle: org.eclipse.epp.mpc.rest.api;bundle-version="2.0.0";visibility:=reexport,
+ org.reactivestreams;bundle-version="1.0.2";visibility:=reexport,
+ org.apache.commons.io;bundle-version="2.6.0";visibility:=reexport
+Bundle-ClassPath: .,
+ target/dependency/resteasy-client-3.8.1.Final.jar,
+ target/dependency/resteasy-jackson2-provider-3.8.1.Final.jar
