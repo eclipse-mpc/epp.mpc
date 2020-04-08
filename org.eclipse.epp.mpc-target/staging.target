@@ -16,7 +16,11 @@
 <unit id="org.junit" version="0.0.0"/>
 <unit id="org.mockito" version="0.0.0"/>
 <unit id="javax.ws.rs" version="0.0.0"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20191126223242/repository"/>
+<unit id="org.reactivestreams" version="0.0.0"/>
+<unit id="org.apache.commons.io" version="0.0.0"/>
+<unit id="org.glassfish.jersey.core.jersey-client" version="0.0.0"/>
+<unit id="org.glassfish.jersey.media.jersey-media-json-jackson" version="0.0.0"/>
+<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20200224183213/repository"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.epp.mpc.apache.httpclient.feature.feature.group" version="0.0.0"/>

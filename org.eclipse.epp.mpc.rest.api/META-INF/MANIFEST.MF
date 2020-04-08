@@ -7,7 +7,12 @@ Bundle-Vendor: %Bundle-Vendor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: org.eclipse.epp.mpc.rest.api
-Require-Bundle: javax.ws.rs;bundle-version="2.0.1"
+Require-Bundle: javax.ws.rs;bundle-version="2.1.1";visibility:=reexport,
+ com.fasterxml.jackson.core.jackson-annotations;bundle-version="2.9.9",
+ com.fasterxml.jackson.core.jackson-core;bundle-version="2.9.9",
+ com.fasterxml.jackson.core.jackson-databind;bundle-version="2.9.93",
+ com.fasterxml.jackson.jaxrs.jackson-jaxrs-json-provider;bundle-version="2.9.9",
+ com.fasterxml.jackson.jaxrs.jackson-jaxrs-base;bundle-version="2.9.9"
 Export-Package: org.eclipse.epp.mpc.rest.api,
  org.eclipse.epp.mpc.rest.model
 Import-Package: org.osgi.framework;version="1.9.0"
@@ -15,6 +20,4 @@ Bundle-ClassPath: .,
  target/dependency/swagger-annotations-1.5.18.jar,
  target/dependency/value-annotations-2.8.3.jar,
  target/dependency/swagger-jaxrs-1.5.18.jar,
- target/dependency/jackson-annotations-2.9.3.jar,
- target/dependency/jackson-jaxrs-json-provider-2.9.9.jar,
  target/dependency/jackson-module-jaxb-annotations-2.9.9.jar

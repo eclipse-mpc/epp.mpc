@@ -233,8 +233,8 @@
          <version>${swagger-core-version}</version>
       </dependency>
       <dependency>
-         <groupId>com.fasterxml.jackson.jaxrs</groupId>
-         <artifactId>jackson-jaxrs-json-provider</artifactId>
+         <groupId>com.fasterxml.jackson.module</groupId>
+         <artifactId>jackson-module-jaxb-annotations</artifactId>
          <version>${jackson-jaxrs-version}</version>
          <scope>compile</scope>
       </dependency>

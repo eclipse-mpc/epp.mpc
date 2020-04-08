@@ -14,8 +14,6 @@
 	<classpathentry exported="true" kind="lib" path="target/dependency/swagger-annotations-1.5.18.jar"/>
 	<classpathentry exported="true" kind="lib" path="target/dependency/value-annotations-2.8.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="target/dependency/swagger-jaxrs-1.5.18.jar"/>
-	<classpathentry exported="true" kind="lib" path="target/dependency/jackson-annotations-2.9.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="target/dependency/jackson-jaxrs-json-provider-2.9.9.jar"/>
 	<classpathentry exported="true" kind="lib" path="target/dependency/jackson-module-jaxb-annotations-2.9.9.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
