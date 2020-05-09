@@ -35,6 +35,7 @@ import org.eclipse.epp.internal.mpc.ui.wizards.SelectionModel.CatalogItemEntry;
 import org.eclipse.epp.internal.mpc.ui.wizards.SelectionModel.FeatureEntry;
 import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
+import org.eclipse.equinox.internal.p2.operations.ResolutionResult;
 import org.eclipse.equinox.internal.p2.ui.dialogs.RemediationGroup;
 import org.eclipse.equinox.p2.core.ProvisionException;
 import org.eclipse.equinox.p2.operations.ProfileChangeOperation;
@@ -506,6 +507,20 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 					if (newText != originalText || (newText != null && !newText.equals(originalText))) {
 						detailStatusText.setText(newText);
 					}
+					((GridData) detailsControl.getLayoutData()).exclude = false;
+				} else if (getWizard().getAdditionalVerificationPlan() != null
+						&& !getWizard().getAdditionalVerificationPlan().getStatus().isOK()) {
+					IStatus additionalStatus = getWizard().getAdditionalVerificationPlan().getStatus();
+					String message = additionalStatus.getMessage();
+					if (additionalStatus.getSeverity() == IStatus.ERROR) {
+						message = Messages.FeatureSelectionWizardPage_provisioningErrorAdvisory;
+					} else if (additionalStatus.getSeverity() == IStatus.WARNING) {
+						message = Messages.FeatureSelectionWizardPage_provisioningWarningAdvisory;
+					}
+					setMessage(message, Util.computeMessageType(additionalStatus));
+					ResolutionResult additionalResolutionResult = new ResolutionResult();
+					additionalResolutionResult.addSummaryStatus(additionalStatus);
+					detailStatusText.setText(additionalResolutionResult.getSummaryReport());
 					((GridData) detailsControl.getLayoutData()).exclude = false;
 				} else {
 					setMessage(null, IMessageProvider.NONE);

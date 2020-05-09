@@ -77,6 +77,7 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.ui.ProvUI;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryWizard;
+import org.eclipse.equinox.p2.engine.IProvisioningPlan;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.equinox.p2.operations.ProfileChangeOperation;
 import org.eclipse.equinox.p2.operations.ProvisioningJob;
@@ -203,6 +204,8 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	private ProfileChangeOperation profileChangeOperation;
 
+	private IProvisioningPlan currentJREPlan;
+
 	private FeatureSelectionWizardPage featureSelectionWizardPage;
 
 	private AcceptLicensesWizardPage acceptLicensesPage;
@@ -267,10 +270,6 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	public ProfileChangeOperation getProfileChangeOperation() {
 		return profileChangeOperation;
-	}
-
-	public void setProfileChangeOperation(ProfileChangeOperation profileChangeOperation) {
-		this.profileChangeOperation = profileChangeOperation;
 	}
 
 	void initializeInitialSelection() throws CoreException {
@@ -405,7 +404,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			case IStatus.OK:
 			case IStatus.WARNING:
 			case IStatus.INFO:
-				return true;
+				return currentJREPlan == null || currentJREPlan.getStatus().getSeverity() != IStatus.ERROR;
 			}
 		}
 		return false;
@@ -437,6 +436,11 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 						.setCurrentRemedy(featureSelectionWizardPage.getRemediationGroup().getCurrentRemedy());
 						profileChangeOperation.resolveModal(monitor);
 					});
+					if (ProvisioningUI.getDefaultUI().getPolicy().getCheckAgainstCurrentExecutionEnvironment()) {
+						container.run(true, false,
+								monitor -> currentJREPlan = ProvUI
+								.toCompabilityWithCurrentJREProvisioningPlan(profileChangeOperation, monitor));
+					}
 				} catch (InterruptedException e) {
 					// Nothing to report if thread was interrupted
 				} catch (InvocationTargetException e) {
@@ -450,7 +454,8 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 					updateProfileChangeOperation();
 					operationUpdated = true;
 				}
-				if (profileChangeOperation == null || !profileChangeOperation.getResolutionResult().isOK()) {
+				if (profileChangeOperation == null || !profileChangeOperation.getResolutionResult().isOK()
+						|| (currentJREPlan != null && !currentJREPlan.getStatus().isOK())) {
 					// can't compute a change operation, so there must be some kind of error
 					// we show these on the the feature selection wizard page
 					nextPage = featureSelectionWizardPage;
@@ -748,6 +753,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		removeAddedRepositoryLocations();
 		addedRepositoryLocations = null;
 		profileChangeOperation = null;
+		currentJREPlan = null;
 		operationIUs = null;
 		IWizardContainer wizardContainer = getContainer();
 		if (getSelectionModel().computeProvisioningOperationViable()) {
@@ -840,7 +846,10 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 						job.schedule();
 					}
 				}
-
+				if (ProvisioningUI.getDefaultUI().getPolicy().getCheckAgainstCurrentExecutionEnvironment()) {
+					wizardContainer.run(true, false, monitor -> currentJREPlan = ProvUI
+							.toCompabilityWithCurrentJREProvisioningPlan(profileChangeOperation, monitor));
+				}
 			} catch (InvocationTargetException e) {
 				Throwable cause = e.getCause();
 				IStatus status;
@@ -1218,5 +1227,9 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			}
 		});
+	}
+
+	IProvisioningPlan getAdditionalVerificationPlan() {
+		return this.currentJREPlan;
 	}
 }
