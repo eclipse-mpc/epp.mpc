@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 
 import org.eclipse.epp.mpc.rest.model.ListingVersion;
 
-public class SolutionVersionUtil {
+public class ListingVersionUtil {
 
 	private static final String ZEROES = "00000000000000000000"; //$NON-NLS-1$
 

@@ -20,7 +20,7 @@ import org.eclipse.epp.internal.mpc.core.model.Iu;
 import org.eclipse.epp.internal.mpc.core.model.Ius;
 import org.eclipse.epp.mpc.core.model.IIu;
 import org.eclipse.epp.mpc.core.model.IIus;
-import org.eclipse.epp.mpc.rest.client.compatibility.util.SolutionVersionUtil;
+import org.eclipse.epp.mpc.rest.client.compatibility.util.ListingVersionUtil;
 import org.eclipse.epp.mpc.rest.model.Feature;
 import org.eclipse.epp.mpc.rest.model.Feature.InstallStateEnum;
 import org.eclipse.epp.mpc.rest.model.ListingVersion;
@@ -42,7 +42,7 @@ public abstract class IuMapper extends AbstractMapper {
 	}
 
 	Ius toIusInternal(List<ListingVersion> versions) {
-		List<IIu> ius = SolutionVersionUtil.newestApplicableVersion(versions)
+		List<IIu> ius = ListingVersionUtil.newestApplicableVersion(versions)
 				.map(v -> v.getFeatureIds().stream().map(f -> toIu(f)).collect(Collectors.toList()))
 				.orElse(Collections.emptyList());
 		Ius result = new Ius();

@@ -23,7 +23,7 @@ import org.eclipse.epp.internal.mpc.core.model.Node;
 import org.eclipse.epp.internal.mpc.core.model.SearchResult;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
-import org.eclipse.epp.mpc.rest.client.compatibility.util.SolutionVersionUtil;
+import org.eclipse.epp.mpc.rest.client.compatibility.util.ListingVersionUtil;
 import org.eclipse.epp.mpc.rest.model.Account;
 import org.eclipse.epp.mpc.rest.model.Listing;
 import org.eclipse.epp.mpc.rest.model.ListingVersion;
@@ -92,19 +92,19 @@ public abstract class NodeMapper extends AbstractMapper {
 
 	@Named("NodeVersion")
 	String latestSolutionVersion(List<ListingVersion> versions) {
-		return SolutionVersionUtil.newestApplicableVersion(versions).map(ListingVersion::getVersion).orElse(null);
+		return ListingVersionUtil.newestApplicableVersion(versions).map(ListingVersion::getVersion).orElse(null);
 	}
 
 	@Named("NodeEclipseVersions")
 	String latestSolutionVersionEclipseVersions(List<ListingVersion> versions) {
-		return SolutionVersionUtil.newestApplicableVersion(versions)
+		return ListingVersionUtil.newestApplicableVersion(versions)
 				.map(sv -> sv.getEclipseVersions().stream().collect(Collectors.joining(","))) //$NON-NLS-1$
 				.orElse(null);
 	}
 
 	@Named("NodeUpdateUrl")
 	String latestSolutionVersionUpdateUrl(List<ListingVersion> versions) {
-		return SolutionVersionUtil.newestApplicableVersion(versions)
+		return ListingVersionUtil.newestApplicableVersion(versions)
 				.map(ListingVersion::getUpdateSiteUrl)
 				.orElse(null);
 	}
