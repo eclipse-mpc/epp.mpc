@@ -269,7 +269,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				if (!isCurrentPage()) {
+				if (!isCurrentPage() || getControl().isDisposed()) {
 					return;
 				}
 				SelectionModel selectionModel = getWizard().getSelectionModel();
