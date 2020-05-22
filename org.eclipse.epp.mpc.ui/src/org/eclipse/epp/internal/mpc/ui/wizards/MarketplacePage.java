@@ -341,6 +341,10 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 				//state themselves...
 				((FeatureSelectionWizardPage) nextPage).setPageComplete(true);
 			}
+			if (nextPage != null && nextPage.getControl() != null && nextPage.getControl().isDisposed()) {
+				// page already disposed?
+				return;
+			}
 			container.showPage(nextPage);
 		}
 	}
