@@ -855,6 +855,19 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 					}
 				}
 				if (ProvisioningUI.getDefaultUI().getPolicy().getCheckAgainstCurrentExecutionEnvironment()) {
+					if ((profileChangeOperation instanceof RemediationOperation)
+							&& ((RemediationOperation) profileChangeOperation).getCurrentRemedy() == null) {
+						// "Dirty" workaround, see bug 561865: To be able to calculate a plan while checking compatibility to the running JRE, we set the current remedy to the best solution found, here.
+						// This is reset afterwards, but not reresolved since this costs extra time and does not seem to be needed.
+						RemediationOperation remediationOperation = (RemediationOperation) profileChangeOperation;
+						try {
+							remediationOperation.setCurrentRemedy(
+									((RemediationOperation) profileChangeOperation).bestSolutionChangingTheRequest());
+							wizardContainer.run(true, false, monitor -> profileChangeOperation.resolveModal(monitor));
+						} finally {
+							remediationOperation.setCurrentRemedy(null);
+						}
+					}
 					wizardContainer.run(true, false, monitor -> currentJREPlan = ProvUI
 							.toCompabilityWithCurrentJREProvisioningPlan(profileChangeOperation, monitor));
 				}
