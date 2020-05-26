@@ -101,14 +101,14 @@ update_composite() {
     org.eclipse.equinox.internal.p2.artifact.repository.CompositeArtifactRepository \
     "$NAME" \
     "$TIMESTAMP" \
-    "$DIRS"
+    $DIRS
 
   compose compositeContent.xml \
     compositeMetadataRepository \
     org.eclipse.equinox.internal.p2.metadata.repository.CompositeMetadataRepository \
     "$NAME" \
     "$TIMESTAMP" \
-    "$DIRS"
+    $DIRS
 
 }
 
