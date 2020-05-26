@@ -459,8 +459,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 					updateProfileChangeOperation();
 					operationUpdated = true;
 				}
-				if (profileChangeOperation == null || !profileChangeOperation.getResolutionResult().isOK()
-						|| (currentJREPlan != null && !currentJREPlan.getStatus().isOK())) {
+				if (profileChangeOperation == null) {
 					// can't compute a change operation, so there must be some kind of error
 					// we show these on the the feature selection wizard page
 					nextPage = featureSelectionWizardPage;
@@ -471,6 +470,10 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				} else if (profileChangeOperation instanceof RemediationOperation) {
 					nextPage = featureSelectionWizardPage;
 				}
+			}
+			if (nextPage == null && (!profileChangeOperation.getResolutionResult().isOK()
+					|| (currentJREPlan != null && !currentJREPlan.getStatus().isOK()))) {
+				nextPage = featureSelectionWizardPage;
 			}
 			if (nextPage == null && nextpressed && profileChangeOperation instanceof RemediationOperation
 					&& !featureSelectionWizardPage.isInRemediationMode()) {
