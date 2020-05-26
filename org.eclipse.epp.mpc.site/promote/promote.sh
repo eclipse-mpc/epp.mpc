@@ -15,30 +15,30 @@ do_promote() {
 
   DST=$ARCHIVE/$VERSION/$QUALIFIER
 
-  if [ -e $DST ]; then
-    echo $DST already exists
+  if [ -e "$DST" ]; then
+    echo "$DST" already exists
     exit 1
   fi
 
-  echo Promoting $VERSION.$QUALIFIER to $DST
+  echo Promoting "$VERSION"."$QUALIFIER" to "$DST"
 
   umask 0002
-  mkdir -p $DST/
-  unzip -d $DST/ $SRC
-  cp $SRC $DST/$DIST-$VERSION.$QUALIFIER.zip
+  mkdir -p "$DST"/
+  unzip -d "$DST"/ "$SRC"
+  cp "$SRC" "$DST"/"$DIST"-"$VERSION"."$QUALIFIER".zip
 
-  chmod g+rwX -R $DST
-  chmod g+rwx $ARCHIVE $ARCHIVE/$VERSION || true
+  chmod g+rwX -R "$DST"
+  chmod g+rwx "$ARCHIVE" "$ARCHIVE"/"$VERSION" || true
 
-  cd $(dirname $0)
+  cd $(dirname "$0")
   BASE=$(pwd)
 
   if [ -n "$SITE" ]; then
-    for i in $SITE $SITE/*; do
-      if [ -e $i/composite.index ]; then
+    for i in "$SITE" "$SITE"/*; do
+      if [ -e "$i"/composite.index ]; then
         echo "Updating $i"
-        cd $i
-        $BASE/update-composite.sh
+        cd "$i"
+        "$BASE"/update-composite.sh
       fi
     done
   fi
@@ -56,9 +56,9 @@ compose() {
   TIMESTAMP="$1"
   shift
 
-  cat >$FILE <<-EOF
+  cat >"$FILE" <<-EOF
 		<?xml version='1.0' encoding='UTF-8'?>
-		<?TAG version='1.0.0'?>
+		<?$TAG version='1.0.0'?>
 		<repository name='$NAME' type='$TYPE' version='1.0.0'>
 		  <properties size='2'>
 		    <property name='p2.compressed' value='true'/>
@@ -68,12 +68,12 @@ compose() {
 	EOF
   COUNT=0
   for i in "$@"; do
-    echo "    <child location='$i'/>" >>$FILE
+    echo "    <child location='$i'/>" >>"$FILE"
     COUNT=$((COUNT + 1))
   done
-  sed -i -e "s/CHILD_COUNT/$COUNT/" $FILE
+  sed -i -e "s/CHILD_COUNT/$COUNT/" "$FILE"
 
-  cat >>$FILE <<-EOF
+  cat >>"$FILE" <<-EOF
 		  </children>
 		</repository>
 	EOF
@@ -101,14 +101,14 @@ update_composite() {
     org.eclipse.equinox.internal.p2.artifact.repository.CompositeArtifactRepository \
     "$NAME" \
     "$TIMESTAMP" \
-    $DIRS
+    "$DIRS"
 
   compose compositeContent.xml \
     compositeMetadataRepository \
     org.eclipse.equinox.internal.p2.metadata.repository.CompositeMetadataRepository \
     "$NAME" \
     "$TIMESTAMP" \
-    $DIRS
+    "$DIRS"
 
 }
 
@@ -117,7 +117,7 @@ download_build_archive() {
   TARGET_PATH="$2"
   case "$TARGET_PATH" in
   */)
-    TARGET_PATH="${TARGET_PATH}$(basename '$ARCHIVE_PATH')"
+    TARGET_PATH="${TARGET_PATH}$(basename "$ARCHIVE_PATH")"
     ;;
   esac
   test -s "$TARGET_PATH" && echo "$TARGET_PATH already exists" && return 0
@@ -133,8 +133,8 @@ download_promote_package() {
 download_promoted_build() {
   download_promote_package
 
-  SITE_ARCHIVE=org.eclipse.epp.mpc.site-$version-SNAPSHOT.zip
-  download_build_archive org.eclipse.epp.mpc.site/target/$SITE_ARCHIVE ./$SITE_ARCHIVE
+  SITE_ARCHIVE=org.eclipse.epp.mpc.site-"$version"-SNAPSHOT.zip
+  download_build_archive org.eclipse.epp.mpc.site/target/"$SITE_ARCHIVE" ./"$SITE_ARCHIVE"
 }
 
 promote_remote() {
@@ -154,8 +154,8 @@ promote_remote() {
   esac
 
   REMOTE_WORKDIR=$(ssh genie.mpc@projects-storage.eclipse.org \
-    "mkdir -p $PROMOTE_BASE && mktemp -p $PROMOTE_BASE/$version-XXXXXXXX")
-  scp promote.zip $SITE_ARCHIVE genie.mpc@projects-storage.eclipse.org:"$REMOTE_WORKDIR/"
+    "mkdir -p $PROMOTE_BASE && mktemp -p $PROMOTE_BASE -d $version-XXXXXXXX")
+  scp promote.zip "$SITE_ARCHIVE" genie.mpc@projects-storage.eclipse.org:"$REMOTE_WORKDIR/"
   RESULT=0
   ssh genie.mpc@projects-storage.eclipse.org "cd $REMOTE_WORKDIR && unzip promote.zip && . promote.sh && promote_${STAGE}_remote" "$@" || RESULT=$?
   ssh genie.mpc@projects-storage.eclipse.org "rm -rf $PROMOTE_BASE"
@@ -169,13 +169,13 @@ promote_integration() {
   . ./promote.properties
   SITE_ARCHIVE=org.eclipse.epp.mpc.site-$version-SNAPSHOT.zip
 
-  promote_remote integration $SITE_ARCHIVE
+  promote_remote integration "$SITE_ARCHIVE"
 }
 
 promote_integration_remote() {
   . ./promote.properties
-  do_promote mpc $version $qualifier \
-    ./org.eclipse.epp.mpc.site-$version-SNAPSHOT.zip \
+  do_promote mpc "$version" "$qualifier" \
+    ./org.eclipse.epp.mpc.site-"$version"-SNAPSHOT.zip \
     $PUBLISH_BASE/drops \
     $PUBLISH_BASE/nightly
 
@@ -192,7 +192,7 @@ promote_release() {
 
   SITE_ARCHIVE=org.eclipse.epp.mpc.site-$version-SNAPSHOT.zip
   test -z "$RELEASE" && RELEASE=$version
-  promote_remote release $SITE_ARCHIVE "$RELEASE"
+  promote_remote release "$SITE_ARCHIVE" "$RELEASE"
 }
 
 promote_release_remote() {
@@ -204,11 +204,11 @@ promote_release_remote() {
   SOURCE=org.eclipse.epp.mpc.site-$version-SNAPSHOT.zip
   TARGET=$PUBLISH_BASE/releases/$RELEASE
 
-  rm -rf $TARGET
-  mkdir -p $TARGET
+  rm -rf "$TARGET"
+  mkdir -p "$TARGET"
 
-  cp $SOURCE $TARGET/mpc-${version}.zip
-  unzip -d $TARGET/ $SOURCE
+  cp "$SOURCE" "$TARGET"/mpc-"${version}".zip
+  unzip -d "$TARGET"/ "$SOURCE"
 
   # Update latest release composite
   cd $PUBLISH_BASE/releases/latest
@@ -226,10 +226,10 @@ promote_train_release() {
 promote_train_release_remote() {
   TRAIN="$1"
 
-  IFS=' ,;' read -ra TRAINDIRS < <(echo $TRAIN | tr '[:upper:]' '[:lower:]')
+  IFS=' ,;' read -ra TRAINDIRS < <(echo "$TRAIN" | tr '[:upper:]' '[:lower:]')
   for t in "${TRAINDIRS[@]}"; do
-    test ! -d $PUBLISH_BASE/$t && echo "Train $t does not exist" && continue
-    cd $PUBLISH_BASE/$t
+    test ! -d $PUBLISH_BASE/"$t" && echo "Train $t does not exist" && continue
+    cd $PUBLISH_BASE/"$t"
     update_composite
     test -d latest && cd latest && update_composite
   done
