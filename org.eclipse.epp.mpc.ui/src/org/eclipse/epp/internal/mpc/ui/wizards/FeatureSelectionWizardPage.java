@@ -475,7 +475,9 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 		ProfileChangeOperation profileChangeOperation = getWizard().getProfileChangeOperation();
 		if (profileChangeOperation != null) {
 			if (profileChangeOperation instanceof RemediationOperation
-					&& ((RemediationOperation) profileChangeOperation).getResolutionResult() == Status.OK_STATUS) {
+					&& (((RemediationOperation) profileChangeOperation).getResolutionResult() == Status.OK_STATUS)
+					&& (getWizard().getAdditionalVerificationPlan() == null
+							|| getWizard().getAdditionalVerificationPlan().getStatus().isOK())) {
 				if (remediationGroup == null) {
 					remediationGroup = new RemediationGroup(this);
 					remediationGroup.createRemediationControl(container);
