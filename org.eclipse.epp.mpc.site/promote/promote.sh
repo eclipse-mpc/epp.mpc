@@ -120,6 +120,7 @@ download_build_archive() {
     TARGET_PATH="${TARGET_PATH}$(basename '$ARCHIVE_PATH')"
     ;;
   esac
+  test -s "$TARGET_PATH" && echo "$TARGET_PATH already exists" && return 0
   curl -o "$TARGET_PATH" "${PROMOTED_URL}/artifact/${ARCHIVE_PATH}"
 }
 
