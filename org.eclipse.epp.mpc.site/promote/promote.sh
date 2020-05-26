@@ -38,7 +38,7 @@ do_promote() {
       if [ -e "$i"/composite.index ]; then
         echo "Updating $i"
         cd "$i"
-        "$BASE"/update-composite.sh
+        update_composite
       fi
     done
   fi
