@@ -272,6 +272,11 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		return profileChangeOperation;
 	}
 
+	public void resetProfileChangeOperation() {
+		profileChangeOperation = null;
+		currentJREPlan = null;
+	}
+
 	void initializeInitialSelection() throws CoreException {
 		if (!wantInitializeInitialSelection()) {
 			throw new IllegalStateException();

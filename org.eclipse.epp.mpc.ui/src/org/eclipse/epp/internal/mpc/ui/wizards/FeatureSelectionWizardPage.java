@@ -326,6 +326,7 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 				FeatureEntry featureEntry = (FeatureEntry) event.getElement();
 				featureEntry.setChecked(checked);
 			}
+			getWizard().resetProfileChangeOperation();
 			refreshState();
 		});
 
