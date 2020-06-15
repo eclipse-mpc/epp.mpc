@@ -16,9 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
-import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
 
 import org.apache.commons.io.input.CountingInputStream;
 import org.apache.http.HttpEntity;
@@ -34,7 +32,6 @@ import org.eclipse.epp.mpc.rest.client.IRestClient;
 import org.eclipse.epp.mpc.rest.client.IRestClientFactory;
 import org.eclipse.epp.mpc.rest.client.internal.httpclient.HttpClientFactory;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 
@@ -57,7 +54,7 @@ public class DefaultMarketplaceRestClientFactoryImpl implements IRestClientFacto
 				long contentLength = entity.getContentLength();
 				response.setEntity(new HttpEntityWrapper(entity) {
 					@Override
-					public InputStream getContent() {
+					public InputStream getContent() throws IOException {
 						SubMonitor contentStreamMonitor = SubMonitor.convert(monitor, ""/*TODO*/, (int) contentLength);
 						return new CountingInputStream(this.wrappedEntity.getContent()) {
 							private long mark = 0;
@@ -93,11 +90,12 @@ public class DefaultMarketplaceRestClientFactoryImpl implements IRestClientFacto
 
 							@Override
 							public int read(final byte[] bts, final int off, final int len) throws IOException {
+								int readLen = len;
 								int available = available();
 								if (available > 0 && available < len) {
-									len = available;
+									readLen = available;
 								}
-								return super.read(bts, off, len);
+								return super.read(bts, off, readLen);
 							}
 
 							@Override
@@ -115,11 +113,12 @@ public class DefaultMarketplaceRestClientFactoryImpl implements IRestClientFacto
 		};
 		HttpClientBuilder.create().addInterceptorFirst(itcp);
 		ResteasyClientBuilder builder = (ResteasyClientBuilder) ClientBuilder.newBuilder();
-		builder.httpEngine(new ApacheHttpClient43Engine(httpClient, contextInjector));
-
-		Client client = builder.build();
-
-		WebTarget target = client.target(baseUri).property(CONTEXT_PROVIDER_KEY, contextInjector);
+//WIP
+//		builder.httpEngine(new ApacheHttpClient43Engine(httpClient, contextInjector));
+//
+//		Client client = builder.build();
+//
+//		WebTarget target = client.target(baseUri).property(CONTEXT_PROVIDER_KEY, contextInjector);
 		return null;
 	}
 

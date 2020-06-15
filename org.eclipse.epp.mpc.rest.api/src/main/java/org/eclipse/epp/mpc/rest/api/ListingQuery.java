@@ -21,9 +21,9 @@ import org.immutables.value.Value.Immutable;
 
 @Immutable
 public interface ListingQuery {
-	Optional<Integer> marketId();
+	Optional<String> marketId();
 
-	Optional<Integer> categoryId();
+	Optional<String> categoryId();
 
 	List<LicenseType> licenseType();
 
@@ -31,13 +31,13 @@ public interface ListingQuery {
 
 	List<String> tags();
 
-	List<Integer> ids();
+	List<String> ids();
 
 	Optional<PlatformInfo> platform();
 
-	ListingQuery withMarketId(int id);
+	ListingQuery withMarketId(String id);
 
-	ListingQuery withCategoryId(int id);
+	ListingQuery withCategoryId(String id);
 
 	ListingQuery withLicenseType(LicenseType... types);
 
@@ -49,9 +49,9 @@ public interface ListingQuery {
 
 	ListingQuery withTags(Iterable<String> tags);
 
-	ListingQuery withIds(int... ids);
+	ListingQuery withIds(String... ids);
 
-	ListingQuery withIds(Iterable<Integer> ids);
+	ListingQuery withIds(Iterable<String> ids);
 
 	ListingQuery withPlatform(PlatformInfo platform);
 
@@ -73,13 +73,13 @@ public interface ListingQuery {
 			return ImmutableListingQuery.builder().from(instance);
 		}
 
-		Builder marketId(int id);
+		Builder marketId(String id);
 
-		Builder marketId(Optional<Integer> id);
+		Builder marketId(Optional<String> id);
 
-		Builder categoryId(int id);
+		Builder categoryId(String id);
 
-		Builder categoryId(Optional<Integer> id);
+		Builder categoryId(Optional<String> id);
 
 		Builder query(String query);
 
@@ -101,13 +101,13 @@ public interface ListingQuery {
 
 		Builder addAllTags(Iterable<String> tags);
 
-		Builder ids(Iterable<Integer> tags);
+		Builder ids(Iterable<String> ids);
 
-		Builder addIds(int tag);
+		Builder addIds(String ids);
 
-		Builder addIds(int... tags);
+		Builder addIds(String... ids);
 
-		Builder addAllIds(Iterable<Integer> tags);
+		Builder addAllIds(Iterable<String> ids);
 
 		Builder platform(PlatformInfo platform);
 

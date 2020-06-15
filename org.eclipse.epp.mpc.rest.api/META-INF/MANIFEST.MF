@@ -7,7 +7,9 @@ Bundle-Vendor: %Bundle-Vendor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: org.eclipse.epp.mpc.rest.api
-Require-Bundle: javax.ws.rs;bundle-version="2.0.1"
+Require-Bundle: javax.ws.rs;bundle-version="2.0.1",
+ javax.xml.bind;bundle-version="2.2.0",
+ javax.annotation;bundle-version="1.2.0"
 Export-Package: org.eclipse.epp.mpc.rest.api,
  org.eclipse.epp.mpc.rest.model
 Import-Package: org.osgi.framework;version="1.9.0"

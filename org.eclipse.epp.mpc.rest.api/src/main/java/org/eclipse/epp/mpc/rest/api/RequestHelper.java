@@ -54,11 +54,11 @@ public abstract class RequestHelper {
 				.build();
 	}
 
-	public Listing getListing(ListingsApi api, int listingId) {
+	public Listing getListing(ListingsApi api, String listingId) {
 		return getListing(api, listingId, defaultPlatform().orElse(null));
 	}
 
-	public Listing getListing(ListingsApi api, int listingId, PlatformInfo platform) {
+	public Listing getListing(ListingsApi api, String listingId, PlatformInfo platform) {
 		return api.getListing(listingId, Parameters.platformVersion(platform), Parameters.javaVersion(platform),
 				Parameters.os(platform));
 	}
@@ -89,11 +89,11 @@ public abstract class RequestHelper {
 
 	public Installs getInstalls(InstallsApi api, InstallsQuery query, PagingInfo page) {
 		return query.version().isPresent()
-				? api.getInstallsForVersion(Parameters.listingId(query), Parameters.versionNumber(query),
+				? api.getInstallsForVersion(Parameters.listingId(query), Parameters.versionId(query),
 						Parameters.platformVersion(query), Parameters.javaVersion(query), Parameters.os(query),
-						Parameters.country(query), Parameters.page(page), Parameters.limit(page))
+						Parameters.country(query))
 						: api.getInstalls(Parameters.listingId(query), Parameters.platformVersion(query),
-								Parameters.javaVersion(query), Parameters.os(query), Parameters.country(query),
+						Parameters.javaVersion(query), Parameters.os(query),
 								Parameters.page(page), Parameters.limit(page));
 	}
 
@@ -103,14 +103,6 @@ public abstract class RequestHelper {
 
 	public List<Category> getCategories(CategoriesApi api, PagingInfo page) {
 		return api.getCategories(Parameters.page(page), Parameters.limit(page));
-	}
-
-	public Market getMarketCategory(CategoriesApi api, int marketId, int categoryId) {
-		return getMarketCategory(api, marketId, categoryId, defaultPage().orElse(null));
-	}
-
-	public Market getMarketCategory(CategoriesApi api, int marketId, int categoryId, PagingInfo page) {
-		return api.getMarketCategory(marketId, categoryId, Parameters.page(page), Parameters.limit(page));
 	}
 
 	private ListingQuery applyDefaultPlatform(ListingQuery query) {
@@ -178,11 +170,11 @@ public abstract class RequestHelper {
 					.build();
 		}
 
-		public CompletionStage<Listing> getListing(ListingsApi.Async api, int listingId) {
+		public CompletionStage<Listing> getListing(ListingsApi.Async api, String listingId) {
 			return getListing(api, listingId, defaultPlatform().orElse(null));
 		}
 
-		public CompletionStage<Listing> getListing(ListingsApi.Async api, int listingId, PlatformInfo platform) {
+		public CompletionStage<Listing> getListing(ListingsApi.Async api, String listingId, PlatformInfo platform) {
 			return api.getListing(listingId, Parameters.platformVersion(platform), Parameters.javaVersion(platform),
 					Parameters.os(platform));
 		}
@@ -215,11 +207,11 @@ public abstract class RequestHelper {
 
 		public CompletionStage<Installs> getInstalls(InstallsApi.Async api, InstallsQuery query, PagingInfo page) {
 			return query.version().isPresent()
-					? api.getInstallsForVersion(Parameters.listingId(query), Parameters.versionNumber(query),
+					? api.getInstallsForVersion(Parameters.listingId(query), Parameters.versionId(query),
 							Parameters.platformVersion(query), Parameters.javaVersion(query), Parameters.os(query),
-							Parameters.country(query), Parameters.page(page), Parameters.limit(page))
+							Parameters.country(query))
 							: api.getInstalls(Parameters.listingId(query), Parameters.platformVersion(query),
-									Parameters.javaVersion(query), Parameters.os(query), Parameters.country(query),
+							Parameters.javaVersion(query), Parameters.os(query),
 									Parameters.page(page), Parameters.limit(page));
 		}
 
@@ -229,15 +221,6 @@ public abstract class RequestHelper {
 
 		public CompletionStage<List<Category>> getCategories(CategoriesApi.Async api, PagingInfo page) {
 			return api.getCategories(Parameters.page(page), Parameters.limit(page));
-		}
-
-		public CompletionStage<Market> getMarketCategory(CategoriesApi.Async api, int marketId, int categoryId) {
-			return getMarketCategory(api, marketId, categoryId, defaultPage().orElse(null));
-		}
-
-		public CompletionStage<Market> getMarketCategory(CategoriesApi.Async api, int marketId, int categoryId,
-				PagingInfo page) {
-			return api.getMarketCategory(marketId, categoryId, Parameters.page(page), Parameters.limit(page));
 		}
 
 		private ListingQuery applyDefaultPlatform(ListingQuery query) {
@@ -314,7 +297,7 @@ public abstract class RequestHelper {
 			return query == null ? null : nullIfEmpty(query.tags());
 		}
 
-		static List<Integer> ids(ListingQuery query) {
+		static List<String> ids(ListingQuery query) {
 			return query == null ? null : nullIfEmpty(query.ids());
 		}
 
@@ -334,15 +317,15 @@ public abstract class RequestHelper {
 			return query == null ? null : nullIfEmpty(query.licenseType());
 		}
 
-		static Integer categoryId(ListingQuery query) {
+		static String categoryId(ListingQuery query) {
 			return query == null ? null : query.categoryId().orElse(null);
 		}
 
-		static Integer marketId(ListingQuery query) {
+		static String marketId(ListingQuery query) {
 			return query == null ? null : query.marketId().orElse(null);
 		}
 
-		static Float versionNumber(InstallsQuery query) {
+		static String versionId(InstallsQuery query) {
 			return query == null ? null : query.version().orElse(null);
 		}
 
@@ -358,7 +341,7 @@ public abstract class RequestHelper {
 			return query == null ? null : query.platform().map(Parameters::platformVersion).orElse(null);
 		}
 
-		static Integer listingId(InstallsQuery query) {
+		static String listingId(InstallsQuery query) {
 			return query == null ? null : query.listingId();
 		}
 
