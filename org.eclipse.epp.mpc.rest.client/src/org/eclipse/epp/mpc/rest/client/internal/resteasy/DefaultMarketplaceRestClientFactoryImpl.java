@@ -16,12 +16,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
+import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
 
 import org.apache.commons.io.input.CountingInputStream;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.HttpEntityWrapper;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -32,6 +35,7 @@ import org.eclipse.epp.mpc.rest.client.IRestClient;
 import org.eclipse.epp.mpc.rest.client.IRestClientFactory;
 import org.eclipse.epp.mpc.rest.client.internal.httpclient.HttpClientFactory;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 
@@ -39,6 +43,8 @@ import org.osgi.service.component.annotations.Component;
 public class DefaultMarketplaceRestClientFactoryImpl implements IRestClientFactory {
 
 //	private final Client client;
+
+	private static final String CONTEXT_PROVIDER_KEY = null;
 
 	private final HttpContextInjector contextInjector = new HttpContextInjector();
 
@@ -111,14 +117,15 @@ public class DefaultMarketplaceRestClientFactoryImpl implements IRestClientFacto
 				});
 			}
 		};
-		HttpClientBuilder.create().addInterceptorFirst(itcp);
+		HttpClient httpClient = HttpClientBuilder.create().addInterceptorFirst(itcp).build();
 		ResteasyClientBuilder builder = (ResteasyClientBuilder) ClientBuilder.newBuilder();
-//WIP
-//		builder.httpEngine(new ApacheHttpClient43Engine(httpClient, contextInjector));
-//
-//		Client client = builder.build();
-//
-//		WebTarget target = client.target(baseUri).property(CONTEXT_PROVIDER_KEY, contextInjector);
+
+		builder.httpEngine(new ApacheHttpClient43Engine(httpClient, contextInjector));
+
+		Client client = builder.build();
+
+		WebTarget target = client.target(baseUri).property(CONTEXT_PROVIDER_KEY, contextInjector);
+		//WIP
 		return null;
 	}
 

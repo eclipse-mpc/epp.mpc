@@ -13,6 +13,10 @@
    <artifactId>org.eclipse.epp.mpc.rest.client.tests</artifactId>
    <packaging>eclipse-test-plugin</packaging>
 
+   <properties>
+      <pact.version>4.0.7</pact.version>
+   </properties>
+
    <dependencyManagement>
       <dependencies>
          <dependency>
@@ -26,10 +30,10 @@
    </dependencyManagement>
 
    <dependencies>
-      <!--<dependency>
+      <dependency>
          <groupId>org.jboss.resteasy</groupId>
-         <artifactId>resteasy-jaxrs</artifactId>
-      </dependency>-->
+         <artifactId>resteasy-jackson2-provider</artifactId>
+      </dependency>
       <dependency>
          <groupId>org.jboss.resteasy</groupId>
          <artifactId>resteasy-client</artifactId>
@@ -49,6 +53,16 @@
          <artifactId>javax.ws.rs-api</artifactId>
          <version>2.1.1</version>
       </dependency>
+      <dependency>
+         <groupId>au.com.dius</groupId>
+         <artifactId>pact-jvm-consumer-junit</artifactId>
+         <version>${pact.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>au.com.dius</groupId>
+         <artifactId>pact-jvm-consumer-java8</artifactId>
+         <version>${pact.version}</version>
+      </dependency>
    </dependencies>
    <build>
       <pluginManagement>
@@ -66,6 +80,18 @@
          </plugins>
       </pluginManagement>
       <plugins>
+         <plugin>
+            <groupId>au.com.dius</groupId>
+            <artifactId>pact-jvm-provider-maven</artifactId>
+            <version>${pact.version}</version>
+            <configuration>
+               <pactDirectory>${project.build.directory}/pacts</pactDirectory> <!-- Default -->
+               <pactBrokerUrl>http://localhost:9292</pactBrokerUrl>
+               <projectVersion>${project.version}</projectVersion> <!-- Default -->
+               <trimSnapshot>true</trimSnapshot> <!-- Defaults to false -->
+               <skipPactPublish>false</skipPactPublish> <!-- Defaults to false -->
+            </configuration>
+         </plugin>
          <plugin>
             <groupId>org.eclipse.tycho</groupId>
             <artifactId>tycho-surefire-plugin</artifactId>

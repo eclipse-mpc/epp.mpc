@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="target/dependency/smallrye-config-1.3.9.jar"/>
-	<classpathentry exported="true" kind="lib" path="target/dependency/microprofile-config-api-1.3.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src">
@@ -9,23 +7,142 @@
 			<attribute name="test" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="target/dependency/ST4-4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/activation-1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/alpn-api-1.1.3.v20160715.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/annotations-13.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/antlr-runtime-3.5.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/antlr4-4.7.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/antlr4-runtime-4.7.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/atomicfu-0.14.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/atomicfu-common-0.14.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/automaton-1.11-8.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/aws-java-sdk-core-1.11.587.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/aws-java-sdk-kms-1.11.587.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/aws-java-sdk-s3-1.11.587.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/btf-1.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/cdi-api-2.0.SP1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/checker-qual-2.8.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/commons-codec-1.13.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/commons-collections4-4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/commons-io-2.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/commons-lang3-3.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/commons-logging-1.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/config-1.3.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/diffutils-1.3.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/evo-inflector-1.2.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/failureaccess-1.0.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/fluent-hc-4.5.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/generex-1.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/gson-2.8.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/guava-28.1-jre.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/hamcrest-core-1.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/httpasyncclient-4.1.4.jar" sourcepath="C:/Users/carsten.reckord/.m2/repository/org/apache/httpcomponents/httpasyncclient/4.1.4/httpasyncclient-4.1.4-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/httpclient-4.5.10.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/httpcore-4.4.13.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/httpcore-nio-4.4.13.jar" sourcepath="C:/Users/carsten.reckord/.m2/repository/org/apache/httpcomponents/httpcore-nio/4.4.13/httpcore-nio-4.4.13-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/httpmime-4.5.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/icu4j-61.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/ion-java-1.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/istack-commons-runtime-3.0.10.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/iterators-1.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jackson-annotations-2.10.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jackson-core-2.10.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jackson-coreutils-1.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jackson-databind-2.10.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jackson-dataformat-cbor-2.6.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jackson-dataformat-yaml-2.9.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jackson-jaxrs-base-2.10.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jackson-jaxrs-json-provider-2.10.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jackson-module-jaxb-annotations-2.10.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jakarta.activation-1.2.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jakarta.activation-api-1.2.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jakarta.validation-api-2.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/java-semver-0.9.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/javassist-3.21.0-GA.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/javax.el-api-3.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/javax.inject-1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/javax.interceptor-api-1.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/javax.json-1.0.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/javax.ws.rs-api-2.1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jaxb-runtime-2.3.3-b01.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jboss-annotations-api_1.3_spec-2.0.1.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jboss-jaxb-api_2.3_spec-1.0.1.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jboss-jaxrs-api_2.1_spec-2.0.1.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jboss-logging-3.3.2.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jmespath-java-1.11.587.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/joda-time-2.8.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/json-20160212.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/json-patch-1.9.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jsr305-3.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jsr311-api-1.1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/junit-4.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/kotlin-logging-1.6.26.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/kotlin-logging-common-1.6.26.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/kotlin-reflect-1.3.60.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/kotlin-stdlib-1.3.60.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/kotlin-stdlib-common-1.3.60.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/kotlin-stdlib-jdk7-1.3.60.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/kotlin-stdlib-jdk8-1.3.60.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/kotlinx-coroutines-core-1.3.2-1.3.60.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/kotlinx-coroutines-core-common-1.3.2-1.3.60.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/kotlinx-coroutines-io-0.1.16.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/kotlinx-coroutines-io-jvm-0.1.16.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/kotlinx-coroutines-jdk8-1.3.2-1.3.60.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/kotlinx-io-0.1.16.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/kotlinx-io-jvm-0.1.16.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/kotson-2.5.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/ktor-http-cio-jvm-1.2.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/ktor-http-jvm-1.2.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/ktor-network-1.2.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/ktor-network-tls-1.2.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/ktor-server-core-1.2.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/ktor-server-host-common-1.2.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/ktor-server-netty-1.2.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/ktor-utils-jvm-1.2.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/mail-1.5.0-b01.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/microprofile-config-api-1.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/msg-simple-1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/netty-buffer-4.1.30.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/netty-codec-4.1.30.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/netty-codec-http-4.1.37.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/netty-codec-http2-4.1.37.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/netty-common-4.1.30.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/netty-handler-4.1.30.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/netty-resolver-4.1.30.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/netty-transport-4.1.30.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/netty-transport-native-epoll-4.1.37.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/netty-transport-native-kqueue-4.1.37.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/netty-transport-native-unix-common-4.1.37.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/optional-0.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/org.abego.treelayout.core-1.0.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/org.osgi.annotation.versioning-1.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/pact-jvm-consumer-4.0.7.jar" sourcepath="C:/Users/carsten.reckord/.m2/repository/au/com/dius/pact-jvm-consumer/4.0.7/pact-jvm-consumer-4.0.7-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/pact-jvm-consumer-java8-4.0.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/pact-jvm-consumer-junit-4.0.7.jar" sourcepath="C:/Users/carsten.reckord/.m2/repository/au/com/dius/pact-jvm-consumer-junit/4.0.7/pact-jvm-consumer-junit-4.0.7-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/pact-jvm-core-matchers-4.0.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/pact-jvm-core-model-4.0.7.jar" sourcepath="C:/Users/carsten.reckord/.m2/repository/au/com/dius/pact-jvm-core-model/4.0.7/pact-jvm-core-model-4.0.7-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/pact-jvm-core-pact-broker-4.0.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/pact-jvm-core-support-4.0.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/reactive-streams-1.0.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/reflections-0.9.11.jar"/>
 	<classpathentry exported="true" kind="lib" path="target/dependency/resteasy-client-4.4.2.Final.jar" sourcepath="C:/Users/carsten.reckord/.m2/repository/org/jboss/resteasy/resteasy-client/4.4.2.Final/resteasy-client-4.4.2.Final-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="target/dependency/resteasy-client-api-4.4.2.Final.jar" sourcepath="C:/Users/carsten.reckord/.m2/repository/org/jboss/resteasy/resteasy-client-api/4.4.2.Final/resteasy-client-api-4.4.2.Final-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="target/dependency/resteasy-core-spi-4.4.2.Final.jar" sourcepath="C:/Users/carsten.reckord/.m2/repository/org/jboss/resteasy/resteasy-core-spi/4.4.2.Final/resteasy-core-spi-4.4.2.Final-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="target/dependency/jboss-jaxb-api_2.3_spec-1.0.1.Final.jar"/>
-	<classpathentry exported="true" kind="lib" path="target/dependency/reactive-streams-1.0.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="target/dependency/jakarta.validation-api-2.0.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="target/dependency/jboss-annotations-api_1.3_spec-2.0.1.Final.jar"/>
-	<classpathentry exported="true" kind="lib" path="target/dependency/jakarta.activation-1.2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="target/dependency/resteasy-core-4.4.2.Final.jar" sourcepath="C:/Users/carsten.reckord/.m2/repository/org/jboss/resteasy/resteasy-core/4.4.2.Final/resteasy-core-4.4.2.Final-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="target/dependency/jboss-logging-3.3.2.Final.jar"/>
-	<classpathentry exported="true" kind="lib" path="target/dependency/httpcore-nio-4.4.13.jar" sourcepath="C:/Users/carsten.reckord/.m2/repository/org/apache/httpcomponents/httpcore-nio/4.4.13/httpcore-nio-4.4.13-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="target/dependency/httpasyncclient-4.1.4.jar" sourcepath="C:/Users/carsten.reckord/.m2/repository/org/apache/httpcomponents/httpasyncclient/4.1.4/httpasyncclient-4.1.4-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="target/dependency/jackson-annotations-2.9.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="target/dependency/jackson-core-2.9.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="target/dependency/jackson-databind-2.9.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="target/dependency/reflections-0.9.11.jar"/>
-	<classpathentry exported="true" kind="lib" path="target/dependency/javax.ws.rs-api-2.1.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="target/dependency/jsr311-api-1.1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/resteasy-core-spi-4.4.2.Final.jar" sourcepath="C:/Users/carsten.reckord/.m2/repository/org/jboss/resteasy/resteasy-core-spi/4.4.2.Final/resteasy-core-spi-4.4.2.Final-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/resteasy-jaxb-provider-4.4.2.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/rfc3986-uri-0.8.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/slf4j-api-1.7.28.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/smallrye-config-1.3.9.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/snakeyaml-1.18.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/swagger-annotations-1.5.18.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/swagger-core-1.5.18.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/swagger-jaxrs-1.5.18.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/swagger-models-1.5.18.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/txw2-2.3.3-b01.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/validation-api-1.1.0.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/xercesImpl-2.12.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/xml-apis-1.4.01.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

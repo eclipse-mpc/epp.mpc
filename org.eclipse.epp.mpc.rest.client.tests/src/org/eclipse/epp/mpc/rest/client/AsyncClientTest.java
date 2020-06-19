@@ -24,6 +24,7 @@ import org.junit.Test;
 /**
  * @author carsten.reckord
  */
+//FIXME WIP At the moment, this is more a sandbox than an actual test class, useful to try out some stuff without launching an RCP...
 public class AsyncClientTest {
 
 	@Test
