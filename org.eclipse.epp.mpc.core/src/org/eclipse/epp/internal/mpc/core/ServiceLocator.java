@@ -22,7 +22,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.IProduct;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.epp.internal.mpc.core.service.CachingMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.service.DefaultCatalogService;
@@ -566,54 +565,18 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 
 	public static Map<String, String> computeDefaultRequestMetaParameters() {
 		Map<String, String> requestMetaParameters = new LinkedHashMap<>();
-		BundleContext bundleContext = FrameworkUtil.getBundle(MarketplaceClientCore.class).getBundleContext();
 
 		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_CLIENT,
 				MarketplaceClientCore.BUNDLE_ID);
-		Bundle clientBundle = Platform.getBundle(MarketplaceClientCore.BUNDLE_ID);
-		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_CLIENT_VERSION,
-				clientBundle.getVersion().toString());
 
 		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_OS,
 				Platform.getOS());
-		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_WS,
-				Platform.getWS());
-		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_NL,
-				Platform.getNL());
-		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_JAVA_VERSION,
-				bundleContext.getProperty("java.version")); //$NON-NLS-1$
 
-		IProduct product = Platform.getProduct();
-		String productId;
-		{
-			productId = bundleContext.getProperty("eclipse.product"); //$NON-NLS-1$
-			if (productId == null && product != null) {
-				productId = product.getId();
-			}
-		}
-		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_PRODUCT,
-				productId);
-		String productVersion = null;
-		if (productId != null) {
-			productVersion = bundleContext.getProperty("eclipse.buildId"); //$NON-NLS-1$
-			if (productVersion == null && product != null) {
-				Bundle productBundle = product.getDefiningBundle();
-				if (productBundle != null) {
-					productVersion = productBundle.getVersion().toString();
-				}
-			}
-		}
-		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_PRODUCT_VERSION,
-				productVersion);
-
-		Bundle runtimeBundle = Platform.getBundle("org.eclipse.core.runtime"); //$NON-NLS-1$
-		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_RUNTIME_VERSION,
-				runtimeBundle == null ? null : runtimeBundle.getVersion().toString());
 
 		// also send the platform version to distinguish between 3.x and 4.x platforms using the same runtime
 		Bundle platformBundle = Platform.getBundle("org.eclipse.platform"); //$NON-NLS-1$
 		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_PLATFORM_VERSION,
-				platformBundle == null ? null : platformBundle.getVersion().toString());
+				platformBundle == null ? null : shortenVersionString(platformBundle.getVersion().toString()));
 
 		return requestMetaParameters;
 	}
@@ -632,5 +595,16 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		if (value != null) {
 			requestMetaParameters.put(key, value);
 		}
+	}
+
+	private static String shortenVersionString(String version) {
+		int index = version.indexOf('.');
+		if (index > -1) {
+			index = version.indexOf('.', index + 1);
+			if (index > -1) {
+				return version.substring(0, index);
+			}
+		}
+		return version;
 	}
 }
