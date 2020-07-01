@@ -10,7 +10,7 @@
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.epp.mpc.rest.client.compatibility.util;
+package org.eclipse.epp.mpc.rest.client.internal.util;
 
 import java.util.function.Function;
 

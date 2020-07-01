@@ -58,6 +58,7 @@ public abstract class NodeMapper extends AbstractMapper {
 		@Mapping(source = "installCount", target = "installsTotal"),
 		@Mapping(source = "versions", target = "ius"),
 		@Mapping(source = "listing", target = "owner", qualifiedByName = "NodeOwner"),
+		@Mapping(source = "licenseType", target = "license"),
 		@Mapping(source = "versions", target = "platforms"),
 		@Mapping(ignore = true, target = "screenshot"),
 		@Mapping(source = "teaser", target = "shortdescription"),
@@ -80,7 +81,7 @@ public abstract class NodeMapper extends AbstractMapper {
 	String authorsAndOrganizationsToOwner(Listing listing) {
 		return Stream
 				.concat(listing.getAuthors().stream().map(Account::getFullName),
-						Stream.of(listing.getOrganization()).filter(Objects::nonNull).map(Organization::getName))
+						Stream.ofNullable(listing.getOrganization()).map(Organization::getName))
 				.findFirst()
 				.orElse(null);
 	}
@@ -91,19 +92,19 @@ public abstract class NodeMapper extends AbstractMapper {
 	}
 
 	@Named("NodeVersion")
-	String latestSolutionVersion(List<ListingVersion> versions) {
+	String latestListingVersion(List<ListingVersion> versions) {
 		return ListingVersionUtil.newestApplicableVersion(versions).map(ListingVersion::getVersion).orElse(null);
 	}
 
 	@Named("NodeEclipseVersions")
-	String latestSolutionVersionEclipseVersions(List<ListingVersion> versions) {
+	String latestListingVersionEclipseVersions(List<ListingVersion> versions) {
 		return ListingVersionUtil.newestApplicableVersion(versions)
 				.map(sv -> sv.getEclipseVersions().stream().collect(Collectors.joining(","))) //$NON-NLS-1$
 				.orElse(null);
 	}
 
 	@Named("NodeUpdateUrl")
-	String latestSolutionVersionUpdateUrl(List<ListingVersion> versions) {
+	String latestListingVersionUpdateUrl(List<ListingVersion> versions) {
 		return ListingVersionUtil.newestApplicableVersion(versions)
 				.map(ListingVersion::getUpdateSiteUrl)
 				.orElse(null);

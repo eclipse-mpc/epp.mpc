@@ -26,7 +26,7 @@ import org.apache.http.impl.auth.win.WindowsCredentialsProvider;
 import org.apache.http.impl.auth.win.WindowsNTLMSchemeFactory;
 import org.apache.http.impl.auth.win.WindowsNegotiateSchemeFactory;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientCustomizer;
+import org.eclipse.epp.mpc.rest.client.internal.httpclient.HttpClientCustomizer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;

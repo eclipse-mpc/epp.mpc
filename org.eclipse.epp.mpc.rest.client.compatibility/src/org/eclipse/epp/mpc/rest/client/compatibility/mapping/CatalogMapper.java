@@ -18,7 +18,7 @@ import org.eclipse.epp.mpc.core.model.ICatalog;
 import org.eclipse.epp.mpc.core.model.ICatalogBranding;
 import org.eclipse.epp.mpc.core.model.INews;
 import org.eclipse.epp.mpc.rest.model.Catalog;
-import org.eclipse.epp.mpc.rest.model.CatalogTab.TypeEnum;
+import org.eclipse.epp.mpc.rest.model.CatalogTabType;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -48,7 +48,7 @@ public abstract class CatalogMapper extends AbstractMapper {
 	abstract org.eclipse.epp.internal.mpc.core.model.Catalog toCatalogInternal(Catalog catalog);
 
 	News toNewsInternal(Catalog catalog) {
-		return catalog.getTabs().stream().filter(tab -> tab.getType() == TypeEnum.EMBEDDED).limit(1).map(tab -> {
+		return catalog.getTabs().stream().filter(tab -> tab.getType() == CatalogTabType.EMBEDDED).limit(1).map(tab -> {
 			News news = new News();
 			news.setShortTitle(tab.getTitle());
 			news.setUrl(tab.getUrl());

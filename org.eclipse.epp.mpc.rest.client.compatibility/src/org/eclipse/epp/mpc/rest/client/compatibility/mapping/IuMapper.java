@@ -21,8 +21,8 @@ import org.eclipse.epp.internal.mpc.core.model.Ius;
 import org.eclipse.epp.mpc.core.model.IIu;
 import org.eclipse.epp.mpc.core.model.IIus;
 import org.eclipse.epp.mpc.rest.client.compatibility.util.ListingVersionUtil;
-import org.eclipse.epp.mpc.rest.model.Feature;
-import org.eclipse.epp.mpc.rest.model.Feature.InstallStateEnum;
+import org.eclipse.epp.mpc.rest.model.FeatureID;
+import org.eclipse.epp.mpc.rest.model.InstallState;
 import org.eclipse.epp.mpc.rest.model.ListingVersion;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -33,7 +33,7 @@ import org.mapstruct.Named;
 @Mapper
 public abstract class IuMapper extends AbstractMapper {
 
-	public IIu toIu(Feature feature) {
+	public IIu toIu(FeatureID feature) {
 		return toIuInternal(feature);
 	}
 
@@ -53,15 +53,15 @@ public abstract class IuMapper extends AbstractMapper {
 	@Mappings({ @Mapping(source = "featureId", target = "id"),
 		@Mapping(source = "installState", target = "optional", qualifiedByName = "IuOptional"),
 		@Mapping(source = "installState", target = "selected", qualifiedByName = "IuSelected") })
-	abstract Iu toIuInternal(Feature feature);
+	abstract Iu toIuInternal(FeatureID feature);
 
 	@Named("IuOptional")
-	boolean installStateToOptional(InstallStateEnum installState) {
-		return installState != InstallStateEnum.REQUIRED;
+	boolean installStateToOptional(InstallState installState) {
+		return installState != InstallState.REQUIRED;
 	}
 
 	@Named("IuSelected")
-	boolean installStateToSelected(InstallStateEnum installState) {
-		return installState == InstallStateEnum.REQUIRED || installState == InstallStateEnum.OPTIONAL_SELECTED;
+	boolean installStateToSelected(InstallState installState) {
+		return installState == InstallState.REQUIRED || installState == InstallState.OPTIONAL_SELECTED;
 	}
 }

@@ -155,7 +155,7 @@ paths:
         description: Unique ID of an individual listing
         required: true
         schema:
-          type: string
+          $ref: "#/components/schemas/ObjectID"
       - $ref: "#/components/parameters/platform_version"
       - $ref: "#/components/parameters/java_version"
       - $ref: "#/components/parameters/os"
@@ -179,6 +179,7 @@ paths:
     delete:
       tags:
         - Listings
+      operationId: delete-listing
       summary: Delete listing
       description: Deletes a single listing that has a matching ID. User must be authorized to delete items to access this endpoint.
       responses:
@@ -187,10 +188,12 @@ paths:
         403:
           description: Unauthorized
           
+#WIP see below - should we have this? Or just make this a sub-resource of listing?
   /listing_versions:
     get:
       tags:
         - Listing Versions
+      operationId: get-listing-versions
       summary: Listing version list
       description: Retrieves a list of listing versions available within the marketplace.
       parameters:
@@ -208,6 +211,7 @@ paths:
     put:
       tags:
         - Listing Versions
+      operationId: put-listing-version
       summary: Listing version update
       description: Add or update information about a listing version in the marketplace. User must be authorized to update items to access this endpoint.
       requestBody:
@@ -222,6 +226,7 @@ paths:
         500:
           description: Error while inserting data
 
+#WIP inconsistent to installs api below - one qualifies by listing id, the other doesn't
   /listing_versions/{version_id}:
     parameters:
       - name: version_id
@@ -229,10 +234,11 @@ paths:
         description: Unique ID of an individual listing version
         required: true
         schema:
-          type: string
+          $ref: "#/components/schemas/ObjectID"
     get:
       tags:
         - Listing Versions
+      operationId: get-listing-version
       summary: Listing Version
       description: Retrieve a single listing version within the marketplace, matching on its ID.
       responses:
@@ -247,6 +253,7 @@ paths:
     delete:
       tags:
         - Listing Versions
+      operationId: delete-listing-version
       summary: Delete Listing version
       description: Deletes a single listing version that has a matching ID. User must be authorized to delete items to access this endpoint.
       responses:
@@ -265,10 +272,11 @@ paths:
         description: Unique ID of an individual listing
         required: true
         schema:
-          type: string
+          $ref: "#/components/schemas/ObjectID"
       - $ref: "#/components/parameters/platform_version"
       - $ref: "#/components/parameters/java_version"
       - $ref: "#/components/parameters/os"
+#WIP no country?      
       - $ref: "#/components/parameters/page"
       - $ref: "#/components/parameters/limit"
     get:
@@ -287,6 +295,7 @@ paths:
         404:
           description: No listing found
           
+#WIP what's the difference to above? Same content type...
   /installs/{listing_id}/metrics:
     parameters:
       - name: listing_id
@@ -294,10 +303,11 @@ paths:
         description: Unique ID of an individual listing
         required: true
         schema:
-          type: string
+          $ref: "#/components/schemas/ObjectID"
     get:
       tags:
         - Installs
+      operationId: get-install-metrics
       summary: Install metrics by listing ID
       description: Retrieve install metrics for a marketplace listing by listing ID.
       responses:
@@ -317,13 +327,14 @@ paths:
         description: Unique ID of an individual listing
         required: true
         schema:
-          type: string
+          $ref: "#/components/schemas/ObjectID"
+#WIP Why both if all ids are unique?
       - name: version_id
         in: path
         description: Unique ID for the version that is being updated
         required: true
         schema:
-          type: string
+          $ref: "#/components/schemas/ObjectID"
     get:
       tags:
         - Installs
@@ -332,6 +343,7 @@ paths:
         - $ref: "#/components/parameters/java_version"
         - $ref: "#/components/parameters/os"
         - $ref: "#/components/parameters/country"
+#WIP overload -> just get-installs ?
       operationId: get-installs-for-version
       description: Retrieve number of installs for the given marketplace listing and version by its unique listing ID and version number. The parameters that are available for this call act as filters for the statistics, allowing for greater flexibility of analysis of the Installation stats.
       summary: Count of installs for given listing version install
@@ -405,7 +417,7 @@ paths:
         description: Unique ID of an individual catalog
         required: true
         schema:
-          type: string
+          $ref: "#/components/schemas/ObjectID"
     get:
       tags:
         - Catalogs
@@ -426,6 +438,7 @@ paths:
     delete:
       tags:
         - Catalogs
+      operationId: delete-catalog
       summary: Delete catalog
       description: Deletes a single listing that has a matching ID. User must be authorized to delete items to access this endpoint.
       responses:
@@ -480,7 +493,7 @@ paths:
         description: Unique ID of an individual market
         required: true
         schema:
-          type: string
+          $ref: "#/components/schemas/ObjectID"
     get:
       tags:
         - Markets
@@ -499,6 +512,7 @@ paths:
     delete:
       tags:
         - Markets
+      operationId: delete-market
       summary: Delete Market
       description: Deletes a single market that has a matching ID. User must be authorized to delete items to access this endpoint.
       responses:
@@ -559,7 +573,7 @@ paths:
         description: Unique ID of an individual category
         required: true
         schema:
-          type: string
+          $ref: "#/components/schemas/ObjectID"
     get:
       tags:
         - Categories
@@ -580,6 +594,7 @@ paths:
     delete:
       tags:
         - Categories
+      operationId: delete-category
       summary: Delete category
       description: Deletes a single category that has a matching ID. User must be authorized to delete items to access this endpoint.
       responses:
@@ -597,6 +612,7 @@ paths:
       parameters:
         - $ref: "#/components/parameters/page"
         - $ref: "#/components/parameters/limit"
+      operationId: get-error-reports
       summary: Error reports list
       description: Retrieves a list of error reports available within the marketplace.
       responses:
@@ -611,6 +627,7 @@ paths:
     put:
       tags:
         - Error reports
+      operationId: put-error-report
       summary: Error reports update
       description: Add or update information about a error report in the marketplace. User must be authorized to update items to access this endpoint.
       requestBody:
@@ -636,10 +653,11 @@ paths:
         description: Unique ID of an individual error report
         required: true
         schema:
-          type: string
+          $ref: "#/components/schemas/ObjectID"
     get:
       tags:
         - Error reports
+      operationId: get-error-report
       summary: Error report
       description: Retrieves an error report available within the marketplace, matched on its ID.
       responses:
@@ -656,6 +674,7 @@ paths:
     delete:
       tags:
         - Error reports
+      operationId: delete-error-report
       summary: Delete error report
       description: Deletes a single error report that has a matching ID. User must be authorized to delete items to access this endpoint.
       responses:
@@ -745,12 +764,12 @@ components:
           type: array
           description: List of IDs of markets this listing should be listed in 
           items:
-            type: string
+            $ref: "#/components/schemas/ObjectID"
         category_ids:
           type: array
           description: List of IDs of categories this listing should be listed in 
           items:
-            type: string
+            $ref: "#/components/schemas/ObjectID"
         tags:
           type: array
           items: 
@@ -806,6 +825,7 @@ components:
           description: Listing license
         organization:
           $ref: "#/components/schemas/Organization"
+          description: Organizations involved with the development of the listing
         status:
           type: string
           description: Release status
@@ -819,6 +839,9 @@ components:
             type: string
         versions:
           $ref: "#/components/schemas/ListingVersions"
+#          type: array
+#          items: 
+#            $ref: "#/components/schemas/ListingVersion"
 
     Listings:
       type: array
@@ -828,9 +851,11 @@ components:
     Account:
       type: object
       properties:
+        id:
+          $ref: "#/components/schemas/ObjectID"
         full_name:
           type: string
-          description: Real/display name of the account
+          description: Name of the author
         username:
           type: string
           description: Eclipse Foundation username for the account
@@ -900,7 +925,12 @@ components:
           type: array
           items: 
             $ref: "#/components/schemas/Category"
-          description: Array of categories that this market makes use of
+          description: Array of categories that are used for the current market
+        listing_ids:
+          type: array
+          items: 
+            $ref: "#/components/schemas/ObjectID"
+          description: Array of listing IDs that should be used for the current market
 
     Markets:
       type: array
@@ -958,12 +988,16 @@ components:
           type: string
           description: URL for default content of the tab
         type:
-          type: string
-          description: Type of tab, can either be a default tab, a search tab, or an embedded content tab
-          enum:
-            - default
-            - search
-            - embedded
+          $ref: "#/components/schemas/catalog_tab_type"
+
+#WIP case
+    catalog_tab_type:
+      type: string
+      description: Type of tab, can either be a default tab, a search tab, or an embedded content tab
+      enum:
+        - default
+        - search
+        - embedded
 
     license_type:
       type: string
@@ -988,7 +1022,7 @@ components:
 
     osgiVersion:
       type: number
-      format: float # TODO also use string here?
+      format: float
       description: Describes the version of OSGi the given platform is using
     
     ListingVersions:
@@ -1002,7 +1036,7 @@ components:
         id:
           $ref: "#/components/schemas/ObjectID"
         listing_id:
-          description: The listing ID this solution version represents
+          description: The listing ID this listing version represents
           $ref: "#/components/schemas/ObjectID"
         version:
           type: string
@@ -1092,22 +1126,26 @@ components:
       type: array
       description: Describes additional feature packages available for install with the current version
       items:
-        $ref: "#/components/schemas/Feature"
-        
-    Feature:
+        $ref: "#/components/schemas/FeatureID"
+
+    FeatureID:
       type: object
+      description: Describes an additional feature package available for install with the current version
       properties:
         feature_id:
           type: string
           description: The ID of the feature for the solution
         install_state:
-          type: string
-          description: Whether the feature is required, optional, or recommended.
-          enum:
-            - optional
-            - required
-            - optional_selected
+          $ref: "#/components/schemas/install_state"
 
+    install_state:
+      type: string
+      description: Whether the feature is required, optional, or recommended.
+      enum:
+        - optional
+        - required
+        - optional_selected    
+    
     Installs:
       type: object
       properties:

@@ -89,11 +89,11 @@ public abstract class RequestHelper {
 
 	public Installs getInstalls(InstallsApi api, InstallsQuery query, PagingInfo page) {
 		return query.version().isPresent()
-				? api.getInstallsForVersion(Parameters.listingId(query), Parameters.versionNumber(query),
+				? api.getInstallsForVersion(Parameters.listingId(query), Parameters.versionId(query),
 						Parameters.platformVersion(query), Parameters.javaVersion(query), Parameters.os(query),
-						Parameters.country(query)/*, Parameters.page(page), Parameters.limit(page)*/)
+						Parameters.country(query))
 						: api.getInstalls(Parameters.listingId(query), Parameters.platformVersion(query),
-								Parameters.javaVersion(query), Parameters.os(query), /*Parameters.country(query),*/
+						        Parameters.javaVersion(query), Parameters.os(query),
 								Parameters.page(page), Parameters.limit(page));
 	}
 
@@ -207,11 +207,11 @@ public abstract class RequestHelper {
 
 		public CompletionStage<Installs> getInstalls(InstallsApi.Async api, InstallsQuery query, PagingInfo page) {
 			return query.version().isPresent()
-					? api.getInstallsForVersion(Parameters.listingId(query), Parameters.versionNumber(query),
+					? api.getInstallsForVersion(Parameters.listingId(query), Parameters.versionId(query),
 							Parameters.platformVersion(query), Parameters.javaVersion(query), Parameters.os(query),
-							Parameters.country(query)/*, Parameters.page(page), Parameters.limit(page)*/)
+							Parameters.country(query))
 							: api.getInstalls(Parameters.listingId(query), Parameters.platformVersion(query),
-									Parameters.javaVersion(query), Parameters.os(query), /*Parameters.country(query),*/
+							        Parameters.javaVersion(query), Parameters.os(query),
 									Parameters.page(page), Parameters.limit(page));
 		}
 
@@ -325,7 +325,7 @@ public abstract class RequestHelper {
 			return query == null ? null : query.marketId().orElse(null);
 		}
 
-		static String versionNumber(InstallsQuery query) {
+		static String versionId(InstallsQuery query) {
 			return query == null ? null : query.version().orElse(null);
 		}
 

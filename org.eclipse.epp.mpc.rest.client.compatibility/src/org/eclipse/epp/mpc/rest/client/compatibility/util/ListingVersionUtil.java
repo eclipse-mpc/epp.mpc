@@ -27,7 +27,7 @@ public class ListingVersionUtil {
 	private static final Pattern NUMBER_PATTERN = Pattern.compile("\\d+"); //$NON-NLS-1$
 
 	public static Optional<ListingVersion> newestApplicableVersion(List<ListingVersion> versions) {
-		//TODO filter by applicable SolutionVersion according to current platform etc
+		//TODO filter by applicable ListingVersion according to current platform etc
 		return versions.stream().sorted(Comparator.<ListingVersion, String> comparing(v -> {
 			Matcher paddingMatcher = NUMBER_PATTERN.matcher(v.getVersion());
 			StringBuffer sb = new StringBuffer();

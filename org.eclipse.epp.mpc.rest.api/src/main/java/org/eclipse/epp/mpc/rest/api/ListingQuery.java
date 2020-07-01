@@ -103,7 +103,7 @@ public interface ListingQuery {
 
 		Builder ids(Iterable<String> ids);
 
-		Builder addIds(String id);
+		Builder addIds(String ids);
 
 		Builder addIds(String... ids);
 

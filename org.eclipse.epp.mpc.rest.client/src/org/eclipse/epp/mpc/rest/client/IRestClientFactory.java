@@ -10,14 +10,10 @@
  * Contributors:
  *     The Eclipse Foundation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.epp.mpc.rest.client.compatibility.util;
+package org.eclipse.epp.mpc.rest.client;
 
-import java.util.concurrent.Callable;
+import java.net.URI;
 
-import org.eclipse.core.runtime.CoreException;
-
-@FunctionalInterface
-public interface CoreCallable<T> extends Callable<T> {
-
-	T call() throws CoreException;
+public interface IRestClientFactory {
+	public <E> IRestClient<E> createRestClient(URI baseUri, Class<E> endpointClass);
 }

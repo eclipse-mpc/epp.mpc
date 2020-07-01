@@ -32,7 +32,7 @@ public interface InstallsQuery {
 
 	InstallsQuery withCountry(String country);
 
-	InstallsQuery withVersion(String version);
+	InstallsQuery withVersion(String versionId);
 
 	InstallsQuery withPlatform(PlatformInfo platform);
 
@@ -59,7 +59,7 @@ public interface InstallsQuery {
 
 		Builder country(Optional<String> country);
 
-		Builder version(Optional<String> version);
+		Builder version(Optional<String> versionId);
 
 		Builder platform(Optional<? extends PlatformInfo> platform);
 

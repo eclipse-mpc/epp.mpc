@@ -12,12 +12,54 @@
   <artifactId>org.eclipse.epp.mpc.rest.client</artifactId>
   <packaging>eclipse-plugin</packaging>
 
-   <properties>
-      <resteasy-version>3.8.1.Final</resteasy-version>
-   </properties>
 
+   <dependencyManagement>
+      <dependencies>
+         <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-bom</artifactId>
+            <version>4.4.2.Final</version>
+            <type>pom</type>
+            <scope>import</scope>
+         </dependency>
+      </dependencies>
+   </dependencyManagement>
+
+   <dependencies>
+      <!--<dependency>
+         <groupId>org.jboss.resteasy</groupId>
+         <artifactId>resteasy-jaxrs</artifactId>
+      </dependency>-->
+      <dependency>
+         <groupId>org.jboss.resteasy</groupId>
+         <artifactId>resteasy-client</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.apache.httpcomponents</groupId>
+         <artifactId>httpcore-nio</artifactId>
+         <version>4.4.13</version>
+      </dependency>
+      <dependency>
+         <groupId>org.apache.httpcomponents</groupId>
+         <artifactId>httpasyncclient</artifactId>
+         <version>4.1.4</version>
+      </dependency>
+      <dependency>
+         <groupId>javax.ws.rs</groupId>
+         <artifactId>javax.ws.rs-api</artifactId>
+         <version>2.1.1</version>
+      </dependency>
+   </dependencies>
    <build>
       <plugins>
+         <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>target-platform-configuration</artifactId>
+            <version>${tycho-version}</version>
+            <configuration>
+               <pomDependencies>consider</pomDependencies>
+            </configuration>
+         </plugin>
          <plugin>
             <artifactId>maven-dependency-plugin</artifactId>
             <version>2.10</version>
@@ -37,19 +79,4 @@
          </plugin>
       </plugins>
    </build>
-
-  <dependencies>
-    <dependency>
-      <groupId>org.jboss.resteasy</groupId>
-      <artifactId>resteasy-jackson2-provider</artifactId>
-      <scope>compile</scope>
-      <version>${resteasy-version}</version>
-     </dependency>
-    <dependency>
-      <groupId>org.jboss.resteasy</groupId>
-      <artifactId>resteasy-client</artifactId>
-      <scope>compile</scope>
-      <version>${resteasy-version}</version>
-    </dependency>
-  </dependencies>
 </project>
