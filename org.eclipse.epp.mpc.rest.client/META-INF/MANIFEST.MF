@@ -4,12 +4,13 @@ Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.eclipse.epp.mpc.rest.client;singleton:=true
 Bundle-Version: 2.0.0.qualifier
 Bundle-Vendor: %Bundle-Vendor
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.epp.mpc.rest.client.internal.MarketplaceRestClientPlugin
 Service-Component: OSGI-INF/services/*.xml
 Automatic-Module-Name: org.eclipse.epp.mpc.rest.client
-Export-Package: org.eclipse.epp.mpc.rest.client
+Export-Package: org.eclipse.epp.mpc.rest.client,
+ org.eclipse.epp.mpc.rest.client.internal.httpclient
 Import-Package: org.apache.commons.io.input;version="2.6.0",
  org.apache.http;version="4.4.0",
  org.apache.http.auth;version="4.5.2",

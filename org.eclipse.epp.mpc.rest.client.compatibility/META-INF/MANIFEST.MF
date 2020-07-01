@@ -4,7 +4,7 @@ Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.eclipse.epp.mpc.rest.client.compatibility;singleton:=true
 Bundle-Version: 2.0.0.qualifier
 Bundle-Vendor: %Bundle-Vendor
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.epp.mpc.rest.client.compatibility.MarketplaceRestClientCompatibilityPlugin
 Service-Component: OSGI-INF/services/*.xml

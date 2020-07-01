@@ -14,7 +14,6 @@ and is available at
 package org.eclipse.epp.mpc.rest.client.compatibility.mapping;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -58,7 +57,6 @@ public abstract class NodeMapper extends AbstractMapper {
 		@Mapping(source = "installCount", target = "installsTotal"),
 		@Mapping(source = "versions", target = "ius"),
 		@Mapping(source = "listing", target = "owner", qualifiedByName = "NodeOwner"),
-		@Mapping(source = "licenseType", target = "license"),
 		@Mapping(source = "versions", target = "platforms"),
 		@Mapping(ignore = true, target = "screenshot"),
 		@Mapping(source = "teaser", target = "shortdescription"),

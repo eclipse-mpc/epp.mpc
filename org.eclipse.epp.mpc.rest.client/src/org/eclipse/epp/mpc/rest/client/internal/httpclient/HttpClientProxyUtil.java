@@ -32,7 +32,7 @@ import org.osgi.framework.FrameworkUtil;
  * @author Carsten Reckord
  */
 @SuppressWarnings("restriction")
-final class HttpClientProxyUtil {
+public final class HttpClientProxyUtil {
 	private static final String PROP_HTTP_AUTH_NTLM_DOMAIN = "http.auth.ntlm.domain";
 
 	private static final String ENV_USER_DOMAIN = "USERDOMAIN";

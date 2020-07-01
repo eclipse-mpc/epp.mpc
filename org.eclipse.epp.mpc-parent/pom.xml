@@ -17,12 +17,12 @@
    <properties>
       <mpc-version>${project.version}</mpc-version>
       <target-platform>staging</target-platform>
-      <java-version>1.8</java-version>
+      <java-version>11</java-version>
       <java-bree>JavaSE-${java-version}</java-bree>
-      <enforced.java.version>[1.8.0,)</enforced.java.version>
+      <enforced.java.version>[11,)</enforced.java.version>
       <java-jdk>SYSTEM</java-jdk>
 
-      <tycho-version>1.5.1</tycho-version>
+      <tycho-version>1.7.0</tycho-version>
       <tycho-extras-version>${tycho-version}</tycho-extras-version>
 
       <qualifier-format>'v'yyyyMMdd-HHmm</qualifier-format>
