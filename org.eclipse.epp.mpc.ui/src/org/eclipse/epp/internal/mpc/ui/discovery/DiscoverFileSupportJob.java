@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -85,7 +84,7 @@ final class DiscoverFileSupportJob extends Job {
 		try {
 			ISearchResult searchResult = marketplaceService.tagged(fileExtensionTags, monitor);
 			nodes = orderNodesByTagSubExtensionCount(searchResult.getNodes(), fileExtensionTags);
-		} catch (CoreException ex) {
+		} catch (Exception ex) {
 			IStatus status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
 					NLS.bind(Messages.DiscoverFileSupportJob_discoveryFailed, getFileExtensionLabel(fileName)), ex);
 			// Do not return this status as it would show an error, e.g. when the user is currently offline
@@ -123,6 +122,9 @@ final class DiscoverFileSupportJob extends Job {
 
 		Map<String, List<INode>> nodesByTags = new HashMap<>();
 		for (INode iNode : nodes) {
+			if (iNode.getTags() == null || iNode.getTags().getTags() == null) {
+				continue;
+			}
 			for (ITag nodeTag : iNode.getTags().getTags()) {
 				boolean foundTag = false;
 				for (String tag : fileExtensionTags) {

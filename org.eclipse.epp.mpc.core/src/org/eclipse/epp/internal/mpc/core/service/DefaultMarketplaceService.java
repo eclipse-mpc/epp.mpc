@@ -131,46 +131,11 @@ MarketplaceService {
 	public static final String META_PARAM_CLIENT = "client"; //$NON-NLS-1$
 
 	/**
-	 * parameter identifying client plugin version
-	 *
-	 * @see {@link #setRequestMetaParameters(Map)}
-	 */
-	public static final String META_PARAM_CLIENT_VERSION = "client.version"; //$NON-NLS-1$
-
-	/**
-	 * parameter identifying windowing system as reported by {@link org.eclipse.core.runtime.Platform#getWS()}
-	 *
-	 * @see {@link #setRequestMetaParameters(Map)}
-	 */
-	public static final String META_PARAM_WS = "ws"; //$NON-NLS-1$
-
-	/**
 	 * parameter identifying operating system as reported by {@link org.eclipse.core.runtime.Platform#getOS()}
 	 *
 	 * @see {@link #setRequestMetaParameters(Map)}
 	 */
 	public static final String META_PARAM_OS = "os"; //$NON-NLS-1$
-
-	/**
-	 * parameter identifying the current local as reported by {@link org.eclipse.core.runtime.Platform#getNL()}
-	 *
-	 * @see {@link #setRequestMetaParameters(Map)}
-	 */
-	public static final String META_PARAM_NL = "nl"; //$NON-NLS-1$
-
-	/**
-	 * parameter identifying Java version
-	 *
-	 * @see {@link #setRequestMetaParameters(Map)}
-	 */
-	public static final String META_PARAM_JAVA_VERSION = "java.version"; //$NON-NLS-1$
-
-	/**
-	 * parameter identifying the Eclipse runtime version (the version of the org.eclipse.core.runtime bundle)
-	 *
-	 * @see {@link #setRequestMetaParameters(Map)}
-	 */
-	public static final String META_PARAM_RUNTIME_VERSION = "runtime.version"; //$NON-NLS-1$
 
 	/**
 	 * parameter identifying the Eclipse platform version (the version of the org.eclipse.platform bundle) This

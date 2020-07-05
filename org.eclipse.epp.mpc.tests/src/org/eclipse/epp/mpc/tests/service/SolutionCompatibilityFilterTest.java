@@ -98,7 +98,6 @@ public class SolutionCompatibilityFilterTest {
 
 		public void applyTo(Map<String, String> metaParams) {
 			metaParams.put(DefaultMarketplaceService.META_PARAM_OS, os);
-			metaParams.put(DefaultMarketplaceService.META_PARAM_WS, ws);
 		}
 	}
 
@@ -107,37 +106,27 @@ public class SolutionCompatibilityFilterTest {
 	private static final String SDK_PRODUCT_ID = "org.eclipse.sdk.ide";
 
 	public static enum EclipseRelease {
-		UNKNOWN(null, null, null, null), //
-		INDIGO(JAVA_PRODUCT_ID, "1.4.2.20120131-1457", "3.7.0.v20110110", null), //
-		JUNO_3_8(SDK_PRODUCT_ID, "3.8.0.v201206081200", "3.8.0.v20120521-2346", null), //
-		JUNO_3_8_WITH_PLATFORM(SDK_PRODUCT_ID, JUNO_3_8.productVersion(), JUNO_3_8.runtimeVersion(),
-				"3.8.0.v201206081200"), //
-		JUNO(JAVA_PRODUCT_ID, "1.5.0.20120131-1544", "3.8.0.v20120521-2346", null), //
-		JUNO_WITH_PLATFORM(JAVA_PRODUCT_ID, JUNO.productVersion(), JUNO.runtimeVersion(), "4.2.0.v201206081400"), //
-		JUNO_SR2(JAVA_PRODUCT_ID, "1.5.2.20130110-1126", "3.8.0.v20120521-2346", "4.2.2.v201302041200"), //
-		KEPLER(JAVA_PRODUCT_ID, "2.0.0.20130613-0530", "3.9.0.v20130326-1255", "4.3.0.v20130605-2000"), //
-		KEPLER_SR2(JAVA_PRODUCT_ID, "2.0.2.20140224-0000", "3.9.100.v20131218-1515", "4.3.2.v20140221-1700"), //
-		LUNA(JAVA_PRODUCT_ID, "4.4.0.20140612-0500", "3.10.0.v20140318-2214", "4.4.0.v20140606-1215"), //
-		LUNA_SR2(JAVA_PRODUCT_ID, "4.4.2.20150219-0708", "3.10.0.v20140318-2214", "4.4.2.v20150204-1700"), //
-		MARS(JAVA_PRODUCT_ID, "4.5.0.20150326-0704", "3.10.0.v20150112-1422", "4.5.0.v20150203-1300");
+		UNKNOWN(null, null, null), //
+		KEPLER(JAVA_PRODUCT_ID, "2.0.0.20130613-0530", "4.3.0.v20130605-2000"), //
+		KEPLER_SR2(JAVA_PRODUCT_ID, "2.0.2.20140224-0000", "4.3.2.v20140221-1700"), //
+		LUNA(JAVA_PRODUCT_ID, "4.4.0.20140612-0500", "4.4.0.v20140606-1215"), //
+		LUNA_SR2(JAVA_PRODUCT_ID, "4.4.2.20150219-0708", "4.4.2.v20150204-1700"), //
+		MARS(JAVA_PRODUCT_ID, "4.5.0.20150326-0704", "4.5.0.v20150203-1300");
 
 		private final String productId;
 
 		private final String productVersion;
 
-		private final String runtimeVersion;
-
 		private final String platformVersion;
 
-		private EclipseRelease(String productId, String productVersion, String runtimeVersion, String platformVersion) {
+		private EclipseRelease(String productId, String productVersion, String platformVersion) {
 			this.productId = productId;
 			this.productVersion = productVersion;
-			this.runtimeVersion = runtimeVersion;
 			this.platformVersion = platformVersion;
 		}
 
-		private EclipseRelease(String productVersion, String runtimeVersion, String platformVersion) {
-			this(JAVA_PRODUCT_ID, productVersion, runtimeVersion, platformVersion);
+		private EclipseRelease(String productVersion, String platformVersion) {
+			this(JAVA_PRODUCT_ID, productVersion, platformVersion);
 		}
 
 		public String productId() {
@@ -146,10 +135,6 @@ public class SolutionCompatibilityFilterTest {
 
 		public String productVersion() {
 			return productVersion;
-		}
-
-		public String runtimeVersion() {
-			return runtimeVersion;
 		}
 
 		public String platformVersion() {
@@ -163,11 +148,6 @@ public class SolutionCompatibilityFilterTest {
 			} else {
 				metaParams.put(DefaultMarketplaceService.META_PARAM_PRODUCT, productId);
 				metaParams.put(DefaultMarketplaceService.META_PARAM_PRODUCT_VERSION, productVersion);
-			}
-			if (runtimeVersion == null) {
-				metaParams.remove(DefaultMarketplaceService.META_PARAM_RUNTIME_VERSION);
-			} else {
-				metaParams.put(DefaultMarketplaceService.META_PARAM_RUNTIME_VERSION, runtimeVersion);
 			}
 			if (platformVersion == null) {
 				metaParams.remove(DefaultMarketplaceService.META_PARAM_PLATFORM_VERSION);
@@ -194,11 +174,9 @@ public class SolutionCompatibilityFilterTest {
 	}
 
 	public static enum Solution {
-		JUNO("test-entry-juno", EclipseRelease.JUNO_3_8, EclipseRelease.JUNO_SR2), //
 		KEPLER("test-entry-kepler", EclipseRelease.KEPLER, EclipseRelease.KEPLER_SR2), //
 		LUNA("test-entry-luna", EclipseRelease.LUNA, EclipseRelease.LUNA_SR2), //
 		MARS("test-entry-mars", EclipseRelease.MARS, EclipseRelease.MARS), //
-		JUNO_AND_EARLIER("test-entry-juno-and-earlier", null, EclipseRelease.JUNO_SR2), //
 		KEPLER_AND_EARLIER("test-entry-kepler-and-earlier", null, EclipseRelease.KEPLER_SR2), //
 		KEPLER_LUNA("test-entry-kepler-luna", EclipseRelease.KEPLER, EclipseRelease.LUNA_SR2), //
 		KEPLER_MARS("test-entry-kepler-luna-mars", EclipseRelease.KEPLER, EclipseRelease.MARS), //
@@ -296,20 +274,10 @@ public class SolutionCompatibilityFilterTest {
 	@Parameters(name = "{index}__{0}__with__{1}_{2}")
 	public static Iterable<Object[]> data() {
 		List<Object[]> data = new ArrayList<>();
-		checkSolutionReleaseBounds(data, Solution.JUNO);
 		checkSolutionReleaseBounds(data, Solution.KEPLER);
 		checkSolutionReleaseBounds(data, Solution.LUNA);
 		checkSolutionReleaseBounds(data, Solution.MARS);
 
-		//bug 466627
-		checkSolutionWithEclipse(data, "Solution should not be installable in an older release", Solution.MARS,
-				EclipseRelease.INDIGO, null);
-		checkSolutionWithEclipse(data, "Solution should not be installable in an older release", Solution.MARS,
-				EclipseRelease.JUNO_3_8, null);
-		checkSolutionWithEclipse(data, "Solution should not be installable in an older release", Solution.MARS,
-				EclipseRelease.JUNO, null);
-
-		checkSolutionReleaseBounds(data, Solution.JUNO_AND_EARLIER);
 		checkSolutionReleaseBounds(data, Solution.KEPLER_AND_EARLIER);
 		checkSolutionReleaseBounds(data, Solution.KEPLER_LUNA);
 
@@ -344,9 +312,6 @@ public class SolutionCompatibilityFilterTest {
 				Solution.LUNA_LINUX_MACOS, EclipseRelease.LUNA, System.MACOS);
 		checkSolutionWithEclipse(data, "Solution should not installable in an incompatible os",
 				Solution.LUNA_LINUX_MACOS, EclipseRelease.LUNA, System.WIN32);
-		checkSolutionData(data, "Solution should have version 1.1.0 features for Juno release", Solution.MULTI_VERSION,
-				EclipseRelease.JUNO, System.LINUX, "1.1.0", "http://example.org/juno-kepler",
-				"org.example.feature.juno.kepler");
 		checkSolutionData(data, "Solution should have version 1.1.0 features for Kepler release",
 				Solution.MULTI_VERSION, EclipseRelease.KEPLER, System.MACOS, "1.1.0", "http://example.org/juno-kepler",
 				"org.example.feature.juno.kepler");

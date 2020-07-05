@@ -75,10 +75,10 @@ public class UserAgentUtil {
 			String productVersion = getProperty(context, "eclipse.buildId", null); //$NON-NLS-1$
 			String appId = getProperty(context, "eclipse.application", null); //$NON-NLS-1$
 			if (productId == null || productVersion == null) {
-				Map<String, String> defaultRequestMetaParameters = ServiceLocator.computeDefaultRequestMetaParameters();
-				productId = getProperty(defaultRequestMetaParameters, DefaultMarketplaceService.META_PARAM_PRODUCT,
+				Map<String, String> productInfo = ServiceLocator.computeProductInfo();
+				productId = getProperty(productInfo, DefaultMarketplaceService.META_PARAM_PRODUCT,
 						"unknownProduct"); //$NON-NLS-1$
-				productVersion = getProperty(defaultRequestMetaParameters,
+				productVersion = getProperty(productInfo,
 						DefaultMarketplaceService.META_PARAM_PRODUCT_VERSION, "unknownBuildId"); //$NON-NLS-1$
 			}
 			if (appId == null) {

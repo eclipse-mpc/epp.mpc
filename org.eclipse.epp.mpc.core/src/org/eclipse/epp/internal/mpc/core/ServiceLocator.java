@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProduct;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.epp.internal.mpc.core.service.CachingMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.service.DefaultCatalogService;
@@ -242,8 +243,8 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		}
 		try {
 			MarketplaceStorageService marketplaceStorageService = new MarketplaceStorageService();
-			registration = registerService(marketplaceBaseUrl,
-					IMarketplaceStorageService.class, marketplaceStorageService, config);
+			registration = registerService(marketplaceBaseUrl, IMarketplaceStorageService.class,
+					marketplaceStorageService, config);
 			BundleContext bundleContext = ServiceUtil.getBundleContext(registration);
 			if (bundleContext != null) {
 				marketplaceStorageService.activate(bundleContext, config);
@@ -281,16 +282,13 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 			this.defaultMarketplaceUrl = marketplaceUrl;
 		} //else the default value from the constructor is used
 
-		marketplaceServiceTracker = new ServiceTracker<>(context,
-				IMarketplaceService.class, null);
+		marketplaceServiceTracker = new ServiceTracker<>(context, IMarketplaceService.class, null);
 		marketplaceServiceTracker.open(true);
 
-		catalogServiceTracker = new ServiceTracker<>(context, ICatalogService.class,
-				null);
+		catalogServiceTracker = new ServiceTracker<>(context, ICatalogService.class, null);
 		catalogServiceTracker.open(true);
 
-		storageServiceTracker = new ServiceTracker<>(context,
-				IMarketplaceStorageService.class,
+		storageServiceTracker = new ServiceTracker<>(context, IMarketplaceStorageService.class,
 				new ServiceTrackerCustomizer<IMarketplaceStorageService, IMarketplaceStorageService>() {
 
 			@Override
@@ -325,8 +323,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		});
 		storageServiceTracker.open(true);
 
-		favoritesServiceTracker = new ServiceTracker<>(context,
-				IUserFavoritesService.class,
+		favoritesServiceTracker = new ServiceTracker<>(context, IUserFavoritesService.class,
 				new ServiceTrackerCustomizer<IUserFavoritesService, IUserFavoritesService>() {
 			@Override
 			public IUserFavoritesService addingService(ServiceReference<IUserFavoritesService> reference) {
@@ -572,13 +569,42 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_OS,
 				Platform.getOS());
 
-
 		// also send the platform version to distinguish between 3.x and 4.x platforms using the same runtime
 		Bundle platformBundle = Platform.getBundle("org.eclipse.platform"); //$NON-NLS-1$
 		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_PLATFORM_VERSION,
 				platformBundle == null ? null : shortenVersionString(platformBundle.getVersion().toString()));
 
 		return requestMetaParameters;
+	}
+
+	public static Map<String, String> computeProductInfo() {
+		Map<String, String> productInfo = new LinkedHashMap<>();
+
+		BundleContext bundleContext = FrameworkUtil.getBundle(MarketplaceClientCore.class).getBundleContext();
+
+		IProduct product = Platform.getProduct();
+		String productId;
+		{
+			productId = bundleContext.getProperty("eclipse.product"); //$NON-NLS-1$
+			if (productId == null && product != null) {
+				productId = product.getId();
+			}
+		}
+		addDefaultRequestMetaParameter(productInfo, DefaultMarketplaceService.META_PARAM_PRODUCT, productId);
+		String productVersion = null;
+		if (productId != null) {
+			productVersion = bundleContext.getProperty("eclipse.buildId"); //$NON-NLS-1$
+			if (productVersion == null && product != null) {
+				Bundle productBundle = product.getDefiningBundle();
+				if (productBundle != null) {
+					productVersion = productBundle.getVersion().toString();
+				}
+			}
+		}
+		addDefaultRequestMetaParameter(productInfo, DefaultMarketplaceService.META_PARAM_PRODUCT_VERSION,
+				productVersion);
+
+		return productInfo;
 	}
 
 	private static void addDefaultRequestMetaParameter(Map<String, String> requestMetaParameters, String key,
