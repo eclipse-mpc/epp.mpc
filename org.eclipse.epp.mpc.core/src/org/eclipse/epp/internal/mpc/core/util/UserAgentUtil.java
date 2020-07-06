@@ -13,7 +13,9 @@
 package org.eclipse.epp.internal.mpc.core.util;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProduct;
 import org.eclipse.core.runtime.Platform;
@@ -34,36 +36,54 @@ public class UserAgentUtil {
 		String version = getAgentVersion(mpcCoreBundle);
 		String java = getAgentJava(context);
 		String os = getAgentOS(context);
-		String language = getProperty(context, "osgi.nl", "unknownLanguage");//$NON-NLS-1$//$NON-NLS-2$
+		String language = getProperty(context, "osgi.nl", "en");//$NON-NLS-1$//$NON-NLS-2$
 		String agentDetail = getAgentDetail(context);
 
-		String userAgent = MessageFormat.format("mpc/{0} (Java {1}; {2}; {3}) {4}", //$NON-NLS-1$
+		String userAgent = MessageFormat.format("mpc/{0} ({1}; {2}; {3}) {4}", //$NON-NLS-1$
 				/*{0}*/version, /*{1}*/java, /*{2}*/os, /*{3}*/language, /*{4}*/agentDetail);
 		return userAgent;
 	}
 
 	private static String getAgentVersion(Bundle bundle) {
-		String version;
-		Version mpcCoreVersion = bundle.getVersion();
-		version = MessageFormat.format("{0}.{1}.{2}", mpcCoreVersion.getMajor(), mpcCoreVersion.getMinor(), //$NON-NLS-1$
-				mpcCoreVersion.getMicro());
-		return version;
+		return formatVersion(bundle.getVersion());
+	}
+
+	private static String formatVersion(String version) {
+		try {
+			return formatVersion(Version.parseVersion(version));
+		} catch (RuntimeException ex) {
+			String[] parts = version.split("[\\._\\-]", 4); //$NON-NLS-1$
+			String shortVersion = Arrays.stream(parts)
+					.limit(3)
+					.map(part -> part == null || part.isBlank() ? "0" : part) //$NON-NLS-1$
+					.collect(Collectors.joining(".")); //$NON-NLS-1$
+			return shortVersion;
+		}
+	}
+
+	private static String formatVersion(Version version) {
+		return MessageFormat.format("{0}.{1}.{2}", version.getMajor(), version.getMinor(), //$NON-NLS-1$
+				version.getMicro());
 	}
 
 	private static String getAgentJava(BundleContext context) {
-		String java;
-		String javaSpec = getProperty(context, "java.runtime.version", "unknownJava"); //$NON-NLS-1$ //$NON-NLS-2$
-		String javaVendor = getProperty(context, "java.vendor", "unknownJavaVendor");//$NON-NLS-1$//$NON-NLS-2$
-		java = MessageFormat.format("{0} {1}", javaSpec, javaVendor); //$NON-NLS-1$
+		String javaName = getProperty(context, "java.runtime.name", //$NON-NLS-1$
+				getProperty(context, "java.vendor", "Unknown Java")); //$NON-NLS-1$ //$NON-NLS-2$
+		if (javaName.endsWith("Runtime Environment")) { //$NON-NLS-1$
+			javaName = javaName.substring(0, javaName.length() - "Runtime Environment".length()); //$NON-NLS-1$
+		}
+		String javaVersion = getProperty(context, "java.runtime.version", //$NON-NLS-1$
+				getProperty(context, "java.version", "0.0.0")); //$NON-NLS-1$ //$NON-NLS-2$
+		String java = MessageFormat.format("{0} {1}", javaName, javaVersion); //$NON-NLS-1$
 		return java;
 	}
 
 	private static String getAgentOS(BundleContext context) {
 		String os;
-		String osName = getProperty(context, "org.osgi.framework.os.name", "unknownOS"); //$NON-NLS-1$ //$NON-NLS-2$
-		String osVersion = getProperty(context, "org.osgi.framework.os.version", "unknownOSVersion"); //$NON-NLS-1$ //$NON-NLS-2$
-		String osArch = getProperty(context, "org.osgi.framework.processor", "unknownArch");//$NON-NLS-1$//$NON-NLS-2$
-		os = MessageFormat.format("{0} {1} {2}", osName, osVersion, osArch); //$NON-NLS-1$
+		String osName = getProperty(context, "org.osgi.framework.os.name", null); //$NON-NLS-1$
+		String osVersion = getProperty(context, "org.osgi.framework.os.version", "Unknown Version"); //$NON-NLS-1$ //$NON-NLS-2$
+		String osArch = getProperty(context, "org.osgi.framework.processor", "Unknown Arch");//$NON-NLS-1$//$NON-NLS-2$
+		os = osName == null ? "Unknown OS" : MessageFormat.format("{0} {1} {2}", osName, osVersion, osArch); //$NON-NLS-1$ //$NON-NLS-2$
 		return os;
 	}
 
@@ -73,24 +93,32 @@ public class UserAgentUtil {
 		if (agentDetail == null) {
 			String productId = getProperty(context, "eclipse.product", null); //$NON-NLS-1$
 			String productVersion = getProperty(context, "eclipse.buildId", null); //$NON-NLS-1$
-			String appId = getProperty(context, "eclipse.application", null); //$NON-NLS-1$
 			if (productId == null || productVersion == null) {
-				Map<String, String> productInfo = ServiceLocator.computeProductInfo();
-				productId = getProperty(productInfo, DefaultMarketplaceService.META_PARAM_PRODUCT,
-						"unknownProduct"); //$NON-NLS-1$
-				productVersion = getProperty(productInfo,
-						DefaultMarketplaceService.META_PARAM_PRODUCT_VERSION, "unknownBuildId"); //$NON-NLS-1$
+				Map<String, String> defaultRequestMetaParameters = ServiceLocator.computeProductInfo();
+				productId = getProperty(defaultRequestMetaParameters, DefaultMarketplaceService.META_PARAM_PRODUCT,
+						null);
+				productVersion = getProperty(defaultRequestMetaParameters,
+						DefaultMarketplaceService.META_PARAM_PRODUCT_VERSION, "Unknown Build"); //$NON-NLS-1$
 			}
+			if (productId == null) {
+				agentDetail = "Unknown Product"; //$NON-NLS-1$
+			} else if (productVersion == null) {
+				agentDetail = productId;
+			} else {
+				productVersion = formatVersion(productVersion);
+				agentDetail = MessageFormat.format("{0}/{1}", productId, productVersion); //$NON-NLS-1$
+			}
+
+			String appId = getProperty(context, "eclipse.application", null); //$NON-NLS-1$
 			if (appId == null) {
 				IProduct product = Platform.getProduct();
 				if (product != null) {
 					appId = product.getApplication();
 				}
-				if (appId == null) {
-					appId = "unknownApp"; //$NON-NLS-1$
-				}
 			}
-			agentDetail = MessageFormat.format("{0}/{1} ({2})", productId, productVersion, appId); //$NON-NLS-1$
+			if (appId != null) {
+				agentDetail = MessageFormat.format("{0} ({1})", agentDetail, appId); //$NON-NLS-1$
+			}
 		}
 		return agentDetail;
 	}
