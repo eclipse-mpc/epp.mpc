@@ -2,6 +2,6 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Marketplace Client Test Catalog
 Bundle-SymbolicName: org.eclipse.epp.mpc.tests.catalog;singleton:=true
-Bundle-Version: 1.8.3.qualifier
+Bundle-Version: 1.8.4.qualifier
 Bundle-Vendor: Eclipse Marketplace Client
-Require-Bundle: org.eclipse.epp.mpc.ui;bundle-version="1.8.3"
+Require-Bundle: org.eclipse.epp.mpc.ui;bundle-version="1.8.4"
