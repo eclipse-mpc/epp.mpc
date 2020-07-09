@@ -55,7 +55,7 @@ public class UserAgentUtil {
 			String[] parts = version.split("[\\._\\-]", 4); //$NON-NLS-1$
 			String shortVersion = Arrays.stream(parts)
 					.limit(3)
-					.map(part -> part == null || part.isBlank() ? "0" : part) //$NON-NLS-1$
+					.map(part -> part == null || part.trim().isEmpty() ? "0" : part) //$NON-NLS-1$
 					.collect(Collectors.joining(".")); //$NON-NLS-1$
 			return shortVersion;
 		}
