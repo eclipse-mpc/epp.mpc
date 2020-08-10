@@ -13,7 +13,7 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.core.service;
 
-import org.eclipse.epp.internal.mpc.core.MarketplaceClientCorePlugin;
+import org.eclipse.epp.internal.mpc.core.ServiceHelperImpl;
 
 /**
  * Convenience class to access marketplace-related OSGi services.
@@ -25,7 +25,7 @@ import org.eclipse.epp.internal.mpc.core.MarketplaceClientCorePlugin;
 public abstract class ServiceHelper {
 
 	private static ServiceHelper getInstance() {
-		return MarketplaceClientCorePlugin.getDefault().getServiceHelper();
+		return ServiceHelperImpl.getImplInstance();
 	}
 
 	protected abstract IMarketplaceServiceLocator doGetMarketplaceServiceLocator();

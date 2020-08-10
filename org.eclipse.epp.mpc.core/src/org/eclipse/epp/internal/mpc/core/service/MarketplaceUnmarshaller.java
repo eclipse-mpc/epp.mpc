@@ -37,6 +37,7 @@ import org.eclipse.epp.internal.mpc.core.service.xml.Unmarshaller;
 import org.eclipse.epp.mpc.core.service.IMarketplaceUnmarshaller;
 import org.eclipse.epp.mpc.core.service.UnmarshalException;
 import org.eclipse.osgi.util.NLS;
+import org.osgi.service.component.annotations.Component;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -44,6 +45,7 @@ import org.xml.sax.XMLReader;
 /**
  * @author Carsten Reckord
  */
+@Component(name = "org.eclipse.epp.mpc.core.unmarshaller")
 public class MarketplaceUnmarshaller implements IMarketplaceUnmarshaller {
 
 	@Override

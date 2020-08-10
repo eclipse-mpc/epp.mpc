@@ -20,6 +20,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,9 +33,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -52,7 +53,8 @@ import org.eclipse.epp.internal.mpc.core.model.NodeListing;
 import org.eclipse.epp.internal.mpc.core.model.Search;
 import org.eclipse.epp.internal.mpc.core.model.SearchResult;
 import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
-import org.eclipse.epp.internal.mpc.core.util.HttpUtil;
+import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientService;
+import org.eclipse.epp.internal.mpc.core.transport.httpclient.RequestTemplate;
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.mpc.core.model.ICategory;
@@ -118,6 +120,8 @@ MarketplaceService {
 
 	public static final String API_FREETAGGING_URI = "category/free-tagging/"; //$NON-NLS-1$
 
+	private static final String API_ERROR_REPORT_URI = "install/error/report"; //$NON-NLS-1$
+
 	public static final String DEFAULT_SERVICE_LOCATION = System
 			.getProperty(IMarketplaceServiceLocator.DEFAULT_MARKETPLACE_PROPERTY_NAME, "http://marketplace.eclipse.org"); //$NON-NLS-1$
 
@@ -170,6 +174,8 @@ MarketplaceService {
 	}
 
 	private IUserFavoritesService userFavoritesService;
+
+	private HttpClientService httpClient;
 
 	public DefaultMarketplaceService(URL baseUrl) {
 		this.baseUrl = baseUrl == null ? DEFAULT_SERVICE_URL : baseUrl;
@@ -775,19 +781,6 @@ MarketplaceService {
 	@Override
 	public void reportInstallError(IStatus result, Set<? extends INode> nodes, Set<String> iuIdsAndVersions,
 			String resolutionDetails, IProgressMonitor monitor) throws CoreException {
-		HttpClient client;
-		URL location;
-		HttpPost method;
-		try {
-			location = new URL(baseUrl, "install/error/report"); //$NON-NLS-1$
-			String target = location.toURI().toString();
-			client = HttpUtil.createHttpClient(target);
-			method = new HttpPost(target);
-		} catch (URISyntaxException e) {
-			throw new IllegalStateException(e);
-		} catch (MalformedURLException e) {
-			throw new IllegalStateException(e);
-		}
 		try {
 			List<NameValuePair> parameters = new ArrayList<>();
 
@@ -811,15 +804,29 @@ MarketplaceService {
 			parameters.add(new BasicNameValuePair("detailedMessage", resolutionDetails)); //$NON-NLS-1$
 			if (!parameters.isEmpty()) {
 				UrlEncodedFormEntity entity = new UrlEncodedFormEntity(parameters, StandardCharsets.UTF_8);
-				method.setEntity(entity);
-				client.execute(method);
+				new RequestTemplate<Void>() {
+
+					@Override
+					protected HttpUriRequest createRequest(URI uri) {
+						return RequestBuilder.post(uri.resolve(API_ERROR_REPORT_URI)).setEntity(entity).build();
+					}
+
+					@Override
+					protected Void handleResponseStream(InputStream content, Charset charset) throws IOException {
+						// ignore
+						return null;
+					}
+
+				}.execute(httpClient, baseUrl.toURI());
 			}
+		} catch (URISyntaxException e) {
+			throw new IllegalStateException(e);
+		} catch (MalformedURLException e) {
+			throw new IllegalStateException(e);
 		} catch (IOException e) {
 			String message = NLS.bind(Messages.DefaultMarketplaceService_cannotCompleteRequest_reason,
-					location.toString(), e.getMessage());
+					baseUrl.toString() + API_ERROR_REPORT_URI, e.getMessage());
 			throw new CoreException(createErrorStatus(message, e));
-		} finally {
-			client.getConnectionManager().shutdown();
 		}
 	}
 
@@ -853,5 +860,13 @@ MarketplaceService {
 
 	public void setUserFavoritesService(IUserFavoritesService userFavoritesService) {
 		this.userFavoritesService = userFavoritesService;
+	}
+
+	public void setHttpClient(HttpClientService httpClient) {
+		this.httpClient = httpClient;
+	}
+
+	public HttpClientService getHttpClient() {
+		return httpClient;
 	}
 }

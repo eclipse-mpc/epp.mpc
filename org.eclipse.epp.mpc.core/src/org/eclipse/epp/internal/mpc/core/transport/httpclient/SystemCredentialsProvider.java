@@ -27,15 +27,15 @@ public class SystemCredentialsProvider extends SystemDefaultCredentialsProvider 
 				String domain = ntCredentials.getDomain();
 				String userName = ntCredentials.getUserName();
 				String workstation = ntCredentials.getWorkstation();
-				String strippedUserName = HttpClientProxyUtil.getNTLMUserName(userName);
+				String strippedUserName = NTLMDomainUtil.getNTLMUserName(userName);
 				if (domain == null || !strippedUserName.equals(userName)) {
-					domain = HttpClientProxyUtil.getNTLMUserDomain(userName);
+					domain = NTLMDomainUtil.getNTLMUserDomain(userName);
 					if (domain != null) {
 						userName = strippedUserName;
 					}
 				}
 				if (workstation == null) {
-					workstation = HttpClientProxyUtil.getNTLMWorkstation();
+					workstation = NTLMDomainUtil.getNTLMWorkstation();
 				}
 				credentials = new NTCredentials(userName, ntCredentials.getPassword(), workstation, domain);
 			}

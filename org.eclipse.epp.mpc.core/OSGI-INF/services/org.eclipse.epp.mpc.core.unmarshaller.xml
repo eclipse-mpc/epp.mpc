@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.epp.mpc.core.unmarshaller">
+   <service>
+      <provide interface="org.eclipse.epp.mpc.core.service.IMarketplaceUnmarshaller"/>
+   </service>
+   <implementation class="org.eclipse.epp.internal.mpc.core.service.MarketplaceUnmarshaller"/>
+</scr:component>

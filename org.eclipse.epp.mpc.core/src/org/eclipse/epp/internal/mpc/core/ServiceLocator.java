@@ -29,6 +29,7 @@ import org.eclipse.epp.internal.mpc.core.service.DefaultCatalogService;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.service.MarketplaceStorageService;
 import org.eclipse.epp.internal.mpc.core.service.UserFavoritesService;
+import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientService;
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.mpc.core.service.ICatalogService;
@@ -42,6 +43,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -51,9 +56,10 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * @author David Green
  * @author Carsten Reckord
  */
+@Component(name = "org.eclipse.epp.mpc.core.servicelocator", service = IMarketplaceServiceLocator.class)
 public class ServiceLocator implements IMarketplaceServiceLocator {
 
-	public static final String STORAGE_SERVICE_BINDING_ID = "bind.storageService"; //$NON-NLS-1$
+	private static final String STORAGE_SERVICE_BINDING_ID = "bind.storageService"; //$NON-NLS-1$
 
 	private abstract class DynamicBindingOperation<T, B> implements ServiceReferenceOperation<T> {
 
@@ -113,9 +119,67 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 
 	private final List<ServiceRegistration<?>> dynamicServiceRegistrations = new ArrayList<>();
 
+	private HttpClientService httpClient;
+
 	public ServiceLocator() {
 		defaultMarketplaceUrl = DefaultMarketplaceService.DEFAULT_SERVICE_URL;
 		defaultCatalogUrl = DefaultCatalogService.DEFAULT_CATALOG_SERVICE_URL;
+	}
+
+	public HttpClientService getHttpClient() {
+		return httpClient;
+	}
+
+	public void setHttpClient(HttpClientService httpClient) {
+		HttpClientService oldClient = this.httpClient;
+		this.httpClient = httpClient;
+		if (oldClient != httpClient) {
+			updateHttpClient(httpClient);
+		}
+	}
+
+	@Reference(unbind = "unbindHttpClient", cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC)
+	public void bindHttpClient(HttpClientService httpClient) {
+		setHttpClient(httpClient);
+	}
+
+	public void unbindHttpClient(HttpClientService httpClient) {
+		if (this.httpClient == httpClient) {
+			setHttpClient(null);
+		}
+	}
+
+	private void updateHttpClient(HttpClientService httpClient) {
+		applyServiceReferenceOperation(favoritesServiceTracker, new ServiceReferenceOperation<IUserFavoritesService>() {
+
+			@Override
+			public void apply(ServiceReference<IUserFavoritesService> reference) {
+				ServiceRegistration<IUserFavoritesService> registration = getDynamicServiceInstance(reference);
+				if (registration != null) {
+					IUserFavoritesService service = ServiceUtil.getService(registration);
+					if (service instanceof UserFavoritesService) {
+						if (httpClient == null) {
+							((UserFavoritesService) service).unbindHttpClient(httpClient);
+						} else {
+							((UserFavoritesService) service).bindHttpClient(httpClient);
+						}
+					}
+				}
+			}
+		});
+		applyServiceReferenceOperation(marketplaceServiceTracker, new ServiceReferenceOperation<IMarketplaceService>() {
+
+			@Override
+			public void apply(ServiceReference<IMarketplaceService> reference) {
+				ServiceRegistration<IMarketplaceService> registration = getDynamicServiceInstance(reference);
+				if (registration != null) {
+					IMarketplaceService service = ServiceUtil.getService(registration);
+					if (service instanceof DefaultMarketplaceService) {
+						((DefaultMarketplaceService) service).setHttpClient(httpClient);
+					}
+				}
+			}
+		});
 	}
 
 	/**
@@ -194,6 +258,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		defaultService.setRequestMetaParameters(requestMetaParameters);
 		IUserFavoritesService favoritesService = getFavoritesService(baseUrl);
 		defaultService.setUserFavoritesService(favoritesService);//FIXME this should be a service reference!
+		defaultService.setHttpClient(httpClient);
 		service = new CachingMarketplaceService(defaultService);
 		return service;
 	}
@@ -229,6 +294,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		}
 		UserFavoritesService favoritesService = new UserFavoritesService();
 		favoritesService.bindStorageService(storageService);
+		favoritesService.bindHttpClient(httpClient);
 		registerService(marketplaceBaseUrl, IUserFavoritesService.class, favoritesService);
 		return favoritesService;
 	}

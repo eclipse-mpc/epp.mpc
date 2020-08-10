@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.3.0" name="org.eclipse.epp.mpc.core.http.client">
+   <service>
+      <provide interface="org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientService"/>
+   </service>
+   <reference bind="bindClientFactory" interface="org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientFactory" name="ClientFactory" policy="dynamic" policy-option="greedy" unbind="unbindClientFactory" updated="bindClientFactory"/>
+   <reference bind="bindProxyService" field="proxyService" interface="org.eclipse.core.net.proxy.IProxyService" name="ProxyService" policy="dynamic" unbind="unbindProxyService"/>
+   <implementation class="org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientService"/>
+</scr:component>

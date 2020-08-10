@@ -25,6 +25,7 @@ import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentConstants;
@@ -185,5 +186,12 @@ public class ServiceUtil {
 	public static <T> T getService(ServiceRegistration<T> registration) {
 		ServiceReference<T> reference = registration.getReference();
 		return reference == null ? null : getService(reference);
+	}
+
+	public static <T> T getService(Class<?> context, Class<T> serviceType) {
+		BundleContext bundleContext = FrameworkUtil.getBundle(context).getBundleContext();
+		ServiceReference<T> serviceReference = bundleContext == null ? null
+				: bundleContext.getServiceReference(serviceType);
+		return serviceReference == null ? null : bundleContext.getService(serviceReference);
 	}
 }
