@@ -214,6 +214,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	private Set<CatalogItem> operationNewInstallItems;
 
+	private boolean inInitialSelectionInitializer;
 	private boolean initialSelectionInitialized;
 
 	private Set<URI> addedRepositoryLocations;
@@ -282,21 +283,27 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			throw new IllegalStateException();
 		}
 		initialSelectionInitialized = true;
-		initializeCatalog();
-		if (getConfiguration().getInitialState() != null || getConfiguration().getInitialOperations() != null) {
-			SelectionModelStateSerializer serializer = new SelectionModelStateSerializer(getCatalog(),
-					getSelectionModel());
-			try {
-				getContainer().run(true, true,
-						monitor -> serializer.deserialize(getConfiguration().getInitialState(),
-								getConfiguration().getInitialOperations(), monitor));
-			} catch (InvocationTargetException e) {
-				throw new CoreException(MarketplaceClientCore.computeStatus(e, Messages.MarketplaceViewer_unexpectedException));
-			} catch (InterruptedException e) {
-				// user canceled
-				throw new CoreException(Status.CANCEL_STATUS);
+		inInitialSelectionInitializer = true;
+		try {
+			initializeCatalog();
+			if (getConfiguration().getInitialState() != null || getConfiguration().getInitialOperations() != null) {
+				SelectionModelStateSerializer serializer = new SelectionModelStateSerializer(getCatalog(),
+						getSelectionModel());
+				try {
+					getContainer().run(true, true,
+							monitor -> serializer.deserialize(getConfiguration().getInitialState(),
+									getConfiguration().getInitialOperations(), monitor));
+				} catch (InvocationTargetException e) {
+					throw new CoreException(
+							MarketplaceClientCore.computeStatus(e, Messages.MarketplaceViewer_unexpectedException));
+				} catch (InterruptedException e) {
+					// user canceled
+					throw new CoreException(Status.CANCEL_STATUS);
+				}
+				updateSelection(serializer);
 			}
-			updateSelection(serializer);
+		} finally {
+			inInitialSelectionInitializer = false;
 		}
 	}
 
@@ -1252,5 +1259,10 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	IProvisioningPlan getAdditionalVerificationPlan() {
 		return this.currentJREPlan;
+	}
+
+	protected boolean canProceedInstallation() {
+		return !inInitialSelectionInitializer || getInitialState() == null
+				|| !Boolean.FALSE.equals(getInitialState().getProceedWithInstallation());
 	}
 }

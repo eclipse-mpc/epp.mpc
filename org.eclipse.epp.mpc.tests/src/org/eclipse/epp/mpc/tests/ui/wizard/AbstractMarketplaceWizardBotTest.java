@@ -12,10 +12,10 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui.wizard;
 
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.allOf;
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellIsActive;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.Assert.assertEquals;
@@ -64,6 +64,7 @@ import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
@@ -73,6 +74,7 @@ import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
 import org.eclipse.swtbot.swt.finder.junit.ScreenshotCaptureListener;
+import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.results.ArrayResult;
 import org.eclipse.swtbot.swt.finder.results.Result;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferenceConstants;
@@ -469,7 +471,8 @@ public abstract class AbstractMarketplaceWizardBotTest {
 
 	protected SWTBotBrowser marketplaceBrowser() {
 		SWTWorkbenchBot wbBot = new SWTWorkbenchBot();
-		Matcher<IEditorReference> marketplaceBrowserMatch = allOf(WidgetMatcherFactory.<IEditorReference> withPartId("org.eclipse.ui.browser.editor"), WidgetMatcherFactory
+		Matcher<IEditorReference> marketplaceBrowserMatch = Matchers.allOf(WidgetMatcherFactory
+				.<IEditorReference> withPartId("org.eclipse.ui.browser.editor"), WidgetMatcherFactory
 				.<IEditorReference> withTitle(containsString("Marketplace")));
 		SWTBotEditor browserEditor = wbBot.editor(marketplaceBrowserMatch);
 		SWTBotBrowser browser = browserEditor.bot().browser();
@@ -598,7 +601,9 @@ public abstract class AbstractMarketplaceWizardBotTest {
 			linkText = String.format("%s solutions selected", count);
 		}
 		String linkContent = String.format("<a href=\"showSelection\">%s</a>", linkText);
-		return bot.link(linkContent);
+
+		Matcher<Link> matcher = allOf(widgetOfType(Link.class), WithRegex.withRegex("\\Q" + linkContent + "\\E"));
+		return new SWTBotLink(bot.widget(matcher, 0), matcher);
 	}
 
 	protected void tryWaitForBrowser(SWTBotBrowser browser) {

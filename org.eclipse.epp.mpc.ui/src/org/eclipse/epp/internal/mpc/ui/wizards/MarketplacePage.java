@@ -280,7 +280,8 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 				if (!event.getSelection().isEmpty()) {
 
 					if (previousSelectionSize == 0 && newSelectionSize > 0
-							&& selectionModel.computeProvisioningOperationViableForFeatureSelection()) {
+							&& selectionModel.computeProvisioningOperationViableForFeatureSelection()
+							&& getWizard().canProceedInstallation()) {
 						showNextPage();
 					}
 				}
