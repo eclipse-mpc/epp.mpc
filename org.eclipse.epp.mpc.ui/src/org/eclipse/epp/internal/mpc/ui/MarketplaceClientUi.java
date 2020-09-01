@@ -45,6 +45,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -135,7 +136,7 @@ public class MarketplaceClientUi {
 	}
 
 	public static BundleContext getBundleContext() {
-		return MarketplaceClientUiPlugin.getInstance().getBundle().getBundleContext();
+		return FrameworkUtil.getBundle(MarketplaceClientUiPlugin.class).getBundleContext();
 	}
 
 	public static Map<String, IInstallableUnit> computeInstalledIUsById(IProgressMonitor monitor) {

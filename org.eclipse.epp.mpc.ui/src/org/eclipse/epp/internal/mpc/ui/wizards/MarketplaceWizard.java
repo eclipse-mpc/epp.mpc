@@ -53,6 +53,7 @@ import org.eclipse.epp.internal.mpc.core.model.News;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
@@ -356,8 +357,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 					@Override
 					public Image getImage(Object element) {
-						return MarketplaceClientUiPlugin.getInstance()
-								.getImageRegistry()
+						return MarketplaceClientUiResources.getInstance().getImageRegistry()
 								.get(MarketplaceClientUiPlugin.IU_ICON_ERROR);
 					}
 				};
@@ -551,8 +551,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	private void doDefaultCatalogSelection() {
 		if (getConfiguration().getCatalogDescriptor() == null) {
-			String defaultCatalogUrl = MarketplaceClientUiPlugin.getInstance()
-					.getPreferenceStore()
+			String defaultCatalogUrl = MarketplaceClientUiResources.getInstance().getPreferenceStore()
 					.getString(PREF_DEFAULT_CATALOG);
 			// if a preferences was set, we default to that catalog descriptor
 			if (defaultCatalogUrl != null && defaultCatalogUrl.length() > 0) {
@@ -583,8 +582,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		if (getConfiguration().getCatalogDescriptor() != null) {
 			// remember the catalog for next time.
 			try {
-				MarketplaceClientUiPlugin.getInstance()
-				.getPreferenceStore()
+				MarketplaceClientUiResources.getInstance().getPreferenceStore()
 				.setValue(PREF_DEFAULT_CATALOG,
 						getConfiguration().getCatalogDescriptor().getUrl().toURI().toString());
 			} catch (URISyntaxException e) {

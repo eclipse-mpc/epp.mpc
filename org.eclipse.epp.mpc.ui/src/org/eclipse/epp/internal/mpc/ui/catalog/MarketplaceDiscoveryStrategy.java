@@ -46,7 +46,6 @@ import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotA
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory.Contents;
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem.UserAction;
 import org.eclipse.epp.mpc.core.model.ICategories;
@@ -167,10 +166,8 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 				}
 				@Override
 				public boolean belongsTo(Object family) {
-					BundleContext bundleContext = MarketplaceClientUiPlugin.getBundleContext();
-					MarketplaceClientUiPlugin plugin = MarketplaceClientUiPlugin.getInstance();
-					return (bundleContext != null && (family == bundleContext || family == bundleContext.getBundle()))
-							|| (plugin != null && family == plugin);
+					BundleContext bundleContext = MarketplaceClientUi.getBundleContext();
+					return bundleContext != null && (family == bundleContext || family == bundleContext.getBundle());
 				}
 
 				@Override

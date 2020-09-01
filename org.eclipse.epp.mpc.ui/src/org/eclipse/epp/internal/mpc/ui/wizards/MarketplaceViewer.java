@@ -34,7 +34,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.model.Identifiable;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory.Contents;
@@ -950,7 +949,7 @@ public class MarketplaceViewer extends CatalogViewer {
 	@Override
 	protected StructuredViewer doCreateViewer(Composite container) {
 		ServiceReference<IDiscoveryItemFactory> serviceReference = null;
-		final BundleContext bundleContext = MarketplaceClientUiPlugin.getInstance().getBundle().getBundleContext();
+		final BundleContext bundleContext = MarketplaceClientUi.getBundleContext();
 		try {
 			serviceReference = bundleContext.getServiceReference(IDiscoveryItemFactory.class);
 			if (serviceReference != null) {

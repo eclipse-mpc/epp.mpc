@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.Messages;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
@@ -37,6 +36,7 @@ import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.progress.UIJob;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 
 final class DiscoverFileSupportJob extends Job {
@@ -59,7 +59,7 @@ final class DiscoverFileSupportJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		BundleContext bundleContext = MarketplaceClientUiPlugin.getBundleContext();
+		BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
 		ServiceReference<IMarketplaceServiceLocator> locatorReference = bundleContext
 				.getServiceReference(IMarketplaceServiceLocator.class);
 		IMarketplaceServiceLocator locator = bundleContext.getService(locatorReference);

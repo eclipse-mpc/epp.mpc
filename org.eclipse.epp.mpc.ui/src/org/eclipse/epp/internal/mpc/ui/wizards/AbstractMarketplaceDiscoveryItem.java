@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalogSource;
 import org.eclipse.epp.internal.mpc.ui.css.StyleHelper;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
@@ -424,8 +425,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		if (getIcon() != null) {
 			provideIconImage(iconLabel, connector.getSource(), getIcon(), 64, true);
 		} else {
-			iconLabel.setImage(MarketplaceClientUiPlugin.getInstance()
-					.getImageRegistry()
+			iconLabel.setImage(MarketplaceClientUiResources.getInstance().getImageRegistry()
 					.get(getDefaultIconResourceId()));
 		}
 	}
@@ -492,15 +492,14 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		String iconPath = getResources().getIconPath(icon, size, fallback);
 		if (iconPath.startsWith(REGISTRY_SCHEME)) {
 			String key = iconPath.substring(REGISTRY_SCHEME.length());
-			Image image = MarketplaceClientUiPlugin.getInstance().getImageRegistry().get(key);
+			Image image = MarketplaceClientUiResources.getInstance().getImageRegistry().get(key);
 			receiver.setImage(image);
 		} else {
 			getResources().setImage(
 					receiver,
 					source,
 					iconPath,
-					MarketplaceClientUiPlugin.getInstance()
-					.getImageRegistry()
+					MarketplaceClientUiResources.getInstance().getImageRegistry()
 					.get(getDefaultIconResourceId()));
 		}
 	}

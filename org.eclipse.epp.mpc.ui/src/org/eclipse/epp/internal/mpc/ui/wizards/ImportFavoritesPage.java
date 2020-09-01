@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
 import org.eclipse.epp.internal.mpc.core.service.UserFavoritesService;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
@@ -121,7 +121,7 @@ public class ImportFavoritesPage extends CatalogPage {
 	}
 
 	private IDialogSettings getDialogSettings(boolean create) {
-		IDialogSettings dialogSettings = MarketplaceClientUiPlugin.getInstance().getDialogSettings();
+		IDialogSettings dialogSettings = MarketplaceClientUiResources.getInstance().getDialogSettings();
 		String sectionName = this.getClass().getName();
 		IDialogSettings section = dialogSettings.getSection(sectionName);
 		if (create && section == null) {

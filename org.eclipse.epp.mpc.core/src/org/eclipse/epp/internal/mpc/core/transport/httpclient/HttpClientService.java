@@ -47,7 +47,7 @@ public class HttpClientService {
 
 	private HttpServiceContext context;
 
-	private IProxyService proxyService;
+	private volatile IProxyService proxyService;
 
 	@Reference(policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY, updated = "bindClientFactory", unbind = "unbindClientFactory")
 	void bindClientFactory(HttpClientFactory factory) {

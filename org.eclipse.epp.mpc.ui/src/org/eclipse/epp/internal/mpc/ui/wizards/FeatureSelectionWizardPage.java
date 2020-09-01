@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.operations.FeatureDescriptor;
 import org.eclipse.epp.internal.mpc.ui.operations.ResolveFeatureNamesOperation;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
@@ -113,29 +114,23 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 				FeatureEntry entry = (FeatureEntry) element;
 				switch (entry.computeChangeOperation()) {
 				case UPDATE:
-					return MarketplaceClientUiPlugin.getInstance()
-							.getImageRegistry()
+					return MarketplaceClientUiResources.getInstance().getImageRegistry()
 							.get(MarketplaceClientUiPlugin.IU_ICON_UPDATE);
 				case INSTALL:
-					return MarketplaceClientUiPlugin.getInstance()
-							.getImageRegistry()
+					return MarketplaceClientUiResources.getInstance().getImageRegistry()
 							.get(MarketplaceClientUiPlugin.IU_ICON_INSTALL);
 				case UNINSTALL:
-					return MarketplaceClientUiPlugin.getInstance()
-							.getImageRegistry()
+					return MarketplaceClientUiResources.getInstance().getImageRegistry()
 							.get(MarketplaceClientUiPlugin.IU_ICON_UNINSTALL);
 				case NONE:
-					return MarketplaceClientUiPlugin.getInstance()
-							.getImageRegistry()
+					return MarketplaceClientUiResources.getInstance().getImageRegistry()
 							.get(MarketplaceClientUiPlugin.IU_ICON_DISABLED);
 				default:
-					return MarketplaceClientUiPlugin.getInstance()
-							.getImageRegistry()
+					return MarketplaceClientUiResources.getInstance().getImageRegistry()
 							.get(MarketplaceClientUiPlugin.IU_ICON);
 				}
 			} else if (element instanceof CatalogItemEntry) {
-				return MarketplaceClientUiPlugin.getInstance()
-						.getImageRegistry()
+				return MarketplaceClientUiResources.getInstance().getImageRegistry()
 						.get(MarketplaceClientUiPlugin.IU_ICON);
 			}
 			return null;

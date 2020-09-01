@@ -24,6 +24,7 @@ import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotA
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalogSource;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
 import org.eclipse.epp.internal.mpc.ui.css.StyleHelper;
@@ -327,7 +328,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 			favoriteButton.setData(FAVORITED_BUTTON_STATE_DATA, lastFavorited);
 			String imageId = favorited ? MarketplaceClientUiPlugin.ITEM_ICON_STAR_SELECTED
 					: MarketplaceClientUiPlugin.ITEM_ICON_STAR;
-			favoriteButton.setImage(MarketplaceClientUiPlugin.getInstance().getImageRegistry().get(imageId));
+			favoriteButton.setImage(MarketplaceClientUiResources.getInstance().getImageRegistry().get(imageId));
 
 			IUserFavoritesService userFavoritesService = getUserFavoritesService();
 			favoriteButton.setEnabled(userFavoritesService != null);

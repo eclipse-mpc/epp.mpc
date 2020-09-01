@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.css.StyleHelper;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -130,7 +131,7 @@ public class CatalogSwitcherItem extends Composite {
 	}
 
 	private Image getDefaultCatalogImage() {
-		return MarketplaceClientUiPlugin.getInstance().getImageRegistry().get(
+		return MarketplaceClientUiResources.getInstance().getImageRegistry().get(
 				MarketplaceClientUiPlugin.NO_ICON_PROVIDED_CATALOG);
 	}
 

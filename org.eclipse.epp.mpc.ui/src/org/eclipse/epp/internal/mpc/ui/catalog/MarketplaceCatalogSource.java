@@ -16,7 +16,7 @@ package org.eclipse.epp.internal.mpc.ui.catalog;
 import java.io.IOException;
 import java.net.URL;
 
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.equinox.internal.p2.discovery.AbstractCatalogSource;
 
@@ -32,7 +32,7 @@ public class MarketplaceCatalogSource extends AbstractCatalogSource {
 
 	public MarketplaceCatalogSource(IMarketplaceService marketplaceService) {
 		this.marketplaceService = marketplaceService;
-		this.resourceProvider = MarketplaceClientUiPlugin.getInstance().getResourceProvider();
+		this.resourceProvider = MarketplaceClientUiResources.getInstance().getResourceProvider();
 	}
 
 	@Override
