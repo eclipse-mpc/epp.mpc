@@ -210,7 +210,6 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 	@Test
 	public void testFavorite() {
 		SWTBotButton favorite = bot.buttonWithId(AbstractMarketplaceDiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_RATING);
-		bot.sleep(5000);
 		favorite.click();
 		SWTBotShell login = bot.shell("Authorizing with Eclipse.org");
 		login.bot().button("Cancel").click();
