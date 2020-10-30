@@ -44,6 +44,87 @@ public class DefaultMarketplaceRestClientFactoryImpl implements IRestClientFacto
 
 //	private final Client client;
 
+	private final class ProgressEntityWrapper extends HttpEntityWrapper {
+		private final IProgressMonitor monitor;
+
+		private final long contentLength;
+
+		private ProgressEntityWrapper(HttpEntity wrappedEntity, IProgressMonitor monitor, long contentLength) {
+			super(wrappedEntity);
+			this.monitor = monitor;
+			this.contentLength = contentLength;
+		}
+
+		@Override
+		public InputStream getContent() throws IOException {
+			SubMonitor contentStreamMonitor = SubMonitor.convert(monitor, ""/*TODO*/, (int) contentLength);
+			InputStream content = this.wrappedEntity.getContent();
+			return new ProgressInputStream(content, contentLength, contentStreamMonitor);
+		}
+	}
+
+	private final class ProgressInputStream extends CountingInputStream {
+		private final long contentLength;
+
+		private final SubMonitor contentStreamMonitor;
+
+		private long mark = 0;
+
+		private ProgressInputStream(InputStream in, long contentLength, SubMonitor contentStreamMonitor) {
+			super(in);
+			this.contentLength = contentLength;
+			this.contentStreamMonitor = contentStreamMonitor;
+		}
+
+		@Override
+		protected synchronized void afterRead(int r) {
+			super.afterRead(r);
+			if (r > 0) {
+				contentStreamMonitor.worked(r);
+			}
+		}
+
+		@Override
+		public synchronized void mark(final int readlimit) {
+			super.mark(readlimit);
+			this.mark = getByteCount();
+		}
+
+		@Override
+		public synchronized void reset() throws IOException {
+			super.reset();
+			contentStreamMonitor.setWorkRemaining((int) (contentLength - this.mark));
+		}
+
+		@Override
+		public int read(final byte[] bts) throws IOException {
+			int available = available();
+			if (available > 0 && available < bts.length) {
+				return super.read(bts, 0, available);
+			}
+			return super.read(bts);
+		}
+
+		@Override
+		public int read(final byte[] bts, final int off, final int len) throws IOException {
+			int readLen = len;
+			int available = available();
+			if (available > 0 && available < len) {
+				readLen = available;
+			}
+			return super.read(bts, off, readLen);
+		}
+
+		@Override
+		public long skip(final long ln) throws IOException {
+			long skipped = super.skip(ln);
+			if (skipped > 0) {
+				contentStreamMonitor.worked((int) skipped);
+			}
+			return skipped;
+		}
+	}
+
 	private static final String CONTEXT_PROVIDER_KEY = null;
 
 	private final HttpContextInjector contextInjector = new HttpContextInjector();
@@ -52,71 +133,7 @@ public class DefaultMarketplaceRestClientFactoryImpl implements IRestClientFacto
 
 	@Override
 	public <E> IRestClient<E> createRestClient(URI baseUri, Class<E> endpointClass) {
-		HttpResponseInterceptor itcp = (HttpResponse response, HttpContext context) -> {
-			HttpClientContext clientContext = HttpClientContext.adapt(context);
-			IProgressMonitor monitor = clientContext.getAttribute(null, IProgressMonitor.class);
-			HttpEntity entity = response.getEntity();
-			if (monitor != null && entity != null && entity.getContentLength() != 0) {
-				long contentLength = entity.getContentLength();
-				response.setEntity(new HttpEntityWrapper(entity) {
-					@Override
-					public InputStream getContent() throws IOException {
-						SubMonitor contentStreamMonitor = SubMonitor.convert(monitor, ""/*TODO*/, (int) contentLength);
-						return new CountingInputStream(this.wrappedEntity.getContent()) {
-							private long mark = 0;
-
-							@Override
-							protected synchronized void afterRead(int r) {
-								super.afterRead(r);
-								if (r > 0) {
-									contentStreamMonitor.worked(r);
-								}
-							}
-
-							@Override
-							public synchronized void mark(final int readlimit) {
-								super.mark(readlimit);
-								this.mark = getByteCount();
-							}
-
-							@Override
-							public synchronized void reset() throws IOException {
-								super.reset();
-								contentStreamMonitor.setWorkRemaining((int) (contentLength - this.mark));
-							}
-
-							@Override
-							public int read(final byte[] bts) throws IOException {
-								int available = available();
-								if (available > 0 && available < bts.length) {
-									return super.read(bts, 0, available);
-								}
-								return super.read(bts);
-							}
-
-							@Override
-							public int read(final byte[] bts, final int off, final int len) throws IOException {
-								int readLen = len;
-								int available = available();
-								if (available > 0 && available < len) {
-									readLen = available;
-								}
-								return super.read(bts, off, readLen);
-							}
-
-							@Override
-							public long skip(final long ln) throws IOException {
-								long skipped = super.skip(ln);
-								if (skipped > 0) {
-									contentStreamMonitor.worked((int) skipped);
-								}
-								return skipped;
-							}
-						};
-					}
-				});
-			}
-		};
+		HttpResponseInterceptor itcp = createProgressInterceptor();
 		HttpClient httpClient = HttpClientBuilder.create().addInterceptorFirst(itcp).build();
 		ResteasyClientBuilder builder = (ResteasyClientBuilder) ClientBuilder.newBuilder();
 
@@ -127,6 +144,19 @@ public class DefaultMarketplaceRestClientFactoryImpl implements IRestClientFacto
 		WebTarget target = client.target(baseUri).property(CONTEXT_PROVIDER_KEY, contextInjector);
 		//WIP
 		return null;
+	}
+
+	private HttpResponseInterceptor createProgressInterceptor() {
+		HttpResponseInterceptor itcp = (HttpResponse response, HttpContext context) -> {
+			HttpClientContext clientContext = HttpClientContext.adapt(context);
+			IProgressMonitor monitor = clientContext.getAttribute(null, IProgressMonitor.class);
+			HttpEntity entity = response.getEntity();
+			if (monitor != null && entity != null && entity.getContentLength() != 0) {
+				long contentLength = entity.getContentLength();
+				response.setEntity(new ProgressEntityWrapper(entity, monitor, contentLength));
+			}
+		};
+		return itcp;
 	}
 
 	@Activate

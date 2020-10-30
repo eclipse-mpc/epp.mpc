@@ -6,16 +6,11 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry exported="true" kind="lib" path="target/dependency/javax.ws.rs-api-2.1.1.jar"/>
 	<classpathentry kind="src" path="src/main/java/"/>
 	<classpathentry kind="src" path="src/main/resources/"/>
 	<classpathentry kind="src" path="target/generated-sources/annotations/"/>
 	<classpathentry kind="src" path="target/generated-sources/openapi/"/>
 	<classpathentry kind="src" path="target/generated-sources/openapi-templates/"/>
-	<classpathentry exported="true" kind="lib" path="target/dependency/swagger-annotations-1.5.18.jar"/>
-	<classpathentry exported="true" kind="lib" path="target/dependency/value-annotations-2.8.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="target/dependency/swagger-jaxrs-1.5.18.jar"/>
-	<classpathentry exported="true" kind="lib" path="target/dependency/jackson-module-jaxb-annotations-2.9.9.jar"/>
 	<classpathentry kind="src" path="src/main/mustache/"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

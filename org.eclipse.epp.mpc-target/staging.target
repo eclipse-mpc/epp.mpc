@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="MPC Target Platform - Staging" sequenceNumber="21">
+<?pde version="3.8"?>
+<target name="MPC Target Platform - Staging" sequenceNumber="21">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.equinox.executable.feature.group" version="0.0.0"/>
@@ -39,6 +40,13 @@
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.userstorage.sdk.feature.group" version="0.0.0"/>
 <repository location="http://download.eclipse.org/usssdk/drops/release/1.2.0"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.jboss.resteasy.client" version="0.0.0"/>
+<unit id="io.swagger.jaxrs" version="0.0.0"/>
+<unit id="org.mapstruct" version="0.0.0"/>
+<unit id="org.immutables.value" version="0.0.0"/>
+<repository location="file:///C:/dev/projects/mpc/git/orbit-recipes/releng/repository/target/repository"/>
 </location>
 </locations>
 </target>

@@ -19,7 +19,7 @@ import org.jboss.resteasy.client.jaxrs.engines.HttpContextProvider;
 
 class HttpContextInjector implements HttpContextProvider {
 
-	private final ThreadLocal<HttpContext> localContext = new ThreadLocal<HttpContext>();
+	private final ThreadLocal<HttpContext> localContext = new ThreadLocal<>();
 
 	public <T> T withContext(HttpContext context, Callable<T> action) throws Exception {
 		final HttpContext previousContext = localContext.get();
