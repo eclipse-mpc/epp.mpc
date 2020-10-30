@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -115,12 +116,27 @@ public class MarketplaceStorageService implements IMarketplaceStorageService {
 	}
 
 	protected IStorage createStorage() {
+		ensureTmpdirExists();
 		IStorage storage = getStorageFactory().create(applicationToken,
 				new FileStorageCache.SingleApplication(this.applicationToken));
 		credentialsProvider = new EclipseOAuthCredentialsProvider(new MPCOAuthParameters());
 		credentialsProvider.setInteractive(false);
 		storage.setCredentialsProvider(credentialsProvider);
 		return storage;
+	}
+
+	private static void ensureTmpdirExists() {
+		try {
+			String tmpdirProperty = System.getProperty("java.io.tmpdir"); //$NON-NLS-1$
+			if (tmpdirProperty != null) {
+				File tmpDir = new File(tmpdirProperty);
+				if (!tmpDir.exists()) {
+					tmpDir.mkdirs();
+				}
+			}
+		} catch (Exception ex) {
+			//fall-through
+		}
 	}
 
 	@Override

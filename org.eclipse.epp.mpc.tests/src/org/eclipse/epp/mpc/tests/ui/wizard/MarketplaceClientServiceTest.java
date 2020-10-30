@@ -26,13 +26,13 @@ import org.eclipse.epp.mpc.core.service.QueryHelper;
 import org.eclipse.epp.mpc.tests.Categories.RemoteTests;
 import org.eclipse.epp.mpc.tests.Categories.UITests;
 import org.eclipse.epp.mpc.tests.ui.wizard.matcher.NodeMatcher;
+import org.eclipse.epp.mpc.tests.util.SWTBotComboAdapter;
 import org.eclipse.epp.mpc.ui.IMarketplaceClientConfiguration;
 import org.eclipse.epp.mpc.ui.IMarketplaceClientService;
 import org.eclipse.epp.mpc.ui.MarketplaceClient;
 import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swtbot.swt.finder.SWTBot;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotCombo;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.eclipse.ui.PlatformUI;
@@ -108,8 +108,8 @@ public class MarketplaceClientServiceTest extends AbstractMarketplaceWizardBotTe
 		initWizardBot();
 		checkSelectedTab("Search");
 
-		SWTBotCombo marketCombo = bot.comboBox(0);
-		SWTBotCombo categoryCombo = bot.comboBox(1);
+		SWTBotComboAdapter marketCombo = SWTBotComboAdapter.comboBox(bot, 0);
+		SWTBotComboAdapter categoryCombo = SWTBotComboAdapter.comboBox(bot, 1);
 		assertEquals("Tools", marketCombo.getText());
 		assertEquals("Editor", categoryCombo.getText());
 

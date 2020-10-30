@@ -27,7 +27,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.core.runtime.jobs.JobGroup;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.Messages;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -59,10 +60,9 @@ public class MissingNatureDetector implements IStartup, IPropertyChangeListener 
 				showProposalsIfReady();
 			}
 		} catch (CoreException e) {
-			MarketplaceClientUiPlugin.getInstance()
-			.getLog()
+			MarketplaceClientUi.getLog()
 			.log(new Status(IStatus.ERROR,
-					MarketplaceClientUiPlugin.getInstance().getBundle().getSymbolicName(),
+					MarketplaceClientUi.getBundleContext().getBundle().getSymbolicName(),
 					e.getLocalizedMessage(), e));
 		}
 	};
@@ -118,7 +118,7 @@ public class MissingNatureDetector implements IStartup, IPropertyChangeListener 
 	@Override
 	public void earlyStartup() {
 		allJobs = new JobGroup(Messages.MissingNatureDetector_Title, 3, 0);
-		IPreferenceStore preferenceStore = MarketplaceClientUiPlugin.getInstance().getPreferenceStore();
+		IPreferenceStore preferenceStore = MarketplaceClientUiResources.getInstance().getPreferenceStore();
 		preferenceStore.addPropertyChangeListener(this);
 		boolean preferenceValue = preferenceStore.getBoolean(ENABLEMENT_PROPERTY);
 		if (preferenceValue) {

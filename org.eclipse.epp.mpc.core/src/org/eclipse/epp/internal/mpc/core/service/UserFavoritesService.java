@@ -37,7 +37,8 @@ import java.util.regex.Pattern;
 
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.fluent.Request;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.RequestBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -45,6 +46,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.model.FavoriteList;
+import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientService;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.RequestTemplate;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.mpc.core.model.IFavoriteList;
@@ -137,6 +139,8 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 	private final Map<String, Integer> favoritesCorrections = new HashMap<>();
 
 	private final Set<String> favorites = new HashSet<>();
+
+	private HttpClientService httpClient;
 
 	protected IBlob getFavoritesBlob() {
 		return getStorageService().getBlob(KEY);
@@ -232,7 +236,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 				return favoritesByUserId;
 			}
 
-		}.execute(randomFavoritesUri);
+		}.execute(httpClient, randomFavoritesUri);
 	}
 
 	private static String getAttribute(Pattern attributePattern, String attributeName, String entryBody) {
@@ -518,7 +522,7 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 					return null;
 				}
 
-			}.execute(uri);
+			}.execute(httpClient, uri);
 		} catch (FileNotFoundException e) {
 			return new ArrayList<>();
 		}
@@ -617,10 +621,10 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		}
 
 		@Override
-		protected Request configureRequest(Request request, URI uri) {
-			return super.configureRequest(request, uri).setHeader(HttpHeaders.USER_AGENT, Session.USER_AGENT_ID)
-					.addHeader(HttpHeaders.CONTENT_TYPE, Session.APPLICATION_JSON) //
-					.addHeader(HttpHeaders.ACCEPT, Session.APPLICATION_JSON);
+		protected HttpUriRequest configureRequest(HttpClientService client, HttpUriRequest request) {
+			HttpUriRequest configuredRequest = super.configureRequest(client, request);
+			configuredRequest.setHeader(HttpHeaders.USER_AGENT, Session.USER_AGENT_ID);
+			return configuredRequest;
 		}
 
 		@Override
@@ -675,8 +679,30 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		protected abstract T parseListElement(String listElement);
 
 		@Override
-		protected Request createRequest(URI uri) {
-			return Request.Get(uri);
+		protected HttpUriRequest createRequest(URI uri) {
+			return RequestBuilder.get(uri)
+					.addHeader(HttpHeaders.CONTENT_TYPE, Session.APPLICATION_JSON) //
+					.addHeader(HttpHeaders.ACCEPT, Session.APPLICATION_JSON)
+					.build();
 		}
 	}
+
+	public void setHttpClient(HttpClientService httpClient) {
+		this.httpClient = httpClient;
+	}
+
+	public HttpClientService getHttpClient() {
+		return httpClient;
+	}
+
+	public void bindHttpClient(HttpClientService httpClient) {
+		setHttpClient(httpClient);
+	}
+
+	public void unbindHttpClient(HttpClientService httpClient) {
+		if (this.httpClient == httpClient) {
+			setHttpClient(null);
+		}
+	}
+
 }

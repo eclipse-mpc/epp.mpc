@@ -25,8 +25,10 @@ public class Node extends Identifiable implements INode {
 	protected Integer installsTotal;
 	protected Integer installsRecent;
 	protected String type;
-	protected Categories categories;
-	protected Tags tags;
+
+	protected Categories categories = new Categories();
+
+	protected Tags tags = new Tags();
 	protected String owner;
 	protected String shortdescription;
 	protected String body;
@@ -43,8 +45,10 @@ public class Node extends Identifiable implements INode {
 	protected String eclipseversion;
 	protected String supporturl;
 	protected String updateurl;
-	protected Ius ius;
-	protected Platforms platforms;
+
+	protected Ius ius = new Ius();
+
+	protected Platforms platforms = new Platforms();
 
 	protected Boolean userFavorite;
 

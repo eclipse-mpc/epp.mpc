@@ -12,20 +12,10 @@
  */
 package org.eclipse.epp.internal.mpc.core.transport.httpclient;
 
-import java.io.IOException;
 import java.net.InetAddress;
-import java.net.URI;
 import java.net.UnknownHostException;
 
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.NTCredentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.fluent.Executor;
-import org.eclipse.core.net.proxy.IProxyData;
-import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.epp.internal.mpc.core.util.ProxyHelper;
 
 /**
  * This code is based on {@link org.eclipse.userstorage.internal.util.ProxyUtil} and has been copied here to avoid
@@ -39,7 +29,7 @@ import org.eclipse.epp.internal.mpc.core.util.ProxyHelper;
 //FIXME remove...
 @Deprecated
 @SuppressWarnings("restriction")
-final class HttpClientProxyUtil {
+final class NTLMDomainUtil {
 	private static final String PROP_HTTP_AUTH_NTLM_DOMAIN = "http.auth.ntlm.domain";
 
 	private static final String ENV_USER_DOMAIN = "USERDOMAIN";
@@ -50,44 +40,7 @@ final class HttpClientProxyUtil {
 
 	private static String workstation;
 
-	private HttpClientProxyUtil() {
-	}
-
-	public static HttpHost getProxyHost(URI uri) {
-		IProxyData proxy = ProxyHelper.getProxyData(uri);
-		if (proxy != null) {
-			if (IProxyData.HTTPS_PROXY_TYPE.equals(proxy.getType())
-					|| IProxyData.HTTP_PROXY_TYPE.equals(proxy.getType())) {
-				return new HttpHost(proxy.getHost(), proxy.getPort(), proxy.getType());
-			}
-			//SOCKS proxies are handled by Java on the socket level
-			return null;
-		}
-
-		return null;
-	}
-
-	public static Executor proxyAuthentication(Executor executor, URI uri)
-			throws IOException {
-		IProxyData proxy = ProxyHelper.getProxyData(uri);
-		if (proxy != null) {
-			HttpHost proxyHost = new HttpHost(proxy.getHost(), proxy.getPort());
-			String proxyUserID = proxy.getUserId();
-			if (proxyUserID != null) {
-				String domainUserID = getNTLMUserName(proxyUserID);
-				String password = proxy.getPassword();
-				String domain = getNTLMUserDomain(proxyUserID);
-				if (domain != null || !proxyUserID.equals(domainUserID)) {
-					String workstation = getNTLMWorkstation();
-					executor.auth(new AuthScope(proxyHost, AuthScope.ANY_REALM, "ntlm"),
-							new NTCredentials(domainUserID, password, workstation, domain));
-				}
-				return executor.auth(new AuthScope(proxyHost, AuthScope.ANY_REALM, AuthScope.ANY_SCHEME),
-						new UsernamePasswordCredentials(proxyUserID, password));
-			}
-		}
-
-		return executor;
+	private NTLMDomainUtil() {
 	}
 
 	public static String getNTLMWorkstation() {
@@ -168,16 +121,5 @@ final class HttpClientProxyUtil {
 		}
 
 		return userName;
-	}
-
-	private static IProxyData getProxyData(IProxyService proxyService, URI uri) {
-		if (proxyService != null) {
-			IProxyData[] proxies = proxyService.select(uri);
-			if (proxies.length != 0) {
-				return proxies[0];
-			}
-		}
-
-		return null;
 	}
 }

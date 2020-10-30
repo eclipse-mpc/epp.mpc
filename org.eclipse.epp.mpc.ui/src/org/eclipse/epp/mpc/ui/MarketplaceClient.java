@@ -17,7 +17,9 @@ import java.util.List;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 /**
  * Provides a means to configure and launch the marketplace client.
@@ -97,6 +99,14 @@ public class MarketplaceClient {
 	 * @return a client service from the OSGi service registry
 	 */
 	public static IMarketplaceClientService getMarketplaceClientService() {
-		return MarketplaceClientUiPlugin.getInstance().getClientService();
+		BundleContext bundleContext = MarketplaceClientUi.getBundleContext();
+		ServiceReference<IMarketplaceClientService> serviceReference = bundleContext == null ? null
+				: bundleContext.getServiceReference(IMarketplaceClientService.class);
+		IMarketplaceClientService clientService = serviceReference == null ? null
+				: bundleContext.getService(serviceReference);
+		if (clientService != null) {
+			bundleContext.ungetService(serviceReference);//FIXME baaaad...
+		}
+		return clientService;
 	}
 }

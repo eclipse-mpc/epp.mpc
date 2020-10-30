@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.epp.mpc.core.transport.http.factory">
+   <service>
+      <provide interface="org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientTransportFactory"/>
+      <provide interface="org.eclipse.epp.mpc.core.service.ITransportFactory"/>
+   </service>
+   <reference bind="bindTransport" cardinality="1..1" interface="org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientTransport" name="org.eclipse.epp.mpc.core.transport.http" policy="static" unbind="unbindTransport"/>
+   <implementation class="org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientTransportFactory"/>
+</scr:component>

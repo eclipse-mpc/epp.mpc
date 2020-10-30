@@ -19,13 +19,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.Messages;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
@@ -38,6 +36,7 @@ import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.progress.UIJob;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 
 final class DiscoverFileSupportJob extends Job {
@@ -60,7 +59,7 @@ final class DiscoverFileSupportJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		BundleContext bundleContext = MarketplaceClientUiPlugin.getBundleContext();
+		BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
 		ServiceReference<IMarketplaceServiceLocator> locatorReference = bundleContext
 				.getServiceReference(IMarketplaceServiceLocator.class);
 		IMarketplaceServiceLocator locator = bundleContext.getService(locatorReference);
@@ -85,7 +84,7 @@ final class DiscoverFileSupportJob extends Job {
 		try {
 			ISearchResult searchResult = marketplaceService.tagged(fileExtensionTags, monitor);
 			nodes = orderNodesByTagSubExtensionCount(searchResult.getNodes(), fileExtensionTags);
-		} catch (CoreException ex) {
+		} catch (Exception ex) {
 			IStatus status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
 					NLS.bind(Messages.DiscoverFileSupportJob_discoveryFailed, getFileExtensionLabel(fileName)), ex);
 			// Do not return this status as it would show an error, e.g. when the user is currently offline
@@ -123,6 +122,9 @@ final class DiscoverFileSupportJob extends Job {
 
 		Map<String, List<INode>> nodesByTags = new HashMap<>();
 		for (INode iNode : nodes) {
+			if (iNode.getTags() == null || iNode.getTags().getTags() == null) {
+				continue;
+			}
 			for (ITag nodeTag : iNode.getTags().getTags()) {
 				boolean foundTag = false;
 				for (String tag : fileExtensionTags) {

@@ -21,14 +21,14 @@ import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.fluent.Executor;
-import org.apache.http.client.fluent.Request;
-import org.apache.http.client.fluent.Response;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -37,7 +37,11 @@ import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.util.UserAgentUtil;
 import org.eclipse.epp.mpc.core.service.ITransport;
 import org.eclipse.epp.mpc.core.service.ServiceUnavailableException;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
+@Component(name = "org.eclipse.epp.mpc.core.transport.http", service = { HttpClientTransport.class,
+		ITransport.class })
 public class HttpClientTransport implements ITransport {
 
 	public static final String USER_AGENT;
@@ -72,36 +76,30 @@ public class HttpClientTransport implements ITransport {
 		USER_AGENT = UserAgentUtil.computeUserAgent();
 	}
 
-	private final HttpClient client;
-
-	private final Executor executor;
-
-	public HttpClientTransport() {
-		HttpClientFactory httpClientFactory = new HttpClientFactory();
-		client = httpClientFactory.build();
-		executor = httpClientFactory.getExecutor();
-	}
+	private HttpClientService clientService;
 
 	public HttpClient getClient() {
-		return client;
+		return clientService.getClient();
 	}
 
-	public Executor getExecutor() {
-		return executor;
-	}
-	protected Response execute(Request request, URI uri) throws ClientProtocolException, IOException {
-		return HttpClientProxyUtil.proxyAuthentication(executor, uri).execute(request);
+	@Reference
+	public void bindHttpClientService(HttpClientService service) {
+		this.clientService = service;
 	}
 
-	protected Request configureRequest(Request request, URI uri) {
-		return request.viaProxy(HttpClientProxyUtil.getProxyHost(uri));
+	protected HttpResponse execute(HttpUriRequest request) throws ClientProtocolException, IOException {
+		return clientService.execute(request);
+	}
+
+	protected HttpRequest configureRequest(HttpUriRequest request) {
+		return clientService.configureRequest(request);
 	}
 
 	@Override
 	public InputStream stream(URI location, IProgressMonitor monitor)
 			throws FileNotFoundException, ServiceUnavailableException, CoreException {
 		try {
-			return createStreamingRequest().execute(location);
+			return createStreamingRequest().execute(clientService, location);
 		} catch (HttpResponseException e) {
 			int statusCode = e.getStatusCode();
 			switch (statusCode) {
@@ -121,18 +119,17 @@ public class HttpClientTransport implements ITransport {
 	}
 
 	protected RequestTemplate<InputStream> createStreamingRequest() {
-		return new RequestTemplate<InputStream>(this) {
+		return new RequestTemplate<InputStream>() {
 
 			@Override
-			protected Request createRequest(URI uri) {
-				return Request.Get(uri);
+			protected HttpUriRequest createRequest(URI uri) {
+				return new HttpGet(uri);
 			}
 
 			@Override
-			protected InputStream handleResponse(Response response) throws ClientProtocolException, IOException {
-				HttpResponse returnResponse = response.returnResponse();
-				HttpEntity entity = returnResponse.getEntity();
-				StatusLine statusLine = returnResponse.getStatusLine();
+			protected InputStream handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
+				HttpEntity entity = response.getEntity();
+				StatusLine statusLine = response.getStatusLine();
 				handleResponseStatus(statusLine.getStatusCode(), statusLine.getReasonPhrase());
 				return handleResponseEntity(entity);
 			}

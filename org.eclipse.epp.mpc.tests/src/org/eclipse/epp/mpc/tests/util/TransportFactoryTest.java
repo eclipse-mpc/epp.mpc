@@ -13,14 +13,20 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.util;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
@@ -35,12 +41,9 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.AuthSchemes;
-import org.apache.http.client.fluent.Request;
-import org.apache.http.client.fluent.Response;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.Lookup;
@@ -50,8 +53,13 @@ import org.apache.http.protocol.HttpContext;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCorePlugin;
+import org.eclipse.epp.internal.mpc.core.ServiceHelperImpl;
+import org.eclipse.epp.internal.mpc.core.transport.httpclient.ChainedCredentialsProvider;
+import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientCustomizer;
+import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientService;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientTransport;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientTransportFactory;
+import org.eclipse.epp.internal.mpc.core.transport.httpclient.SynchronizedCredentialsProvider;
 import org.eclipse.epp.internal.mpc.core.util.FallbackTransportFactory;
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
 import org.eclipse.epp.internal.mpc.core.util.TransportFactory;
@@ -59,9 +67,6 @@ import org.eclipse.epp.mpc.core.service.ITransport;
 import org.eclipse.epp.mpc.core.service.ITransportFactory;
 import org.eclipse.epp.mpc.core.service.ServiceHelper;
 import org.eclipse.epp.mpc.core.service.ServiceUnavailableException;
-import org.eclipse.epp.mpc.rest.client.internal.httpclient.ChainedCredentialsProvider;
-import org.eclipse.epp.mpc.rest.client.internal.httpclient.HttpClientCustomizer;
-import org.eclipse.epp.mpc.rest.client.internal.httpclient.SynchronizedCredentialsProvider;
 import org.eclipse.epp.mpc.tests.LambdaMatchers;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assume;
@@ -69,6 +74,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
+import org.mockito.internal.MockitoCore;
+import org.mockito.internal.util.MockUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
@@ -109,6 +116,11 @@ public class TransportFactoryTest {
 	public void clearTransportFilters() {
 		System.getProperties().remove("org.eclipse.epp.mpc.core.service.transport.disabled");
 		System.getProperties().remove("org.eclipse.ecf.provider.filetransfer.excludeContributors");
+	}
+
+	@Before
+	public void initServiceHelper() {
+		ServiceHelperImpl.getImplInstance();
 	}
 
 	@Test
@@ -225,26 +237,15 @@ public class TransportFactoryTest {
 		createFailingHttpClientTransport().stream(URI.create("http://127.0.0.1:54321"), null);
 	}
 
-	private static HttpClientTransport createFailingHttpClientTransport() {
-		return new HttpClientTransport() {
-			@Override
-			protected Response execute(Request request, URI uri) throws ClientProtocolException, IOException {
-				HttpResponse mockResponse = mockResponse(mockStatusLine(503, "Expected test error"), null);
-				try {
-					Constructor<Response> ctor = Response.class.getDeclaredConstructor(HttpResponse.class);
-					ctor.setAccessible(true);
-					return ctor.newInstance(mockResponse);
-				} catch (Exception e) {
-					try {
-						fail("Failed to create response");
-					} catch (AssertionError ae) {
-						ae.initCause(e);
-						throw ae;
-					}
-					return null;
-				}
-			}
-		};
+	private static HttpClientTransport createFailingHttpClientTransport() throws Exception {
+		HttpClientTransport transport = new HttpClientTransport();
+		HttpClientService mockClient = Mockito.mock(HttpClientService.class);
+		Mockito.when(mockClient.configureRequest(ArgumentMatchers.any())).thenAnswer(args -> args.getArgument(0));
+		Mockito.doReturn(mockResponse(mockStatusLine(503, "Expected test error"), null)).when(mockClient).execute(
+				ArgumentMatchers.any());
+
+		transport.bindHttpClientService(mockClient);
+		return transport;
 	}
 
 	@Test
@@ -253,9 +254,12 @@ public class TransportFactoryTest {
 
 		HttpClientTransportFactory httpClientFactory = new HttpClientTransportFactory();
 		httpClientFactory.setTransport(httpClientTransport);
+
+		String expectedMessage = "Secondary transport";
 		ITransportFactory secondaryFactory = Mockito.mock(ITransportFactory.class);
 		ITransport secondaryTransport = Mockito.mock(ITransport.class);
-		InputStream expectedResultStream = new ByteArrayInputStream("Secondary transport".getBytes("UTF-8"));
+		InputStream expectedResultStream = new ByteArrayInputStream(expectedMessage.getBytes(
+				StandardCharsets.UTF_8));
 		Mockito.when(secondaryFactory.getTransport()).thenReturn(secondaryTransport);
 		Mockito.when(secondaryTransport.stream(ArgumentMatchers.<URI> any(), ArgumentMatchers.<IProgressMonitor> any())).thenReturn(
 				expectedResultStream);
@@ -265,7 +269,10 @@ public class TransportFactoryTest {
 		fallbackTransportFactory.setSecondaryFactory(secondaryFactory);
 
 		InputStream stream = fallbackTransportFactory.getTransport().stream(URI.create("http://127.0.0.1:54321"), null);
-		assertSame(expectedResultStream, stream);
+		byte[] resultBytes = new byte[24];
+		int read = stream.read(resultBytes);
+		String actualMessage = new String(resultBytes, 0, read, StandardCharsets.UTF_8);
+		assertEquals(expectedMessage, actualMessage);
 	}
 
 	@Test
@@ -294,20 +301,33 @@ public class TransportFactoryTest {
 			return new HttpClientTransport();
 		}
 
+		BundleContext clientServiceContext = FrameworkUtil.getBundle(HttpClientService.class).getBundleContext();
 		List<ServiceRegistration<?>> registrations = new ArrayList<>();
 		for (int i = 0; i < customizers.length; i++) {
+			MockitoCore mockitoCore = new MockitoCore();
+			for (HttpClientCustomizer customizer : customizers) {
+				if (MockUtil.isMock(customizer)) {
+					mockitoCore.clearInvocations(customizer);
+				}
+			}
 			HttpClientCustomizer customizer = customizers[i];
 			Dictionary<String, Object> serviceProperties = ServiceUtil.serviceName(
 					"org.eclipse.epp.mpc.core.transport.http.test.customizer." + i, ServiceUtil.serviceRanking(1000 + i,
 							null));
-			ServiceRegistration<?> registration = FrameworkUtil.getBundle(HttpClientCustomizer.class).getBundleContext()
+			ServiceRegistration<?> registration = clientServiceContext
 					.registerService(HttpClientCustomizer.class, customizer, serviceProperties);
 			registrations.add(registration);
 		}
+
+		ServiceReference<HttpClientService> clientServiceRef = clientServiceContext.getServiceReference(
+				HttpClientService.class);
+		HttpClientService clientService = clientServiceContext.getService(clientServiceRef);
+
 		HttpClientTransport httpClientTransport;
 		try
 		{
 			httpClientTransport = new HttpClientTransport();
+			httpClientTransport.bindHttpClientService(clientService);
 		}
 		finally
 		{
@@ -381,7 +401,7 @@ public class TransportFactoryTest {
 		BundleContext bundleContext = FrameworkUtil.getBundle(TransportFactory.class).getBundleContext();
 		Collection<ServiceReference<ITransportFactory>> transportServiceReferences = TransportFactory
 				.getTransportServiceReferences(
-				bundleContext);
+						bundleContext);
 		if (!transportServiceReferences.isEmpty()) {
 			ServiceReference<ITransportFactory> transportServiceReference = transportServiceReferences.iterator()
 					.next();

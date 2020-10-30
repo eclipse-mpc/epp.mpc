@@ -22,7 +22,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.catalog.ResourceProvider;
 import org.eclipse.epp.internal.mpc.ui.catalog.ResourceProvider.ResourceFuture;
 import org.eclipse.epp.internal.mpc.ui.catalog.ResourceProviderImageDescriptor;
@@ -102,7 +102,7 @@ public final class CatalogDescriptor {
 	private static ImageDescriptor imageDescriptorForUrl(ICatalog catalog, String imageUrl)
 			throws MalformedURLException {
 		if (imageUrl != null && imageUrl.length() > 0) {
-			ResourceProvider resourceProvider = MarketplaceClientUiPlugin.getInstance().getResourceProvider();
+			ResourceProvider resourceProvider = MarketplaceClientUiResources.getInstance().getResourceProvider();
 			ResourceFuture resource = resourceProvider.getResource(imageUrl);
 			if (resource == null) {
 				String requestSource = NLS.bind(Messages.CatalogDescriptor_requestCatalog, catalog.getName(),

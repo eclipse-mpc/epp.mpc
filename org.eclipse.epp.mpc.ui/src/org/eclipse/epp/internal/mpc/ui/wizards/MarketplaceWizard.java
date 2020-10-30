@@ -53,6 +53,7 @@ import org.eclipse.epp.internal.mpc.core.model.News;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
@@ -77,6 +78,7 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.equinox.internal.p2.ui.ProvUI;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.DiscoveryWizard;
+import org.eclipse.equinox.p2.engine.IProvisioningPlan;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.equinox.p2.operations.ProfileChangeOperation;
 import org.eclipse.equinox.p2.operations.ProvisioningJob;
@@ -203,6 +205,8 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	private ProfileChangeOperation profileChangeOperation;
 
+	private IProvisioningPlan currentJREPlan;
+
 	private FeatureSelectionWizardPage featureSelectionWizardPage;
 
 	private AcceptLicensesWizardPage acceptLicensesPage;
@@ -211,6 +215,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	private Set<CatalogItem> operationNewInstallItems;
 
+	private boolean inInitialSelectionInitializer;
 	private boolean initialSelectionInitialized;
 
 	private Set<URI> addedRepositoryLocations;
@@ -269,8 +274,9 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		return profileChangeOperation;
 	}
 
-	public void setProfileChangeOperation(ProfileChangeOperation profileChangeOperation) {
-		this.profileChangeOperation = profileChangeOperation;
+	public void resetProfileChangeOperation() {
+		profileChangeOperation = null;
+		currentJREPlan = null;
 	}
 
 	void initializeInitialSelection() throws CoreException {
@@ -278,21 +284,27 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			throw new IllegalStateException();
 		}
 		initialSelectionInitialized = true;
-		initializeCatalog();
-		if (getConfiguration().getInitialState() != null || getConfiguration().getInitialOperations() != null) {
-			SelectionModelStateSerializer serializer = new SelectionModelStateSerializer(getCatalog(),
-					getSelectionModel());
-			try {
-				getContainer().run(true, true,
-						monitor -> serializer.deserialize(getConfiguration().getInitialState(),
-								getConfiguration().getInitialOperations(), monitor));
-			} catch (InvocationTargetException e) {
-				throw new CoreException(MarketplaceClientCore.computeStatus(e, Messages.MarketplaceViewer_unexpectedException));
-			} catch (InterruptedException e) {
-				// user canceled
-				throw new CoreException(Status.CANCEL_STATUS);
+		inInitialSelectionInitializer = true;
+		try {
+			initializeCatalog();
+			if (getConfiguration().getInitialState() != null || getConfiguration().getInitialOperations() != null) {
+				SelectionModelStateSerializer serializer = new SelectionModelStateSerializer(getCatalog(),
+						getSelectionModel());
+				try {
+					getContainer().run(true, true,
+							monitor -> serializer.deserialize(getConfiguration().getInitialState(),
+									getConfiguration().getInitialOperations(), monitor));
+				} catch (InvocationTargetException e) {
+					throw new CoreException(
+							MarketplaceClientCore.computeStatus(e, Messages.MarketplaceViewer_unexpectedException));
+				} catch (InterruptedException e) {
+					// user canceled
+					throw new CoreException(Status.CANCEL_STATUS);
+				}
+				updateSelection(serializer);
 			}
-			updateSelection(serializer);
+		} finally {
+			inInitialSelectionInitializer = false;
 		}
 	}
 
@@ -345,8 +357,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 					@Override
 					public Image getImage(Object element) {
-						return MarketplaceClientUiPlugin.getInstance()
-								.getImageRegistry()
+						return MarketplaceClientUiResources.getInstance().getImageRegistry()
 								.get(MarketplaceClientUiPlugin.IU_ICON_ERROR);
 					}
 				};
@@ -405,7 +416,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			case IStatus.OK:
 			case IStatus.WARNING:
 			case IStatus.INFO:
-				return true;
+				return currentJREPlan == null || currentJREPlan.getStatus().getSeverity() != IStatus.ERROR;
 			}
 		}
 		return false;
@@ -437,6 +448,11 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 						.setCurrentRemedy(featureSelectionWizardPage.getRemediationGroup().getCurrentRemedy());
 						profileChangeOperation.resolveModal(monitor);
 					});
+					if (ProvisioningUI.getDefaultUI().getPolicy().getCheckAgainstCurrentExecutionEnvironment()) {
+						container.run(true, false,
+								monitor -> currentJREPlan = ProvUI
+								.toCompabilityWithCurrentJREProvisioningPlan(profileChangeOperation, monitor));
+					}
 				} catch (InterruptedException e) {
 					// Nothing to report if thread was interrupted
 				} catch (InvocationTargetException e) {
@@ -450,7 +466,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 					updateProfileChangeOperation();
 					operationUpdated = true;
 				}
-				if (profileChangeOperation == null || !profileChangeOperation.getResolutionResult().isOK()) {
+				if (profileChangeOperation == null) {
 					// can't compute a change operation, so there must be some kind of error
 					// we show these on the the feature selection wizard page
 					nextPage = featureSelectionWizardPage;
@@ -461,6 +477,10 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				} else if (profileChangeOperation instanceof RemediationOperation) {
 					nextPage = featureSelectionWizardPage;
 				}
+			}
+			if (nextPage == null && (!profileChangeOperation.getResolutionResult().isOK()
+					|| (currentJREPlan != null && !currentJREPlan.getStatus().isOK()))) {
+				nextPage = featureSelectionWizardPage;
 			}
 			if (nextPage == null && nextpressed && profileChangeOperation instanceof RemediationOperation
 					&& !featureSelectionWizardPage.isInRemediationMode()) {
@@ -531,8 +551,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	private void doDefaultCatalogSelection() {
 		if (getConfiguration().getCatalogDescriptor() == null) {
-			String defaultCatalogUrl = MarketplaceClientUiPlugin.getInstance()
-					.getPreferenceStore()
+			String defaultCatalogUrl = MarketplaceClientUiResources.getInstance().getPreferenceStore()
 					.getString(PREF_DEFAULT_CATALOG);
 			// if a preferences was set, we default to that catalog descriptor
 			if (defaultCatalogUrl != null && defaultCatalogUrl.length() > 0) {
@@ -563,8 +582,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		if (getConfiguration().getCatalogDescriptor() != null) {
 			// remember the catalog for next time.
 			try {
-				MarketplaceClientUiPlugin.getInstance()
-				.getPreferenceStore()
+				MarketplaceClientUiResources.getInstance().getPreferenceStore()
 				.setValue(PREF_DEFAULT_CATALOG,
 						getConfiguration().getCatalogDescriptor().getUrl().toURI().toString());
 			} catch (URISyntaxException e) {
@@ -748,6 +766,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		removeAddedRepositoryLocations();
 		addedRepositoryLocations = null;
 		profileChangeOperation = null;
+		currentJREPlan = null;
 		operationIUs = null;
 		IWizardContainer wizardContainer = getContainer();
 		if (getSelectionModel().computeProvisioningOperationViable()) {
@@ -840,7 +859,23 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 						job.schedule();
 					}
 				}
-
+				if (ProvisioningUI.getDefaultUI().getPolicy().getCheckAgainstCurrentExecutionEnvironment()) {
+					if ((profileChangeOperation instanceof RemediationOperation)
+							&& ((RemediationOperation) profileChangeOperation).getCurrentRemedy() == null) {
+						// "Dirty" workaround, see bug 561865: To be able to calculate a plan while checking compatibility to the running JRE, we set the current remedy to the best solution found, here.
+						// This is reset afterwards, but not reresolved since this costs extra time and does not seem to be needed.
+						RemediationOperation remediationOperation = (RemediationOperation) profileChangeOperation;
+						try {
+							remediationOperation.setCurrentRemedy(
+									((RemediationOperation) profileChangeOperation).bestSolutionChangingTheRequest());
+							wizardContainer.run(true, false, monitor -> profileChangeOperation.resolveModal(monitor));
+						} finally {
+							remediationOperation.setCurrentRemedy(null);
+						}
+					}
+					wizardContainer.run(true, false, monitor -> currentJREPlan = ProvUI
+							.toCompabilityWithCurrentJREProvisioningPlan(profileChangeOperation, monitor));
+				}
 			} catch (InvocationTargetException e) {
 				Throwable cause = e.getCause();
 				IStatus status;
@@ -1218,5 +1253,14 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			}
 		});
+	}
+
+	IProvisioningPlan getAdditionalVerificationPlan() {
+		return this.currentJREPlan;
+	}
+
+	protected boolean canProceedInstallation() {
+		return !inInitialSelectionInitializer || getInitialState() == null
+				|| !Boolean.FALSE.equals(getInitialState().getProceedWithInstallation());
 	}
 }

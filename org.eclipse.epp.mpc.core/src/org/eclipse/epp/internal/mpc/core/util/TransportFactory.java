@@ -44,6 +44,9 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -87,6 +90,10 @@ public abstract class TransportFactory implements ITransportFactory {
 				.getProperty(ECF_EXCLUDES_PROPERTY);
 		if (excludeContributors != null && excludeContributors.contains(ECF_HTTPCLIENT4_TRANSPORT_ID)) {
 			disabledTransportsStr += "," + HTTP_TRANSPORT_WRAPPER_ID + "," + HTTP_TRANSPORT_FACTORY_ID; //$NON-NLS-1$//$NON-NLS-2$
+		} else if (disabledTransportsStr.contains(HTTP_TRANSPORT_WRAPPER_ID)) {
+			disabledTransportsStr += "," + HTTP_TRANSPORT_FACTORY_ID; //$NON-NLS-1$
+		} else if (disabledTransportsStr.contains(HTTP_TRANSPORT_FACTORY_ID)) {
+			disabledTransportsStr += "," + HTTP_TRANSPORT_WRAPPER_ID; //$NON-NLS-1$
 		}
 		Set<String> disabledTransports = new HashSet<>();
 		StringBuilder bldr = new StringBuilder("(&"); //$NON-NLS-1$
@@ -105,6 +112,8 @@ public abstract class TransportFactory implements ITransportFactory {
 		return disabledTransportsFilter;
 	}
 
+	@Component(name = "org.eclipse.epp.mpc.core.transportfactory.legacy", property = {
+			"org.eclipse.epp.mpc.core.service.transport.legacy:Boolean=true", "service.ranking:Integer=-2147483647" })
 	public static final class LegacyFactory implements ITransportFactory {
 		private ITransportFactory delegate;
 
@@ -122,6 +131,7 @@ public abstract class TransportFactory implements ITransportFactory {
 			return delegate.getTransport();
 		}
 
+		@Activate
 		public void activate(ComponentContext context) throws InvalidSyntaxException {
 			BundleContext bundleContext = context.getBundleContext();
 			Collection<ServiceReference<ITransportFactory>> serviceReferences = bundleContext.getServiceReferences(
@@ -152,6 +162,7 @@ public abstract class TransportFactory implements ITransportFactory {
 			delegateReference = null;
 		}
 
+		@Deactivate
 		public void deactivate(ComponentContext context) {
 			delegate = null;
 			if (delegateReference != null) {
@@ -245,7 +256,10 @@ public abstract class TransportFactory implements ITransportFactory {
 							lastFallbackTransport = null;
 						}
 					}
-					return transportService.getTransport();
+					org.eclipse.epp.mpc.core.service.ITransport transport = transportService.getTransport();
+					if (transport != null) {
+						return transport;
+					}
 				} finally {
 					context.ungetService(serviceReference);
 				}
@@ -264,8 +278,15 @@ public abstract class TransportFactory implements ITransportFactory {
 			for (ITransportFactory factory : listAvailableFactories()) {
 				try {
 					org.eclipse.epp.mpc.core.service.ITransport transport = factory.getTransport();
-					logTransportServiceFallback(serviceError, defaultServiceReference, null, factory);
-					return transport;
+					if (transport != null) {
+						logTransportServiceFallback(serviceError, defaultServiceReference, null, factory);
+						return transport;
+					} else {
+						serviceError.add(new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID,
+								NLS.bind(Messages.TransportFactory_LegacyFallbackCreationError,
+										factory.getClass().getName()),
+								new NullPointerException("Factory returned null transport")));
+					}
 				} catch (Exception ex) {
 					serviceError.add(new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID,
 							NLS.bind(Messages.TransportFactory_LegacyFallbackCreationError, factory.getClass().getName()), ex));
@@ -390,17 +411,22 @@ public abstract class TransportFactory implements ITransportFactory {
 		return factories;
 	}
 
+	private ITransport transport;
+
 	@Override
 	@SuppressWarnings("deprecation")
-	public ITransport getTransport() {
-		return (location, monitor) -> {
-			try {
-				return invokeStream(location, monitor);
-			} catch (Exception e) {
-				handleStreamExceptions(e);
-			}
-			return null;
-		};
+	public synchronized ITransport getTransport() {
+		if (transport == null && isAvailable()) {
+			transport = (location, monitor) -> {
+				try {
+					return invokeStream(location, monitor);
+				} catch (Exception e) {
+					handleStreamExceptions(e);
+				}
+				return null;
+			};
+		}
+		return transport;
 	}
 
 	protected abstract boolean isAvailable();

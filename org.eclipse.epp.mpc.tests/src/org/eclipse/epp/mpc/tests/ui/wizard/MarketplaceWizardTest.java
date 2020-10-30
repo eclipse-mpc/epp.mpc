@@ -13,9 +13,14 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui.wizard;
 
-import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.*;
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.allOf;
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.withId;
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.withText;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -66,6 +71,7 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 		itemBot(NodeMatcher.withNameRegex(".*Snipmatch.*"));
 	}
 
+	@Ignore //Tags are currently disabled in the REST API
 	@Test
 	public void testSearchTag() {
 		Matcher<StyledText> widgetOfType = widgetOfType(StyledText.class);
@@ -170,7 +176,7 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 
 	@Test
 	public void testNews() {
-		bot.tabItemWithId(MarketplacePage.WIDGET_ID_KEY, MarketplacePage.WIDGET_ID_TAB_NEWS).activate();
+		bot.cTabItemWithId(MarketplacePage.WIDGET_ID_KEY, MarketplacePage.WIDGET_ID_TAB_NEWS).activate();
 		bot.sleep(500);
 		tryWaitForBrowser(bot.browser());
 		String url = bot.browser().getUrl();
@@ -179,21 +185,24 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 
 	@Test
 	public void testRecentBackToSearch() {
-		bot.tabItem("Recent").activate();
+		bot.cTabItem("Recent").activate();
 		waitForWizardProgress();
-		testSearchTag();
+		bot.cTabItem("Search").activate();
+		waitForWizardProgress();
+		searchField();
+		assertTrue(bot.label("Featured").isVisible());
 	}
 
 	@Test
 	public void testRecent() {
-		bot.tabItem("Recent").activate();
+		bot.cTabItem("Recent").activate();
 		waitForWizardProgress();
 		//TODO test something useful
 	}
 
 	@Test
 	public void testPopular() {
-		bot.tabItem("Popular").activate();
+		bot.cTabItem("Popular").activate();
 		waitForWizardProgress();
 		//TODO test something useful
 	}
@@ -201,7 +210,6 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 	@Test
 	public void testFavorite() {
 		SWTBotButton favorite = bot.buttonWithId(AbstractMarketplaceDiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_RATING);
-		bot.sleep(5000);
 		favorite.click();
 		SWTBotShell login = bot.shell("Authorizing with Eclipse.org");
 		login.bot().button("Cancel").click();

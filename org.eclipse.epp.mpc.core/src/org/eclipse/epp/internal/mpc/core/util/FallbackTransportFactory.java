@@ -38,11 +38,13 @@ import org.osgi.framework.ServiceReference;
 public class FallbackTransportFactory implements ITransportFactory {
 
 	private static final class FallbackTransport implements ITransport {
-		private ITransport primaryTransport;
+		private final ITransport primaryTransport;
 
-		private final ITransport fallbackTransport;
+		private ITransport fallbackTransport;
 
-		public FallbackTransport(ITransport primaryTransport, ITransport fallbackTransport) {
+		private boolean primaryDisabled = false;
+
+		FallbackTransport(ITransport primaryTransport, ITransport fallbackTransport) {
 			super();
 			this.primaryTransport = primaryTransport;
 			this.fallbackTransport = fallbackTransport;
@@ -59,11 +61,12 @@ public class FallbackTransportFactory implements ITransportFactory {
 				throws FileNotFoundException, ServiceUnavailableException, CoreException {
 			connectionAttempts++;
 			if (connectionAttempts > 10 && connectionFailures / (double) connectionAttempts > 0.75) {
-				MarketplaceClientCore.getLog().log(new Status(IStatus.INFO, MarketplaceClientCore.BUNDLE_ID,
+				MarketplaceClientCore.getLog()
+				.log(new Status(IStatus.INFO, MarketplaceClientCore.BUNDLE_ID,
 						NLS.bind(Messages.FallbackTransportFactory_disablingTransport, primaryTransport)));
-				primaryTransport = null;
+				primaryDisabled = true;
 			}
-			if (primaryTransport == null) {
+			if (primaryTransport == null || primaryDisabled) {
 				return fallbackTransport.stream(location, monitor);
 			}
 			InputStream stream;
@@ -126,6 +129,8 @@ public class FallbackTransportFactory implements ITransportFactory {
 				boolean fallbackSucceeded = false;
 				try {
 					InputStream fallbackStream = fallbackTransport.stream(location, monitor);
+					BufferedInputStream buffered = new BufferedInputStream(fallbackStream);
+					tryBuffer(buffered);
 					fallbackSucceeded = true;
 					String problemKey = ex.getClass().getName() + ": " + ex.getMessage() + "\n\t" //$NON-NLS-1$//$NON-NLS-2$
 							+ ex.getStackTrace()[0];
@@ -136,7 +141,9 @@ public class FallbackTransportFactory implements ITransportFactory {
 										fallbackTransport)));
 					}
 
-					return fallbackStream;
+					return buffered;
+				} catch (Exception fallbackEx) {
+					ex.addSuppressed(fallbackEx);
 				} finally {
 					if (!fallbackSucceeded) {
 						//fallback didn't work either - probably something unrelated to transport going on, so don't count this as a transport failure
@@ -146,11 +153,25 @@ public class FallbackTransportFactory implements ITransportFactory {
 			}
 			return null;
 		}
+
+		void setFallbackTransport(ITransport fallbackTransport) {
+			this.fallbackTransport = fallbackTransport;
+		}
+
+		public ITransport getPrimaryTransport() {
+			return primaryTransport;
+		}
+
+		public ITransport getFallbackTransport() {
+			return fallbackTransport;
+		}
 	}
 
 	private ITransportFactory primaryFactory;
 
 	private ITransportFactory secondaryFactory;
+
+	private FallbackTransport transport;
 
 	public FallbackTransportFactory() {
 		super();
@@ -158,13 +179,20 @@ public class FallbackTransportFactory implements ITransportFactory {
 	}
 
 	@Override
-	public ITransport getTransport() {
+	public synchronized ITransport getTransport() {
 		ITransportFactory delegateFactory = getFallbackFactory();
+		ITransport primaryTransport = primaryFactory.getTransport();
 		if (delegateFactory == null) {
-			return primaryFactory.getTransport();
+			return primaryTransport;
 		}
 
-		return new FallbackTransport(primaryFactory.getTransport(), delegateFactory.getTransport());
+		ITransport secondaryTransport = delegateFactory.getTransport();
+
+		if (transport == null || transport.getPrimaryTransport() != primaryTransport
+				|| transport.getFallbackTransport() != secondaryTransport) {
+			transport = new FallbackTransport(primaryTransport, secondaryTransport);
+		}
+		return transport;
 	}
 
 	public ITransportFactory getFallbackFactory() {

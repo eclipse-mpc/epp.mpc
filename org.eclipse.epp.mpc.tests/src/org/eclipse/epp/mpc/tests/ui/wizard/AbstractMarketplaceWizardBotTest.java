@@ -12,10 +12,10 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui.wizard;
 
+import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.allOf;
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.shellIsActive;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.Assert.assertEquals;
@@ -54,6 +54,7 @@ import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.service.QueryHelper;
 import org.eclipse.epp.mpc.tests.ui.wizard.matcher.NodeMatcher;
+import org.eclipse.epp.mpc.tests.util.SWTBotComboAdapter;
 import org.eclipse.equinox.internal.p2.discovery.model.Tag;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogFilter;
 import org.eclipse.osgi.util.NLS;
@@ -64,6 +65,7 @@ import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
@@ -73,6 +75,7 @@ import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
 import org.eclipse.swtbot.swt.finder.junit.ScreenshotCaptureListener;
+import org.eclipse.swtbot.swt.finder.matchers.WithRegex;
 import org.eclipse.swtbot.swt.finder.results.ArrayResult;
 import org.eclipse.swtbot.swt.finder.results.Result;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferenceConstants;
@@ -84,7 +87,6 @@ import org.eclipse.swtbot.swt.finder.waits.WaitForObjectCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotBrowser;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCTabItem;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotCombo;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotLabel;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotLink;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
@@ -438,21 +440,21 @@ public abstract class AbstractMarketplaceWizardBotTest {
 	}
 
 	protected void filterMarket(String term) {
-		SWTBotCombo comboBox = marketCombo();
+		SWTBotComboAdapter comboBox = marketCombo();
 		select(comboBox, IMarket.class, term);
 	}
 
-	protected SWTBotCombo marketCombo() {
-		return bot.comboBox(0);
+	protected SWTBotComboAdapter marketCombo() {
+		return SWTBotComboAdapter.comboBox(bot, 0);
 	}
 
 	protected void filterCategory(String term) {
-		SWTBotCombo comboBox = categoryCombo();
+		SWTBotComboAdapter comboBox = categoryCombo();
 		select(comboBox, ICategory.class, term);
 	}
 
-	protected SWTBotCombo categoryCombo() {
-		return bot.comboBox(1);
+	protected SWTBotComboAdapter categoryCombo() {
+		return SWTBotComboAdapter.comboBox(bot, 1);
 	}
 
 	protected void search(String term) {
@@ -469,7 +471,8 @@ public abstract class AbstractMarketplaceWizardBotTest {
 
 	protected SWTBotBrowser marketplaceBrowser() {
 		SWTWorkbenchBot wbBot = new SWTWorkbenchBot();
-		Matcher<IEditorReference> marketplaceBrowserMatch = allOf(WidgetMatcherFactory.<IEditorReference> withPartId("org.eclipse.ui.browser.editor"), WidgetMatcherFactory
+		Matcher<IEditorReference> marketplaceBrowserMatch = Matchers.allOf(WidgetMatcherFactory
+				.<IEditorReference> withPartId("org.eclipse.ui.browser.editor"), WidgetMatcherFactory
 				.<IEditorReference> withTitle(containsString("Marketplace")));
 		SWTBotEditor browserEditor = wbBot.editor(marketplaceBrowserMatch);
 		SWTBotBrowser browser = browserEditor.bot().browser();
@@ -520,7 +523,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 		return text.substring(range.start, range.start + range.length);
 	}
 
-	protected void select(SWTBotCombo comboBox, Class<?> classifier, String choice) {
+	protected void select(SWTBotComboAdapter comboBox, Class<?> classifier, String choice) {
 		AbstractTagFilter filter = findFilter(classifier);
 		String choiceText = choice != null ? choice : ((ComboTagFilter) filter).getNoSelectionLabel();
 
@@ -598,7 +601,9 @@ public abstract class AbstractMarketplaceWizardBotTest {
 			linkText = String.format("%s solutions selected", count);
 		}
 		String linkContent = String.format("<a href=\"showSelection\">%s</a>", linkText);
-		return bot.link(linkContent);
+
+		Matcher<Link> matcher = allOf(widgetOfType(Link.class), WithRegex.withRegex("\\Q" + linkContent + "\\E"));
+		return new SWTBotLink(bot.widget(matcher, 0), matcher);
 	}
 
 	protected void tryWaitForBrowser(SWTBotBrowser browser) {

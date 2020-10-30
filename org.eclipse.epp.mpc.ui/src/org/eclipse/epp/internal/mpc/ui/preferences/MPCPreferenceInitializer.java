@@ -13,7 +13,7 @@
 package org.eclipse.epp.internal.mpc.ui.preferences;
 
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.discovery.MissingNatureDetector;
 
 public class MPCPreferenceInitializer extends AbstractPreferenceInitializer {
@@ -23,7 +23,7 @@ public class MPCPreferenceInitializer extends AbstractPreferenceInitializer {
 
 	@Override
 	public void initializeDefaultPreferences() {
-		MarketplaceClientUiPlugin.getInstance().getPreferenceStore().setDefault(
+		MarketplaceClientUiResources.getInstance().getPreferenceStore().setDefault(
 				MissingNatureDetector.ENABLEMENT_PROPERTY, true);
 	}
 

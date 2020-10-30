@@ -17,4 +17,5 @@
       <provide interface="org.eclipse.epp.mpc.core.service.ITransportFactory"/>
    </service>
    <reference bind="bindPrimaryFactory" cardinality="1..1" interface="org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientTransportFactory" name="org.eclipse.epp.mpc.core.transport.http.factory" policy="static" unbind="unbindPrimaryFactory"/>
+   <property name="service.ranking" type="Integer" value="1"/>
 </scr:component>

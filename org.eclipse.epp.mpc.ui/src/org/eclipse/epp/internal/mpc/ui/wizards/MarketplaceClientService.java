@@ -30,7 +30,9 @@ import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.ui.IMarketplaceClientConfiguration;
 import org.eclipse.epp.mpc.ui.IMarketplaceClientService;
 import org.eclipse.ui.statushandlers.StatusManager;
+import org.osgi.service.component.annotations.Component;
 
+@Component(name = "org.eclipse.epp.mpc.ui.marketplace-client", service = { IMarketplaceClientService.class })
 public class MarketplaceClientService implements IMarketplaceClientService {
 
 	@Override

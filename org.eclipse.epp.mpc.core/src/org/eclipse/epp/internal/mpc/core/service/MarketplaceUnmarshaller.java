@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2014, 2019 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -23,9 +23,9 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -37,6 +37,7 @@ import org.eclipse.epp.internal.mpc.core.service.xml.Unmarshaller;
 import org.eclipse.epp.mpc.core.service.IMarketplaceUnmarshaller;
 import org.eclipse.epp.mpc.core.service.UnmarshalException;
 import org.eclipse.osgi.util.NLS;
+import org.osgi.service.component.annotations.Component;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -44,6 +45,7 @@ import org.xml.sax.XMLReader;
 /**
  * @author Carsten Reckord
  */
+@Component(name = "org.eclipse.epp.mpc.core.unmarshaller")
 public class MarketplaceUnmarshaller implements IMarketplaceUnmarshaller {
 
 	@Override
@@ -60,7 +62,7 @@ public class MarketplaceUnmarshaller implements IMarketplaceUnmarshaller {
 		ByteBuffer peekBuffer = peekResponseContent(bufferedInput);
 
 		// FIXME how can the charset be determined?
-		Reader reader = new InputStreamReader(bufferedInput, RemoteMarketplaceService.UTF_8);
+		Reader reader = new InputStreamReader(bufferedInput, StandardCharsets.UTF_8);
 		reader = new StripInvalidXMLCharsReader(reader);
 		try {
 			xmlReader.parse(new InputSource(reader));
@@ -120,7 +122,7 @@ public class MarketplaceUnmarshaller implements IMarketplaceUnmarshaller {
 	private IStatus createContentInfo(ByteBuffer peekBuffer) {
 		try {
 			StringBuilder message = new StringBuilder("Received response begins with:\n\n"); //$NON-NLS-1$
-			CharsetDecoder decoder = Charset.forName("ASCII").newDecoder(); //$NON-NLS-1$
+			CharsetDecoder decoder = StandardCharsets.US_ASCII.newDecoder();
 			decoder.onMalformedInput(CodingErrorAction.REPLACE);
 			decoder.onUnmappableCharacter(CodingErrorAction.REPLACE);
 			decoder.replaceWith("?"); //$NON-NLS-1$

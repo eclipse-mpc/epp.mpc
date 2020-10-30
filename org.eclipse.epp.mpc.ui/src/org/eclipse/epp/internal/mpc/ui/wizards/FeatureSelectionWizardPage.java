@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.operations.FeatureDescriptor;
 import org.eclipse.epp.internal.mpc.ui.operations.ResolveFeatureNamesOperation;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
@@ -35,6 +36,7 @@ import org.eclipse.epp.internal.mpc.ui.wizards.SelectionModel.CatalogItemEntry;
 import org.eclipse.epp.internal.mpc.ui.wizards.SelectionModel.FeatureEntry;
 import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
+import org.eclipse.equinox.internal.p2.operations.ResolutionResult;
 import org.eclipse.equinox.internal.p2.ui.dialogs.RemediationGroup;
 import org.eclipse.equinox.p2.core.ProvisionException;
 import org.eclipse.equinox.p2.operations.ProfileChangeOperation;
@@ -112,29 +114,23 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 				FeatureEntry entry = (FeatureEntry) element;
 				switch (entry.computeChangeOperation()) {
 				case UPDATE:
-					return MarketplaceClientUiPlugin.getInstance()
-							.getImageRegistry()
+					return MarketplaceClientUiResources.getInstance().getImageRegistry()
 							.get(MarketplaceClientUiPlugin.IU_ICON_UPDATE);
 				case INSTALL:
-					return MarketplaceClientUiPlugin.getInstance()
-							.getImageRegistry()
+					return MarketplaceClientUiResources.getInstance().getImageRegistry()
 							.get(MarketplaceClientUiPlugin.IU_ICON_INSTALL);
 				case UNINSTALL:
-					return MarketplaceClientUiPlugin.getInstance()
-							.getImageRegistry()
+					return MarketplaceClientUiResources.getInstance().getImageRegistry()
 							.get(MarketplaceClientUiPlugin.IU_ICON_UNINSTALL);
 				case NONE:
-					return MarketplaceClientUiPlugin.getInstance()
-							.getImageRegistry()
+					return MarketplaceClientUiResources.getInstance().getImageRegistry()
 							.get(MarketplaceClientUiPlugin.IU_ICON_DISABLED);
 				default:
-					return MarketplaceClientUiPlugin.getInstance()
-							.getImageRegistry()
+					return MarketplaceClientUiResources.getInstance().getImageRegistry()
 							.get(MarketplaceClientUiPlugin.IU_ICON);
 				}
 			} else if (element instanceof CatalogItemEntry) {
-				return MarketplaceClientUiPlugin.getInstance()
-						.getImageRegistry()
+				return MarketplaceClientUiResources.getInstance().getImageRegistry()
 						.get(MarketplaceClientUiPlugin.IU_ICON);
 			}
 			return null;
@@ -325,6 +321,7 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 				FeatureEntry featureEntry = (FeatureEntry) event.getElement();
 				featureEntry.setChecked(checked);
 			}
+			getWizard().resetProfileChangeOperation();
 			refreshState();
 		});
 
@@ -473,7 +470,9 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 		ProfileChangeOperation profileChangeOperation = getWizard().getProfileChangeOperation();
 		if (profileChangeOperation != null) {
 			if (profileChangeOperation instanceof RemediationOperation
-					&& ((RemediationOperation) profileChangeOperation).getResolutionResult() == Status.OK_STATUS) {
+					&& (((RemediationOperation) profileChangeOperation).getResolutionResult() == Status.OK_STATUS)
+					&& (getWizard().getAdditionalVerificationPlan() == null
+							|| getWizard().getAdditionalVerificationPlan().getStatus().isOK())) {
 				if (remediationGroup == null) {
 					remediationGroup = new RemediationGroup(this);
 					remediationGroup.createRemediationControl(container);
@@ -506,6 +505,20 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 					if (newText != originalText || (newText != null && !newText.equals(originalText))) {
 						detailStatusText.setText(newText);
 					}
+					((GridData) detailsControl.getLayoutData()).exclude = false;
+				} else if (getWizard().getAdditionalVerificationPlan() != null
+						&& !getWizard().getAdditionalVerificationPlan().getStatus().isOK()) {
+					IStatus additionalStatus = getWizard().getAdditionalVerificationPlan().getStatus();
+					String message = additionalStatus.getMessage();
+					if (additionalStatus.getSeverity() == IStatus.ERROR) {
+						message = Messages.FeatureSelectionWizardPage_provisioningErrorAdvisory;
+					} else if (additionalStatus.getSeverity() == IStatus.WARNING) {
+						message = Messages.FeatureSelectionWizardPage_provisioningWarningAdvisory;
+					}
+					setMessage(message, Util.computeMessageType(additionalStatus));
+					ResolutionResult additionalResolutionResult = new ResolutionResult();
+					additionalResolutionResult.addSummaryStatus(additionalStatus);
+					detailStatusText.setText(additionalResolutionResult.getSummaryReport());
 					((GridData) detailsControl.getLayoutData()).exclude = false;
 				} else {
 					setMessage(null, IMessageProvider.NONE);

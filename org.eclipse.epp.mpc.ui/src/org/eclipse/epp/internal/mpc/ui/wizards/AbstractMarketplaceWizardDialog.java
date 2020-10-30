@@ -12,7 +12,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IPageChangedListener;
@@ -240,9 +240,9 @@ public class AbstractMarketplaceWizardDialog extends WizardDialog {
 
 	protected static IDialogSettings getDialogBoundsSettings(
 			Class<? extends AbstractMarketplaceWizardDialog> dialogClass, boolean relative, boolean create) {
-		String sectionName = dialogClass.getName() + "_dialogBounds." + (relative ? "relative" : "absolute"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		String sectionName = dialogClass.getName() + "_dialogBounds." + (relative ? "relative" : "absolute");
 
-		IDialogSettings settings = MarketplaceClientUiPlugin.getInstance().getDialogSettings();
+		IDialogSettings settings = MarketplaceClientUiResources.getInstance().getDialogSettings();
 		IDialogSettings section = settings.getSection(sectionName);
 		if (section == null && create) {
 			section = settings.addNewSection(sectionName);

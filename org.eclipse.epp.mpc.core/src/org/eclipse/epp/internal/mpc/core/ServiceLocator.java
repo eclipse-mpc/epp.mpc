@@ -29,6 +29,7 @@ import org.eclipse.epp.internal.mpc.core.service.DefaultCatalogService;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.service.MarketplaceStorageService;
 import org.eclipse.epp.internal.mpc.core.service.UserFavoritesService;
+import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientService;
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.mpc.core.service.ICatalogService;
@@ -42,6 +43,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -51,9 +56,10 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * @author David Green
  * @author Carsten Reckord
  */
+@Component(name = "org.eclipse.epp.mpc.core.servicelocator", service = IMarketplaceServiceLocator.class)
 public class ServiceLocator implements IMarketplaceServiceLocator {
 
-	public static final String STORAGE_SERVICE_BINDING_ID = "bind.storageService"; //$NON-NLS-1$
+	private static final String STORAGE_SERVICE_BINDING_ID = "bind.storageService"; //$NON-NLS-1$
 
 	private abstract class DynamicBindingOperation<T, B> implements ServiceReferenceOperation<T> {
 
@@ -113,9 +119,67 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 
 	private final List<ServiceRegistration<?>> dynamicServiceRegistrations = new ArrayList<>();
 
+	private HttpClientService httpClient;
+
 	public ServiceLocator() {
 		defaultMarketplaceUrl = DefaultMarketplaceService.DEFAULT_SERVICE_URL;
 		defaultCatalogUrl = DefaultCatalogService.DEFAULT_CATALOG_SERVICE_URL;
+	}
+
+	public HttpClientService getHttpClient() {
+		return httpClient;
+	}
+
+	public void setHttpClient(HttpClientService httpClient) {
+		HttpClientService oldClient = this.httpClient;
+		this.httpClient = httpClient;
+		if (oldClient != httpClient) {
+			updateHttpClient(httpClient);
+		}
+	}
+
+	@Reference(unbind = "unbindHttpClient", cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC)
+	public void bindHttpClient(HttpClientService httpClient) {
+		setHttpClient(httpClient);
+	}
+
+	public void unbindHttpClient(HttpClientService httpClient) {
+		if (this.httpClient == httpClient) {
+			setHttpClient(null);
+		}
+	}
+
+	private void updateHttpClient(HttpClientService httpClient) {
+		applyServiceReferenceOperation(favoritesServiceTracker, new ServiceReferenceOperation<IUserFavoritesService>() {
+
+			@Override
+			public void apply(ServiceReference<IUserFavoritesService> reference) {
+				ServiceRegistration<IUserFavoritesService> registration = getDynamicServiceInstance(reference);
+				if (registration != null) {
+					IUserFavoritesService service = ServiceUtil.getService(registration);
+					if (service instanceof UserFavoritesService) {
+						if (httpClient == null) {
+							((UserFavoritesService) service).unbindHttpClient(httpClient);
+						} else {
+							((UserFavoritesService) service).bindHttpClient(httpClient);
+						}
+					}
+				}
+			}
+		});
+		applyServiceReferenceOperation(marketplaceServiceTracker, new ServiceReferenceOperation<IMarketplaceService>() {
+
+			@Override
+			public void apply(ServiceReference<IMarketplaceService> reference) {
+				ServiceRegistration<IMarketplaceService> registration = getDynamicServiceInstance(reference);
+				if (registration != null) {
+					IMarketplaceService service = ServiceUtil.getService(registration);
+					if (service instanceof DefaultMarketplaceService) {
+						((DefaultMarketplaceService) service).setHttpClient(httpClient);
+					}
+				}
+			}
+		});
 	}
 
 	/**
@@ -194,6 +258,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		defaultService.setRequestMetaParameters(requestMetaParameters);
 		IUserFavoritesService favoritesService = getFavoritesService(baseUrl);
 		defaultService.setUserFavoritesService(favoritesService);//FIXME this should be a service reference!
+		defaultService.setHttpClient(httpClient);
 		service = new CachingMarketplaceService(defaultService);
 		return service;
 	}
@@ -229,6 +294,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		}
 		UserFavoritesService favoritesService = new UserFavoritesService();
 		favoritesService.bindStorageService(storageService);
+		favoritesService.bindHttpClient(httpClient);
 		registerService(marketplaceBaseUrl, IUserFavoritesService.class, favoritesService);
 		return favoritesService;
 	}
@@ -243,8 +309,8 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		}
 		try {
 			MarketplaceStorageService marketplaceStorageService = new MarketplaceStorageService();
-			registration = registerService(marketplaceBaseUrl,
-					IMarketplaceStorageService.class, marketplaceStorageService, config);
+			registration = registerService(marketplaceBaseUrl, IMarketplaceStorageService.class,
+					marketplaceStorageService, config);
 			BundleContext bundleContext = ServiceUtil.getBundleContext(registration);
 			if (bundleContext != null) {
 				marketplaceStorageService.activate(bundleContext, config);
@@ -282,16 +348,13 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 			this.defaultMarketplaceUrl = marketplaceUrl;
 		} //else the default value from the constructor is used
 
-		marketplaceServiceTracker = new ServiceTracker<>(context,
-				IMarketplaceService.class, null);
+		marketplaceServiceTracker = new ServiceTracker<>(context, IMarketplaceService.class, null);
 		marketplaceServiceTracker.open(true);
 
-		catalogServiceTracker = new ServiceTracker<>(context, ICatalogService.class,
-				null);
+		catalogServiceTracker = new ServiceTracker<>(context, ICatalogService.class, null);
 		catalogServiceTracker.open(true);
 
-		storageServiceTracker = new ServiceTracker<>(context,
-				IMarketplaceStorageService.class,
+		storageServiceTracker = new ServiceTracker<>(context, IMarketplaceStorageService.class,
 				new ServiceTrackerCustomizer<IMarketplaceStorageService, IMarketplaceStorageService>() {
 
 			@Override
@@ -326,8 +389,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		});
 		storageServiceTracker.open(true);
 
-		favoritesServiceTracker = new ServiceTracker<>(context,
-				IUserFavoritesService.class,
+		favoritesServiceTracker = new ServiceTracker<>(context, IUserFavoritesService.class,
 				new ServiceTrackerCustomizer<IUserFavoritesService, IUserFavoritesService>() {
 			@Override
 			public IUserFavoritesService addingService(ServiceReference<IUserFavoritesService> reference) {
@@ -566,22 +628,25 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 
 	public static Map<String, String> computeDefaultRequestMetaParameters() {
 		Map<String, String> requestMetaParameters = new LinkedHashMap<>();
-		BundleContext bundleContext = FrameworkUtil.getBundle(MarketplaceClientCore.class).getBundleContext();
 
 		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_CLIENT,
 				MarketplaceClientCore.BUNDLE_ID);
-		Bundle clientBundle = Platform.getBundle(MarketplaceClientCore.BUNDLE_ID);
-		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_CLIENT_VERSION,
-				clientBundle.getVersion().toString());
 
 		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_OS,
 				Platform.getOS());
-		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_WS,
-				Platform.getWS());
-		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_NL,
-				Platform.getNL());
-		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_JAVA_VERSION,
-				bundleContext.getProperty("java.version")); //$NON-NLS-1$
+
+		// also send the platform version to distinguish between 3.x and 4.x platforms using the same runtime
+		Bundle platformBundle = Platform.getBundle("org.eclipse.platform"); //$NON-NLS-1$
+		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_PLATFORM_VERSION,
+				platformBundle == null ? null : shortenVersionString(platformBundle.getVersion().toString()));
+
+		return requestMetaParameters;
+	}
+
+	public static Map<String, String> computeProductInfo() {
+		Map<String, String> productInfo = new LinkedHashMap<>();
+
+		BundleContext bundleContext = FrameworkUtil.getBundle(MarketplaceClientCore.class).getBundleContext();
 
 		IProduct product = Platform.getProduct();
 		String productId;
@@ -591,8 +656,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 				productId = product.getId();
 			}
 		}
-		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_PRODUCT,
-				productId);
+		addDefaultRequestMetaParameter(productInfo, DefaultMarketplaceService.META_PARAM_PRODUCT, productId);
 		String productVersion = null;
 		if (productId != null) {
 			productVersion = bundleContext.getProperty("eclipse.buildId"); //$NON-NLS-1$
@@ -603,19 +667,10 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 				}
 			}
 		}
-		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_PRODUCT_VERSION,
+		addDefaultRequestMetaParameter(productInfo, DefaultMarketplaceService.META_PARAM_PRODUCT_VERSION,
 				productVersion);
 
-		Bundle runtimeBundle = Platform.getBundle("org.eclipse.core.runtime"); //$NON-NLS-1$
-		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_RUNTIME_VERSION,
-				runtimeBundle == null ? null : runtimeBundle.getVersion().toString());
-
-		// also send the platform version to distinguish between 3.x and 4.x platforms using the same runtime
-		Bundle platformBundle = Platform.getBundle("org.eclipse.platform"); //$NON-NLS-1$
-		addDefaultRequestMetaParameter(requestMetaParameters, DefaultMarketplaceService.META_PARAM_PLATFORM_VERSION,
-				platformBundle == null ? null : platformBundle.getVersion().toString());
-
-		return requestMetaParameters;
+		return productInfo;
 	}
 
 	private static void addDefaultRequestMetaParameter(Map<String, String> requestMetaParameters, String key,
@@ -632,5 +687,16 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		if (value != null) {
 			requestMetaParameters.put(key, value);
 		}
+	}
+
+	private static String shortenVersionString(String version) {
+		int index = version.indexOf('.');
+		if (index > -1) {
+			index = version.indexOf('.', index + 1);
+			if (index > -1) {
+				return version.substring(0, index);
+			}
+		}
+		return version;
 	}
 }

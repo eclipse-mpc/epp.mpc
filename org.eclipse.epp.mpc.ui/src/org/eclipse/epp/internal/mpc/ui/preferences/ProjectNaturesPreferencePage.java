@@ -12,7 +12,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.preferences;
 
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.Messages;
 import org.eclipse.epp.internal.mpc.ui.discovery.MissingNatureDetector;
 import org.eclipse.jface.preference.BooleanFieldEditor;
@@ -33,7 +33,7 @@ public class ProjectNaturesPreferencePage extends FieldEditorPreferencePage impl
 
 	@Override
 	public void init(IWorkbench workbench) {
-		setPreferenceStore(MarketplaceClientUiPlugin.getInstance().getPreferenceStore());
+		setPreferenceStore(MarketplaceClientUiResources.getInstance().getPreferenceStore());
 	}
 
 	@Override

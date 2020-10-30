@@ -29,6 +29,7 @@ import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 
 final class DiscoverNatureSupportJob extends Job {
@@ -43,7 +44,7 @@ final class DiscoverNatureSupportJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		BundleContext bundleContext = MarketplaceClientUiPlugin.getBundleContext();
+		BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 		ServiceReference<IMarketplaceServiceLocator> locatorReference = bundleContext
 				.getServiceReference(IMarketplaceServiceLocator.class);
 		IMarketplaceServiceLocator locator = bundleContext.getService(locatorReference);

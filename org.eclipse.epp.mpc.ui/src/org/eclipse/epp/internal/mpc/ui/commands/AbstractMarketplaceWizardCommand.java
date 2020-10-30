@@ -29,7 +29,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.ResourceProvider;
 import org.eclipse.epp.internal.mpc.ui.wizards.AbstractMarketplaceWizardDialog;
@@ -178,7 +178,7 @@ public abstract class AbstractMarketplaceWizardCommand extends AbstractHandler i
 
 			List<? extends ICatalog> catalogs = result.get();
 			for (ICatalog catalog : catalogs) {
-				ResourceProvider resourceProvider = MarketplaceClientUiPlugin.getInstance().getResourceProvider();
+				ResourceProvider resourceProvider = MarketplaceClientUiResources.getInstance().getResourceProvider();
 				String catalogName = catalog.getName();
 				String requestSource = NLS.bind(Messages.MarketplaceWizardCommand_requestCatalog, catalogName,
 						catalog.getId());

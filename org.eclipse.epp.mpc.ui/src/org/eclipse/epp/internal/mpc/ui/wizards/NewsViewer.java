@@ -20,7 +20,7 @@ import java.net.URL;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.epp.internal.mpc.core.model.News;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.mpc.core.model.INews;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
@@ -171,7 +171,7 @@ public class NewsViewer {
 			showUrl(url);
 
 			String key = computeNewsPreferenceKey();
-			MarketplaceClientUiPlugin.getInstance().getPreferenceStore().putValue(key, computeNewsStamp(news));
+			MarketplaceClientUiResources.getInstance().getPreferenceStore().putValue(key, computeNewsStamp(news));
 		}
 	}
 
@@ -217,7 +217,7 @@ public class NewsViewer {
 			return false;
 		}
 		String key = computeNewsPreferenceKey();
-		String previous = MarketplaceClientUiPlugin.getInstance().getPreferenceStore().getString(key);
+		String previous = MarketplaceClientUiResources.getInstance().getPreferenceStore().getString(key);
 		if (previous != null && previous.length() > 0) {
 			String current = computeNewsStamp(news);
 			return !previous.equals(current);
