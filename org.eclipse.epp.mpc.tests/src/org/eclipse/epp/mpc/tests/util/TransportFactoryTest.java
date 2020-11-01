@@ -52,7 +52,6 @@ import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.epp.internal.mpc.core.MarketplaceClientCorePlugin;
 import org.eclipse.epp.internal.mpc.core.ServiceHelperImpl;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.ChainedCredentialsProvider;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientCustomizer;
@@ -125,7 +124,7 @@ public class TransportFactoryTest {
 
 	@Test
 	public void testRegisteredFactories() throws Exception {
-		BundleContext context = MarketplaceClientCorePlugin.getBundle().getBundleContext();
+		BundleContext context = FrameworkUtil.getBundle(TransportFactoryTest.class).getBundleContext();
 		Collection<ServiceReference<ITransportFactory>> serviceReferences = context.getServiceReferences(
 				ITransportFactory.class, null);
 		assertFalse(serviceReferences.isEmpty());

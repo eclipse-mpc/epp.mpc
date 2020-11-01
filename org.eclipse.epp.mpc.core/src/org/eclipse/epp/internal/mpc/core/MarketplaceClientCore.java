@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
+import org.osgi.framework.FrameworkUtil;
 
 /**
  * @author David Green
@@ -45,7 +46,7 @@ public class MarketplaceClientCore {
 	private static final String PIPE_BROKEN_MESSAGE = "Pipe broken"; //$NON-NLS-1$
 
 	public static ILog getLog() {
-		return Platform.getLog(MarketplaceClientCorePlugin.getBundle());
+		return Platform.getLog(FrameworkUtil.getBundle(MarketplaceClientCore.class));
 	}
 
 	public static void error(String message, Throwable exception) {

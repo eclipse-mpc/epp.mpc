@@ -12,8 +12,13 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.service;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assume.*;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -40,6 +45,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCorePlugin;
+import org.eclipse.epp.internal.mpc.core.ServiceHelperImpl;
 import org.eclipse.epp.internal.mpc.core.ServiceLocator;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
 import org.eclipse.epp.mpc.core.model.IIu;
@@ -577,7 +583,7 @@ public class SolutionCompatibilityFilterTest {
 		protected void starting(final Description description) {
 			final IMarketplaceUnmarshaller marketplaceUnmarshaller = org.eclipse.epp.mpc.core.service.ServiceHelper
 					.getMarketplaceUnmarshaller();
-			unmarshallerRegistration = MarketplaceClientCorePlugin.getDefault().getServiceHelper()
+			unmarshallerRegistration = ServiceHelperImpl.getImplInstance()
 					.registerMarketplaceUnmarshaller(new IMarketplaceUnmarshaller() {
 
 						public <T> T unmarshal(InputStream in, Class<T> type, IProgressMonitor monitor)

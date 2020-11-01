@@ -17,12 +17,9 @@ import org.eclipse.epp.internal.mpc.core.util.DebugTraceUtil;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.debug.DebugOptionsListener;
 import org.eclipse.osgi.service.debug.DebugTrace;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Component;
 
-public class MarketplaceClientCorePlugin implements BundleActivator {
+public class MarketplaceClientCorePlugin {
 
 	public static final String DEBUG_OPTION = "/debug"; //$NON-NLS-1$
 
@@ -37,38 +34,6 @@ public class MarketplaceClientCorePlugin implements BundleActivator {
 	public static boolean DEBUG_FAKE_CLIENT = false;
 
 	private static DebugTrace debugTrace;
-
-	private static MarketplaceClientCorePlugin instance;
-
-	private Bundle bundle;
-
-	@Override
-	public void start(BundleContext context) throws Exception {
-		bundle = context.getBundle();
-		instance = this;
-	}
-
-	@Override
-	public void stop(BundleContext context) throws Exception {
-		debugTrace = null;
-		instance = null;
-	}
-
-	/**
-	 * @deprecated Inject ServiceHelper as a service instead
-	 */
-	@Deprecated
-	public ServiceHelperImpl getServiceHelper() {
-		return ServiceHelperImpl.getImplInstance();
-	}
-
-	public static MarketplaceClientCorePlugin getDefault() {
-		return instance;
-	}
-
-	public static Bundle getBundle() {
-		return instance == null ? null : instance.bundle;
-	}
 
 	public static void trace(String option, String message) {
 		final DebugTrace trace = debugTrace;

@@ -24,7 +24,6 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.epp.internal.mpc.core.MarketplaceClientCorePlugin;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientTransport;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientTransportFactory;
 import org.eclipse.epp.internal.mpc.core.util.FallbackTransportFactory;
@@ -34,6 +33,7 @@ import org.eclipse.epp.mpc.core.service.ITransportFactory;
 import org.eclipse.epp.mpc.core.service.ServiceHelper;
 import org.eclipse.epp.mpc.core.service.ServiceUnavailableException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 
 public class MappedTransportFactory implements ITransportFactory {
@@ -134,7 +134,7 @@ public class MappedTransportFactory implements ITransportFactory {
 			this.delegate = delegate;
 			Dictionary<String, Object> maxServiceRanking = new Hashtable<>(Collections.singletonMap(
 					Constants.SERVICE_RANKING, Integer.MAX_VALUE));
-			registration = MarketplaceClientCorePlugin.getBundle().getBundleContext().registerService(
+			registration = FrameworkUtil.getBundle(MappedTransportFactory.class).getBundleContext().registerService(
 					ITransportFactory.class, this,
 					maxServiceRanking);
 			transportFactory = ServiceHelper.getTransportFactory();
