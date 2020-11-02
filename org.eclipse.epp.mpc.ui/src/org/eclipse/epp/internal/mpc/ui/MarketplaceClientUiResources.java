@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2018, 2020 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
@@ -40,13 +39,11 @@ public class MarketplaceClientUiResources {
 
 	private ResourceProvider resourceProvider;
 
-	private Bundle bundle;
-
 	private AbstractUIPlugin delegate;
 
 	@Activate
 	protected void activate(ComponentContext context) throws Exception {
-		bundle = context.getBundleContext().getBundle();
+		context.getBundleContext().getBundle();
 		delegate = new AbstractUIPlugin() {
 			@Override
 			protected void initializeImageRegistry(ImageRegistry reg) {
@@ -78,11 +75,6 @@ public class MarketplaceClientUiResources {
 			delegate.stop(context.getBundleContext());
 		}
 		delegate = null;
-		bundle = null;
-	}
-
-	protected Bundle getBundle() {
-		return bundle;
 	}
 
 	public IPreferenceStore getPreferenceStore() {
@@ -104,22 +96,22 @@ public class MarketplaceClientUiResources {
 	protected void initializeImageRegistry(ImageRegistry imageRegistry) {
 
 		imageRegistry.put(MarketplaceClientUiPlugin.NO_ICON_PROVIDED,
-				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/noiconprovided.png") //$NON-NLS-1$
+				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/noiconprovided.png") //$NON-NLS-1$
 				.get());
 		imageRegistry.put(MarketplaceClientUiPlugin.NO_ICON_PROVIDED_CATALOG,
-				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/noiconprovided32.png").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/noiconprovided32.png").get()); //$NON-NLS-1$
 		imageRegistry.put(MarketplaceClientUiPlugin.DEFAULT_MARKETPLACE_ICON,
-				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/marketplace_banner.png").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/marketplace_banner.png").get()); //$NON-NLS-1$
 		imageRegistry.put(MarketplaceClientUiPlugin.IU_ICON,
-				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/iu_obj.png").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/iu_obj.png").get()); //$NON-NLS-1$
 		imageRegistry.put(MarketplaceClientUiPlugin.IU_ICON_UPDATE,
-				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/iu_update_obj.png").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/iu_update_obj.png").get()); //$NON-NLS-1$
 		imageRegistry.put(MarketplaceClientUiPlugin.IU_ICON_INSTALL,
-				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/iu_install_obj.png").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/iu_install_obj.png").get()); //$NON-NLS-1$
 		imageRegistry.put(MarketplaceClientUiPlugin.IU_ICON_UNINSTALL,
-				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/iu_uninstall_obj.png").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/iu_uninstall_obj.png").get()); //$NON-NLS-1$
 		imageRegistry.put(MarketplaceClientUiPlugin.IU_ICON_DISABLED,
-				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/iu_disabled_obj.png").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/iu_disabled_obj.png").get()); //$NON-NLS-1$
 		{
 			ImageDescriptor errorOverlay = PlatformUI.getWorkbench()
 					.getSharedImages()
@@ -131,23 +123,23 @@ public class MarketplaceClientUiResources {
 		}
 
 		imageRegistry.put(MarketplaceClientUiPlugin.NEWS_ICON_UPDATE,
-				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/news_update.png").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/news_update.png").get()); //$NON-NLS-1$
 		imageRegistry.put(MarketplaceClientUiPlugin.ITEM_ICON_STAR,
-				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/star.png").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/star.png").get()); //$NON-NLS-1$
 		imageRegistry.put(MarketplaceClientUiPlugin.ITEM_ICON_STAR_SELECTED,
-				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/star-selected.png").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/star-selected.png").get()); //$NON-NLS-1$
 		imageRegistry.put(MarketplaceClientUiPlugin.ITEM_ICON_SHARE,
-				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/share.png").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/share.png").get()); //$NON-NLS-1$
 		imageRegistry.put(MarketplaceClientUiPlugin.ACTION_ICON_FAVORITES,
-				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/action-item-favorites.png").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/action-item-favorites.png").get()); //$NON-NLS-1$
 		imageRegistry.put(MarketplaceClientUiPlugin.ACTION_ICON_LOGIN,
-				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/action-item-login.png").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/action-item-login.png").get()); //$NON-NLS-1$
 		imageRegistry.put(MarketplaceClientUiPlugin.ACTION_ICON_WARNING,
-				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/action-item-warning.png").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/action-item-warning.png").get()); //$NON-NLS-1$
 		imageRegistry.put(MarketplaceClientUiPlugin.ACTION_ICON_UPDATE,
-				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/action-item-update.png").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/action-item-update.png").get()); //$NON-NLS-1$
 		imageRegistry.put(MarketplaceClientUiPlugin.FAVORITES_LIST_ICON,
-				imageDescriptorFromBundle(getBundle().getSymbolicName(), "icons/favorites-list.png").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/favorites-list.png").get()); //$NON-NLS-1$
 	}
 
 	public static synchronized MarketplaceClientUiResources getInstance() {
