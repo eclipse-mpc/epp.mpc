@@ -4,5 +4,5 @@
    <service>
       <provide interface="org.eclipse.osgi.service.debug.DebugOptionsListener"/>
    </service>
-   <implementation class="org.eclipse.epp.internal.mpc.core.MarketplaceClientCorePlugin$DebugOptionsInitializer"/>
+   <implementation class="org.eclipse.epp.internal.mpc.core.ServiceLocator$DebugOptionsInitializer"/>
 </scr:component>

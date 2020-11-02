@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2020 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,8 @@ import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
 import org.eclipse.epp.mpc.core.service.IMarketplaceStorageService;
 import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.epp.mpc.core.service.ServiceHelper;
+import org.eclipse.osgi.service.debug.DebugOptions;
+import org.eclipse.osgi.service.debug.DebugOptionsListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -59,7 +61,34 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 @Component(name = "org.eclipse.epp.mpc.core.servicelocator", service = IMarketplaceServiceLocator.class)
 public class ServiceLocator implements IMarketplaceServiceLocator {
 
+	private static final String DEBUG_CLIENT_REMOVE_OPTION = "xxx"; //$NON-NLS-1$
+
 	private static final String STORAGE_SERVICE_BINDING_ID = "bind.storageService"; //$NON-NLS-1$
+
+	private static final String DEBUG_CLIENT_OPTIONS_PATH = MarketplaceClientCore.BUNDLE_ID + "/client/"; //$NON-NLS-1$
+
+	private static boolean DEBUG_FAKE_CLIENT = false;
+
+	private static final String DEBUG_OPTION = "/debug"; //$NON-NLS-1$
+
+	private static final String DEBUG_FAKE_CLIENT_OPTION = "/client/fakeVersion"; //$NON-NLS-1$
+
+	@Component(name = "org.eclipse.epp.mpc.core.debug.options", property = {
+			"listener.symbolic.name=org.eclipse.epp.mpc.core" })
+	public static class DebugOptionsInitializer implements DebugOptionsListener {
+
+		@Override
+		public void optionsChanged(DebugOptions options) {
+			boolean debug = options.getBooleanOption(MarketplaceClientCore.BUNDLE_ID + DEBUG_OPTION, false);
+			boolean fakeClient = false;
+			if (debug) {
+				fakeClient = options.getBooleanOption(MarketplaceClientCore.BUNDLE_ID + DEBUG_FAKE_CLIENT_OPTION,
+						false);
+			}
+			DEBUG_FAKE_CLIENT = fakeClient;
+		}
+
+	}
 
 	private abstract class DynamicBindingOperation<T, B> implements ServiceReferenceOperation<T> {
 
@@ -675,9 +704,9 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 
 	private static void addDefaultRequestMetaParameter(Map<String, String> requestMetaParameters, String key,
 			String value) {
-		if (MarketplaceClientCorePlugin.DEBUG_FAKE_CLIENT) {
-			String debugOption = Platform.getDebugOption(MarketplaceClientCorePlugin.DEBUG_CLIENT_OPTIONS_PATH + key);
-			if (MarketplaceClientCorePlugin.DEBUG_CLIENT_REMOVE_OPTION.equals(debugOption)) {
+		if (DEBUG_FAKE_CLIENT) {
+			String debugOption = Platform.getDebugOption(DEBUG_CLIENT_OPTIONS_PATH + key);
+			if (DEBUG_CLIENT_REMOVE_OPTION.equals(debugOption)) {
 				requestMetaParameters.remove(key);
 				return;
 			} else if (debugOption != null && !"".equals(debugOption)) { //$NON-NLS-1$
