@@ -14,7 +14,7 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import java.util.List;
 
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceInfo;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
@@ -79,7 +79,7 @@ public class InstallUpdatesNotificationItem extends AbstractUserActionItem {
 
 	@Override
 	protected Icon getIcon() {
-		String path = REGISTRY_SCHEME + MarketplaceClientUiPlugin.ACTION_ICON_UPDATE;
+		String path = REGISTRY_SCHEME + MarketplaceClientUiResources.ACTION_ICON_UPDATE;
 		return createIcon(path);
 	}
 

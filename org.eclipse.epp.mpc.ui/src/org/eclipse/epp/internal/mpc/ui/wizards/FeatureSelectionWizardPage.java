@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.operations.FeatureDescriptor;
 import org.eclipse.epp.internal.mpc.ui.operations.ResolveFeatureNamesOperation;
@@ -115,23 +114,23 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 				switch (entry.computeChangeOperation()) {
 				case UPDATE:
 					return MarketplaceClientUiResources.getInstance().getImageRegistry()
-							.get(MarketplaceClientUiPlugin.IU_ICON_UPDATE);
+							.get(MarketplaceClientUiResources.IU_ICON_UPDATE);
 				case INSTALL:
 					return MarketplaceClientUiResources.getInstance().getImageRegistry()
-							.get(MarketplaceClientUiPlugin.IU_ICON_INSTALL);
+							.get(MarketplaceClientUiResources.IU_ICON_INSTALL);
 				case UNINSTALL:
 					return MarketplaceClientUiResources.getInstance().getImageRegistry()
-							.get(MarketplaceClientUiPlugin.IU_ICON_UNINSTALL);
+							.get(MarketplaceClientUiResources.IU_ICON_UNINSTALL);
 				case NONE:
 					return MarketplaceClientUiResources.getInstance().getImageRegistry()
-							.get(MarketplaceClientUiPlugin.IU_ICON_DISABLED);
+							.get(MarketplaceClientUiResources.IU_ICON_DISABLED);
 				default:
 					return MarketplaceClientUiResources.getInstance().getImageRegistry()
-							.get(MarketplaceClientUiPlugin.IU_ICON);
+							.get(MarketplaceClientUiResources.IU_ICON);
 				}
 			} else if (element instanceof CatalogItemEntry) {
 				return MarketplaceClientUiResources.getInstance().getImageRegistry()
-						.get(MarketplaceClientUiPlugin.IU_ICON);
+						.get(MarketplaceClientUiResources.IU_ICON);
 			}
 			return null;
 		}
@@ -472,7 +471,7 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 			if (profileChangeOperation instanceof RemediationOperation
 					&& (((RemediationOperation) profileChangeOperation).getResolutionResult() == Status.OK_STATUS)
 					&& (getWizard().getAdditionalVerificationPlan() == null
-							|| getWizard().getAdditionalVerificationPlan().getStatus().isOK())) {
+					|| getWizard().getAdditionalVerificationPlan().getStatus().isOK())) {
 				if (remediationGroup == null) {
 					remediationGroup = new RemediationGroup(this);
 					remediationGroup.createRemediationControl(container);

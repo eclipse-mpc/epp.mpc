@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2019 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2020 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -29,65 +29,6 @@ import org.osgi.service.component.annotations.Component;
  */
 public class MarketplaceClientUiPlugin implements BundleActivator {
 
-	/**
-	 * image registry key
-	 */
-	public static final String IU_ICON_UPDATE = "IU_ICON_UPDATE"; //$NON-NLS-1$
-
-	/**
-	 * image registry key
-	 */
-	public static final String IU_ICON_INSTALL = "IU_ICON_INSTALL"; //$NON-NLS-1$
-
-	/**
-	 * image registry key
-	 */
-	public static final String IU_ICON_UNINSTALL = "IU_ICON_UNINSTALL"; //$NON-NLS-1$
-
-	/**
-	 * image registry key
-	 */
-	public static final String IU_ICON_DISABLED = "IU_ICON_DISABLED"; //$NON-NLS-1$
-
-	/**
-	 * image registry key
-	 */
-	public static final String IU_ICON = "IU_ICON"; //$NON-NLS-1$
-
-	/**
-	 * image registry key
-	 */
-	public static final String IU_ICON_ERROR = "IU_ICON_ERROR"; //$NON-NLS-1$
-
-	/**
-	 * image registry key
-	 */
-	public static final String NEWS_ICON_UPDATE = "NEWS_ICON_UPDATE"; //$NON-NLS-1$
-
-	/**
-	 * image registry key
-	 */
-	public static final String NO_ICON_PROVIDED = "NO_ICON_PROVIDED"; //$NON-NLS-1$
-
-	public static final String NO_ICON_PROVIDED_CATALOG = "NO_ICON_PROVIDED_CATALOG"; //$NON-NLS-1$
-
-	public static final String DEFAULT_MARKETPLACE_ICON = "DEFAULT_MARKETPLACE_ICON"; //$NON-NLS-1$
-
-	public static final String ACTION_ICON_FAVORITES = "ACTION_ICON_FAVORITES"; //$NON-NLS-1$
-
-	public static final String ACTION_ICON_LOGIN = "ACTION_ICON_LOGIN"; //$NON-NLS-1$
-
-	public static final String ACTION_ICON_WARNING = "ACTION_ICON_WARNING"; //$NON-NLS-1$
-
-	public static final String ACTION_ICON_UPDATE = "ACTION_ICON_UPDATE"; //$NON-NLS-1$
-
-	public static final String FAVORITES_LIST_ICON = "FAVORITES_LIST_ICON"; //$NON-NLS-1$
-
-	public static final String ITEM_ICON_STAR = "ITEM_ICON_STAR"; //$NON-NLS-1$
-
-	public static final String ITEM_ICON_STAR_SELECTED = "ITEM_ICON_STAR_SELECTED"; //$NON-NLS-1$
-
-	public static final String ITEM_ICON_SHARE = "ITEM_ICON_SHARE"; //$NON-NLS-1$
 
 	public static final String DEBUG_OPTION = "/debug"; //$NON-NLS-1$
 
@@ -108,13 +49,6 @@ public class MarketplaceClientUiPlugin implements BundleActivator {
 	public void stop(BundleContext context) throws Exception {
 		Job.getJobManager().cancel(context.getBundle());
 		debugTrace = null;
-	}
-
-	public static void trace(String option, String message) {
-		final DebugTrace trace = debugTrace;
-		if (DEBUG && trace != null) {
-			trace.trace(option, message);
-		}
 	}
 
 	public static void trace(String option, String message, Object... parameters) {

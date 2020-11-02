@@ -13,7 +13,6 @@
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.GradientToolTip;
@@ -89,7 +88,7 @@ public class CatalogToolTip extends GradientToolTip {
 		image = label.getImage();
 		if (image == null) {
 			ImageRegistry registry = MarketplaceClientUiResources.getInstance().getImageRegistry();
-			image = registry.get(MarketplaceClientUiPlugin.NO_ICON_PROVIDED_CATALOG);
+			image = registry.get(MarketplaceClientUiResources.NO_ICON_PROVIDED_CATALOG);
 		}
 		Label iconLabel = new Label(parent, SWT.NULL);
 		iconLabel.setImage(image);

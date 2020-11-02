@@ -23,7 +23,6 @@ import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalogSource;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
@@ -326,8 +325,8 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 		Object lastFavorited = favoriteButton.getData(FAVORITED_BUTTON_STATE_DATA);
 		if (lastFavorited == null || (favorited != Boolean.TRUE.equals(lastFavorited))) {
 			favoriteButton.setData(FAVORITED_BUTTON_STATE_DATA, lastFavorited);
-			String imageId = favorited ? MarketplaceClientUiPlugin.ITEM_ICON_STAR_SELECTED
-					: MarketplaceClientUiPlugin.ITEM_ICON_STAR;
+			String imageId = favorited ? MarketplaceClientUiResources.ITEM_ICON_STAR_SELECTED
+					: MarketplaceClientUiResources.ITEM_ICON_STAR;
 			favoriteButton.setImage(MarketplaceClientUiResources.getInstance().getImageRegistry().get(imageId));
 
 			IUserFavoritesService userFavoritesService = getUserFavoritesService();
