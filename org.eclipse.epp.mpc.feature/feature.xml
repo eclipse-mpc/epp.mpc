@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.epp.mpc"
       label="%featureName"
-      version="1.8.5.qualifier"
+      version="1.9.0.qualifier"
       provider-name="%providerName"
       plugin="org.eclipse.epp.mpc.ui"
       license-feature="org.eclipse.license"
