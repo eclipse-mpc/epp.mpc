@@ -103,7 +103,6 @@ public class MarketplaceClientUiResources {
 
 	@Activate
 	protected void activate(ComponentContext context) throws Exception {
-		context.getBundleContext().getBundle();
 		delegate = new AbstractUIPlugin() {
 			@Override
 			protected void initializeImageRegistry(ImageRegistry reg) {
