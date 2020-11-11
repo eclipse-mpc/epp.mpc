@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientDebug;
 import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler;
 import org.eclipse.jface.util.Util;
 import org.eclipse.swt.SWT;
@@ -323,35 +323,35 @@ public class MarketplaceDropAdapter implements IStartup {
 		}
 
 		private void traceDropOperation(int op) {
-			if (MarketplaceClientUiPlugin.DEBUG) {
-				MarketplaceClientUiPlugin.trace(MarketplaceClientUiPlugin.DROP_ADAPTER_DEBUG_OPTION,
+			if (MarketplaceClientDebug.DEBUG) {
+				MarketplaceClientDebug.trace(MarketplaceClientDebug.DROP_ADAPTER_DEBUG_OPTION,
 						"Updating drop event: Setting drop operation to {0}", op); //$NON-NLS-1$
 			}
 		}
 
 		private void traceInvalidEventData(DropTargetEvent event) {
-			if (MarketplaceClientUiPlugin.DEBUG) {
-				MarketplaceClientUiPlugin.trace(MarketplaceClientUiPlugin.DROP_ADAPTER_DEBUG_OPTION,
+			if (MarketplaceClientDebug.DEBUG) {
+				MarketplaceClientDebug.trace(MarketplaceClientDebug.DROP_ADAPTER_DEBUG_OPTION,
 						"Drop event: Data is not a solution url: {0}", event.data, new Throwable()); //$NON-NLS-1$
 			}
 		}
 
 		private void traceMissingEventData(DropTargetEvent event) {
-			if (MarketplaceClientUiPlugin.DEBUG) {
-				MarketplaceClientUiPlugin.trace(MarketplaceClientUiPlugin.DROP_ADAPTER_DEBUG_OPTION,
+			if (MarketplaceClientDebug.DEBUG) {
+				MarketplaceClientDebug.trace(MarketplaceClientDebug.DROP_ADAPTER_DEBUG_OPTION,
 						"Missing drop event data {0}", event.data, new Throwable()); //$NON-NLS-1$
 			}
 		}
 
 		private void traceUnsupportedDataType(DropTargetEvent event) {
-			if (MarketplaceClientUiPlugin.DEBUG) {
-				MarketplaceClientUiPlugin.trace(MarketplaceClientUiPlugin.DROP_ADAPTER_DEBUG_OPTION,
+			if (MarketplaceClientDebug.DEBUG) {
+				MarketplaceClientDebug.trace(MarketplaceClientDebug.DROP_ADAPTER_DEBUG_OPTION,
 						"Unsupported drop data type {0}", traceTransferData(event.currentDataType), new Throwable()); //$NON-NLS-1$
 			}
 		}
 
 		private Object traceTransferData(TransferData data) {
-			if (MarketplaceClientUiPlugin.DEBUG) {
+			if (MarketplaceClientDebug.DEBUG) {
 				return new TransferDataTraceFormatter(data);
 			}
 			return null;

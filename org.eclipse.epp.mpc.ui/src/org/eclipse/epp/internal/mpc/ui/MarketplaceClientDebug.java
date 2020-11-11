@@ -13,22 +13,18 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui;
 
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.epp.internal.mpc.core.util.DebugTraceUtil;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.debug.DebugOptionsListener;
 import org.eclipse.osgi.service.debug.DebugTrace;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * bundle activator. Prefer {@link MarketplaceClientUi} where possible.
+ * Used to centralise the debug message processing.
  *
  * @author David Green
  */
-public class MarketplaceClientUiPlugin implements BundleActivator {
-
+public class MarketplaceClientDebug {
 
 	public static final String DEBUG_OPTION = "/debug"; //$NON-NLS-1$
 
@@ -37,19 +33,6 @@ public class MarketplaceClientUiPlugin implements BundleActivator {
 	public static boolean DEBUG = false;
 
 	private static DebugTrace debugTrace;
-
-	public MarketplaceClientUiPlugin() {
-	}
-
-	@Override
-	public void start(BundleContext context) throws Exception {
-	}
-
-	@Override
-	public void stop(BundleContext context) throws Exception {
-		Job.getJobManager().cancel(context.getBundle());
-		debugTrace = null;
-	}
 
 	public static void trace(String option, String message, Object... parameters) {
 		final DebugTrace trace = debugTrace;
@@ -70,7 +53,7 @@ public class MarketplaceClientUiPlugin implements BundleActivator {
 				debugTrace = options.newDebugTrace(MarketplaceClientUi.BUNDLE_ID);
 			}
 			DEBUG = debug;
-			MarketplaceClientUiPlugin.debugTrace = debugTrace;
+			MarketplaceClientDebug.debugTrace = debugTrace;
 		}
 
 	}

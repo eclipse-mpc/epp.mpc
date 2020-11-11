@@ -39,6 +39,6 @@ Export-Package: org.eclipse.epp.internal.mpc.ui;x-internal:=true,
  org.eclipse.epp.internal.mpc.ui.wizards;x-internal:=true,
  org.eclipse.epp.mpc.ui
 Bundle-ActivationPolicy: lazy
-Bundle-Activator: org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin
+Bundle-Activator: org.eclipse.epp.internal.mpc.ui.MarketplaceClientDebug
 Service-Component: OSGI-INF/services/*.xml
 Import-Package: org.w3c.css.sac;version="[1.3.0,2.0.0)"

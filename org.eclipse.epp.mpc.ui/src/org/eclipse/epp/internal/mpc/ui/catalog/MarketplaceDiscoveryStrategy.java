@@ -165,12 +165,6 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 					setUser(false);
 				}
 				@Override
-				public boolean belongsTo(Object family) {
-					BundleContext bundleContext = MarketplaceClientUi.getBundleContext();
-					return bundleContext != null && (family == bundleContext || family == bundleContext.getBundle());
-				}
-
-				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
 						fMarketplaceInfo.save();
