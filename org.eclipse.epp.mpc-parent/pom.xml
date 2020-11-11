@@ -6,7 +6,7 @@
    <modelVersion>4.0.0</modelVersion>
 
    <prerequisites>
-      <maven>3.3.1</maven>
+      <maven>3.6.3</maven>
    </prerequisites>
 
    <groupId>org.eclipse.epp.mpc</groupId>
@@ -22,9 +22,8 @@
       <enforced.java.version>[1.8.0,)</enforced.java.version>
       <java-jdk>SYSTEM</java-jdk>
 
-      <tycho-version>1.5.1</tycho-version>
-      <tycho-extras-version>${tycho-version}</tycho-extras-version>
-
+      <tycho-version>2.1.0</tycho-version>
+      
       <qualifier-format>'v'yyyyMMdd-HHmm</qualifier-format>
 
       <skip-source-check>true</skip-source-check>
@@ -261,7 +260,7 @@
                   <dependency>
                      <groupId>org.eclipse.tycho.extras</groupId>
                      <artifactId>tycho-sourceref-jgit</artifactId>
-                     <version>${tycho-extras-version}</version>
+                     <version>${tycho-version}</version>
                   </dependency>
                   <!-- Required by timestampProvider configuration. -->
                   <dependency>

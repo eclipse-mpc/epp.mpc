@@ -67,7 +67,6 @@
               
               <!-- run all tests with a space in the application path (this is the osgi.install.area, but the configuration area should follow suit -->
               <work>${project.build.directory}/work/test rcp</work>
-              <useJDK>BREE</useJDK>
             </configuration>
           </plugin>
        </plugins>
