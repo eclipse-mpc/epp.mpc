@@ -108,8 +108,6 @@ public class SolutionCompatibilityFilterTest {
 
 	private static final String JAVA_PRODUCT_ID = "epp.package.java";
 
-	private static final String SDK_PRODUCT_ID = "org.eclipse.sdk.ide";
-
 	public static enum EclipseRelease {
 		UNKNOWN(null, null, null), //
 		KEPLER(JAVA_PRODUCT_ID, "2.0.0.20130613-0530", "4.3.0.v20130605-2000"), //

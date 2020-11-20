@@ -888,7 +888,6 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		disableTabSelection = true;
 		updateTitle();
 		CatalogDescriptor descriptor = configuration.getCatalogDescriptor();
-		ICatalogBranding oldBranding = currentBranding;
 		ICatalogBranding branding = descriptor == null ? null : descriptor.getCatalogBranding();
 		if (branding == null) {
 			branding = getDefaultBranding();

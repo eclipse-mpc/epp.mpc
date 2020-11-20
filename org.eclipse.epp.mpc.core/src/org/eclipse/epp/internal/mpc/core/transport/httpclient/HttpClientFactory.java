@@ -12,8 +12,6 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.transport.httpclient;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.http.HttpRequestInterceptor;
@@ -25,12 +23,8 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.ProxyAuthenticationStrategy;
 import org.apache.http.impl.client.TargetAuthenticationStrategy;
-import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.userstorage.internal.StorageProperties;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.FieldOption;
 import org.osgi.service.component.annotations.Reference;
@@ -209,22 +203,5 @@ public class HttpClientFactory {
 		}
 		CredentialsProvider customCredentialsProvider = customizer.customizeCredentialsProvider(credentialsProvider);
 		return customCredentialsProvider == null ? credentialsProvider : customCredentialsProvider;
-	}
-
-	private static BundleContext getBundleContext() {
-		return FrameworkUtil.getBundle(HttpClientTransport.class).getBundleContext();
-	}
-
-	private static Collection<ServiceReference<HttpClientCustomizer>> getClientBuilderCustomizers(
-			BundleContext context) {
-		Collection<ServiceReference<HttpClientCustomizer>> serviceReferences;
-		try {
-			serviceReferences = context.getServiceReferences(HttpClientCustomizer.class,
-					/*TransportFactory.computeDisabledTransportsFilter()*/null);
-		} catch (InvalidSyntaxException e) {
-			MarketplaceClientCore.error(e);
-			serviceReferences = Collections.emptySet();
-		}
-		return serviceReferences;
 	}
 }

@@ -16,7 +16,6 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 import java.util.Arrays;
 
 import org.eclipse.epp.internal.mpc.ui.css.StyleHelper;
-import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler;
 import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler.SolutionInstallationInfo;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -51,7 +50,6 @@ public class MarketplaceWizardDialog extends AbstractMarketplaceWizardDialog {
 			@Override
 			protected void proceedInstallation(String url) {
 				SolutionInstallationInfo info = MarketplaceUrlHandler.createSolutionInstallInfo(url);
-				CatalogDescriptor catalogDescriptor = info.getCatalogDescriptor();
 				String installItem = info.getInstallId();
 				//we ignore previous wizard state here, since the wizard is still open...
 				if (installItem != null && installItem.length() > 0) {

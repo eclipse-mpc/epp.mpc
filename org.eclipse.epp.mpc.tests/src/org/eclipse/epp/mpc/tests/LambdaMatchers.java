@@ -12,7 +12,6 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests;
 
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -74,24 +73,6 @@ public class LambdaMatchers {
 		protected boolean doMatch(Object item) {
 			T transformedItem = function.apply((S) item);
 			return matcher.matches(transformedItem);
-		}
-	}
-
-	private static final class OptionalFunction<S, T> implements Function<Optional<S>, Optional<T>> {
-		private final Function<S, T> function;
-
-		public OptionalFunction(Function<S, T> function) {
-			super();
-			this.function = function;
-		}
-
-		@Override
-		public Optional<T> apply(Optional<S> value) {
-			if (!value.isPresent()) {
-				return Optional.empty();
-			}
-			T result = function.apply(value.get());
-			return Optional.ofNullable(result);
 		}
 	}
 

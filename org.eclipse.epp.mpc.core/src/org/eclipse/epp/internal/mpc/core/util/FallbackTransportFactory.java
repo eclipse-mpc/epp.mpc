@@ -40,7 +40,7 @@ public class FallbackTransportFactory implements ITransportFactory {
 	private static final class FallbackTransport implements ITransport {
 		private final ITransport primaryTransport;
 
-		private ITransport fallbackTransport;
+		private final ITransport fallbackTransport;
 
 		private boolean primaryDisabled = false;
 
@@ -152,10 +152,6 @@ public class FallbackTransportFactory implements ITransportFactory {
 				}
 			}
 			return null;
-		}
-
-		void setFallbackTransport(ITransport fallbackTransport) {
-			this.fallbackTransport = fallbackTransport;
 		}
 
 		public ITransport getPrimaryTransport() {
