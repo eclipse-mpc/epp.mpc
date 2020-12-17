@@ -8,7 +8,7 @@
 <unit id="org.eclipse.equinox.p2.sdk.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.equinox.ds" version="0.0.0"/>
 <unit id="org.eclipse.sdk.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/eclipse/updates/4.18-I-builds"/>
+<repository location="http://download.eclipse.org/eclipse/updates/4.18"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.hamcrest" version="0.0.0"/>
@@ -21,12 +21,12 @@
 <unit id="org.apache.commons.io" version="0.0.0"/>
 <unit id="org.glassfish.jersey.core.jersey-client" version="0.0.0"/>
 <unit id="org.glassfish.jersey.media.jersey-media-json-jackson" version="0.0.0"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/S20200826182026/repository"/>
+<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20201130205003/repository"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.epp.mpc.apache.httpclient.feature.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.epp.mpc.apache.httpclient.feature.source.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/mpc/httpclient/drops/I-builds/202002052133"/>
+<repository location="file:///C:/dev/projects/mpc/git/org.eclipse.epp.mpc/httpclient-target-site/org.eclipse.epp.mpc.apache.httpclient.site/target/repository"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.license.feature.group" version="0.0.0"/>
@@ -46,7 +46,12 @@
 <unit id="io.swagger.jaxrs" version="0.0.0"/>
 <unit id="org.mapstruct" version="0.0.0"/>
 <unit id="org.immutables.value" version="0.0.0"/>
-<repository location="file:///C:/dev/projects/mpc/git/orbit-recipes/releng/repository/target/repository"/>
+<unit id="jakarta.xml.bind" version="0.0.0"/>
+<unit id="javax.ws.rs" version="2.1.6.v20200505-2127"/>
+<unit id="com.fasterxml.jackson.core.jackson-annotations" version="0.0.0"/>
+<unit id="com.fasterxml.jackson.core.jackson-databind" version="0.0.0"/>
+<repository location="http://cdn.yatta.de/update/orbit-repo"/>
 </location>
 </locations>
+<targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11"/>
 </target>

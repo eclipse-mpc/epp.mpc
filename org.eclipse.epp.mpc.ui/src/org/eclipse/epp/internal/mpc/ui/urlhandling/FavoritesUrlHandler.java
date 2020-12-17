@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2018, 2020 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -20,7 +20,7 @@ public interface FavoritesUrlHandler extends UrlHandlerStrategy {
 
 	FavoritesDescriptor parse(String url);
 
-	Registry<FavoritesUrlHandler> DEFAULT = new Registry<FavoritesUrlHandler>() {
+	Registry<FavoritesUrlHandler> DEFAULT = new Registry<>() {
 		private final FavoritesUrlHandler[] handlers = new FavoritesUrlHandler[] { new HttpFavoritesUrlHandler(),
 				new MpcProtocolFavoritesUrlHandler() };
 

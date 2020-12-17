@@ -21,7 +21,6 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.epp.internal.mpc.core.MarketplaceClientCorePlugin;
 import org.eclipse.epp.internal.mpc.core.ServiceLocator;
 import org.eclipse.epp.internal.mpc.core.model.Catalog;
 import org.eclipse.epp.internal.mpc.core.service.CatalogService;
@@ -37,6 +36,7 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
@@ -64,7 +64,7 @@ public class CatalogServiceTest {
 
 	@Before
 	public void setUp() throws Exception {
-		bundleContext = MarketplaceClientCorePlugin.getBundle().getBundleContext();
+		bundleContext = FrameworkUtil.getBundle(CatalogServiceTest.class).getBundleContext();
 		serviceLocatorReference = bundleContext.getServiceReference(IMarketplaceServiceLocator.class);
 		serviceLocator = bundleContext.getService(serviceLocatorReference);
 		catalogService = serviceLocator.getCatalogService();

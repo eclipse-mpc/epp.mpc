@@ -12,7 +12,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
 import org.eclipse.equinox.internal.p2.discovery.model.Icon;
 import org.eclipse.equinox.internal.p2.ui.discovery.wizards.CatalogViewer;
@@ -37,7 +37,7 @@ class DiscoverFavoritesUserActionItem extends AbstractUserActionItem {
 
 	@Override
 	protected Icon getIcon() {
-		String path = REGISTRY_SCHEME + MarketplaceClientUiPlugin.ACTION_ICON_FAVORITES;
+		String path = REGISTRY_SCHEME + MarketplaceClientUiResources.ACTION_ICON_FAVORITES;
 		return createIcon(path);
 	}
 

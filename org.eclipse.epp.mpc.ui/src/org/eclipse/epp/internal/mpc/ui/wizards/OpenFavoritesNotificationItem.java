@@ -12,7 +12,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
 import org.eclipse.equinox.internal.p2.discovery.model.Icon;
@@ -35,7 +35,7 @@ public class OpenFavoritesNotificationItem extends AbstractUserActionItem {
 
 	@Override
 	protected Icon getIcon() {
-		String path = REGISTRY_SCHEME + MarketplaceClientUiPlugin.DEFAULT_MARKETPLACE_ICON;
+		String path = REGISTRY_SCHEME + MarketplaceClientUiResources.DEFAULT_MARKETPLACE_ICON;
 		return createIcon(path);
 	}
 

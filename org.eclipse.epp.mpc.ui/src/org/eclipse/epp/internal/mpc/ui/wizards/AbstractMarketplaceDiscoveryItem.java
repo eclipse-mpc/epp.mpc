@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalogSource;
 import org.eclipse.epp.internal.mpc.ui.css.StyleHelper;
@@ -431,7 +430,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 	}
 
 	protected String getDefaultIconResourceId() {
-		return MarketplaceClientUiPlugin.NO_ICON_PROVIDED;
+		return MarketplaceClientUiResources.NO_ICON_PROVIDED;
 	}
 
 	protected Icon getIcon() {

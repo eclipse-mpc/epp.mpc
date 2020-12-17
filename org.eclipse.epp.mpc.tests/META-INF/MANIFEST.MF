@@ -35,3 +35,4 @@ Import-Package: org.eclipse.ecf.core;version="3.0.0",
  org.eclipse.ecf.filetransfer,
  org.eclipse.equinox.security.storage;version="1.0.0",
  org.osgi.service.component
+Automatic-Module-Name: org.eclipse.epp.mpc.tests

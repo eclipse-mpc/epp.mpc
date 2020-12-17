@@ -12,7 +12,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoriteListCatalogItem;
 import org.eclipse.equinox.internal.p2.discovery.model.Icon;
 import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
@@ -26,7 +26,7 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 public class FavoriteListDiscoveryItem extends AbstractSimpleDiscoveryItem<FavoriteListCatalogItem> {
 	private static final Icon DEFAULT_LIST_ICON = createIcon(
-			REGISTRY_SCHEME + MarketplaceClientUiPlugin.FAVORITES_LIST_ICON);
+			REGISTRY_SCHEME + MarketplaceClientUiResources.FAVORITES_LIST_ICON);
 
 	public FavoriteListDiscoveryItem(Composite parent, MarketplaceDiscoveryResources resources,
 			FavoriteListCatalogItem connector, FavoritesViewer viewer) {
@@ -59,7 +59,7 @@ public class FavoriteListDiscoveryItem extends AbstractSimpleDiscoveryItem<Favor
 
 	@Override
 	protected String getDefaultIconResourceId() {
-		return MarketplaceClientUiPlugin.FAVORITES_LIST_ICON;
+		return MarketplaceClientUiResources.FAVORITES_LIST_ICON;
 	}
 
 	@Override

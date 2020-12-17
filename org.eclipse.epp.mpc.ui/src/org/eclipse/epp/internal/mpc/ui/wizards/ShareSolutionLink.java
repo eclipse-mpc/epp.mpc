@@ -21,7 +21,6 @@ import java.net.URI;
 import org.eclipse.core.runtime.URIUtil;
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.util.Util;
 import org.eclipse.epp.mpc.core.model.INode;
@@ -72,7 +71,7 @@ public class ShareSolutionLink {
 		final Button share = new Button(parent, SWT.PUSH);
 		AbstractMarketplaceDiscoveryItem.setWidgetId(share, DiscoveryItem.WIDGET_ID_SHARE);
 		share.setImage(MarketplaceClientUiResources.getInstance().getImageRegistry()
-				.get(MarketplaceClientUiPlugin.ITEM_ICON_SHARE));
+				.get(MarketplaceClientUiResources.ITEM_ICON_SHARE));
 		share.setToolTipText(Messages.ShareSolutionLink_Tooltip);
 		share.getAccessible().addAccessibleListener(new AccessibleAdapter() {
 			@Override

@@ -12,7 +12,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.urlhandling;
 
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientDebug;
 import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.urischeme.IUriSchemeHandler;
@@ -60,8 +60,8 @@ public class MarketplaceUriSchemeHandler implements IUriSchemeHandler {
 	}
 
 	private void traceInvalidUrl(String url) {
-		if (MarketplaceClientUiPlugin.DEBUG) {
-			MarketplaceClientUiPlugin.trace(MarketplaceClientUiPlugin.DROP_ADAPTER_DEBUG_OPTION,
+		if (MarketplaceClientDebug.DEBUG) {
+			MarketplaceClientDebug.trace(MarketplaceClientDebug.DROP_ADAPTER_DEBUG_OPTION,
 					"URL handler: Data is not a solution url: {0}", url, new Throwable()); //$NON-NLS-1$
 		}
 	}

@@ -15,7 +15,7 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
 import org.eclipse.equinox.internal.p2.discovery.model.Icon;
@@ -50,7 +50,7 @@ public class UserFavoritesSignInActionItem extends AbstractUserActionItem {
 
 	@Override
 	protected Icon getIcon() {
-		String path = REGISTRY_SCHEME + MarketplaceClientUiPlugin.ACTION_ICON_LOGIN;
+		String path = REGISTRY_SCHEME + MarketplaceClientUiResources.ACTION_ICON_LOGIN;
 		return createIcon(path);
 	}
 

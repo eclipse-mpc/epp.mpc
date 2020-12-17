@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2020 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.util;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
@@ -20,7 +21,6 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
@@ -52,7 +52,6 @@ import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.epp.internal.mpc.core.MarketplaceClientCorePlugin;
 import org.eclipse.epp.internal.mpc.core.ServiceHelperImpl;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.ChainedCredentialsProvider;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientCustomizer;
@@ -125,7 +124,7 @@ public class TransportFactoryTest {
 
 	@Test
 	public void testRegisteredFactories() throws Exception {
-		BundleContext context = MarketplaceClientCorePlugin.getBundle().getBundleContext();
+		BundleContext context = FrameworkUtil.getBundle(TransportFactoryTest.class).getBundleContext();
 		Collection<ServiceReference<ITransportFactory>> serviceReferences = context.getServiceReferences(
 				ITransportFactory.class, null);
 		assertFalse(serviceReferences.isEmpty());

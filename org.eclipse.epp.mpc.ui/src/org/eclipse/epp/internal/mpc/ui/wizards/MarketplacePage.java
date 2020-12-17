@@ -31,7 +31,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.model.CatalogBranding;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
@@ -627,7 +626,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		Image tabImage = null;
 		if (news != null && newsViewer.isUpdated(news)) {
 			tabImage = MarketplaceClientUiResources.getInstance().getImageRegistry()
-					.get(MarketplaceClientUiPlugin.NEWS_ICON_UPDATE);
+					.get(MarketplaceClientUiResources.NEWS_ICON_UPDATE);
 		}
 		newsTabItem.setImage(tabImage);
 		newsTabItem.getParent().layout();
@@ -954,7 +953,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		} else {
 			final Display display = Display.getCurrent();
 			MarketplaceClientUiResources.getInstance()
-					.getResourceProvider()
+			.getResourceProvider()
 			.provideResource(new ResourceReceiver<ImageDescriptor>() {
 
 				@Override

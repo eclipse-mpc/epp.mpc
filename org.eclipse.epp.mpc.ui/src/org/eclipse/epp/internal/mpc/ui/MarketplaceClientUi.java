@@ -136,7 +136,7 @@ public class MarketplaceClientUi {
 	}
 
 	public static BundleContext getBundleContext() {
-		return FrameworkUtil.getBundle(MarketplaceClientUiPlugin.class).getBundleContext();
+		return FrameworkUtil.getBundle(MarketplaceClientDebug.class).getBundleContext();
 	}
 
 	public static Map<String, IInstallableUnit> computeInstalledIUsById(IProgressMonitor monitor) {

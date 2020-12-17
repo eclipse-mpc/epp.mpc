@@ -52,7 +52,6 @@ import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.model.News;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesDiscoveryStrategy;
@@ -358,7 +357,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 					@Override
 					public Image getImage(Object element) {
 						return MarketplaceClientUiResources.getInstance().getImageRegistry()
-								.get(MarketplaceClientUiPlugin.IU_ICON_ERROR);
+								.get(MarketplaceClientUiResources.IU_ICON_ERROR);
 					}
 				};
 			}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2020 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -66,7 +66,7 @@ public class NodeMatcher<T extends Widget> extends AbstractMatcher<T> {
 
 	@Factory
 	public static <T extends Widget> NodeMatcher<T> withId(String id) {
-		return withNode(new NodeValueMatcher<String>("id", id) {
+		return withNode(new NodeValueMatcher<>("id", id) {
 
 			@Override
 			protected String getValue(INode item) {
@@ -77,7 +77,7 @@ public class NodeMatcher<T extends Widget> extends AbstractMatcher<T> {
 
 	@Factory
 	public static <T extends Widget> NodeMatcher<T> withUrl(String url) {
-		return withNode(new NodeValueMatcher<String>("url", url) {
+		return withNode(new NodeValueMatcher<>("url", url) {
 
 			@Override
 			protected String getValue(INode item) {
@@ -88,7 +88,7 @@ public class NodeMatcher<T extends Widget> extends AbstractMatcher<T> {
 
 	@Factory
 	public static <T extends Widget> NodeMatcher<T> withName(String name) {
-		return withNode(new NodeValueMatcher<String>("name", name) {
+		return withNode(new NodeValueMatcher<>("name", name) {
 
 			@Override
 			protected String getValue(INode item) {
@@ -99,7 +99,7 @@ public class NodeMatcher<T extends Widget> extends AbstractMatcher<T> {
 
 	@Factory
 	public static <T extends Widget> NodeMatcher<T> withNameRegex(String name) {
-		return withNode(new NodeValueMatcher<String>("name", name) {
+		return withNode(new NodeValueMatcher<>("name", name) {
 			private final Pattern pattern = Pattern.compile(expected);
 			@Override
 			protected boolean doMatch(String expected, String actual) {

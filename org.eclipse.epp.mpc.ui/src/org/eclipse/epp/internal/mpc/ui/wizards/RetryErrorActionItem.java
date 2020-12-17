@@ -14,7 +14,7 @@ package org.eclipse.epp.internal.mpc.ui.wizards;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiPlugin;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.catalog.UserActionCatalogItem;
 import org.eclipse.equinox.internal.p2.discovery.model.Icon;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -50,7 +50,7 @@ public class RetryErrorActionItem extends AbstractUserActionItem {
 
 	@Override
 	protected Icon getIcon() {
-		String path = REGISTRY_SCHEME + MarketplaceClientUiPlugin.ACTION_ICON_WARNING;
+		String path = REGISTRY_SCHEME + MarketplaceClientUiResources.ACTION_ICON_WARNING;
 		return createIcon(path);
 	}
 

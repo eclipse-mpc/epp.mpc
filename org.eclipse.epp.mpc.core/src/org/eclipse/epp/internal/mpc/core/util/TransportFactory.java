@@ -33,7 +33,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
-import org.eclipse.epp.internal.mpc.core.MarketplaceClientCorePlugin;
+import org.eclipse.epp.internal.mpc.core.ServiceHelperImpl;
 import org.eclipse.epp.mpc.core.service.ITransportFactory;
 import org.eclipse.epp.mpc.core.service.ServiceHelper;
 import org.eclipse.epp.mpc.core.service.ServiceUnavailableException;
@@ -227,8 +227,7 @@ public abstract class TransportFactory implements ITransportFactory {
 	 */
 	@Deprecated
 	public static synchronized TransportFactory instance() {
-		TransportFactory legacyTransportFactory = MarketplaceClientCorePlugin.getDefault()
-				.getServiceHelper()
+		TransportFactory legacyTransportFactory = ServiceHelperImpl.getImplInstance()
 				.getLegacyTransportFactory();
 		if (legacyTransportFactory == null) {
 			throw new IllegalStateException();
@@ -238,7 +237,7 @@ public abstract class TransportFactory implements ITransportFactory {
 
 	public static org.eclipse.epp.mpc.core.service.ITransport createTransport() {
 		//search for registered factory service
-		BundleContext context = MarketplaceClientCorePlugin.getBundle().getBundleContext();
+		BundleContext context = FrameworkUtil.getBundle(TransportFactory.class).getBundleContext();
 		Collection<ServiceReference<ITransportFactory>> serviceReferences = getTransportServiceReferences(context);
 
 		MultiStatus serviceError = null;
