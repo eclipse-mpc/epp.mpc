@@ -208,9 +208,6 @@ public class MarketplaceClientUiResources {
 					: bundleContext.getServiceReference(MarketplaceClientUiResources.class);
 			MarketplaceClientUiResources registered = serviceReference == null ? null
 					: bundleContext.getService(serviceReference);
-			if (registered != null) {
-				bundleContext.ungetService(serviceReference);//FIXME baaaad...
-			}
 			if (instance == null) {
 				instance = registered;
 			}
