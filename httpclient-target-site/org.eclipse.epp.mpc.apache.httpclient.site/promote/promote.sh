@@ -6,6 +6,7 @@ PUBLISH_BASE=/home/data/httpd/download.eclipse.org/mpc/httpclient
 PROMOTE_BASE=$PUBLISH_BASE/.promote
 SITE_ID=org.eclipse.epp.mpc.apache.httpclient.site
 DIST_NAME=mpc.apache.httpclient
+TARGET_SITE=artifact/httpclient-target-site
 
 do_promote() {
   DIST=$1
@@ -123,7 +124,7 @@ download_build_archive() {
     ;;
   esac
   test -s "$TARGET_PATH" && echo "$TARGET_PATH already exists" && return 0
-  curl -o "$TARGET_PATH" "${PROMOTED_URL}/artifact/${ARCHIVE_PATH}"
+  curl -o "$TARGET_PATH" "${PROMOTED_URL}/$TARGET_SITE/${ARCHIVE_PATH}"
 }
 
 download_promote_package() {
