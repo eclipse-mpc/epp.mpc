@@ -44,6 +44,27 @@
             </executions>
          </plugin>
          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>3.3.0</version>
+            <executions>
+               <execution>
+                  <id>promote-assembly</id>
+                  <phase>package</phase>
+                  <goals>
+                     <goal>single</goal>
+                  </goals>
+                  <configuration>
+                     <descriptors>
+                        <descriptor>promote-assembly.xml</descriptor>
+                     </descriptors>
+                     <finalName>org.eclipse.epp.mpc.apache.httpclient.site-promote</finalName>
+                     <appendAssemblyId>false</appendAssemblyId>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
+         <plugin>
             <groupId>org.eclipse.tycho</groupId>
             <artifactId>tycho-p2-repository-plugin</artifactId>
             <configuration>
