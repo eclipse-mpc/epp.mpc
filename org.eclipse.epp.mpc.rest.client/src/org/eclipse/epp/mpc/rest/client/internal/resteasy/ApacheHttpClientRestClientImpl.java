@@ -37,6 +37,9 @@ public class ApacheHttpClientRestClientImpl<E> implements IRestClient<E> {
 
 	public static final String CONTEXT_PROVIDER_KEY = ApacheHttpClientRestClientImpl.class + ".httpContextProvider";
 
+	public static final String CONTEXT_MONITOR_KEY = ApacheHttpClientRestClientImpl.class
+			+ ".httpContext.progressMonitor";
+
 	private final HttpContext defaultContext;
 
 	private final WebTarget webTarget;
@@ -138,7 +141,7 @@ public class ApacheHttpClientRestClientImpl<E> implements IRestClient<E> {
 			}
 
 			HttpContext monitoredContext = new BasicHttpContext(parentContext);
-			monitoredContext.setAttribute(""/*TODO WIP*/, monitor);
+			monitoredContext.setAttribute(CONTEXT_MONITOR_KEY, monitor);
 
 			Callable<?> delegateInvoke = () -> {
 				try {

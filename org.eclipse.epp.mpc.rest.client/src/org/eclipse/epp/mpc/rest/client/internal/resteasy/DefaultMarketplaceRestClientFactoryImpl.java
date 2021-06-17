@@ -16,8 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 
 import org.apache.commons.io.input.CountingInputStream;
@@ -33,18 +31,16 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.epp.mpc.rest.client.IRestClient;
 import org.eclipse.epp.mpc.rest.client.IRestClientFactory;
-import org.eclipse.epp.mpc.rest.client.internal.httpclient.HttpClientFactory;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
 @Component
 public class DefaultMarketplaceRestClientFactoryImpl implements IRestClientFactory {
 
-//	private final Client client;
-
-	private final class ProgressEntityWrapper extends HttpEntityWrapper {
+	private static final class ProgressEntityWrapper extends HttpEntityWrapper {
 		private final IProgressMonitor monitor;
 
 		private final long contentLength;
@@ -63,7 +59,7 @@ public class DefaultMarketplaceRestClientFactoryImpl implements IRestClientFacto
 		}
 	}
 
-	private final class ProgressInputStream extends CountingInputStream {
+	private static final class ProgressInputStream extends CountingInputStream {
 		private final long contentLength;
 
 		private final SubMonitor contentStreamMonitor;
@@ -125,31 +121,42 @@ public class DefaultMarketplaceRestClientFactoryImpl implements IRestClientFacto
 		}
 	}
 
-	private static final String CONTEXT_PROVIDER_KEY = null;
-
 	private final HttpContextInjector contextInjector = new HttpContextInjector();
 
-	private HttpClientFactory clientFactory;
+	private ResteasyFactoryService resteasyService;
+
+	@Reference(policy = ReferencePolicy.DYNAMIC)
+	public void setResteasyService(ResteasyFactoryService resteasyService) {
+		this.resteasyService = resteasyService;
+	}
+
+	public void unsetResteasyService(ResteasyFactoryService resteasyService) {
+		if (this.resteasyService == resteasyService) {
+			this.resteasyService = null;
+		}
+	}
 
 	@Override
 	public <E> IRestClient<E> createRestClient(URI baseUri, Class<E> endpointClass) {
+		//FIXME use shared apache and resteasy client for all requests
 		HttpResponseInterceptor itcp = createProgressInterceptor();
 		HttpClient httpClient = HttpClientBuilder.create().addInterceptorFirst(itcp).build();
-		ResteasyClientBuilder builder = (ResteasyClientBuilder) ClientBuilder.newBuilder();
 
-		builder.httpEngine(new ApacheHttpClient43Engine(httpClient, contextInjector));
+		ResteasyClient client = resteasyService.newClientBuilder()
+				.httpEngine(new ApacheHttpClient43Engine(httpClient, contextInjector))
+				.build();
 
-		Client client = builder.build();
+		WebTarget target = client.target(baseUri)
+				.property(ApacheHttpClientRestClientImpl.CONTEXT_PROVIDER_KEY, contextInjector);
 
-		WebTarget target = client.target(baseUri).property(CONTEXT_PROVIDER_KEY, contextInjector);
-		//WIP
-		return null;
+		return new ApacheHttpClientRestClientImpl<>(endpointClass, target, null);
 	}
 
 	private HttpResponseInterceptor createProgressInterceptor() {
 		HttpResponseInterceptor itcp = (HttpResponse response, HttpContext context) -> {
 			HttpClientContext clientContext = HttpClientContext.adapt(context);
-			IProgressMonitor monitor = clientContext.getAttribute(null, IProgressMonitor.class);
+			IProgressMonitor monitor = clientContext.getAttribute(ApacheHttpClientRestClientImpl.CONTEXT_MONITOR_KEY,
+					IProgressMonitor.class);
 			HttpEntity entity = response.getEntity();
 			if (monitor != null && entity != null && entity.getContentLength() != 0) {
 				long contentLength = entity.getContentLength();
@@ -159,8 +166,8 @@ public class DefaultMarketplaceRestClientFactoryImpl implements IRestClientFacto
 		return itcp;
 	}
 
-	@Activate
-	protected void activate(HttpClientFactory clientFactory) {
-
-	}
+//	@Activate
+//	protected void activate(HttpClientFactory clientFactory) {
+//
+//	}
 }
