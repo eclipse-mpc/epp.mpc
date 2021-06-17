@@ -12,14 +12,14 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.rest.client;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-
-import org.eclipse.epp.mpc.rest.api.CatalogsApi;
-import org.jboss.resteasy.client.jaxrs.ProxyBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.junit.Test;
+//import javax.ws.rs.client.Client;
+//import javax.ws.rs.client.ClientBuilder;
+//import javax.ws.rs.client.WebTarget;
+//
+//import org.eclipse.epp.mpc.rest.api.CatalogsApi;
+//import org.jboss.resteasy.client.jaxrs.ProxyBuilder;
+//import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+//import org.junit.Test;
 
 /**
  * @author carsten.reckord
@@ -27,24 +27,24 @@ import org.junit.Test;
 //FIXME WIP At the moment, this is more a sandbox than an actual test class, useful to try out some stuff without launching an RCP...
 public class AsyncClientTest {
 
-	@Test
-	public void testCreateSyncClient() {
-		Client client = ClientBuilder.newClient();
-		WebTarget target = client.target("http://example.com/base/uri");
-		CatalogsApi proxy = ProxyBuilder.builder(CatalogsApi.class, target).build();
-		System.out.println(proxy.getClass());
-	}
-
-	@Test
-	public void testCreateAsyncClient() {
-		ResteasyClientBuilder builder = (ResteasyClientBuilder) ClientBuilder.newBuilder();
-		//		Client client = builder.useAsyncHttpEngine()
-		//				.register(org.jboss.resteasy.client.jaxrs.internal.CompletionStageRxInvokerProvider.class)
-		//				.build();
-		Client client = builder.register(
-				org.jboss.resteasy.client.jaxrs.internal.CompletionStageRxInvokerProvider.class).build();
-		WebTarget target = client.target("http://example.com/base/uri");
-		CatalogsApi proxy = ProxyBuilder.builder(CatalogsApi.class, target).build();
-		System.out.println(proxy.getClass());
-	}
+//	@Test
+//	public void testCreateSyncClient() {
+//		Client client = ClientBuilder.newClient();
+//		WebTarget target = client.target("http://example.com/base/uri");
+//		CatalogsApi proxy = ProxyBuilder.builder(CatalogsApi.class, target).build();
+//		System.out.println(proxy.getClass());
+//	}
+//
+//	@Test
+//	public void testCreateAsyncClient() {
+//		ResteasyClientBuilder builder = (ResteasyClientBuilder) ClientBuilder.newBuilder();
+//		//		Client client = builder.useAsyncHttpEngine()
+//		//				.register(org.jboss.resteasy.client.jaxrs.internal.CompletionStageRxInvokerProvider.class)
+//		//				.build();
+//		Client client = builder.register(
+//				org.jboss.resteasy.client.jaxrs.internal.CompletionStageRxInvokerProvider.class).build();
+//		WebTarget target = client.target("http://example.com/base/uri");
+//		CatalogsApi proxy = ProxyBuilder.builder(CatalogsApi.class, target).build();
+//		System.out.println(proxy.getClass());
+//	}
 }
