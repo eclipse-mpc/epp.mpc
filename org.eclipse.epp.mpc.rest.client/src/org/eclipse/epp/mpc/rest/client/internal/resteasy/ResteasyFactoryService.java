@@ -34,7 +34,7 @@ import java.util.stream.StreamSupport;
 import javax.ws.rs.RuntimeType;
 import javax.ws.rs.ext.Providers;
 
-import org.eclipse.epp.mpc.rest.client.internal.support.EmptyConfigProviderResolver;
+import org.eclipse.epp.mpc.rest.client.internal.support.SystemPropertiesConfigProviderResolver;
 import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.internal.LocalResteasyProviderFactory;
@@ -80,7 +80,7 @@ public class ResteasyFactoryService {
 		});
 
 		this.serviceProviders = serviceProviders;
-		ConfigProviderResolver.setInstance(EmptyConfigProviderResolver.INSTANCE);//TODO Eclipse Config Registry Provider?
+		ConfigProviderResolver.setInstance(SystemPropertiesConfigProviderResolver.INSTANCE);//TODO Eclipse Config Registry Provider?
 		getGlobalResteasyProviderFactory();//Init global singleton
 	}
 
