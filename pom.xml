@@ -16,6 +16,7 @@
 
   <modules>
     <module>org.eclipse.epp.mpc-target</module>
+    <module>org.eclipse.epp.mpc.core.compatibility.api</module>
     <module>org.eclipse.epp.mpc.core</module>
     <module>org.eclipse.epp.mpc.core.win32</module>
     <module>org.eclipse.epp.mpc.dependencies.feature</module>

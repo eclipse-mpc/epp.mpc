@@ -3,6 +3,6 @@
    <service>
       <provide interface="org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator"/>
    </service>
-   <reference bind="bindHttpClient" cardinality="1..1" interface="org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientService" name="HttpClient" policy="dynamic" unbind="unbindHttpClient"/>
+   <reference bind="bindHttpClient" cardinality="1..1" interface="HttpClientService" name="HttpClient" policy="dynamic" unbind="unbindHttpClient"/>
    <implementation class="org.eclipse.epp.internal.mpc.core.ServiceLocator"/>
 </scr:component>
