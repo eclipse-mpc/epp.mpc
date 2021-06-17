@@ -20,9 +20,9 @@
       <java-version>11</java-version>
       <java-bree>JavaSE-${java-version}</java-bree>
       <enforced.java.version>[11,)</enforced.java.version>
-      <java-jdk>SYSTEM</java-jdk>
+      <java-jdk>BREE</java-jdk>
 
-      <tycho-version>1.7.0</tycho-version>
+      <tycho-version>2.2.0</tycho-version>
       <tycho-extras-version>${tycho-version}</tycho-extras-version>
 
       <qualifier-format>'v'yyyyMMdd-HHmm</qualifier-format>
