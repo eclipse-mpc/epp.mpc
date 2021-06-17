@@ -30,7 +30,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ServiceScope;
 
-@Component(scope = ServiceScope.PROTOTYPE)
+@Component(service = HttpClientFactory.class, scope = ServiceScope.PROTOTYPE)
 public class HttpClientFactory {
 
 	private CredentialsProvider credentialsProvider;
