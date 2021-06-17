@@ -6,13 +6,15 @@ Bundle-Version: 2.0.0.qualifier
 Bundle-Vendor: %Bundle-Vendor
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
-Bundle-Activator: org.eclipse.epp.mpc.rest.client.internal.MarketplaceRestClientPlugin
 Service-Component: OSGI-INF/services/*.xml
 Automatic-Module-Name: org.eclipse.epp.mpc.rest.client
 Export-Package: org.eclipse.epp.mpc.rest.client,
- org.eclipse.epp.mpc.rest.client.internal.httpclient
-Import-Package: javax.ws.rs.client,
+ org.eclipse.epp.mpc.rest.client.internal.httpclient,
+ org.eclipse.epp.mpc.rest.client.internal.resteasy
+Import-Package: javax.ws.rs;version="1.1.1",
+ javax.ws.rs.client,
  javax.ws.rs.core;version="2.1.1",
+ javax.ws.rs.ext;version="2.1.6",
  org.apache.commons.io.input;version="2.6.0",
  org.apache.http;version="4.4.0",
  org.apache.http.auth;version="4.5.2",
@@ -36,12 +38,21 @@ Import-Package: javax.ws.rs.client,
  org.apache.http.protocol;version="4.4.0",
  org.apache.http.util;version="4.4.0",
  org.eclipse.core.net.proxy,
- org.eclipse.core.runtime;version="3.5.0",
- org.eclipse.equinox.p2.core;version="2.0.0",
+ org.eclipse.core.runtime;version="3.7.0",
+ org.eclipse.microprofile.config;version="1.0.1",
+ org.eclipse.microprofile.config.spi;version="1.4.0",
  org.jboss.resteasy.client.jaxrs,
  org.jboss.resteasy.client.jaxrs.engines,
+ org.jboss.resteasy.client.jaxrs.internal;version="4.5.8",
+ org.jboss.resteasy.spi;version="4.5.8",
  org.osgi.framework;version="1.9.0",
+ org.osgi.framework.wiring;version="1.2.0",
  org.osgi.service.component;resolution:=optional,
  org.osgi.service.component.annotations;resolution:=optional,
  org.osgi.util.tracker;version="1.5.2"
 Bundle-ClassPath: .
+Require-Bundle: org.jboss.resteasy.client;bundle-version="4.5.8",
+ org.jboss.resteasy.core;bundle-version="4.5.8",
+ org.jboss.resteasy.jackson2-provider;bundle-version="4.5.8",
+ com.fasterxml.jackson.jaxrs.jackson-jaxrs-base;bundle-version="2.12.1",
+ com.fasterxml.jackson.jaxrs.jackson-jaxrs-json-provider;bundle-version="2.12.1"

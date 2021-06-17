@@ -55,6 +55,7 @@
                   </goals>
                   <configuration>
                      <excludeGroupIds>p2.eclipse-plugin,org.eclipse.epp.mpc</excludeGroupIds>
+                     <outputDirectory>${project.basedir}/.annotation_processors/lib</outputDirectory>
                   </configuration>
                </execution>
             </executions>
@@ -63,9 +64,6 @@
             <groupId>org.eclipse.tycho</groupId>
             <artifactId>target-platform-configuration</artifactId>
             <version>${tycho-version}</version>
-            <configuration>
-               <pomDependencies>consider</pomDependencies>
-            </configuration>
          </plugin>
       </plugins>
    </build>

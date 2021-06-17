@@ -29,41 +29,6 @@
       </dependencies>
    </dependencyManagement>
 
-   <dependencies>
-      <dependency>
-         <groupId>org.jboss.resteasy</groupId>
-         <artifactId>resteasy-jackson2-provider</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.jboss.resteasy</groupId>
-         <artifactId>resteasy-client</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.httpcomponents</groupId>
-         <artifactId>httpcore-nio</artifactId>
-         <version>4.4.13</version>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.httpcomponents</groupId>
-         <artifactId>httpasyncclient</artifactId>
-         <version>4.1.4</version>
-      </dependency>
-      <dependency>
-         <groupId>javax.ws.rs</groupId>
-         <artifactId>javax.ws.rs-api</artifactId>
-         <version>2.1.1</version>
-      </dependency>
-      <dependency>
-         <groupId>au.com.dius</groupId>
-         <artifactId>pact-jvm-consumer-junit</artifactId>
-         <version>${pact.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>au.com.dius</groupId>
-         <artifactId>pact-jvm-consumer-java8</artifactId>
-         <version>${pact.version}</version>
-      </dependency>
-   </dependencies>
    <build>
       <pluginManagement>
          <plugins>
@@ -80,18 +45,19 @@
          </plugins>
       </pluginManagement>
       <plugins>
-         <plugin>
+<!--          <plugin>
             <groupId>au.com.dius</groupId>
             <artifactId>pact-jvm-provider-maven</artifactId>
             <version>${pact.version}</version>
             <configuration>
-               <pactDirectory>${project.build.directory}/pacts</pactDirectory> <!-- Default -->
+               <pactDirectory>${project.build.directory}/pacts</pactDirectory> <!- Default ->
                <pactBrokerUrl>http://localhost:9292</pactBrokerUrl>
-               <projectVersion>${project.version}</projectVersion> <!-- Default -->
-               <trimSnapshot>true</trimSnapshot> <!-- Defaults to false -->
-               <skipPactPublish>false</skipPactPublish> <!-- Defaults to false -->
+               <projectVersion>${project.version}</projectVersion> <!- Default ->
+               <trimSnapshot>true</trimSnapshot> <!- Defaults to false ->
+               <skipPactPublish>false</skipPactPublish> <!- Defaults to false ->
             </configuration>
          </plugin>
+ -->
          <plugin>
             <groupId>org.eclipse.tycho</groupId>
             <artifactId>tycho-surefire-plugin</artifactId>
@@ -103,23 +69,6 @@
             <configuration>
                <pomDependencies>consider</pomDependencies>
             </configuration>
-         </plugin>
-         <plugin>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <version>2.10</version>
-            <executions>
-               <execution>
-                  <id>get-libs</id>
-                  <phase>initialize</phase>
-                  <!-- TODO need to move dependencies to Orbit and do proper import in Manifest -->
-                  <goals>
-                     <goal>copy-dependencies</goal>
-                  </goals>
-                  <configuration>
-                     <excludeGroupIds>p2.eclipse-plugin,org.eclipse.epp.mpc</excludeGroupIds>
-                  </configuration>
-               </execution>
-            </executions>
          </plugin>
       </plugins>
    </build>

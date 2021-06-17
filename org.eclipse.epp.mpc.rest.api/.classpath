@@ -10,7 +10,5 @@
 	<classpathentry kind="src" path="src/main/resources/"/>
 	<classpathentry kind="src" path="target/generated-sources/annotations/"/>
 	<classpathentry kind="src" path="target/generated-sources/openapi/"/>
-	<classpathentry kind="src" path="target/generated-sources/openapi-templates/"/>
-	<classpathentry kind="src" path="src/main/mustache/"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

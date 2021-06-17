@@ -97,17 +97,6 @@
                   </configuration>
                </execution>
                <execution>
-                  <id>get-libs</id>
-                  <phase>initialize</phase>
-                  <!-- TODO need to move dependencies to Orbit and do proper import in Manifest -->
-                  <goals>
-                     <goal>copy-dependencies</goal>
-                  </goals>
-                  <configuration>
-                     <excludeGroupIds>p2.eclipse-plugin,org.eclipse.epp.mpc</excludeGroupIds>
-                  </configuration>
-               </execution>
-               <execution>
                   <id>get-annotation-processors</id>
                   <phase>initialize</phase>
                   <goals>
@@ -200,50 +189,7 @@
             <groupId>org.eclipse.tycho</groupId>
             <artifactId>target-platform-configuration</artifactId>
             <version>${tycho-version}</version>
-            <configuration>
-               <pomDependencies>consider</pomDependencies>
-            </configuration>
          </plugin>
       </plugins>
    </build>
-
-   <dependencies>
-      <dependency>
-         <groupId>org.immutables</groupId>
-         <artifactId>value-annotations</artifactId>
-         <version>2.8.3</version>
-         <scope>provided</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.immutables</groupId>
-         <artifactId>value</artifactId>
-         <version>2.8.3</version>
-         <scope>provided</scope>
-      </dependency>
-
-      <dependency>
-         <groupId>io.swagger</groupId>
-         <artifactId>swagger-jaxrs</artifactId>
-         <scope>compile</scope>
-         <version>${swagger-core-version}</version>
-      </dependency>
-
-      <dependency>
-         <groupId>io.swagger</groupId>
-         <artifactId>swagger-jaxrs</artifactId>
-         <scope>compile</scope>
-         <version>${swagger-core-version}</version>
-      </dependency>
-      <dependency>
-         <groupId>com.fasterxml.jackson.module</groupId>
-         <artifactId>jackson-module-jaxb-annotations</artifactId>
-         <version>${jackson-jaxrs-version}</version>
-         <scope>compile</scope>
-      </dependency>
-      <dependency>
-         <groupId>javax.ws.rs</groupId>
-         <artifactId>javax.ws.rs-api</artifactId>
-         <version>2.1.1</version>
-      </dependency>
-   </dependencies>
 </project>

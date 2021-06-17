@@ -65,6 +65,7 @@ paths:
             items: 
               $ref: "#/components/schemas/license_type"
           style: form
+          explode: true
         - name: sort
           in: query
           description: |
@@ -922,9 +923,7 @@ components:
           type: string
           description: URL to retrieve the market details.
         categories:
-          type: array
-          items: 
-            $ref: "#/components/schemas/Category"
+          $ref: "#/components/schemas/Categories"
           description: Array of categories that are used for the current market
         listing_ids:
           type: array
