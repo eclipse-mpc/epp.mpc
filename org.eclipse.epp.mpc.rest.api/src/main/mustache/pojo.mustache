@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
@@ -97,6 +98,7 @@ public interface {{classname}} {{#parent}}extends {{{parent}}}{{/parent}}{{#seri
 {{#isListContainer}}
     public Builder {{name}}(Iterable<{{^items.isPrimitiveType}}? extends {{/items.isPrimitiveType}}{{{items.datatypeWithEnum}}}> {{name}}Items);
     public Builder add{{nameInCamelCase}}({{#items}}{{>unboxed}}{{/items}} {{name}}Item);
+    @JsonIgnore
     public Builder add{{nameInCamelCase}}({{#items}}{{>unboxed}}{{/items}}... {{name}}Items);
     public Builder addAll{{nameInCamelCase}}(Iterable<{{^items.isPrimitiveType}}? extends {{/items.isPrimitiveType}}{{{items.datatypeWithEnum}}}> {{name}}Items);
 {{/isListContainer}}
