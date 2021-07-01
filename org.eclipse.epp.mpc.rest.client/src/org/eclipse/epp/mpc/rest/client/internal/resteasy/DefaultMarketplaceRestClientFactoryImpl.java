@@ -63,30 +63,54 @@ public class DefaultMarketplaceRestClientFactoryImpl implements IRestClientFacto
 
 		@Override
 		public InputStream getContent() throws IOException {
-			SubMonitor contentStreamMonitor = SubMonitor.convert(monitor, ""/*TODO*/, (int) contentLength);
 			InputStream content = this.wrappedEntity.getContent();
-			return new ProgressInputStream(content, contentLength, contentStreamMonitor);
+			return new ProgressInputStream(content, contentLength, monitor);
 		}
 	}
 
 	private static final class ProgressInputStream extends CountingInputStream {
 		private final long contentLength;
 
-		private final SubMonitor contentStreamMonitor;
+		private final IProgressMonitor realMonitor;
+
+		private final SubMonitor monitor;
+
+		private boolean done;
 
 		private long mark = 0;
 
-		private ProgressInputStream(InputStream in, long contentLength, SubMonitor contentStreamMonitor) {
+		private ProgressInputStream(InputStream in, long contentLength, IProgressMonitor contentStreamMonitor) {
 			super(in);
 			this.contentLength = contentLength;
-			this.contentStreamMonitor = contentStreamMonitor;
+			this.realMonitor = contentStreamMonitor;
+			this.monitor = SubMonitor.convert(contentStreamMonitor, ""/*TODO*/, (int) contentLength);
 		}
 
 		@Override
 		protected synchronized void afterRead(int r) {
 			super.afterRead(r);
 			if (r > 0) {
-				contentStreamMonitor.worked(r);
+				monitor.worked(r);
+			} else if (r == -1) {
+				monitorDone();
+			}
+		}
+
+		private void monitorDone() {
+			if (!done) {
+				done = true;
+				monitor.done();
+				//SubMonitor does not delegate done() call
+				realMonitor.done();
+			}
+		}
+
+		@Override
+		protected void handleIOException(IOException e) throws IOException {
+			try {
+				super.handleIOException(e);
+			} finally {
+				monitorDone();
 			}
 		}
 
@@ -99,7 +123,7 @@ public class DefaultMarketplaceRestClientFactoryImpl implements IRestClientFacto
 		@Override
 		public synchronized void reset() throws IOException {
 			super.reset();
-			contentStreamMonitor.setWorkRemaining((int) (contentLength - this.mark));
+			monitor.setWorkRemaining((int) (contentLength - this.mark));
 		}
 
 		@Override
@@ -125,9 +149,18 @@ public class DefaultMarketplaceRestClientFactoryImpl implements IRestClientFacto
 		public long skip(final long ln) throws IOException {
 			long skipped = super.skip(ln);
 			if (skipped > 0) {
-				contentStreamMonitor.worked((int) skipped);
+				monitor.worked((int) skipped);
 			}
 			return skipped;
+		}
+
+		@Override
+		public void close() throws IOException {
+			try {
+				super.close();
+			} finally {
+				monitorDone();
+			}
 		}
 	}
 

@@ -137,7 +137,7 @@ public class ApacheHttpClientRestClientImpl<E> implements IRestClient<E> {
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			IProgressMonitor monitor = monitorReference.getAndSet(null);
 			if (monitor == null) {
-				//TODO exception
+				throw new IllegalStateException("monitor not set or already consumed"); //$NON-NLS-1$
 			}
 
 			HttpContext monitoredContext = new BasicHttpContext(parentContext);
