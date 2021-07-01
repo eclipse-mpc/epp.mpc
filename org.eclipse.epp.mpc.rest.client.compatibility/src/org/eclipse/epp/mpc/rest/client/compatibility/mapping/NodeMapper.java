@@ -13,6 +13,10 @@ and is available at
  *******************************************************************************/
 package org.eclipse.epp.mpc.rest.client.compatibility.mapping;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -108,4 +112,11 @@ public abstract class NodeMapper extends AbstractMapper {
 				.orElse(null);
 	}
 
+	Date map(OffsetDateTime value) {
+		return value == null ? null : new Date(value.toInstant().toEpochMilli());
+	}
+
+	OffsetDateTime map(Date value) {
+		return value == null ? null : Instant.ofEpochMilli(value.getTime()).atOffset(ZoneOffset.UTC);
+	}
 }
