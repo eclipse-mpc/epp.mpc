@@ -805,12 +805,12 @@ components:
           type: string
           description: Full description
         created:
-          type: integer
-          format: int64
+          type: string
+          format: date-time
           description: Timestamp
         changed:
-          type: integer
-          format: int64
+          type: string
+          format: date-time
           description: Timestamp
         foundation_member:
           type: boolean
