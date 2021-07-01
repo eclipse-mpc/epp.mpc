@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import org.eclipse.jdt.annotation.Nullable;
 
 import org.eclipse.epp.mpc.rest.model.impl.Immutable{{classname}};
 
@@ -47,8 +48,9 @@ public interface {{classname}} {{#parent}}extends {{{parent}}}{{/parent}}{{#seri
 {{#withXml}}
   @XmlElement(name="{{baseName}}"{{#required}}, required = {{required}}{{/required}})
 {{/withXml}}
-  @JsonProperty("{{baseName}}")
-{{#vendorExtensions.extraAnnotation}}
+  @JsonProperty("{{baseName}}"{{#required}}, required = {{required}}{{/required}}){{^required}}{{^useBeanValidation}}{{^isListContainer}}{{^isMapContainer}}
+  @Nullable
+{{/isMapContainer}}{{/isListContainer}}{{/useBeanValidation}}{{/required}}{{#vendorExtensions.extraAnnotation}}
   {{{vendorExtensions.extraAnnotation}}}
 {{/vendorExtensions.extraAnnotation}}
 {{#useBeanValidation}}
