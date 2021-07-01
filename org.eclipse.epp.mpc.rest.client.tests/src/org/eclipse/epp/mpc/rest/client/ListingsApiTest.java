@@ -13,20 +13,31 @@
 package org.eclipse.epp.mpc.rest.client;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
 
 import java.net.URI;
+import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.epp.mpc.rest.api.ListingsApi;
 import org.eclipse.epp.mpc.rest.model.Listing;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 class ListingsApiTest extends AbstractRestClientTest {
 
 	private IRestClient<ListingsApi> client;
+
+	private static String listingId;
 
 	@BeforeEach
 	void initClient() {
@@ -34,9 +45,43 @@ class ListingsApiTest extends AbstractRestClientTest {
 	}
 
 	@Test
+	void getListings() {
+		listingId = null;
+		List<Listing> listings = client.call()
+				.getListings(null, null, null, null, null, null, null, null, null, null, null, null, null);
+		assertNotNull(listings);
+		assertThat(listings, not(empty()));
+		listingId = listings.get(0).getId();
+	}
+
+	@Test
 	void getListing() {
-		Listing listing = client.call().getListing("846fc9c0-7596-4efc-8874-d9543363bba3", null, null, null); //$NON-NLS-1$
+		if (listingId == null) {
+			getListings();
+		}
+		Listing listing = client.call().getListing(listingId, null, null, null);
 		assertNotNull(listing);
 		assertThat(listing.getBody(), not(isEmptyOrNullString()));
+	}
+
+	@Test
+	void getListingsWithProgress() {
+		IProgressMonitor monitor = Mockito.mock(IProgressMonitor.class);
+		List<Listing> listings = client.call(monitor)
+				.getListings(null, null, null, null, null, null, null, null, null, null, null, null, null);
+		assertNotNull(listings);
+		assertThat(listings, not(empty()));
+		verify(monitor).beginTask(any(), anyInt());
+		verify(monitor, atLeastOnce()).worked(anyInt());
+		verify(monitor).done();
+	}
+
+	@Test
+	void callingWithProgressTwiceFails() {
+		IProgressMonitor monitor = Mockito.mock(IProgressMonitor.class);
+		ListingsApi monitoredCall = client.call(monitor);
+		monitoredCall.getListings(null, null, null, null, null, null, null, null, null, null, null, null, null);
+		assertThrows(IllegalStateException.class, () -> monitoredCall.getListings(null, null, null, null, null, null,
+				null, null, null, null, null, null, null));
 	}
 }
