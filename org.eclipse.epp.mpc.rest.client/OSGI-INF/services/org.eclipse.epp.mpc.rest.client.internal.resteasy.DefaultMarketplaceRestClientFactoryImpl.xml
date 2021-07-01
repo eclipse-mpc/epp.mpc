@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.epp.mpc.rest.client.internal.resteasy.DefaultMarketplaceRestClientFactoryImpl">
+   <service>
+      <provide interface="org.eclipse.epp.mpc.rest.client.IRestClientFactory"/>
+   </service>
+   <reference bind="setResteasyService" interface="org.eclipse.epp.mpc.rest.client.internal.resteasy.ResteasyFactoryService" name="ResteasyService" policy="dynamic" unbind="unsetResteasyService"/>
+   <implementation class="org.eclipse.epp.mpc.rest.client.internal.resteasy.DefaultMarketplaceRestClientFactoryImpl"/>
+</scr:component>
