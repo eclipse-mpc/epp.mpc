@@ -53,13 +53,15 @@
 <unit id="com.fasterxml.jackson.core.jackson-annotations" version="0.0.0"/>
 <unit id="com.fasterxml.jackson.core.jackson-databind" version="0.0.0"/>
 <unit id="com.fasterxml.jackson.core.jackson-core" version="0.0.0"/>
+<unit id="com.fasterxml.jackson.datatype.jackson-datatype-jsr310" version="0.0.0"/>
 <unit id="com.fasterxml.jackson.jaxrs.jackson-jaxrs-base" version="0.0.0"/>
 <unit id="com.fasterxml.jackson.jaxrs.jackson-jaxrs-json-provider" version="0.0.0"/>
 <unit id="com.fasterxml.jackson.module.jackson-module-jaxb-annotations" version="0.0.0"/>
 <unit id="com.github.java-json-tools.patch" version="0.0.0"/>
 <unit id="com.github.java-json-tools.jackson.coreutils" version="0.0.0"/>
 <unit id="com.github.java-json-tools.msg.simple" version="0.0.0"/>
-<repository location="http://cdn.yatta.de/update/orbit-repo"/>
+<!--<repository location="http://cdn.yatta.de/update/orbit-repo"/>-->
+<repository location="file:///C:/dev/projects/mpc/git/orbit-recipes/releng/repository/target/repository"/>
 </location>
 </locations>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11"/>

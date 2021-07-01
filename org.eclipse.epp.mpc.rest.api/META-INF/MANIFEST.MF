@@ -16,6 +16,7 @@ Import-Package: com.fasterxml.jackson.annotation;version="2.9.9",
  javax.ws.rs;version="2.1.1",
  javax.ws.rs.core;version="2.1.1",
  javax.xml.bind.annotation;version="2.2.0",
+ org.eclipse.jdt.annotation;resolution:=optional,
  org.immutables.value,
  org.osgi.framework;version="1.9.0"
 Bundle-ClassPath: .

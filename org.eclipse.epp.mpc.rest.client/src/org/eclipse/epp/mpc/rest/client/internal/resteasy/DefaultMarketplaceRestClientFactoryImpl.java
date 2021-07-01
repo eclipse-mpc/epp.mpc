@@ -33,9 +33,19 @@ import org.eclipse.epp.mpc.rest.client.IRestClient;
 import org.eclipse.epp.mpc.rest.client.IRestClientFactory;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
+import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferencePolicy;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.json.JsonReadFeature;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Component
 public class DefaultMarketplaceRestClientFactoryImpl implements IRestClientFactory {
@@ -144,12 +154,54 @@ public class DefaultMarketplaceRestClientFactoryImpl implements IRestClientFacto
 
 		ResteasyClient client = resteasyService.newClientBuilder()
 				.httpEngine(new ApacheHttpClient43Engine(httpClient, contextInjector))
+				.register(createJacksonProvider())
 				.build();
 
 		WebTarget target = client.target(baseUri)
 				.property(ApacheHttpClientRestClientImpl.CONTEXT_PROVIDER_KEY, contextInjector);
 
 		return new ApacheHttpClientRestClientImpl<>(endpointClass, target, null);
+	}
+
+	private ResteasyJackson2Provider createJacksonProvider() {
+		ObjectMapper objectMapper = createObjectMapper();
+
+		ResteasyJackson2Provider resteasyJacksonProvider = new ResteasyJackson2Provider() {
+			//subclass to allow re-registration over the original
+		};
+		resteasyJacksonProvider.setMapper(objectMapper);
+		return resteasyJacksonProvider;
+	}
+
+	private ObjectMapper createObjectMapper() {
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.registerModule(new JavaTimeModule());
+
+		objectMapper.enable(MapperFeature.REQUIRE_SETTERS_FOR_GETTERS);
+		objectMapper.enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES);
+		objectMapper.enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS);
+
+		objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+		objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		objectMapper.disable(SerializationFeature.WRITE_ENUMS_USING_INDEX);
+		objectMapper.disable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
+		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		objectMapper.disable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
+		objectMapper.disable(DeserializationFeature.FAIL_ON_NUMBERS_FOR_ENUMS);
+		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+		objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+		objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+		objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+		objectMapper.configure(JsonParser.Feature.IGNORE_UNDEFINED, true);
+		objectMapper.configure(JsonReadFeature.ALLOW_TRAILING_COMMA.mappedFeature(), true);
+		objectMapper.configure(JsonReadFeature.ALLOW_JAVA_COMMENTS.mappedFeature(), true);
+		objectMapper.configure(JsonReadFeature.ALLOW_LEADING_DECIMAL_POINT_FOR_NUMBERS.mappedFeature(), true);
+		objectMapper.configure(JsonReadFeature.ALLOW_LEADING_ZEROS_FOR_NUMBERS.mappedFeature(), true);
+
+		//ignore null values
+		objectMapper.setSerializationInclusion(JsonInclude.Include.NON_ABSENT);
+		return objectMapper;
 	}
 
 	private HttpResponseInterceptor createProgressInterceptor() {
