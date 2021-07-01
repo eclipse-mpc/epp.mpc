@@ -36,9 +36,7 @@ import javax.ws.rs.ext.Providers;
 
 import org.eclipse.epp.mpc.rest.client.internal.support.SystemPropertiesConfigProviderResolver;
 import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.internal.LocalResteasyProviderFactory;
-import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.jboss.resteasy.core.ThreadLocalResteasyProviderFactory;
 import org.jboss.resteasy.core.providerfactory.ResteasyProviderFactoryImpl;
 import org.jboss.resteasy.plugins.interceptors.AcceptEncodingGZIPFilter;
@@ -203,8 +201,8 @@ public class ResteasyFactoryService {
 		return resteasyProviderFactory;
 	}
 
-	public ResteasyClientBuilder newClientBuilder() {
-		return new ResteasyClientBuilderImpl() {
+	public IResteasyClientBuilder newClientBuilder() {
+		return new ResteasyClientBuilderImplExt() {
 			@Override
 			public ResteasyProviderFactory getProviderFactory() {
 				if (providerFactory == null) {
