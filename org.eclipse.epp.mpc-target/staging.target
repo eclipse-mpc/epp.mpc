@@ -7,7 +7,7 @@
 <unit id="org.eclipse.equinox.p2.discovery.feature.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.equinox.p2.sdk.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.sdk.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/eclipse/updates/4.20-I-builds"/>
+<repository location="http://download.eclipse.org/eclipse/updates/4.21-I-builds"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.hamcrest" version="0.0.0"/>
@@ -15,7 +15,7 @@
 <unit id="org.hamcrest.library" version="0.0.0"/>
 <unit id="org.junit" version="0.0.0"/>
 <unit id="org.mockito" version="0.0.0"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/S20210518003616/repository"/>
+<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/S20210817231813/repository"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.epp.mpc.apache.httpclient.feature.feature.group" version="0.0.0"/>
@@ -33,7 +33,7 @@
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.userstorage.sdk.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/usssdk/drops/release/1.2.1"/>
+<repository location="http://download.eclipse.org/usssdk/drops/release/1.2.2"/>
 </location>
 </locations>
 	<targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11"/>
