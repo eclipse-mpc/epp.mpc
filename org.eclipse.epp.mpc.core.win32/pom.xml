@@ -12,22 +12,4 @@
   <artifactId>org.eclipse.epp.mpc.core.win32</artifactId>
   <packaging>eclipse-plugin</packaging>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>target-platform-configuration</artifactId>
-        <configuration>
-          <environments>
-            <environment>
-              <os>win32</os>
-              <ws>*</ws>
-              <arch>*</arch>
-            </environment>
-          </environments>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-
 </project>

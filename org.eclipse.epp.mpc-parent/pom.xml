@@ -22,17 +22,12 @@
       <enforced.java.version>[1.8.0,)</enforced.java.version>
       <java-jdk>SYSTEM</java-jdk>
 
-      <tycho-version>2.1.0</tycho-version>
+      <tycho-version>2.5.0</tycho-version>
       
       <qualifier-format>'v'yyyyMMdd-HHmm</qualifier-format>
 
       <skip-source-check>true</skip-source-check>
       <skip-sign>true</skip-sign>
-
-      <!-- FIXME skip-pack is currently not supported, because
-         1) tycho-pack200b-plugin:pack doesn't support it and doing it with profiles is a mess
-         2) pack has moved to the release profile so it won't happen in regular dev/ci builds anyway -->
-      <skip-pack>true</skip-pack>
 
       <tycho.scmUrl>scm:git:https://git.eclipse.org/r/mpc/org.eclipse.epp.mpc</tycho.scmUrl>
    </properties>
@@ -106,7 +101,6 @@
          <id>release</id>
          <properties>
             <skip-sign>false</skip-sign>
-            <skip-pack>false</skip-pack>
             <skip-source-check>false</skip-source-check>
             <java-jdk>BREE</java-jdk>
          </properties>
@@ -295,17 +289,6 @@
                </configuration>
             </plugin>
 
-            <!-- Eclipse Tycho extras -->
-            <plugin>
-               <groupId>org.eclipse.tycho.extras</groupId>
-               <artifactId>tycho-pack200a-plugin</artifactId>
-               <version>${tycho-version}</version>
-            </plugin>
-            <plugin>
-               <groupId>org.eclipse.tycho.extras</groupId>
-               <artifactId>tycho-pack200b-plugin</artifactId>
-               <version>${tycho-version}</version>
-            </plugin>
             <!-- Eclipse Common Build Infrastructure plugins -->
             <plugin>
                <groupId>org.eclipse.cbi.maven.plugins</groupId>
