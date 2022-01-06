@@ -119,7 +119,7 @@ public class HttpClientTransport implements ITransport {
 	}
 
 	protected RequestTemplate<InputStream> createStreamingRequest() {
-		return new RequestTemplate<InputStream>() {
+		return new RequestTemplate<>() {
 
 			@Override
 			protected HttpUriRequest createRequest(URI uri) {
