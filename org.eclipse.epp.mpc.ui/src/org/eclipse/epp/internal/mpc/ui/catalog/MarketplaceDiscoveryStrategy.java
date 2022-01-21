@@ -77,7 +77,6 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.userstorage.IStorage;
 import org.eclipse.userstorage.oauth.EclipseOAuthCredentialsProvider;
 import org.eclipse.userstorage.spi.ICredentialsProvider;
-import org.osgi.framework.BundleContext;
 
 /**
  * @author David Green
