@@ -373,7 +373,7 @@ public class DefaultMarketplaceServiceTest {
 	public void getNodes() throws CoreException {
 		INode idNode1 = QueryHelper.nodeById("206");//Mylyn
 		INode idNode2 = QueryHelper.nodeById("1139");//Subversive
-		INode idNode3 = QueryHelper.nodeById("252");//M2E
+		INode idNode3 = QueryHelper.nodeById("5321178");//M2E
 		INode urlNode = QueryHelper.nodeByUrl("https://marketplace.eclipse.org/content/egit-git-integration-eclipse");
 		List<INode> query = Arrays.asList(idNode1, idNode2, urlNode, idNode3);
 
