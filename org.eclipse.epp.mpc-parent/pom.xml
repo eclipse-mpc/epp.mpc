@@ -293,7 +293,7 @@
             <plugin>
                <groupId>org.eclipse.cbi.maven.plugins</groupId>
                <artifactId>eclipse-jarsigner-plugin</artifactId>
-               <version>1.1.7</version>
+               <version>1.3.2</version>
             </plugin>
 
             <plugin>
@@ -372,6 +372,16 @@
          </releases>
          <snapshots>
             <enabled>true</enabled>
+         </snapshots>
+      </pluginRepository>
+      <pluginRepository>
+         <id>eclipse-cbi-releases</id>
+         <url>https://repo.eclipse.org/content/repositories/cbi-releases/</url>
+         <releases>
+            <enabled>true</enabled>
+         </releases>
+         <snapshots>
+            <enabled>false</enabled>
          </snapshots>
       </pluginRepository>
    </pluginRepositories>
