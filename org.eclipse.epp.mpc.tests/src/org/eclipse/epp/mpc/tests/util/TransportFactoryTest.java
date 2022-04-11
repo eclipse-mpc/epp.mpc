@@ -34,22 +34,21 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.http.ConnectionClosedException;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.AuthSchemes;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.config.Lookup;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
+import org.apache.hc.client5.http.auth.CredentialsProvider;
+import org.apache.hc.client5.http.auth.CredentialsStore;
+import org.apache.hc.client5.http.auth.StandardAuthScheme;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ConnectionClosedException;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpRequest;
+import org.apache.hc.core5.http.HttpRequestInterceptor;
+import org.apache.hc.core5.http.config.Lookup;
+import org.apache.hc.core5.http.protocol.BasicHttpContext;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.ServiceHelperImpl;
@@ -89,13 +88,13 @@ public class TransportFactoryTest {
 		private HttpRequest interceptedRequest;
 
 		@Override
-		public CredentialsProvider customizeCredentialsProvider(CredentialsProvider credentialsProvider) {
-			return null;
+		public CredentialsStore customizeCredentialsProvider(CredentialsStore credentialsProvider) {
+			return credentialsProvider;
 		}
 
 		@Override
 		public HttpClientBuilder customizeBuilder(HttpClientBuilder builder) {
-			return builder.addInterceptorLast((HttpRequestInterceptor) (request, context) -> {
+			return builder.addRequestInterceptorLast((HttpRequestInterceptor) (request, entityDetails, context) -> {
 				interceptedRequest = request;
 				interceptedContext = context;
 				throw new ConnectionClosedException("Aborting test request before execution");
@@ -240,7 +239,8 @@ public class TransportFactoryTest {
 		HttpClientTransport transport = new HttpClientTransport();
 		HttpClientService mockClient = Mockito.mock(HttpClientService.class);
 		Mockito.when(mockClient.configureRequest(ArgumentMatchers.any())).thenAnswer(args -> args.getArgument(0));
-		Mockito.doReturn(mockResponse(mockStatusLine(503, "Expected test error"), null)).when(mockClient).execute(
+
+		Mockito.doReturn(mockResponse(503, "Expected test error")).when(mockClient).execute(
 				ArgumentMatchers.any());
 
 		transport.bindHttpClientService(mockClient);
@@ -280,7 +280,7 @@ public class TransportFactoryTest {
 		Mockito.when(customizer.customizeBuilder(ArgumentMatchers.any())).thenAnswer(invocation -> {
 			HttpClientBuilder builder = (HttpClientBuilder) invocation.getArguments()[0];
 			return builder == null ? null
-					: builder.addInterceptorFirst((HttpRequestInterceptor) (request, context) -> request.addHeader(
+					: builder.addRequestInterceptorFirst((HttpRequestInterceptor) (request, entityDetails, context) -> request.addHeader(
 							"X-Customizer-Test", "true"));
 		});
 		Mockito.when(customizer.customizeCredentialsProvider(ArgumentMatchers.any())).thenReturn(null);
@@ -349,7 +349,7 @@ public class TransportFactoryTest {
 				HttpClientContext.CREDS_PROVIDER);
 
 		assertNotNull(authRegistry);
-		Object ntlmFactory = authRegistry.lookup(AuthSchemes.NTLM);
+		Object ntlmFactory = authRegistry.lookup(StandardAuthScheme.NTLM);
 		assertNotNull(ntlmFactory);
 		assertEquals("org.apache.http.impl.auth.win.WindowsNTLMSchemeFactory", ntlmFactory.getClass().getName());
 
@@ -382,19 +382,14 @@ public class TransportFactoryTest {
 		return abortRequestCustomizer;
 	}
 
-	private static HttpResponse mockResponse(StatusLine statusLine, HttpEntity entity) {
-		HttpResponse mockResponse = Mockito.mock(HttpResponse.class);
-		Mockito.when(mockResponse.getStatusLine()).thenReturn(statusLine);
-		Mockito.when(mockResponse.getEntity()).thenReturn(entity);
+	private static ClassicHttpResponse mockResponse(int statusCode, String reasonPhrase) {
+
+		ClassicHttpResponse mockResponse = Mockito.mock(ClassicHttpResponse.class);
+		Mockito.when(mockResponse.getCode()).thenReturn(statusCode);
+		Mockito.when(mockResponse.getReasonPhrase()).thenReturn(reasonPhrase);
 		return mockResponse;
 	}
 
-	private static StatusLine mockStatusLine(int statusCode, String reasonPhrase) {
-		StatusLine statusLine = Mockito.mock(StatusLine.class);
-		Mockito.when(statusLine.getReasonPhrase()).thenReturn(reasonPhrase);
-		Mockito.when(statusLine.getStatusCode()).thenReturn(statusCode);
-		return statusLine;
-	}
 
 	private static String getTransportServiceName() {
 		BundleContext bundleContext = FrameworkUtil.getBundle(TransportFactory.class).getBundleContext();

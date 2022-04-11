@@ -127,8 +127,7 @@ public class FallbackTransportFactory implements ITransportFactory {
 			connectionFailures++;
 			if (fallbackTransport != null) {
 				boolean fallbackSucceeded = false;
-				try {
-					InputStream fallbackStream = fallbackTransport.stream(location, monitor);
+				try (InputStream fallbackStream = fallbackTransport.stream(location, monitor)) {
 					BufferedInputStream buffered = new BufferedInputStream(fallbackStream);
 					tryBuffer(buffered);
 					fallbackSucceeded = true;

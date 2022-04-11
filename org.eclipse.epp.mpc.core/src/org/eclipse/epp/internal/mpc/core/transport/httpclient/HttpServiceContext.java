@@ -12,9 +12,9 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.transport.httpclient;
 
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.hc.client5.http.auth.CredentialsStore;
+import org.apache.hc.client5.http.cookie.CookieStore;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 
 public class HttpServiceContext {
 
@@ -22,14 +22,14 @@ public class HttpServiceContext {
 
 	private final CookieStore cookieStore;
 
-	private final CredentialsProvider credentialsProvider;
+	private final CredentialsStore credentialsProvider;
 
-	private final CredentialsProvider credentialsCacheProvider;
+	private final CredentialsStore credentialsCacheProvider;
 
-	private final CredentialsProvider initialCredentialsProvider;
+	private final CredentialsStore initialCredentialsProvider;
 
-	HttpServiceContext(CloseableHttpClient client, CookieStore cookieStore, CredentialsProvider credentialsProvider,
-			CredentialsProvider initialCredentialsProvider, CredentialsProvider credentialsCacheProvider) {
+	HttpServiceContext(CloseableHttpClient client, CookieStore cookieStore, CredentialsStore credentialsProvider,
+			CredentialsStore initialCredentialsProvider, CredentialsStore credentialsCacheProvider) {
 		this.client = client;
 		this.cookieStore = cookieStore;
 		this.credentialsProvider = credentialsProvider;
@@ -45,15 +45,15 @@ public class HttpServiceContext {
 		return cookieStore;
 	}
 
-	public CredentialsProvider getCredentialsProvider() {
+	public CredentialsStore getCredentialsProvider() {
 		return credentialsProvider;
 	}
 
-	CredentialsProvider getInitialCredentialsProvider() {
+	CredentialsStore getInitialCredentialsProvider() {
 		return initialCredentialsProvider;
 	}
 
-	CredentialsProvider getCredentialsCacheProvider() {
+	CredentialsStore getCredentialsCacheProvider() {
 		return credentialsCacheProvider;
 	}
 }

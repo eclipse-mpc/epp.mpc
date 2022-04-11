@@ -5,7 +5,7 @@
 <unit id="org.eclipse.equinox.p2.discovery.feature.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.equinox.p2.sdk.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.sdk.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/eclipse/updates/4.23-I-builds"/>
+<repository location="http://download.eclipse.org/eclipse/updates/4.24-I-builds"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.hamcrest" version="0.0.0"/>
@@ -14,11 +14,6 @@
 <unit id="org.junit" version="0.0.0"/>
 <unit id="org.mockito" version="0.0.0"/>
 <repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20211213173813/repository"/>
-</location>
-<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.epp.mpc.apache.httpclient.feature.feature.group" version="0.0.0"/>
-<unit id="org.eclipse.epp.mpc.apache.httpclient.feature.source.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/mpc/httpclient/drops/1.0.0/202101081126/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.license.feature.group" version="0.0.0"/>

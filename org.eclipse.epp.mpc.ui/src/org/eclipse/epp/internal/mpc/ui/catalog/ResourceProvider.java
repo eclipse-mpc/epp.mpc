@@ -305,8 +305,7 @@ public class ResourceProvider {
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					try {
-						InputStream in = TransportFactory.createTransport().stream(resourceUrl, monitor);
+					try (InputStream in = TransportFactory.createTransport().stream(resourceUrl, monitor)) {
 						finalResourceFuture.retrieve(in);
 					} catch (FileNotFoundException e) {
 						//MarketplaceClientUi.error(NLS.bind(Messages.AbstractResourceRunnable_resourceNotFound, new Object[] { catalogItem.getName(),

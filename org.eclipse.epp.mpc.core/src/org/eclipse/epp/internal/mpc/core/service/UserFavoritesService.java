@@ -35,10 +35,10 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.methods.RequestBuilder;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -621,8 +621,8 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		}
 
 		@Override
-		protected HttpUriRequest configureRequest(HttpClientService client, HttpUriRequest request) {
-			HttpUriRequest configuredRequest = super.configureRequest(client, request);
+		protected ClassicHttpRequest configureRequest(HttpClientService client, ClassicHttpRequest request) {
+			ClassicHttpRequest configuredRequest = super.configureRequest(client, request);
 			configuredRequest.setHeader(HttpHeaders.USER_AGENT, Session.USER_AGENT_ID);
 			return configuredRequest;
 		}
@@ -679,8 +679,8 @@ public class UserFavoritesService extends AbstractDataStorageService implements 
 		protected abstract T parseListElement(String listElement);
 
 		@Override
-		protected HttpUriRequest createRequest(URI uri) {
-			return RequestBuilder.get(uri)
+		protected ClassicHttpRequest createRequest(URI uri) {
+			return ClassicRequestBuilder.get(uri)
 					.addHeader(HttpHeaders.CONTENT_TYPE, Session.APPLICATION_JSON) //
 					.addHeader(HttpHeaders.ACCEPT, Session.APPLICATION_JSON)
 					.build();

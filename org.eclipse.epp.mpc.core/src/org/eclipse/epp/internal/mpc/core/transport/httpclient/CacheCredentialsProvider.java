@@ -17,12 +17,14 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.Credentials;
-import org.apache.http.client.CredentialsProvider;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.Credentials;
+import org.apache.hc.client5.http.auth.CredentialsStore;
+import org.apache.hc.core5.http.protocol.HttpContext;
 
-class CacheCredentialsProvider implements CredentialsProvider {
+class CacheCredentialsProvider implements CredentialsStore {
 
+	private static final String AUTHENTICATION_SCOPE_MAY_NOT_BE_NULL = "Authentication scope may not be null";
 	private final HashMap<AuthScope, Credentials> credentials;
 
 	/**
@@ -35,9 +37,9 @@ class CacheCredentialsProvider implements CredentialsProvider {
 
 	public synchronized void removeCredentials(final AuthScope authscope) {
 		if (authscope == null) {
-			throw new IllegalArgumentException("Authentication scope may not be null");
+			throw new IllegalArgumentException(AUTHENTICATION_SCOPE_MAY_NOT_BE_NULL);
 		}
-		Credentials match = getCredentials(authscope);
+		Credentials match = getCredentials(authscope, null);
 		if (match == null) {
 			return;
 		}
@@ -54,7 +56,7 @@ class CacheCredentialsProvider implements CredentialsProvider {
 	@Override
 	public synchronized void setCredentials(final AuthScope authscope, final Credentials credentials) {
 		if (authscope == null) {
-			throw new IllegalArgumentException("Authentication scope may not be null");
+			throw new IllegalArgumentException(AUTHENTICATION_SCOPE_MAY_NOT_BE_NULL);
 		}
 		if (credentials == null) {
 			removeCredentials(authscope);
@@ -93,9 +95,9 @@ class CacheCredentialsProvider implements CredentialsProvider {
 	}
 
 	@Override
-	public synchronized Credentials getCredentials(final AuthScope authscope) {
+	public synchronized Credentials getCredentials(final AuthScope authscope, HttpContext context) {
 		if (authscope == null) {
-			throw new IllegalArgumentException("Authentication scope may not be null");
+			throw new IllegalArgumentException(AUTHENTICATION_SCOPE_MAY_NOT_BE_NULL);
 		}
 		return findBestCredentials(authscope);
 	}
@@ -109,4 +111,5 @@ class CacheCredentialsProvider implements CredentialsProvider {
 	public String toString() {
 		return credentials.toString();
 	}
+
 }

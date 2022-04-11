@@ -161,8 +161,7 @@ public class RemoteMarketplaceService<T> {
 		try {
 			while (true) {
 				progress.setWorkRemaining(100);
-				try {
-					InputStream in = transport.stream(location, progress.newChild(70));
+				try (InputStream in = transport.stream(location, progress.newChild(70));) {
 					try {
 						progress.setWorkRemaining(100);
 						progress.worked(30);
@@ -172,10 +171,6 @@ public class RemoteMarketplaceService<T> {
 						MarketplaceClientCore.error(
 								NLS.bind(Messages.DefaultMarketplaceService_parseError, location.toString()), e);
 						throw e;
-					} finally {
-						if (in != null) {
-							in.close();
-						}
 					}
 				} catch (Exception e) {
 					if (e.getCause() instanceof OperationCanceledException) {

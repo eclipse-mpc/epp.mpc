@@ -14,24 +14,28 @@ package org.eclipse.epp.internal.mpc.core.transport.httpclient;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 
-import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.Credentials;
-import org.apache.http.auth.NTCredentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.Configurable;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.methods.RequestBuilder;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.protocol.HttpContext;
+import org.apache.hc.client5.http.ClientProtocolException;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.Credentials;
+import org.apache.hc.client5.http.auth.CredentialsStore;
+import org.apache.hc.client5.http.auth.NTCredentials;
+import org.apache.hc.client5.http.auth.StandardAuthScheme;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.config.Configurable;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.epp.internal.mpc.core.util.ProxyHelper;
@@ -43,7 +47,7 @@ import org.osgi.service.component.annotations.ReferencePolicyOption;
 @Component(name = "org.eclipse.epp.mpc.core.http.client", service = { HttpClientService.class })
 public class HttpClientService {
 
-	private HttpClient client;
+	private CloseableHttpClient client;
 
 	private HttpServiceContext context;
 
@@ -70,19 +74,20 @@ public class HttpClientService {
 		}
 	}
 
-	public HttpResponse execute(HttpUriRequest request) throws ClientProtocolException, IOException {
+	public ClassicHttpResponse execute(ClassicHttpRequest request)
+			throws ClientProtocolException, IOException {
 		return execute(request, null);
 	}
 
-	public HttpResponse execute(HttpUriRequest request, HttpContext context)
+	public ClassicHttpResponse execute(ClassicHttpRequest request, HttpContext context)
 			throws ClientProtocolException, IOException {
 		HttpClientContext internalContext = context == null ? new HttpClientContext()
 				: HttpClientContext.adapt(context);
-		HttpUriRequest configuredRequest = configureRequestExecution(request, internalContext);
+		ClassicHttpRequest configuredRequest = configureRequestExecution(request, internalContext);
 		return client.execute(configuredRequest, internalContext);
 	}
 
-	private HttpUriRequest configureRequestExecution(HttpUriRequest request, HttpClientContext context)
+	private ClassicHttpRequest configureRequestExecution(ClassicHttpRequest request, HttpClientContext context)
 			throws IOException {
 		final RequestConfig.Builder builder;
 		RequestConfig requestConfig = context.getRequestConfig();
@@ -100,36 +105,37 @@ public class HttpClientService {
 		configureRequestExecution(request, context, builder);
 
 		RequestConfig config = builder.build();
-		if (request instanceof HttpRequestBase) {
-			((HttpRequestBase) request).setConfig(config);
-			return request;
-		} else {
-			return RequestBuilder.copy(request).setConfig(config).build();
+		return setConfig(request, config);
+	}
+
+	protected void configureRequestExecution(ClassicHttpRequest request, HttpClientContext context,
+			RequestConfig.Builder builder) throws IOException {
+		try {
+			configureProxy(request.getUri(), context, builder);
+		} catch (URISyntaxException e) {
+			throw new IOException(e);
 		}
 	}
 
-	protected void configureRequestExecution(HttpUriRequest request, HttpClientContext context,
-			RequestConfig.Builder builder) throws IOException {
-		configureProxy(request.getURI(), context, builder);
-	}
-
-	private static HttpUriRequest setConfig(HttpUriRequest request, RequestConfig config) {
-		if (request instanceof HttpRequestBase) {
-			((HttpRequestBase) request).setConfig(config);
+	private static ClassicHttpRequest setConfig(ClassicHttpRequest request, RequestConfig config) {
+		if (request instanceof HttpUriRequestBase) {
+			((HttpUriRequestBase) request).setConfig(config);
 		} else {
-			request = RequestBuilder.copy(request).setConfig(config).build();
+			// TODO httpclient5: how to set the config
+			request = ClassicRequestBuilder.copy(request)/*.setConfig(config)*/.build();
 		}
 		return request;
 	}
 
-	public HttpUriRequest configureRequest(HttpUriRequest request) {
+	public ClassicHttpRequest configureRequest(ClassicHttpRequest request) {
 		if (client instanceof Configurable && ((Configurable) client).getConfig() != null) {
 			return setConfig(request, ((Configurable) client).getConfig());
 		}
 		return request;
 	}
 
-	public HttpResponse configureAndExecute(HttpUriRequest request) throws ClientProtocolException, IOException {
+	public HttpResponse configureAndExecute(HttpUriRequest request)
+			throws ClientProtocolException, IOException {
 		return configureAndExecute(request, null);
 	}
 
@@ -138,7 +144,7 @@ public class HttpClientService {
 		return execute(configureRequest(request), context);
 	}
 
-	public HttpClient getClient() {
+	public CloseableHttpClient getClient() {
 		return client;
 	}
 
@@ -173,21 +179,21 @@ public class HttpClientService {
 		HttpHost proxyHost;
 		if ((proxyUserID = proxy.getUserId()) != null && (proxyHost = getProxyHost(proxy)) != null) {
 			String domainUserID = NTLMDomainUtil.getNTLMUserName(proxyUserID);
-			String password = proxy.getPassword();
+			char[] password = proxy.getPassword().toCharArray();
 			String domain = NTLMDomainUtil.getNTLMUserDomain(proxyUserID);
 			if (domain != null || !proxyUserID.equals(domainUserID)) {
 				String workstation = NTLMDomainUtil.getNTLMWorkstation();
-				setAuth(context, new AuthScope(proxyHost, AuthScope.ANY_REALM, "ntlm"), //$NON-NLS-1$
+				setAuth(context, new AuthScope(proxyHost, null, StandardAuthScheme.NTLM),
 						new NTCredentials(domainUserID, password, workstation, domain));
 			} else {
-				setAuth(context, new AuthScope(proxyHost, AuthScope.ANY_REALM, AuthScope.ANY_SCHEME),
+				setAuth(context, new AuthScope(proxyHost, null, null),
 						new UsernamePasswordCredentials(proxyUserID, password));
 			}
 		}
 	}
 
 	private void setAuth(HttpClientContext clientContext, AuthScope authScope, Credentials credentials) {
-		CredentialsProvider authStore = clientContext.getCredentialsProvider();
+		CredentialsStore authStore = (CredentialsStore) clientContext.getCredentialsProvider();
 		if (authStore == null) {
 			authStore = new BasicCredentialsProvider();
 			authStore = new ChainedCredentialsProvider(authStore, this.context.getCredentialsProvider());

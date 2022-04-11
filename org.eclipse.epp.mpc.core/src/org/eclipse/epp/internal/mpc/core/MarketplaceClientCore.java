@@ -21,8 +21,8 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
-import org.apache.http.ConnectionClosedException;
-import org.apache.http.NoHttpResponseException;
+import org.apache.hc.core5.http.ConnectionClosedException;
+import org.apache.hc.core5.http.NoHttpResponseException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;

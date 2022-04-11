@@ -12,15 +12,16 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.transport.httpclient;
 
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.Credentials;
-import org.apache.http.auth.NTCredentials;
-import org.apache.http.impl.client.SystemDefaultCredentialsProvider;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.Credentials;
+import org.apache.hc.client5.http.auth.NTCredentials;
+import org.apache.hc.client5.http.impl.auth.SystemDefaultCredentialsProvider;
+import org.apache.hc.core5.http.protocol.HttpContext;
 
 public class SystemCredentialsProvider extends SystemDefaultCredentialsProvider {
 	@Override
-	public Credentials getCredentials(AuthScope authscope) {
-		Credentials credentials = super.getCredentials(authscope);
+	public Credentials getCredentials(AuthScope authscope, HttpContext context) {
+		Credentials credentials = super.getCredentials(authscope, context);
 		if (credentials instanceof NTCredentials) {
 			NTCredentials ntCredentials = (NTCredentials) credentials;
 			if (ntCredentials.getDomain() == null || ntCredentials.getWorkstation() == null) {

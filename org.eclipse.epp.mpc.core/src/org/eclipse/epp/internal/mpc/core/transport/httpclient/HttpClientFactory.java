@@ -14,15 +14,16 @@ package org.eclipse.epp.internal.mpc.core.transport.httpclient;
 
 import java.util.List;
 
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.config.SocketConfig;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.ProxyAuthenticationStrategy;
-import org.apache.http.impl.client.TargetAuthenticationStrategy;
+import org.apache.hc.client5.http.auth.CredentialsStore;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.cookie.BasicCookieStore;
+import org.apache.hc.client5.http.cookie.CookieStore;
+import org.apache.hc.client5.http.impl.DefaultAuthenticationStrategy;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.core5.http.HttpRequestInterceptor;
+import org.apache.hc.core5.http.io.SocketConfig;
+import org.apache.hc.core5.util.Timeout;
 import org.eclipse.userstorage.internal.StorageProperties;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Component;
@@ -58,17 +59,16 @@ public class HttpClientFactory {
 			cookieStore = createCookieStore();
 		}
 
-		CredentialsProvider cacheProvider = oldContext == null ? null
+		CredentialsStore cacheProvider = oldContext == null ? null
 				: oldContext.getCredentialsCacheProvider();
 		if (cacheProvider == null) {
 			cacheProvider = createCredentialsCacheProvider();
 		}
-		CredentialsProvider initialCredentialsProvider = oldContext == null ? null
-				: oldContext.getInitialCredentialsProvider();
+		CredentialsStore initialCredentialsProvider = oldContext == null ? null : oldContext.getInitialCredentialsProvider();
 		if (initialCredentialsProvider == null) {
 			initialCredentialsProvider = createCredentialsProvider();
 		}
-		CredentialsProvider credentialsProvider = initialCredentialsProvider;
+		CredentialsStore credentialsProvider = initialCredentialsProvider;
 		if (credentialsProvider != null) {
 			credentialsProvider = customizeCredentialsProvider(clientBuilder, credentialsProvider, cacheProvider);
 		}
@@ -78,15 +78,15 @@ public class HttpClientFactory {
 
 		clientBuilder = customizeBuilder(clientBuilder);
 
-		return new HttpServiceContext(clientBuilder.build(), cookieStore, credentialsProvider,
-				initialCredentialsProvider, cacheProvider);
+		return new HttpServiceContext(clientBuilder.build(), cookieStore, credentialsProvider, initialCredentialsProvider,
+				cacheProvider);
 	}
 
-	protected CredentialsProvider createCredentialsProvider() {
+	protected CredentialsStore createCredentialsProvider() {
 		return new SystemCredentialsProvider();
 	}
 
-	protected CredentialsProvider createCredentialsCacheProvider() {
+	protected CredentialsStore createCredentialsCacheProvider() {
 		return new CacheCredentialsProvider();
 	}
 
@@ -94,15 +94,16 @@ public class HttpClientFactory {
 		return new BasicCookieStore();
 	}
 
-	private CredentialsProvider customizeCredentialsProvider(HttpClientBuilder clientBuilder,
-			CredentialsProvider credentialsProvider, CredentialsProvider cacheProvider) {
+	private CredentialsStore customizeCredentialsProvider(HttpClientBuilder clientBuilder,
+			CredentialsStore credentialsProvider, CredentialsStore cacheProvider) {
 		//TODO we should handle configured proxy passwords and dialogs to prompt for unknown credentials on our own...
 		credentialsProvider = customizeCredentialsProvider(credentialsProvider);
 
 		if (cacheProvider != null) {
 			credentialsProvider = new ChainedCredentialsProvider(cacheProvider, credentialsProvider);
 
-			clientBuilder.addInterceptorFirst((HttpRequestInterceptor) (request, context) -> context
+			clientBuilder
+			.addRequestInterceptorFirst((HttpRequestInterceptor) (request, entityDetails, context) -> context
 					.setAttribute(CacheCredentialsAuthenticationStrategy.CREDENTIALS_CACHE_ATTRIBUTE, cacheProvider));
 		}
 		credentialsProvider = new SynchronizedCredentialsProvider(credentialsProvider);
@@ -113,13 +114,16 @@ public class HttpClientFactory {
 	protected HttpClientBuilder builder() {
 		HttpClientBuilder builder = HttpClientBuilder.create();
 
-		builder.setMaxConnPerRoute(100).setMaxConnTotal(200);
+		PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
+		connManager.setDefaultMaxPerRoute(100);
+		connManager.setMaxTotal(200);
+		builder.setConnectionManager(connManager);
 		setClientDefaultTimeouts(builder);
 
 		builder.setTargetAuthenticationStrategy(
-				new CacheCredentialsAuthenticationStrategy.Target(TargetAuthenticationStrategy.INSTANCE));
+				new CacheCredentialsAuthenticationStrategy.Target(DefaultAuthenticationStrategy.INSTANCE)); // TODO httpclient5: was TargetAuthenticationStrategy.INSTANCE
 		builder.setProxyAuthenticationStrategy(
-				new CacheCredentialsAuthenticationStrategy.Proxy(ProxyAuthenticationStrategy.INSTANCE));
+				new CacheCredentialsAuthenticationStrategy.Proxy(DefaultAuthenticationStrategy.INSTANCE)); // TODO httpclient5: was ProxyAuthenticationStrategy.INSTANCE
 
 		builder.setUserAgent(HttpClientTransport.USER_AGENT);
 
@@ -141,7 +145,7 @@ public class HttpClientFactory {
 				HttpClientTransport.DEFAULT_CONNECTION_REQUEST_TIMEOUT);
 
 		SocketConfig defaultSocketConfig = SocketConfig.copy(SocketConfig.DEFAULT)
-				.setSoTimeout(readTimeout)
+				.setSoTimeout(Timeout.ofMilliseconds(readTimeout))
 				.setTcpNoDelay(true)//Disable Nagle - see https://en.wikipedia.org/wiki/Nagle%27s_algorithm#Negative_effect_on_larger_writes
 				//.setSoLinger(0)
 				//TODO is it safe to set this to 0? This will forcefully terminate sockets on close instead of waiting for graceful close
@@ -149,11 +153,13 @@ public class HttpClientFactory {
 				//and https://issues.apache.org/jira/browse/HTTPCLIENT-1497
 				.build();
 		RequestConfig defaultRequestConfig = RequestConfig.copy(RequestConfig.DEFAULT)
-				.setSocketTimeout(readTimeout)
-				.setConnectTimeout(connectTimeout)
-				.setConnectionRequestTimeout(connectionRequestTimeout)
+				.setResponseTimeout(Timeout.ofMilliseconds(readTimeout))
+				.setConnectTimeout(Timeout.ofMilliseconds(connectTimeout))
+				.setConnectionRequestTimeout(Timeout.ofMilliseconds(connectionRequestTimeout))
 				.build();
-		builder.setDefaultSocketConfig(defaultSocketConfig);
+		PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
+		connManager.setDefaultSocketConfig(defaultSocketConfig);
+		builder.setConnectionManager(connManager);
 		builder.setDefaultRequestConfig(defaultRequestConfig);
 	}
 
@@ -188,20 +194,20 @@ public class HttpClientFactory {
 		return customBuilder == null ? builder : customBuilder;
 	}
 
-	private CredentialsProvider customizeCredentialsProvider(CredentialsProvider credentialsProvider) {
-		CredentialsProvider customizedCredentialsProvider = credentialsProvider;
+	private CredentialsStore customizeCredentialsProvider(CredentialsStore credentialsProvider) {
+		CredentialsStore customizedCredentialsProvider = credentialsProvider;
 		for (HttpClientCustomizer customizer : this.customizers) {
 			customizedCredentialsProvider = customizeCredentialsProvider(customizer, customizedCredentialsProvider);
 		}
 		return customizedCredentialsProvider;
 	}
 
-	private static CredentialsProvider customizeCredentialsProvider(HttpClientCustomizer customizer,
-			CredentialsProvider credentialsProvider) {
+	private static CredentialsStore customizeCredentialsProvider(HttpClientCustomizer customizer,
+			CredentialsStore credentialsProvider) {
 		if (customizer == null) {
 			return credentialsProvider;
 		}
-		CredentialsProvider customCredentialsProvider = customizer.customizeCredentialsProvider(credentialsProvider);
+		CredentialsStore customCredentialsProvider = customizer.customizeCredentialsProvider(credentialsProvider);
 		return customCredentialsProvider == null ? credentialsProvider : customCredentialsProvider;
 	}
 }

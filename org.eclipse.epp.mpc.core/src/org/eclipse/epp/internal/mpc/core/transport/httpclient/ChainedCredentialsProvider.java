@@ -12,17 +12,18 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.transport.httpclient;
 
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.Credentials;
-import org.apache.http.client.CredentialsProvider;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.Credentials;
+import org.apache.hc.client5.http.auth.CredentialsStore;
+import org.apache.hc.core5.http.protocol.HttpContext;
 
-public class ChainedCredentialsProvider implements CredentialsProvider {
+public class ChainedCredentialsProvider implements CredentialsStore {
 
-	private final CredentialsProvider first;
+	private final CredentialsStore first;
 
-	private final CredentialsProvider second;
+	private final CredentialsStore second;
 
-	public ChainedCredentialsProvider(CredentialsProvider first, CredentialsProvider second) {
+	public ChainedCredentialsProvider(CredentialsStore first, CredentialsStore second) {
 		super();
 		this.first = first;
 		this.second = second;
@@ -34,12 +35,12 @@ public class ChainedCredentialsProvider implements CredentialsProvider {
 	}
 
 	@Override
-	public Credentials getCredentials(AuthScope authscope) {
-		Credentials credentials = first.getCredentials(authscope);
+	public Credentials getCredentials(AuthScope authscope, HttpContext context) {
+		Credentials credentials = first.getCredentials(authscope, context);
 		if (credentials != null) {
 			return credentials;
 		}
-		return second.getCredentials(authscope);
+		return second.getCredentials(authscope, context);
 	}
 
 	@Override
@@ -51,14 +52,14 @@ public class ChainedCredentialsProvider implements CredentialsProvider {
 	/**
 	 * @noreference For test purposes only. This method is not intended to be referenced by clients.
 	 */
-	public CredentialsProvider getFirst() {
+	public CredentialsStore getFirst() {
 		return first;
 	}
 
 	/**
 	 * @noreference For test purposes only. This method is not intended to be referenced by clients.
 	 */
-	public CredentialsProvider getSecond() {
+	public CredentialsStore getSecond() {
 		return second;
 	}
 }

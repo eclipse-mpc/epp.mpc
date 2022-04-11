@@ -20,15 +20,14 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.hc.client5.http.ClientProtocolException;
+import org.apache.hc.client5.http.HttpResponseException;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpRequest;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -87,10 +86,6 @@ public class HttpClientTransport implements ITransport {
 		this.clientService = service;
 	}
 
-	protected HttpResponse execute(HttpUriRequest request) throws ClientProtocolException, IOException {
-		return clientService.execute(request);
-	}
-
 	protected HttpRequest configureRequest(HttpUriRequest request) {
 		return clientService.configureRequest(request);
 	}
@@ -99,7 +94,7 @@ public class HttpClientTransport implements ITransport {
 	public InputStream stream(URI location, IProgressMonitor monitor)
 			throws FileNotFoundException, ServiceUnavailableException, CoreException {
 		try {
-			return createStreamingRequest().execute(clientService, location);
+			return createStreamingRequest().execute(clientService, location, false);
 		} catch (HttpResponseException e) {
 			int statusCode = e.getStatusCode();
 			switch (statusCode) {
@@ -127,10 +122,10 @@ public class HttpClientTransport implements ITransport {
 			}
 
 			@Override
-			protected InputStream handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
+			protected InputStream handleResponse(ClassicHttpResponse response)
+					throws ClientProtocolException, IOException {
 				HttpEntity entity = response.getEntity();
-				StatusLine statusLine = response.getStatusLine();
-				handleResponseStatus(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+				handleResponseStatus(response.getCode(), response.getReasonPhrase());
 				return handleResponseEntity(entity);
 			}
 

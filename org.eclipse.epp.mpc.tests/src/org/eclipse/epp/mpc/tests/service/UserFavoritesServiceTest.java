@@ -12,12 +12,17 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
+import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.ServiceLocator;

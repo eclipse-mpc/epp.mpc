@@ -12,11 +12,11 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.transport.httpclient;
 
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.auth.CredentialsStore;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 
 public interface HttpClientCustomizer {
 	HttpClientBuilder customizeBuilder(HttpClientBuilder builder);
 
-	CredentialsProvider customizeCredentialsProvider(CredentialsProvider credentialsProvider);
+	CredentialsStore customizeCredentialsProvider(CredentialsStore credentialsProvider);
 }

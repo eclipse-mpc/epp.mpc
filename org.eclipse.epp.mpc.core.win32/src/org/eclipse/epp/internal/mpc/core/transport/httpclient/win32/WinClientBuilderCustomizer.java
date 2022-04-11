@@ -14,19 +14,19 @@ package org.eclipse.epp.internal.mpc.core.transport.httpclient.win32;
 
 import java.util.Map;
 
-import org.apache.http.auth.AuthSchemeProvider;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.config.AuthSchemes;
-import org.apache.http.config.Registry;
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.impl.auth.BasicSchemeFactory;
-import org.apache.http.impl.auth.DigestSchemeFactory;
-import org.apache.http.impl.auth.KerberosSchemeFactory;
-import org.apache.http.impl.auth.win.WindowsCredentialsProvider;
-import org.apache.http.impl.auth.win.WindowsNTLMSchemeFactory;
-import org.apache.http.impl.auth.win.WindowsNegotiateSchemeFactory;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.auth.AuthSchemeFactory;
+import org.apache.hc.client5.http.auth.CredentialsStore;
+import org.apache.hc.client5.http.auth.StandardAuthScheme;
+import org.apache.hc.client5.http.impl.auth.BasicSchemeFactory;
+import org.apache.hc.client5.http.impl.auth.DigestSchemeFactory;
+import org.apache.hc.client5.http.impl.auth.KerberosSchemeFactory;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.win.WindowsNTLMSchemeFactory;
+import org.apache.hc.client5.http.impl.win.WindowsNegotiateSchemeFactory;
+import org.apache.hc.core5.http.config.Registry;
+import org.apache.hc.core5.http.config.RegistryBuilder;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientCustomizer;
+import org.eclipse.epp.internal.mpc.core.transport.httpclient.SynchronizedCredentialsProvider;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -70,30 +70,31 @@ public class WinClientBuilderCustomizer implements HttpClientCustomizer {
 			return builder;
 		}
 		HttpClientBuilder winBuilder = builder == null ? HttpClientBuilder.create() : builder;
-		Registry<AuthSchemeProvider> authSchemeRegistry = createAuthSchemeRegistry();
+		Registry<AuthSchemeFactory> authSchemeRegistry = createAuthSchemeRegistry();
 		return winBuilder.setDefaultAuthSchemeRegistry(authSchemeRegistry);
 	}
 
-	private Registry<AuthSchemeProvider> createAuthSchemeRegistry() {
+	private Registry<AuthSchemeFactory> createAuthSchemeRegistry() {
 		@SuppressWarnings("restriction")
-		Registry<AuthSchemeProvider> authSchemeRegistry = RegistryBuilder.<AuthSchemeProvider> create()
-		.register(AuthSchemes.BASIC, new BasicSchemeFactory())
-		.register(AuthSchemes.DIGEST, new DigestSchemeFactory())
-		.register(AuthSchemes.NTLM, new WindowsNTLMSchemeFactory(servicePrincipalName))
-		.register(AuthSchemes.SPNEGO, new WindowsNegotiateSchemeFactory(servicePrincipalName))
-		.register(AuthSchemes.KERBEROS, new KerberosSchemeFactory())
+		Registry<AuthSchemeFactory> authSchemeRegistry = RegistryBuilder.<AuthSchemeFactory> create()
+		.register(StandardAuthScheme.BASIC, BasicSchemeFactory.INSTANCE)
+		.register(StandardAuthScheme.DIGEST, DigestSchemeFactory.INSTANCE)
+		.register(StandardAuthScheme.NTLM, new WindowsNTLMSchemeFactory(servicePrincipalName))
+		.register(StandardAuthScheme.SPNEGO, new WindowsNegotiateSchemeFactory(servicePrincipalName))
+		.register(StandardAuthScheme.KERBEROS, KerberosSchemeFactory.DEFAULT)
 		.build();
 		return authSchemeRegistry;
 	}
 
-	public CredentialsProvider customizeCredentialsProvider(CredentialsProvider credentialsProvider) {
+	@Override
+	public CredentialsStore customizeCredentialsProvider(CredentialsStore credentialsProvider) {
 		if (credentialsProvider == null || !isWinAuthAvailable()) {
 			return credentialsProvider;
 		}
 
 		@SuppressWarnings("restriction")
-		CredentialsProvider winCredentialsProvider = new WindowsCredentialsProvider(credentialsProvider);
-		return winCredentialsProvider;
+		CredentialsStore winCredentialsStore = new SynchronizedCredentialsProvider(credentialsProvider);
+		return winCredentialsStore;
 	}
 
 	public synchronized void activate(BundleContext context, Map<?, ?> properties) {
@@ -111,4 +112,5 @@ public class WinClientBuilderCustomizer implements HttpClientCustomizer {
 		}
 		return System.getProperty(SERVICE_PRINCIPAL_NAME_PROPERTY);
 	}
+
 }

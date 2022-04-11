@@ -32,11 +32,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.methods.RequestBuilder;
-import org.apache.http.message.BasicNameValuePair;
+import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -348,11 +348,11 @@ MarketplaceService {
 				IStatus missingNodeDetailStatus = error == null
 						? createStatus(IStatus.INFO, Messages.DefaultMarketplaceService_nodeNotFound, query)
 								: createStatus(IStatus.INFO, Messages.DefaultMarketplaceService_nodeNotFound, query, error);
-						if (missingNodes == null) {
-							missingNodes = new MultiStatus(MarketplaceClientCore.BUNDLE_ID, 0,
-									"Some entries could not be found on the Marketplace", null); //$NON-NLS-1$
-						}
-						missingNodes.add(missingNodeDetailStatus);
+				if (missingNodes == null) {
+					missingNodes = new MultiStatus(MarketplaceClientCore.BUNDLE_ID, 0,
+							"Some entries could not be found on the Marketplace", null); //$NON-NLS-1$
+				}
+				missingNodes.add(missingNodeDetailStatus);
 			}
 		}
 		if (missingNodes != null) {
@@ -807,8 +807,10 @@ MarketplaceService {
 				new RequestTemplate<Void>() {
 
 					@Override
-					protected HttpUriRequest createRequest(URI uri) {
-						return RequestBuilder.post(uri.resolve(API_ERROR_REPORT_URI)).setEntity(entity).build();
+					protected ClassicHttpRequest createRequest(URI uri) {
+						return ClassicRequestBuilder.post(uri.resolve(API_ERROR_REPORT_URI))
+								.setEntity(entity)
+								.build();
 					}
 
 					@Override
@@ -838,15 +840,9 @@ MarketplaceService {
 		}
 		url += "success"; //$NON-NLS-1$
 		url = addMetaParameters(url);
-		try {
-			InputStream stream = transport.stream(new URI(url), monitor);
-
-			try {
-				while (stream.read() != -1) {
-					// nothing to do
-				}
-			} finally {
-				stream.close();
+		try (InputStream stream = transport.stream(new URI(url), monitor)) {
+			while (stream.read() != -1) {
+				// nothing to do
 			}
 		} catch (Throwable e) {
 			//per bug 314028 logging this error is not useful.

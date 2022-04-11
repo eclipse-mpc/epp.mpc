@@ -18,16 +18,15 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.entity.ContentType;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.ClientProtocolException;
+import org.apache.hc.client5.http.HttpResponseException;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+
 
 public abstract class RequestTemplate<T> {
 
@@ -36,25 +35,33 @@ public abstract class RequestTemplate<T> {
 	}
 
 	public T execute(HttpClientService client, URI uri) throws ClientProtocolException, IOException {
-		HttpUriRequest request = createRequest(uri);
-		request = configureRequest(client, request);
-		HttpResponse response = client.execute(request);
-		return handleResponse(response);
+		return execute(client, uri, true);
 	}
 
-	protected abstract HttpUriRequest createRequest(URI uri);
+	public T execute(HttpClientService client, URI uri, boolean closeResponse)
+			throws ClientProtocolException, IOException {
+		ClassicHttpRequest request = createRequest(uri);
+		request = configureRequest(client, request);
+		ClassicHttpResponse response = client.execute(request);
+		T handledResponse = handleResponse(response);
+		if (closeResponse) {
+			response.close();
+		}
+		return handledResponse;
+	}
 
-	protected HttpUriRequest configureRequest(HttpClientService client, HttpUriRequest request) {
+	protected abstract ClassicHttpRequest createRequest(URI uri);
+
+	protected ClassicHttpRequest configureRequest(HttpClientService client, ClassicHttpRequest request) {
 		request.setHeader(HttpHeaders.USER_AGENT, getUserAgent());
 		return client.configureRequest(request);
 	}
 
-	protected T handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
+	protected T handleResponse(ClassicHttpResponse response) throws ClientProtocolException, IOException {
 		HttpEntity entity = null;
 		try {
-			final StatusLine statusLine = response.getStatusLine();
 			entity = response.getEntity();
-			handleResponseStatus(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+			handleResponseStatus(response.getCode(), response.getReasonPhrase());
 			return handleResponseEntity(entity);
 		} finally {
 			closeResponse(response, entity);
@@ -66,7 +73,8 @@ public abstract class RequestTemplate<T> {
 			return handleEmptyResponse();
 		}
 		Charset charset = null;
-		ContentType contentType = ContentType.get(entity);
+		ContentType contentType = ContentType.parse(entity.getContentType());
+
 		if (contentType != null) {
 			charset = contentType.getCharset();
 		}
@@ -90,13 +98,10 @@ public abstract class RequestTemplate<T> {
 		}
 	}
 
-	private static void closeResponse(HttpResponse response, final HttpEntity entity) throws IOException {
+	private static void closeResponse(ClassicHttpResponse response, final HttpEntity entity) throws IOException {
 		if (entity != null) {
 			EntityUtils.consumeQuietly(entity);
 		}
-		if (response instanceof CloseableHttpResponse) {
-			CloseableHttpResponse closeable = (CloseableHttpResponse) response;
-			closeable.close();
-		}
+		response.close();
 	}
 }
