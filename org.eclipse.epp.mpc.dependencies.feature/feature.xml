@@ -35,14 +35,14 @@
 
 
    <plugin
-         id="org.apache.httpcomponents.httpclient"
+         id="org.apache.httpcomponents.client5.httpclient5"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.apache.httpcomponents.httpclient.win"
+         id="org.apache.httpcomponents.client5.httpclient5-win"
          os="win32"
          download-size="0"
          install-size="0"
@@ -50,7 +50,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.apache.httpcomponents.httpcore"
+         id="org.apache.httpcomponents.core5.httpcore5"
          download-size="0"
          install-size="0"
          version="0.0.0"
