@@ -40,7 +40,9 @@ public class ChainedCredentialsProvider implements CredentialsStore {
 		if (credentials != null) {
 			return credentials;
 		}
-		return second.getCredentials(authscope, context);
+		credentials = second.getCredentials(authscope, context);
+		context.setAttribute(CacheCredentialsAuthenticationStrategy.CURRENT_CREDENTIALS, credentials);
+		return credentials;
 	}
 
 	@Override

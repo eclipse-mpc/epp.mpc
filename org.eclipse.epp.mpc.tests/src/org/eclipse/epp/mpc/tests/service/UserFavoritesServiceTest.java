@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
-import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.ServiceLocator;

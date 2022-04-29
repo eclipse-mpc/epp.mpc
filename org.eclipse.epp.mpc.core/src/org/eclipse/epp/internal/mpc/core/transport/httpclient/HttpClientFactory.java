@@ -18,7 +18,6 @@ import org.apache.hc.client5.http.auth.CredentialsStore;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.cookie.CookieStore;
-import org.apache.hc.client5.http.impl.DefaultAuthenticationStrategy;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.core5.http.HttpRequestInterceptor;
@@ -120,10 +119,7 @@ public class HttpClientFactory {
 		builder.setConnectionManager(connManager);
 		setClientDefaultTimeouts(builder);
 
-		builder.setTargetAuthenticationStrategy(
-				new CacheCredentialsAuthenticationStrategy.Target(DefaultAuthenticationStrategy.INSTANCE)); // TODO httpclient5: was TargetAuthenticationStrategy.INSTANCE
-		builder.setProxyAuthenticationStrategy(
-				new CacheCredentialsAuthenticationStrategy.Proxy(DefaultAuthenticationStrategy.INSTANCE)); // TODO httpclient5: was ProxyAuthenticationStrategy.INSTANCE
+		builder.addResponseInterceptorLast(new CacheCredentialsAuthenticationStrategy());
 
 		builder.setUserAgent(HttpClientTransport.USER_AGENT);
 

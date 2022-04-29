@@ -121,7 +121,7 @@ public class HttpClientService {
 		if (request instanceof HttpUriRequestBase) {
 			((HttpUriRequestBase) request).setConfig(config);
 		} else {
-			// TODO httpclient5: how to set the config
+			// could not set the config, here
 			request = ClassicRequestBuilder.copy(request)/*.setConfig(config)*/.build();
 		}
 		return request;
