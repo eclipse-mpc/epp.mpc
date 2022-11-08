@@ -34,7 +34,7 @@
 
       <owner>Mark Feber</owner>
       <favorited>13</favorited>
-      <body><![CDATA[<b>Emacs+ - <font color="#363696"><i>Eclipse Extensions for Emacs Expatriates</i></font></b>  - provides an enhanced <i>Emacs-like</i> experience in the Eclipse text editors.  Included are: 
+      <body><![CDATA[<b>Emacs+ - <font color="#363696"><i>Eclipse Extensions for Emacs Expatriates</i></font></b>  - provides an enhanced <i>Emacs-like</i> experience in the Eclipse text editors.  Included are:
 <ul>
 <li><b><i>M-x</i></b> command execution</li>
 <li><b><i>C-u</i></b> universal-argument</li>
@@ -51,7 +51,7 @@
 <li>Line and character commands</li>
 <li>Space and blank line handling</li>
 <li>Simple text manipulation commands</li>
-<li>End-of-line comment operations</li> 
+<li>End-of-line comment operations</li>
 </ul>
 In cases where the normal Emacs binding interferes with an Eclipse binding, the Emacs binding is preferred. As an optional feature, additional command and convenience override bindings can be installed.
 <br>
@@ -63,7 +63,7 @@ In cases where the normal Emacs binding interferes with an Eclipse binding, the 
       <foundationmember>0</foundationmember>
 
       <homepageurl><![CDATA[http://www.mulgasoft.com/emacsplus]]></homepageurl>
-      <image><![CDATA[http://marketplace.eclipse.org/sites/default/files/BlueLogo.png]]></image>
+      <image><![CDATA[https://marketplace.eclipse.org/sites/default/files/BlueLogo.png]]></image>
       <version>2.7.5</version>
       <license>EPL</license>
       <companyname><![CDATA[Mark Feber]]></companyname>
@@ -87,7 +87,7 @@ In cases where the normal Emacs binding interferes with an Eclipse binding, the 
       <favorited>12</favorited>
       <body><![CDATA[An Eclipse Team Provider plug-in providing support for Subversion within the Eclipse IDE.  Developed and maintained by Subversion core committers, Subclipse is always in synch with the latest Subversion features and releases.
 
-Subclipse includes the CollabNet Merge Client originally developed as part of the <a href="http://marketplace.eclipse.org/content/collabnet-desktop-eclipse-edition">CollabNet Desktop - Eclipse Edition</a>.  The CollabNet Merge Client provides powerful graphical merge capabilities that leverages the merge tracking functionality that was added as part of the Subversion 1.5 release.
+Subclipse includes the CollabNet Merge Client originally developed as part of the <a href="https://marketplace.eclipse.org/content/collabnet-desktop-eclipse-edition">CollabNet Desktop - Eclipse Edition</a>.  The CollabNet Merge Client provides powerful graphical merge capabilities that leverages the merge tracking functionality that was added as part of the Subversion 1.5 release.
 
 Subclipse includes an optional Mylyn connector that enables Mylyn to create automatic changesets based on the tasks you are working on.  It also enables links to tasks when viewing history of Subversion commits.
 
@@ -99,7 +99,7 @@ Finally, Subclipse includes a powerful revision graph feature that is built with
       <changed>1260805609</changed>
       <foundationmember>0</foundationmember>
       <homepageurl><![CDATA[http://subclipse.tigris.org/]]></homepageurl>
-      <image><![CDATA[http://marketplace.eclipse.org/sites/default/files/cn_svn.png]]></image>
+      <image><![CDATA[https://marketplace.eclipse.org/sites/default/files/cn_svn.png]]></image>
       <version>1.6.5</version>
       <license>EPL</license>
       <companyname><![CDATA[Subclipse Project]]></companyname>
@@ -120,10 +120,10 @@ Finally, Subclipse includes a powerful revision graph feature that is built with
       <owner>Jens Eckels</owner>
       <favorited>8</favorited>
       <body><![CDATA[<TABLE WIDTH=550 BORDER=0 align="left" CELLPADDING=0 CELLSPACING=0>
-  <tr><TD colspan=10"><div align="left"><font face="trebuchet ms"><strong>You already have the skills and resources to program for mobile devices. You just didn't know it until now! <br /><br /><em>Also now available: <a href="http://www.genuitec.com/mobiledredge">Mobile News</a> & <a href="http://www.genuitec.com/mobiledredge">Wireless News</a> for free! 
-  
+  <tr><TD colspan=10"><div align="left"><font face="trebuchet ms"><strong>You already have the skills and resources to program for mobile devices. You just didn't know it until now! <br /><br /><em>Also now available: <a href="http://www.genuitec.com/mobiledredge">Mobile News</a> & <a href="http://www.genuitec.com/mobiledredge">Wireless News</a> for free!
+
 </em></strong></font></div><font face="trebuchet ms"><br><font size="2"><a href="http://www.genuitec.com/mobile" target="_blank" title="mobile web development">Genuitec&#039;s MobiOne</a> is the best <a href="http://www.genuitec.com/mobile" target="_blank" title="iPhone simulator">iPhone emulator</a> on the market today, and has added a <a href="http://www.genuitec.com/mobile" target="_blank" title="Palm Pre simulator">Palm Pre emulator</a> and PhoneGap support in the latest milestone version! Try MobiOne today and learn how you already have the skills and resources to program for these popular mobile devices. It's more simple than you think.  </font></font></td></tr>
-  <TR> 
+  <TR>
     <TD colspan="11"><br><font face="trebuchet ms"><small><br /><center><img src="http://www.genuitec.com/images/epic_mobi_homeb.jpg" border="0" usemap="#map1"></center><br />
       MobiOne is available for developers using Windows, with plans soon for Mac and Linux. MobiOne is currently targeted at both iPhone and Palm Pre development, but will soon include Android and other smartphone modes!<br /><br /><a href="http://www.genuitec.com/mobile/download.html">Download MobiOne</a> now!</small></font></TD>
     <TD><br></TD>
@@ -140,7 +140,7 @@ Finally, Subclipse includes a powerful revision graph feature that is built with
   <area href="http://www.genuitec.com/mobile/download.html" shape="rect" coords="10,147,83,161" target="_blank" alt="Download MobiOne">
   <area href="http://www.genuitec.com/mobile/nn.html" shape="rect" coords="10,175,83,191" target="_blank" alt="MobiOne Resources">
   <area href="http://www.genuitec.com/download.html" shape="rect" coords="371,191,537,292" target="_blank" alt="Download MobiOne">
- 
+
 </map>
 ]]></body>
       <created>1243450561</created>
@@ -169,7 +169,7 @@ Finally, Subclipse includes a powerful revision graph feature that is built with
       </categories>
       <owner>Jens Eckels</owner>
       <favorited>8</favorited>
-      <body><![CDATA[<font class="pn-normal"><center><b>MyEclipse Blue Edition: the powerful IDE for WebSphere development<br>Now migrate from RAD or WSAD into MyEclipse with ease in 8.0 Blue Edition and take advantage of Internet Explorer Debugging, VisualVM Java Profiling, RESTful Web Service support, and a powerful Visual SQL Builder!</b><br><br><a href="http://www.myeclipseide.com/blue.php" target="_blank"><img src="http://www.myeclipseide.com/images/footer-images/myeclipseblue-logo.png" border="0" alt="MyEclipse Blue Edition | RAD and WebSphere Development"></a> <br></center><a href="http://www.myeclipseide.com/blue.php"><br></a><a href="http://www.myeclipseide.com/blue.php">MyEclipse Blue Edition</a> is a custom version of MyEclipse Enterprise Workbench tailored specifically for IBM WebSphere application server development. As a low cost compliment to Rational Application Developer (RAD), MyEclipse Blue Edition includes advanced customized tooling and capabilities for WebSphere's web services specifications, integrates seamlessly with ClearCase and is compatible with WebSphere 5.x, 6.0, 6.1 and 7. Blue Edition is available for Windows only at this time.<br><br><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-4.html"><strong>Download here!</strong></a><br><br><a href="http://cdn4.libsyn.com/interarbor/BriefingsDirect_Genuitec1.mp3" target="_blank">Listen to a podcast about Blue and choice in this development space</a><br><br>MyEclipse Blue Edition features include:  
+      <body><![CDATA[<font class="pn-normal"><center><b>MyEclipse Blue Edition: the powerful IDE for WebSphere development<br>Now migrate from RAD or WSAD into MyEclipse with ease in 8.0 Blue Edition and take advantage of Internet Explorer Debugging, VisualVM Java Profiling, RESTful Web Service support, and a powerful Visual SQL Builder!</b><br><br><a href="http://www.myeclipseide.com/blue.php" target="_blank"><img src="http://www.myeclipseide.com/images/footer-images/myeclipseblue-logo.png" border="0" alt="MyEclipse Blue Edition | RAD and WebSphere Development"></a> <br></center><a href="http://www.myeclipseide.com/blue.php"><br></a><a href="http://www.myeclipseide.com/blue.php">MyEclipse Blue Edition</a> is a custom version of MyEclipse Enterprise Workbench tailored specifically for IBM WebSphere application server development. As a low cost compliment to Rational Application Developer (RAD), MyEclipse Blue Edition includes advanced customized tooling and capabilities for WebSphere's web services specifications, integrates seamlessly with ClearCase and is compatible with WebSphere 5.x, 6.0, 6.1 and 7. Blue Edition is available for Windows only at this time.<br><br><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-4.html"><strong>Download here!</strong></a><br><br><a href="http://cdn4.libsyn.com/interarbor/BriefingsDirect_Genuitec1.mp3" target="_blank">Listen to a podcast about Blue and choice in this development space</a><br><br>MyEclipse Blue Edition features include:
 <br>
 <br>
 <table width="754">
@@ -255,7 +255,7 @@ Finally, Subclipse includes a powerful revision graph feature that is built with
     </tr>
     <tr>
       <td valign="top"><div align="center"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-18.html" target="_blank"><img border="0" src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/features_persistence.gif"></a></div></td>
-      <td valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-18.html" target="_blank">MyEclipse 
+      <td valign="middle"><a href="http://www.myeclipseide.com/module-htmlpages-display-pid-18.html" target="_blank">MyEclipse
         Persistence Tools- JPA, Toplink & Hibernate</a> </td>
       <td valign="middle"><div align="center"><img src="http://www.myeclipseide.com/modules/ContentExpress/img_repository/newsite/icons_features_win.gif"></div></td>
       <td valign="middle"><br></td>
@@ -345,21 +345,21 @@ Finally, Subclipse includes a powerful revision graph feature that is built with
       <td valign="middle"><br></td>
       <td valign="middle"><br></td>
     </tr>
-    
+
   </tbody>
 </table> <br><p><b>MyEclipse Innovations</b><br>The innovation and application of Eclipse technology is Genuitec's sole business. With well over 10 million downloads, MyEclipse Enterprise Workbench has grown to be the most popular and successful Eclipse-based JEE IDE. Our history of blending the best of open source with commercial-grade developed tools has created a long chain of Eclipse technology innovation that includes:<ul>
-    <li>First JSR-045 compliant source-level <a href="http://sandbox.myeclipseide.com/index.php?module=htmlpages&func=display&pid=62" target="_blank" title="JSP Debugger">JSP debugger</a> for Eclipse 
-    <li>First <a href="http://www.myeclipseide.com/static/java-ide.htm" target="_blank" title="RCP">public article</a> explaining that Eclipse could be used as a rich-client platform in early 2002 
+    <li>First JSR-045 compliant source-level <a href="http://sandbox.myeclipseide.com/index.php?module=htmlpages&func=display&pid=62" target="_blank" title="JSP Debugger">JSP debugger</a> for Eclipse
+    <li>First <a href="http://www.myeclipseide.com/static/java-ide.htm" target="_blank" title="RCP">public article</a> explaining that Eclipse could be used as a rich-client platform in early 2002
     <li>First commercial RCP applications shipped on Eclipse 2.0, well before the Eclipse 3.0 RCP
-    <li>First and most comprehensive suite of <a href="http://www.myeclipseide.com/index.php?module=htmlpages&func=display&pid=55" target="_blank" title="Application Server Connectors">application server connectors</a> for Eclipse 
+    <li>First and most comprehensive suite of <a href="http://www.myeclipseide.com/index.php?module=htmlpages&func=display&pid=55" target="_blank" title="Application Server Connectors">application server connectors</a> for Eclipse
     <li>First 'hot sync' JEE application deployer to enable continuous web development without server restarts
-    <li>Firstnative <a href="http://www.myeclipseide.com/index.php?module=htmlpages&func=display&pid=62" target="_blank" title="JavaScript Debugger">JavaScript debugger</a> for Eclipse 
+    <li>Firstnative <a href="http://www.myeclipseide.com/index.php?module=htmlpages&func=display&pid=62" target="_blank" title="JavaScript Debugger">JavaScript debugger</a> for Eclipse
     <li>First <a href="http://www.myeclipseide.com/index.php?module=htmlpages&func=display&pid=57" target="_blank" title="Ajax Tools">Ajax tool</a> feature-set for Eclipse
     <li>Most database connectors supported on Eclipse
     <li>First IDE to fully support Hibernate / Spring integration
     <li>First full featured image editor for Eclipse
     <li>First Eclipse IDE to offer a low-cost, all-inclusive subscription pricing model
-    <li>The most comprehensive set of <a href="http://www.myeclipseide.com/" target="_blank" title="Eclipse Plugins">Eclipse Plugins</a> available 
+    <li>The most comprehensive set of <a href="http://www.myeclipseide.com/" target="_blank" title="Eclipse Plugins">Eclipse Plugins</a> available
 </ul>]]></body>
 
       <created>1202827170</created>
@@ -394,7 +394,7 @@ Finally, Subclipse includes a powerful revision graph feature that is built with
       <changed>1260192445</changed>
       <foundationmember>0</foundationmember>
       <homepageurl><![CDATA[http://www.umlet.com]]></homepageurl>
-      <image><![CDATA[http://marketplace.eclipse.org/sites/default/files/umlet_logo.jpg]]></image>
+      <image><![CDATA[https://marketplace.eclipse.org/sites/default/files/umlet_logo.jpg]]></image>
 
       <version>10.2</version>
       <license>GPL</license>

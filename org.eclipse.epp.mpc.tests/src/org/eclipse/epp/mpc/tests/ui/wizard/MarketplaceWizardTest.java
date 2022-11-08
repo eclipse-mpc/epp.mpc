@@ -91,7 +91,7 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 
 	@Test
 	public void testSearchMarketplaceUrl() {
-		search("http://marketplace.eclipse.org/content/mylyn");
+		search("https://marketplace.eclipse.org/content/mylyn");
 		itemBot(NodeMatcher.withNameRegex(".*Mylyn.*"));
 	}
 

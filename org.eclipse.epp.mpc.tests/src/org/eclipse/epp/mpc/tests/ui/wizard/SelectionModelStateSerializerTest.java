@@ -55,7 +55,7 @@ public class SelectionModelStateSerializerTest {
 
 	@Before
 	public void setUp() throws Exception {
-		CatalogDescriptor catalogDescriptor = new CatalogDescriptor(new URL("http://marketplace.eclipse.org"),
+		CatalogDescriptor catalogDescriptor = new CatalogDescriptor(new URL("https://marketplace.eclipse.org"),
 				"Eclipse.org Marketplace");
 		discoveryStrategy = new MarketplaceDiscoveryStrategy(catalogDescriptor) {
 			@Override

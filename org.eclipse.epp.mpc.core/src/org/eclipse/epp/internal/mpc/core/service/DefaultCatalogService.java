@@ -32,7 +32,7 @@ import org.eclipse.epp.mpc.core.service.ServiceHelper;
 public class DefaultCatalogService extends RemoteMarketplaceService<Catalogs> implements ICatalogService {
 
 	public static final String DEFAULT_CATALOG_SERVICE_LOCATION = System.getProperty(DefaultCatalogService.class.getName()
-			+ ".url", "http://marketplace.eclipse.org"); //$NON-NLS-1$//$NON-NLS-2$
+			+ ".url", "https://marketplace.eclipse.org"); //$NON-NLS-1$//$NON-NLS-2$
 
 	public static final URL DEFAULT_CATALOG_SERVICE_URL;
 

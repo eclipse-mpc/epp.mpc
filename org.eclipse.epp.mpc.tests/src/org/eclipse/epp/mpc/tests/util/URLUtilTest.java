@@ -25,32 +25,32 @@ public class URLUtilTest {
 
 	@Test
 	public void testSimpleUrl() throws MalformedURLException {
-		URL url = URLUtil.toURL("http://marketplace.eclipse.org/sites/default/files/logo.png");
-		assertEquals("http://marketplace.eclipse.org/sites/default/files/logo.png", url.toString());
+		URL url = URLUtil.toURL("https://marketplace.eclipse.org/sites/default/files/logo.png");
+		assertEquals("https://marketplace.eclipse.org/sites/default/files/logo.png", url.toString());
 	}
 
 	@Test
 	public void testUrlWithSpaceInPath() throws MalformedURLException, URISyntaxException {
-		URL url = URLUtil.toURL("http://marketplace.eclipse.org/sites/default files/logo 2.png");
-		assertEquals("http://marketplace.eclipse.org/sites/default%20files/logo%202.png", url.toString());
+		URL url = URLUtil.toURL("https://marketplace.eclipse.org/sites/default files/logo 2.png");
+		assertEquals("https://marketplace.eclipse.org/sites/default%20files/logo%202.png", url.toString());
 	}
 
 	@Test
 	public void testUrlWithSpaceInQuery() throws MalformedURLException {
-		URL url = URLUtil.toURL("http://marketplace.eclipse.org/sites/default/files/logo.png?foo=bar baz");
-		assertEquals("http://marketplace.eclipse.org/sites/default/files/logo.png?foo=bar+baz", url.toString());
+		URL url = URLUtil.toURL("https://marketplace.eclipse.org/sites/default/files/logo.png?foo=bar baz");
+		assertEquals("https://marketplace.eclipse.org/sites/default/files/logo.png?foo=bar+baz", url.toString());
 	}
 
 	@Test
 	public void testEscapedUrl() throws MalformedURLException {
-		URL url = URLUtil.toURL("http://marketplace.eclipse.org/sites/default%20files/logo%202.png");
-		assertEquals("http://marketplace.eclipse.org/sites/default%20files/logo%202.png", url.toString());
+		URL url = URLUtil.toURL("https://marketplace.eclipse.org/sites/default%20files/logo%202.png");
+		assertEquals("https://marketplace.eclipse.org/sites/default%20files/logo%202.png", url.toString());
 	}
 
 	@Test
 	public void testPartiallyEscapedUrl() throws MalformedURLException {
-		URL url = URLUtil.toURL("http://marketplace.eclipse.org/sites/default%20files/logo 2.png");
-		assertEquals("http://marketplace.eclipse.org/sites/default%20files/logo%202.png", url.toString());
+		URL url = URLUtil.toURL("https://marketplace.eclipse.org/sites/default%20files/logo 2.png");
+		assertEquals("https://marketplace.eclipse.org/sites/default%20files/logo%202.png", url.toString());
 	}
 
 	@Test(expected = MalformedURLException.class)

@@ -345,14 +345,14 @@ public class UnmarshallerTest {
 		assertTrue(node.getBody().startsWith("Lorem ipsum dolor"));
 		assertTrue(node.getBody().endsWith("vitae aliquam lectus."));
 		assertTrue(node.getFoundationmember());
-		assertEquals("http://marketplace.eclipse.org/xmlapi", node.getHomepageurl());
-		assertEquals("http://marketplace.eclipse.org/sites/default/files/equinox.png", node.getImage());
+		assertEquals("https://marketplace.eclipse.org/xmlapi", node.getHomepageurl());
+		assertEquals("https://marketplace.eclipse.org/sites/default/files/equinox.png", node.getImage());
 		assertEquals("1.0", node.getVersion());
 		assertEquals("EPL", node.getLicense());
 		assertEquals("Eclipse Foundation Inc.", node.getCompanyname());
 		assertEquals("Mature", node.getStatus());
 		assertEquals("3.5", node.getEclipseversion());
-		assertEquals("http://marketplace.eclipse.org/support", node.getSupporturl());
+		assertEquals("https://marketplace.eclipse.org/support", node.getSupporturl());
 		assertEquals("http://update.eclipse.org/marketplace", node.getUpdateurl());
 
 		{
@@ -399,7 +399,7 @@ public class UnmarshallerTest {
 		ITag tag = node.getTags().getTags().get(3);
 		assertEquals("mylyn", tag.getName());
 		assertEquals("88", tag.getId());
-		assertEquals("http://marketplace.eclipse.org/category/free-tagging/mylyn", tag.getUrl());
+		assertEquals("https://marketplace.eclipse.org/category/free-tagging/mylyn", tag.getUrl());
 	}
 
 	@Test
@@ -411,11 +411,11 @@ public class UnmarshallerTest {
 
 		assertEquals(3, catalogs.getCatalogs().size());
 
-		//	     <catalog id="35656" title="Marketplace Catalog" url="http://marketplace.eclipse.org" selfContained="1"  dependencyRepository="http://download.eclipse.org/releases/helios">
+		//	     <catalog id="35656" title="Marketplace Catalog" url="https://marketplace.eclipse.org" selfContained="1"  dependencyRepository="http://download.eclipse.org/releases/helios">
 		//	        <description>Here is a description</description>
-		//	        <icon>http://marketplace.eclipse.org/sites/default/files/jacket.jpg</icon>
+		//	        <icon>https://marketplace.eclipse.org/sites/default/files/jacket.jpg</icon>
 		//	        <wizard title="Eclipse Marketplace Catalog">
-		//	          <icon>http://marketplace.eclipse.org/sites/default/files/giant-rabbit2.jpg</icon>
+		//	          <icon>https://marketplace.eclipse.org/sites/default/files/giant-rabbit2.jpg</icon>
 		//	          <searchtab enabled='1'>Search</searchtab>
 		//	          <populartab enabled='1'>Popular</populartab>
 		//	          <recenttab enabled='1'>Recent</recenttab>
@@ -425,16 +425,16 @@ public class UnmarshallerTest {
 		ICatalog catalog = catalogs.getCatalogs().get(0);
 		assertEquals("35656", catalog.getId());
 		assertEquals("Marketplace Catalog", catalog.getName());
-		assertEquals("http://marketplace.eclipse.org", catalog.getUrl());
+		assertEquals("https://marketplace.eclipse.org", catalog.getUrl());
 		assertEquals("Here is a description", catalog.getDescription());
 		assertTrue(catalog.isSelfContained());
-		assertEquals("http://marketplace.eclipse.org/sites/default/files/marketplace32.png", catalog.getImageUrl());
+		assertEquals("https://marketplace.eclipse.org/sites/default/files/marketplace32.png", catalog.getImageUrl());
 		assertEquals("http://download.eclipse.org/releases/helios", catalog.getDependencyRepository());
 
 		ICatalogBranding branding = catalog.getBranding();
 		assertNotNull(branding);
 		assertEquals("Eclipse Marketplace Catalog", branding.getWizardTitle());
-		assertEquals("http://marketplace.eclipse.org/sites/default/files/giant-rabbit2.jpg", branding.getWizardIcon());
+		assertEquals("https://marketplace.eclipse.org/sites/default/files/giant-rabbit2.jpg", branding.getWizardIcon());
 		assertEquals("Search", branding.getSearchTabName());
 		assertEquals("Popular", branding.getPopularTabName());
 		assertEquals("Recent", branding.getRecentTabName());
@@ -444,7 +444,7 @@ public class UnmarshallerTest {
 
 		INews news = catalog.getNews();
 		assertNotNull(news);
-		assertEquals("http://marketplace.eclipse.org/news", news.getUrl());
+		assertEquals("https://marketplace.eclipse.org/news", news.getUrl());
 		assertEquals("News", news.getShortTitle());
 		assertEquals(Long.valueOf(1363181064000l), news.getTimestamp());
 		assertNull(catalogs.getCatalogs().get(1).getNews());
@@ -460,7 +460,7 @@ public class UnmarshallerTest {
 		Marketplace marketplace = (Marketplace) model;
 		News news = marketplace.getNews();
 		assertNotNull(news);
-		assertEquals("http://marketplace.eclipse.org/news", news.getUrl());
+		assertEquals("https://marketplace.eclipse.org/news", news.getUrl());
 		assertEquals("News", news.getShortTitle());
 		assertEquals(Long.valueOf(1363181064000l), news.getTimestamp());
 	}

@@ -150,7 +150,7 @@ public class DefaultMarketplaceServiceTest {
 
 	/**
 	 * bug 302825 - Make sure that search URLs have the following form:<br/>
-	 * <code>http://marketplace.eclipse.org/api/p/search/apachesolr_search/WikiText?filters=tid:38%20tid:31</code>
+	 * <code>https://marketplace.eclipse.org/api/p/search/apachesolr_search/WikiText?filters=tid:38%20tid:31</code>
 	 * <p>
 	 * bug 397004 - If both market and category are provided, make sure market is listed first
 	 */

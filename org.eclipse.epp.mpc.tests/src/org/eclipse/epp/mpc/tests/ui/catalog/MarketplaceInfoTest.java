@@ -57,11 +57,11 @@ public class MarketplaceInfoTest {
 
 	public static MarketplaceNodeCatalogItem createTestItem() throws Exception {
 		MarketplaceNodeCatalogItem item = new MarketplaceNodeCatalogItem();
-		item.setMarketplaceUrl(new URL("http://marketplace.eclipse.org"));
+		item.setMarketplaceUrl(new URL("https://marketplace.eclipse.org"));
 		item.setId("123");
 		Node node = new Node();
 		node.setId(item.getId());
-		node.setUrl("http://marketplace.eclipse.org/node/" + node.getId());
+		node.setUrl("https://marketplace.eclipse.org/node/" + node.getId());
 		node.setIus(new Ius());
 		addIu(node, "com.example.test.a1");
 		addIu(node, "com.example.test.a2");

@@ -46,12 +46,12 @@ public class CatalogDescriptorTest {
 
 	@Test
 	public void testCatalogDescriptor() throws Exception {
-		URL dependenciesRepository = new URL("http://marketplace.eclipse.org/repo/");
+		URL dependenciesRepository = new URL("https://marketplace.eclipse.org/repo/");
 		String description = "some description";
 		ImageDescriptor icon = ImageDescriptor.getMissingImageDescriptor();
 		boolean installFromAllRepositories = true;
 		String label = "some label";
-		URL url = new URL("http://marketplace.eclipse.org");
+		URL url = new URL("https://marketplace.eclipse.org");
 
 		CatalogDescriptor descriptor = new CatalogDescriptor();
 		descriptor.setDependenciesRepository(dependenciesRepository);
@@ -84,7 +84,7 @@ public class CatalogDescriptorTest {
 	@Test
 	public void testCatalogDescriptorURLString() throws Exception {
 		String label = "some label";
-		URL url = new URL("http://marketplace.eclipse.org");
+		URL url = new URL("https://marketplace.eclipse.org");
 		CatalogDescriptor descriptor = new CatalogDescriptor(url, label);
 
 		assertEquals(label, descriptor.getLabel());
@@ -103,8 +103,8 @@ public class CatalogDescriptorTest {
 	@Test
 	public void testFindCatalogDescriptorWithCommonPrefix() throws Exception {
 		CatalogRegistry registry = CatalogRegistry.getInstance();
-		String marketplace = "http://marketplace.eclipse.org";
-		String hostedMarketplace = "http://marketplace.eclipse.org/hosted_catalog/test";
+		String marketplace = "https://marketplace.eclipse.org";
+		String hostedMarketplace = "https://marketplace.eclipse.org/hosted_catalog/test";
 		CatalogDescriptor marketplaceDescriptor = new CatalogDescriptor(new URL(marketplace), null);
 		CatalogDescriptor hostedMarketplaceDescriptor = new CatalogDescriptor(new URL(hostedMarketplace), null);
 		registry.register(marketplaceDescriptor);
@@ -124,7 +124,7 @@ public class CatalogDescriptorTest {
 	@Test
 	public void testFindCatalogDescriptorWithCommonPrefixDifferentProtocol1() throws Exception {
 		CatalogRegistry registry = CatalogRegistry.getInstance();
-		String marketplace = "http://marketplace.eclipse.org";
+		String marketplace = "https://marketplace.eclipse.org";
 		String marketplaceHttps = URLUtil.toggleHttps(marketplace);
 		String hostedMarketplace = "https://marketplace.eclipse.org/hosted_catalog/test";
 		String hostedMarketplaceHttp = URLUtil.toggleHttps(hostedMarketplace);
@@ -150,7 +150,7 @@ public class CatalogDescriptorTest {
 		CatalogRegistry registry = CatalogRegistry.getInstance();
 		String marketplace = "https://marketplace.eclipse.org";
 		String marketplaceHttp = URLUtil.toggleHttps(marketplace);
-		String hostedMarketplace = "http://marketplace.eclipse.org/hosted_catalog/test";
+		String hostedMarketplace = "https://marketplace.eclipse.org/hosted_catalog/test";
 		String hostedMarketplaceHttps = URLUtil.toggleHttps(hostedMarketplace);
 
 		CatalogDescriptor marketplaceDescriptor = new CatalogDescriptor(new URL(marketplace), null);
@@ -168,7 +168,7 @@ public class CatalogDescriptorTest {
 	@Test
 	public void testFindCatalogDescriptorMatchingProtocol() throws Exception {
 		CatalogRegistry registry = CatalogRegistry.getInstance();
-		String marketplace = "http://marketplace.eclipse.org";
+		String marketplace = "https://marketplace.eclipse.org";
 		String marketplaceHttps = URLUtil.toggleHttps(marketplace);
 		CatalogDescriptor marketplaceDescriptor = new CatalogDescriptor(new URL(marketplace), null);
 		CatalogDescriptor marketplaceHttpsDescriptor = new CatalogDescriptor(new URL(marketplaceHttps), null);
@@ -185,7 +185,7 @@ public class CatalogDescriptorTest {
 	@Test
 	public void testIgnoreCatalogDescriptorWithDedicatedHostingSuffix() throws Exception {
 		CatalogRegistry registry = CatalogRegistry.getInstance();
-		String marketplace = "http://marketplace.eclipse.org";
+		String marketplace = "https://marketplace.eclipse.org";
 		String dedicatedHostingMarketplace = marketplace + "/" + ICatalogService.DEDICATED_CATALOG_HOSTING_SEGMENT
 				+ "test";
 		CatalogDescriptor dedicatedHostingDescriptor = new CatalogDescriptor(new URL(dedicatedHostingMarketplace),

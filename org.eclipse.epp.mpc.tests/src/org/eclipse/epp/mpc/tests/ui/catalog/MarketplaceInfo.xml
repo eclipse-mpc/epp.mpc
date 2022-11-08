@@ -1,36 +1,36 @@
-<?xml version="1.0" encoding="UTF-8"?> 
-<java version="1.6.0_45" class="java.beans.XMLDecoder"> 
- <object class="org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceInfo"> 
-  <void property="iuToNodeKey"> 
-   <void method="put"> 
-    <string>com.example.test.a1</string> 
-    <object class="java.util.ArrayList"> 
-     <void method="add"> 
-      <string>http://marketplace.eclipse.org#123</string> 
-     </void> 
-    </object> 
-   </void> 
-   <void method="put"> 
-    <string>com.example.test.a2</string> 
-    <object class="java.util.ArrayList"> 
-     <void method="add"> 
-      <string>http://marketplace.eclipse.org#123</string> 
-     </void> 
-    </object> 
-   </void> 
-  </void> 
-  <void property="nodeKeyToIU"> 
-   <void method="put"> 
-    <string>http://marketplace.eclipse.org#123</string> 
-    <object class="java.util.ArrayList"> 
-     <void method="add"> 
-      <string>com.example.test.a1</string> 
-     </void> 
-     <void method="add"> 
-      <string>com.example.test.a2</string> 
-     </void> 
-    </object> 
-   </void> 
-  </void> 
- </object> 
-</java> 
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="1.6.0_45" class="java.beans.XMLDecoder">
+ <object class="org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceInfo">
+  <void property="iuToNodeKey">
+   <void method="put">
+    <string>com.example.test.a1</string>
+    <object class="java.util.ArrayList">
+     <void method="add">
+      <string>https://marketplace.eclipse.org#123</string>
+     </void>
+    </object>
+   </void>
+   <void method="put">
+    <string>com.example.test.a2</string>
+    <object class="java.util.ArrayList">
+     <void method="add">
+      <string>https://marketplace.eclipse.org#123</string>
+     </void>
+    </object>
+   </void>
+  </void>
+  <void property="nodeKeyToIU">
+   <void method="put">
+    <string>https://marketplace.eclipse.org#123</string>
+    <object class="java.util.ArrayList">
+     <void method="add">
+      <string>com.example.test.a1</string>
+     </void>
+     <void method="add">
+      <string>com.example.test.a2</string>
+     </void>
+    </object>
+   </void>
+  </void>
+ </object>
+</java>

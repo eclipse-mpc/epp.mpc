@@ -37,7 +37,7 @@ public class MarketplaceUrlHandlerTest {
 
 	@Before
 	public void installMockMarketplace() throws Exception {
-		URL url = new URL("http://marketplace.eclipse.org");
+		URL url = new URL("https://marketplace.eclipse.org");
 		eclipseMarketplace = new CatalogDescriptor(url, "Eclipse Marketplace");
 		CatalogRegistry.getInstance().register(eclipseMarketplace);
 	}
@@ -55,24 +55,24 @@ public class MarketplaceUrlHandlerTest {
 		assertNull(info);
 		info = MarketplaceUrlHandler.createSolutionInstallInfo("http://www.eclipse.org");
 		assertNull(info);
-		String missingInstallId = "http://marketplace.eclipse.org/mpc/install?mpc_install=";
+		String missingInstallId = "https://marketplace.eclipse.org/mpc/install?mpc_install=";
 		info = MarketplaceUrlHandler.createSolutionInstallInfo(missingInstallId);
 	}
 
 	@Test
 	public void testGetInstallationInfo() throws Exception {
-		String url = "http://marketplace.eclipse.org/mpc/install?x=19&y=17&mpc_state=&mpc_install=953";
+		String url = "https://marketplace.eclipse.org/mpc/install?x=19&y=17&mpc_state=&mpc_install=953";
 		SolutionInstallationInfo info = MarketplaceUrlHandler.createSolutionInstallInfo(url);
-		assertEquals("http://marketplace.eclipse.org", info.getCatalogDescriptor().getUrl().toExternalForm());
+		assertEquals("https://marketplace.eclipse.org", info.getCatalogDescriptor().getUrl().toExternalForm());
 		assertEquals("953", info.getInstallId());
 		assertNull(info.getState());
 	}
 
 	@Test
 	public void testGetInstallationInfoWithState() throws Exception {
-		String statefulUrl = "http://marketplace.eclipse.org/mpc/install?mpc_install=953";
+		String statefulUrl = "https://marketplace.eclipse.org/mpc/install?mpc_install=953";
 		SolutionInstallationInfo info = MarketplaceUrlHandler.createSolutionInstallInfo(statefulUrl);
-		assertEquals("http://marketplace.eclipse.org", info.getCatalogDescriptor().getUrl().toExternalForm());
+		assertEquals("https://marketplace.eclipse.org", info.getCatalogDescriptor().getUrl().toExternalForm());
 		assertEquals("953", info.getInstallId());
 		assertNull(info.getState());
 	}
@@ -81,10 +81,10 @@ public class MarketplaceUrlHandlerTest {
 	public void testPotentialUrls() throws Exception {
 		assertFalse(MarketplaceUrlHandler.isPotentialSolution(null));
 		assertFalse(MarketplaceUrlHandler.isPotentialSolution(""));
-		String url = "http://marketplace.eclipse.org/mpc/install?x=19&y=17&mpc_state=&mpc_install=953";
+		String url = "https://marketplace.eclipse.org/mpc/install?x=19&y=17&mpc_state=&mpc_install=953";
 		assertTrue(MarketplaceUrlHandler.isPotentialSolution(url));
 
-		url = "http://marketplace.eclipse.org";
+		url = "https://marketplace.eclipse.org";
 		assertFalse(MarketplaceUrlHandler.isPotentialSolution(url));
 	}
 
@@ -100,14 +100,14 @@ public class MarketplaceUrlHandlerTest {
 		};
 
 		testNode[0] = null;
-		String url = "http://marketplace.eclipse.org/content/test";
+		String url = "https://marketplace.eclipse.org/content/test";
 		assertTrue(handler.handleUri(url));
 		assertNotNull(testNode[0]);
 		assertEquals(url, testNode[0].getUrl());
 
 		testNode[0] = null;
 		String nodeId = "12345";
-		url = "http://marketplace.eclipse.org/node/" + nodeId;
+		url = "https://marketplace.eclipse.org/node/" + nodeId;
 		assertTrue(handler.handleUri(url));
 		assertNotNull(testNode[0]);
 		assertEquals(nodeId, testNode[0].getId());
@@ -124,7 +124,7 @@ public class MarketplaceUrlHandlerTest {
 			}
 		};
 
-		String url = "http://marketplace.eclipse.org/featured";
+		String url = "https://marketplace.eclipse.org/featured";
 		assertTrue(handler.handleUri(url));
 
 		url = "https://marketplace.eclipse.org/featured";

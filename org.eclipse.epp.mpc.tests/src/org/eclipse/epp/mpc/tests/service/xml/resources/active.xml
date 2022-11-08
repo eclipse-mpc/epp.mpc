@@ -10,7 +10,7 @@
       <favorited>0</favorited>
       <body><![CDATA[This Eclipse plug-in enables the use of Beyond Compare (externally) to compare files and folders. You can also compare a file to a previous revision in CVS or in your Local History. It also allows you to open up Putty and WinSCP from inside Eclipse.
 
-It adds extra actions to the package explorer context menu under the &#039;Compare With...&#039; menu as well as some toolbar buttons.  
+It adds extra actions to the package explorer context menu under the &#039;Compare With...&#039; menu as well as some toolbar buttons.
 
 There is also a separate Commit action under the &#039;Team&#039; menu which allows you to revert, refresh, or compare (using Beyond Compare) the files being committed to the latest head revison.
 
@@ -43,36 +43,36 @@ Also now supports both Subversion plug-ins: Subclipse and Subversive.]]></body>
 URL: http://agilegrid.sourceforge.net/
 _______________________________________________________________________
 
-Agile Grid is a new implement of table control based on the Eclipse SWT. You 
-can implement various complex electronic table with agile grid. Agile grid&#039;s 
-design results from many references to the TableViewer of Eclipse JFace and 
-pay attention to the design of agility and extendablity especially. According 
-to the requirement of some application, programmers can customize the layout, 
-rendering, cell editor and keybord&#039;s navigation of agile grid. The main features 
+Agile Grid is a new implement of table control based on the Eclipse SWT. You
+can implement various complex electronic table with agile grid. Agile grid&#039;s
+design results from many references to the TableViewer of Eclipse JFace and
+pay attention to the design of agility and extendablity especially. According
+to the requirement of some application, programmers can customize the layout,
+rendering, cell editor and keybord&#039;s navigation of agile grid. The main features
 as follow:
-1. Different cells may have different rendering style. Agile Grid provides 
-   some of rendering class such as TextCellRenderer, HeaderCellRenderer, 
-   ButtonCellRenderer, CheckboxCellRenderer etc. Programmer can implement more 
+1. Different cells may have different rendering style. Agile Grid provides
+   some of rendering class such as TextCellRenderer, HeaderCellRenderer,
+   ButtonCellRenderer, CheckboxCellRenderer etc. Programmer can implement more
    individualizing rendering class by implementing the interface ICellRenderer.
-2. According to the cell content, Agile grid can provides appropriate editor,  
-   for examples  editing  text with  TextCellEditor,  providing a series of 
-   valid value for selecting with ComboBoxCellEditor, making a boolean choice 
-   with CheckboxCellEditor,  using  DialogCellEditor to provide more complex 
-   and  intuitionistic editing manner. Programmer can implement more 
+2. According to the cell content, Agile grid can provides appropriate editor,
+   for examples  editing  text with  TextCellEditor,  providing a series of
+   valid value for selecting with ComboBoxCellEditor, making a boolean choice
+   with CheckboxCellEditor,  using  DialogCellEditor to provide more complex
+   and  intuitionistic editing manner. Programmer can implement more
    individualizing editing class by extending the abstract class CellEditor.
 3. A cell may span over several rows and/or columns.
-4. Agile Grid has a left header and a top header, the left header indicates row 
-   number, the top header indicates column number, which style and label can be 
+4. Agile Grid has a left header and a top header, the left header indicates row
+   number, the top header indicates column number, which style and label can be
    customized. The left and top header can be hidden or visible individually.
-5. The indicated row or column can be froze, which still keep visible at all 
+5. The indicated row or column can be froze, which still keep visible at all
    times when scrolling other rows or columns.
 6. The grid line can be shown or hidden.
 
-For a detailed function description refer to the api documentation that 
+For a detailed function description refer to the api documentation that
 is included in the source files.
 
-Agile Grid is a open source project,  please visit the project through : 
-http://sourceforge.net/projects/agilegrid/, Any feedbacks are welcome by the 
+Agile Grid is a open source project,  please visit the project through :
+http://sourceforge.net/projects/agilegrid/, Any feedbacks are welcome by the
 author :  Sihong Zhu (fourbroad@gmail.com)
 ]]></body>
       <created>1221757638</created>
@@ -275,7 +275,7 @@ The advantage of this plug-in beside writing a ANT file is that :
       <changed>1260471691</changed>
       <foundationmember>0</foundationmember>
       <homepageurl><![CDATA[http://www.phurnace.com/products/phurnace-deliver-2.html]]></homepageurl>
-      <image><![CDATA[http://marketplace.eclipse.org/sites/default/files/g5650.png]]></image>
+      <image><![CDATA[https://marketplace.eclipse.org/sites/default/files/g5650.png]]></image>
       <version>3.6</version>
       <license>Commercial</license>
       <companyname><![CDATA[Phurnace Software]]></companyname>
@@ -300,7 +300,7 @@ The advantage of this plug-in beside writing a ANT file is that :
 * Source Formatter
 * Custom targets
 * Automatically (Ctrl+S)/Manually (Ctrl+Shift+G) code generator
-* Problem markers for errors and warnings in grammar files    
+* Problem markers for errors and warnings in grammar files
 * Advanced text editor, code selection (F3) and code completion (Ctrl+Space)
 * Simple syntax highlighting for target language (action code)
 * Outline and quick outline (Ctrl + O) views for options, tokens, scopes, actions and rules

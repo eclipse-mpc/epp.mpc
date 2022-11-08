@@ -6,7 +6,7 @@
     https://www.eclipse.org/legal/epl-2.0/
 
     SPDX-License-Identifier: EPL-2.0
-   
+
     Contributors:
     	The Eclipse Foundation - initial API and implementation
  -->
@@ -21,12 +21,12 @@
 			<category id='38' name='Mylyn Connectors' url='http://www.eclipseplugincentral.net/category/categories/mylyn-connectors'/>
 		</categories>
 		<tags>
-			<tag id='44' name='svn' url='http://marketplace.eclipse.org/category/free-tagging/svn'/>
-			<tag id='45' name='subversion' url='http://marketplace.eclipse.org/category/free-tagging/subversion'/>
-			<tag id='46' name='team provider' url='http://marketplace.eclipse.org/category/free-tagging/team-provider'/>
-			<tag id='88' name='mylyn' url='http://marketplace.eclipse.org/category/free-tagging/mylyn'/>
-			<tag id='370' name='alm' url='http://marketplace.eclipse.org/category/free-tagging/alm'/>
-			<tag id='1074' name='version control' url='http://marketplace.eclipse.org/category/free-tagging/version-control'/>
+			<tag id='44' name='svn' url='https://marketplace.eclipse.org/category/free-tagging/svn'/>
+			<tag id='45' name='subversion' url='https://marketplace.eclipse.org/category/free-tagging/subversion'/>
+			<tag id='46' name='team provider' url='https://marketplace.eclipse.org/category/free-tagging/team-provider'/>
+			<tag id='88' name='mylyn' url='https://marketplace.eclipse.org/category/free-tagging/mylyn'/>
+			<tag id='370' name='alm' url='https://marketplace.eclipse.org/category/free-tagging/alm'/>
+			<tag id='1074' name='version control' url='https://marketplace.eclipse.org/category/free-tagging/version-control'/>
 		</tags>
 	    <owner>David Green</owner>
 
@@ -58,5 +58,4 @@ More information about Mylyn WikiText is available <a href="http://wiki.eclipse.
 </platforms>
       	    </node>
 	  </marketplace>
-		
-		
+

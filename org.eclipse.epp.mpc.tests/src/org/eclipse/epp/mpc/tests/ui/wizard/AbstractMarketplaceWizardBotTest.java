@@ -107,21 +107,21 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractMarketplaceWizardBotTest {
 
 	protected static final INode[] TEST_NODES = new INode[] { //
-			testNode("206", "http://marketplace.eclipse.org/content/mylyn", "Mylyn"), //
-			testNode("311881", "http://marketplace.eclipse.org/content/eclipse-4-tools-css-spy",
+			testNode("206", "https://marketplace.eclipse.org/content/mylyn", "Mylyn"), //
+			testNode("311881", "https://marketplace.eclipse.org/content/eclipse-4-tools-css-spy",
 					"Eclipse 4 Tools: CSS Spy"), //
-			testNode("311774", "http://marketplace.eclipse.org/content/eclipse-4-tools-lightweight-css-editor",
+			testNode("311774", "https://marketplace.eclipse.org/content/eclipse-4-tools-lightweight-css-editor",
 					"Eclipse 4 Tools: Lightweight CSS Editor"), //
-			testNode("311838", "http://marketplace.eclipse.org/content/eclipse-4-tools-application-model-editor", ""), //
-			testNode("2780381", "http://marketplace.eclipse.org/content/trace-compass", "Trace Compass"), //
-			testNode("2410217", "http://marketplace.eclipse.org/content/memory-analyzer-0", "Memory Analyzer"), //
-			testNode("1336", "http://marketplace.eclipse.org/content/egit-git-team-provider",
+			testNode("311838", "https://marketplace.eclipse.org/content/eclipse-4-tools-application-model-editor", ""), //
+			testNode("2780381", "https://marketplace.eclipse.org/content/trace-compass", "Trace Compass"), //
+			testNode("2410217", "https://marketplace.eclipse.org/content/memory-analyzer-0", "Memory Analyzer"), //
+			testNode("1336", "https://marketplace.eclipse.org/content/egit-git-team-provider",
 					"EGit - Git Team Provider"), //
-			testNode("2706327", "http://marketplace.eclipse.org/content/eclipse-docker-tooling",
+			testNode("2706327", "https://marketplace.eclipse.org/content/eclipse-docker-tooling",
 					"Eclipse Docker Tooling"), //
-			testNode("2706342", "http://marketplace.eclipse.org/content/eclipse-vagrant-tooling",
+			testNode("2706342", "https://marketplace.eclipse.org/content/eclipse-vagrant-tooling",
 					"Eclipse Vagrant Tooling"), //
-			testNode("2579663", "http://marketplace.eclipse.org/content/egerrit", "EGerrit") //
+			testNode("2579663", "https://marketplace.eclipse.org/content/egerrit", "EGerrit") //
 	};
 
 	private static INode testNode(String id, String url, String name) {

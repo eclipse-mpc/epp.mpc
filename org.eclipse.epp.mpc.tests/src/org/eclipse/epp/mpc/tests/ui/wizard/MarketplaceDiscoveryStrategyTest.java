@@ -51,7 +51,7 @@ public class MarketplaceDiscoveryStrategyTest {
 
 	@Before
 	public void setUp() throws Exception {
-		catalogUrl = new URL("http://marketplace.eclipse.org");
+		catalogUrl = new URL("https://marketplace.eclipse.org");
 		catalogDescriptor = new CatalogDescriptor(catalogUrl, "Eclipse.org Marketplace");
 		CatalogRegistry.getInstance().register(catalogDescriptor);
 		catalog = new MarketplaceCatalog();

@@ -104,7 +104,7 @@ public class MarketplaceCatalogTest {
 		discoveryResult.setNodes(discoveryNodes);
 
 		CatalogDescriptor catalogDescriptor = new CatalogDescriptor();
-		catalogDescriptor.setUrl(new URL("http://marketplace.eclipse.org"));
+		catalogDescriptor.setUrl(new URL("https://marketplace.eclipse.org"));
 
 		MarketplaceDiscoveryStrategy discoveryStrategy = new MarketplaceDiscoveryStrategy(catalogDescriptor) {
 			final MarketplaceCategory category = new MarketplaceCategory();

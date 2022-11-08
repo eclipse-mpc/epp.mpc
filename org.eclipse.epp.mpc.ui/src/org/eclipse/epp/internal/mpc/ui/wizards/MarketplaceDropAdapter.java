@@ -312,7 +312,7 @@ public class MarketplaceDropAdapter implements IStartup {
 			}
 			final String url = getUrl(event.data);
 			if (acceptUrl(url)) {
-				//http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=1640500
+				//https://marketplace.eclipse.org/marketplace-client-intro?mpc_install=1640500
 				//or https://marketplace.eclipse.org/user/xxx/favorites
 				DropTarget source = (DropTarget) event.getSource();
 				Display display = source.getDisplay();

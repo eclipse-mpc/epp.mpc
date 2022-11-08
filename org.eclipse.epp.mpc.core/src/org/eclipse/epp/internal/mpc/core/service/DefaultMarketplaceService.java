@@ -123,7 +123,7 @@ MarketplaceService {
 	private static final String API_ERROR_REPORT_URI = "install/error/report"; //$NON-NLS-1$
 
 	public static final String DEFAULT_SERVICE_LOCATION = System
-			.getProperty(IMarketplaceServiceLocator.DEFAULT_MARKETPLACE_PROPERTY_NAME, "http://marketplace.eclipse.org"); //$NON-NLS-1$
+			.getProperty(IMarketplaceServiceLocator.DEFAULT_MARKETPLACE_PROPERTY_NAME, "https://marketplace.eclipse.org"); //$NON-NLS-1$
 
 	public static final URL DEFAULT_SERVICE_URL;
 
@@ -468,7 +468,7 @@ MarketplaceService {
 				relativeUrl += '?' + queryString;
 			}
 		} else if (market != null || category != null) {
-			// http://marketplace.eclipse.org/taxonomy/term/38,31
+			// https://marketplace.eclipse.org/taxonomy/term/38,31
 			relativeUrl = API_TAXONOMY_URI;
 			if (category != null) {
 				relativeUrl += urlEncode(category.getId());
