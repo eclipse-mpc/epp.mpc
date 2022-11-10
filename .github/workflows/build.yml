@@ -12,7 +12,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - uses: GabrielBB/xvfb-action@v1
     - uses: actions/cache@v1
       with:
         path: ~/.m2/repository
@@ -32,12 +31,14 @@ jobs:
         maven-version: 3.8.6
 
     - name: Build
-      run: >
-        mvn verify
-        -Dmaven.test.failure.ignore=true
-        -Dtycho.disableP2Mirrors=true
-        -Dorg.eclipse.swt.browser.UseWebKitGTK=true
-        -Dorg.eclipse.swt.browser.DefaultType=WebKit
-        -Dtycho.localArtifacts=ignore
-        -Dsurefire.timeout=1500
-        -Dhttp.nonProxyHosts=localhost
+      uses: GabrielBB/xvfb-action@v1
+      with:
+        run: >
+          mvn verify
+          -Dmaven.test.failure.ignore=true
+          -Dtycho.disableP2Mirrors=true
+          -Dorg.eclipse.swt.browser.UseWebKitGTK=true
+          -Dorg.eclipse.swt.browser.DefaultType=WebKit
+          -Dtycho.localArtifacts=ignore
+          -Dsurefire.timeout=1500
+          -Dhttp.nonProxyHosts=localhost
