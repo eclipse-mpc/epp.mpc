@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.log4j.Logger;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.epp.internal.mpc.core.model.Node;
@@ -102,6 +101,8 @@ import org.junit.Rule;
 import org.junit.rules.TestRule;
 import org.junit.runner.notification.Failure;
 import org.junit.runners.model.Statement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractMarketplaceWizardBotTest {
 
@@ -132,7 +133,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 
 	private static long PROGRESS_TIMEOUT = Long.getLong("org.eclipse.epp.mpc.tests.progress.timeout", 30000);
 
-	private static final Logger logger = Logger.getLogger(AbstractMarketplaceWizardBotTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(AbstractMarketplaceWizardBotTest.class);
 
 	private static boolean dumpThreadsOnTearDownError = Boolean.valueOf(System.getProperty(
 			"org.eclipse.epp.mpc.tests.dump.threads", "true"));
@@ -325,7 +326,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 			Method dumpMethod = ThreadMXBean.class.getMethod("dumpAllThreads", Boolean.TYPE, Boolean.TYPE);
 			ThreadInfo[] threadInfos = (ThreadInfo[]) dumpMethod.invoke(threadMXBean, true, true);
 			for (ThreadInfo threadInfo : threadInfos) {
-				logger.debug(threadInfo);
+				logger.debug(threadInfo.toString());
 			}
 		} catch (NoSuchMethodException e) {
 			dumpThreadsOnTearDownError = false;
