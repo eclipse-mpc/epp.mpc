@@ -30,12 +30,13 @@ jobs:
       with:
         maven-version: 3.8.6
 
-    - name: Test
+    - name: Build
       run: >
-        maven.test.failure.ignore=true
-        tycho.disableP2Mirrors=true
-        org.eclipse.swt.browser.UseWebKitGTK=true
-        org.eclipse.swt.browser.DefaultType=WebKit
-        tycho.localArtifacts=ignore
-        surefire.timeout=1500
-        http.nonProxyHosts=localhost
+        mvn verify
+        -Dmaven.test.failure.ignore=true
+        -Dtycho.disableP2Mirrors=true
+        -Dorg.eclipse.swt.browser.UseWebKitGTK=true
+        -Dorg.eclipse.swt.browser.DefaultType=WebKit
+        -Dtycho.localArtifacts=ignore
+        -Dsurefire.timeout=1500
+        -Dhttp.nonProxyHosts=localhost
