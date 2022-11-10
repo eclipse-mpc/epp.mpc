@@ -32,5 +32,10 @@ jobs:
 
     - name: Test
       run: >
-           mvn verify  
-           --file pom.xml --batch-mode --fail-at-end -Dmaven.test.failure.ignore=true
+        maven.test.failure.ignore=true
+        tycho.disableP2Mirrors=true
+        org.eclipse.swt.browser.UseWebKitGTK=true
+        org.eclipse.swt.browser.DefaultType=WebKit
+        tycho.localArtifacts=ignore
+        surefire.timeout=1500
+        http.nonProxyHosts=localhost
