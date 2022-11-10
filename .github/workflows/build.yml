@@ -12,6 +12,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - uses: GabrielBB/xvfb-action@v1
     - uses: actions/cache@v1
       with:
         path: ~/.m2/repository
