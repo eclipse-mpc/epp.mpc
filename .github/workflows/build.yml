@@ -46,7 +46,7 @@ jobs:
     - name: 'Upload Screenshots'
       uses: actions/upload-artifact@v2
       with:
-        name: org.eclipse.epp.mpc.tests/target/screenshots
+        name: org.eclipse.epp.mpc.tests-target-screenshots
         path: org.eclipse.epp.mpc.tests/target/screenshots/**
         retention-days: 3
   
