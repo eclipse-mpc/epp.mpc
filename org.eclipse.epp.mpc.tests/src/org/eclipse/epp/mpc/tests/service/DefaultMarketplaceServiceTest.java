@@ -206,7 +206,7 @@ public class DefaultMarketplaceServiceTest {
 	@Test
 	@org.junit.experimental.categories.Category(RemoteTests.class)
 	public void search() throws CoreException {
-		ISearchResult result = search("Tools", "Editor", "snipmatch");
+		ISearchResult result = search("Tools", "Editor", "jaspersoft");
 		assertNotNull(result);
 		assertNotNull(result.getNodes());
 		assertEquals(Integer.valueOf(1), result.getMatchCount());
@@ -214,8 +214,8 @@ public class DefaultMarketplaceServiceTest {
 
 		INode node = result.getNodes().get(0);
 
-		assertTrue(node.getName().startsWith("Snipmatch"));
-		assertEquals("1743547", node.getId());
+		assertTrue(node.getName().startsWith("Jaspersoft"));
+		assertEquals("8068", node.getId());
 	}
 
 	@Test
@@ -379,9 +379,8 @@ public class DefaultMarketplaceServiceTest {
 
 		List<INode> result = marketplaceService.getNodes(query, new NullProgressMonitor());
 		assertEquals(query.size(), result.size());
-		for (int i = 0; i < query.size(); i++) {
-			INode queryNode = query.get(i);
-			INode resultNode = query.get(i);
+		for (INode queryNode : query) {
+			INode resultNode = queryNode;
 			if (queryNode.getId() != null) {
 				assertEquals(queryNode.getId(), resultNode.getId());
 			}

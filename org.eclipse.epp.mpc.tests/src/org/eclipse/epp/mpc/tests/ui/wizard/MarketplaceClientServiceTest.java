@@ -44,7 +44,7 @@ import org.junit.experimental.categories.Category;
 @Category({ RemoteTests.class, UITests.class })
 public class MarketplaceClientServiceTest extends AbstractMarketplaceWizardBotTest {
 
-	private static final String ITEM_ID = "1743547";
+	private static final String ITEM_ID = "8068";
 
 	private Display display;
 
@@ -103,7 +103,7 @@ public class MarketplaceClientServiceTest extends AbstractMarketplaceWizardBotTe
 		final IMarket toolsMarket = QueryHelper.marketByName("Tools");
 		final ICategory mylynCategory = QueryHelper.categoryByName("Editor");
 
-		display.asyncExec(() -> service.openSearch(config, toolsMarket, mylynCategory, "snipmatch"));
+		display.asyncExec(() -> service.openSearch(config, toolsMarket, mylynCategory, "jaspersoft"));
 
 		initWizardBot();
 		checkSelectedTab("Search");
@@ -114,9 +114,9 @@ public class MarketplaceClientServiceTest extends AbstractMarketplaceWizardBotTe
 		assertEquals("Editor", categoryCombo.getText());
 
 		SWTBotText searchText = bot.text(0);
-		assertEquals("snipmatch", searchText.getText());
+		assertEquals("jaspersoft", searchText.getText());
 
-		itemBot(NodeMatcher.withNameRegex(".*Snipmatch.*"));
+		itemBot(NodeMatcher.withNameRegex(".*Jaspersoft.*"));
 
 	}
 
