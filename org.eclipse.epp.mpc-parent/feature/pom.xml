@@ -16,8 +16,8 @@
    <build>
       <plugins>
          <plugin>
-            <groupId>org.eclipse.tycho.extras</groupId>
-            <artifactId>tycho-source-feature-plugin</artifactId>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>tycho-source-plugin</artifactId>
             <configuration>
                <excludes>
                   <plugin id="org.eclipse.epp.mpc.help.ui" />
@@ -35,8 +35,8 @@
       <pluginManagement>
          <plugins>
             <plugin>
-               <groupId>org.eclipse.tycho.extras</groupId>
-               <artifactId>tycho-source-feature-plugin</artifactId>
+               <groupId>org.eclipse.tycho</groupId>
+               <artifactId>tycho-source-plugin</artifactId>
                <version>${tycho-version}</version>
                <configuration>
                   <!-- Non-breakable space, as normal spaces are trimmed. -->
@@ -44,10 +44,10 @@
                </configuration>
                <executions>
                   <execution>
-                     <id>source-feature</id>
+                     <id>feature-source</id>
                      <phase>package</phase>
                      <goals>
-                        <goal>source-feature</goal>
+                        <goal>feature-source</goal>
                      </goals>
                   </execution>
                </executions>
