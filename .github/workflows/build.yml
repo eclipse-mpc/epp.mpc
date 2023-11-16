@@ -1,0 +1,66 @@
+name: Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/cache@v1
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+    
+    - name: Setup Maven
+      # todo change?
+      uses: stCarolas/setup-maven@v4.2
+      with:
+        maven-version: 3.8.6
+
+    - name: Build
+      uses: GabrielBB/xvfb-action@v1
+      with:
+        run: >
+          mvn verify
+          -Dmaven.test.failure.ignore=true
+          -Dtycho.disableP2Mirrors=true
+          -Dorg.eclipse.swt.browser.UseWebKitGTK=true
+          -Dorg.eclipse.swt.browser.DefaultType=WebKit
+          -Dtycho.localArtifacts=ignore
+          -Dsurefire.timeout=1500
+          -Dhttp.nonProxyHosts=localhost
+          
+    - name: 'Upload Screenshots'
+      uses: actions/upload-artifact@v2
+      with:
+        name: org.eclipse.epp.mpc.tests-target-screenshots
+        path: org.eclipse.epp.mpc.tests/target/screenshots/**
+        retention-days: 3
+  
+    - name: 'Upload Screenshots'
+      uses: actions/upload-artifact@v2
+      with:
+        name: org.eclipse.epp.mpc.tests-log
+        path: org.eclipse.epp.mpc.tests/target/work/data/.metadata/.log
+        retention-days: 3
+        
+        
+    - name: 'Upload Screenshots Backup'
+      uses: actions/upload-artifact@v2
+      with:
+        name: org.eclipse.epp.mpc.tests-log-all
+        path: org.eclipse.epp.mpc.tests/target/work/data/.metadata/**
+        retention-days: 3
