@@ -20,7 +20,6 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.swtbot.swt.finder.matchers.AbstractMatcher;
 import org.hamcrest.Description;
-import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 import org.hamcrest.core.IsAnything;
 
@@ -54,17 +53,14 @@ public class NodeMatcher<T extends Widget> extends AbstractMatcher<T> {
 		matcher.describeTo(description);
 	}
 
-	@Factory
 	public static <T extends Widget> NodeMatcher<T> any() {
 		return new NodeMatcher<>(IsAnything.anything("Any node"));
 	}
 
-	@Factory
 	public static <T extends Widget> NodeMatcher<T> withNode(Matcher<INode> matcher) {
 		return new NodeMatcher<>(matcher);
 	}
 
-	@Factory
 	public static <T extends Widget> NodeMatcher<T> withId(String id) {
 		return withNode(new NodeValueMatcher<>("id", id) {
 
@@ -75,7 +71,6 @@ public class NodeMatcher<T extends Widget> extends AbstractMatcher<T> {
 		});
 	}
 
-	@Factory
 	public static <T extends Widget> NodeMatcher<T> withUrl(String url) {
 		return withNode(new NodeValueMatcher<>("url", url) {
 
@@ -86,7 +81,6 @@ public class NodeMatcher<T extends Widget> extends AbstractMatcher<T> {
 		});
 	}
 
-	@Factory
 	public static <T extends Widget> NodeMatcher<T> withName(String name) {
 		return withNode(new NodeValueMatcher<>("name", name) {
 
@@ -97,7 +91,6 @@ public class NodeMatcher<T extends Widget> extends AbstractMatcher<T> {
 		});
 	}
 
-	@Factory
 	public static <T extends Widget> NodeMatcher<T> withNameRegex(String name) {
 		return withNode(new NodeValueMatcher<>("name", name) {
 			private final Pattern pattern = Pattern.compile(expected);
