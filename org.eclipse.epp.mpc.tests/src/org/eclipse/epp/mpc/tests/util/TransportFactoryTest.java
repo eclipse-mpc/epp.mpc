@@ -24,6 +24,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -40,6 +41,8 @@ import org.apache.hc.client5.http.auth.StandardAuthScheme;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ConnectionClosedException;
@@ -94,6 +97,14 @@ public class TransportFactoryTest {
 
 		@Override
 		public HttpClientBuilder customizeBuilder(HttpClientBuilder builder) {
+			HttpClientConnectionManager manager = Mockito.spy(new BasicHttpClientConnectionManager());
+			try {
+				Mockito.doNothing().when(manager).connect(ArgumentMatchers.any(), ArgumentMatchers.any(),
+						ArgumentMatchers.any());
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			builder.setConnectionManager(manager);
 			return builder.addRequestInterceptorLast((HttpRequestInterceptor) (request, entityDetails, context) -> {
 				interceptedRequest = request;
 				interceptedContext = context;
@@ -351,7 +362,7 @@ public class TransportFactoryTest {
 		assertNotNull(authRegistry);
 		Object ntlmFactory = authRegistry.lookup(StandardAuthScheme.NTLM);
 		assertNotNull(ntlmFactory);
-		assertEquals("org.apache.http.impl.auth.win.WindowsNTLMSchemeFactory", ntlmFactory.getClass().getName());
+		assertEquals("org.apache.hc.client5.http.impl.win.WindowsNTLMSchemeFactory", ntlmFactory.getClass().getName());
 
 		assertNotNull(credentialsProvider);
 		List<CredentialsProvider> nestedProviders = listCredentialsProviders(credentialsProvider);
