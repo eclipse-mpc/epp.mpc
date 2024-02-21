@@ -67,8 +67,8 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 
 	@Test
 	public void testSearch() {
-		search("Jaspersoft");
-		itemBot(NodeMatcher.withNameRegex(".*Jaspersoft.*"));
+		search("WindowBuilder");
+		itemBot(NodeMatcher.withNameRegex(".*WindowBuilder.*"));
 	}
 
 	@Ignore //Tags are currently disabled in the REST API

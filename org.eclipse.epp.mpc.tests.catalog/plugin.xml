@@ -6,7 +6,8 @@
       <catalog
             icon="icons/marketplace32.png"
             label="Eclipse Plugin Central"
-            url="http://www.eclipseplugincentral.net">
+            url="marketplace.eclipse.org">
+<!--            url="http://www.eclipseplugincentral.net">-->
       </catalog>
    </extension>
 
