@@ -206,16 +206,16 @@ public class DefaultMarketplaceServiceTest {
 	@Test
 	@org.junit.experimental.categories.Category(RemoteTests.class)
 	public void search() throws CoreException {
-		ISearchResult result = search("Tools", "Editor", "jaspersoft");
+		ISearchResult result = search("Tools", "Editor", "windowbuilder");
 		assertNotNull(result);
 		assertNotNull(result.getNodes());
-		assertEquals(Integer.valueOf(1), result.getMatchCount());
-		assertEquals(1, result.getNodes().size());
+		assertEquals(Integer.valueOf(2), result.getMatchCount());
+		assertEquals(2, result.getNodes().size());
 
 		INode node = result.getNodes().get(0);
 
-		assertTrue(node.getName().startsWith("Jaspersoft"));
-		assertEquals("8068", node.getId());
+		assertTrue(node.getName().startsWith("WindowBuilder"));
+		assertEquals("3085446", node.getId());
 	}
 
 	@Test
