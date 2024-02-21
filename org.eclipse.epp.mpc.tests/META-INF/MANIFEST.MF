@@ -2,13 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Marketplace Client Tests
 Bundle-SymbolicName: org.eclipse.epp.mpc.tests
-Bundle-Version: 1.10.2.qualifier
+Bundle-Version: 1.10.3.qualifier
 Bundle-Vendor: Eclipse Marketplace Client
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: org.eclipse.osgi;bundle-version="3.6.0",
  org.eclipse.core.runtime;bundle-version="3.6.0",
- org.eclipse.epp.mpc.core;bundle-version="[1.10.2,2.0.0)",
- org.eclipse.epp.mpc.ui;bundle-version="[1.10.2,2.0.0)",
+ org.eclipse.epp.mpc.core;bundle-version="[1.10.3,2.0.0)",
+ org.eclipse.epp.mpc.ui;bundle-version="[1.10.3,2.0.0)",
  org.junit;bundle-version="4.7.0",
  org.eclipse.equinox.p2.repository;bundle-version="2.0.0",
  org.eclipse.equinox.p2.core;bundle-version="2.0.0",
