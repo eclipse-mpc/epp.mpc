@@ -5,8 +5,8 @@
 <unit id="org.eclipse.equinox.p2.discovery.feature.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.equinox.p2.sdk.feature.group" version="0.0.0"/>
 <unit id="org.eclipse.sdk.feature.group" version="0.0.0"/>
-<repository location="https://download.eclipse.org/eclipse/updates/4.30-I-builds"/>
-<!-- <repository location="https://download.eclipse.org/eclipse/updates/4.29"/> -->
+<repository location="https://download.eclipse.org/eclipse/updates/4.31-I-builds"/>
+<!-- <repository location="https://download.eclipse.org/eclipse/updates/4.30"/> -->
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.hamcrest" version="0.0.0"/>
@@ -14,8 +14,8 @@
 <unit id="org.hamcrest.library" version="0.0.0"/>
 <unit id="org.junit" version="0.0.0"/>
 <unit id="org.mockito.mockito-core" version="0.0.0"/>
-<repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20230531010532/repository"/>
-<!-- repository location="https://download.eclipse.org/tools/orbit/test/orbit-aggregation/2023-09"/ -->
+<repository location="https://download.eclipse.org/tools/orbit/simrel/orbit-aggregation/release/latest"/>
+<!-- repository location="https://download.eclipse.org/tools/orbit/simrel/orbit-aggregation/2023-12"/ -->
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.license.feature.group" version="0.0.0"/>
