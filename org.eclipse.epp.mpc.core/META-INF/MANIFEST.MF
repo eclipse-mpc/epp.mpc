@@ -12,7 +12,8 @@ Require-Bundle: org.eclipse.osgi;bundle-version="3.6.0",
  org.eclipse.core.net;bundle-version="1.2.100",
  org.eclipse.userstorage;bundle-version="[1.1.0,2.0.0)",
  org.eclipse.userstorage.oauth;bundle-version="[1.0.0,2.0.0)",
- org.eclipse.equinox.security;bundle-version="1.2.0"
+ org.eclipse.equinox.security;bundle-version="1.2.0",
+ org.apache.httpcomponents.client5.httpclient5
 Export-Package: org.eclipse.epp.internal.mpc.core;x-friends:="org.eclipse.epp.mpc.ui";
   uses:="org.osgi.framework,
    org.eclipse.epp.mpc.core.service,

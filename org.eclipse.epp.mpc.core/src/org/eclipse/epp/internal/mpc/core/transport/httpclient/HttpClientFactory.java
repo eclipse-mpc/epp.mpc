@@ -14,12 +14,16 @@ package org.eclipse.epp.internal.mpc.core.transport.httpclient;
 
 import java.util.List;
 
+import javax.net.ssl.SSLContext;
+
 import org.apache.hc.client5.http.auth.CredentialsStore;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.cookie.CookieStore;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.core5.http.HttpRequestInterceptor;
 import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.util.Timeout;
@@ -112,8 +116,18 @@ public class HttpClientFactory {
 
 	protected HttpClientBuilder builder() {
 		HttpClientBuilder builder = HttpClientBuilder.create();
+		
+		PoolingHttpClientConnectionManager connManager = null;
+		try {
+			SSLConnectionSocketFactory sslFactory = new SSLConnectionSocketFactory(SSLContext.getDefault());
+			connManager = PoolingHttpClientConnectionManagerBuilder.create().setSSLSocketFactory(sslFactory).build();
 
-		PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
+		} catch (Exception defaultProcess) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+			connManager = new PoolingHttpClientConnectionManager();
+		}
+
 		connManager.setDefaultMaxPerRoute(100);
 		connManager.setMaxTotal(200);
 		builder.setConnectionManager(connManager);
