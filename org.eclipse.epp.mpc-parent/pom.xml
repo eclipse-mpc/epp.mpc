@@ -11,7 +11,7 @@
 
    <groupId>org.eclipse.epp.mpc</groupId>
    <artifactId>org.eclipse.epp.mpc-parent</artifactId>
-   <version>1.10.3-SNAPSHOT</version>
+   <version>1.11.0-SNAPSHOT</version>
    <packaging>pom</packaging>
 
    <properties>
@@ -22,7 +22,7 @@
       <enforced.java.version>[1.8.0,)</enforced.java.version>
       <java-jdk>SYSTEM</java-jdk>
 
-      <tycho-version>4.0.4</tycho-version>
+      <tycho-version>4.0.8</tycho-version>
       
       <qualifier-format>'v'yyyyMMdd-HHmm</qualifier-format>
 
@@ -198,10 +198,7 @@
                <artifactId>target-platform-configuration</artifactId>
                <version>${tycho-version}</version>
                <configuration>
-                  <resolver>p2</resolver>
                   <executionEnvironmentDefault>${java-bree}</executionEnvironmentDefault>
-                  <includePackedArtifacts>false</includePackedArtifacts>
-                  <ignoreTychoRepositories>true</ignoreTychoRepositories>
                   <target>
                      <artifact>
                         <groupId>org.eclipse.epp.mpc</groupId>
@@ -239,7 +236,6 @@
                   <timestampProvider>jgit</timestampProvider>
                   <!-- Changed back to "error" in the "release" profile. -->
                   <jgit.dirtyWorkingTree>warning</jgit.dirtyWorkingTree>
-                  <archiveSite>true</archiveSite>
                   <sourceReferences>
                      <generate>true</generate>
                   </sourceReferences>

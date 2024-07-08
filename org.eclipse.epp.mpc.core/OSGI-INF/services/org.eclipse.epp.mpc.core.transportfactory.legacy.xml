@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" name="org.eclipse.epp.mpc.core.transportfactory.legacy">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" deactivate="deactivate" name="org.eclipse.epp.mpc.core.transportfactory.legacy">
    <property name="org.eclipse.epp.mpc.core.service.transport.legacy" type="Boolean" value="true"/>
    <property name="service.ranking" type="Integer" value="-2147483647"/>
    <service>
