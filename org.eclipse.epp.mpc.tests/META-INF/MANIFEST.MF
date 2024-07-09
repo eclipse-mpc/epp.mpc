@@ -2,13 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Marketplace Client Tests
 Bundle-SymbolicName: org.eclipse.epp.mpc.tests
-Bundle-Version: 1.10.3.qualifier
+Bundle-Version: 1.11.0.qualifier
 Bundle-Vendor: Eclipse Marketplace Client
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: org.eclipse.osgi;bundle-version="3.6.0",
  org.eclipse.core.runtime;bundle-version="3.6.0",
- org.eclipse.epp.mpc.core;bundle-version="[1.10.3,2.0.0)",
- org.eclipse.epp.mpc.ui;bundle-version="[1.10.3,2.0.0)",
+ org.eclipse.epp.mpc.core;bundle-version="[1.11.0,2.0.0)",
+ org.eclipse.epp.mpc.ui;bundle-version="[1.11.0,2.0.0)",
  org.junit;bundle-version="4.7.0",
  org.eclipse.equinox.p2.repository;bundle-version="2.0.0",
  org.eclipse.equinox.p2.core;bundle-version="2.0.0",
@@ -27,10 +27,10 @@ Require-Bundle: org.eclipse.osgi;bundle-version="3.6.0",
  org.apache.httpcomponents.httpclient,
  org.slf4j.api;bundle-version="1.7.30",
  org.mockito.mockito-core;bundle-version="4.8.1"
-Import-Package: org.apache.hc.client5.http.auth;version="[5.1.0,5.3.0)",
- org.apache.hc.client5.http.classic;version="[5.1.0,5.3.0)",
- org.apache.hc.client5.http.classic.methods;version="[5.1.0,5.3.0)",
- org.apache.hc.client5.http.impl.classic;version="[5.1.0,5.3.0)",
+Import-Package: org.apache.hc.client5.http.auth;version="[5.1.0,6.0.0)",
+ org.apache.hc.client5.http.classic;version="[5.1.0,6.0.0)",
+ org.apache.hc.client5.http.classic.methods;version="[5.1.0,6.0.0)",
+ org.apache.hc.client5.http.impl.classic;version="[5.1.0,6.0.0)",
  org.apache.hc.core5.http;version="[5.1.0,5.3.0)",
  org.apache.hc.core5.http.config;version="[5.1.0,5.3.0)",
  org.apache.hc.core5.http.io.support;version="5.1.2",
