@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.transport.httpclient;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import javax.net.ssl.SSLContext;
@@ -20,13 +21,14 @@ import org.apache.hc.client5.http.auth.CredentialsStore;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.cookie.CookieStore;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.core5.http.HttpRequestInterceptor;
 import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.util.Timeout;
+import org.eclipse.epp.internal.mpc.core.util.PKIContext;
 import org.eclipse.userstorage.internal.StorageProperties;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Component;
@@ -42,6 +44,8 @@ public class HttpClientFactory {
 	@Reference(cardinality = ReferenceCardinality.MULTIPLE, policyOption = ReferencePolicyOption.GREEDY, policy = ReferencePolicy.STATIC, fieldOption = FieldOption.REPLACE)
 	private List<HttpClientCustomizer> customizers;
 
+	private static SSLContext sslContext = null;
+
 	public List<HttpClientCustomizer> getCustomizers() {
 		return customizers;
 	}
@@ -56,7 +60,6 @@ public class HttpClientFactory {
 
 	public HttpServiceContext build(HttpServiceContext oldContext) {
 		HttpClientBuilder clientBuilder = builder();
-
 		CookieStore cookieStore = oldContext == null ? null : oldContext.getCookieStore();
 		if (cookieStore == null) {
 			cookieStore = createCookieStore();
@@ -116,18 +119,23 @@ public class HttpClientFactory {
 
 	protected HttpClientBuilder builder() {
 		HttpClientBuilder builder = HttpClientBuilder.create();
-		
-		PoolingHttpClientConnectionManager connManager = null;
+		PoolingHttpClientConnectionManager connManager;
 		try {
-			SSLConnectionSocketFactory sslFactory = new SSLConnectionSocketFactory(SSLContext.getDefault());
+
+			sslContext = PKIContext.INSTANCE.get();
+			if (sslContext == null) {
+				sslContext = SSLContext.getDefault();
+			}
+
+			SSLConnectionSocketFactory sslFactory = new SSLConnectionSocketFactory(sslContext);
+
 			connManager = PoolingHttpClientConnectionManagerBuilder.create().setSSLSocketFactory(sslFactory).build();
 
-		} catch (Exception defaultProcess) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			//e.printStackTrace();
 			connManager = new PoolingHttpClientConnectionManager();
 		}
-
 		connManager.setDefaultMaxPerRoute(100);
 		connManager.setMaxTotal(200);
 		builder.setConnectionManager(connManager);
@@ -136,7 +144,6 @@ public class HttpClientFactory {
 		builder.addResponseInterceptorLast(new CacheCredentialsAuthenticationStrategy());
 
 		builder.setUserAgent(HttpClientTransport.USER_AGENT);
-
 		return builder;
 	}
 
@@ -153,7 +160,33 @@ public class HttpClientFactory {
 
 		int connectionRequestTimeout = getTimeoutValue(HttpClientTransport.CONNECTION_REQUEST_TIMEOUT_PROPERTY,
 				HttpClientTransport.DEFAULT_CONNECTION_REQUEST_TIMEOUT);
+		//System.out.println("HttpClientFactory -- setClientDefaultTimeouts");
 
+		PoolingHttpClientConnectionManager connManager = null;
+
+		try {
+			try {
+				sslContext = PKIContext.INSTANCE.get();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				//e.printStackTrace();
+			}
+			if (sslContext == null) {
+				sslContext = SSLContext.getDefault();
+			}
+
+			SSLConnectionSocketFactory sslFactory = new SSLConnectionSocketFactory(sslContext);
+
+			connManager = PoolingHttpClientConnectionManagerBuilder.create()
+					.setSSLSocketFactory(sslFactory)
+					.build();
+
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+			//System.out.println("HttpClientFactory -- NO SSL INSTALLED");
+			connManager = new PoolingHttpClientConnectionManager();
+		}
 		SocketConfig defaultSocketConfig = SocketConfig.copy(SocketConfig.DEFAULT)
 				.setSoTimeout(Timeout.ofMilliseconds(readTimeout))
 				.setTcpNoDelay(true)//Disable Nagle - see https://en.wikipedia.org/wiki/Nagle%27s_algorithm#Negative_effect_on_larger_writes
@@ -167,8 +200,9 @@ public class HttpClientFactory {
 				.setConnectTimeout(Timeout.ofMilliseconds(connectTimeout))
 				.setConnectionRequestTimeout(Timeout.ofMilliseconds(connectionRequestTimeout))
 				.build();
-		PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
+		//PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
 		connManager.setDefaultSocketConfig(defaultSocketConfig);
+
 		builder.setConnectionManager(connManager);
 		builder.setDefaultRequestConfig(defaultRequestConfig);
 	}

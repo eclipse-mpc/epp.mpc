@@ -58,7 +58,10 @@ class CacheCredentialsAuthenticationStrategy implements HttpResponseInterceptor 
 		CredentialsStore credentialsCache = getCredentialsCache(context);
 		if (credentialsCache != null) {
 			AuthScope scope = createAuthScope(authhost, authScheme);
-			credentialsCache.setCredentials(scope, null);
+			// SUPPORT for PKI enabled
+			if (scope != null) {
+				credentialsCache.setCredentials(scope, null);
+			}
 		}
 	}
 
@@ -89,7 +92,13 @@ class CacheCredentialsAuthenticationStrategy implements HttpResponseInterceptor 
 			schemeName = scheme.getName();
 			realm = scheme.getRealm();
 		}
-		return new AuthScope(targetHost, realm, schemeName);
+		// SUPPORT for PKI enabled
+		try {
+			return new AuthScope(targetHost, realm, schemeName);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			return null;
+		}
 	}
 
 }

@@ -46,6 +46,16 @@ public class FallbackTransportFactory implements ITransportFactory {
 
 		FallbackTransport(ITransport primaryTransport, ITransport fallbackTransport) {
 			super();
+			try {
+				if (PKIContext.INSTANCE.isEnabled) {
+					primaryDisabled = true;
+				}
+			} catch (Exception e) {
+
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 			this.primaryTransport = primaryTransport;
 			this.fallbackTransport = fallbackTransport;
 		}
