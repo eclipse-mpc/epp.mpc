@@ -24,10 +24,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -52,22 +50,16 @@ import org.eclipse.epp.internal.mpc.core.model.Node;
 import org.eclipse.epp.internal.mpc.core.model.NodeListing;
 import org.eclipse.epp.internal.mpc.core.model.Search;
 import org.eclipse.epp.internal.mpc.core.model.SearchResult;
-import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientService;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.RequestTemplate;
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.mpc.core.model.ICategory;
-import org.eclipse.epp.mpc.core.model.IFavoriteList;
 import org.eclipse.epp.mpc.core.model.IIdentifiable;
-import org.eclipse.epp.mpc.core.model.IIus;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INode;
-import org.eclipse.epp.mpc.core.model.ISearchResult;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
-import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
-import org.eclipse.epp.mpc.core.service.ServiceHelper;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -172,8 +164,6 @@ MarketplaceService {
 	static {
 		DEFAULT_SERVICE_URL = ServiceUtil.parseUrl(DEFAULT_SERVICE_LOCATION);
 	}
-
-	private IUserFavoritesService userFavoritesService;
 
 	private HttpClientService httpClient;
 
@@ -586,138 +576,6 @@ MarketplaceService {
 	}
 
 	@Override
-	public List<IFavoriteList> userFavoriteLists(IProgressMonitor monitor) throws CoreException {
-		IUserFavoritesService userFavoritesService = getUserFavoritesService();
-		if (userFavoritesService == null) {
-			throw new UnsupportedOperationException();
-		}
-		try {
-			return userFavoritesService.getRandomFavoriteLists(monitor);
-		} catch (Exception e) {
-			throw new CoreException(MarketplaceClientCore.computeStatus(e,
-					Messages.DefaultMarketplaceService_FavoritesErrorRetrieving));
-		}
-	}
-
-	@Override
-	public ISearchResult userFavorites(IProgressMonitor monitor) throws CoreException, NotAuthorizedException {
-		SubMonitor progress = SubMonitor.convert(monitor, Messages.DefaultMarketplaceService_FavoritesRetrieve, 10000);
-		IUserFavoritesService userFavoritesService = getUserFavoritesService();
-		if (userFavoritesService == null) {
-			throw new UnsupportedOperationException();
-		}
-		final List<INode> favorites;
-		try {
-			favorites = userFavoritesService.getFavorites(progress.newChild(1000));
-		} catch (NotAuthorizedException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new CoreException(MarketplaceClientCore.computeStatus(e, Messages.DefaultMarketplaceService_FavoritesErrorRetrieving));
-		}
-		progress.setWorkRemaining(9000);
-		return resolveFavoriteNodes(favorites, progress.newChild(9000), true);
-	}
-
-	@Override
-	public ISearchResult userFavorites(URI favoritesUri, IProgressMonitor monitor) throws CoreException {
-		SubMonitor progress = SubMonitor.convert(monitor, Messages.DefaultMarketplaceService_FavoritesRetrieve, 10000);
-		IUserFavoritesService userFavoritesService = getUserFavoritesService();
-		if (userFavoritesService == null) {
-			throw new UnsupportedOperationException();
-		}
-		final List<INode> favorites;
-		try {
-			favorites = userFavoritesService.getFavorites(favoritesUri, progress.newChild(1000));
-		} catch (Exception e) {
-			throw new CoreException(MarketplaceClientCore.computeStatus(e,
-					Messages.DefaultMarketplaceService_FavoritesErrorRetrieving));
-		}
-		progress.setWorkRemaining(9000);
-		return resolveFavoriteNodes(favorites, progress.newChild(9000), false);
-	}
-
-	@Override
-	public void userFavorites(List<? extends INode> nodes, IProgressMonitor monitor)
-			throws NotAuthorizedException, CoreException {
-		SubMonitor progress = SubMonitor.convert(monitor, Messages.DefaultMarketplaceService_FavoritesUpdate, 10000);
-		IUserFavoritesService userFavoritesService = getUserFavoritesService();
-		if (userFavoritesService == null) {
-			throw new UnsupportedOperationException();
-		}
-		if (nodes == null || nodes.isEmpty()) {
-			return;
-		}
-		Set<String> favorites = null;
-		try {
-			favorites = userFavoritesService == null ? null : userFavoritesService.getFavoriteIds(progress);
-		} catch (NotAuthorizedException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new CoreException(MarketplaceClientCore.computeStatus(e, Messages.DefaultMarketplaceService_FavoritesErrorRetrieving));
-		} finally {
-			for (INode node : nodes) {
-				((Node) node).setUserFavorite(favorites == null ? null : favorites.contains(node.getId()));
-			}
-		}
-	}
-
-	private ISearchResult resolveFavoriteNodes(final List<INode> nodes, IProgressMonitor monitor, boolean filterIncompatible) throws CoreException {
-		IMarketplaceService resolveService = this;
-		IMarketplaceService registeredService = ServiceHelper.getMarketplaceServiceLocator()
-				.getMarketplaceService(this.getBaseUrl().toString());
-		if (registeredService instanceof CachingMarketplaceService) {
-			CachingMarketplaceService cachingService = (CachingMarketplaceService) registeredService;
-			if (cachingService.getDelegate() == this) {
-				resolveService = cachingService;
-			}
-		}
-		final List<INode> resolvedNodes = resolveService.getNodes(nodes, monitor);
-		for (ListIterator<INode> i = resolvedNodes.listIterator(); i.hasNext();) {
-			INode resolved = i.next();
-			((Node) resolved).setUserFavorite(true);
-			if (filterIncompatible && !isInstallable(resolved)) {
-				i.remove();
-			}
-		}
-		if (!filterIncompatible) {
-			//sort the node list so uninstallable nodes come last
-			Collections.sort(resolvedNodes, (n1, n2) -> {
-				if (n1 == n2) {
-					return 0;
-				}
-				boolean n1Installable = isInstallable(n1);
-				boolean n2Installable = isInstallable(n2);
-				if (n1Installable == n2Installable) {
-					return 0;
-				}
-				if (n1Installable) { // && !n2Installable
-					return -1;
-				}
-				// !n1Installable && n2Installable
-				return 1;
-			});
-		}
-
-		return new ISearchResult() {
-
-			@Override
-			public List<? extends INode> getNodes() {
-				return resolvedNodes;
-			}
-
-			@Override
-			public Integer getMatchCount() {
-				return resolvedNodes.size();
-			}
-		};
-	}
-
-	private boolean isInstallable(INode resolved) {
-		IIus ius = resolved.getIus();
-		return ius != null && !ius.getIuElements().isEmpty();
-	}
-
-	@Override
 	public SearchResult popular(IProgressMonitor monitor) throws CoreException {
 		Marketplace marketplace = processRequest(API_POPULAR_URI + '/' + API_URI_SUFFIX, monitor);
 		return createSearchResult(marketplace.getPopular());
@@ -847,15 +705,6 @@ MarketplaceService {
 		} catch (Throwable e) {
 			//per bug 314028 logging this error is not useful.
 		}
-	}
-
-	@Override
-	public IUserFavoritesService getUserFavoritesService() {
-		return userFavoritesService;
-	}
-
-	public void setUserFavoritesService(IUserFavoritesService userFavoritesService) {
-		this.userFavoritesService = userFavoritesService;
 	}
 
 	public void setHttpClient(HttpClientService httpClient) {

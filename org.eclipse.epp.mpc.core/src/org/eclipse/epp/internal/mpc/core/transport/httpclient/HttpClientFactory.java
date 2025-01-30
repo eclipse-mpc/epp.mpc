@@ -23,7 +23,6 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.core5.http.HttpRequestInterceptor;
 import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.util.Timeout;
-import org.eclipse.userstorage.internal.StorageProperties;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.FieldOption;
@@ -127,15 +126,10 @@ public class HttpClientFactory {
 	}
 
 	private static void setClientDefaultTimeouts(HttpClientBuilder builder) {
-		@SuppressWarnings("restriction")
-		int connectTimeoutUssDefault = StorageProperties.getProperty(StorageProperties.CONNECT_TIMEOUT,
+		int connectTimeout = getTimeoutValue(HttpClientTransport.CONNECT_TIMEOUT_PROPERTY,
 				HttpClientTransport.DEFAULT_CONNECT_TIMEOUT);
-		@SuppressWarnings("restriction")
-		int readTimeoutUssDefault = StorageProperties.getProperty(StorageProperties.SOCKET_TIMEOUT,
+		int readTimeout = getTimeoutValue(HttpClientTransport.READ_TIMEOUT_PROPERTY,
 				HttpClientTransport.DEFAULT_READ_TIMEOUT);
-
-		int connectTimeout = getTimeoutValue(HttpClientTransport.CONNECT_TIMEOUT_PROPERTY, connectTimeoutUssDefault);
-		int readTimeout = getTimeoutValue(HttpClientTransport.READ_TIMEOUT_PROPERTY, readTimeoutUssDefault);
 
 		int connectionRequestTimeout = getTimeoutValue(HttpClientTransport.CONNECTION_REQUEST_TIMEOUT_PROPERTY,
 				HttpClientTransport.DEFAULT_CONNECTION_REQUEST_TIMEOUT);

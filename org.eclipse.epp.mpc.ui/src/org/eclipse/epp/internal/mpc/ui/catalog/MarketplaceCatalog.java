@@ -106,14 +106,6 @@ public class MarketplaceCatalog extends Catalog {
 		return performDiscovery((strategy, monitor1) -> strategy.installed(monitor1), false, monitor);
 	}
 
-	public IStatus userFavorites(final boolean login, IProgressMonitor monitor) {
-		return performDiscovery((strategy, monitor1) -> strategy.userFavorites(login, monitor1), false, monitor);
-	}
-
-	public IStatus refreshUserFavorites(IProgressMonitor monitor) {
-		return performDiscovery((strategy, monitor1) -> strategy.refreshUserFavorites(monitor1), true, monitor);
-	}
-
 	/**
 	 * Query for a set of node ids. Use this method infrequently since it may have to make multiple server round-trips.
 	 *
@@ -237,7 +229,7 @@ public class MarketplaceCatalog extends Catalog {
 			SubMonitor itemProgress = discoveryStrategyProgress.newChild(500);
 			itemProgress.setWorkRemaining(installedNodes.size() * 100);
 			for (INode node : installedNodes) {
-				CatalogItem item = marketplaceDiscoveryStrategy.createCatalogItem(node, catalogCategory.getId(), false,
+				CatalogItem item = marketplaceDiscoveryStrategy.createCatalogItem(node, catalogCategory.getId(),
 						itemProgress.newChild(100));
 				if (!itemsById.containsKey(item.getId())) {
 					itemsById.put(item.getId(), item);

@@ -17,7 +17,7 @@
    <properties>
       <mpc-version>${project.version}</mpc-version>
       <target-platform>staging</target-platform>
-      <java-version>17</java-version>
+      <java-version>21</java-version>
       <java-bree>JavaSE-${java-version}</java-bree>
       <enforced.java.version>[1.8.0,)</enforced.java.version>
       <java-jdk>SYSTEM</java-jdk>

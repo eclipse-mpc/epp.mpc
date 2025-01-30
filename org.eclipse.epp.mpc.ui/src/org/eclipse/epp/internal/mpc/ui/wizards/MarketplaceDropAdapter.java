@@ -19,8 +19,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientDebug;
+import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler;
 import org.eclipse.jface.util.Util;
 import org.eclipse.swt.SWT;
@@ -70,11 +70,6 @@ public class MarketplaceDropAdapter implements IStartup {
 		@Override
 		protected boolean handleInstallRequest(SolutionInstallationInfo installInfo, String url) {
 			return triggerInstall(installInfo);
-		}
-
-		@Override
-		protected boolean handleImportFavoritesRequest(FavoritesDescriptor descriptor) {
-			return triggerFavoritesImport(descriptor);
 		}
 	};
 
@@ -188,24 +183,16 @@ public class MarketplaceDropAdapter implements IStartup {
 		proceed(url);
 	}
 
-	protected void proceedFavorites(String url) {
-		proceed(url);
-	}
-
 	protected void proceed(String url) {
 		urlHandler.handleUri(url);
 	}
 
 	protected boolean acceptUrl(final String url) {
-		return acceptSolutionUrl(url) || acceptFavoritesListUrl(url);
+		return acceptSolutionUrl(url);
 	}
 
 	protected boolean acceptSolutionUrl(final String url) {
 		return MarketplaceUrlHandler.isPotentialSolution(url);
-	}
-
-	protected boolean acceptFavoritesListUrl(final String url) {
-		return MarketplaceUrlHandler.isPotentialFavoritesList(url);
 	}
 
 	private class MarketplaceDropTargetListener extends DropTargetAdapter {

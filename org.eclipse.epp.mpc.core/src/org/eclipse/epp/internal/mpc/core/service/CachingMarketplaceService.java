@@ -16,7 +16,6 @@ package org.eclipse.epp.internal.mpc.core.service;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
-import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,16 +30,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.epp.internal.mpc.core.model.Node;
-import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.mpc.core.model.ICategory;
-import org.eclipse.epp.mpc.core.model.IFavoriteList;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INews;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
-import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.epp.mpc.core.service.QueryHelper;
 
 public class CachingMarketplaceService implements IMarketplaceService {
@@ -425,39 +421,4 @@ public class CachingMarketplaceService implements IMarketplaceService {
 	public void reportInstallSuccess(INode node, IProgressMonitor monitor) {
 		delegate.reportInstallSuccess(node, monitor);
 	}
-
-	@Override
-	@Deprecated
-	public ISearchResult favorites(IProgressMonitor monitor) throws CoreException {
-		return topFavorites(monitor);
-	}
-
-	@Override
-	public List<IFavoriteList> userFavoriteLists(IProgressMonitor monitor) throws CoreException {
-		return delegate.userFavoriteLists(monitor);
-	}
-
-	@Override
-	public ISearchResult userFavorites(IProgressMonitor monitor) throws CoreException, NotAuthorizedException {
-		//we don't cache the favorite status, only contents individual nodes, which happens internally...
-		return delegate.userFavorites(monitor);
-	}
-
-	@Override
-	public void userFavorites(List<? extends INode> nodes, IProgressMonitor monitor)
-			throws CoreException, NotAuthorizedException {
-		//we don't cache the favorite status, only contents individual nodes, which happens internally...
-		delegate.userFavorites(nodes, monitor);
-	}
-
-	@Override
-	public IUserFavoritesService getUserFavoritesService() {
-		return delegate.getUserFavoritesService();
-	}
-
-	@Override
-	public ISearchResult userFavorites(URI favoritesUri, IProgressMonitor monitor) throws CoreException {
-		return delegate.userFavorites(favoritesUri, monitor);
-	}
-
 }

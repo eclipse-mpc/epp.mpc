@@ -20,7 +20,6 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.commands.AbstractMarketplaceWizardCommand;
-import org.eclipse.epp.internal.mpc.ui.commands.ImportFavoritesWizardCommand;
 import org.eclipse.epp.internal.mpc.ui.commands.MarketplaceWizardCommand;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceWizard.WizardState;
@@ -119,25 +118,6 @@ public class MarketplaceClientService implements IMarketplaceClientService {
 		WizardState wizardState = new WizardState();
 		wizardState.setProceedWithInstallation(true);
 		command.setWizardDialogState(wizardState);
-		execute(command);
-	}
-
-	@Override
-	public void openFavorites(IMarketplaceClientConfiguration configuration) {
-		MarketplaceWizardCommand command = new MarketplaceWizardCommand();
-		command.setConfiguration(configuration);
-		WizardState wizardState = new WizardState();
-		wizardState.setContentType(ContentType.FAVORITES);
-		wizardState.setProceedWithInstallation(false);
-		command.setWizardDialogState(wizardState);
-		execute(command);
-	}
-
-	@Override
-	public void openFavoritesImport(IMarketplaceClientConfiguration configuration, String favoritesUrl) {
-		ImportFavoritesWizardCommand command = new ImportFavoritesWizardCommand();
-		command.setConfiguration(configuration);
-		command.setFavoritesUrl(favoritesUrl);
 		execute(command);
 	}
 

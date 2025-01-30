@@ -25,7 +25,7 @@ import org.eclipse.equinox.internal.p2.discovery.model.CatalogCategory;
 public class MarketplaceCategory extends CatalogCategory {
 
 	public enum Contents {
-		FEATURED, POPULAR, INSTALLED, RECENT, QUERY, RELATED, USER_FAVORITES, FAVORITE_LISTS
+		FEATURED, POPULAR, INSTALLED, RECENT, QUERY, RELATED
 	}
 
 	private List<? extends IMarket> markets;

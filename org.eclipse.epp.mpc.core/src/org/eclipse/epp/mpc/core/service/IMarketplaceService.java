@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.core.service;
 
-import java.net.URI;
 import java.net.URL;
 import java.util.Collection;
 import java.util.List;
@@ -22,9 +21,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
 import org.eclipse.epp.mpc.core.model.ICategory;
-import org.eclipse.epp.mpc.core.model.IFavoriteList;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INews;
 import org.eclipse.epp.mpc.core.model.INode;
@@ -159,15 +156,6 @@ public interface IMarketplaceService {
 	 * Find most-favorited nodes in the marketplace
 	 *
 	 * @return the search result
-	 * @deprecated use {@link #topFavorites(IProgressMonitor)} instead
-	 */
-	@Deprecated
-	ISearchResult favorites(IProgressMonitor monitor) throws CoreException;
-
-	/**
-	 * Find most-favorited nodes in the marketplace
-	 *
-	 * @return the search result
 	 */
 	ISearchResult topFavorites(IProgressMonitor monitor) throws CoreException;
 
@@ -185,43 +173,6 @@ public interface IMarketplaceService {
 	 * @return the search result
 	 */
 	ISearchResult related(List<? extends INode> basedOn, IProgressMonitor monitor) throws CoreException;
-
-	/**
-	 * Find nodes favorited by the user
-	 *
-	 * @return the search result
-	 * @throws CoreException
-	 * @throws NotAuthorizedException
-	 *             if the user isn't logged in
-	 */
-	ISearchResult userFavorites(IProgressMonitor monitor) throws CoreException, NotAuthorizedException;
-
-	/**
-	 * Set the favorite status of the given nodes for the current user.
-	 *
-	 * @param nodes
-	 *            the nodes to update
-	 * @param monitor
-	 *            progress and cancellation
-	 * @throws CoreException
-	 * @throws NotAuthorizedException
-	 *             if the user isn't logged in
-	 */
-	void userFavorites(List<? extends INode> nodes, IProgressMonitor monitor)
-			throws CoreException, NotAuthorizedException;
-
-	/**
-	 * Retrieve the favorite nodes for the given favorites uri.
-	 *
-	 * @param favoritesUri
-	 *            a url pointing to a favorites list
-	 * @param monitor
-	 *            progress and cancellation
-	 * @throws CoreException
-	 */
-	ISearchResult userFavorites(URI favoritesUri, IProgressMonitor monitor) throws CoreException;
-
-	List<IFavoriteList> userFavoriteLists(IProgressMonitor monitor) throws CoreException;
 
 	/**
 	 * Get the news configuration for the marketplace
@@ -258,6 +209,4 @@ public interface IMarketplaceService {
 	 *              of an install operation.
 	 */
 	void reportInstallSuccess(INode node, IProgressMonitor monitor);
-
-	IUserFavoritesService getUserFavoritesService();
 }

@@ -58,8 +58,6 @@ public class MarketplaceNodeCatalogItem extends CatalogItem {
 
 	private URL marketplaceUrl;
 
-	private Boolean userFavorite;
-
 	private List<MarketplaceNodeInstallableUnitItem> installableUnitItems = new ArrayList<>();
 
 	private transient PropertyChangeSupport propertyChangeSupport;
@@ -262,19 +260,6 @@ public class MarketplaceNodeCatalogItem extends CatalogItem {
 	private boolean maybeHasOptionalFeatures() {
 		Boolean hasOptional = getHasOptionalFeatures();
 		return !Boolean.FALSE.equals(hasOptional) && getInstallableUnitItems().size() > 1;
-	}
-
-	public void setUserFavorite(Boolean favorited) {
-		if ((favorited == null && this.userFavorite != null)
-				|| (favorited != null && !favorited.equals(this.userFavorite))) {
-			Boolean oldValue = this.userFavorite;
-			this.userFavorite = favorited;
-			firePropertyChange("userFavorite", oldValue, favorited); //$NON-NLS-1$
-		}
-	}
-
-	public Boolean getUserFavorite() {
-		return userFavorite;
 	}
 
 	@Override

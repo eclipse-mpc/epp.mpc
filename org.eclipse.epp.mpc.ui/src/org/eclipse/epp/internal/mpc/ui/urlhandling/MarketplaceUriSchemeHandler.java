@@ -27,11 +27,6 @@ public class MarketplaceUriSchemeHandler implements IUriSchemeHandler {
 		protected boolean handleInstallRequest(SolutionInstallationInfo installInfo, String url) {
 			return triggerInstall(installInfo);
 		}
-
-		@Override
-		protected boolean handleImportFavoritesRequest(FavoritesDescriptor descriptor) {
-			return triggerFavoritesImport(descriptor);
-		}
 	};
 
 	public MarketplaceUriSchemeHandler() {
@@ -51,8 +46,7 @@ public class MarketplaceUriSchemeHandler implements IUriSchemeHandler {
 	private boolean accept(String mpcUri) {
 		//eclipse+mpc://marketplace.eclipse.org/install/1640500
 		//or eclipse+mpc://marketplace.eclipse.org/favorites/someuser
-		return MarketplaceUrlHandler.isPotentialSolution(mpcUri)
-				|| MarketplaceUrlHandler.isPotentialFavoritesList(mpcUri);
+		return MarketplaceUrlHandler.isPotentialSolution(mpcUri);
 	}
 
 	private void proceed(String mpcUri) {

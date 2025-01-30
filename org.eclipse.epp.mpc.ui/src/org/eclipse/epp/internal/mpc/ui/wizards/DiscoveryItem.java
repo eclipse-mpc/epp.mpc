@@ -14,37 +14,24 @@
 
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
-import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
-import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
-import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalogSource;
-import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
 import org.eclipse.epp.internal.mpc.ui.css.StyleHelper;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer.ContentType;
 import org.eclipse.epp.mpc.core.model.INode;
-import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.RowLayoutFactory;
-import org.eclipse.jface.operation.ModalContext;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.accessibility.AccessibleAdapter;
 import org.eclipse.swt.accessibility.AccessibleEvent;
-import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.TypedEvent;
@@ -52,10 +39,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.statushandlers.StatusManager;
-import org.eclipse.userstorage.util.ConflictException;
 
 /**
  * @author Steffen Pingel
@@ -110,17 +94,6 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 	@Override
 	protected String getItemId() {
 		return WIDGET_ID_CSS_PREFIX + connector.getId();
-	}
-
-	@Override
-	protected void createContent() {
-		toggleFavoritesListener = new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				toggleFavorite();
-			}
-		};
-		super.createContent();
 	}
 
 	@Override
@@ -272,10 +245,6 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 	private Integer getFavoriteCount() {
 		if (connector.getData() instanceof INode) {
 			INode node = (INode) connector.getData();
-			IUserFavoritesService userFavoritesService = getUserFavoritesService();
-			if (userFavoritesService != null) {
-				return userFavoritesService.getFavoriteCount(node);
-			}
 			return node.getFavorited();
 		}
 		return null;
@@ -284,7 +253,6 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 	private void createFavoriteButton(Composite parent) {
 		favoriteButton = new Button(parent, SWT.PUSH);
 		setWidgetId(favoriteButton, WIDGET_ID_RATING);
-		refreshFavoriteButton();
 
 		//Make width more or less fixed
 		int width = SWT.DEFAULT;
@@ -313,32 +281,6 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 		.applyTo(favoriteButton);
 	}
 
-	private void refreshFavoriteButton() {
-		if (favoriteButton == null || this.isDisposed() || favoriteButton.isDisposed()) {
-			return;
-		}
-		if (Display.getCurrent() != this.getDisplay()) {
-			this.getDisplay().asyncExec(() -> refreshFavoriteButton());
-			return;
-		}
-		boolean favorited = isFavorited();
-		Object lastFavorited = favoriteButton.getData(FAVORITED_BUTTON_STATE_DATA);
-		if (lastFavorited == null || (favorited != Boolean.TRUE.equals(lastFavorited))) {
-			favoriteButton.setData(FAVORITED_BUTTON_STATE_DATA, lastFavorited);
-			String imageId = favorited ? MarketplaceClientUiResources.ITEM_ICON_STAR_SELECTED
-					: MarketplaceClientUiResources.ITEM_ICON_STAR;
-			favoriteButton.setImage(MarketplaceClientUiResources.getInstance().getImageRegistry().get(imageId));
-
-			IUserFavoritesService userFavoritesService = getUserFavoritesService();
-			favoriteButton.setEnabled(userFavoritesService != null);
-			favoriteButton.removeSelectionListener(toggleFavoritesListener);
-			if (userFavoritesService != null) {
-				favoriteButton.addSelectionListener(toggleFavoritesListener);
-			}
-		}
-		refreshFavoriteCount();
-	}
-
 	private void refreshFavoriteCount() {
 		Integer favoriteCount = getFavoriteCount();
 		String favoriteCountText;
@@ -348,76 +290,6 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 			favoriteCountText = favoriteCount.toString();
 		}
 		favoriteButton.setText(favoriteCountText);
-	}
-
-	private boolean isFavorited() {
-		MarketplaceNodeCatalogItem nodeConnector = (MarketplaceNodeCatalogItem) connector;
-		Boolean favorited = nodeConnector.getUserFavorite();
-		return Boolean.TRUE.equals(favorited);
-	}
-
-	private void setFavorited(boolean newFavorited) {
-		boolean oldFavorited = isFavorited();
-		if (oldFavorited != newFavorited) {
-			//FIXME we should type the connector to MarketplaceNodeCatalogItem
-			MarketplaceNodeCatalogItem nodeConnector = (MarketplaceNodeCatalogItem) connector;
-			nodeConnector.setUserFavorite(newFavorited);
-			if (!newFavorited && getViewer().getContentType() == ContentType.FAVORITES) {
-				getViewer().getCatalog().removeItem(connector);
-				getViewer().refresh();
-			} else {
-				refreshFavoriteButton();
-			}
-		}
-	}
-
-	private IUserFavoritesService getUserFavoritesService() {
-		MarketplaceCatalogSource source = (MarketplaceCatalogSource) this.getData().getSource();
-		IUserFavoritesService userFavoritesService = source.getMarketplaceService().getUserFavoritesService();
-		return userFavoritesService;
-	}
-
-	private void toggleFavorite() {
-		final INode node = this.getCatalogItemNode();
-		final IUserFavoritesService userFavoritesService = getUserFavoritesService();
-		if (node != null && userFavoritesService != null) {
-			final boolean newFavorited = !isFavorited();
-			final Throwable[] error = new Throwable[] { null };
-			BusyIndicator.showWhile(getDisplay(), () -> {
-				try {
-					ModalContext.run(monitor -> {
-						try {
-							userFavoritesService.getStorageService().runWithLogin(() -> {
-								userFavoritesService.setFavorite(node, newFavorited, monitor);
-								return null;
-							});
-						} catch (Exception e) {
-							error[0] = e;
-						}
-					}, true, new NullProgressMonitor(), getDisplay());
-				} catch (InvocationTargetException e1) {
-					error[0] = e1.getCause();
-				} catch (InterruptedException e2) {
-					error[0] = e2;
-				}
-			});
-			Throwable e = error[0];
-			if (e != null) {
-				if (e instanceof NotAuthorizedException) {
-					// authentication was cancelled
-					return;
-				} else if (e instanceof ConflictException) {
-					// silently ignored - service already tried to resolve this
-					return;
-				} else {
-					IStatus status = MarketplaceClientCore.computeStatus(e,
-							NLS.bind(Messages.DiscoveryItem_FavoriteActionFailed, this.getNameLabelText()));
-					MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
-					return;
-				}
-			}
-			setFavorited(newFavorited);
-		}
 	}
 
 	private INode getCatalogItemNode() {
@@ -474,12 +346,6 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 
 	public Operation getSelectedOperation() {
 		return getViewer().getSelectionModel().getSelectedOperation(getData());
-	}
-
-	@Override
-	protected void refresh(boolean updateState) {
-		super.refresh(updateState);
-		refreshFavoriteButton();
 	}
 
 	@Override

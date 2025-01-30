@@ -27,16 +27,12 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.epp.internal.mpc.core.service.CachingMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.service.DefaultCatalogService;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
-import org.eclipse.epp.internal.mpc.core.service.MarketplaceStorageService;
-import org.eclipse.epp.internal.mpc.core.service.UserFavoritesService;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientService;
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.mpc.core.service.ICatalogService;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
-import org.eclipse.epp.mpc.core.service.IMarketplaceStorageService;
-import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.epp.mpc.core.service.ServiceHelper;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.debug.DebugOptionsListener;
@@ -50,7 +46,6 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
  * A service locator for obtaining {@link IMarketplaceService} instances.
@@ -62,8 +57,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 public class ServiceLocator implements IMarketplaceServiceLocator {
 
 	private static final String DEBUG_CLIENT_REMOVE_OPTION = "xxx"; //$NON-NLS-1$
-
-	private static final String STORAGE_SERVICE_BINDING_ID = "bind.storageService"; //$NON-NLS-1$
 
 	private static final String DEBUG_CLIENT_OPTIONS_PATH = MarketplaceClientCore.BUNDLE_ID + "/client/"; //$NON-NLS-1$
 
@@ -138,10 +131,6 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 
 	private ServiceTracker<ICatalogService, ICatalogService> catalogServiceTracker;
 
-	private ServiceTracker<IMarketplaceStorageService, IMarketplaceStorageService> storageServiceTracker;
-
-	private ServiceTracker<IUserFavoritesService, IUserFavoritesService> favoritesServiceTracker;
-
 	private URL defaultCatalogUrl;
 
 	private URL defaultMarketplaceUrl;
@@ -179,23 +168,6 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 	}
 
 	private void updateHttpClient(HttpClientService httpClient) {
-		applyServiceReferenceOperation(favoritesServiceTracker, new ServiceReferenceOperation<IUserFavoritesService>() {
-
-			@Override
-			public void apply(ServiceReference<IUserFavoritesService> reference) {
-				ServiceRegistration<IUserFavoritesService> registration = getDynamicServiceInstance(reference);
-				if (registration != null) {
-					IUserFavoritesService service = ServiceUtil.getService(registration);
-					if (service instanceof UserFavoritesService) {
-						if (httpClient == null) {
-							((UserFavoritesService) service).unbindHttpClient(httpClient);
-						} else {
-							((UserFavoritesService) service).bindHttpClient(httpClient);
-						}
-					}
-				}
-			}
-		});
 		applyServiceReferenceOperation(marketplaceServiceTracker, new ServiceReferenceOperation<IMarketplaceService>() {
 
 			@Override
@@ -285,71 +257,9 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		DefaultMarketplaceService defaultService = new DefaultMarketplaceService(base);
 		Map<String, String> requestMetaParameters = computeDefaultRequestMetaParameters();
 		defaultService.setRequestMetaParameters(requestMetaParameters);
-		IUserFavoritesService favoritesService = getFavoritesService(baseUrl);
-		defaultService.setUserFavoritesService(favoritesService);//FIXME this should be a service reference!
 		defaultService.setHttpClient(httpClient);
 		service = new CachingMarketplaceService(defaultService);
 		return service;
-	}
-
-	@Override
-	public IMarketplaceStorageService getStorageService(String marketplaceUrl) {
-		return getService(storageServiceTracker, marketplaceUrl);
-	}
-
-	@Override
-	public IMarketplaceStorageService getDefaultStorageService() {
-		return getStorageService(defaultMarketplaceUrl.toExternalForm());
-	}
-
-	@Override
-	public IUserFavoritesService getFavoritesService(String marketplaceUrl) {
-		return getService(favoritesServiceTracker, marketplaceUrl);
-	}
-
-	@Override
-	public IUserFavoritesService getDefaultFavoritesService() {
-		return getFavoritesService(defaultMarketplaceUrl.toExternalForm());
-	}
-
-	public IUserFavoritesService registerFavoritesService(String marketplaceBaseUrl, String apiServerUrl,
-			String apiKey) {
-		IMarketplaceStorageService storageService = getStorageService(marketplaceBaseUrl);
-		if (storageService == null) {
-			storageService = registerStorageService(marketplaceBaseUrl, apiServerUrl, apiKey);
-			if (storageService == null) {
-				return null;
-			}
-		}
-		UserFavoritesService favoritesService = new UserFavoritesService();
-		favoritesService.bindStorageService(storageService);
-		favoritesService.bindHttpClient(httpClient);
-		registerService(marketplaceBaseUrl, IUserFavoritesService.class, favoritesService);
-		return favoritesService;
-	}
-
-	public IMarketplaceStorageService registerStorageService(String marketplaceBaseUrl, String apiServerUrl,
-			String apiKey) {
-		ServiceRegistration<IMarketplaceStorageService> registration = null;
-		Hashtable<String, Object> config = new Hashtable<>();
-		config.put(IMarketplaceStorageService.STORAGE_SERVICE_URL_PROPERTY, apiServerUrl);
-		if (apiKey != null) {
-			config.put(IMarketplaceStorageService.APPLICATION_TOKEN_PROPERTY, apiKey);
-		}
-		try {
-			MarketplaceStorageService marketplaceStorageService = new MarketplaceStorageService();
-			registration = registerService(marketplaceBaseUrl, IMarketplaceStorageService.class,
-					marketplaceStorageService, config);
-			BundleContext bundleContext = ServiceUtil.getBundleContext(registration);
-			if (bundleContext != null) {
-				marketplaceStorageService.activate(bundleContext, config);
-			}
-			return marketplaceStorageService;
-		} catch (Exception | NoClassDefFoundError ex) {
-			MarketplaceClientCore.error("Userstorage API failed to initialize", ex);
-			unregisterService(registration);
-			return null;
-		}
 	}
 
 	private void unregisterService(ServiceRegistration<?> registration) {
@@ -382,75 +292,6 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 
 		catalogServiceTracker = new ServiceTracker<>(context, ICatalogService.class, null);
 		catalogServiceTracker.open(true);
-
-		storageServiceTracker = new ServiceTracker<>(context, IMarketplaceStorageService.class,
-				new ServiceTrackerCustomizer<IMarketplaceStorageService, IMarketplaceStorageService>() {
-
-			@Override
-			public IMarketplaceStorageService addingService(
-					ServiceReference<IMarketplaceStorageService> reference) {
-				IMarketplaceStorageService service = storageServiceTracker.addingService(reference);
-				Object marketplaceUrl = ServiceUtil.getOverridablePropertyValue(reference,
-						IMarketplaceService.BASE_URL);
-				if (marketplaceUrl != null && service != null) {
-					bindToUserFavoritesServices(marketplaceUrl.toString(), reference);
-				}
-				return service;
-			}
-
-			@Override
-			public void modifiedService(ServiceReference<IMarketplaceStorageService> reference,
-					IMarketplaceStorageService service) {
-				Object marketplaceUrl = ServiceUtil.getOverridablePropertyValue(reference,
-						IMarketplaceService.BASE_URL);
-				if (marketplaceUrl != null) {
-					rebindToUserFavoritesServices(marketplaceUrl.toString(), reference, service);
-				} else {
-					unbindFromUserFavoritesServices(reference, service);
-				}
-			}
-
-			@Override
-			public void removedService(ServiceReference<IMarketplaceStorageService> reference,
-					IMarketplaceStorageService service) {
-				unbindFromUserFavoritesServices(reference, service);
-			}
-		});
-		storageServiceTracker.open(true);
-
-		favoritesServiceTracker = new ServiceTracker<>(context, IUserFavoritesService.class,
-				new ServiceTrackerCustomizer<IUserFavoritesService, IUserFavoritesService>() {
-			@Override
-			public IUserFavoritesService addingService(ServiceReference<IUserFavoritesService> reference) {
-				return ServiceUtil.getService(reference);
-			}
-
-			@Override
-			public void modifiedService(ServiceReference<IUserFavoritesService> reference,
-					IUserFavoritesService service) {
-				if (!(service instanceof UserFavoritesService)) {
-					return;
-				}
-				ServiceReference<?> storageServiceBinding = (ServiceReference<?>) reference
-						.getProperty(STORAGE_SERVICE_BINDING_ID);
-				if (storageServiceBinding != null && service.getStorageService() == null) {
-					((UserFavoritesService) service).bindStorageService(
-							(IMarketplaceStorageService) ServiceUtil.getService(storageServiceBinding));
-				} else if (service.getStorageService() != null
-						&& getDynamicServiceInstance(reference) != null) {
-					((UserFavoritesService) service).setStorageService(null);
-				}
-			}
-
-			@Override
-			public void removedService(ServiceReference<IUserFavoritesService> reference,
-					IUserFavoritesService service) {
-				// ignore
-
-			}
-
-		});
-		favoritesServiceTracker.open(true);
 	}
 
 	private static <T> void applyServiceReferenceOperation(ServiceTracker<T, ?> serviceTracker,
@@ -462,91 +303,6 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 					op.apply(serviceReference);
 				}
 			}
-		}
-	}
-
-	private void bindToUserFavoritesServices(final String marketplaceUrl,
-			ServiceReference<IMarketplaceStorageService> serviceReference) {
-		applyServiceReferenceOperation(favoritesServiceTracker,
-				new DynamicBindingOperation<IUserFavoritesService, IMarketplaceStorageService>(
-						STORAGE_SERVICE_BINDING_ID, serviceReference) {
-
-			@Override
-			public void apply(ServiceReference<IUserFavoritesService> reference) {
-				Object baseUrl = ServiceUtil.getOverridablePropertyValue(reference,
-						IMarketplaceService.BASE_URL);
-				if (marketplaceUrl.equals(baseUrl)) {
-					super.apply(reference);
-				}
-			}
-
-			@Override
-			protected IMarketplaceStorageService getCurrentBinding(IUserFavoritesService service) {
-				return service.getStorageService();
-			}
-		});
-	}
-
-	private void rebindToUserFavoritesServices(final String marketplaceUrl,
-			final ServiceReference<IMarketplaceStorageService> serviceReference,
-			final IMarketplaceStorageService serviceInstance) {
-		applyServiceReferenceOperation(favoritesServiceTracker,
-				new DynamicBindingOperation<IUserFavoritesService, IMarketplaceStorageService>(
-						STORAGE_SERVICE_BINDING_ID, serviceReference) {
-
-			@Override
-			public void apply(ServiceReference<IUserFavoritesService> reference) {
-				Object baseUrl = ServiceUtil.getOverridablePropertyValue(reference,
-						IMarketplaceService.BASE_URL);
-				if (marketplaceUrl.equals(baseUrl)) {
-					super.apply(reference);
-				} else {
-					unbindFromUserFavoritesService(reference, serviceReference, serviceInstance);
-				}
-			}
-
-			@Override
-			protected IMarketplaceStorageService getCurrentBinding(IUserFavoritesService service) {
-				return service.getStorageService();
-			}
-		});
-	}
-
-	private void unbindFromUserFavoritesServices(final ServiceReference<IMarketplaceStorageService> serviceReference,
-			final IMarketplaceStorageService serviceInstance) {
-		applyServiceReferenceOperation(favoritesServiceTracker,
-				new DynamicBindingOperation<IUserFavoritesService, IMarketplaceStorageService>(
-						STORAGE_SERVICE_BINDING_ID, serviceReference) {
-
-			@Override
-			public void apply(ServiceReference<IUserFavoritesService> reference) {
-				unbindFromUserFavoritesService(reference, serviceReference, serviceInstance);
-			}
-
-			@Override
-			protected IMarketplaceStorageService getCurrentBinding(IUserFavoritesService service) {
-				return service.getStorageService();
-			}
-		});
-	}
-
-	private void unbindFromUserFavoritesService(ServiceReference<IUserFavoritesService> reference,
-			ServiceReference<IMarketplaceStorageService> serviceReference, IMarketplaceStorageService serviceInstance) {
-		ServiceRegistration<IUserFavoritesService> registration = getDynamicServiceInstance(reference);
-		if (registration == null) {
-			return;
-		}
-		Object binding = reference.getProperty(STORAGE_SERVICE_BINDING_ID);
-		if (binding != null && serviceReference.equals(binding)) {
-			if (registration != null) {
-				Dictionary<String, Object> properties = ServiceUtil.getProperties(reference);
-				properties.remove(STORAGE_SERVICE_BINDING_ID);
-				registration.setProperties(properties);
-			}
-		}
-		IUserFavoritesService service = ServiceUtil.getService(registration);
-		if (service.getStorageService() == serviceInstance) {
-			((UserFavoritesService) service).unbindStorageService(serviceInstance);
 		}
 	}
 
@@ -566,14 +322,6 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 	 * services. Multiple calls to {@link #getMarketplaceService(String)} will return a new instance every time.
 	 */
 	public synchronized void deactivate() {
-		if (favoritesServiceTracker != null) {
-			favoritesServiceTracker.close();
-			favoritesServiceTracker = null;
-		}
-		if (storageServiceTracker != null) {
-			storageServiceTracker.close();
-			storageServiceTracker = null;
-		}
 		if (marketplaceServiceTracker != null) {
 			marketplaceServiceTracker.close();
 			marketplaceServiceTracker = null;

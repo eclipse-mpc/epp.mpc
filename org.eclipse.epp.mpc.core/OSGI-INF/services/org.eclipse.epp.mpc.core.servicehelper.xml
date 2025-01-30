@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" deactivate="deactivate" name="org.eclipse.epp.mpc.core.servicehelper">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" name="org.eclipse.epp.mpc.core.servicehelper">
    <service>
       <provide interface="org.eclipse.epp.mpc.core.service.ServiceHelper"/>
       <provide interface="org.eclipse.epp.internal.mpc.core.ServiceHelperImpl"/>

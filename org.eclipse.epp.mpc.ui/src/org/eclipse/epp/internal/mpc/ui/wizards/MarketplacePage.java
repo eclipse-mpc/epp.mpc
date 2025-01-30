@@ -45,8 +45,6 @@ import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INews;
 import org.eclipse.epp.mpc.core.model.INode;
-import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
-import org.eclipse.epp.mpc.core.service.ServiceHelper;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
@@ -127,8 +125,6 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 
 	private CTabItem popularTabItem;
 
-	private CTabItem favoritedTabItem;
-
 	private CTabItem featuredMarketTabItem;
 
 	private CTabItem relatedTabItem;
@@ -208,8 +204,6 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 				currentBranding.getRecentTabName());
 		popularTabItem = createCatalogTab(-1, ContentType.POPULAR, WIDGET_ID_TAB_POPULAR,
 				currentBranding.getPopularTabName());
-		favoritedTabItem = createCatalogTab(-1, ContentType.FAVORITES, WIDGET_ID_TAB_FAVORITES,
-				getFavoritedTabName(currentBranding));
 		installedTabItem = createCatalogTab(-1, ContentType.INSTALLED, WIDGET_ID_TAB_INSTALLED,
 				Messages.MarketplacePage_installed);
 		updateNewsTab();
@@ -510,10 +504,6 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		if (selectionLink != null) {
 			doAddActionLink(0, selectionLink);
 		}
-		if (contentType == ContentType.FAVORITES) {
-			doAddActionLink(-1, new ImportFavoritesActionLink(this));
-			doAddActionLink(-1, new InstallAllActionLink(this));
-		}
 		updateContentListLinks();
 	}
 
@@ -557,8 +547,6 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 			return relatedTabItem;
 		case SELECTION:
 			return searchTabItem;
-		case FAVORITES:
-			return favoritedTabItem;
 		default:
 			throw new IllegalArgumentException();
 		}
@@ -932,12 +920,6 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		if (hasTab) {
 			tabIndex++;
 		}
-		hasTab = hasFavoritedTab(branding);
-		favoritedTabItem = updateTab(favoritedTabItem, ContentType.FAVORITES, WIDGET_ID_TAB_FAVORITES,
-				getFavoritedTabName(branding), hasTab, tabIndex);
-		if (hasTab) {
-			tabIndex++;
-		}
 
 		updateNewsTab();
 
@@ -976,32 +958,6 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		disableTabSelection = false;
 	}
 
-	private boolean hasFavoritedTab(ICatalogBranding branding) {
-		if (branding.hasFavoritesTab()) {
-			return true;
-		}
-		return hasFavoritesService();
-	}
-
-	private boolean hasFavoritesService() {
-		CatalogDescriptor catalogDescriptor = this.configuration.getCatalogDescriptor();
-		if (catalogDescriptor == null) {
-			return false;
-		}
-		URL url = catalogDescriptor.getUrl();
-		IUserFavoritesService favoritesService = url == null ? null
-				: ServiceHelper.getMarketplaceServiceLocator().getFavoritesService(url.toString());
-		return favoritesService != null;
-	}
-
-	private String getFavoritedTabName(ICatalogBranding branding) {
-		String favoritesTabName = branding.getFavoritesTabName();
-		if (favoritesTabName == null) {
-			return Messages.MarketplacePage_favorites;
-		}
-		return favoritesTabName;
-	}
-
 	private boolean hasFeaturedMarketTab(ICatalogBranding branding) {
 		if (branding.hasFeaturedMarketTab()) {
 			String marketName = branding.getFeaturedMarketTabName();
@@ -1038,14 +994,12 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		branding.setHasPopularTab(true);
 		branding.setHasRecentTab(true);
 		branding.setHasRelatedTab(false);
-		branding.setHasFavoritesTab(false);
 		branding.setHasFeaturedMarketTab(false);
 		branding.setSearchTabName(Messages.MarketplacePage_search);
 		branding.setPopularTabName(Messages.MarketplacePage_popular);
 		branding.setRecentTabName(Messages.MarketplacePage_recent);
 		branding.setRelatedTabName(Messages.MarketplacePage_related);
 		branding.setFeaturedMarketTabName(Messages.MarketplacePage_featuredMarket);
-		branding.setFavoritesTabName(Messages.MarketplacePage_favorites);
 		branding.setWizardTitle(Messages.MarketplacePage_eclipseMarketplaceSolutions);
 		branding.setWizardIcon(null);
 		return branding;
