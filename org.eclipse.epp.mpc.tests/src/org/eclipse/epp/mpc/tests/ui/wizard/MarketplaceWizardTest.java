@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Widget;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotBrowser;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotLink;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotStyledText;
@@ -204,5 +205,23 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 		bot.cTabItem("Popular").activate();
 		waitForWizardProgress();
 		//TODO test something useful
+	}
+
+	@Test
+	public void testFavorite() {
+		SWTBotButton favorite = bot.buttonWithId(AbstractMarketplaceDiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_RATING);
+		favorite.click();
+		SWTBotShell login = bot.shell("Authorizing with Marketplace User Storage");
+		login.bot().button("Cancel").click();
+		//TODO test something useful - we'd need a proper login on the server to do this...
+		//better to get started with some server mocking in the ui tests...
+	}
+
+	@Test
+	public void testShare() {
+		SWTBotButton share = bot.buttonWithId(AbstractMarketplaceDiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_SHARE);
+		share.click();
+		share.contextMenu("Twitter");//.click();
+		//TODO test something useful - clicking would open external browser, which is not good for tests
 	}
 }
