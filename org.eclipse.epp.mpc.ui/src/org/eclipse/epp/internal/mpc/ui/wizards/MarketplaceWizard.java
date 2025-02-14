@@ -53,8 +53,6 @@ import org.eclipse.epp.internal.mpc.core.model.News;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
-import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesCatalog;
-import org.eclipse.epp.internal.mpc.ui.catalog.FavoritesDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.commands.MarketplaceWizardCommand;
@@ -93,7 +91,6 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.osgi.util.NLS;
@@ -506,9 +503,6 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				container.updateButtons();
 			}
 			return nextPage;
-		}
-		if (page instanceof ImportFavoritesPage) {
-			return catalogPage;
 		}
 		return getNextPageInList(page);
 	}
@@ -944,7 +938,6 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			if (getConfiguration().getCatalogDescriptor() != null) {
 				MarketplaceDiscoveryStrategy discoveryStrategy = new MarketplaceDiscoveryStrategy(
 						getConfiguration().getCatalogDescriptor());
-				discoveryStrategy.setShellProvider(this);
 				discoveryStrategies.add(discoveryStrategy);
 
 			}
@@ -1103,13 +1096,6 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		}
 	}
 
-	public void importFavorites(String url) {
-		MarketplaceDiscoveryStrategy marketplaceStrategy = findMarketplaceDiscoveryStrategy();
-		if (marketplaceStrategy != null && marketplaceStrategy.hasUserFavoritesService()) {
-			importFavorites(marketplaceStrategy, url);
-		}
-	}
-
 	protected MarketplaceDiscoveryStrategy findMarketplaceDiscoveryStrategy() {
 		MarketplaceDiscoveryStrategy marketplaceStrategy = null;
 		List<AbstractDiscoveryStrategy> discoveryStrategies = getCatalog().getDiscoveryStrategies();
@@ -1120,48 +1106,6 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			}
 		}
 		return marketplaceStrategy;
-	}
-
-	protected void importFavorites(MarketplaceDiscoveryStrategy marketplaceStrategy, String url) {
-		FavoritesCatalog favoritesCatalog = new FavoritesCatalog();
-
-		ImportFavoritesWizard importFavoritesWizard = new ImportFavoritesWizard(favoritesCatalog, getConfiguration(),
-				this);
-		importFavoritesWizard.setInitialFavoritesUrl(url);
-		final ImportFavoritesPage importFavoritesPage = importFavoritesWizard.getImportFavoritesPage();
-		favoritesCatalog.getDiscoveryStrategies().add(new FavoritesDiscoveryStrategy(marketplaceStrategy) {
-			private String discoveryError = null;
-
-			@Override
-			protected void preDiscovery() {
-				discoveryError = null;
-			}
-
-			@Override
-			protected void handleDiscoveryError(CoreException ex) throws CoreException {
-				discoveryError = ImportFavoritesPage.handleDiscoveryError(getFavoritesReference(), ex);
-			}
-
-			@Override
-			protected void postDiscovery() {
-				final String errorMessage = this.discoveryError;
-				this.discoveryError = null;
-				importFavoritesPage.setDiscoveryError(errorMessage);
-			}
-		});
-		ImportFavoritesWizardDialog importWizard = new ImportFavoritesWizardDialog(getShell(), importFavoritesWizard);
-
-		Map<String, Operation> oldOperations = getSelectionModel().getItemIdToSelectedOperation();
-		int result = importWizard.open();
-		if (result == Window.OK) {
-			MarketplacePage catalogPage = getCatalogPage();
-			catalogPage.setActiveTab(ContentType.FAVORITES);
-			catalogPage.reloadCatalog();
-			Map<String, Operation> newOperations = getSelectionModel().getItemIdToSelectedOperation();
-			if (!newOperations.equals(oldOperations)) {
-				updateSelection();
-			}
-		}
 	}
 
 	public boolean shouldShowUpdateBanner(String availableUpdatesKey) {

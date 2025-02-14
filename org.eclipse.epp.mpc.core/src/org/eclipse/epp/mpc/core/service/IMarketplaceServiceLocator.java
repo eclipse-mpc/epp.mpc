@@ -93,34 +93,4 @@ public interface IMarketplaceServiceLocator {
 	 * Get a catalog service for the default {@link #CATALOG_URL discovery url}.
 	 */
 	ICatalogService getCatalogService();
-
-	/**
-	 * Get a userstorage service for the given marketplace url. The OSGi registry is searched for a registered instance
-	 * matching the url. If none is found, a marketplace service is located for the url and its configured storage
-	 * service - which may be null - is returned.
-	 */
-	IMarketplaceStorageService getStorageService(String marketplaceUrl);
-
-	/**
-	 * Get a userstorage service for the default {@link #MARKETPLACE_URL marketplace url}.
-	 */
-	IMarketplaceStorageService getDefaultStorageService();
-
-	/**
-	 * Get the favorites service for the marketplace identified by the given url.
-	 *
-	 * @param marketplaceUrl
-	 *            the REST base url of the marketplace for which the favorites service is requested
-	 * @return a favorites service that manages the favorites for the given marketplace, or null if no such service is
-	 *         registered.
-	 */
-	IUserFavoritesService getFavoritesService(String marketplaceUrl);
-
-	/**
-	 * Get the favorites service for the default marketplace.
-	 *
-	 * @return the favorites service for the default marketplace, or null if no default marketplace exists or it doesn't
-	 *         support the favorites API.
-	 */
-	IUserFavoritesService getDefaultFavoritesService();
 }

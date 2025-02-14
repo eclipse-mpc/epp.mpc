@@ -22,14 +22,6 @@
             commandId="org.eclipse.epp.mpc.ui.command.showMarketplaceWizard">
       </handler>
       <handler
-            class="org.eclipse.epp.internal.mpc.ui.commands.ImportFavoritesWizardCommand"
-            commandId="org.eclipse.epp.mpc.ui.command.importFavoritesWizard">
-      </handler>
-      <handler
-            class="org.eclipse.epp.internal.mpc.ui.commands.ShowFavoritesCommand"
-            commandId="org.eclipse.epp.mpc.ui.command.showFavorites">
-      </handler>
-      <handler
             class="org.eclipse.epp.internal.mpc.ui.commands.ShowInstalledSolutionsCommand"
             commandId="org.eclipse.epp.mpc.ui.command.showInstalled">
       </handler>
@@ -78,17 +70,6 @@
                label="%command.open.label"
                style="push"
                tooltip="%command.open.tooltip">
-         </command>
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
-            locationURI="menu:org.eclipse.userstorage.accounts?after=actions">
-         <command
-               commandId="org.eclipse.epp.mpc.ui.command.showFavorites"
-               icon="icons/marketplace16.png"
-               label="%command.account.favorites.label"
-               style="push"
-               tooltip="%command.account.favorites.tooltip">
          </command>
       </menuContribution>
    </extension>
@@ -169,15 +150,6 @@
                id="org.eclipse.epp.mpc.discovery"
                label="%keyword.discovery">
          </keyword>
-      </extension>
-      <extension
-            point="org.eclipse.userstorage.oauth.clients">
-         <client
-               id="mvwvUx5jVycgXxUY90aMg3RByMD"
-               authURI="https://accounts.eclipse.org/"
-               icon="icons/marketplace16.png"
-               name="Eclipse Marketplace">
-         </client>
       </extension>
       <extension
             point="org.eclipse.e4.ui.css.core.elementProvider">

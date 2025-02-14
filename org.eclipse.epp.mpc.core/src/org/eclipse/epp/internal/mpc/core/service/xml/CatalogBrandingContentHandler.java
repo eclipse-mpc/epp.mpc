@@ -49,11 +49,6 @@ public class CatalogBrandingContentHandler extends UnmarshalContentHandler {
 		} else if (localName.equalsIgnoreCase("relatedtab") || localName.equalsIgnoreCase("recommendationtab")) { //$NON-NLS-1$ //$NON-NLS-2$
 			model.setHasRelatedTab(toBoolean(attributes.getValue(NS_URI, "enabled"))); //$NON-NLS-1$
 			capturingContent = true;
-		} else if (localName.equalsIgnoreCase("favoritestab")) { //$NON-NLS-1$
-			model.setHasFavoritesTab(toBoolean(attributes.getValue(NS_URI, "enabled"))); //$NON-NLS-1$
-			model.setFavoritesServer(attributes.getValue(NS_URI, "apiserver")); //$NON-NLS-1$
-			model.setFavoritesApiKey(attributes.getValue(NS_URI, "apikey")); //$NON-NLS-1$
-			capturingContent = true;
 		}
 	}
 

@@ -22,7 +22,6 @@ import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,9 +34,7 @@ import org.eclipse.epp.internal.mpc.core.model.Node;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
-import org.eclipse.epp.internal.mpc.ui.commands.ImportFavoritesWizardCommand;
 import org.eclipse.epp.internal.mpc.ui.commands.MarketplaceWizardCommand;
-import org.eclipse.epp.internal.mpc.ui.urlhandling.FavoritesUrlHandler;
 import org.eclipse.epp.internal.mpc.ui.urlhandling.MarketplaceUrlUtil;
 import org.eclipse.epp.internal.mpc.ui.urlhandling.SolutionUrlHandler;
 import org.eclipse.epp.mpc.core.model.INode;
@@ -135,12 +132,6 @@ public abstract class MarketplaceUrlHandler {
 				.orElse(false);
 	}
 
-	public static boolean isPotentialFavoritesList(String url) {
-		return FavoritesUrlHandler.DEFAULT.selectUrlHandler(url)
-				.map(handler -> handler.isPotentialFavoritesList(url))
-				.orElse(false);
-	}
-
 	public static boolean triggerInstall(SolutionInstallationInfo info) {
 		if (info.getRequestUrl() != null) {
 			MarketplaceClientUi.getLog().log(
@@ -193,40 +184,11 @@ public abstract class MarketplaceUrlHandler {
 		}
 	}
 
-	public static boolean triggerFavorites(String favoritesUrl) {
-		return FavoritesUrlHandler.DEFAULT.selectUrlHandler(favoritesUrl)
-				.map(handler -> handler.parse(favoritesUrl))
-				.map(command -> triggerFavoritesImport(command))
-				.orElse(Boolean.FALSE);
-	}
-
-	protected static boolean triggerFavoritesImport(FavoritesDescriptor descriptor) {
-		try {
-			ImportFavoritesWizardCommand command = new ImportFavoritesWizardCommand();
-			command.setSelectedCatalogDescriptor(descriptor.getCatalogDescriptor());
-			command.setFavoritesUrl(descriptor.getFavoritesUrl());
-			command.execute(new ExecutionEvent());
-			return true;
-		} catch (ExecutionException e) {
-			IStatus status = MarketplaceClientCore.computeStatus(e,
-					Messages.MarketplaceUrlHandler_cannotOpenMarketplaceWizard);
-			MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
-		}
-		return false;
-	}
-
 	public boolean handleUri(final String uri) {
 		if (isPotentialSolution(uri)) {
 			SolutionInstallationInfo installInfo = createSolutionInstallInfo(uri);
 			if (installInfo != null) {
 				return handleInstallRequest(installInfo, uri);
-			}
-		}
-		if (isPotentialFavoritesList(uri)) {
-			Optional<FavoritesDescriptor> descriptor = FavoritesUrlHandler.DEFAULT.selectUrlHandler(uri)
-					.map(handler -> handler.parse(uri));
-			if (descriptor.isPresent()) {
-				return handleImportFavoritesRequest(descriptor.get());
 			}
 		}
 

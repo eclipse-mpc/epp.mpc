@@ -48,7 +48,6 @@ import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IIdentifiable;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.model.INode;
-import org.eclipse.epp.mpc.core.service.IMarketplaceStorageService.LoginListener;
 import org.eclipse.epp.mpc.core.service.QueryHelper;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.epp.mpc.ui.Operation;
@@ -83,7 +82,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.statushandlers.StatusManager;
@@ -101,7 +99,7 @@ public class MarketplaceViewer extends CatalogViewer {
 	public static final String QUERY_TAG_KEYWORD = "tag:"; //$NON-NLS-1$
 
 	public enum ContentType {
-		SEARCH, FEATURED_MARKET, RECENT, POPULAR, INSTALLED, SELECTION, RELATED, FAVORITES
+		SEARCH, FEATURED_MARKET, RECENT, POPULAR, INSTALLED, SELECTION, RELATED
 	}
 
 	public static class MarketplaceCatalogContentProvider extends CatalogContentProvider {
@@ -237,23 +235,6 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	private Composite header;
 
-	private final LoginListener loginListener = new LoginListener() {
-
-		@Override
-		public void loginChanged(final String oldUser, final String newUser) {
-			final Control control = MarketplaceViewer.this.getControl();
-			if (control != null && !control.isDisposed()) {
-				Display display = control.getDisplay();
-				Display current = Display.getCurrent();
-				if (current == null || current != display) {
-					display.syncExec(() -> loginChanged(oldUser, newUser));
-					return;
-				}
-				refreshFavorites();
-			}
-		}
-	};
-
 	public MarketplaceViewer(Catalog catalog, IShellProvider shellProvider, MarketplaceWizard wizard) {
 		super(catalog, shellProvider, wizard.getContainer(), wizard.getConfiguration());
 		this.browser = wizard;
@@ -355,7 +336,6 @@ public class MarketplaceViewer extends CatalogViewer {
 		for (AbstractDiscoveryStrategy discoveryStrategy : discoveryStrategies) {
 			if (discoveryStrategy instanceof MarketplaceDiscoveryStrategy) {
 				MarketplaceDiscoveryStrategy marketplaceDiscoveryStrategy = (MarketplaceDiscoveryStrategy) discoveryStrategy;
-				marketplaceDiscoveryStrategy.addLoginListener(loginListener);
 				for (CatalogCategory catalogCategory : catalog.getCategories()) {
 					if (catalogCategory instanceof MarketplaceCategory) {
 						MarketplaceCategory marketplaceCategory = (MarketplaceCategory) catalogCategory;
@@ -365,9 +345,6 @@ public class MarketplaceViewer extends CatalogViewer {
 						if (availableUpdatesKey != null && marketplaceCategory.getContents() != Contents.INSTALLED
 								&& getWizard().shouldShowUpdateBanner(availableUpdatesKey)) {
 							marketplaceDiscoveryStrategy.addUpdateItem(marketplaceCategory, availableUpdates);
-						} else if (marketplaceCategory.getContents() == Contents.FEATURED
-								&& getWizard().shouldShowOpenFavoritesBanner()) {
-							marketplaceDiscoveryStrategy.addOpenFavoritesItem(marketplaceCategory);
 						}
 					}
 				}
@@ -468,24 +445,8 @@ public class MarketplaceViewer extends CatalogViewer {
 		switch (userAction) {
 		case BROWSE:
 			return createBrowseItem(catalogItem, parent);
-		case CREATE_FAVORITES:
-			return new UserFavoritesFindFavoritesActionItem(parent, getResources(), catalogItem,
-					getWizard().getCatalogPage());
-		case FAVORITES_UNSUPPORTED:
-			MarketplacePage catalogPage = getWizard().getCatalogPage();
-			ActionLink actionLink = catalogPage.getActionLink(ImportFavoritesActionLink.IMPORT_ACTION_ID);
-			if (actionLink != null) {
-				catalogPage.removeActionLink(actionLink);
-			}
-			return new UserFavoritesUnsupportedActionItem(parent, getResources(), catalogItem,
-					getWizard().getCatalogPage());
-		case LOGIN:
-			return new UserFavoritesSignInActionItem(parent, getResources(), catalogItem, this);
 		case RETRY_ERROR:
 			return new RetryErrorActionItem(parent, getResources(), catalogItem, this);
-		case OPEN_FAVORITES:
-			getWizard().didShowOpenFavoritesBanner();
-			return new OpenFavoritesNotificationItem(parent, getResources(), catalogItem, getWizard().getCatalogPage());
 		case UPDATE:
 			return new InstallUpdatesNotificationItem(parent, getResources(), catalogItem,
 					getWizard().getCatalogPage());
@@ -642,24 +603,6 @@ public class MarketplaceViewer extends CatalogViewer {
 		firePropertyChangeEvent(new PropertyChangeEvent(source, property, oldValue, newValue));
 	}
 
-	protected IStatus refreshFavorites() {
-		IStatus status;
-		try {
-			final IStatus[] result = new IStatus[1];
-			context.run(true, true, monitor -> result[0] = getCatalog().refreshUserFavorites(monitor));
-			status = result[0];
-		} catch (InvocationTargetException e) {
-			status = computeStatus(e, Messages.MarketplaceViewer_unexpectedException);
-		} catch (InterruptedException e) {
-			// cancelled by user so nothing to do here.
-			status = Status.CANCEL_STATUS;
-		}
-		if (status != null && !status.isOK() && status.getSeverity() != IStatus.CANCEL) {
-			MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
-		}
-		return status;
-	}
-
 	private IStatus doQuery(final QueryData queryData,
 			final Set<? extends INode> nodes) {
 		try {
@@ -679,9 +622,6 @@ public class MarketplaceViewer extends CatalogViewer {
 					break;
 				case INSTALLED:
 					result[0] = getCatalog().installed(monitor);
-					break;
-				case FAVORITES:
-					result[0] = getCatalog().userFavorites(false, monitor);
 					break;
 				case SELECTION:
 					Set<INode> selectedNodesById = getSelectionModel().getItemToSelectedOperation()

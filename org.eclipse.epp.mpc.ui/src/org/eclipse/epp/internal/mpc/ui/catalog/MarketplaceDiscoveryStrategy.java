@@ -26,7 +26,6 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -42,7 +41,6 @@ import org.eclipse.epp.internal.mpc.core.ServiceLocator;
 import org.eclipse.epp.internal.mpc.core.model.Identifiable;
 import org.eclipse.epp.internal.mpc.core.model.Node;
 import org.eclipse.epp.internal.mpc.core.model.SearchResult;
-import org.eclipse.epp.internal.mpc.core.service.AbstractDataStorageService.NotAuthorizedException;
 import org.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
@@ -59,9 +57,6 @@ import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
 import org.eclipse.epp.mpc.core.service.IMarketplaceServiceLocator;
-import org.eclipse.epp.mpc.core.service.IMarketplaceStorageService;
-import org.eclipse.epp.mpc.core.service.IMarketplaceStorageService.LoginListener;
-import org.eclipse.epp.mpc.core.service.IUserFavoritesService;
 import org.eclipse.epp.mpc.core.service.QueryHelper;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler;
@@ -72,11 +67,7 @@ import org.eclipse.equinox.internal.p2.discovery.model.Icon;
 import org.eclipse.equinox.internal.p2.discovery.model.Overview;
 import org.eclipse.equinox.internal.p2.discovery.model.Tag;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
-import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.userstorage.IStorage;
-import org.eclipse.userstorage.oauth.EclipseOAuthCredentialsProvider;
-import org.eclipse.userstorage.spi.ICredentialsProvider;
 
 /**
  * @author David Green
@@ -95,10 +86,6 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	private MarketplaceInfo marketplaceInfo;
 
 	private Map<String, IInstallableUnit> featureIUById;
-
-	private List<LoginListener> loginListeners;
-
-	private IShellProvider shellProvider;
 
 	private final String nodeContentUrlPrefix;
 
@@ -139,17 +126,6 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	@Override
 	public void dispose() {
-		List<LoginListener> loginListeners = this.loginListeners;
-		this.loginListeners = null;
-		if (loginListeners != null) {
-			IUserFavoritesService favoritesService = marketplaceService.getUserFavoritesService();
-			if (favoritesService != null) {
-				IMarketplaceStorageService storageService = favoritesService.getStorageService();
-				for (LoginListener loginListener : loginListeners) {
-					storageService.removeLoginListener(loginListener);
-				}
-			}
-		}
 		if (source != null) {
 			source.dispose();
 			source = null;
@@ -176,51 +152,6 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			marketplaceInfo = null;
 		}
 		super.dispose();
-	}
-
-	public synchronized void addLoginListener(LoginListener loginListener) {
-		IUserFavoritesService favoritesService = marketplaceService.getUserFavoritesService();
-		if (favoritesService != null) {
-			if (loginListeners == null) {
-				loginListeners = new CopyOnWriteArrayList<>();
-			}
-			if (!loginListeners.contains(loginListener)) {
-				loginListeners.add(loginListener);
-				IMarketplaceStorageService storageService = favoritesService.getStorageService();
-				storageService.addLoginListener(loginListener);
-			}
-		}
-	}
-
-	public synchronized void removeLoginListener(LoginListener loginListener) {
-		if (loginListeners != null) {
-			loginListeners.remove(loginListener);
-		}
-		IUserFavoritesService favoritesService = marketplaceService.getUserFavoritesService();
-		if (favoritesService != null) {
-			IMarketplaceStorageService storageService = favoritesService.getStorageService();
-			storageService.removeLoginListener(loginListener);
-		}
-	}
-
-	protected void applyShellProvider() {
-		IUserFavoritesService userFavoritesService = marketplaceService.getUserFavoritesService();
-		if (userFavoritesService == null) {
-			return;
-		}
-		IMarketplaceStorageService storageService = userFavoritesService.getStorageService();
-		if (storageService == null) {
-			return;
-		}
-		IStorage storage = storageService.getStorage();
-		ICredentialsProvider credentialsProvider = storage.getCredentialsProvider();
-		if (credentialsProvider instanceof EclipseOAuthCredentialsProvider) {
-			((EclipseOAuthCredentialsProvider) credentialsProvider).setShell(shellProvider);
-		}
-	}
-
-	public boolean hasUserFavoritesService() {
-		return marketplaceService.getUserFavoritesService() != null;
 	}
 
 	@Override
@@ -253,30 +184,12 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		List<CatalogItem> items = getItems();
 		if (items != null && !result.getNodes().isEmpty()) {
 			int nodeWork = 1000;
-			int favoritesWork = catalogCategory.getContents() == Contents.USER_FAVORITES ? 0 : 1000;
 			SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_loadingResources,
-					result.getNodes().size() * nodeWork + favoritesWork);
+					result.getNodes().size() * nodeWork);
 
 			try {
-				boolean userFavoritesSupported = false;
-				if (catalogCategory.getContents() == Contents.USER_FAVORITES) {
-					userFavoritesSupported = true;
-				} else if (hasUserFavoritesService()) {
-					try {
-						applyShellProvider();
-						marketplaceService.userFavorites(result.getNodes(), progress.newChild(favoritesWork));
-						userFavoritesSupported = true;
-					} catch (NotAuthorizedException e1) {
-						// user is not logged in. we just ignore this.
-					} catch (UnsupportedOperationException e1) {
-						// ignore
-					} catch (Exception e1) {
-						// something went wrong. log and proceed.
-						MarketplaceClientCore.error(Messages.MarketplaceDiscoveryStrategy_FavoritesRetrieveError, e1);
-					}
-				}
 				for (final INode node : result.getNodes()) {
-					CatalogItem catalogItem = createCatalogItem(node, catalogCategory.getId(), userFavoritesSupported,
+					CatalogItem catalogItem = createCatalogItem(node, catalogCategory.getId(),
 							progress.newChild(nodeWork));
 					items.add(catalogItem);
 				}
@@ -293,7 +206,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		}
 	}
 
-	protected CatalogItem createCatalogItem(final INode node, String categoryId, boolean userFavoritesSupported,
+	protected CatalogItem createCatalogItem(final INode node, String categoryId,
 			IProgressMonitor monitor) {
 		String id = node.getId();
 		try {
@@ -311,7 +224,6 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			catalogItem.setData(node);
 			catalogItem.setSource(source);
 			catalogItem.setLicense(node.getLicense());
-			catalogItem.setUserFavorite(userFavoritesSupported ? node.getUserFavorite() : null);
 			IIus ius = node.getIus();
 			if (ius != null) {
 				List<MarketplaceNodeInstallableUnitItem> installableUnitItems = new ArrayList<>();
@@ -677,130 +589,6 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		}
 	}
 
-	public void userFavorites(boolean promptLogin, IProgressMonitor monitor) throws CoreException {
-		final SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_FavoritesRetrieve, 1001);
-		try {
-			MarketplaceCategory catalogCategory = findMarketplaceCategory(progress.newChild(1));
-			catalogCategory.setContents(Contents.USER_FAVORITES);
-			IUserFavoritesService userFavoritesService = marketplaceService.getUserFavoritesService();
-			if (userFavoritesService != null) {
-				try {
-					applyShellProvider();
-					ISearchResult result;
-					if (promptLogin) {
-						IMarketplaceStorageService storageService = userFavoritesService.getStorageService();
-						result = storageService
-								.runWithLogin(() -> marketplaceService.userFavorites(progress.newChild(500)));
-					} else {
-						result = marketplaceService.userFavorites(progress.newChild(500));
-					}
-					if (result.getNodes().isEmpty()) {
-						catalogCategory = addPopularItems(progress.newChild(500));
-						addNoFavoritesItem(catalogCategory);
-					} else {
-						handleSearchResult(catalogCategory, result, progress.newChild(500));
-					}
-				} catch (NotAuthorizedException e) {
-					catalogCategory = addPopularItems(progress.newChild(500));
-					addUserStorageLoginItem(catalogCategory, e.getLocalizedMessage());
-				} catch (UnsupportedOperationException ex) {
-					catalogCategory = addPopularItems(progress.newChild(500));
-					addFavoritesNotSupportedItem(catalogCategory);
-				} catch (Exception ex) {
-					//FIXME we should use the wizard page's status line to show errors, but that's unreachable from here...
-					MarketplaceClientCore.error(Messages.MarketplaceDiscoveryStrategy_FavoritesRetrieveError, ex);
-					catalogCategory = addPopularItems(progress.newChild(500));
-					addRetryErrorItem(catalogCategory, ex);
-				}
-			} else {
-				catalogCategory = addPopularItems(progress.newChild(1000));
-				addFavoritesNotSupportedItem(catalogCategory);
-			}
-		} finally {
-			monitor.done();
-		}
-	}
-
-	private MarketplaceCategory addPopularItems(IProgressMonitor monitor) throws CoreException {
-		SubMonitor progress = SubMonitor.convert(monitor, 100);
-		MarketplaceCategory catalogCategory;
-		popular(progress.newChild(99));
-		catalogCategory = findMarketplaceCategory(progress.newChild(1));
-		return catalogCategory;
-	}
-
-	public void refreshUserFavorites(IProgressMonitor monitor) throws CoreException {
-		final SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_FavoritesRefreshing, 1001);
-		try {
-			MarketplaceCategory catalogCategory = findMarketplaceCategory(progress.newChild(1));
-			List<CatalogItem> items = catalogCategory.getItems();
-			if (hasUserFavoritesService()) {
-				Map<String, INode> nodes = new HashMap<>();
-				for (CatalogItem item : items) {
-					Object data = item.getData();
-					if (data instanceof INode) {
-						INode node = (INode) data;
-						nodes.put(node.getId(), node);
-					}
-				}
-				if (nodes.isEmpty()) {
-					return;
-				}
-				try {
-					applyShellProvider();
-					marketplaceService.userFavorites(new ArrayList<>(nodes.values()), progress.newChild(500));
-					for (CatalogItem catalogItem : items) {
-						if (catalogItem instanceof MarketplaceNodeCatalogItem) {
-							MarketplaceNodeCatalogItem nodeItem = (MarketplaceNodeCatalogItem) catalogItem;
-							INode node = nodes.get(nodeItem.getId());
-							nodeItem.setUserFavorite(node == null ? null : node.getUserFavorite());
-						}
-					}
-				} catch (NotAuthorizedException e) {
-					catalogCategory = addPopularItems(progress.newChild(500));
-					addUserStorageLoginItem(catalogCategory, e.getLocalizedMessage());
-				} catch (UnsupportedOperationException ex) {
-					catalogCategory = addPopularItems(progress.newChild(500));
-					addFavoritesNotSupportedItem(catalogCategory);
-				} catch (Exception ex) {
-					//FIXME we should use the wizard page's status line to show errors, but that's unreachable from here...
-					MarketplaceClientCore.error(Messages.MarketplaceDiscoveryStrategy_FavoritesRetrieveError, ex);
-					catalogCategory = addPopularItems(progress.newChild(500));
-					addRetryErrorItem(catalogCategory, ex);
-				}
-			} else {
-				for (CatalogItem catalogItem : items) {
-					if (catalogItem instanceof MarketplaceNodeCatalogItem) {
-						MarketplaceNodeCatalogItem nodeItem = (MarketplaceNodeCatalogItem) catalogItem;
-						nodeItem.setUserFavorite(null);
-					}
-				}
-			}
-		} finally {
-			monitor.done();
-		}
-	}
-
-	private void addUserStorageLoginItem(MarketplaceCategory catalogCategory, String authMessage) {
-		addUserActionItem(catalogCategory, UserAction.LOGIN, authMessage);
-	}
-
-	private void addNoFavoritesItem(MarketplaceCategory catalogCategory) {
-		addUserActionItem(catalogCategory, UserAction.CREATE_FAVORITES);
-	}
-
-	private void addFavoritesNotSupportedItem(MarketplaceCategory catalogCategory) {
-		addUserActionItem(catalogCategory, UserAction.FAVORITES_UNSUPPORTED);
-	}
-
-	private void addRetryErrorItem(MarketplaceCategory catalogCategory, Exception ex) {
-		addUserActionItem(catalogCategory, UserAction.RETRY_ERROR, ex);
-	}
-
-	public void addOpenFavoritesItem(MarketplaceCategory catalogCategory) {
-		addUserActionItem(catalogCategory, UserAction.OPEN_FAVORITES);
-	}
-
 	public void addUpdateItem(MarketplaceCategory catalogCategory, List<MarketplaceNodeCatalogItem> availableUpdates) {
 		addUserActionItem(catalogCategory, UserAction.UPDATE, availableUpdates);
 	}
@@ -822,7 +610,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	protected SearchResult computeInstalled(IProgressMonitor monitor) throws CoreException {
 		SearchResult result = new SearchResult();
-		result.setNodes(new ArrayList<Node>());
+		result.setNodes(new ArrayList<>());
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.MarketplaceDiscoveryStrategy_ComputingInstalled, 1000);
 		Map<String, IInstallableUnit> installedIUs = computeInstalledIUs(progress.newChild(500));
 		if (!monitor.isCanceled()) {
@@ -863,7 +651,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			MarketplaceCategory catalogCategory = findMarketplaceCategory(progress.newChild(1));
 			catalogCategory.setContents(Contents.QUERY);
 			SearchResult result = new SearchResult();
-			result.setNodes(new ArrayList<Node>());
+			result.setNodes(new ArrayList<>());
 			if (!monitor.isCanceled()) {
 				if (!nodes.isEmpty()) {
 					List<INode> resolvedNodes = marketplaceService.getNodes(nodes, progress.newChild(500));
@@ -967,14 +755,5 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 	protected MarketplaceCatalogSource getCatalogSource() {
 		return source;
-	}
-
-	public void setShellProvider(IShellProvider shellProvider) {
-		this.shellProvider = shellProvider;
-		applyShellProvider();
-	}
-
-	public IShellProvider getShellProvider() {
-		return shellProvider;
 	}
 }

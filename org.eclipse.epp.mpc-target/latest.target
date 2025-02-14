@@ -30,9 +30,5 @@
 <unit id="org.eclipse.swtbot.generator.feature.feature.group" version="0.0.0"/>
 <repository location="http://download.eclipse.org/technology/swtbot/releases/latest"/>
 </location>
-<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.userstorage.sdk.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/usssdk/drops/release/1.2.0"/>
-</location>
 </locations>
 </target>

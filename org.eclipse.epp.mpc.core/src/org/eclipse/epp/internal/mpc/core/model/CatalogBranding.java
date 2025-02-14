@@ -45,14 +45,6 @@ public class CatalogBranding extends Identifiable implements ICatalogBranding {
 
 	private String featuredMarketTabName;
 
-	private boolean hasFavoritesTab;
-
-	private String favoritesTabName;
-
-	private String favoritesServer;
-
-	private String favoritesApiKey;
-
 	@Override
 	public String getWizardIcon() {
 		return wizardIcon;
@@ -150,42 +142,6 @@ public class CatalogBranding extends Identifiable implements ICatalogBranding {
 
 	public void setFeaturedMarketTabName(String featuredMarketTabName) {
 		this.featuredMarketTabName = featuredMarketTabName;
-	}
-
-	@Override
-	public boolean hasFavoritesTab() {
-		return hasFavoritesTab;
-	}
-
-	public void setHasFavoritesTab(boolean hasFavoritesTab) {
-		this.hasFavoritesTab = hasFavoritesTab;
-	}
-
-	@Override
-	public String getFavoritesTabName() {
-		return favoritesTabName;
-	}
-
-	public void setFavoritesTabName(String favoritesTabName) {
-		this.favoritesTabName = favoritesTabName;
-	}
-
-	@Override
-	public String getFavoritesServer() {
-		return favoritesServer;
-	}
-
-	public void setFavoritesServer(String favoritesServer) {
-		this.favoritesServer = favoritesServer;
-	}
-
-	@Override
-	public String getFavoritesApiKey() {
-		return favoritesApiKey;
-	}
-
-	public void setFavoritesApiKey(String favoritesApiKey) {
-		this.favoritesApiKey = favoritesApiKey;
 	}
 
 	@Override
