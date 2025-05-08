@@ -116,7 +116,7 @@ public class HttpClientFactory {
 		connManager.setDefaultMaxPerRoute(100);
 		connManager.setMaxTotal(200);
 		builder.setConnectionManager(connManager);
-		setClientDefaultTimeouts(builder);
+		setClientDefaultTimeouts(builder, connManager);
 
 		builder.addResponseInterceptorLast(new CacheCredentialsAuthenticationStrategy());
 
@@ -125,7 +125,7 @@ public class HttpClientFactory {
 		return builder;
 	}
 
-	private static void setClientDefaultTimeouts(HttpClientBuilder builder) {
+	private static void setClientDefaultTimeouts(HttpClientBuilder builder, PoolingHttpClientConnectionManager connManager) {
 		int connectTimeout = getTimeoutValue(HttpClientTransport.CONNECT_TIMEOUT_PROPERTY,
 				HttpClientTransport.DEFAULT_CONNECT_TIMEOUT);
 		int readTimeout = getTimeoutValue(HttpClientTransport.READ_TIMEOUT_PROPERTY,
@@ -147,7 +147,6 @@ public class HttpClientFactory {
 				.setConnectTimeout(Timeout.ofMilliseconds(connectTimeout))
 				.setConnectionRequestTimeout(Timeout.ofMilliseconds(connectionRequestTimeout))
 				.build();
-		PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
 		connManager.setDefaultSocketConfig(defaultSocketConfig);
 		builder.setConnectionManager(connManager);
 		builder.setDefaultRequestConfig(defaultRequestConfig);

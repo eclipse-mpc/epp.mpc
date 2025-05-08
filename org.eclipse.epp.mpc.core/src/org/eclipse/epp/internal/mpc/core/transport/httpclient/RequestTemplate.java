@@ -34,20 +34,16 @@ public abstract class RequestTemplate<T> {
 		return HttpClientTransport.USER_AGENT;
 	}
 
-	public T execute(HttpClientService client, URI uri) throws ClientProtocolException, IOException {
-		return execute(client, uri, true);
-	}
-
-	public T execute(HttpClientService client, URI uri, boolean closeResponse)
+	public T execute(HttpClientService client, URI uri)
 			throws ClientProtocolException, IOException {
 		ClassicHttpRequest request = createRequest(uri);
 		request = configureRequest(client, request);
 		ClassicHttpResponse response = client.execute(request);
-		T handledResponse = handleResponse(response);
-		if (closeResponse) {
+		try {
+			return handleResponse(response);
+		} finally {
 			response.close();
 		}
-		return handledResponse;
 	}
 
 	protected abstract ClassicHttpRequest createRequest(URI uri);

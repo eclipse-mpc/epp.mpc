@@ -28,6 +28,7 @@ import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpRequest;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -94,7 +95,7 @@ public class HttpClientTransport implements ITransport {
 	public InputStream stream(URI location, IProgressMonitor monitor)
 			throws FileNotFoundException, ServiceUnavailableException, CoreException {
 		try {
-			return createStreamingRequest().execute(clientService, location, false);
+			return createStreamingRequest().execute(clientService, location);
 		} catch (HttpResponseException e) {
 			int statusCode = e.getStatusCode();
 			switch (statusCode) {
@@ -125,8 +126,8 @@ public class HttpClientTransport implements ITransport {
 			protected InputStream handleResponse(ClassicHttpResponse response)
 					throws ClientProtocolException, IOException {
 				HttpEntity entity = response.getEntity();
-				handleResponseStatus(response.getCode(), response.getReasonPhrase());
-				return handleResponseEntity(entity);
+				byte[] contentBytes = EntityUtils.toByteArray(entity);
+				return new ByteArrayInputStream(contentBytes);
 			}
 
 			@Override
