@@ -60,7 +60,6 @@
               <forkedProcessTimeoutInSeconds>1500</forkedProcessTimeoutInSeconds>
               <product>org.eclipse.sdk.ide</product>
               <application>org.eclipse.ui.ide.workbench</application>
-              <testSuite>org.eclipse.epp.mpc.tests</testSuite>
               <testClass>${test-suite}</testClass>
               <argLine>-Xmx256m -Djava.io.tmpdir=${project.build.directory}/temp ${test-args} ${test-proxy}</argLine>
               <appArgLine>${test-app-args}</appArgLine>
