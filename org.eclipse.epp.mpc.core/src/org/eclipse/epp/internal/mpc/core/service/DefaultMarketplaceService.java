@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2019 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2025 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -484,7 +484,7 @@ MarketplaceService {
 		if (relativeUrl == null) {
 			// empty search
 			result.setMatchCount(0);
-			result.setNodes(new ArrayList<Node>());
+			result.setNodes(new ArrayList<>());
 		} else {
 			Marketplace marketplace;
 			try {

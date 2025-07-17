@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2025 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -83,7 +83,7 @@ public class MarketplaceWizardCommand extends AbstractMarketplaceWizardCommand i
 		marketFilter.setSelectAllOnNoSelection(true);
 		marketFilter.setNoSelectionLabel(Messages.MarketplaceWizardCommand_allMarkets);
 		marketFilter.setTagClassification(ICategory.class);
-		marketFilter.setChoices(new ArrayList<Tag>());
+		marketFilter.setChoices(new ArrayList<>());
 
 		final ComboTagFilter marketCategoryTagFilter = new ComboTagFilter() {
 			@Override
@@ -94,7 +94,7 @@ public class MarketplaceWizardCommand extends AbstractMarketplaceWizardCommand i
 		marketCategoryTagFilter.setSelectAllOnNoSelection(true);
 		marketCategoryTagFilter.setNoSelectionLabel(Messages.MarketplaceWizardCommand_allCategories);
 		marketCategoryTagFilter.setTagClassification(ICategory.class);
-		marketCategoryTagFilter.setChoices(new ArrayList<Tag>());
+		marketCategoryTagFilter.setChoices(new ArrayList<>());
 
 		final IPropertyChangeListener marketListener = event1 -> {
 			final String property = event1.getProperty();

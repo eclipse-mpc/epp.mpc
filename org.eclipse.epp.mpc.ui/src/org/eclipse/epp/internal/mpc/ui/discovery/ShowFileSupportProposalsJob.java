@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 Red Hat Inc.
+ * Copyright (c) 2017, 2025 Red Hat Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -68,7 +68,7 @@ final class ShowFileSupportProposalsJob extends UIJob {
 				IMarketplaceClientService marketplaceClientService = MarketplaceClient
 						.getMarketplaceClientService();
 				IMarketplaceClientConfiguration config = marketplaceClientService.newConfiguration();
-				marketplaceClientService.open(config, new LinkedHashSet<INode>(nodes));
+				marketplaceClientService.open(config, new LinkedHashSet<>(nodes));
 			} else if (dialog.isAssociateToExtension()) {
 				List<String> fileExtensions = DiscoverFileSupportJob.getFileExtensions(fileName);
 				IFileEditorMapping newMapping = createDefaultDescriptorMapping(
