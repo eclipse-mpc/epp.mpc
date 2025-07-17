@@ -19,7 +19,6 @@
       <target-platform>staging</target-platform>
       <java-version>21</java-version>
       <java-bree>JavaSE-${java-version}</java-bree>
-      <enforced.java.version>[1.8.0,)</enforced.java.version>
       <java-jdk>SYSTEM</java-jdk>
 
       <tycho-version>4.0.13</tycho-version>
@@ -138,10 +137,6 @@
             <groupId>org.eclipse.tycho</groupId>
             <artifactId>target-platform-configuration</artifactId>
          </plugin>
-         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-enforcer-plugin</artifactId>
-         </plugin>
       </plugins>
 
       <pluginManagement>
@@ -153,15 +148,6 @@
             </plugin>
 
             <plugin>
-               <groupId>org.apache.maven.plugins</groupId>
-               <artifactId>maven-compiler-plugin</artifactId>
-               <version>3.14.0</version>
-               <configuration>
-                  <source>${java-version}</source>
-                  <target>${java-version}</target>
-               </configuration>
-            </plugin>
-            <plugin>
                <groupId>org.eclipse.tycho</groupId>
                <artifactId>tycho-compiler-plugin</artifactId>
                <version>${tycho-version}</version>
@@ -170,27 +156,6 @@
                   <useJDK>${java-jdk}</useJDK>
                   <strictCompilerTarget>true</strictCompilerTarget>
                </configuration>
-            </plugin>
-
-            <plugin>
-               <groupId>org.apache.maven.plugins</groupId>
-               <artifactId>maven-enforcer-plugin</artifactId>
-               <version>3.6.0</version>
-               <executions>
-                  <execution>
-                     <id>enforce-java</id>
-                     <goals>
-                        <goal>enforce</goal>
-                     </goals>
-                     <configuration>
-                        <rules>
-                           <requireJavaVersion>
-                              <version>${enforced.java.version}</version>
-                           </requireJavaVersion>
-                        </rules>
-                     </configuration>
-                  </execution>
-               </executions>
             </plugin>
 
             <plugin>
@@ -306,7 +271,6 @@
                <artifactId>spotbugs-maven-plugin</artifactId>
                <version>4.9.3.2</version>
                <configuration>
-                  <findbugsXmlOutput>true</findbugsXmlOutput>
                   <failOnError>false</failOnError>
                   <skip>${skip-source-check}</skip>
                </configuration>
@@ -330,7 +294,6 @@
                <artifactId>maven-pmd-plugin</artifactId>
                <version>3.27.0</version>
                <configuration>
-                  <sourceEncoding>utf-8</sourceEncoding>
                   <minimumTokens>100</minimumTokens>
                   <targetJdk>${java-version}</targetJdk>
                   <format>xml</format>
