@@ -27,6 +27,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -459,14 +460,14 @@ public class MarketplaceInfo {
 			}
 			String path = url.getPath();
 			try {
-				path = URLDecoder.decode(path, "UTF-8"); //$NON-NLS-1$
+				path = URLDecoder.decode(path, StandardCharsets.UTF_8);
 			} catch (IllegalArgumentException e) {
 				//ignore
 			}
 			String query = url.getQuery();
 			if (query != null) {
 				try {
-					query = URLDecoder.decode(query, "UTF-8"); //$NON-NLS-1$
+					query = URLDecoder.decode(query, StandardCharsets.UTF_8);
 				} catch (IllegalArgumentException e) {
 					//ignore
 				}
@@ -474,7 +475,7 @@ public class MarketplaceInfo {
 			String ref = url.getRef();
 			if (ref != null) {
 				try {
-					ref = URLDecoder.decode(ref, "UTF-8"); //$NON-NLS-1$
+					ref = URLDecoder.decode(ref, StandardCharsets.UTF_8);
 				} catch (IllegalArgumentException e) {
 					//ignore
 				}
