@@ -14,9 +14,6 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
-import static org.eclipse.epp.mpc.ui.MarketplaceUrlHandler.UTF_8;
-
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
@@ -25,6 +22,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -688,18 +686,14 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 	}
 
 	private String appendWizardState(String url) {
-		try {
-			if (url.indexOf('?') == -1) {
-				url += '?';
-			} else {
-				url += '&';
-			}
-			String state = new SelectionModelStateSerializer(getCatalog(), getSelectionModel()).serialize();
-			url += "mpc=true&mpc_state=" + URLEncoder.encode(state, "UTF-8"); //$NON-NLS-1$//$NON-NLS-2$
-			return url;
-		} catch (UnsupportedEncodingException e) {
-			throw new IllegalStateException(e); // should never happen
+		if (url.indexOf('?') == -1) {
+			url += '?';
+		} else {
+			url += '&';
 		}
+		String state = new SelectionModelStateSerializer(getCatalog(), getSelectionModel()).serialize();
+		url += "mpc=true&mpc_state=" + URLEncoder.encode(state, StandardCharsets.UTF_8); //$NON-NLS-1$
+		return url;
 	}
 
 	private boolean hookLocationListener(IWebBrowser webBrowser) {
@@ -1006,12 +1000,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			final SelectionModel selectionModel = getSelectionModel();
 			final Map<String, Operation> nodeIdToOperation = new HashMap<>();
 			nodeIdToOperation.putAll(getSelectionModel().getItemIdToSelectedOperation());
-			try {
-				nodeIdToOperation.put(URLDecoder.decode(installId, UTF_8), Operation.INSTALL);
-			} catch (UnsupportedEncodingException e) {
-				//should be unreachable
-				throw new IllegalStateException();
-			}
+			nodeIdToOperation.put(URLDecoder.decode(installId, StandardCharsets.UTF_8), Operation.INSTALL);
 
 			SelectionModelStateSerializer stateSerializer = new SelectionModelStateSerializer(getCatalog(),
 					selectionModel);
@@ -1176,11 +1165,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		}
 		String mpcState = MarketplaceUrlHandler.getMPCState(catalogUrl);
 		if (mpcState != null && mpcState.length() > 0) {
-			try {
-				command.setWizardState(URLDecoder.decode(mpcState, "UTF-8")); //$NON-NLS-1$
-			} catch (UnsupportedEncodingException e) {
-				throw new IllegalStateException(e); // should never happen
-			}
+			command.setWizardState(URLDecoder.decode(mpcState, StandardCharsets.UTF_8));
 			if (!proceedWithInstall) {
 				WizardState wizardState = new WizardState();
 				wizardState.setProceedWithInstallation(false);

@@ -12,15 +12,13 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.core.util;
 
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-
-import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
+import java.nio.charset.StandardCharsets;
 
 public class URLUtil {
 
@@ -70,12 +68,7 @@ public class URLUtil {
 		if (value == null) {
 			return null;
 		}
-		try {
-			return URLEncoder.encode(value, "UTF-8"); //$NON-NLS-1$
-		} catch (UnsupportedEncodingException e) {
-			// should not happen anyways
-			throw new RuntimeException(e);
-		}
+		return URLEncoder.encode(value, StandardCharsets.UTF_8);
 	}
 
 	private static String encodeQuery(String query) {
@@ -109,22 +102,11 @@ public class URLUtil {
 	}
 
 	public static String urlEncode(String s) {
-		try {
-			return s == null ? null : URLEncoder.encode(s, "UTF-8"); //$NON-NLS-1$
-		} catch (UnsupportedEncodingException e) {
-			//this should be impossible
-			MarketplaceClientCore.error(e);
-			return s;
-		}
+		return s == null ? null : URLEncoder.encode(s, StandardCharsets.UTF_8);
 	}
 
 	public static String urlDecode(String path) {
-		try {
-			return path == null ? null : URLDecoder.decode(path, "UTF-8"); //$NON-NLS-1$
-		} catch (UnsupportedEncodingException e) {
-			//should not be possible
-			return path;
-		}
+		return path == null ? null : URLDecoder.decode(path, StandardCharsets.UTF_8);
 	}
 
 	public static String setScheme(String url, String scheme) {

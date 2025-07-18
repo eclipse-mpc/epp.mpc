@@ -13,12 +13,12 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.ui;
 
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -63,6 +63,7 @@ public abstract class MarketplaceUrlHandler {
 
 	private static final Pattern NODE_URL_PATTERN = Pattern.compile("(?:^|/)node/([^/#?]+)"); //$NON-NLS-1$
 
+	@Deprecated(forRemoval = true)
 	public static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
 
 	public static class SolutionInstallationInfo {
@@ -143,16 +144,12 @@ public abstract class MarketplaceUrlHandler {
 		CatalogDescriptor catalogDescriptor = info.getCatalogDescriptor();
 		MarketplaceWizardCommand command = new MarketplaceWizardCommand();
 		command.setSelectedCatalogDescriptor(catalogDescriptor);
-		try {
-			if (mpcState != null) {
-				command.setWizardState(URLDecoder.decode(mpcState, UTF_8));
-			}
-			Map<String, Operation> nodeToOperation = new HashMap<>();
-			nodeToOperation.put(URLDecoder.decode(installId, UTF_8), Operation.INSTALL);
-			command.setOperations(nodeToOperation);
-		} catch (UnsupportedEncodingException e1) {
-			throw new IllegalStateException(e1);
+		if (mpcState != null) {
+			command.setWizardState(URLDecoder.decode(mpcState, StandardCharsets.UTF_8));
 		}
+		Map<String, Operation> nodeToOperation = new HashMap<>();
+		nodeToOperation.put(URLDecoder.decode(installId, StandardCharsets.UTF_8), Operation.INSTALL);
+		command.setOperations(nodeToOperation);
 		try {
 			command.execute(new ExecutionEvent());
 			return true;

@@ -14,11 +14,11 @@
 package org.eclipse.epp.internal.mpc.core.service;
 
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.Map;
 
@@ -44,8 +44,6 @@ public class RemoteMarketplaceService<T> {
 	protected URL baseUrl;
 
 	public static final String API_URI_SUFFIX = "api/p"; //$NON-NLS-1$
-
-	private static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
 
 	private static final int RETRY_COUNT = 3;
 
@@ -202,26 +200,22 @@ public class RemoteMarketplaceService<T> {
 
 	public String addMetaParameters(String uri) {
 		if (requestMetaParameters != null) {
-			try {
-				boolean hasQueryString = uri.indexOf('?') != -1;
-				for (Map.Entry<String, String> param : requestMetaParameters.entrySet()) {
-					if (param.getKey() == null) {
-						continue;
-					}
-					if (hasQueryString) {
-						uri += '&';
-					} else {
-						hasQueryString = true;
-						uri += '?';
-					}
-					uri += URLEncoder.encode(param.getKey(), UTF_8);
-					uri += '=';
-					if (param.getValue() != null) {
-						uri += URLEncoder.encode(param.getValue(), UTF_8);
-					}
+			boolean hasQueryString = uri.indexOf('?') != -1;
+			for (Map.Entry<String, String> param : requestMetaParameters.entrySet()) {
+				if (param.getKey() == null) {
+					continue;
 				}
-			} catch (UnsupportedEncodingException e) {
-				throw new IllegalStateException(e);
+				if (hasQueryString) {
+					uri += '&';
+				} else {
+					hasQueryString = true;
+					uri += '?';
+				}
+				uri += URLEncoder.encode(param.getKey(), StandardCharsets.UTF_8);
+				uri += '=';
+				if (param.getValue() != null) {
+					uri += URLEncoder.encode(param.getValue(), StandardCharsets.UTF_8);
+				}
 			}
 		}
 		return uri;
@@ -247,12 +241,7 @@ public class RemoteMarketplaceService<T> {
 	}
 
 	protected static String urlEncode(String urlPart) {
-		try {
-			return URLEncoder.encode(urlPart, UTF_8);
-		} catch (UnsupportedEncodingException e) {
-			// should never happen
-			throw new IllegalStateException(e);
-		}
+		return URLEncoder.encode(urlPart, StandardCharsets.UTF_8);
 	}
 
 	public void activate(Map<?, ?> properties) {
