@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.epp.mpc.dependencies"
       label="%featureName"
-      version="1.12.1.qualifier"
+      version="1.13.0.qualifier"
       provider-name="%providerName"
       license-feature="org.eclipse.license"
       license-feature-version="2.0.2">
@@ -21,39 +21,23 @@
 
    <plugin
          id="com.sun.jna"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="com.sun.jna.platform"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
+         version="0.0.0"/>
 
    <plugin
          id="org.apache.httpcomponents.client5.httpclient5"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.apache.httpcomponents.client5.httpclient5-win"
          os="win32"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.apache.httpcomponents.core5.httpcore5"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
 </feature>
