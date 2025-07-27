@@ -90,6 +90,7 @@
             <artifactId>tycho-p2-repository-plugin</artifactId>
             <configuration>
                <includeAllDependencies>false</includeAllDependencies>
+               <includeAllSources>true</includeAllSources>
                <compress>false</compress>
                <xzCompress>false</xzCompress>
             </configuration>

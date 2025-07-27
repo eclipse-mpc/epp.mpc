@@ -6,13 +6,7 @@
    <feature id="org.eclipse.epp.mpc" version="0.0.0">
       <category name="EPP Marketplace Client"/>
    </feature>
-   <feature id="org.eclipse.epp.mpc.source" version="0.0.0">
-      <category name="no.category"/>
-   </feature>
    <feature id="org.eclipse.epp.mpc.dependencies" version="0.0.0">
-      <category name="no.category"/>
-   </feature>
-   <feature id="org.eclipse.epp.mpc.dependencies.source" version="0.0.0">
       <category name="no.category"/>
    </feature>
    <category-def name="EPP Marketplace Client" label="EPP Marketplace Client">
