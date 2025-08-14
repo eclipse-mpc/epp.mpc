@@ -4,4 +4,4 @@ Bundle-Name: Marketplace Client Test Catalog
 Bundle-SymbolicName: org.eclipse.epp.mpc.tests.catalog;singleton:=true
 Bundle-Version: 1.13.0.qualifier
 Bundle-Vendor: Eclipse Marketplace Client
-Require-Bundle: org.eclipse.epp.mpc.ui;bundle-version="1.12.1"
+Require-Bundle: org.eclipse.epp.mpc.ui;bundle-version="1.13.0"
