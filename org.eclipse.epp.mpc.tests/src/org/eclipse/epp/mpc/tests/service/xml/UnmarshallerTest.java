@@ -477,7 +477,7 @@ public class UnmarshallerTest {
 	@Test(expected = UnmarshalException.class)
 	public void invalidLeadingBytes() throws Exception {
 		ByteBuffer buffer = ByteBuffer.allocate(4096);
-		buffer.put((byte) 0);
+		buffer.put((byte) 0xDC);
 		buffer.put((byte) 0);
 		buffer = readResource("resources/catalogs.xml", buffer);
 		buffer.flip();
