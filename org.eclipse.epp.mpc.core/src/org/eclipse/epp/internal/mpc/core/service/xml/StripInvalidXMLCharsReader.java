@@ -25,31 +25,34 @@ public class StripInvalidXMLCharsReader extends FilterReader {
 	@Override
 	public int read() throws IOException {
 		for (int r = -1; (r = super.read()) != -1;) {
-			if (isValidXMLCodePoint(r)) {
+			if (isValidXMLChar((char) r)) {
 				return r;
 			}
 		}
 		return -1;
 	}
 
-	private boolean isValidXMLCodePoint(int cp) {
-		return (cp == 0x9) || (cp == 0xA) || (cp == 0xD) || ((cp >= 0x20) && (cp <= 0xD7FF))
-				|| ((cp >= 0xE000) && (cp <= 0xFFFD)) || ((cp >= 0x10000) && (cp <= 0x10FFFF));
+	private boolean isValidXMLChar(char c) {
+		// https://marketplace.eclipse.org/content/surfexample/api/p
+		// Strip ASCII control characters disallowed in general by XML 1.0.
+		return (c >= 0x20) || (c == 0x9) || (c == 0xA) || (c == 0xD);
 	}
 
 	@Override
 	public int read(char[] cbuf, int off, int len) throws IOException {
 		int read = super.read(cbuf, off, len);
 		int remaining = read;
-		for (int i = off; i < off + read; i++) {
+		for (int i = off; i < off + remaining;) {
 			char c = cbuf[i];
-			if (!isValidXMLCodePoint(c)) {
+			if (!isValidXMLChar(c)) {
 				remaining--;
-				int after = off + read - i - 1;
+				int after = off + remaining - i;
 				if (after > 0) {
 					System.arraycopy(cbuf, i + 1, cbuf, i, after);
 					cbuf[remaining] = 0;
 				}
+			} else {
+				++i;
 			}
 		}
 		return remaining;
