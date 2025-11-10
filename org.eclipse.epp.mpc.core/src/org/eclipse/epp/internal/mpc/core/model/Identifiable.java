@@ -154,4 +154,15 @@ public abstract class Identifiable implements IIdentifiable {
 		return id2 == id1 || id2.equalsId(id1) || (id2.getId() == null && id2.equalsUrl(id1))
 				|| (id2.getId() == null && id2.getUrl() == null && id2.equalsName(id1));
 	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() //
+				+ '@' + Integer.toHexString(System.identityHashCode(this)) //
+				+ " [id=" + id //$NON-NLS-1$
+				+ ", name=" + name //$NON-NLS-1$
+				+ ", url=" + url //$NON-NLS-1$
+				+ ']';
+	}
+
 }
