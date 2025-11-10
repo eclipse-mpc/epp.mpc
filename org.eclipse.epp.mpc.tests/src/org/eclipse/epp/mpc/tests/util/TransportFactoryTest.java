@@ -61,6 +61,7 @@ import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientService;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientTransport;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientTransportFactory;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.SynchronizedCredentialsProvider;
+import org.eclipse.epp.internal.mpc.core.transport.httpclient.SystemCredentialsProvider;
 import org.eclipse.epp.internal.mpc.core.util.FallbackTransportFactory;
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
 import org.eclipse.epp.internal.mpc.core.util.TransportFactory;
@@ -366,8 +367,7 @@ public class TransportFactoryTest {
 
 		assertNotNull(credentialsProvider);
 		List<CredentialsProvider> nestedProviders = listCredentialsProviders(credentialsProvider);
-		assertThat(nestedProviders, hasItem(LambdaMatchers.map(x -> x.getClass().getName()).matches(
-				"org.apache.http.impl.auth.win.WindowsCredentialsProvider")));
+		assertThat(nestedProviders, hasItem(instanceOf(SystemCredentialsProvider.class)));
 	}
 
 	private static AbortRequestCustomizer interceptRequest(HttpClientCustomizer... customizers) throws Exception {

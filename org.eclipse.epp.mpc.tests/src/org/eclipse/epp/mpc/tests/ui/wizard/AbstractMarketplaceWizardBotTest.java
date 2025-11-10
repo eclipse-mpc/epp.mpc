@@ -108,19 +108,20 @@ public abstract class AbstractMarketplaceWizardBotTest {
 
 	protected static final INode[] TEST_NODES = new INode[] { //
 			testNode("206", "https://marketplace.eclipse.org/content/mylyn", "Mylyn"), //
-			testNode("311881", "https://marketplace.eclipse.org/content/eclipse-4-tools-css-spy",
-					"Eclipse 4 Tools: CSS Spy"), //
-			testNode("311774", "https://marketplace.eclipse.org/content/eclipse-4-tools-lightweight-css-editor",
-					"Eclipse 4 Tools: Lightweight CSS Editor"), //
-			testNode("311838", "https://marketplace.eclipse.org/content/eclipse-4-tools-application-model-editor", ""), //
+			testNode("2963400", "https://marketplace.eclipse.org/content/eclipse-web-developer-tools",
+					"Eclipse Web Developer Tools"), //
+			testNode("2953952", "https://marketplace.eclipse.org/content/eclipse-xml-editors-and-tools",
+					"Eclipse XML Editors and Tools"), //
+			testNode("507775", "https://marketplace.eclipse.org/content/dbeaver", "DBeaver"), //
 			testNode("2780381", "https://marketplace.eclipse.org/content/trace-compass", "Trace Compass"), //
 			testNode("2410217", "https://marketplace.eclipse.org/content/memory-analyzer-0", "Memory Analyzer"), //
 			testNode("1336", "https://marketplace.eclipse.org/content/egit-git-team-provider",
 					"EGit - Git Team Provider"), //
 			testNode("2706327", "https://marketplace.eclipse.org/content/eclipse-docker-tooling",
 					"Eclipse Docker Tooling"), //
-			testNode("2706342", "https://marketplace.eclipse.org/content/eclipse-vagrant-tooling",
-					"Eclipse Vagrant Tooling"), //
+			testNode("2963451",
+					"https://marketplace.eclipse.org/content/eclipse-enterprise-java-and-web-developer-tools",
+					"Eclipse Enterprise Java and Web Developer Tools"), //
 			testNode("2579663", "https://marketplace.eclipse.org/content/egerrit", "EGerrit") //
 	};
 

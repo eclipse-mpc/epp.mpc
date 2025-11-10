@@ -22,7 +22,7 @@
       <java-jdk>SYSTEM</java-jdk>
 
       <tycho-version>4.0.13</tycho-version>
-      
+
       <qualifier-format>'v'yyyyMMdd-HHmm</qualifier-format>
 
       <skip-source-check>true</skip-source-check>
@@ -187,6 +187,11 @@
                         <os>macosx</os>
                         <ws>cocoa</ws>
                         <arch>x86_64</arch>
+                     </environment>
+                     <environment>
+                        <os>macosx</os>
+                        <ws>cocoa</ws>
+                        <arch>aarch64</arch>
                      </environment>
                   </environments>
                </configuration>

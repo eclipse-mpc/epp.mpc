@@ -42,7 +42,7 @@ import org.junit.Test;
  */
 public class MarketplaceClientUiTest {
 
-	private static final String OFFLINE_HINT_TEXT = "Please check your Internet connection and retry";
+	private static final String OFFLINE_HINT_TEXT = "This is most often caused by a problem with your internet connection. Please check your internet connection and retry.";
 	private static final String UNREACHABLE_MARKETPLACE_URL = "http://marketplace.eclipse.invalid";
 
 	@Test
@@ -60,17 +60,18 @@ public class MarketplaceClientUiTest {
 		//UnknownHostException - should be treated as a hint for broken internet connection
 		status = MarketplaceClientCore.computeStatus(wrapInCoreException(new InvocationTargetException(
 				wrapInCoreException(new UnknownHostException("marketplace.eclipse.org")))), contextMessage);
-		expectedMessage = NLS.bind("{0}: {1}", contextMessage, OFFLINE_HINT_TEXT);
+		expectedMessage = NLS.bind("{0}: Cannot resolve host\n\n{1}", contextMessage, OFFLINE_HINT_TEXT);
 		assertEquals(IStatus.ERROR, status.getSeverity());
-		assertTrue(status.getMessage().startsWith(expectedMessage));
+		assertEquals(expectedMessage, status.getMessage());
 
 		//same with NoRouteToHostException and ConnectException
 		status = MarketplaceClientCore.computeStatus(new NoRouteToHostException("marketplace.eclipse.org"), contextMessage);
 		assertEquals(IStatus.ERROR, status.getSeverity());
-		assertTrue(status.getMessage().startsWith(expectedMessage));
+		assertEquals(expectedMessage, status.getMessage());
 		status = MarketplaceClientCore.computeStatus(new ConnectException("marketplace.eclipse.org"), contextMessage);
+		expectedMessage = NLS.bind("{0}: Connection failed\n\n{1}", contextMessage, OFFLINE_HINT_TEXT);
 		assertEquals(IStatus.ERROR, status.getSeverity());
-		assertTrue(status.getMessage().startsWith(expectedMessage));
+		assertEquals(status.getMessage(), expectedMessage);
 
 		//Wrapped HTTP 503 in ECF transport - unwrap and report as-is
 		errorMessage = "Service temporarily unavailable";
@@ -103,7 +104,9 @@ public class MarketplaceClientUiTest {
 			});
 			IStatus status = new MarketplaceWizardCommand().installRemoteCatalogs();
 			assertEquals(IStatus.ERROR, status.getSeverity());
-			assertTrue(status.getMessage().contains(": " + OFFLINE_HINT_TEXT));
+			String expectedMessage = NLS.bind("Cannot install remote marketplace locations: Cannot resolve host\n\n{0}",
+					OFFLINE_HINT_TEXT);
+			assertEquals(status.getMessage(), expectedMessage);
 		} finally {
 			ServiceLocator.setInstance(new ServiceLocator());
 		}
@@ -117,6 +120,7 @@ public class MarketplaceClientUiTest {
 						"Unreachable Marketplace")));
 		IStatus status = catalog.performDiscovery(new NullProgressMonitor());
 		assertEquals(IStatus.ERROR, status.getSeverity());
-		assertTrue(status.getMessage().startsWith(OFFLINE_HINT_TEXT));
+		String expectedMessage = NLS.bind("Cannot resolve host\n\n{0}", OFFLINE_HINT_TEXT);
+		assertEquals(status.getMessage(), expectedMessage);
 	}
 }

@@ -1,66 +1,273 @@
+# https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax
 name: Build
 
-on:
+on:  # https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows
   push:
-    branches: [master]
+    branches-ignore:  # build all branches except:
+    - 'dependabot/**'  # prevent GHA triggered twice (once for commit to the branch and once for opening/syncing the PR)
+    tags-ignore:  # don't build tags
+    - '**'
+    paths-ignore:
+    - '**/*.md'
+    - '.github/*.yml'
+    - '.github/workflows/codeql.yml'
+    - '.github/workflows/licensecheck.yml'
+    - '**/.project'
+    - '**/.settings/*.prefs'
+    - '.gitignore'
+    - '.actrc'
+    - 'Jenkinsfile'
   pull_request:
+    paths-ignore:
+    - '**/*.md'
+    - '.github/*.yml'
+    - '.github/workflows/codeql.yml'
+    - '.github/workflows/licensecheck.yml'
+    - '**/.project'
+    - '**/.settings/*.prefs'
+    - '.gitignore'
+    - '.actrc'
+    - 'Jenkinsfile'
+  workflow_dispatch:
+    # https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_dispatch
+    inputs:
+      additional_maven_args:
+        description: 'Additional Maven Args'
+        required: false
+        default: ''
+      debug-with-ssh:
+        description: "Start an SSH session for debugging purposes at the end of the build:"
+        default: never
+        type: choice
+        options: [ always, on_failure, on_failure_or_cancelled, never ]
+      debug-with-ssh-only-for-actor:
+        description: "Limit access to the SSH session to the GitHub user that triggered the job."
+        default: true
+        type: boolean
+
+
+defaults:
+  run:
+    shell: bash
+
+
+env:
+  JAVA_VERSION: 21
+
 
 jobs:
-  build:
 
-    runs-on: ubuntu-latest
+  ###########################################################
+  build:
+  ###########################################################
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:  # https://github.com/actions/runner-images#available-images
+        - ubuntu-latest
+        - macos-15-intel  # Intel
+        - macos-latest  # ARM
+        - windows-latest
+        target-platform:
+        - oldest
+        - latest
+        - staging
+
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/cache@v1
-      with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
-    - name: Set up JDK 21
-      uses: actions/setup-java@v3
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-    
-    - name: Setup Maven
-      # todo change?
-      uses: stCarolas/setup-maven@v4.2
-      with:
-        maven-version: 3.9.5
+    - name: "Show: GitHub context"
+      env:
+        GITHUB_CONTEXT: ${{ toJSON(github) }}
+      run: printf '%s' "$GITHUB_CONTEXT" | python -m json.tool
 
-    - name: Build
-      uses: GabrielBB/xvfb-action@v1
+
+    - name: "Show: environment variables"
+      run: env | sort
+
+
+    - name: Git Checkout
+      uses: actions/checkout@v5  # https://github.com/actions/checkout
       with:
-        run: >
-          mvn verify
-          -Dmaven.test.failure.ignore=true
-          -Dtycho.disableP2Mirrors=true
-          -Dorg.eclipse.swt.browser.UseWebKitGTK=true
-          -Dorg.eclipse.swt.browser.DefaultType=WebKit
-          -Dtycho.localArtifacts=ignore
-          -Dsurefire.timeout=1500
-          -Dhttp.nonProxyHosts=localhost
-          
-    - name: 'Upload Screenshots'
-      uses: actions/upload-artifact@v2
+        fetch-depth: 0  # required to prevent tycho-p2-extras-plugin:compare-version-with-baseline potentially failing the build
+
+
+    - name: Configure fast APT repository mirror
+      if: runner.os == 'Linux'
+      uses: vegardit/fast-apt-mirror.sh@v1
+
+
+    - name: "Install: Linux packages 📦"
+      if: runner.os == 'Linux'
+      run: |
+        set -eux
+        sudo apt-get install --no-install-recommends -y xvfb
+
+        # prevents: "Failed to execute child process “dbus-launch” (No such file or directory)"
+        sudo apt-get install --no-install-recommends -y dbus-x11
+
+        # prevents: "dbind-WARNING **: 20:17:55.046: AT-SPI: Error retrieving accessibility bus address: org.freedesktop.DBus.Error.ServiceUnknown: The name org.a11y.Bus was not provided by any .service files"
+        # see https://gist.github.com/jeffcogswell/62395900725acef1c0a5a608f7eb7a05
+        sudo apt-get install --no-install-recommends -y at-spi2-core
+
+        # prevents:
+        #  java.lang.UnsatisfiedLinkError: Could not load SWT library. Reasons:
+        #    no swt-pi4-gtk-4956r13 in java.library.path: /usr/java/packages/lib:/usr/lib64:/lib64:/lib:/usr/lib
+        #    no swt-pi4-gtk in java.library.path: /usr/java/packages/lib:/usr/lib64:/lib64:/lib:/usr/lib
+        #    no swt-pi4 in java.library.path: /usr/java/packages/lib:/usr/lib64:/lib64:/lib:/usr/lib
+        sudo apt-get install --no-install-recommends -y libswt-gtk-*-java
+
+        # required by org.eclipse.epp.mpc.tests.ui.wizard.MarketplaceWizardTest.testNews
+        # see https://www.eclipse.org/swt/faq.php#browserwebkitgtk
+        sudo apt-get install -y libwebkit2gtk-4.1-0
+
+        # prevents: Gtk-WARNING **: 22:59:43.054: Could not load a pixbuf from /org/gtk/libgtk/theme/Adwaita/assets/check-symbolic.svg.
+        sudo apt-get install --no-install-recommends -y adwaita-icon-theme librsvg2-common gdk-pixbuf2.0-bin
+        sudo /usr/lib/*-linux-gnu/gdk-pixbuf-*/gdk-pixbuf-query-loaders --update-cache
+        echo "GDK_BACKEND=x11" >> $GITHUB_ENV
+
+
+    - name: "Cache: Local Maven Repository"
+      uses: actions/cache@v4
       with:
-        name: org.eclipse.epp.mpc.tests-target-screenshots
+        # Excluded sub directory not working https://github.com/actions/toolkit/issues/713
+        path: |
+          ~/.m2/repository/*
+          !~/.m2/repository/.cache/tycho
+          !~/.m2/repository/.meta/p2-artifacts.properties
+          !~/.m2/repository/p2
+          !~/.m2/repository/*SNAPSHOT*
+        key: ${{ runner.os }}-${{ runner.arch }}-repo-mvn-${{ hashFiles('**/pom.xml') }}
+
+
+    - name: "Cache: Local Tycho Repository"
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.m2/repository/.cache/tycho
+          ~/.m2/repository/.meta/p2-artifacts.properties
+          ~/.m2/repository/p2
+        key: ${{ runner.os }}-${{ runner.arch }}-repo-tycho-${{ hashFiles(format('org.eclipse.epp.mpc-target/{0}.target', matrix.target-platform)) }}
+
+
+    - name: "Install: JDK ${{ env.JAVA_VERSION }} ☕"
+      uses: actions/setup-java@v5  # https://github.com/actions/setup-java
+      with:
+        distribution: temurin
+        java-version: ${{ env.JAVA_VERSION }}
+
+
+    - name: Setup Maven
+      uses: stCarolas/setup-maven@v5
+      with:
+        maven-version: 3.9.11
+
+
+    - name: "Build with Maven 🔨"
+      continue-on-error: ${{ matrix.target-platform == 'staging' }}
+      run: |
+        set -euo pipefail
+
+        MAVEN_OPTS="${MAVEN_OPTS:-}"
+        if [[ "${{ runner.os }}" == "Windows" ]]; then
+          MAVEN_OPTS+=" -Djava.security.egd=file:/dev/urandom" # https://www.baeldung.com/java-security-egd#bd-testing-the-effect-of-javasecurityegd
+        else
+          MAVEN_OPTS+=" -Djava.security.egd=file:/dev/./urandom" # https://stackoverflow.com/questions/58991966/what-java-security-egd-option-is-for/59097932#59097932
+        fi
+        MAVEN_OPTS+=" -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS" # https://stackoverflow.com/questions/5120470/how-to-time-the-different-stages-of-maven-execution/49494561#49494561
+        MAVEN_OPTS+=" -Xmx1024m -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true -Dhttps.protocols=TLSv1.3,TLSv1.2"
+        export MAVEN_OPTS
+        echo "MAVEN_OPTS: $MAVEN_OPTS"
+
+        if [[ ${ACT:-} == "true" ]]; then # when running locally using nektos/act
+          maven_args="-Djgit.dirtyWorkingTree=warning"
+        else
+          maven_args="--no-transfer-progress"
+        fi
+
+        # prevent "org.eclipse.swt.SWTError: No more handles [gtk_init_check() failed]" on Linux
+        ${{ runner.os == 'Linux' && 'xvfb-run --auto-servernum --server-args="-screen 0 1600x900x24" \' || '' }}
+        mvn \
+          --errors \
+          --update-snapshots \
+          --batch-mode \
+          --show-version \
+          -Declipse.p2.mirrors=false \
+          -Dtarget-platform=${{ matrix.target-platform }} \
+          -Dorg.eclipse.swt.browser.UseWebKitGTK=true \
+          -Dorg.eclipse.swt.browser.DefaultType=WebKit \
+          -Dtycho.localArtifacts=ignore \
+          -Dsurefire.rerunFailingTestsCount=3 \
+          -Dsurefire.timeout=1500 \
+          $maven_args \
+          ${{ github.event.inputs.additional_maven_args }} \
+          clean verify || (
+            rc=$?
+            if [[ ${ACT:-} != "true" ]]; then
+              find . -path "*/target/work/data/.metadata/.log" | while IFS= read -r file; do
+                echo "::group::$file"
+                  cat "$file"
+                echo "::endgroup::"
+              done
+            fi
+            exit $rc
+          )
+
+
+    - name: "Upload: Screenshots"
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: org.eclipse.epp.mpc.tests-target-screenshots-${{matrix.target-platform}}-${{matrix.os}}
         path: org.eclipse.epp.mpc.tests/target/screenshots/**
         retention-days: 3
-  
-    - name: 'Upload Screenshots'
-      uses: actions/upload-artifact@v2
+
+
+    - name: "Upload: .metadata/.log"
+      uses: actions/upload-artifact@v4
+      if: always()
       with:
-        name: org.eclipse.epp.mpc.tests-log
+        name: org.eclipse.epp.mpc.tests-log-${{matrix.target-platform}}-${{matrix.os}}
         path: org.eclipse.epp.mpc.tests/target/work/data/.metadata/.log
+        include-hidden-files: true
         retention-days: 3
-        
-        
-    - name: 'Upload Screenshots Backup'
-      uses: actions/upload-artifact@v2
+
+
+    - name: "Upload: .metadata/**"
+      uses: actions/upload-artifact@v4
+      if: always()
       with:
-        name: org.eclipse.epp.mpc.tests-log-all
+        name: org.eclipse.epp.mpc.tests-log-all-${{matrix.target-platform}}-${{matrix.os}}
         path: org.eclipse.epp.mpc.tests/target/work/data/.metadata/**
+        include-hidden-files: true
         retention-days: 3
+
+
+    ##################################################
+    # Setup SSH debug session
+    ##################################################
+    - name: "SSH session for debugging: check"
+      id: DEBUG_SSH_SESSSION_CHECK
+      if: always()
+      run: |
+        set -eu
+
+        when="${{ inputs.debug-with-ssh }}"
+
+        if [[ $when == "always" ]] || case "${{ job.status }}" in
+          success)   [[ $when == "always" ]] ;;
+          cancelled) [[ $when == "on_failure_or_cancelled" ]] ;;
+          failure)   [[ $when == "on_failure"* ]] ;;
+        esac; then
+          echo "start_ssh_session=true" | tee -a "$GITHUB_OUTPUT"
+        fi
+
+
+    - name: "SSH session for debugging: start"
+      uses: mxschmitt/action-tmate@v3  # https://github.com/mxschmitt/action-tmate
+      if: always() && steps.DEBUG_SSH_SESSSION_CHECK.outputs.start_ssh_session
+      with:
+        limit-access-to-actor: ${{ inputs.debug-with-ssh-only-for-actor }}

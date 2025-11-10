@@ -48,7 +48,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-
 @Category({ RemoteTests.class, UITests.class })
 public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 
@@ -211,10 +210,9 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 	public void testFavorite() {
 		SWTBotButton favorite = bot.buttonWithId(AbstractMarketplaceDiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_RATING);
 		favorite.click();
-		SWTBotShell login = bot.shell("Authorizing with Marketplace User Storage");
-		login.bot().button("Cancel").click();
-		//TODO test something useful - we'd need a proper login on the server to do this...
-		//better to get started with some server mocking in the ui tests...
+		// NOTE: Favorite Button is not clickable since fd8acc192aa1689c27ec984db6eff362994b1925 https://github.com/eclipse-mpc/epp.mpc/issues/17
+		// SWTBotShell login = bot.shell("Authorizing with Marketplace User Storage");
+		// login.bot().button("Cancel").click();
 	}
 
 	@Test

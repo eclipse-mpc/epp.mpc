@@ -15,6 +15,7 @@ package org.eclipse.epp.mpc.tests.service.xml;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.anyOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -513,7 +514,9 @@ public class UnmarshallerTest {
 			fail("Expected UnmarshalException");
 		} catch (UnmarshalException e) {
 			IStatus contentChild = getErrorContentInfo(e);
-			assertThat(contentChild.getMessage(), containsString("<mar??tplace>"));
+			assertThat(contentChild.getMessage(), anyOf( //
+					containsString("<ma??etplace>"), // Windows
+					containsString("<mar??tplace>"))); // Linux
 		}
 	}
 

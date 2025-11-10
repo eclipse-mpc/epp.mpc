@@ -21,7 +21,6 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.epp.internal.mpc.core.ServiceLocator;
 import org.eclipse.epp.internal.mpc.core.model.Catalog;
 import org.eclipse.epp.internal.mpc.core.service.CatalogService;
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
@@ -89,8 +88,8 @@ public class CatalogServiceTest {
 		ServiceRegistration<ICatalogService> registration = bundleContext.registerService(ICatalogService.class,
 				new MockCatalogService(), ServiceUtil.serviceRanking(Integer.MAX_VALUE, null));
 		try {
-			catalogService = ServiceLocator.getInstance().getCatalogService();
-			List<? extends ICatalog> catalogs = catalogService.listCatalogs(null);
+			catalogService = serviceLocator.getCatalogService();
+			List<? extends ICatalog> catalogs = catalogService.listCatalogs(new NullProgressMonitor());
 			assertEquals(1, catalogs.size());
 			assertEquals("mock", catalogs.get(0).getId());
 		} finally {

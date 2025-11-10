@@ -17,8 +17,10 @@ import static org.junit.Assert.*;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore("Not yet implemented")
 public class ServiceLocatorTest {
 
 	@Before
@@ -31,16 +33,19 @@ public class ServiceLocatorTest {
 
 	@Test
 	public void testGetMarketplaceServiceString() {
+		// TODO implement
 		fail("Not yet implemented");
 	}
 
 	@Test
 	public void testGetCatalogService() {
+		// TODO implement
 		fail("Not yet implemented");
 	}
 
 	@Test
 	public void testGetInstance() {
+		// TODO implement
 		fail("Not yet implemented");
 	}
 

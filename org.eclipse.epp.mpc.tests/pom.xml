@@ -16,6 +16,7 @@
     <test-args>-ea</test-args>
     <test-proxy></test-proxy>
     <test-app-args></test-app-args>
+    <tycho-surefire-plugin.vmargs></tycho-surefire-plugin.vmargs>
   </properties>
 
   <profiles>
@@ -46,6 +47,18 @@
          </pluginManagement>
        </build>
     </profile>
+    <!-- Automatic profile for Mac-specific settings -->
+    <profile>
+      <id>macos</id>
+      <activation>
+        <os>
+          <family>mac</family>
+        </os>
+      </activation>
+      <properties>
+        <tycho-surefire-plugin.vmargs>-XstartOnFirstThread</tycho-surefire-plugin.vmargs>
+      </properties>
+    </profile>
   </profiles>
 
   <build>
@@ -61,9 +74,9 @@
               <product>org.eclipse.sdk.ide</product>
               <application>org.eclipse.ui.ide.workbench</application>
               <testClass>${test-suite}</testClass>
-              <argLine>-Xmx256m -Djava.io.tmpdir=${project.build.directory}/temp ${test-args} ${test-proxy}</argLine>
+              <argLine>-Xmx256m ${tycho-surefire-plugin.vmargs} -Djava.io.tmpdir=${project.build.directory}/temp ${test-args} ${test-proxy}</argLine>
               <appArgLine>${test-app-args}</appArgLine>
-              
+
               <!-- run all tests with a space in the application path (this is the osgi.install.area, but the configuration area should follow suit -->
               <work>${project.build.directory}/work/test rcp</work>
             </configuration>
