@@ -12,14 +12,14 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite.SuiteClasses;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
 /**
  * @author David Green
  */
-@RunWith(LoggingSuite.class)
-@SuiteClasses({ //
+@Suite
+@SelectClasses({ //
 	RestTests.class, //
 	UITests.class, //
 	BotTests.class //

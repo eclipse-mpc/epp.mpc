@@ -17,14 +17,14 @@ import org.eclipse.epp.mpc.tests.ui.catalog.MarketplaceInfoSerializationTest;
 import org.eclipse.epp.mpc.tests.ui.catalog.MarketplaceInfoTest;
 import org.eclipse.epp.mpc.tests.ui.wizard.MarketplaceUrlHandlerTest;
 import org.eclipse.epp.mpc.tests.ui.wizard.SelectionModelStateSerializerTest;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite.SuiteClasses;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
 /**
  * @author David Green
  */
-@RunWith(UISuite.class)
-@SuiteClasses({ //
+@Suite
+@SelectClasses({ //
 	SelectionModelStateSerializerTest.class, //
 	MarketplaceUrlHandlerTest.class, //
 	MarketplaceInfoTest.class, //
