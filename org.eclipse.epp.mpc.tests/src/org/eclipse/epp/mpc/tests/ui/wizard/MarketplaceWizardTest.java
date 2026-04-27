@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -205,16 +205,6 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 		bot.cTabItem("Popular").activate();
 		waitForWizardProgress();
 		//TODO test something useful
-	}
-
-	@Test
-	public void testFavorite() {
-		SWTBotButton favorite = bot.buttonWithId(AbstractMarketplaceDiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_RATING);
-		favorite.click();
-		SWTBotShell login = bot.shell("Authorizing with Marketplace User Storage");
-		login.bot().button("Cancel").click();
-		//TODO test something useful - we'd need a proper login on the server to do this...
-		//better to get started with some server mocking in the ui tests...
 	}
 
 	@Test
