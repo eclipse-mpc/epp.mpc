@@ -45,14 +45,14 @@ jobs:
           -Dhttp.nonProxyHosts=localhost
           
     - name: 'Upload Screenshots'
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
       with:
         name: org.eclipse.epp.mpc.tests-target-screenshots
         path: org.eclipse.epp.mpc.tests/target/screenshots/**
         retention-days: 3
   
-    - name: 'Upload Screenshots'
-      uses: actions/upload-artifact@v2
+    - name: 'Upload Logs'
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
       with:
         name: org.eclipse.epp.mpc.tests-log
         path: org.eclipse.epp.mpc.tests/target/work/data/.metadata/.log
@@ -60,7 +60,7 @@ jobs:
         
         
     - name: 'Upload Screenshots Backup'
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
       with:
         name: org.eclipse.epp.mpc.tests-log-all
         path: org.eclipse.epp.mpc.tests/target/work/data/.metadata/**
