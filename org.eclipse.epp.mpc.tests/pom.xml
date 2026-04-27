@@ -61,7 +61,7 @@
               <product>org.eclipse.sdk.ide</product>
               <application>org.eclipse.ui.ide.workbench</application>
               <testClass>${test-suite}</testClass>
-              <argLine>-Xmx256m -Djava.io.tmpdir=${project.build.directory}/temp ${test-args} ${test-proxy}</argLine>
+              <argLine>-Xmx256m ${test-args} ${test-proxy}</argLine>
               <appArgLine>${test-app-args}</appArgLine>
               
               <!-- run all tests with a space in the application path (this is the osgi.install.area, but the configuration area should follow suit -->
@@ -81,11 +81,6 @@
         <configuration>
           <dependency-resolution>
             <extraRequirements>
-              <requirement>
-                <type>eclipse-feature</type>
-                <id>org.eclipse.sdk</id>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
               <requirement>
                 <type>eclipse-feature</type>
                 <id>org.eclipse.epp.mpc</id>
