@@ -21,7 +21,7 @@
       <java-bree>JavaSE-${java-version}</java-bree>
       <java-jdk>SYSTEM</java-jdk>
 
-      <tycho-version>4.0.13</tycho-version>
+      <tycho-version>5.0.2</tycho-version>
       
       <qualifier-format>'v'yyyyMMdd-HHmm</qualifier-format>
 
