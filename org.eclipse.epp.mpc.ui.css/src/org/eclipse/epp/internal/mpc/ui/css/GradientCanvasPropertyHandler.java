@@ -45,7 +45,7 @@ public class GradientCanvasPropertyHandler  extends AbstractCSSPropertySWTHandle
 					canvas.setBackgroundGradient(null, null, false);
 					return;
 				}
-				List<CSSPrimitiveValue> values = grad.getValues();
+				List<? extends CSSPrimitiveValue> values = grad.getValues();
 				List<Color> colors = new ArrayList<>(values.size());
 				for (CSSPrimitiveValue cssValue : values) {
 					if (cssValue != null) {
