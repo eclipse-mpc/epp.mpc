@@ -14,7 +14,9 @@
 
 package org.eclipse.epp.internal.mpc.ui.wizards;
 
+import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.util.Date;
 
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.css.StyleHelper;
@@ -186,10 +188,13 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 
 		Integer installsTotal = null;
 		Integer installsRecent = null;
-		if (connector.getData() instanceof INode) {
-			INode node = (INode) connector.getData();
+		Date created = null;
+		Date changed = null;
+		if (connector.getData() instanceof final INode node) {
 			installsTotal = node.getInstallsTotal();
 			installsRecent = node.getInstallsRecent();
+			created = node.getCreated();
+			changed = node.getChanged();
 		}
 
 		if (installsTotal != null || installsRecent != null) {
@@ -216,6 +221,29 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 		} else {
 			if (shareSolutionLink != null) {
 				shareSolutionLink.setShowText(true);
+			}
+		}
+
+		// Append Created/Updated information when available
+		if (created != null || changed != null) {
+			final var dateFormat = DateFormat.getDateInstance(DateFormat.SHORT);
+			final var datesTextBuilder = new StringBuilder();
+			if (changed != null) {
+				datesTextBuilder.append(" | "); //$NON-NLS-1$
+				datesTextBuilder.append(NLS.bind(Messages.DiscoveryItem_Updated, dateFormat.format(changed)));
+			}
+			if (created != null) {
+				if (!datesTextBuilder.isEmpty()) {
+					datesTextBuilder.append(" | "); //$NON-NLS-1$
+				}
+				datesTextBuilder.append(NLS.bind(Messages.DiscoveryItem_Created, dateFormat.format(created)));
+			}
+
+			if (!datesTextBuilder.isEmpty()) {
+				datesTextBuilder.insert(0, "| "); //$NON-NLS-1$
+				final var datesInfo = new StyledText(composite, SWT.READ_ONLY | SWT.SINGLE);
+				setWidgetId(datesInfo, "dates"); //$NON-NLS-1$
+				datesInfo.setText(datesTextBuilder.toString());
 			}
 		}
 	}
