@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<setup:Configuration
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:setup="http://www.eclipse.org/oomph/setup/1.0"
+    label="Marketplace Client Development Environment">
+  <annotation
+      source="http://www.eclipse.org/oomph/setup/BrandingInfo">
+    <detail
+        key="imageURI">
+      <value>https://raw.githubusercontent.com/eclipse-mpc/epp.mpc/master/org.eclipse.epp.mpc.ui/icons/svg/marketplace32.svg</value>
+    </detail>
+    <detail
+        key="badgeLabel">
+      <value>Marketplace Client</value>
+    </detail>
+  </annotation>
+  <installation
+      name="mpc.development.environment.installation"
+      label="Marketplace Client Development Environment Installation">
+    <productVersion
+        href="index:/org.eclipse.setup#//@productCatalogs[name='org.eclipse.products']/@products[name='epp.package.committers']/@versions[name='latest']"/>
+    <description>The Marketplace Client Development Environment installation provides a full development environment for working on Marketplace Client.</description>
+  </installation>
+  <workspace
+      name="mpc.development.environment.workspace"
+      label="Marketplace Client Development Environment Workspace">
+    <setupTask
+        xsi:type="setup:VariableTask"
+        name="eclipse.target.platform"
+        value="${eclipse.target.platform.latest}"/>
+    <stream
+        href="index:/org.eclipse.setup#//@projectCatalogs[name='org.eclipse']/@projects[name='mpc']/@streams[name='master']"/>
+    <description>The Marketplace Client Development Environment workspace contains all features and plugins from the Marketplace Client Git repository.</description>
+  </workspace>
+  <description>
+    &lt;p>
+    The &lt;a href=&quot;https://projects.eclipse.org/projects/technology.packaging.mpc&quot;/>Marketplace Client&lt;/a> Development Environment configuration provisions a dedicated development environment 
+    for the complete set of source projects used by &lt;a href=&quot;https://ci.eclipse.org/mpc/&quot;>Marketplace Client's build server&lt;/a> 
+    to produce &lt;a href=&quot;https://download.eclipse.org/mpc/updates/?d&quot;>Marketplace Client's update sites&lt;/a>.
+    &lt;/p>
+    &lt;p>
+    All the source projects from &lt;a href=&quot;https://github.com/eclipse-mpc/epp.mpc.git&quot;>Marketplace Client's Git Repository&lt;/a>
+    are available, organized into working sets, and ready for contribution.
+    &lt;/p>
+    &lt;/p>
+    Please &lt;a href=&quot;https://eclipse.dev/oomph/?file=Eclipse_Platform_SDK_Provisioning.md&quot;>read the analogous tutorial instructions&lt;/a> for the Eclipse Platform SDK's configuration for more details.
+    &lt;/p>
+  </description>
+</setup:Configuration>
