@@ -35,6 +35,8 @@ Export-Package: org.eclipse.epp.internal.mpc.ui;x-internal:=true,
  org.eclipse.epp.internal.mpc.ui.wizards;x-internal:=true,
  org.eclipse.epp.mpc.ui
 Bundle-ActivationPolicy: lazy
-Service-Component: OSGI-INF/services/*.xml
+Service-Component: OSGI-INF/services/org.eclipse.epp.mpc.ui.debug.options.xml,
+ OSGI-INF/services/org.eclipse.epp.mpc.ui.marketplace-client.xml,
+ OSGI-INF/services/org.eclipse.epp.mpc.ui.resources.xml
 Import-Package: org.osgi.service.component;version="[1.5.1,2.0.0)"
 Automatic-Module-Name: org.eclipse.epp.mpc.ui
