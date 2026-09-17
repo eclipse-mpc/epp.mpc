@@ -114,7 +114,7 @@ public abstract class AbstractSimpleDiscoveryItem<T extends CatalogItem> extends
 		StyleRange range = StyledTextHelper.createDynamicForegroundRange(subline, 0, subline.getText().length(),
 				SWT.ITALIC);
 		subline.setStyleRange(range);
-		new StyleHelper().on(subline).setClasses("subline", "disabled");
+		new StyleHelper().on(subline).setClasses("subline", "disabled"); //$NON-NLS-1$ //$NON-NLS-2$
 		return subline;
 	}
 

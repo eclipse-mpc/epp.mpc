@@ -24,7 +24,7 @@ import org.apache.hc.core5.http.protocol.HttpContext;
 
 class CacheCredentialsProvider implements CredentialsStore {
 
-	private static final String AUTHENTICATION_SCOPE_MAY_NOT_BE_NULL = "Authentication scope may not be null";
+	private static final String AUTHENTICATION_SCOPE_MAY_NOT_BE_NULL = "Authentication scope may not be null"; //$NON-NLS-1$
 	private final HashMap<AuthScope, Credentials> credentials;
 
 	/**

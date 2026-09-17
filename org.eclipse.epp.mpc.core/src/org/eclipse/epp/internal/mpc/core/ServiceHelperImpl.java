@@ -152,7 +152,7 @@ public class ServiceHelperImpl extends ServiceHelper {
 		for (ITransportFactory factory : factories) {
 			Hashtable<String, Object> properties = new Hashtable<>();
 			properties.put(Constants.SERVICE_RANKING, prio);
-			properties.put(ComponentConstants.COMPONENT_NAME, "legacy:" + factory.getClass().getName());
+			properties.put(ComponentConstants.COMPONENT_NAME, "legacy:" + factory.getClass().getName()); //$NON-NLS-1$
 			properties.put(TransportFactory.LEGACY_TRANSPORT_KEY, true);
 			ServiceRegistration<ITransportFactory> registration = context.registerService(ITransportFactory.class,
 					factory, properties);

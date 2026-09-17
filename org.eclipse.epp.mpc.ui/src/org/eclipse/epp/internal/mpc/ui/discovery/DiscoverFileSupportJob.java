@@ -117,8 +117,8 @@ final class DiscoverFileSupportJob extends Job {
 	private static List<? extends INode> orderNodesByTagSubExtensionCount(List<? extends INode> nodes,
 			List<String> fileExtensionTags) {
 
-		Collections.sort(fileExtensionTags, (s1, s2) -> (s2.length() - s2.replace(".", "").length())
-				- (s1.length() - s1.replace(".", "").length()));
+		Collections.sort(fileExtensionTags, (s1, s2) -> (s2.length() - s2.replace(".", "").length()) //$NON-NLS-1$ //$NON-NLS-2$
+				- (s1.length() - s1.replace(".", "").length())); //$NON-NLS-1$//$NON-NLS-2$
 
 		Map<String, List<INode>> nodesByTags = new HashMap<>();
 		for (INode iNode : nodes) {

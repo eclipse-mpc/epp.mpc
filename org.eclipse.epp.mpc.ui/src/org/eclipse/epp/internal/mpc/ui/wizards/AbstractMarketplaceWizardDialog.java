@@ -240,7 +240,7 @@ public class AbstractMarketplaceWizardDialog extends WizardDialog {
 
 	protected static IDialogSettings getDialogBoundsSettings(
 			Class<? extends AbstractMarketplaceWizardDialog> dialogClass, boolean relative, boolean create) {
-		String sectionName = dialogClass.getName() + "_dialogBounds." + (relative ? "relative" : "absolute");
+		String sectionName = dialogClass.getName() + "_dialogBounds." + (relative ? "relative" : "absolute"); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 
 		IDialogSettings settings = MarketplaceClientUiResources.getInstance().getDialogSettings();
 		IDialogSettings section = settings.getSection(sectionName);

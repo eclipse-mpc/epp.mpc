@@ -71,7 +71,7 @@ public class GradientCanvasElement extends CompositeElement {
 			} catch (Exception ex) {
 				Bundle bundle = FrameworkUtil.getBundle(GradientCanvasElement.class);
 				Platform.getLog(bundle).log(new Status(IStatus.INFO, bundle.getSymbolicName(),
-						"Dynamic theming for GradientCanvas is limited", ex));
+						"Dynamic theming for GradientCanvas is limited", ex)); //$NON-NLS-1$
 			}
 			if (enabled) {
 				FIELD_GRADIENT_INFO = f_gradientInfo;

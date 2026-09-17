@@ -176,7 +176,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 
 		Composite pageContent = new Composite(parent, SWT.NULL);
 		GridLayoutFactory.fillDefaults().numColumns(1).spacing(0, 5).applyTo(pageContent);
-		styleHelper.on(pageContent).setId("MarketplacePage");
+		styleHelper.on(pageContent).setId("MarketplacePage"); //$NON-NLS-1$
 
 		tabFolder = new CTabFolder(pageContent, SWT.TOP | SWT.BORDER | SWT.FLAT);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tabFolder);
@@ -185,7 +185,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		super.createControl(tabFolder);
 
 		tabContent = getControl();
-		styleHelper.on(tabContent).setId("MarketplaceContent");
+		styleHelper.on(tabContent).setId("MarketplaceContent"); //$NON-NLS-1$
 		final Color selectionBackground = tabFolder.getSelectionBackground();
 		tabContent.setBackground(selectionBackground);
 		tabContent.addPaintListener(e -> {
@@ -298,7 +298,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 	private static void setTabFolderAlwaysHighlight(final CTabFolder tabFolder) {
 		final Field highlightField;
 		try {
-			highlightField = CTabFolder.class.getDeclaredField("highlight");
+			highlightField = CTabFolder.class.getDeclaredField("highlight"); //$NON-NLS-1$
 			highlightField.setAccessible(true);
 		} catch (Exception ex) {
 			// ignore - we just won't be able to keep highlight
@@ -635,9 +635,9 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setBackgroundMode(SWT.INHERIT_DEFAULT);
 		composite.setLayout(new FillLayout());
-		composite.setData("CSS_SUPPORTS_BORDERS", true);
+		composite.setData("CSS_SUPPORTS_BORDERS", true); //$NON-NLS-1$
 		StyleHelper styleHelper = new StyleHelper();
-		styleHelper.on(composite).setId("switcher-parent");
+		styleHelper.on(composite).setId("switcher-parent"); //$NON-NLS-1$
 
 		final CatalogSwitcher switcher = new CatalogSwitcher(composite,
 				MarketplaceClientUi.useNativeBorders() ? SWT.BORDER : SWT.None,
@@ -652,7 +652,7 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 			switcher.setSelection(new StructuredSelection(selectedDescriptor));
 			lastSelection = selectedDescriptor;
 		}
-		styleHelper.on(switcher).setId("MarketplaceSwitcher");
+		styleHelper.on(switcher).setId("MarketplaceSwitcher"); //$NON-NLS-1$
 
 		marketplaceSwitcher = switcher;
 		GridDataFactory.fillDefaults()

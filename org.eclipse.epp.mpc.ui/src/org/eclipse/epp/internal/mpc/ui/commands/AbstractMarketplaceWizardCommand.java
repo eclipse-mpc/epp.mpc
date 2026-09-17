@@ -206,8 +206,8 @@ public abstract class AbstractMarketplaceWizardCommand extends AbstractHandler i
 				registerOrOverrideCatalog(descriptor);
 			}
 		} catch (InterruptedException ie) {
-			if (ie.getMessage() == null || "".equals(ie.getMessage())) {
-				InterruptedException ie1 = new InterruptedException("Operation cancelled");
+			if (ie.getMessage() == null || "".equals(ie.getMessage())) { //$NON-NLS-1$
+				InterruptedException ie1 = new InterruptedException("Operation cancelled"); //$NON-NLS-1$
 				ie1.setStackTrace(ie.getStackTrace());
 				if (ie.getCause() != null) {
 					ie1.initCause(ie.getCause());

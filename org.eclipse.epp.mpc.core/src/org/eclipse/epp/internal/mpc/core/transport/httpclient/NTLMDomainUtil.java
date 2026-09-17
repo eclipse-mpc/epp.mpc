@@ -26,9 +26,9 @@ import org.eclipse.core.runtime.Platform;
  */
 @SuppressWarnings("restriction")
 final class NTLMDomainUtil {
-	private static final String PROP_HTTP_AUTH_NTLM_DOMAIN = "http.auth.ntlm.domain";
+	private static final String PROP_HTTP_AUTH_NTLM_DOMAIN = "http.auth.ntlm.domain"; //$NON-NLS-1$
 
-	private static final String ENV_USER_DOMAIN = "USERDOMAIN";
+	private static final String ENV_USER_DOMAIN = "USERDOMAIN"; //$NON-NLS-1$
 
 	private static final char BACKSLASH = '\\';
 
@@ -47,15 +47,15 @@ final class NTLMDomainUtil {
 			InetAddress localHost = InetAddress.getLocalHost();
 			if (!localHost.isLoopbackAddress()) {
 				String hostName = localHost.getHostName();
-				if (hostName != null && !"".equals(hostName) && !"localhost".equals(hostName)) {
+				if (hostName != null && !"".equals(hostName) && !"localhost".equals(hostName)) { //$NON-NLS-1$ //$NON-NLS-2$
 					workstation = hostName;
 					return hostName;
 				}
 			}
 		} catch (UnknownHostException e) {
 		}
-		String computerName = System.getenv("COMPUTERNAME");
-		String hostName = System.getenv("HOSTNAME");
+		String computerName = System.getenv("COMPUTERNAME"); //$NON-NLS-1$
+		String hostName = System.getenv("HOSTNAME"); //$NON-NLS-1$
 		if (computerName != null) {
 			if (hostName != null && !computerName.equals(hostName)) {
 				if (Platform.getOS().equals(Platform.OS_WIN32)) {

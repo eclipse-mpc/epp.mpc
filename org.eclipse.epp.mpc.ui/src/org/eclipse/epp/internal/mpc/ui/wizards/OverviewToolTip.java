@@ -69,11 +69,11 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
  */
 class OverviewToolTip extends ToolTip {
 
-	private static final String CSS_PATH = "overview.css";
+	private static final String CSS_PATH = "overview.css"; //$NON-NLS-1$
 
-	private static final String DEFAULT_THEME_CSS = "body { background-color: white; }";
+	private static final String DEFAULT_THEME_CSS = "body { background-color: white; }"; //$NON-NLS-1$
 
-	private static final String INITIALIZED_FLAG = OverviewToolTip.class.getName() + ".initialized";
+	private static final String INITIALIZED_FLAG = OverviewToolTip.class.getName() + ".initialized"; //$NON-NLS-1$
 
 	final int SCREENSHOT_HEIGHT = 240;
 
@@ -113,7 +113,7 @@ class OverviewToolTip extends ToolTip {
 			shell.setData(INITIALIZED_FLAG, Boolean.TRUE);
 			backgroundColor = shell.getDisplay().getSystemColor(SWT.COLOR_WHITE);
 			shell.setBackground(backgroundColor);
-			new StyleHelper().on(shell).addClasses("ToolTip", "OverviewToolTip"); //$NON-NLS-1$
+			new StyleHelper().on(shell).addClasses("ToolTip", "OverviewToolTip"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		AbstractMarketplaceDiscoveryItem.setWidgetId(shell, DiscoveryItem.WIDGET_ID_OVERVIEW);
@@ -281,7 +281,7 @@ class OverviewToolTip extends ToolTip {
 		latestThemeCss = null;
 		try (InputStream in = cssUrl.openStream(); Scanner s = new Scanner(in).useDelimiter("\\Z")) { //$NON-NLS-1$
 			String themeCss = s.next();
-			themeCss = themeCss.replaceAll("[\\r\\n]+", " ");
+			themeCss = themeCss.replaceAll("[\\r\\n]+", " "); //$NON-NLS-1$//$NON-NLS-2$
 			latestThemeCss = themeCss;
 			return themeCss;
 		} catch (Exception ex) {

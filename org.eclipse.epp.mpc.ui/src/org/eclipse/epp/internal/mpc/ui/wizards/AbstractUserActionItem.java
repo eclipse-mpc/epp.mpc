@@ -38,6 +38,6 @@ public abstract class AbstractUserActionItem extends AbstractSimpleDiscoveryItem
 
 	@Override
 	protected String getItemClass() {
-		return "NotificationItem";
+		return "NotificationItem"; //$NON-NLS-1$
 	}
 }
