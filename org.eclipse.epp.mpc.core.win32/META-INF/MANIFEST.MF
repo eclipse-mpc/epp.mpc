@@ -18,4 +18,4 @@ Import-Package: com.sun.jna;version="4.1.0",
  org.apache.hc.core5.http.config;version="[5.1.0,6.0.0)",
  org.eclipse.epp.internal.mpc.core.transport.httpclient;bundle-version="1.13.1"
 Eclipse-PlatformFilter: (osgi.os=win32)
-Service-Component: OSGI-INF/services/*.xml
+Service-Component: OSGI-INF/services/httpclient-transport.xml

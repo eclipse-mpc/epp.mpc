@@ -73,5 +73,14 @@ Import-Package: org.apache.hc.client5.http;version="[5.1.0,6.0.0)",
  org.eclipse.equinox.p2.core;version="2.0.0",
  org.osgi.service.component;version="[1.5.1,2.0.0)"
 Bundle-ActivationPolicy: lazy
-Service-Component: OSGI-INF/services/*.xml
+Service-Component: OSGI-INF/services/httpclient-wrapper-factory.xml,
+ OSGI-INF/services/org.eclipse.epp.mpc.core.debug.options.xml,
+ OSGI-INF/services/org.eclipse.epp.mpc.core.http.client.factory.xml,
+ OSGI-INF/services/org.eclipse.epp.mpc.core.http.client.xml,
+ OSGI-INF/services/org.eclipse.epp.mpc.core.servicehelper.xml,
+ OSGI-INF/services/org.eclipse.epp.mpc.core.servicelocator.xml,
+ OSGI-INF/services/org.eclipse.epp.mpc.core.transport.http.factory.xml,
+ OSGI-INF/services/org.eclipse.epp.mpc.core.transport.http.xml,
+ OSGI-INF/services/org.eclipse.epp.mpc.core.transportfactory.legacy.xml,
+ OSGI-INF/services/org.eclipse.epp.mpc.core.unmarshaller.xml
 Automatic-Module-Name: org.eclipse.epp.mpc.core
