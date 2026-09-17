@@ -229,22 +229,17 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 			final var dateFormat = DateFormat.getDateInstance(DateFormat.SHORT);
 			final var datesTextBuilder = new StringBuilder();
 			if (changed != null) {
-				datesTextBuilder.append(" | "); //$NON-NLS-1$
+				datesTextBuilder.append("| "); //$NON-NLS-1$
 				datesTextBuilder.append(NLS.bind(Messages.DiscoveryItem_Updated, dateFormat.format(changed)));
 			}
 			if (created != null) {
-				if (!datesTextBuilder.isEmpty()) {
-					datesTextBuilder.append(" | "); //$NON-NLS-1$
-				}
+				datesTextBuilder.append(datesTextBuilder.isEmpty() ? "| " : " | "); //$NON-NLS-1$
 				datesTextBuilder.append(NLS.bind(Messages.DiscoveryItem_Created, dateFormat.format(created)));
 			}
 
-			if (!datesTextBuilder.isEmpty()) {
-				datesTextBuilder.insert(0, "| "); //$NON-NLS-1$
-				final var datesInfo = new StyledText(composite, SWT.READ_ONLY | SWT.SINGLE);
-				setWidgetId(datesInfo, "dates"); //$NON-NLS-1$
-				datesInfo.setText(datesTextBuilder.toString());
-			}
+			final var datesInfo = new StyledText(composite, SWT.READ_ONLY | SWT.SINGLE);
+			setWidgetId(datesInfo, "dates"); //$NON-NLS-1$
+			datesInfo.setText(datesTextBuilder.toString());
 		}
 	}
 
