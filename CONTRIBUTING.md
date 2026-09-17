@@ -2,12 +2,6 @@
 
 Thanks for your interest in this project.
 
-## Project description
-
-The Eclipse Marketplace Client provides a rich client for installing solutions listed on Eclipse Marketplace.
-MPC provides a workflow for finding and installing solutions, layering on top of the Eclipse p2 
-and providing a streamlined and simplified workflow that does not require users to enter and manage update sites.
-
 ## ⚖️ Legal and Eclipse Foundation terms
 
 The project license is available at [LICENSE](LICENSE).
