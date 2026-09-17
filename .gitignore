@@ -1,6 +1,9 @@
 # Local work folder that is not checked in
 _LOCAL/
 
+# Promotion
+/org.eclipse.epp.mpc.site/mpc
+
 # Eclipse
 /bin/
 /*/bin/
@@ -13,6 +16,7 @@ _LOCAL/
 /target/
 /*/target/
 **/.tycho-consumer-pom.xml
+**/.polyglot.*
 *.log
 
 # OSX
