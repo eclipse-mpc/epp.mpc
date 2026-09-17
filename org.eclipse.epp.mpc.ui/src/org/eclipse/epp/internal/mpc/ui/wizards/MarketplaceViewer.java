@@ -245,7 +245,7 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	@Override
 	protected void doCreateHeaderControls(Composite parent) {
-		new StyleHelper().on(parent).setClass("MarketplaceSearchHeader");
+		new StyleHelper().on(parent).setClass("MarketplaceSearchHeader"); //$NON-NLS-1$
 		header = parent;
 		header.setBackgroundMode(SWT.INHERIT_DEFAULT);
 		fixFindControlsLayout(parent);
@@ -430,7 +430,7 @@ public class MarketplaceViewer extends CatalogViewer {
 		} else {
 			item = super.doCreateViewerItem(parent, element);
 		}
-		new StyleHelper().on(item).addClass(isCategory ? "MarketplaceCategory" : "MarketplaceItem");
+		new StyleHelper().on(item).addClass(isCategory ? "MarketplaceCategory" : "MarketplaceItem"); //$NON-NLS-1$ //$NON-NLS-2$
 		return item;
 	}
 
@@ -926,7 +926,7 @@ public class MarketplaceViewer extends CatalogViewer {
 			final ServiceReference<IDiscoveryItemFactory> ref = serviceReference;
 			viewer.getControl().addDisposeListener(e -> bundleContext.ungetService(ref));
 		}
-		new StyleHelper().on(viewer.getControl()).setClass("MarketplaceViewer");
+		new StyleHelper().on(viewer.getControl()).setClass("MarketplaceViewer"); //$NON-NLS-1$
 		return viewer;
 	}
 

@@ -284,7 +284,7 @@ public abstract class TransportFactory implements ITransportFactory {
 						serviceError.add(new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID,
 								NLS.bind(Messages.TransportFactory_LegacyFallbackCreationError,
 										factory.getClass().getName()),
-								new NullPointerException("Factory returned null transport")));
+								new NullPointerException("Factory returned null transport"))); //$NON-NLS-1$
 					}
 				} catch (Exception ex) {
 					serviceError.add(new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID,

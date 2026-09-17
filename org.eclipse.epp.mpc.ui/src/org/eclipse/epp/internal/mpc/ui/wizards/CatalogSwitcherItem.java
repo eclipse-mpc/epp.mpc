@@ -70,12 +70,12 @@ public class CatalogSwitcherItem extends Composite {
 		container.setLayout(layout);
 
 		StyleHelper styleHelper = new StyleHelper().on(container);
-		styleHelper.setClass("Catalog");
+		styleHelper.setClass("Catalog"); //$NON-NLS-1$
 
 		iconLabel = new Label(container, SWT.NONE);
 		//label.setBackground(container.getBackground());
 		iconLabel.setImage(getDefaultCatalogImage());
-		styleHelper.on(iconLabel).setClass("CatalogImage");
+		styleHelper.on(iconLabel).setClass("CatalogImage"); //$NON-NLS-1$
 
 		CatalogDescriptor catalogDescriptor = getCatalogDescriptor();
 		retrieveCatalogImage(catalogDescriptor, iconLabel);

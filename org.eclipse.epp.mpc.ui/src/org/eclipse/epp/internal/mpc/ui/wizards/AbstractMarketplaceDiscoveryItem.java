@@ -541,7 +541,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		.applyTo(providerLink);
 		// always disabled color to make it less prominent
 		providerLink.setForeground(resources.getColorDisabled());
-		new StyleHelper().on(providerLink).addClass("disabled");
+		new StyleHelper().on(providerLink).addClass("disabled"); //$NON-NLS-1$
 		String labelTemplate = Messages.DiscoveryItem_byProviderLicense;
 		String providerName = connector.getProvider();
 		LinkListener listener = new LinkListener() {
@@ -668,19 +668,19 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 					shell.setData(initializedFlag, Boolean.TRUE);
 					backgroundColor = shell.getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND);
 					shell.setBackground(backgroundColor);
-					new StyleHelper().on(shell).addClasses("ToolTip", "TagsToolTip"); //$NON-NLS-1$
+					new StyleHelper().on(shell).addClasses("ToolTip", "TagsToolTip"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				Composite result = new Composite(parent, SWT.NONE);
 				result.setBackgroundMode(SWT.INHERIT_DEFAULT);
 				result.setBackground(backgroundColor);
 				result.setLayout(new GridLayout());
 				StyleHelper helper = new StyleHelper();
-				helper.on(result).setClasses("ToolTip", "TagsToolTip");
+				helper.on(result).setClasses("ToolTip", "TagsToolTip"); //$NON-NLS-1$ //$NON-NLS-2$
 
 				StyledText fullTagLinks = StyledTextHelper.createStyledTextLabel(result);
 				fullTagLinks.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 				fullTagLinks.setForeground(parent.getDisplay().getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-				helper.on(fullTagLinks).setClass("Tags");
+				helper.on(fullTagLinks).setClass("Tags"); //$NON-NLS-1$
 				for (int i = 0; i < MAX_TOTAL_TAGS && i < tags.size(); i++) {
 					ITag tag = tags.get(i);
 					String tagName = tag.getName();

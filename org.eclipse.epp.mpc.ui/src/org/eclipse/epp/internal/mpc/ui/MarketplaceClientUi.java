@@ -261,7 +261,7 @@ public class MarketplaceClientUi {
 
 	public static boolean useNativeBorders() {
 		IPreferencesService service = Platform.getPreferencesService();
-		return service.getBoolean(BUNDLE_ID, "native-borders", true,
+		return service.getBoolean(BUNDLE_ID, "native-borders", true, //$NON-NLS-1$
 				new IScopeContext[] { InstanceScope.INSTANCE });
 	}
 }

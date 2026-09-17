@@ -73,7 +73,7 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 		setBackground(listBackground);
 
 		StyleHelper styleHelper = new StyleHelper().on(this);
-		styleHelper.setClass("CatalogSwitcher");
+		styleHelper.setClass("CatalogSwitcher"); //$NON-NLS-1$
 
 		createContents(this);
 	}
@@ -128,14 +128,14 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 				new DiscoveryResources(parent.getDisplay()), fakeCategory);
 		MarketplaceViewer.setSeparatorVisible(header, false);
 		MarketplaceViewer.fixLayout(header);
-		new StyleHelper().on(header).setClass("CatalogSwitcherHeader");
+		new StyleHelper().on(header).setClass("CatalogSwitcherHeader"); //$NON-NLS-1$
 	}
 
 	private CatalogSwitcherItem createMarketplace(Composite composite, final CatalogDescriptor catalogDescriptor) {
 		CatalogSwitcherItem marketplaceItem = new CatalogSwitcherItem(composite, imageRegistry, catalogDescriptor);
 
 		StyleHelper styleHelper = new StyleHelper().on(marketplaceItem);
-		styleHelper.setId("catalog-" + composite.getChildren().length);
+		styleHelper.setId("catalog-" + composite.getChildren().length); //$NON-NLS-1$
 
 		return marketplaceItem;
 	}

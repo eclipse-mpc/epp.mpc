@@ -44,7 +44,7 @@ public class MarketplaceWizardDialog extends AbstractMarketplaceWizardDialog {
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		newShell.setData(this);//make jface dialog accessible for swtbot
-		new StyleHelper().on(newShell).setClass("MarketplaceWizardDialog").setId("MarketplaceWizard");
+		new StyleHelper().on(newShell).setClass("MarketplaceWizardDialog").setId("MarketplaceWizard"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		new MarketplaceDropAdapter() {
 			@Override

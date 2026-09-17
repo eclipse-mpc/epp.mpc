@@ -110,7 +110,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 				&& getViewer().getContentType() != ContentType.SELECTION) {
 			Button alreadyInstalledButton = new Button(composite, SWT.PUSH | SWT.BOLD);
 			setWidgetId(alreadyInstalledButton, WIDGET_ID_ALREADY_INSTALLED);
-			new StyleHelper().on(alreadyInstalledButton).addClass("install-action");
+			new StyleHelper().on(alreadyInstalledButton).addClass("install-action"); //$NON-NLS-1$
 			alreadyInstalledButton.setText(Messages.DiscoveryItem_AlreadyInstalled);
 			alreadyInstalledButton.setFont(JFaceResources.getFontRegistry().getItalic("")); //$NON-NLS-1$
 			Point preferredSize = alreadyInstalledButton.computeSize(SWT.DEFAULT, SWT.DEFAULT);
@@ -139,7 +139,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 			DropDownButton dropDown = new DropDownButton(composite, SWT.PUSH);
 			Button button = dropDown.getButton();
 			setWidgetId(button, WIDGET_ID_ACTION);
-			new StyleHelper().on(button).addClass("install-action");
+			new StyleHelper().on(button).addClass("install-action"); //$NON-NLS-1$
 			Point preferredSize = button.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 			int preferredWidth = preferredSize.x + 10;//Give a bit of extra padding for bold or italic font
 
@@ -233,7 +233,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 				datesTextBuilder.append(NLS.bind(Messages.DiscoveryItem_Updated, dateFormat.format(changed)));
 			}
 			if (created != null) {
-				datesTextBuilder.append(datesTextBuilder.isEmpty() ? "| " : " | "); //$NON-NLS-1$
+				datesTextBuilder.append(datesTextBuilder.isEmpty() ? "| " : " | "); //$NON-NLS-1$ //$NON-NLS-2$
 				datesTextBuilder.append(NLS.bind(Messages.DiscoveryItem_Created, dateFormat.format(created)));
 			}
 
