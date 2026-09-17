@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?><?pde version="3.8"?>
-<target name="MPC Target Platform - Staging" sequenceNumber="21">
+<target name="MPC Target Platform - 2024-12">
 	<locations>
 		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 			<unit id="org.eclipse.equinox.executable.feature.group" version="0.0.0" />
@@ -7,13 +7,15 @@
 			<unit id="org.eclipse.equinox.p2.sdk.feature.group" version="0.0.0" />
 			<unit id="org.eclipse.sdk.feature.group" version="0.0.0" />
 			<unit id="org.eclipse.jdt.junit5.runtime" version="0.0.0" />
-			<repository location="https://download.eclipse.org/eclipse/updates/I-builds" />
+			<unit id="org.apache.commons.commons-logging" version="0.0.0" />
+			<unit id="org.mockito.mockito-core" version="0.0.0" />
+			<repository location="https://download.eclipse.org/eclipse/updates/4.34/R-4.34-202411201800" />
 		</location>
 
 		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-			<unit id="org.apache.commons.commons-logging" version="0.0.0" />
-			<unit id="org.mockito.mockito-core" version="0.0.0" />
-			<repository location="https://download.eclipse.org/tools/orbit/simrel/orbit-aggregation/milestone/latest" />
+			<unit id="junit-jupiter-api" version="[5,6)" />
+			<unit id="slf4j.api" version="0.0.0" />
+			<repository location="https://download.eclipse.org/tools/orbit/simrel/orbit-aggregation/release/4.34.0" />
 		</location>
 
 		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
@@ -27,5 +29,5 @@
 			<repository location="https://download.eclipse.org/technology/swtbot/releases/latest" />
 		</location>
 	</locations>
-	<targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-21" />
+	<targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17" />
 </target>

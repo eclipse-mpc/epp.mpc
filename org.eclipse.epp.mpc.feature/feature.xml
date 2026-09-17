@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.epp.mpc"
       label="%featureName"
-      version="1.13.1.qualifier"
+      version="1.14.0.qualifier"
       provider-name="%providerName"
       plugin="org.eclipse.epp.mpc.ui"
       license-feature="org.eclipse.license"
@@ -21,43 +21,28 @@
    </license>
 
    <requires>
-      <import feature="org.eclipse.equinox.p2.discovery.feature" version="1.0.0.v201004" match="compatible"/>
+      <import feature="org.eclipse.equinox.p2.discovery.feature" version="1.0.0" match="compatible"/>
    </requires>
 
    <plugin
          id="org.eclipse.epp.mpc.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.epp.mpc.core.win32"
          os="win32"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.epp.mpc.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.epp.mpc.ui.css"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.epp.mpc.help.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
 </feature>

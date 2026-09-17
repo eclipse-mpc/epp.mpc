@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -214,8 +215,8 @@ public class UnmarshallerTest {
 		assertNotNull(search);
 
 		assertEquals("test", search.getTerm());
-		assertEquals("http://www.eclipseplugincentral.net/search/apachesolr/test?filters=tid%3A16%20tid%3A31",
-				search.getUrl());
+		assertEquals("http://www.eclipseplugincentral.net/search/apachesolr/test?filters=tid%3A16%20tid%3A31", search
+				.getUrl());
 		assertEquals(Integer.valueOf(62), search.getCount());
 		assertEquals(7, search.getNode().size());
 		INode node = search.getNode().get(0);
@@ -567,12 +568,19 @@ public class UnmarshallerTest {
 		return buffer;
 	}
 
-	private static InputStream getResourceAsStream(String resource) {
+	private static InputStream getResourceAsStream(String resource) throws IOException {
 		InputStream in = UnmarshallerTest.class.getResourceAsStream(resource);
 		if (in == null) {
 			throw new IllegalStateException(resource);
 		}
-		return in;
+		byte[] bytes = in.readAllBytes();
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(bytes.length);
+		for (byte b : bytes) {
+			if (b != '\r') {
+				byteArrayOutputStream.write(b);
+			}
+		}
+		return new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
 	}
 
 	private Object processResource(String resource) throws IOException, UnmarshalException {

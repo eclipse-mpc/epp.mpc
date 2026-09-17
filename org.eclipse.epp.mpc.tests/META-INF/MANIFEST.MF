@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Marketplace Client Tests
 Bundle-SymbolicName: org.eclipse.epp.mpc.tests
-Bundle-Version: 1.13.1.qualifier
+Bundle-Version: 1.14.0.qualifier
 Bundle-Vendor: Eclipse Marketplace Client
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: org.eclipse.osgi;bundle-version="3.6.0",
@@ -10,13 +10,13 @@ Require-Bundle: org.eclipse.osgi;bundle-version="3.6.0",
  org.eclipse.epp.mpc.core;bundle-version="[1.13.1,2.0.0)",
  org.eclipse.epp.mpc.ui;bundle-version="[1.13.1,2.0.0)",
  org.junit;bundle-version="4.13.2",
- junit-jupiter-api;bundle-version="[5.14.3,6.0.0)",
- junit-jupiter-engine;bundle-version="[5.14.3,6.0.0)",
- junit-vintage-engine;bundle-version="[5.14.3,6.0.0)",
- junit-platform-commons;bundle-version="[1.14.3,2.0.0)",
- junit-platform-engine;bundle-version="[1.14.3,2.0.0)",
- junit-platform-engine;bundle-version="[1.14.3,2.0.0)",
- junit-platform-suite-api;bundle-version="[1.14.3,2.0.0)",
+ junit-jupiter-api;bundle-version="[5.0.0,6.0.0)",
+ junit-jupiter-engine;bundle-version="[5.0.0,6.0.0)",
+ junit-vintage-engine;bundle-version="[5.0.0,6.0.0)",
+ junit-platform-commons;bundle-version="[1.0.0,2.0.0)",
+ junit-platform-engine;bundle-version="[1.0.0,2.0.0)",
+ junit-platform-engine;bundle-version="[1.0.0,2.0.0)",
+ junit-platform-suite-api;bundle-version="[1.0.0,2.0.0)",
  org.eclipse.equinox.p2.repository;bundle-version="2.0.0",
  org.eclipse.equinox.p2.core;bundle-version="2.0.0",
  org.eclipse.equinox.p2.discovery,
@@ -29,7 +29,7 @@ Require-Bundle: org.eclipse.osgi;bundle-version="3.6.0",
  org.eclipse.core.net;bundle-version="1.2.200",
  org.eclipse.equinox.p2.metadata;bundle-version="2.2.0",
  org.apache.httpcomponents.client5.httpclient5,
- slf4j.api;bundle-version="2.0.17",
+ slf4j.api;bundle-version="1.0.0",
  org.mockito.mockito-core;bundle-version="4.8.1"
 Import-Package: org.apache.hc.client5.http.auth;version="[5.1.0,6.0.0)",
  org.apache.hc.client5.http.classic;version="[5.1.0,6.0.0)",
