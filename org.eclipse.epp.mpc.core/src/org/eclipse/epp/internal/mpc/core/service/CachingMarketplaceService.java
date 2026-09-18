@@ -246,7 +246,7 @@ public class CachingMarketplaceService implements IMarketplaceService {
 			}
 			for (Iterator<Reference<Object>> i = cache.values().iterator(); i.hasNext();) {
 				Reference<Object> reference = i.next();
-				if (reference.isEnqueued()) {
+				if (reference.refersTo(null)) {
 					i.remove();
 				}
 			}

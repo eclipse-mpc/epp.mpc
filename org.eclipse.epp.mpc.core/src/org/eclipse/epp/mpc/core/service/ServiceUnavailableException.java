@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.IStatus;
  *
  * @author David Green
  */
-@SuppressWarnings("serial")
 public class ServiceUnavailableException extends CoreException {
 
 	public ServiceUnavailableException(IStatus status) {

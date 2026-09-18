@@ -83,42 +83,6 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 
 	}
 
-	private abstract class DynamicBindingOperation<T, B> implements ServiceReferenceOperation<T> {
-
-		private final String dynamicBindId;
-
-		private final ServiceReference<B> binding;
-
-		public DynamicBindingOperation(String dynamicBindId, ServiceReference<B> binding) {
-			this.dynamicBindId = dynamicBindId;
-			this.binding = binding;
-		}
-
-		@Override
-		public void apply(ServiceReference<T> reference) {
-			ServiceRegistration<T> registration = getDynamicServiceInstance(reference);
-			if (registration != null) {
-				Dictionary<String, Object> properties = ServiceUtil.getProperties(reference);
-				if (properties.get(dynamicBindId) != null) {
-					return;
-				}
-				T service = ServiceUtil.getService(registration);
-				B currentBinding = service == null ? null : getCurrentBinding(service);
-				apply(service, currentBinding, registration, properties);
-			}
-		}
-
-		protected void apply(T service, B currentBinding, ServiceRegistration<T> registration,
-				Dictionary<String, Object> properties) {
-			if (service != null && currentBinding == null) {
-				properties.put(dynamicBindId, binding);
-				registration.setProperties(properties);
-			}
-		}
-
-		protected abstract B getCurrentBinding(T service);
-	}
-
 	private static interface ServiceReferenceOperation<T> {
 		void apply(ServiceReference<T> reference);
 	}

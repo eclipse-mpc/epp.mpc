@@ -28,9 +28,13 @@ import org.eclipse.osgi.util.NLS;
  */
 @Deprecated
 public enum Operation {
+	@Deprecated
 	INSTALL(OperationType.INSTALL, org.eclipse.epp.mpc.ui.Operation.INSTALL), //
+	@Deprecated
 	UNINSTALL(OperationType.UNINSTALL, org.eclipse.epp.mpc.ui.Operation.UNINSTALL), //
+	@Deprecated
 	CHECK_FOR_UPDATES(OperationType.UPDATE, org.eclipse.epp.mpc.ui.Operation.UPDATE), //
+	@Deprecated
 	NONE(null, org.eclipse.epp.mpc.ui.Operation.NONE);
 
 	private final OperationType operationType;
@@ -42,18 +46,22 @@ public enum Operation {
 		this.operation = operation;
 	}
 
+	@Deprecated
 	public OperationType getOperationType() {
 		return operationType;
 	}
 
+	@Deprecated
 	public String getLabel() {
 		return operation.getLabel();
 	}
 
+	@Deprecated
 	public org.eclipse.epp.mpc.ui.Operation getOperation() {
 		return operation;
 	}
 
+	@Deprecated
 	public static Operation map(org.eclipse.epp.mpc.ui.Operation operation) {
 		if (operation == null) {
 			return null;
@@ -72,6 +80,7 @@ public enum Operation {
 		}
 	}
 
+	@Deprecated
 	public static org.eclipse.epp.mpc.ui.Operation mapBack(Operation operation) {
 		if (operation == null) {
 			return null;
@@ -90,6 +99,7 @@ public enum Operation {
 		}
 	}
 
+	@Deprecated
 	public static <T> Map<T, Operation> mapAll(Map<T, org.eclipse.epp.mpc.ui.Operation> operations) {
 		if (operations == null) {
 			return null;
@@ -102,6 +112,7 @@ public enum Operation {
 		return mappedOperations;
 	}
 
+	@Deprecated
 	public static <T> Map<T, org.eclipse.epp.mpc.ui.Operation> mapAllBack(Map<T, Operation> operations) {
 		if (operations == null) {
 			return null;

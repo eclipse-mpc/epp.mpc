@@ -22,9 +22,9 @@ import org.eclipse.core.runtime.IStatus;
  * @deprecated use {@link org.eclipse.epp.mpc.core.service.ServiceUnavailableException} instead
  */
 @Deprecated
-@SuppressWarnings("serial")
 public class ServiceUnavailableException extends org.eclipse.epp.mpc.core.service.ServiceUnavailableException {
 
+	@Deprecated
 	public ServiceUnavailableException(IStatus status) {
 		super(status);
 	}

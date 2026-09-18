@@ -22,7 +22,6 @@ pipeline {
 
   tools {
     maven 'apache-maven-latest'
-    jdk 'temurin-jdk25-latest'
   }
 
   parameters {
@@ -84,6 +83,10 @@ PROMOTE=${env.PROMOTE}
     }
 
     stage('Build') {
+      tools {
+        jdk "temurin-jdk${env.JAVA_VERSION}-latest"
+      }
+
       steps {
         script {
           wrap([$class: 'Xvnc', useXauthority: true]) {

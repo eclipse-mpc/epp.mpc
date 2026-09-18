@@ -13,9 +13,9 @@
 package org.eclipse.epp.mpc.tests.service;
 
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
@@ -93,6 +93,7 @@ public class SolutionCompatibilityFilterTest {
 
 		private final String os;
 
+		@SuppressWarnings("unused")
 		private final String ws;
 
 		private System(String os, String ws) {
@@ -890,7 +891,7 @@ public class SolutionCompatibilityFilterTest {
 		assumeTrue("Skipping test - this solution is not installable", solution.installable());
 		INode node = queryNode();
 		String updateurl = node.getUpdateurl();
-		assertThat("Node {1} has no update url", updateurl, not(isEmptyOrNullString()), node);
+		assertThat("Node {1} has no update url", updateurl, not(emptyOrNullString()), node);
 		IIus ius = node.getIus();
 		assertNotNull("Node {1} is missing <ius> element", ius, node);
 		List<IIu> iuElements = ius.getIuElements();

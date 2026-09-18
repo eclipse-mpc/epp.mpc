@@ -37,6 +37,7 @@ public interface MarketplaceService {
 	/**
 	 * Get a list of all markets. This is the entrypoint to the marketplace.
 	 */
+	@Deprecated
 	public List<Market> listMarkets(IProgressMonitor monitor) throws CoreException;
 
 	/**
@@ -46,6 +47,7 @@ public interface MarketplaceService {
 	 *            the market which must have an {@link Market#getUrl() url}.
 	 * @return the identified node
 	 */
+	@Deprecated
 	public Market getMarket(Market market, IProgressMonitor monitor) throws CoreException;
 
 	/**
@@ -55,6 +57,7 @@ public interface MarketplaceService {
 	 *            A category which must have an {@link Category#getUrl() url}.
 	 * @return the identified category
 	 */
+	@Deprecated
 	public Category getCategory(Category category, IProgressMonitor monitor) throws CoreException;
 
 	/**
@@ -64,6 +67,7 @@ public interface MarketplaceService {
 	 *            the node which must either have an {@link Node#getUrl() url} or an {@link Node#getId() id}.
 	 * @return the identified node
 	 */
+	@Deprecated
 	public Node getNode(Node node, IProgressMonitor monitor) throws CoreException;
 
 	/**
@@ -77,6 +81,7 @@ public interface MarketplaceService {
 	 *            the query text, must not be null
 	 * @return the search result
 	 */
+	@Deprecated
 	public SearchResult search(Market market, Category category, String queryText, IProgressMonitor monitor)
 			throws CoreException;
 
@@ -85,6 +90,7 @@ public interface MarketplaceService {
 	 *
 	 * @return the search result
 	 */
+	@Deprecated
 	public SearchResult featured(IProgressMonitor monitor) throws CoreException;
 
 	/**
@@ -96,6 +102,7 @@ public interface MarketplaceService {
 	 *            the category in which to return fetured, or null if featured should include all categories
 	 * @return the search result
 	 */
+	@Deprecated
 	public SearchResult featured(IProgressMonitor monitor, Market market, Category category) throws CoreException;
 
 	/**
@@ -103,6 +110,7 @@ public interface MarketplaceService {
 	 *
 	 * @return the search result
 	 */
+	@Deprecated
 	public SearchResult recent(IProgressMonitor monitor) throws CoreException;
 
 	/**
@@ -110,6 +118,7 @@ public interface MarketplaceService {
 	 *
 	 * @return the search result
 	 */
+	@Deprecated
 	public SearchResult favorites(IProgressMonitor monitor) throws CoreException;
 
 	/**
@@ -117,6 +126,7 @@ public interface MarketplaceService {
 	 *
 	 * @return the search result
 	 */
+	@Deprecated
 	public SearchResult popular(IProgressMonitor monitor) throws CoreException;
 
 	/**
@@ -124,6 +134,7 @@ public interface MarketplaceService {
 	 *
 	 * @return the news configuration
 	 */
+	@Deprecated
 	public News news(IProgressMonitor monitor) throws CoreException;
 
 	/**
@@ -139,6 +150,7 @@ public interface MarketplaceService {
 	 * @param resolutionDetails
 	 *            the detailed error message, or null if unknown.
 	 */
+	@Deprecated
 	public void reportInstallError(IProgressMonitor monitor, IStatus result, Set<Node> nodes,
 			Set<String> iuIdsAndVersions, String resolutionDetails) throws CoreException;
 }

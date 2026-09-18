@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.epp.internal.mpc.ui.discovery;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -34,7 +35,7 @@ import org.osgi.framework.ServiceReference;
 final class DiscoverNatureSupportJob extends Job {
 	private final String natureId;
 
-	private List<? extends INode> nodes;
+	private List<INode> nodes;
 
 	DiscoverNatureSupportJob(String natureId) {
 		super(NLS.bind(Messages.MissingNatureDetector_jobName, natureId));
@@ -51,7 +52,7 @@ final class DiscoverNatureSupportJob extends Job {
 		String fileExtensionTag = "nature_" + natureId; //$NON-NLS-1$]
 		try {
 			ISearchResult searchResult = marketplaceService.tagged(fileExtensionTag, monitor);
-			nodes = searchResult.getNodes();
+			nodes = new ArrayList<>(searchResult.getNodes());
 		} catch (CoreException ex) {
 			IStatus status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
 					NLS.bind(Messages.LookupByNatureJob_discoveryFailed, natureId), ex);
@@ -63,7 +64,7 @@ final class DiscoverNatureSupportJob extends Job {
 	}
 
 	public Collection<INode> getCandidates() {
-		return (List<INode>) this.nodes;
+		return this.nodes;
 	}
 
 	public String getNatureId() {

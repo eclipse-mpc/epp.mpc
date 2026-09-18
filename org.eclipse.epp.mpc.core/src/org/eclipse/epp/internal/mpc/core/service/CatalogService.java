@@ -27,6 +27,7 @@ import org.eclipse.epp.mpc.core.service.ICatalogService;
 public interface CatalogService extends ICatalogService {
 
 	@Override
+	@Deprecated
 	public List<Catalog> listCatalogs(IProgressMonitor monitor) throws CoreException;
 
 }

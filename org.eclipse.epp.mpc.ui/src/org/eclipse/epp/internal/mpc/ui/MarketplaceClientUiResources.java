@@ -204,12 +204,14 @@ public class MarketplaceClientUiResources {
 	public static synchronized MarketplaceClientUiResources getInstance() {
 		if (instance == null) {
 			BundleContext bundleContext = MarketplaceClientUi.getBundleContext();
-			ServiceReference<MarketplaceClientUiResources> serviceReference = bundleContext == null ? null
-					: bundleContext.getServiceReference(MarketplaceClientUiResources.class);
-			MarketplaceClientUiResources registered = serviceReference == null ? null
-					: bundleContext.getService(serviceReference);
-			if (instance == null) {
-				instance = registered;
+			if (bundleContext != null) {
+				ServiceReference<MarketplaceClientUiResources> serviceReference = bundleContext
+						.getServiceReference(MarketplaceClientUiResources.class);
+				MarketplaceClientUiResources registered = serviceReference == null ? null
+						: bundleContext.getService(serviceReference);
+				if (instance == null) {
+					instance = registered;
+				}
 			}
 		}
 		return instance;

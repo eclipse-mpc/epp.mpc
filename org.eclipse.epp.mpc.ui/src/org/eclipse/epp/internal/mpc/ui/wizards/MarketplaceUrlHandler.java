@@ -31,32 +31,38 @@ public abstract class MarketplaceUrlHandler extends org.eclipse.epp.mpc.ui.Marke
 	public static class SolutionInstallationInfo extends
 	org.eclipse.epp.mpc.ui.MarketplaceUrlHandler.SolutionInstallationInfo {
 
+		@Deprecated
 		public SolutionInstallationInfo() {
 			super();
 		}
 
+		@Deprecated
 		protected SolutionInstallationInfo(String installId, String state, CatalogDescriptor catalogDescriptor) {
 			super(installId, state, catalogDescriptor);
 		}
 	}
 
+	@Deprecated
 	public static SolutionInstallationInfo createSolutionInstallInfo(String url) {
 		org.eclipse.epp.mpc.ui.MarketplaceUrlHandler.SolutionInstallationInfo solutionInstallInfo = org.eclipse.epp.mpc.ui.MarketplaceUrlHandler.createSolutionInstallInfo(url);
 
 		return wrap(solutionInstallInfo);
 	}
 
+	@Deprecated
 	private static SolutionInstallationInfo wrap(
 			org.eclipse.epp.mpc.ui.MarketplaceUrlHandler.SolutionInstallationInfo solutionInstallInfo) {
 		return new SolutionInstallationInfo(solutionInstallInfo.getInstallId(), solutionInstallInfo.getState(),
 				solutionInstallInfo.getCatalogDescriptor());
 	}
 
+	@Deprecated
 	protected boolean handleInstallRequest(SolutionInstallationInfo installInfo, String url) {
 		return false;
 	}
 
 	@Override
+	@Deprecated
 	protected boolean handleInstallRequest(
 			org.eclipse.epp.mpc.ui.MarketplaceUrlHandler.SolutionInstallationInfo installInfo, String url) {
 		if (installInfo instanceof SolutionInstallationInfo) {

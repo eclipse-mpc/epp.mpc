@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.equinox.internal.p2.repository.Transport;
 
-@SuppressWarnings("restriction")
 public abstract class AbstractP2TransportFactory extends TransportFactory {
 
 	private static final String STREAM_METHOD = "stream"; //$NON-NLS-1$

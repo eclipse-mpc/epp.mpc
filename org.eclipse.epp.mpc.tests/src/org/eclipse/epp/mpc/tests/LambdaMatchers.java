@@ -71,6 +71,7 @@ public class LambdaMatchers {
 
 		@Override
 		protected boolean doMatch(Object item) {
+			@SuppressWarnings("unchecked")
 			T transformedItem = function.apply((S) item);
 			return matcher.matches(transformedItem);
 		}

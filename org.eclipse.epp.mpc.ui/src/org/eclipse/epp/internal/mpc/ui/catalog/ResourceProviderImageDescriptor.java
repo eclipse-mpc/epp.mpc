@@ -23,7 +23,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 
 /**
- * @author Carsten Reckord 
+ * @author Carsten Reckord
  */
 public class ResourceProviderImageDescriptor extends ImageDescriptor {
 
@@ -120,9 +120,7 @@ public class ResourceProviderImageDescriptor extends ImageDescriptor {
 	}
 
 	@Override
-	public ImageData getImageData() {
-		ImageDescriptor delegate = getDelegate();
-		return delegate == null ? null : delegate.getImageData();
+	public ImageData getImageData(int zoom) {
+		return delegate == null ? null : delegate.getImageData(zoom);
 	}
-
 }
