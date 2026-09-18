@@ -18,9 +18,9 @@ package org.eclipse.epp.internal.mpc.core.service;
  * @deprecated unused, will be removed in a future version
  */
 @Deprecated
-@SuppressWarnings("serial")
 public class NotFoundException extends Exception {
 
+	@Deprecated
 	public NotFoundException(String message) {
 		super(message);
 	}

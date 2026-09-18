@@ -65,6 +65,7 @@ public class WinClientBuilderCustomizer implements HttpClientCustomizer {
 		return servicePrincipalName;
 	}
 
+	@Override
 	public HttpClientBuilder customizeBuilder(HttpClientBuilder builder) {
 		if (!isWinAuthAvailable()) {
 			return builder;
@@ -75,7 +76,6 @@ public class WinClientBuilderCustomizer implements HttpClientCustomizer {
 	}
 
 	private Registry<AuthSchemeFactory> createAuthSchemeRegistry() {
-		@SuppressWarnings("restriction")
 		Registry<AuthSchemeFactory> authSchemeRegistry = RegistryBuilder.<AuthSchemeFactory> create()
 		.register(StandardAuthScheme.BASIC, BasicSchemeFactory.INSTANCE)
 		.register(StandardAuthScheme.DIGEST, DigestSchemeFactory.INSTANCE)
@@ -92,7 +92,6 @@ public class WinClientBuilderCustomizer implements HttpClientCustomizer {
 			return credentialsProvider;
 		}
 
-		@SuppressWarnings("restriction")
 		CredentialsStore winCredentialsStore = new SynchronizedCredentialsProvider(credentialsProvider);
 		return winCredentialsStore;
 	}

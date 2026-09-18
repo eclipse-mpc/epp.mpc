@@ -190,8 +190,10 @@ public class ServiceUtil {
 
 	public static <T> T getService(Class<?> context, Class<T> serviceType) {
 		BundleContext bundleContext = FrameworkUtil.getBundle(context).getBundleContext();
-		ServiceReference<T> serviceReference = bundleContext == null ? null
-				: bundleContext.getServiceReference(serviceType);
+		if (bundleContext == null) {
+			return null;
+		}
+		ServiceReference<T> serviceReference = bundleContext.getServiceReference(serviceType);
 		return serviceReference == null ? null : bundleContext.getService(serviceReference);
 	}
 }

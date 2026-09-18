@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.Platform;
  * @author Eike Stepper
  * @author Carsten Reckord
  */
-@SuppressWarnings("restriction")
 final class NTLMDomainUtil {
 	private static final String PROP_HTTP_AUTH_NTLM_DOMAIN = "http.auth.ntlm.domain"; //$NON-NLS-1$
 

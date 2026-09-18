@@ -100,8 +100,11 @@ public class MarketplaceClient {
 	 */
 	public static IMarketplaceClientService getMarketplaceClientService() {
 		BundleContext bundleContext = MarketplaceClientUi.getBundleContext();
-		ServiceReference<IMarketplaceClientService> serviceReference = bundleContext == null ? null
-				: bundleContext.getServiceReference(IMarketplaceClientService.class);
+		if (bundleContext == null) {
+			return null;
+		}
+		ServiceReference<IMarketplaceClientService> serviceReference = bundleContext
+				.getServiceReference(IMarketplaceClientService.class);
 		IMarketplaceClientService clientService = serviceReference == null ? null
 				: bundleContext.getService(serviceReference);
 		if (clientService != null) {

@@ -22,7 +22,6 @@ import org.osgi.framework.Bundle;
  * @author David Green
  * @author Benjamin Muskalla
  */
-@SuppressWarnings("restriction")
 class Eclipse36TransportFactory extends AbstractP2TransportFactory {
 
 	private static final String GET_INSTANCE_METHOD = "getInstance"; //$NON-NLS-1$

@@ -33,7 +33,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.wizards.SelectionModel.FeatureEntry;
 import org.eclipse.epp.mpc.ui.Operation;
@@ -364,7 +363,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 	}
 
 	public void resolveModal(IProgressMonitor monitor, ProfileChangeOperation operation) throws CoreException {
-		operation.resolveModal(new SubProgressMonitor(monitor, items.size()));
+		operation.resolveModal(SubMonitor.convert(monitor, items.size()));
 	}
 
 	public IInstallableUnit[] computeInstallableUnits(IProgressMonitor monitor) throws CoreException {

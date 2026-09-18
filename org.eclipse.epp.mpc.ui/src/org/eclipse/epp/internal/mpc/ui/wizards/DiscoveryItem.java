@@ -52,8 +52,6 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 
 	public static final String STYLING_CLASS = "DiscoveryItem"; //$NON-NLS-1$
 
-	private static final String FAVORITED_BUTTON_STATE_DATA = "favorited"; //$NON-NLS-1$
-
 	public static final String WIDGET_ID_INSTALLS = "installs"; //$NON-NLS-1$
 
 	public static final String WIDGET_ID_TAGS = "tags"; //$NON-NLS-1$
@@ -79,8 +77,6 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 	private ShareSolutionLink shareSolutionLink;
 
 	private Button favoriteButton;
-
-	private SelectionListener toggleFavoritesListener;
 
 	public DiscoveryItem(Composite parent, int style, MarketplaceDiscoveryResources resources,
 			IMarketplaceWebBrowser browser,

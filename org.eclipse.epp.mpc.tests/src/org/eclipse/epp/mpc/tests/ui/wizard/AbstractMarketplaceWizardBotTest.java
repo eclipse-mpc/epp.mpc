@@ -596,6 +596,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 		}
 		String linkContent = String.format("<a href=\"showSelection\">%s</a>", linkText);
 
+		@SuppressWarnings("unchecked")
 		Matcher<Link> matcher = allOf(widgetOfType(Link.class), WithRegex.withRegex("\\Q" + linkContent + "\\E"));
 		return new SWTBotLink(bot.widget(matcher, 0), matcher);
 	}

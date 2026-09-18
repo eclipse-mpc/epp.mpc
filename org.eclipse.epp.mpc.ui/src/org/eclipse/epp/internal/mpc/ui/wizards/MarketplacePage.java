@@ -85,8 +85,6 @@ import org.eclipse.swt.widgets.Listener;
  */
 public class MarketplacePage extends CatalogPage implements IWizardButtonLabelProvider {
 
-	private static final String WIDGET_ID_TAB_FAVORITES = "tab:favorites"; //$NON-NLS-1$
-
 	public static final String WIDGET_ID_TAB_SEARCH = "tab:search"; //$NON-NLS-1$
 
 	public static final String WIDGET_ID_TAB_FEATURED_MARKET = "tab:featured-market"; //$NON-NLS-1$

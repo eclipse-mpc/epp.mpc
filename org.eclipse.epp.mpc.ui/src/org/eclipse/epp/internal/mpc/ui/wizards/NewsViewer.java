@@ -87,9 +87,9 @@ public class NewsViewer {
 		final Link link = new Link(container, SWT.NONE);
 		GridDataFactory.fillDefaults()
 		.align(SWT.BEGINNING, SWT.BEGINNING)
-		.indent(IDialogConstants.SMALL_INDENT, 0)
+				.indent(IDialogConstants.VERTICAL_MARGIN, 0)
 		.grab(true, true)
-		.hint(450 - IDialogConstants.SMALL_INDENT, SWT.DEFAULT)
+				.hint(450 - IDialogConstants.VERTICAL_MARGIN, SWT.DEFAULT)
 		.applyTo(link);
 		link.setText(Messages.NewsViewer_No_news);
 		link.setEnabled(false);

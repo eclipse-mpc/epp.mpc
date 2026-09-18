@@ -26,7 +26,6 @@ import org.osgi.framework.ServiceReference;
  * @author David Green
  * @author Benjamin Muskalla
  */
-@SuppressWarnings("restriction")
 class P2TransportFactory extends AbstractP2TransportFactory {
 
 	private static final String SERVICE_NAME_FIELD = "SERVICE_NAME"; //$NON-NLS-1$
