@@ -134,6 +134,74 @@
     <description>${scope.project.label}</description>
   </setupTask>
   <setupTask
+      xsi:type="git:GitCloneTask"
+      id="mpc.github.clone"
+      locationQualifier="mpc"
+      remoteURI="eclipse-mpc/.github"
+      checkoutBranch="main">
+    <annotation
+        source="http://www.eclipse.org/oomph/setup/InducedChoices">
+      <detail
+          key="inherit">
+        <value>github.remoteURIs</value>
+      </detail>
+      <detail
+          key="label">
+        <value>MPC .github GitHub Repository</value>
+      </detail>
+      <detail
+          key="target">
+        <value>remoteURI</value>
+      </detail>
+    </annotation>
+    <configSections
+        name="branch">
+      <properties
+          key="autoSetupRebase"
+          value="always"/>
+    </configSections>
+    <description>MPC .github</description>
+  </setupTask>
+  <setupTask
+      xsi:type="setup:ResourceCreationTask"
+      excludedTriggers="BOOTSTRAP"
+      targetURL="${mpc.github.clone.location|uri}/.project">
+    <content>
+      &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>
+      &lt;projectDescription>
+      	&lt;name>org.eclipse.mpc.github&lt;/name>
+      	&lt;comment>MPC GitHub&lt;/comment>
+      	&lt;projects>
+      	&lt;/projects>
+      	&lt;buildSpec>
+      	&lt;/buildSpec>
+      	&lt;natures>
+      	&lt;/natures>
+      &lt;/projectDescription>
+
+    </content>
+  </setupTask>
+  <setupTask
+      xsi:type="setup:ResourceCreationTask"
+      excludedTriggers="BOOTSTRAP"
+      targetURL="${mpc.github.clone.location|uri}/.gitignore">
+    <content>
+      .project
+      .gitignore
+      /.settings/
+    </content>
+  </setupTask>
+  <setupTask
+      xsi:type="setup:ResourceCreationTask"
+      excludedTriggers="BOOTSTRAP"
+      targetURL="${mpc.github.clone.location|uri}/.settings/org.eclipse.core.resources.prefs">
+    <content>
+      eclipse.preferences.version=1
+      encoding/&lt;project>=UTF-8
+
+    </content>
+  </setupTask>
+  <setupTask
       xsi:type="setup:VariableTask"
       name="eclipse.target.platform"
       value="${eclipse.target.platform.latest}"
@@ -158,6 +226,8 @@
       <sourceLocator
           rootFolder="${github.clone.mpc.location}"
           locateNestedProjects="true"/>
+      <sourceLocator
+          rootFolder="${mpc.github.clone.location}"/>
       <repositoryList>
         <repository
             url="https://download.eclipse.org/technology/swtbot/snapshots"/>
@@ -200,6 +270,7 @@
   </setupTask>
   <setupTask
       xsi:type="setup.workingsets:WorkingSetTask"
+      id="mpc.workingsets"
       prefix="org.eclipse.mpc-">
     <workingSet
         name="MPC Plugins"
@@ -214,7 +285,7 @@
             nature="org.eclipse.pde.PluginNature"/>
         <operand
             xsi:type="workingsets:ExclusionPredicate"
-            excludedWorkingSet="//@setupTasks.10/@workingSets[name='MPC%20Tests']"/>
+            excludedWorkingSet="//'mpc.workingsets'/@workingSets[name='MPC%20Tests']"/>
       </predicate>
     </workingSet>
     <workingSet
@@ -256,7 +327,17 @@
             project="org.eclipse.epp.mpc.core"/>
         <operand
             xsi:type="workingsets:ExclusionPredicate"
-            excludedWorkingSet="//@setupTasks.10/@workingSets[name='MPC%20Features'] //@setupTasks.10/@workingSets[name='MPC%20Plugins'] //@setupTasks.10/@workingSets[name='MPC%20Tests']"/>
+            excludedWorkingSet="//'mpc.workingsets'/@workingSets[name='MPC%20Features'] //'mpc.workingsets'/@workingSets[name='MPC%20Plugins'] //'mpc.workingsets'/@workingSets[name='MPC%20Tests']"/>
+      </predicate>
+    </workingSet>
+    <workingSet
+        name="MPC .github"
+        id="mpc.github">
+      <predicate
+          xsi:type="predicates:AndPredicate">
+        <operand
+            xsi:type="predicates:RepositoryPredicate"
+            project="org.eclipse.mpc.github"/>
       </predicate>
     </workingSet>
     <description>The dynamic working sets for ${scope.project.label}</description>
