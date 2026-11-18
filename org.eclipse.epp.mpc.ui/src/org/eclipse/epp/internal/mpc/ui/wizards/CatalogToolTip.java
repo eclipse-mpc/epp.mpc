@@ -78,7 +78,9 @@ public class CatalogToolTip extends GradientToolTip {
 	private void createLabel(Composite parent) {
 		Label nameLabel = new Label(parent, SWT.NULL);
 		FontDescriptor h1FontDescriptor = createFontDescriptor(SWT.BOLD, 1.35f);
-		nameLabel.setFont(h1FontDescriptor.createFont(parent.getDisplay()));
+		Font font = h1FontDescriptor.createFont(parent.getDisplay());
+		nameLabel.addDisposeListener(e -> font.dispose());
+		nameLabel.setFont(font);
 		nameLabel.setText(TextUtil.escapeText(catalogDescriptor.getLabel()));
 		nameLabel.setBackground(null);
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(nameLabel);
