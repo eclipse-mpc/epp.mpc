@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -98,8 +98,7 @@ public abstract class AbstractMarketplaceWizardCommand extends AbstractHandler i
 				if (!remoteCatalogStatus.isOK()) {
 					cause = remoteCatalogStatus;
 				} else {
-					cause = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
-							Messages.MarketplaceWizardCommand_noRemoteCatalogs);
+					cause = Status.error(Messages.MarketplaceWizardCommand_noRemoteCatalogs);
 				}
 				IStatus exitStatus = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, cause.getCode(),
 						Messages.MarketplaceWizardCommand_cannotOpenMarketplace, new CoreException(cause));
@@ -124,9 +123,8 @@ public abstract class AbstractMarketplaceWizardCommand extends AbstractHandler i
 				CatalogDescriptor resolvedDescriptor = CatalogRegistry.getInstance().findCatalogDescriptor(
 						selectedCatalogDescriptor.getUrl().toExternalForm());
 				if (resolvedDescriptor == null) {
-					IStatus status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
-							Messages.MarketplaceWizardCommand_CouldNotFindMarketplaceForSolution, new ExecutionException(
-									selectedCatalogDescriptor.getUrl().toExternalForm()));
+					IStatus status = Status.error(Messages.MarketplaceWizardCommand_CouldNotFindMarketplaceForSolution,
+							new ExecutionException(selectedCatalogDescriptor.getUrl().toExternalForm()));
 					MarketplaceClientUi.handle(status,
 							StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 					return null;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -54,8 +54,7 @@ final class DiscoverNatureSupportJob extends Job {
 			ISearchResult searchResult = marketplaceService.tagged(fileExtensionTag, monitor);
 			nodes = new ArrayList<>(searchResult.getNodes());
 		} catch (CoreException ex) {
-			IStatus status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
-					NLS.bind(Messages.LookupByNatureJob_discoveryFailed, natureId), ex);
+			IStatus status = Status.error(NLS.bind(Messages.LookupByNatureJob_discoveryFailed, natureId), ex);
 			MarketplaceClientUi.getLog().log(status);
 			// Do not return this status as it would show an error
 			return Status.CANCEL_STATUS;

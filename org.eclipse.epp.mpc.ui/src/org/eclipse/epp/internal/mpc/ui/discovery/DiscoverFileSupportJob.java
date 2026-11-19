@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 Red Hat Inc.
+ * Copyright (c) 2017, 2026 Red Hat Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -85,7 +85,7 @@ final class DiscoverFileSupportJob extends Job {
 			ISearchResult searchResult = marketplaceService.tagged(fileExtensionTags, monitor);
 			nodes = orderNodesByTagSubExtensionCount(searchResult.getNodes(), fileExtensionTags);
 		} catch (Exception ex) {
-			IStatus status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
+			IStatus status = Status.error(
 					NLS.bind(Messages.DiscoverFileSupportJob_discoveryFailed, getFileExtensionLabel(fileName)), ex);
 			// Do not return this status as it would show an error, e.g. when the user is currently offline
 			MarketplaceClientUi.getLog().log(status);

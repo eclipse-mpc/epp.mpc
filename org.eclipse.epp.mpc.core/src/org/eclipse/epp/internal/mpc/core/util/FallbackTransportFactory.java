@@ -23,7 +23,6 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientTransportFactory;
@@ -63,8 +62,7 @@ public class FallbackTransportFactory implements ITransportFactory {
 			connectionAttempts++;
 			if (connectionAttempts > 10 && connectionFailures / (double) connectionAttempts > 0.75) {
 				MarketplaceClientCore.getLog()
-				.log(new Status(IStatus.INFO, MarketplaceClientCore.BUNDLE_ID,
-						NLS.bind(Messages.FallbackTransportFactory_disablingTransport, primaryTransport)));
+				.log(Status.info(NLS.bind(Messages.FallbackTransportFactory_disablingTransport, primaryTransport)));
 				primaryDisabled = true;
 			}
 			if (primaryTransport == null || primaryDisabled) {

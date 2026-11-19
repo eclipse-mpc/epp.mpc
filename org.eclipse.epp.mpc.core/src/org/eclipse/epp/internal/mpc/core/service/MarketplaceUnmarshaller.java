@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2019 The Eclipse Foundation and others.
+ * Copyright (c) 2014, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.service.xml.StripInvalidXMLCharsReader;
 import org.eclipse.epp.internal.mpc.core.service.xml.Unmarshaller;
 import org.eclipse.epp.mpc.core.service.IMarketplaceUnmarshaller;
@@ -145,7 +144,7 @@ public class MarketplaceUnmarshaller implements IMarketplaceUnmarshaller {
 				}
 				message.append(i + 1).append(": ").append(new String(safeChars)).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			return new Status(IStatus.INFO, MarketplaceClientCore.BUNDLE_ID, 0, message.toString(), null);
+			return Status.info(message.toString());
 		} catch (Exception e) {
 			// ignore - this is only additional diagnostic info, so don't bother anybody with errors assembling it
 			return null;
@@ -153,7 +152,7 @@ public class MarketplaceUnmarshaller implements IMarketplaceUnmarshaller {
 	}
 
 	protected IStatus createErrorStatus(String message, Throwable t) {
-		return new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID, 0, message, t);
+		return Status.error(message, t);
 	}
 
 }

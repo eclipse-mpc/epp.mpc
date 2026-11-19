@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2018 Red Hat Inc. and others.
+ * Copyright (c) 2016, 2026 Red Hat Inc. and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -22,7 +22,6 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
@@ -61,9 +60,7 @@ public class MissingNatureDetector implements IStartup, IPropertyChangeListener 
 			}
 		} catch (CoreException e) {
 			MarketplaceClientUi.getLog()
-			.log(new Status(IStatus.ERROR,
-					MarketplaceClientUi.getBundleContext().getBundle().getSymbolicName(),
-					e.getLocalizedMessage(), e));
+			.log(Status.error(e.getLocalizedMessage(), e));
 		}
 	};
 

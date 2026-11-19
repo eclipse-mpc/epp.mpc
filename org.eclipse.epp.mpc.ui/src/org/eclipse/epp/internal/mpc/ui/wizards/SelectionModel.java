@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -26,7 +26,6 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeInstallableUnitItem;
 import org.eclipse.epp.internal.mpc.ui.operations.FeatureDescriptor;
@@ -474,7 +473,7 @@ public class SelectionModel {
 							featureEntries.put(featureEntry, old);
 							old = null;
 						} else if (verify && !old.equals(operation)) {
-							IStatus error = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
+							IStatus error = Status.error(NLS.bind(
 									Messages.SelectionModel_Inconsistent_Actions, new Object[] {
 											featureEntry.getFeatureDescriptor().getName(), old, operation }));
 							throw new IllegalStateException(new CoreException(error));
@@ -583,11 +582,10 @@ public class SelectionModel {
 		Map<Operation, List<CatalogItem>> operationToItem = computeOperationToItem();
 
 		if (operationToItem.size() == 0) {
-			return new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, Messages.SelectionModel_Nothing_Selected);
+			return Status.error(Messages.SelectionModel_Nothing_Selected);
 		} else if (operationToItem.size() == 1) {
 			Entry<Operation, List<CatalogItem>> entry = operationToItem.entrySet().iterator().next();
-			return new Status(IStatus.INFO, MarketplaceClientUi.BUNDLE_ID,
-					NLS.bind(
+			return Status.info(NLS.bind(
 							Messages.SelectionModel_count_selectedFor_operation,
 							entry.getValue().size() == 1 ? Messages.SelectionModel_oneSolution : NLS.bind(
 									Messages.SelectionModel_countSolutions, entry.getValue().size()), entry.getKey()
@@ -598,11 +596,10 @@ public class SelectionModel {
 			for (List<CatalogItem> items : operationToItem.values()) {
 				count += items.size();
 			}
-			return new Status(IStatus.INFO, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
+			return Status.info(NLS.bind(
 					Messages.SelectionModel_countSolutionsSelectedForInstallUpdate, count));
 		} else {
-			return new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
-					Messages.SelectionModel_cannotInstallRemoveConcurrently);
+			return Status.error(Messages.SelectionModel_cannotInstallRemoveConcurrently);
 		}
 	}
 

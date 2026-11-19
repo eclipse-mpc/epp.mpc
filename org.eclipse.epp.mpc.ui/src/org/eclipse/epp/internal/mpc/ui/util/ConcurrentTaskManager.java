@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -99,7 +99,7 @@ public class ConcurrentTaskManager {
 							throw new CoreException(new Status(IStatus.CANCEL, MarketplaceClientUi.BUNDLE_ID,
 									e.getMessage()));
 						} catch (ExecutionException e) {
-							errorStatus.add(new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, e.getCause()
+							errorStatus.add(Status.error(e.getCause()
 									.getMessage(), e.getCause()));
 							if (monitor.isCanceled()) {
 								break;
