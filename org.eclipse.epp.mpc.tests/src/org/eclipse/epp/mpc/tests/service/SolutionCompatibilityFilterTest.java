@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -17,8 +17,8 @@ import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assume.assumeFalse;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.security.cert.Certificate;
 import java.text.MessageFormat;
@@ -54,35 +55,34 @@ import org.eclipse.epp.mpc.core.model.ISearchResult;
 import org.eclipse.epp.mpc.core.service.IMarketplaceUnmarshaller;
 import org.eclipse.epp.mpc.core.service.QueryHelper;
 import org.eclipse.epp.mpc.core.service.UnmarshalException;
-import org.eclipse.epp.mpc.tests.Categories.RemoteTests;
 import org.eclipse.equinox.internal.p2.core.helpers.ServiceHelper;
 import org.eclipse.equinox.internal.p2.repository.Activator;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
 import org.eclipse.equinox.p2.core.UIServices;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.ComparisonFailure;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-import org.junit.rules.ExternalResource;
-import org.junit.rules.TestRule;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
-import org.junit.runners.model.Statement;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
+import org.junit.jupiter.params.Parameter;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.opentest4j.AssertionFailedError;
 import org.osgi.framework.ServiceRegistration;
 
-@RunWith(Parameterized.class)
-@Category(RemoteTests.class)
-@Ignore("Disabled until test data on marketplace-staging.eclipse.org can be recreated")
+@ParameterizedClass(name = "{index}__{0}__with__{1}_{2}")
+@MethodSource("data")
+@Tag("RemoteTests")
+@Disabled("Disabled until test data on marketplace-staging.eclipse.org can be recreated")
 public class SolutionCompatibilityFilterTest {
 	private static final String BASE_URL = "http://marketplace-staging.eclipse.org";
 
@@ -274,7 +274,6 @@ public class SolutionCompatibilityFilterTest {
 		}
 	}
 
-	@Parameters(name = "{index}__{0}__with__{1}_{2}")
 	public static Iterable<Object[]> data() {
 		List<Object[]> data = new ArrayList<>();
 		checkSolutionReleaseBounds(data, Solution.KEPLER);
@@ -447,19 +446,15 @@ public class SolutionCompatibilityFilterTest {
 	}
 
 	private static void assertTrue(String message, boolean b, Object... details) {
-		Assert.assertTrue(format(message, flatten(b, details)), b);
-	}
-
-	private static void assertNotNull(Object value) {
-		Assert.assertNotNull(value);
+		Assertions.assertTrue(b, format(message, flatten(b, details)));
 	}
 
 	private static void assertEquals(String message, Object o1, Object o2, Object... details) {
-		Assert.assertEquals(format(message, flatten(o1, o2, details)), o1, o2);
+		Assertions.assertEquals(o1, o2, format(message, flatten(o1, o2, details)));
 	}
 
 	private static void assertNotNull(String message, Object value, Object... details) {
-		Assert.assertNotNull(format(message, flatten(value, details)), value);
+		Assertions.assertNotNull(value, format(message, flatten(value, details)));
 	}
 
 	private static <T> void assertThat(String reason, T actual, Matcher<? super T> matcher, Object... details) {
@@ -467,7 +462,7 @@ public class SolutionCompatibilityFilterTest {
 	}
 
 	private static void assertNull(String message, Object value, Object... details) {
-		Assert.assertNull(format(message, flatten(value, details)), value);
+		Assertions.assertNull(value, format(message, flatten(value, details)));
 	}
 
 	private static String format(String message, Object... details) {
@@ -519,279 +514,221 @@ public class SolutionCompatibilityFilterTest {
 		}
 	}
 
-	@ClassRule
-	public static TestRule stageCredentialsRule = new ExternalResource() {
-		private UIServices originalService;
+	private static UIServices originalUIService;
 
-		private UIServices credentialsService;
+	private static UIServices credentialsUIService;
 
-		@Override
-		protected void before() throws Throwable {
-			IProvisioningAgent agent = (IProvisioningAgent) ServiceHelper.getService(Activator.getContext(),
-					IProvisioningAgent.SERVICE_NAME);
-			UIServices adminUIService = (UIServices) agent.getService(UIServices.SERVICE_NAME);
-			originalService = adminUIService;
-			credentialsService = new UIServices() {
-				@Override
-				public AuthenticationInfo getUsernamePassword(String location, AuthenticationInfo previousInfo) {
-					if (previousInfo == null) {
-						return getUsernamePassword(location);
-					}
-					return null;
+	@BeforeAll
+	public static void registerStageCredentials() {
+		IProvisioningAgent agent = (IProvisioningAgent) ServiceHelper.getService(Activator.getContext(),
+				IProvisioningAgent.SERVICE_NAME);
+		originalUIService = (UIServices) agent.getService(UIServices.SERVICE_NAME);
+		credentialsUIService = new UIServices() {
+			@Override
+			public AuthenticationInfo getUsernamePassword(String location, AuthenticationInfo previousInfo) {
+				if (previousInfo == null) {
+					return getUsernamePassword(location);
 				}
-
-				@Override
-				public AuthenticationInfo getUsernamePassword(String location) {
-					if (location != null && location.contains("marketplace-staging")) {
-						return new AuthenticationInfo("testuser", "plaintext", false);
-					}
-					throw new AssertionError("Unexpectedly required authentication for host " + location);
-				}
-
-				@Override
-				public TrustInfo getTrustInfo(Certificate[][] untrustedChain, String[] unsignedDetail) {
-					throw new AssertionError("Unexpectedly required trustinfo");
-				}
-			};
-			agent.registerService(UIServices.SERVICE_NAME, credentialsService);
-		}
-
-		@Override
-		protected void after() {
-			UIServices originalService = this.originalService;
-			UIServices credentialsService = this.credentialsService;
-			this.originalService = null;
-			this.credentialsService = null;
-			IProvisioningAgent agent = (IProvisioningAgent) ServiceHelper.getService(Activator.getContext(),
-					IProvisioningAgent.SERVICE_NAME);
-			Object currentUIService = agent.getService(UIServices.SERVICE_NAME);
-			if (currentUIService == credentialsService && originalService != null) {
-				agent.registerService(UIServices.SERVICE_NAME, originalService);
+				return null;
 			}
+
+			@Override
+			public AuthenticationInfo getUsernamePassword(String location) {
+				if (location != null && location.contains("marketplace-staging")) {
+					return new AuthenticationInfo("testuser", "plaintext", false);
+				}
+				throw new AssertionError("Unexpectedly required authentication for host " + location);
+			}
+
+			@Override
+			public TrustInfo getTrustInfo(Certificate[][] untrustedChain, String[] unsignedDetail) {
+				throw new AssertionError("Unexpectedly required trustinfo");
+			}
+		};
+		agent.registerService(UIServices.SERVICE_NAME, credentialsUIService);
+	}
+
+	@AfterAll
+	public static void restoreUIServices() {
+		UIServices originalService = originalUIService;
+		UIServices credentialsService = credentialsUIService;
+		originalUIService = null;
+		credentialsUIService = null;
+		IProvisioningAgent agent = (IProvisioningAgent) ServiceHelper.getService(Activator.getContext(),
+				IProvisioningAgent.SERVICE_NAME);
+		Object currentUIService = agent.getService(UIServices.SERVICE_NAME);
+		if (currentUIService == credentialsService && originalService != null) {
+			agent.registerService(UIServices.SERVICE_NAME, originalService);
 		}
-	};
+	}
 
-	@Rule
-	public final TestRule xmlDumpRule = new TestWatcher() {
+	@RegisterExtension
+	final TestExecutionExceptionHandler requestInfoHandler = this::addRequestInfo;
 
-		private ServiceRegistration<IMarketplaceUnmarshaller> unmarshallerRegistration;
+	private ServiceRegistration<IMarketplaceUnmarshaller> unmarshallerRegistration;
 
-		@Override
-		protected void starting(final Description description) {
-			final IMarketplaceUnmarshaller marketplaceUnmarshaller = org.eclipse.epp.mpc.core.service.ServiceHelper
-					.getMarketplaceUnmarshaller();
-			unmarshallerRegistration = ServiceHelperImpl.getImplInstance()
-					.registerMarketplaceUnmarshaller(new IMarketplaceUnmarshaller() {
+	private String testName;
 
-						public <T> T unmarshal(InputStream in, Class<T> type, IProgressMonitor monitor)
-								throws UnmarshalException, IOException {
-							byte[] input = capture(in);
-							in = null;
-							try {
-								return marketplaceUnmarshaller
-										.unmarshal(new ByteArrayInputStream(input), type, monitor);
-							} catch (UnmarshalException ex) {
-								dump(description, ex, input);
-								throw ex;
-							} catch (IOException ex) {
-								dump(description, ex, input);
-								throw ex;
-							} catch (RuntimeException ex) {
-								dump(description, ex, input);
-								throw ex;
-							}
+	private static void log(String message) {
+		MarketplaceClientCore.error(message, null);
+		java.lang.System.out.println(message);
+	}
+
+	private void registerDumpingUnmarshaller() {
+		final IMarketplaceUnmarshaller marketplaceUnmarshaller = org.eclipse.epp.mpc.core.service.ServiceHelper
+				.getMarketplaceUnmarshaller();
+		unmarshallerRegistration = ServiceHelperImpl.getImplInstance()
+				.registerMarketplaceUnmarshaller(new IMarketplaceUnmarshaller() {
+
+					@Override
+					public <T> T unmarshal(InputStream in, Class<T> type, IProgressMonitor monitor)
+							throws UnmarshalException, IOException {
+						byte[] input = capture(in);
+						in = null;
+						try {
+							return marketplaceUnmarshaller.unmarshal(new ByteArrayInputStream(input), type, monitor);
+						} catch (UnmarshalException ex) {
+							dump(input);
+							throw ex;
+						} catch (IOException ex) {
+							dump(input);
+							throw ex;
+						} catch (RuntimeException ex) {
+							dump(input);
+							throw ex;
 						}
+					}
 
-						private byte[] capture(InputStream in) throws IOException {
-							try {
-								ByteArrayOutputStream dump = new ByteArrayOutputStream(32768);
-								byte[] buffer = new byte[8192];
-								for (int read = -1; (read = in.read(buffer)) != -1;) {
-									dump.write(buffer, 0, read);
-								}
-								byte[] input = dump.toByteArray();
-								return input;
-							} finally {
-								in.close();
+					private byte[] capture(InputStream in) throws IOException {
+						try {
+							ByteArrayOutputStream dump = new ByteArrayOutputStream(32768);
+							byte[] buffer = new byte[8192];
+							for (int read = -1; (read = in.read(buffer)) != -1;) {
+								dump.write(buffer, 0, read);
 							}
+							byte[] input = dump.toByteArray();
+							return input;
+						} finally {
+							in.close();
 						}
-					});
-		}
+					}
+				});
+	}
 
-		@Override
-		protected void finished(Description description) {
-			if (unmarshallerRegistration != null) {
-				unmarshallerRegistration.unregister();
-			}
+	private void dump(byte[] input) {
+		String fileName = testName + "_" + new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
+		fileName = safeFileName(fileName);
+		File outputDir = findOutputDir();
+		File dumpFile = new File(outputDir, fileName + "-response.dump");
+		for (int i = 1; dumpFile.exists(); i++) {
+			dumpFile = new File(outputDir, fileName + "_" + i + "-response.dump");
 		}
+		log("Dumping XML stream to " + dumpFile.getAbsolutePath());
+		try (FileOutputStream os = new FileOutputStream(dumpFile)) {
+			os.write(input);
+		} catch (IOException e) {
+			log("Failed to dump XML stream to " + dumpFile.getAbsolutePath() + ": " + e);
+		}
+	}
 
-		void dump(Description description, Throwable ex, byte[] input) {
-			String fileName = description.getDisplayName() + "_"
-					+ new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
-			fileName = safeFileName(fileName);
-			File outputDir = findOutputDir();
-			File dumpFile = new File(outputDir, fileName + "-response.dump");
-			for (int i = 1; dumpFile.exists(); i++) {
-				dumpFile = new File(outputDir, fileName + "_" + i + "-response.dump");
+	private static File findOutputDir() {
+		File targetDir = new File("target");
+		if (targetDir.isDirectory()) {
+			File sureFireDir = new File(targetDir, "surefire-reports");
+			if (sureFireDir.isDirectory()) {
+				return sureFireDir.getAbsoluteFile();
 			}
-			failed(new AssertionError("Dumping XML stream to " + dumpFile.getAbsolutePath()), description);
-			FileOutputStream os = null;
+			return targetDir.getAbsoluteFile();
+		}
+		URL resource = SolutionCompatibilityFilterTest.class.getResource("SolutionCompatibilityFilterTest.class");
+		if (resource != null) {
 			try {
-				os = new FileOutputStream(dumpFile);
-				os.write(input);
-			} catch (Exception e) {
-				failed(e, description);
-			} finally {
-				if (os != null) {
-					try {
-						os.close();
-					} catch (IOException e) {
-						failed(e, description);
-					}
-				}
-			}
-		}
-
-		private File findOutputDir() {
-			File targetDir = new File("target");
-			if (targetDir.isDirectory()) {
-				File sureFireDir = new File(targetDir, "surefire-reports");
-				if (sureFireDir.isDirectory()) {
-					return sureFireDir.getAbsoluteFile();
-				}
-				return targetDir.getAbsoluteFile();
-			}
-			URL resource = SolutionCompatibilityFilterTest.class.getResource("SolutionCompatibilityFilterTest.class");
-			if (resource != null) {
-				try {
-					resource = FileLocator.resolve(resource);
-					if ("file".equalsIgnoreCase(resource.getProtocol())) {
-						for (File file = new File(resource.toURI()); file != null && file.exists(); file = file
-								.getParentFile()) {
-							targetDir = new File(file, "target");
-							if (targetDir.isDirectory()) {
-								File sureFireDir = new File(targetDir, "surefire-reports");
-								if (sureFireDir.isDirectory()) {
-									return sureFireDir.getAbsoluteFile();
-								}
-								return targetDir.getAbsoluteFile();
+				resource = FileLocator.resolve(resource);
+				if ("file".equalsIgnoreCase(resource.getProtocol())) {
+					for (File file = new File(resource.toURI()); file != null && file.exists(); file = file
+							.getParentFile()) {
+						targetDir = new File(file, "target");
+						if (targetDir.isDirectory()) {
+							File sureFireDir = new File(targetDir, "surefire-reports");
+							if (sureFireDir.isDirectory()) {
+								return sureFireDir.getAbsoluteFile();
 							}
+							return targetDir.getAbsoluteFile();
 						}
 					}
-				} catch (Exception e) {
 				}
-			}
-			return new File(java.lang.System.getProperty("user.dir"));
-		}
-
-		private String safeFileName(String text) {
-			char[] fileName = text.toCharArray();
-			for (int i = 0; i < fileName.length; i++) {
-				char c = fileName[i];
-				if (!((c >= 48 && c <= 57 /* [0-9] */) || (c >= 65 && c <= 90 /* [A-Z] */)
-						|| (c >= 97 && c <= 122 /* [a-z] */) || c == 45 /* - */|| c == 46 /* . */|| c == 95 /* _ */)) {
-					fileName[i] = '_';
-				}
-			}
-			return new String(fileName);
-		}
-	};
-
-	@Rule
-	public TestRule logRule = new TestRule() {
-
-		public Statement apply(final Statement base, final Description description) {
-			return new Statement() {
-				@Override
-				public void evaluate() throws Throwable {
-					try {
-						log("Starting test " + description.getDisplayName());
-						base.evaluate();
-					} finally {
-						log("Finished test " + description.getDisplayName());
-					}
-				}
-
-				private void log(String message) {
-					MarketplaceClientCore.error(message, null);
-					java.lang.System.out.println(message);
-				}
-			};
-		}
-	};
-
-	@Rule
-	public TestRule requestInfoRule = new TestRule() {
-		public Statement apply(final Statement base, final Description description) {
-			String methodName = description.getMethodName();
-			if (methodName.contains("SearchResult")) {
-				return new Statement() {
-					@Override
-					public void evaluate() throws Throwable {
-						try {
-							base.evaluate();
-						} catch (AssertionError t) {
-							failedSearchQuery(t, description);
-						}
-					}
-				};
-			} else {
-				return new Statement() {
-					@Override
-					public void evaluate() throws Throwable {
-						try {
-							base.evaluate();
-						} catch (AssertionError t) {
-							failedNodeQuery(t, description);
-						}
-					}
-				};
+			} catch (Exception e) {
 			}
 		}
+		return new File(java.lang.System.getProperty("user.dir"));
+	}
 
-		protected void failedSearchQuery(AssertionError error, Description description) {
-			String request = marketplaceService.addMetaParameters(BASE_URL + "/"
-					+ DefaultMarketplaceService.API_SEARCH_URI_FULL + solution.query());
-			String queryDetail = "Unexpected result in search for node " + solution.shortName() + "\n   " + request;
-			failedWithDetails(error, queryDetail);
-		}
-
-		protected void failedNodeQuery(AssertionError error, Description description) {
-			String queryDetail = "Unexpected result in query for node " + solution.shortName() + "\n   "
-					+ marketplaceService.addMetaParameters(solution.url() + "/api/p");
-			failedWithDetails(error, queryDetail);
-		}
-
-		protected void failedWithDetails(AssertionError error, String queryDetail) throws AssertionError {
-			String message = error.getMessage() == null ? queryDetail : queryDetail + "\n\n" + error.getMessage();
-
-			String testDescription = SolutionCompatibilityFilterTest.this.testDescription;
-			if (testDescription != null) {
-				message = testDescription + "\n\n" + message;
+	private static String safeFileName(String text) {
+		char[] fileName = text.toCharArray();
+		for (int i = 0; i < fileName.length; i++) {
+			char c = fileName[i];
+			if (!((c >= 48 && c <= 57 /* [0-9] */) || (c >= 65 && c <= 90 /* [A-Z] */)
+					|| (c >= 97 && c <= 122 /* [a-z] */) || c == 45 /* - */|| c == 46 /* . */|| c == 95 /* _ */)) {
+				fileName[i] = '_';
 			}
-			throw adaptAssertionError(error, message);
+		}
+		return new String(fileName);
+	}
+
+	/**
+	 * Adds the failed request and the test description to assertion failures.
+	 */
+	private void addRequestInfo(ExtensionContext context, Throwable throwable) throws Throwable {
+		if (!(throwable instanceof AssertionError error)) {
+			throw throwable;
+		}
+		if (context.getRequiredTestMethod().getName().contains("SearchResult")) {
+			failedSearchQuery(error);
+		} else {
+			failedNodeQuery(error);
+		}
+	}
+
+	private void failedSearchQuery(AssertionError error) {
+		String request = marketplaceService.addMetaParameters(BASE_URL + "/"
+				+ DefaultMarketplaceService.API_SEARCH_URI_FULL + solution.query());
+		String queryDetail = "Unexpected result in search for node " + solution.shortName() + "\n   " + request;
+		failedWithDetails(error, queryDetail);
+	}
+
+	private void failedNodeQuery(AssertionError error) {
+		String queryDetail = "Unexpected result in query for node " + solution.shortName() + "\n   "
+				+ marketplaceService.addMetaParameters(solution.url() + "/api/p");
+		failedWithDetails(error, queryDetail);
+	}
+
+	private void failedWithDetails(AssertionError error, String queryDetail) throws AssertionError {
+		String message = error.getMessage() == null ? queryDetail : queryDetail + "\n\n" + error.getMessage();
+		if (testDescription != null) {
+			message = testDescription + "\n\n" + message;
+		}
+		throw adaptAssertionError(error, message);
+	}
+
+	private static AssertionError adaptAssertionError(AssertionError error, String message) {
+		if (message == null || message.equals(error.getMessage())) {
+			return error;
 		}
 
-		protected AssertionError adaptAssertionError(AssertionError error, String message) {
-			if (message == null || message.equals(error.getMessage())) {
-				return error;
-			}
-
-			AssertionError newError;
-			if (error.getClass() == AssertionError.class) {
-				newError = new AssertionError(message);
-			} else if (error.getClass() == ComparisonFailure.class) {
-				ComparisonFailure comparisonFailure = (ComparisonFailure) error;
-				newError = new ComparisonFailure(message, comparisonFailure.getExpected(), comparisonFailure
-						.getActual());
-			} else {
-				newError = new AssertionError(message);
-				newError.initCause(error);
-			}
-			newError.setStackTrace(error.getStackTrace());
-			return newError;
+		AssertionError newError;
+		if (error.getClass() == AssertionError.class) {
+			newError = new AssertionError(message);
+		} else if (error instanceof AssertionFailedError failedError && failedError.isExpectedDefined()
+				&& failedError.isActualDefined()) {
+			newError = new AssertionFailedError(message, failedError.getExpected().getValue(),
+					failedError.getActual().getValue());
+		} else {
+			newError = new AssertionError(message);
+			newError.initCause(error);
 		}
-	};
+		newError.setStackTrace(error.getStackTrace());
+		return newError;
+	}
 
 	@Parameter(0)
 	public Solution solution;
@@ -819,10 +756,23 @@ public class SolutionCompatibilityFilterTest {
 
 	private DefaultMarketplaceService marketplaceService;
 
-	@Before
-	public void setupMarketplaceService() throws Exception {
+	@BeforeEach
+	public void setupMarketplaceService(TestInfo testInfo) throws Exception {
+		testName = testInfo.getTestMethod().map(Method::getName).orElse("unknown") + "[" + solution + "__with__"
+				+ eclipseRelease + "_" + system + "]";
+		log("Starting test " + testName);
+		registerDumpingUnmarshaller();
 		marketplaceService = new DefaultMarketplaceService(new URL(BASE_URL));
 		marketplaceService.setRequestMetaParameters(computeRequestMetaParameters(system, eclipseRelease));
+	}
+
+	@AfterEach
+	public void tearDown() {
+		if (unmarshallerRegistration != null) {
+			unmarshallerRegistration.unregister();
+			unmarshallerRegistration = null;
+		}
+		log("Finished test " + testName);
 	}
 
 	protected Map<String, String> computeRequestMetaParameters(System system, EclipseRelease eclipseRelease) {
@@ -834,7 +784,7 @@ public class SolutionCompatibilityFilterTest {
 
 	protected INode queryNode() throws CoreException {
 		INode node = marketplaceService.getNode(QueryHelper.nodeByUrl(solution.url()), new NullProgressMonitor());
-		assertNotNull("Node {0} not found", node);
+		assertNotNull("Node {1} not found", node, solution);
 		if (solution.id() != null) {
 			assertEquals("Node {2} returned with wrong id {1}", solution.id(), node.getId(), solution);
 		}
@@ -887,15 +837,15 @@ public class SolutionCompatibilityFilterTest {
 	}
 
 	public void testCompatibleInstallableNode() throws CoreException {
-		assumeTrue("Skipping test - this solution and Eclipse/OS are incompatible", compatible);
-		assumeTrue("Skipping test - this solution is not installable", solution.installable());
+		assumeTrue(compatible, "Skipping test - this solution and Eclipse/OS are incompatible");
+		assumeTrue(solution.installable(), "Skipping test - this solution is not installable");
 		INode node = queryNode();
 		String updateurl = node.getUpdateurl();
 		assertThat("Node {1} has no update url", updateurl, not(emptyOrNullString()), node);
 		IIus ius = node.getIus();
 		assertNotNull("Node {1} is missing <ius> element", ius, node);
 		List<IIu> iuElements = ius.getIuElements();
-		assertNotNull(iuElements);
+		Assertions.assertNotNull(iuElements);
 		assertThat("Node {1} has no IUs", iuElements, not(empty()), node);
 
 		if (version != null) {
@@ -915,8 +865,8 @@ public class SolutionCompatibilityFilterTest {
 	}
 
 	public void testCompatibleNonInstallableNode() throws CoreException {
-		assumeTrue("Skipping test - this solution and Eclipse/OS are incompatible", compatible);
-		assumeFalse("Skipping test - this solution is installable", solution.installable());
+		assumeTrue(compatible, "Skipping test - this solution and Eclipse/OS are incompatible");
+		assumeFalse(solution.installable(), "Skipping test - this solution is installable");
 		INode node = queryNode();
 		String updateurl = node.getUpdateurl();
 		assertNull("Uninstallable node {1} should not have an update url, but has {0}", updateurl, node);
@@ -925,7 +875,7 @@ public class SolutionCompatibilityFilterTest {
 	}
 
 	public void testIncompatibleNode() throws CoreException {
-		assumeFalse("Skipping test - this solution and Eclipse/OS are compatible", compatible);
+		assumeFalse(compatible, "Skipping test - this solution and Eclipse/OS are compatible");
 		INode node = queryNode();
 		String updateurl = node.getUpdateurl();
 		assertNull("Incompatible node {1} should not have an update url, but has {0}", updateurl, node);
@@ -943,13 +893,13 @@ public class SolutionCompatibilityFilterTest {
 	}
 
 	public void testCompatibleSearchResult() throws CoreException {
-		assumeTrue("Skipping test - this solution and Eclipse/OS are incompatible", compatible);
+		assumeTrue(compatible, "Skipping test - this solution and Eclipse/OS are incompatible");
 		INode foundNode = searchForNode();
 		assertNotNull("Compatible node {1} not found in search", foundNode, solution);
 	}
 
 	public void testIncompatibleSearchResult() throws CoreException {
-		assumeFalse("Skipping test - this solution and Eclipse/OS are compatible", compatible);
+		assumeFalse(compatible, "Skipping test - this solution and Eclipse/OS are compatible");
 		INode foundNode = searchForNode();
 		assertNull("Incompatible node {0} found in search", foundNode);
 	}
