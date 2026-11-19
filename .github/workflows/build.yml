@@ -25,6 +25,9 @@ jobs:
         java-version: '25'
         distribution: 'temurin'
     
+    - name: Install WebKitGTK for the SWT Browser
+      run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-0
+
     - name: Build
       run: >
         xvfb-run -a mvn -B verify
