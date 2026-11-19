@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -30,8 +30,10 @@ import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.client5.http.routing.RoutingSupport;
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
@@ -82,9 +84,15 @@ public class HttpClientService {
 	public ClassicHttpResponse execute(ClassicHttpRequest request, HttpContext context)
 			throws ClientProtocolException, IOException {
 		HttpClientContext internalContext = context == null ? new HttpClientContext()
-				: HttpClientContext.adapt(context);
+				: HttpClientContext.castOrCreate(context);
 		ClassicHttpRequest configuredRequest = configureRequestExecution(request, internalContext);
-		return client.execute(configuredRequest, internalContext);
+		HttpHost target;
+		try {
+			target = RoutingSupport.determineHost(configuredRequest);
+		} catch (HttpException e) {
+			throw new ClientProtocolException(e);
+		}
+		return client.executeOpen(target, configuredRequest, internalContext);
 	}
 
 	private ClassicHttpRequest configureRequestExecution(ClassicHttpRequest request, HttpClientContext context)

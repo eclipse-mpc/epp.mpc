@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -39,7 +39,7 @@ class CacheCredentialsAuthenticationStrategy implements HttpResponseInterceptor 
 	@Override
 	public void process(HttpResponse response, EntityDetails entity, HttpContext context)
 			throws HttpException, IOException {
-		final HttpClientContext clientContext = HttpClientContext.adapt(context);
+		final HttpClientContext clientContext = HttpClientContext.castOrCreate(context);
 		HttpRoute route = (HttpRoute) clientContext.getHttpRoute();
 		HttpHost authhost = route.getProxyHost();
 		// also for target: HttpHost authhost = AuthSupport.resolveAuthTarget(clientContext.getRequest(), route);
