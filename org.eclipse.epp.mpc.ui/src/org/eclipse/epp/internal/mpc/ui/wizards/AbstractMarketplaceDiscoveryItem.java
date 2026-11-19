@@ -385,7 +385,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 
 	private void createInfoLink(StyledText description) {
 		// bug 323257: don't display if there's no internal browser
-		boolean internalBrowserAvailable = computeBrowserAvailable(description);
+		boolean internalBrowserAvailable = isBrowserAvailable(description.getDisplay());
 		if (internalBrowserAvailable && (hasTooltip(connector) || connector.isInstalled())) {
 			if (hasTooltip(connector)) {
 				String descriptionLink = Messages.DiscoveryItem_More_Info;
@@ -506,16 +506,25 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 				&& connector.getOverview().getUrl().trim().length() > 0;
 	}
 
-	private synchronized boolean computeBrowserAvailable(Composite composite) {
+	/**
+	 * Detects whether an internal browser is available by creating one in a temporary shell (SWT Snippet148), and
+	 * caches the result.
+	 * <p>
+	 * With WebKit, disposing a browser runs a nested event loop that paints all pending controls. Call this before the
+	 * catalog items are created (see {@link MarketplaceViewer}), so that controls that are not laid out yet don't get
+	 * painted.
+	 */
+	static synchronized boolean isBrowserAvailable(Display display) {
 		if (browserAvailable == null) {
-			// SWT Snippet148: detect if a browser is available by attempting to create one
-			// SWTError is thrown if not available.
+			Shell shell = new Shell(display);
 			try {
-				Browser browser = new Browser(composite, SWT.NULL);
+				Browser browser = new Browser(shell, SWT.NONE);
 				browser.dispose();
 				browserAvailable = true;
 			} catch (SWTError | NoClassDefFoundError | Exception e) {
 				browserAvailable = false;
+			} finally {
+				shell.dispose();
 			}
 		}
 		return browserAvailable;
