@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2020 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -67,7 +67,7 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 	private static final String DEBUG_FAKE_CLIENT_OPTION = "/client/fakeVersion"; //$NON-NLS-1$
 
 	@Component(name = "org.eclipse.epp.mpc.core.debug.options", property = {
-			"listener.symbolic.name=org.eclipse.epp.mpc.core" })
+	"listener.symbolic.name=org.eclipse.epp.mpc.core" })
 	public static class DebugOptionsInitializer implements DebugOptionsListener {
 
 		@Override
@@ -139,20 +139,12 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 				ServiceRegistration<IMarketplaceService> registration = getDynamicServiceInstance(reference);
 				if (registration != null) {
 					IMarketplaceService service = ServiceUtil.getService(registration);
-					if (service instanceof DefaultMarketplaceService) {
-						((DefaultMarketplaceService) service).setHttpClient(httpClient);
+					if (service instanceof DefaultMarketplaceService defaultService) {
+						defaultService.setHttpClient(httpClient);
 					}
 				}
 			}
 		});
-	}
-
-	/**
-	 * @deprecated use {@link #getDefaultMarketplaceService()} or {@link #getMarketplaceService(String)} instead
-	 */
-	@Deprecated
-	public IMarketplaceService getMarketplaceService() {
-		return getDefaultMarketplaceService();
 	}
 
 	@Override
@@ -224,13 +216,6 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 		defaultService.setHttpClient(httpClient);
 		service = new CachingMarketplaceService(defaultService);
 		return service;
-	}
-
-	private void unregisterService(ServiceRegistration<?> registration) {
-		if (registration != null) {
-			dynamicServiceRegistrations.remove(registration);
-			registration.unregister();
-		}
 	}
 
 	/**
@@ -317,40 +302,11 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 	}
 
 	/**
-	 * for testing purposes
-	 *
-	 * @deprecated don't call this outside of tests
-	 */
-	@Deprecated
-	public static synchronized void setInstance(ServiceLocator instance) {
-		ServiceLocator.instance = instance;
-	}
-
-	/**
-	 * @deprecated acquire the registered {@link IMarketplaceServiceLocator} OSGi service instead.
-	 */
-	@Deprecated
-	public static synchronized ServiceLocator getInstance() {
-		if (instance != null) {
-			return instance;
-		}
-		IMarketplaceServiceLocator locator = getCompatibilityLocator();
-		if (locator != null && locator instanceof ServiceLocator) {
-			//don't remember service instance, it might get deregistered
-			return (ServiceLocator) locator;
-		}
-		//remember new default instance
-		instance = new ServiceLocator();
-		return instance;
-	}
-
-	/**
 	 * This method is not intended to be referenced by clients. Acquire the registered
 	 * {@link IMarketplaceServiceLocator} OSGi service instead.
 	 * <p>
-	 * This method provides legacy compatibility with the ServiceLocator singleton for internal use only. It will return
-	 * the ServiceLocator singleton if it has been set explicitly. Otherwise it will return the registered default
-	 * {@link IMarketplaceServiceLocator} OSGi service.
+	 * This method provides legacy compatibility for internal use only. It will return the registered default
+	 * {@link IMarketplaceServiceLocator} OSGi service, or an unmanaged fallback instance if none is registered.
 	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
