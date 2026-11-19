@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
+import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientTransportFactory;
 import org.eclipse.epp.mpc.core.service.ITransport;
 import org.eclipse.epp.mpc.core.service.ITransportFactory;
 import org.eclipse.epp.mpc.core.service.ServiceUnavailableException;
@@ -162,15 +163,14 @@ public class FallbackTransportFactory implements ITransportFactory {
 		}
 	}
 
-	private ITransportFactory primaryFactory;
+	private final ITransportFactory primaryFactory;
 
 	private ITransportFactory secondaryFactory;
 
 	private FallbackTransport transport;
 
-	public FallbackTransportFactory() {
-		super();
-		// ignore
+	public FallbackTransportFactory(HttpClientTransportFactory primaryFactory) {
+		this.primaryFactory = primaryFactory;
 	}
 
 	@Override
@@ -220,20 +220,6 @@ public class FallbackTransportFactory implements ITransportFactory {
 
 	public ITransportFactory getPrimaryFactory() {
 		return primaryFactory;
-	}
-
-	public void setPrimaryFactory(ITransportFactory primaryFactory) {
-		this.primaryFactory = primaryFactory;
-	}
-
-	public void bindPrimaryFactory(ITransportFactory factory) {
-		setPrimaryFactory(factory);
-	}
-
-	public void unbindPrimaryFactory(ITransportFactory factory) {
-		if (primaryFactory == factory) {
-			setPrimaryFactory(null);
-		}
 	}
 
 	public ITransportFactory getSecondaryFactory() {

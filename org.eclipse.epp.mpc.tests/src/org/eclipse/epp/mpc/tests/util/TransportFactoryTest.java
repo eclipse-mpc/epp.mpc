@@ -244,23 +244,20 @@ public class TransportFactoryTest {
 	}
 
 	private static HttpClientTransport createFailingHttpClientTransport() throws Exception {
-		HttpClientTransport transport = new HttpClientTransport();
 		HttpClientService mockClient = Mockito.mock(HttpClientService.class);
 		Mockito.when(mockClient.configureRequest(ArgumentMatchers.any())).thenAnswer(args -> args.getArgument(0));
 
 		Mockito.doReturn(mockResponse(503, "Expected test error")).when(mockClient).execute(
 				ArgumentMatchers.any());
 
-		transport.bindHttpClientService(mockClient);
-		return transport;
+		return new HttpClientTransport(mockClient);
 	}
 
 	@Test
 	public void testHttpClientTransportFallback() throws Exception {
 		HttpClientTransport httpClientTransport = createFailingHttpClientTransport();
 
-		HttpClientTransportFactory httpClientFactory = new HttpClientTransportFactory();
-		httpClientFactory.setTransport(httpClientTransport);
+		HttpClientTransportFactory httpClientFactory = new HttpClientTransportFactory(httpClientTransport);
 
 		String expectedMessage = "Secondary transport";
 		ITransportFactory secondaryFactory = Mockito.mock(ITransportFactory.class);
@@ -271,8 +268,7 @@ public class TransportFactoryTest {
 		Mockito.when(secondaryTransport.stream(ArgumentMatchers.<URI> any(), ArgumentMatchers.<IProgressMonitor> any())).thenReturn(
 				expectedResultStream);
 
-		FallbackTransportFactory fallbackTransportFactory = new FallbackTransportFactory();
-		fallbackTransportFactory.setPrimaryFactory(httpClientFactory);
+		FallbackTransportFactory fallbackTransportFactory = new FallbackTransportFactory(httpClientFactory);
 		fallbackTransportFactory.setSecondaryFactory(secondaryFactory);
 
 		InputStream stream = fallbackTransportFactory.getTransport().stream(URI.create("http://127.0.0.1:54321"), null);
@@ -304,10 +300,6 @@ public class TransportFactoryTest {
 	}
 
 	private static HttpClientTransport createClient(HttpClientCustomizer... customizers) {
-		if (customizers == null || customizers.length == 0) {
-			return new HttpClientTransport();
-		}
-
 		BundleContext clientServiceContext = FrameworkUtil.getBundle(HttpClientService.class).getBundleContext();
 		List<ServiceRegistration<?>> registrations = new ArrayList<>();
 		for (int i = 0; i < customizers.length; i++) {
@@ -329,19 +321,13 @@ public class TransportFactoryTest {
 				HttpClientService.class);
 		HttpClientService clientService = clientServiceContext.getService(clientServiceRef);
 
-		HttpClientTransport httpClientTransport;
-		try
-		{
-			httpClientTransport = new HttpClientTransport();
-			httpClientTransport.bindHttpClientService(clientService);
-		}
-		finally
-		{
+		try {
+			return new HttpClientTransport(clientService);
+		} finally {
 			for (ServiceRegistration<?> registration : registrations) {
 				registration.unregister();
 			}
 		}
-		return httpClientTransport;
 	}
 
 

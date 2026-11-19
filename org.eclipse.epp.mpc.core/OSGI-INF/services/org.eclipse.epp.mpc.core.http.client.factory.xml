@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.3.0" name="org.eclipse.epp.mpc.core.http.client.factory">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.4.0" init="1" name="org.eclipse.epp.mpc.core.http.client.factory">
    <service>
       <provide interface="org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientFactory"/>
    </service>
-   <reference cardinality="0..n" field="customizers" field-option="replace" interface="org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientCustomizer" name="customizers" policy="static" policy-option="greedy"/>
+   <reference cardinality="0..n" field-collection-type="service" interface="org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientCustomizer" name="customizers" parameter="0" policy-option="greedy"/>
    <implementation class="org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientFactory"/>
 </scr:component>

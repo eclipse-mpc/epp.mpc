@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -74,10 +74,8 @@ public class MappedTransportFactory implements ITransportFactory {
 
 			private ITransport getNonHttpTransport(ITransportFactory delegate, ITransport delegateTransport) {
 				ITransport nonHttpTransport = delegateTransport;
-				if (delegate instanceof HttpClientTransportFactory) {
-					FallbackTransportFactory fallbackFactory = new FallbackTransportFactory();
-					fallbackFactory.setPrimaryFactory(delegate);
-					delegate = fallbackFactory;
+				if (delegate instanceof HttpClientTransportFactory httpClientFactory) {
+					delegate = new FallbackTransportFactory(httpClientFactory);
 				}
 				if (delegate instanceof FallbackTransportFactory) {
 					FallbackTransportFactory fallbackFactory = (FallbackTransportFactory) delegate;
