@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -76,7 +76,7 @@ public class MarketplaceClientCore {
 			if (cause instanceof CoreException) {
 				statusCause = ((CoreException) cause).getStatus();
 			} else {
-				statusCause = new Status(IStatus.ERROR, BUNDLE_ID, cause.getMessage(), cause);
+				statusCause = Status.error(cause.getMessage(), cause);
 			}
 		}
 		if (message == null || "".equals(message.trim())) { //$NON-NLS-1$
@@ -93,19 +93,19 @@ public class MarketplaceClientCore {
 		while (exception != null) {
 			if (exception instanceof FileNotFoundException) {
 				// exception message is the URL
-				status = new Status(IStatus.ERROR, BUNDLE_ID,
+				status = Status.error(
 						NLS.bind(Messages.MarketplaceClientCore_notFound, exception.getMessage()), exception);
 				break;
 			}
 			// name resolution didn't work - possibly offline...
 			if (exception instanceof UnknownHostException) {
-				status = new Status(IStatus.ERROR, BUNDLE_ID,
+				status = Status.error(
 						NLS.bind(Messages.MarketplaceClientCore_unknownHost, exception.getMessage()), exception);
 				break;
 			}
 			// could be a previously resolved name, but now unreachable because we're offline...
 			if (exception instanceof NoRouteToHostException) {
-				status = new Status(IStatus.ERROR, BUNDLE_ID,
+				status = Status.error(
 						NLS.bind(Messages.MarketplaceClientCore_unknownHost, exception.getMessage()), exception);
 				break;
 			}
@@ -136,7 +136,7 @@ public class MarketplaceClientCore {
 				if (MarketplaceClientCore.BUNDLE_ID.equals(exceptionStatus.getPlugin())
 						&& exceptionStatus.getCode() == 503) {
 					//received service unavailable error from P2 transport
-					status = new Status(IStatus.ERROR, BUNDLE_ID, exceptionStatus.getMessage(), exception);
+					status = Status.error(exceptionStatus.getMessage(), exception);
 					break;
 				}
 			}
@@ -151,7 +151,7 @@ public class MarketplaceClientCore {
 	}
 
 	public static IStatus createConnectionProblemStatus(Throwable exception) {
-		IStatus status = new Status(IStatus.ERROR, BUNDLE_ID,
+		IStatus status = Status.error(
 				NLS.bind(Messages.MarketplaceClientCore_connectionProblem, exception.getMessage()), exception);
 		return status;
 	}

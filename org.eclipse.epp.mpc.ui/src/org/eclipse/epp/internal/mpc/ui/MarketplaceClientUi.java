@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -193,7 +193,7 @@ public class MarketplaceClientUi {
 	}
 
 	public static void handle(Throwable t, final int style) {
-		handle(new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, t.getLocalizedMessage(), t), style);
+		handle(Status.error(t.getLocalizedMessage(), t), style);
 	}
 
 	public static void handle(final IStatus status, final int style) {

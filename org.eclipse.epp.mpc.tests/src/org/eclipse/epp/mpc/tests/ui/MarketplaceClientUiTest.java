@@ -91,7 +91,7 @@ public class MarketplaceClientUiTest {
 	}
 
 	private static Exception wrapInCoreException(Throwable rootCause) {
-		return new CoreException(new Status(IStatus.ERROR, "org.eclipse.epp.mpc.tests", "Nested Core Exception",
+		return new CoreException(Status.error("Nested Core Exception",
 				rootCause));
 	}
 

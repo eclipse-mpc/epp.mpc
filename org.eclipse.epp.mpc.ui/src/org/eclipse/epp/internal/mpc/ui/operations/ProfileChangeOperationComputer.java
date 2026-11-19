@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2018 Tasktop Technologies and others.
+ * Copyright (c) 2009, 2026 Tasktop Technologies and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -382,8 +382,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 
 		} catch (URISyntaxException e) {
 			// should never happen, since we already validated URLs.
-			throw new CoreException(new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
-					Messages.ProvisioningOperation_unexpectedErrorUrl, e));
+			throw new CoreException(Status.error(Messages.ProvisioningOperation_unexpectedErrorUrl, e));
 		} finally {
 			monitor.done();
 		}
@@ -426,8 +425,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 				}
 			}
 			if (installableUnits.isEmpty()) {
-				throw new CoreException(new Status(IStatus.INFO, MarketplaceClientUi.BUNDLE_ID,
-						Messages.ProvisioningOperation_nothingToUpdate));
+				throw new CoreException(Status.info(Messages.ProvisioningOperation_nothingToUpdate));
 			}
 		}
 	}
@@ -523,8 +521,8 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 					NLS.bind(Messages.ProvisioningOperation_unavailableSolutions_proceedQuestion,
 							new Object[] { finalMessage })));
 			if (!okayToProceed[0]) {
-				throw new CoreException(new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
-						Messages.ProvisioningOperation_unavailableSolutions, detailedMessage), null));
+				throw new CoreException(Status.error(NLS.bind(
+						Messages.ProvisioningOperation_unavailableSolutions, detailedMessage)));
 			}
 		}
 	}

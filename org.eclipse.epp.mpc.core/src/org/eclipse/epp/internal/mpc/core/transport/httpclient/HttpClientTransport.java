@@ -31,7 +31,6 @@ import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.util.UserAgentUtil;
@@ -106,7 +105,7 @@ public class HttpClientTransport implements ITransport {
 				throw fnfe;
 			case 503:
 				throw new ServiceUnavailableException(
-						new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID, e.getMessage(), e));
+						Status.error(e.getMessage(), e));
 			default:
 				throw new CoreException(MarketplaceClientCore.computeStatus(e, null));
 			}

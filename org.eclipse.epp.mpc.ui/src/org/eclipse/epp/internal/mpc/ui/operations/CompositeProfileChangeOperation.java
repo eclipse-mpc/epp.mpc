@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.equinox.internal.p2.director.ProfileChangeRequest;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.equinox.p2.metadata.IRequirement;
@@ -66,8 +65,7 @@ class CompositeProfileChangeOperation extends InstallOperation {
 			requestField.setAccessible(true);
 			requestField.set(this, request);
 		} catch (Exception e) {
-			status.add(new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
-					Messages.CompositeProfileChangeOperation_ChangeRequestError, e));
+			status.add(Status.error(Messages.CompositeProfileChangeOperation_ChangeRequestError, e));
 		}
 	}
 

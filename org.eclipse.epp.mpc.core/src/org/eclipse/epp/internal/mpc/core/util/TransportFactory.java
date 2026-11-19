@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2019 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -281,19 +281,17 @@ public abstract class TransportFactory implements ITransportFactory {
 						logTransportServiceFallback(serviceError, defaultServiceReference, null, factory);
 						return transport;
 					} else {
-						serviceError.add(new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID,
-								NLS.bind(Messages.TransportFactory_LegacyFallbackCreationError,
+						serviceError.add(Status.error(NLS.bind(Messages.TransportFactory_LegacyFallbackCreationError,
 										factory.getClass().getName()),
 								new NullPointerException("Factory returned null transport"))); //$NON-NLS-1$
 					}
 				} catch (Exception ex) {
-					serviceError.add(new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID,
-							NLS.bind(Messages.TransportFactory_LegacyFallbackCreationError, factory.getClass().getName()), ex));
+					serviceError.add(Status.error(NLS.bind(Messages.TransportFactory_LegacyFallbackCreationError,
+							factory.getClass().getName()), ex));
 				}
 			}
 		} catch (Exception ex) {
-			serviceError.add(new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID,
-					Messages.TransportFactory_LegacyFallbacksError, ex));
+			serviceError.add(Status.error(Messages.TransportFactory_LegacyFallbacksError, ex));
 		}
 		//We log and throw, because the exception is lacking details
 		MarketplaceClientCore.getLog().log(serviceError);
@@ -312,14 +310,14 @@ public abstract class TransportFactory implements ITransportFactory {
 		MultiStatus transportFallbackStatus = new MultiStatus(MarketplaceClientCore.BUNDLE_ID, 0,
 				NLS.bind(Messages.TransportFactory_DefaultTransportUnavailable_UseFallback, transportName), null);
 		if (defaultServiceReference != null) {
-			transportFallbackStatus.add(new Status(IStatus.INFO, MarketplaceClientCore.BUNDLE_ID,
+			transportFallbackStatus.add(Status.info(
 					NLS.bind(Messages.TransportFactory_DefaultService, defaultServiceReference.toString())));
 		}
 		if (serviceReference != null) {
-			transportFallbackStatus.add(new Status(IStatus.INFO, MarketplaceClientCore.BUNDLE_ID,
+			transportFallbackStatus.add(Status.info(
 					NLS.bind(Messages.TransportFactory_FallbackService, serviceReference.toString())));
 		} else {
-			transportFallbackStatus.add(new Status(IStatus.INFO, MarketplaceClientCore.BUNDLE_ID,
+			transportFallbackStatus.add(Status.info(
 					NLS.bind(Messages.TransportFactory_UseLegacyFallback, transportName)));
 		}
 		transportFallbackStatus.add(serviceError);
@@ -332,7 +330,7 @@ public abstract class TransportFactory implements ITransportFactory {
 		if (serviceReference != null) {
 			serviceError = new MultiStatus(MarketplaceClientCore.BUNDLE_ID, 0,
 					Messages.TransportFactory_ServiceErrorUnregistered, null);
-			serviceError.add(new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID,
+			serviceError.add(Status.error(
 					NLS.bind(Messages.TransportFactory_ServiceErrorServiceReference, serviceReference)));
 		} else {
 			serviceError = new MultiStatus(MarketplaceClientCore.BUNDLE_ID, 0,
@@ -342,28 +340,25 @@ public abstract class TransportFactory implements ITransportFactory {
 			Collection<ServiceReference<ITransportFactory>> allServiceReferences = context
 					.getServiceReferences(ITransportFactory.class, null);
 			if (allServiceReferences.isEmpty()) {
-				serviceError.add(new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID,
-						Messages.TransportFactory_ServiceErrorNoneAvailable));
+				serviceError.add(Status.error(Messages.TransportFactory_ServiceErrorNoneAvailable));
 			} else {
 				String filter = computeDisabledTransportsFilter();
 				if (!"".equals(filter)) { //$NON-NLS-1$
-					serviceError.add(new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID,
+					serviceError.add(Status.error(
 							NLS.bind(Messages.TransportFactory_ServiceErrorAppliedFilter, filter)));
 				}
 			}
 			for (ServiceReference<ITransportFactory> availableReference : allServiceReferences) {
-				serviceError.add(new Status(IStatus.INFO, MarketplaceClientCore.BUNDLE_ID,
-						NLS.bind(Messages.TransportFactory_ServiceErrorRegisteredService,
+				serviceError.add(Status.info(NLS.bind(Messages.TransportFactory_ServiceErrorRegisteredService,
 								availableReference.toString())));
 			}
 			for (ITransportFactory factory : listAvailableFactories(true)) {
-				serviceError.add(new Status(IStatus.INFO, MarketplaceClientCore.BUNDLE_ID,
+				serviceError.add(Status.info(
 						NLS.bind(Messages.TransportFactory_StaticFactoryInfo, factory.getClass().getName(),
 								((TransportFactory) factory).isAvailable() ? Messages.TransportFactory_available : Messages.TransportFactory_unavailable)));
 			}
 		} catch (Exception e) {
-			serviceError.add(new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID,
-					Messages.TransportFactory_ServiceErrorDetails, e));
+			serviceError.add(Status.error(Messages.TransportFactory_ServiceErrorDetails, e));
 		}
 		return serviceError;
 	}
@@ -403,7 +398,7 @@ public abstract class TransportFactory implements ITransportFactory {
 					factories.add(factory);
 				}
 			} catch (Throwable t) {
-				MarketplaceClientCore.getLog().log(new Status(IStatus.WARNING, MarketplaceClientCore.BUNDLE_ID,
+				MarketplaceClientCore.getLog().log(Status.warning(
 						Messages.TransportFactory_transportAvailabilityError, t));
 			}
 		}
@@ -446,7 +441,7 @@ public abstract class TransportFactory implements ITransportFactory {
 			}
 
 		} else {
-			throw new CoreException(new Status(IStatus.ERROR, MarketplaceClientCore.BUNDLE_ID, e.getMessage(), e));
+			throw new CoreException(Status.error(e.getMessage(), e));
 		}
 	}
 

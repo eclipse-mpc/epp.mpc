@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -663,7 +663,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				MarketplaceClientUi.handle(e.getStatus(),
 						StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			} catch (MalformedURLException e) {
-				IStatus status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
+				IStatus status = Status.error(NLS.bind(
 						Messages.MarketplaceWizard_cannotOpenUrl, new Object[] { url, e.getMessage() }), e);
 				MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			}
@@ -869,7 +869,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				if (cause instanceof CoreException) {
 					status = ((CoreException) cause).getStatus();
 				} else {
-					status = new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
+					status = Status.error(NLS.bind(
 							Messages.MarketplaceWizard_problemsPerformingProvisioningOperation,
 							new Object[] { cause.getMessage() }), cause);
 				}

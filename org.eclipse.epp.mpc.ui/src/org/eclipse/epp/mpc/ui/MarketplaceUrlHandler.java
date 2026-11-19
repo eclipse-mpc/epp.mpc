@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2011, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -136,7 +136,7 @@ public abstract class MarketplaceUrlHandler {
 	public static boolean triggerInstall(SolutionInstallationInfo info) {
 		if (info.getRequestUrl() != null) {
 			MarketplaceClientUi.getLog().log(
-					new Status(IStatus.INFO, MarketplaceClientUi.BUNDLE_ID, NLS.bind(
+					Status.info(NLS.bind(
 							Messages.MarketplaceUrlHandler_performInstallRequest, info.getRequestUrl())));
 		}
 		String installId = info.getInstallId();
