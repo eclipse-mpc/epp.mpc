@@ -16,12 +16,12 @@ package org.eclipse.epp.mpc.tests.util;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -67,9 +67,8 @@ import org.eclipse.epp.mpc.core.service.ServiceHelper;
 import org.eclipse.epp.mpc.core.service.ServiceUnavailableException;
 import org.eclipse.epp.mpc.tests.LambdaMatchers;
 import org.hamcrest.CoreMatchers;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.osgi.framework.BundleContext;
@@ -116,13 +115,13 @@ public class TransportFactoryTest {
 		}
 	}
 
-	@Before
+	@BeforeEach
 	public void clearTransportFilters() {
 		System.getProperties().remove("org.eclipse.epp.mpc.core.service.transport.disabled");
 		System.getProperties().remove("org.eclipse.ecf.provider.filetransfer.excludeContributors");
 	}
 
-	@Before
+	@BeforeEach
 	public void initServiceHelper() {
 		ServiceHelperImpl.getImplInstance();
 	}
@@ -236,9 +235,11 @@ public class TransportFactoryTest {
 		assertEquals("legacy:org.eclipse.epp.internal.mpc.core.util.P2TransportFactory", transportServiceName);
 	}
 
-	@Test(expected = ServiceUnavailableException.class)
+	@Test
 	public void testHttpClientTransportErrorHandling() throws Exception {
-		createFailingHttpClientTransport().stream(URI.create("http://127.0.0.1:54321"), null);
+		HttpClientTransport transport = createFailingHttpClientTransport();
+		assertThrows(ServiceUnavailableException.class,
+				() -> transport.stream(URI.create("http://127.0.0.1:54321"), null));
 	}
 
 	private static HttpClientTransport createFailingHttpClientTransport() throws Exception {
@@ -346,7 +347,7 @@ public class TransportFactoryTest {
 	@Test
 	public void testHttpClientTransportWin32Support() throws Exception {
 		BundleContext bundleContext = FrameworkUtil.getBundle(TransportFactory.class).getBundleContext();
-		Assume.assumeThat(bundleContext.getProperty("osgi.os"), is("win32"));
+		assumeTrue("win32".equals(bundleContext.getProperty("osgi.os")));
 		HttpContext context = interceptRequest().getInterceptedContext();
 
 		Lookup<AuthSchemeFactory> authRegistry = HttpClientContext.castOrCreate(context).getAuthSchemeRegistry();

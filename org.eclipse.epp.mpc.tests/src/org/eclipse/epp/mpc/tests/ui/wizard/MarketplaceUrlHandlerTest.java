@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2011, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,7 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui.wizard;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.URL;
 
@@ -22,9 +22,9 @@ import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler;
 import org.eclipse.epp.mpc.ui.MarketplaceUrlHandler.SolutionInstallationInfo;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test {@link MarketplaceUrlHandler}
@@ -35,14 +35,14 @@ public class MarketplaceUrlHandlerTest {
 
 	private CatalogDescriptor eclipseMarketplace;
 
-	@Before
+	@BeforeEach
 	public void installMockMarketplace() throws Exception {
 		URL url = new URL("https://marketplace.eclipse.org");
 		eclipseMarketplace = new CatalogDescriptor(url, "Eclipse Marketplace");
 		CatalogRegistry.getInstance().register(eclipseMarketplace);
 	}
 
-	@After
+	@AfterEach
 	public void uninstallMockMarketplace() throws Exception {
 		CatalogRegistry.getInstance().unregister(eclipseMarketplace);
 	}

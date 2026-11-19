@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -12,14 +12,15 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.util;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class URLUtilTest {
 
@@ -53,19 +54,19 @@ public class URLUtilTest {
 		assertEquals("https://marketplace.eclipse.org/sites/default%20files/logo%202.png", url.toString());
 	}
 
-	@Test(expected = MalformedURLException.class)
-	public void testEmptyUrl() throws MalformedURLException {
-		URLUtil.toURL("");
+	@Test
+	public void testEmptyUrl() {
+		assertThrows(MalformedURLException.class, () -> URLUtil.toURL(""));
 	}
 
-	@Test(expected = MalformedURLException.class)
-	public void testRelativeUrl() throws MalformedURLException {
-		URLUtil.toURL("sites/default/files/logo.png");
+	@Test
+	public void testRelativeUrl() {
+		assertThrows(MalformedURLException.class, () -> URLUtil.toURL("sites/default/files/logo.png"));
 	}
 
-	@Test(expected = MalformedURLException.class)
-	public void testNullUrl() throws MalformedURLException {
-		URLUtil.toURL(null);
+	@Test
+	public void testNullUrl() {
+		assertThrows(MalformedURLException.class, () -> URLUtil.toURL(null));
 	}
 
 }
