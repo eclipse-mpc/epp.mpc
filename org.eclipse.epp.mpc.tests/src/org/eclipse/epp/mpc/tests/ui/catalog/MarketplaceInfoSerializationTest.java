@@ -434,8 +434,7 @@ public class MarketplaceInfoSerializationTest {
 		if (loaded == null) {
 			return "nowhere";
 		}
-		if (loaded instanceof TestMarketplaceInfo) {
-			TestMarketplaceInfo testInfo = (TestMarketplaceInfo) loaded;
+		if (loaded instanceof TestMarketplaceInfo testInfo) {
 			return testInfo.loadedFrom == null ? "unknown" : testInfo.loadedFrom.getAbsolutePath();
 		}
 		return "unknown";

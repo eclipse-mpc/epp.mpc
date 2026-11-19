@@ -76,8 +76,8 @@ class CacheCredentialsAuthenticationStrategy implements HttpResponseInterceptor 
 	private static CredentialsStore getCredentialsCache(HttpContext context) {
 		CredentialsStore credentialsCache = null;
 		Object value = context.getAttribute(CREDENTIALS_CACHE_ATTRIBUTE);
-		if (value instanceof CredentialsStore) {
-			credentialsCache = (CredentialsStore) value;
+		if (value instanceof CredentialsStore credentialsStore) {
+			credentialsCache = credentialsStore;
 		}
 		return credentialsCache;
 	}

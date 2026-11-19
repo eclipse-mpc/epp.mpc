@@ -360,8 +360,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		for (ListIterator<CatalogItem> i = items.listIterator(items.size()); i.hasPrevious();) {
 			CatalogItem item = i.previous();
 			if (item.getSource() == source && (item.getCategory() == catalogCategory || catalogCategory.getId().equals(item.getCategoryId()))
-					&& item instanceof UserActionCatalogItem) {
-				UserActionCatalogItem actionItem = (UserActionCatalogItem) item;
+					&& item instanceof UserActionCatalogItem actionItem) {
 				if (actionItem.getUserAction() == userAction) {
 					return actionItem;
 				}

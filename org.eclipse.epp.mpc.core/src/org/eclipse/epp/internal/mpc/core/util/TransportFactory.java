@@ -197,12 +197,10 @@ public abstract class TransportFactory implements ITransportFactory {
 				return null;
 			}
 			ITransportFactory service = context.getService(reference);
-			if (service instanceof TransportFactory.LegacyFactory) {
-				TransportFactory.LegacyFactory legacyFactory = (TransportFactory.LegacyFactory) service;
+			if (service instanceof TransportFactory.LegacyFactory legacyFactory) {
 				service = legacyFactory.getDelegate();
 			}
-			if (service instanceof TransportFactory) {
-				TransportFactory transportFactory = (TransportFactory) service;
+			if (service instanceof TransportFactory transportFactory) {
 				if (!trackedServices.containsValue(transportFactory)) {
 					trackedServices.put(reference, transportFactory);
 					return transportFactory;
@@ -430,15 +428,13 @@ public abstract class TransportFactory implements ITransportFactory {
 
 	protected void handleStreamExceptions(Exception e) throws ServiceUnavailableException, CoreException,
 	FileNotFoundException {
-		if (e instanceof InvocationTargetException) {
-			InvocationTargetException targetException = (InvocationTargetException) e;
+		if (e instanceof InvocationTargetException targetException) {
 			Throwable cause = targetException.getCause();
-			if (cause instanceof CoreException) {
-				CoreException coreCause = (CoreException) cause;
+			if (cause instanceof CoreException coreCause) {
 				handleServiceUnavailable(coreCause);
 				throw coreCause;
-			} else if (cause instanceof FileNotFoundException) {
-				throw (FileNotFoundException) cause;
+			} else if (cause instanceof FileNotFoundException fileNotFoundException) {
+				throw fileNotFoundException;
 			}
 
 		} else {

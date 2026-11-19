@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2018, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -96,8 +96,8 @@ public interface SWTBotComboAdapter {
 	public static SWTBotComboAdapter comboBox(SWTBot bot, int index) {
 		Matcher<Widget> matcher = anyOf(widgetOfType(Combo.class), widgetOfType(CCombo.class));
 		Widget widget = bot.widget(matcher, index);
-		if (widget instanceof CCombo) {
-			return new CComboAdapter((CCombo) widget, matcher);
+		if (widget instanceof CCombo cCombo) {
+			return new CComboAdapter(cCombo, matcher);
 		}
 		return new ComboAdapter((Combo) widget, matcher);
 	}

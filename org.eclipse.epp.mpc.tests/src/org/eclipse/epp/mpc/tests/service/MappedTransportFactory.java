@@ -77,8 +77,7 @@ public class MappedTransportFactory implements ITransportFactory {
 				if (delegate instanceof HttpClientTransportFactory httpClientFactory) {
 					delegate = new FallbackTransportFactory(httpClientFactory);
 				}
-				if (delegate instanceof FallbackTransportFactory) {
-					FallbackTransportFactory fallbackFactory = (FallbackTransportFactory) delegate;
+				if (delegate instanceof FallbackTransportFactory fallbackFactory) {
 					ITransportFactory primaryFactory = fallbackFactory.getPrimaryFactory();
 					if (primaryFactory instanceof HttpClientTransportFactory) {
 						ITransportFactory secondaryFactory = fallbackFactory.getFallbackFactory();
@@ -126,8 +125,8 @@ public class MappedTransportFactory implements ITransportFactory {
 		if (transportFactory != this) {
 			unregister();
 			ITransportFactory delegate = transportFactory;
-			if (delegate instanceof MappedTransportFactory) {
-				delegate = ((MappedTransportFactory) delegate).getDelegate();
+			if (delegate instanceof MappedTransportFactory mappedFactory) {
+				delegate = mappedFactory.getDelegate();
 			}
 			this.delegate = delegate;
 			Dictionary<String, Object> maxServiceRanking = new Hashtable<>(Collections.singletonMap(
@@ -151,8 +150,8 @@ public class MappedTransportFactory implements ITransportFactory {
 
 	public static synchronized MappedTransportFactory get() {
 		ITransportFactory transportFactory = ServiceHelper.getTransportFactory();
-		if (transportFactory instanceof MappedTransportFactory) {
-			return (MappedTransportFactory) transportFactory;
+		if (transportFactory instanceof MappedTransportFactory mappedTransportFactory) {
+			return mappedTransportFactory;
 		}
 		MappedTransportFactory factory = new MappedTransportFactory();
 		factory.register();

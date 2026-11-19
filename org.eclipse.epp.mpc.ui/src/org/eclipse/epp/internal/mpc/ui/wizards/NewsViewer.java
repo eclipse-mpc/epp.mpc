@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -158,8 +158,8 @@ public class NewsViewer {
 	}
 
 	public Browser getBrowser() {
-		if (browser instanceof Browser) {
-			return (Browser) browser;
+		if (browser instanceof Browser embeddedBrowser) {
+			return embeddedBrowser;
 		} else {
 			return null;
 		}
@@ -176,8 +176,8 @@ public class NewsViewer {
 	}
 
 	protected void showUrl(String url) {
-		if (browser instanceof Browser) {
-			((Browser) browser).setUrl(url);
+		if (browser instanceof Browser embeddedBrowser) {
+			embeddedBrowser.setUrl(url);
 		} else {
 			Link link = (Link) browser;
 			link.setData("href", url); //$NON-NLS-1$
@@ -188,14 +188,14 @@ public class NewsViewer {
 	}
 
 	public void refresh() {
-		if (browser instanceof Browser) {
-			((Browser) browser).refresh();
+		if (browser instanceof Browser embeddedBrowser) {
+			embeddedBrowser.refresh();
 		}
 	}
 
 	public void stop() {
-		if (browser instanceof Browser) {
-			((Browser) browser).stop();
+		if (browser instanceof Browser embeddedBrowser) {
+			embeddedBrowser.stop();
 		}
 	}
 

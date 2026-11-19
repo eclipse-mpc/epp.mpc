@@ -56,7 +56,7 @@ public class MarketplaceUnmarshaller implements IMarketplaceUnmarshaller {
 		final Unmarshaller unmarshaller = new Unmarshaller();
 		final XMLReader xmlReader = Unmarshaller.createXMLReader(unmarshaller);
 
-		BufferedInputStream bufferedInput = in instanceof BufferedInputStream ? (BufferedInputStream) in
+		BufferedInputStream bufferedInput = in instanceof BufferedInputStream bufferedInputStream ? bufferedInputStream
 				: new BufferedInputStream(in);
 		ByteBuffer peekBuffer = peekResponseContent(bufferedInput);
 

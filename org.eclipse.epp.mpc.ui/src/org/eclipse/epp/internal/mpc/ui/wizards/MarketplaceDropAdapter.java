@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2011, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -135,8 +135,7 @@ public class MarketplaceDropAdapter implements IStartup {
 			registerWithExistingTarget(childTarget);
 			registerDropListener(childTarget, dropListener);
 		}
-		if (child instanceof Composite) {
-			Composite composite = (Composite) child;
+		if (child instanceof Composite composite) {
 			// Bug 485245 - avoid UI freezes for deeply nested widget trees
 			composite.getDisplay().asyncExec(() -> {
 				if (!composite.isDisposed()) {
@@ -173,8 +172,8 @@ public class MarketplaceDropAdapter implements IStartup {
 			return null;
 		}
 		Object object = control.getData(DND.DROP_TARGET_KEY);
-		if (object instanceof DropTarget) {
-			return (DropTarget) object;
+		if (object instanceof DropTarget dropTarget) {
+			return dropTarget;
 		}
 		return null;
 	}
@@ -348,12 +347,12 @@ public class MarketplaceDropAdapter implements IStartup {
 			if (eventData == null) {
 				return null;
 			}
-			if (eventData == null || !(eventData instanceof String)) {
+			if (!(eventData instanceof String text)) {
 				return null;
 			}
 			// Depending on the form the link and browser/os,
 			// we get the url twice in the data separated by new lines
-			String[] dataLines = ((String) eventData).split(System.getProperty("line.separator")); //$NON-NLS-1$
+			String[] dataLines = text.split(System.getProperty("line.separator")); //$NON-NLS-1$
 			String url = dataLines[0];
 			return url;
 		}

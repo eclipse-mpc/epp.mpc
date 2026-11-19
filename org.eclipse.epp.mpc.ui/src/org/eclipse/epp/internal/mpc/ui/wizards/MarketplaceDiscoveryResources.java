@@ -112,8 +112,7 @@ public class MarketplaceDiscoveryResources extends DiscoveryResources {
 			final String imagePath, Image fallbackImage) {
 		if (imagePath != null && imagePath.length() > 0) {
 			Image image = null;
-			if (discoverySource instanceof MarketplaceCatalogSource) {
-				MarketplaceCatalogSource marketplaceSource = (MarketplaceCatalogSource) discoverySource;
+			if (discoverySource instanceof MarketplaceCatalogSource marketplaceSource) {
 				ResourceFuture resource = marketplaceSource.getResourceProvider().getResource(imagePath);
 				if (resource != null) {
 					URL localURL = resource.getLocalURL();

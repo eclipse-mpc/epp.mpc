@@ -163,11 +163,9 @@ public class ResourceProvider {
 				return get();
 			} catch (ExecutionException e) {
 				Throwable cause = e.getCause();
-				if (cause instanceof RuntimeException) {
-					RuntimeException runtimeException = (RuntimeException) cause;
+				if (cause instanceof RuntimeException runtimeException) {
 					throw runtimeException;
-				} else if (cause instanceof IOException) {
-					IOException ioException = (IOException) cause;
+				} else if (cause instanceof IOException ioException) {
 					throw ioException;
 				} else {
 					IOException ioException = new IOException(cause.getMessage());

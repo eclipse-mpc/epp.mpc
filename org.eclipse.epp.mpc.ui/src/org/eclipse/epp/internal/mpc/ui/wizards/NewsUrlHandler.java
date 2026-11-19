@@ -158,8 +158,7 @@ public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationLis
 				String id = filter.substring("tid:".length()); //$NON-NLS-1$
 				List<CatalogCategory> catalogCategories = marketplaceWizard.getCatalog().getCategories();
 				for (CatalogCategory catalogCategory : catalogCategories) {
-					if (catalogCategory instanceof MarketplaceCategory) {
-						MarketplaceCategory marketplaceCategory = (MarketplaceCategory) catalogCategory;
+					if (catalogCategory instanceof MarketplaceCategory marketplaceCategory) {
 						List<? extends IMarket> markets = marketplaceCategory.getMarkets();
 						for (IMarket market : markets) {
 							if (id.equals(market.getId())) {

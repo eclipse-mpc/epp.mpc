@@ -848,11 +848,10 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 					}
 				}
 				if (ProvisioningUI.getDefaultUI().getPolicy().getCheckAgainstCurrentExecutionEnvironment()) {
-					if ((profileChangeOperation instanceof RemediationOperation)
-							&& ((RemediationOperation) profileChangeOperation).getCurrentRemedy() == null) {
+					if ((profileChangeOperation instanceof RemediationOperation remediationOperation)
+							&& remediationOperation.getCurrentRemedy() == null) {
 						// "Dirty" workaround, see bug 561865: To be able to calculate a plan while checking compatibility to the running JRE, we set the current remedy to the best solution found, here.
 						// This is reset afterwards, but not reresolved since this costs extra time and does not seem to be needed.
-						RemediationOperation remediationOperation = (RemediationOperation) profileChangeOperation;
 						try {
 							remediationOperation.setCurrentRemedy(
 									((RemediationOperation) profileChangeOperation).bestSolutionChangingTheRequest());
@@ -867,8 +866,8 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 			} catch (InvocationTargetException e) {
 				Throwable cause = e.getCause();
 				IStatus status;
-				if (cause instanceof CoreException) {
-					status = ((CoreException) cause).getStatus();
+				if (cause instanceof CoreException coreException) {
+					status = coreException.getStatus();
 				} else {
 					status = Status.error(NLS.bind(
 							Messages.MarketplaceWizard_problemsPerformingProvisioningOperation,
@@ -1090,8 +1089,8 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 		MarketplaceDiscoveryStrategy marketplaceStrategy = null;
 		List<AbstractDiscoveryStrategy> discoveryStrategies = getCatalog().getDiscoveryStrategies();
 		for (AbstractDiscoveryStrategy strategy : discoveryStrategies) {
-			if (strategy instanceof MarketplaceDiscoveryStrategy) {
-				marketplaceStrategy = (MarketplaceDiscoveryStrategy) strategy;
+			if (strategy instanceof MarketplaceDiscoveryStrategy marketplaceDiscoveryStrategy) {
+				marketplaceStrategy = marketplaceDiscoveryStrategy;
 				break;
 			}
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -33,8 +33,8 @@ public class LambdaMatchers {
 
 		@Override
 		public void describeTo(Description description) {
-			if (predicate instanceof SelfDescribing) {
-				((SelfDescribing) predicate).describeTo(description);
+			if (predicate instanceof SelfDescribing selfDescribing) {
+				selfDescribing.describeTo(description);
 			} else {
 				description.appendText("predicate ").appendValue(predicate);
 			}
@@ -60,8 +60,7 @@ public class LambdaMatchers {
 		@Override
 		public void describeTo(Description description) {
 			description.appendText("under ");
-			if (function instanceof SelfDescribing) {
-				SelfDescribing describingFunction = (SelfDescribing) function;
+			if (function instanceof SelfDescribing describingFunction) {
 				describingFunction.describeTo(description);
 			} else {
 				description.appendValue(function);

@@ -57,8 +57,8 @@ public class ServiceUtil {
 			return 0;
 		}
 		Object ranking = reference.getProperty(Constants.SERVICE_RANKING);
-		if (ranking instanceof Integer) {
-			return (Integer) ranking;
+		if (ranking instanceof Integer integer) {
+			return integer;
 		}
 		return 0;
 	}
@@ -106,9 +106,9 @@ public class ServiceUtil {
 	public static URL getUrl(Map<?, ?> properties, String key, URL defaultValue) {
 		if (properties != null) {
 			Object value = properties.get(key);
-			if (value instanceof String) {
+			if (value instanceof String string) {
 				try {
-					return URLUtil.toURL((String) value);
+					return URLUtil.toURL(string);
 				} catch (MalformedURLException e) {
 					MarketplaceClientCore.error(e);
 				}

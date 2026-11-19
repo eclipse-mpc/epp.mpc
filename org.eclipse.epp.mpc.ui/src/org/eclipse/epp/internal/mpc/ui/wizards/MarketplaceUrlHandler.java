@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2011, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -65,8 +65,8 @@ public abstract class MarketplaceUrlHandler extends org.eclipse.epp.mpc.ui.Marke
 	@Deprecated
 	protected boolean handleInstallRequest(
 			org.eclipse.epp.mpc.ui.MarketplaceUrlHandler.SolutionInstallationInfo installInfo, String url) {
-		if (installInfo instanceof SolutionInstallationInfo) {
-			return handleInstallRequest((SolutionInstallationInfo) installInfo, url);
+		if (installInfo instanceof SolutionInstallationInfo solutionInstallationInfo) {
+			return handleInstallRequest(solutionInstallationInfo, url);
 		}
 		return handleInstallRequest(wrap(installInfo), url);
 	}

@@ -34,10 +34,9 @@ public class GradientCanvasPropertyHandler  extends AbstractCSSPropertySWTHandle
 	@Override
 	protected void applyCSSProperty(Control control, String property, CSSValue value, String pseudo, CSSEngine engine)
 			throws Exception {
-		if (!(control instanceof GradientCanvas)) {
+		if (!(control instanceof GradientCanvas canvas)) {
 			return;
 		}
-		GradientCanvas canvas = (GradientCanvas) control;
 		if (BACKGROUND_COLOR.equals(property)) {
 			if (value.getCssValueType() == CSSValue.CSS_VALUE_LIST) {
 				Gradient grad = (Gradient) engine.convert(value, Gradient.class, canvas.getDisplay());

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -111,12 +111,12 @@ public class NodeContentHandler extends UnmarshalContentHandler {
 	@Override
 	public boolean endElement(String uri, String localName) throws SAXException {
 		if (localName.equals("node")) { //$NON-NLS-1$
-			if (parentModel instanceof Marketplace) {
-				((Marketplace) parentModel).getNode().add(model);
-			} else if (parentModel instanceof NodeListing) {
-				((NodeListing) parentModel).getNode().add(model);
-			} else if (parentModel instanceof Category) {
-				((Category) parentModel).getNode().add(model);
+			if (parentModel instanceof Marketplace marketplace) {
+				marketplace.getNode().add(model);
+			} else if (parentModel instanceof NodeListing nodeListing) {
+				nodeListing.getNode().add(model);
+			} else if (parentModel instanceof Category category) {
+				category.getNode().add(model);
 			}
 			getUnmarshaller().setModel(model);
 			model = null;

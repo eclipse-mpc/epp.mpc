@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -58,8 +58,8 @@ public class IuContentHandler extends UnmarshalContentHandler {
 		if (localName.equals("iu")) { //$NON-NLS-1$
 			if (content != null) {
 				model.setId(content.toString());
-				if (parentModel instanceof Ius) {
-					((Ius) parentModel).getIuElements().add(model);
+				if (parentModel instanceof Ius ius) {
+					ius.getIuElements().add(model);
 				}
 				content = null;
 				getUnmarshaller().setModel(model);

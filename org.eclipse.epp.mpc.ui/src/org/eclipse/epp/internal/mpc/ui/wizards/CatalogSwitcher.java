@@ -92,8 +92,7 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 
 		SelectionListener selectionListener = SelectionListener.widgetSelectedAdapter(c -> {
 			Object data = c.data;
-			if (data instanceof CatalogDescriptor) {
-				CatalogDescriptor catalogDescriptor = (CatalogDescriptor) data;
+			if (data instanceof CatalogDescriptor catalogDescriptor) {
 				this.selection = catalogDescriptor;
 				refreshSelection();
 				fireSelectionChanged();
@@ -166,8 +165,7 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 
 	@Override
 	public void setSelection(ISelection newSelection) {
-		if (newSelection instanceof IStructuredSelection) {
-			IStructuredSelection structuredSelection = (IStructuredSelection) newSelection;
+		if (newSelection instanceof IStructuredSelection structuredSelection) {
 			CatalogDescriptor oldDescriptor = this.selection;
 			CatalogDescriptor newDescriptor = (CatalogDescriptor) structuredSelection.getFirstElement();
 			this.selection = newDescriptor;

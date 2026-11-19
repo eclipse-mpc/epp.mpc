@@ -377,8 +377,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 
 	private INode getCatalogItemNode() {
 		Object data = connector.getData();
-		if (data instanceof INode) {
-			INode node = (INode) data;
+		if (data instanceof INode node) {
 			return node;
 		}
 		return null;
@@ -639,8 +638,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 			protected void selected(Object href, TypedEvent e) {
 				if (href == ELLIPSIS) {
 					Object data = e.widget.getData();
-					if (data instanceof ToolTip) {
-						ToolTip tooltip = (ToolTip) data;
+					if (data instanceof ToolTip tooltip) {
 						tooltip.show(new Point(0, 0));
 					}
 				} else if (href != null) {
@@ -759,8 +757,8 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		control.addListener(SWT.MouseExit, listener);
 		control.addListener(SWT.MouseDown, listener);
 		control.addListener(SWT.MouseWheel, listener);
-		if (control instanceof Composite) {
-			for (Control child : ((Composite) control).getChildren()) {
+		if (control instanceof Composite container) {
+			for (Control child : container.getChildren()) {
 				hookRecursively(child, listener);
 			}
 		}
@@ -778,8 +776,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 				overview);
 		hookTooltip(toolTip, tipActivator, exitControl);
 
-		if (tipActivator instanceof StyledText) {
-			StyledText link = (StyledText) tipActivator;
+		if (tipActivator instanceof StyledText link) {
 
 			new LinkListener() {
 				@Override
