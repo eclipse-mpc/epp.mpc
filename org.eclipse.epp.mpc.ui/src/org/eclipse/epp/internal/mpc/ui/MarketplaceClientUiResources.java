@@ -79,15 +79,7 @@ public class MarketplaceClientUiResources {
 
 	public static final String DEFAULT_MARKETPLACE_ICON = "DEFAULT_MARKETPLACE_ICON"; //$NON-NLS-1$
 
-	public static final String ACTION_ICON_FAVORITES = "ACTION_ICON_FAVORITES"; //$NON-NLS-1$
-
-	public static final String ACTION_ICON_LOGIN = "ACTION_ICON_LOGIN"; //$NON-NLS-1$
-
-	public static final String ACTION_ICON_WARNING = "ACTION_ICON_WARNING"; //$NON-NLS-1$
-
 	public static final String ACTION_ICON_UPDATE = "ACTION_ICON_UPDATE"; //$NON-NLS-1$
-
-	public static final String FAVORITES_LIST_ICON = "FAVORITES_LIST_ICON"; //$NON-NLS-1$
 
 	public static final String ITEM_ICON_STAR = "ITEM_ICON_STAR"; //$NON-NLS-1$
 
@@ -189,16 +181,8 @@ public class MarketplaceClientUiResources {
 				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/star-selected.png").get()); //$NON-NLS-1$
 		imageRegistry.put(ITEM_ICON_SHARE,
 				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/share.png").get()); //$NON-NLS-1$
-		imageRegistry.put(ACTION_ICON_FAVORITES,
-				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/action-item-favorites.png").get()); //$NON-NLS-1$
-		imageRegistry.put(ACTION_ICON_LOGIN,
-				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/action-item-login.png").get()); //$NON-NLS-1$
-		imageRegistry.put(ACTION_ICON_WARNING,
-				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/action-item-warning.png").get()); //$NON-NLS-1$
 		imageRegistry.put(ACTION_ICON_UPDATE,
 				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/action-item-update.png").get()); //$NON-NLS-1$
-		imageRegistry.put(FAVORITES_LIST_ICON,
-				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/favorites-list.png").get()); //$NON-NLS-1$
 	}
 
 	public static synchronized MarketplaceClientUiResources getInstance() {
