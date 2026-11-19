@@ -101,7 +101,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.LifecycleMethodExecutionExceptionHandler;
 import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
-import org.opentest4j.TestAbortedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,7 +118,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 			testNode("2579663", "https://marketplace.eclipse.org/content/egerrit", "EGerrit") //
 	};
 
-	private static INode testNode(String id, String url, String name) {
+	protected static INode testNode(String id, String url, String name) {
 		Node node = (Node) QueryHelper.nodeById(id);
 		node.setUrl(url);
 		node.setName(name);
@@ -185,9 +184,13 @@ public abstract class AbstractMarketplaceWizardBotTest {
 	}
 
 	protected void launchMarketplaceWizard() {
+		launchMarketplaceWizard(TEST_NODES);
+	}
+
+	protected void launchMarketplaceWizard(INode... content) {
 		final MarketplaceWizardCommand marketplaceWizardCommand = new MarketplaceWizardCommand();
 		WizardState wizardState = new WizardState();
-		wizardState.setContent(new LinkedHashSet<>(Arrays.asList(TEST_NODES)));
+		wizardState.setContent(new LinkedHashSet<>(Arrays.asList(content)));
 		wizardState.setProceedWithInstallation(false);
 		marketplaceWizardCommand.setWizardDialogState(wizardState);
 
@@ -637,36 +640,4 @@ public abstract class AbstractMarketplaceWizardBotTest {
 		return getWizardDialog().getWizard();
 	}
 
-	protected SWTBot assume(SWTBot bot) {
-		return new SWTBot(bot.getFinder()) {
-			@Override
-			public void waitUntilWidgetAppears(ICondition waitForWidget) {
-				try {
-					super.waitUntilWidgetAppears(waitForWidget);
-				} catch (TimeoutException e) {
-					throw new TestAbortedException(e.getMessage(), e);
-				} catch (WidgetNotFoundException e) {
-					throw new TestAbortedException(e.getMessage(), e);
-				}
-			}
-
-			@Override
-			public void waitUntil(ICondition condition, long timeout, long interval) throws TimeoutException {
-				try {
-					super.waitUntil(condition, timeout, interval);
-				} catch (TimeoutException e) {
-					throw new TestAbortedException(e.getMessage(), e);
-				}
-			}
-
-			@Override
-			public void waitWhile(ICondition condition, long timeout, long interval) throws TimeoutException {
-				try {
-					super.waitWhile(condition, timeout, interval);
-				} catch (TimeoutException e) {
-					throw new TestAbortedException(e.getMessage(), e);
-				}
-			}
-		};
-	}
 }

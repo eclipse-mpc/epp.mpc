@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui.wizard;
 
+import static org.eclipse.swtbot.eclipse.finder.matchers.WidgetMatcherFactory.withPartId;
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.allOf;
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.withId;
@@ -20,20 +21,29 @@ import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.withTe
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.epp.internal.mpc.ui.wizards.AbstractMarketplaceDiscoveryItem;
 import org.eclipse.epp.internal.mpc.ui.wizards.DiscoveryItem;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplacePage;
 import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceViewer;
+import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.tests.ui.wizard.matcher.NodeMatcher;
 import org.eclipse.epp.mpc.tests.ui.wizard.widgets.SWTBotClickableStyledText;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Widget;
-import org.eclipse.swtbot.swt.finder.SWTBot;
+import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
+import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
+import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEditor;
+import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
+import org.eclipse.swtbot.swt.finder.results.Result;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotBrowser;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
@@ -41,7 +51,6 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotLink;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotStyledText;
 import org.hamcrest.Matcher;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 
@@ -69,7 +78,6 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 		itemBot(NodeMatcher.withNameRegex(".*WindowBuilder.*"));
 	}
 
-	@Disabled //Tags are currently disabled in the REST API
 	@Test
 	public void testSearchTag() {
 		Matcher<StyledText> widgetOfType = widgetOfType(StyledText.class);
@@ -79,12 +87,34 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 		Matcher<StyledText> nonEmptyTagMatcher = allOf(widgetOfType, withId, not(emptyText));
 		SWTBotClickableStyledText tagsLabel = SWTBotClickableStyledText.from(new SWTBotStyledText(bot.widget(
 				nonEmptyTagMatcher, 0), nonEmptyTagMatcher));
+		String listingId = listingIdOf(tagsLabel.widget);
+		assertNotNull(listingId);
 		StyleRange linkRange = findLink(tagsLabel);
 		String tag = getText(linkRange, tagsLabel);
 		tagsLabel.click(linkRange);
 		waitForWizardProgress();
 		String searchTerm = searchField().getText();
 		assertEquals(MarketplaceViewer.QUERY_TAG_KEYWORD + tag, searchTerm);
+		//the listing the tag was clicked on has to be among the results
+		itemBot(NodeMatcher.withId(listingId));
+	}
+
+	/**
+	 * Returns the id of the marketplace listing the given widget belongs to.
+	 */
+	private static String listingIdOf(Widget widget) {
+		return UIThreadRunnable.syncExec((Result<String>) () -> {
+			for (Control control = (Control) widget; control != null; control = control.getParent()) {
+				Object data = control.getData();
+				if (data instanceof CatalogItem catalogItem) {
+					data = catalogItem.getData();
+				}
+				if (data instanceof INode node) {
+					return node.getId();
+				}
+			}
+			return null;
+		});
 	}
 
 	@Test
@@ -116,33 +146,68 @@ public class MarketplaceWizardTest extends AbstractMarketplaceWizardBotTest {
 		}, 10000);
 	}
 
+	/**
+	 * A long-standing listing without an update site, which the wizard shows with a "learn more" link instead of an
+	 * install button.
+	 */
+	private static final INode NONINSTALLABLE_NODE = testNode("131", "https://marketplace.eclipse.org/content/jinto",
+			"JInto");
+
 	//TODO conditional on embedded browser availability
-	//FIXME
-	@Disabled("Tooltip doesn't stay open")
 	@Test
 	public void testMoreInfoLearnMore() {
-		SWTBotClickableStyledText descriptionLabel = SWTBotClickableStyledText.from(bot.styledTextWithId(
-				AbstractMarketplaceDiscoveryItem.WIDGET_ID_KEY, AbstractMarketplaceDiscoveryItem.WIDGET_ID_DESCRIPTION));
-		StyleRange linkRange = findLink(descriptionLabel, "more\u00a0info");
-		bot.sleep(5000);
-		descriptionLabel.click(linkRange);
-		bot.sleep(5000);
-		SWTBotShell tooltip = bot.shellWithId(AbstractMarketplaceDiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_OVERVIEW);
-		SWTBotLink moreLink = tooltip.bot().linkWithId(AbstractMarketplaceDiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_LEARNMORE);
-		moreLink.click();
+		runWithInternalBrowser(() -> {
+			SWTBotClickableStyledText descriptionLabel = SWTBotClickableStyledText.from(bot.styledTextWithId(
+					AbstractMarketplaceDiscoveryItem.WIDGET_ID_KEY, AbstractMarketplaceDiscoveryItem.WIDGET_ID_DESCRIPTION));
+			StyleRange linkRange = findLink(descriptionLabel, "more\u00a0info");
+			//the tooltip closes when the mouse leaves the description, so click without the final mouse exit
+			descriptionLabel.clickWithoutMouseExit(linkRange);
+			SWTBotShell tooltip = bot.shellWithId(AbstractMarketplaceDiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_OVERVIEW);
+			SWTBotLink moreLink = tooltip.bot().linkWithId(AbstractMarketplaceDiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_LEARNMORE);
+			moreLink.click();
 
-		checkMarketplaceBrowser();
+			checkMarketplaceBrowser();
+		});
 	}
 
 	@Test
 	public void testNoninstallableLearnMore() {
-		SWTBot assumeLearnMoreBot = assume(bot);
-		SWTBotClickableStyledText learnMoreLabel = SWTBotClickableStyledText.from(assumeLearnMoreBot.styledTextWithId(
-				AbstractMarketplaceDiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_LEARNMORE));
-		StyleRange linkRange = findLink(learnMoreLabel);
-		learnMoreLabel.click(linkRange);
+		//the default test content only contains installable solutions
+		closeWizard();
+		launchMarketplaceWizard(NONINSTALLABLE_NODE);
+		initWizardBot();
 
-		checkMarketplaceBrowser();
+		runWithInternalBrowser(() -> {
+			SWTBotClickableStyledText learnMoreLabel = SWTBotClickableStyledText.from(bot.styledTextWithId(
+					AbstractMarketplaceDiscoveryItem.WIDGET_ID_KEY, DiscoveryItem.WIDGET_ID_LEARNMORE));
+			StyleRange linkRange = findLink(learnMoreLabel);
+			learnMoreLabel.click(linkRange);
+
+			checkMarketplaceBrowser();
+		});
+	}
+
+	/**
+	 * Runs the given test code with the workbench configured to use the internal web browser, which
+	 * {@link org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceWizard#openUrl(String)} requires to open marketplace
+	 * pages in a browser editor. Afterwards, closes the browser editors, as the marketplace browser editor is reused.
+	 */
+	private static void runWithInternalBrowser(Runnable test) {
+		IEclipsePreferences browserPreferences = InstanceScope.INSTANCE.getNode("org.eclipse.ui.browser");
+		int browserChoice = browserPreferences.getInt("browser-choice", -1);
+		browserPreferences.putInt("browser-choice", 0);
+		try {
+			test.run();
+		} finally {
+			for (SWTBotEditor editor : new SWTWorkbenchBot().editors(withPartId("org.eclipse.ui.browser.editor"))) {
+				editor.close();
+			}
+			if (browserChoice == -1) {
+				browserPreferences.remove("browser-choice");
+			} else {
+				browserPreferences.putInt("browser-choice", browserChoice);
+			}
+		}
 	}
 
 	private void checkMarketplaceBrowser() {
