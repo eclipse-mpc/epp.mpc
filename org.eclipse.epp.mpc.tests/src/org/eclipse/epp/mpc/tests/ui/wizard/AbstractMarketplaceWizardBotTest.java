@@ -238,7 +238,8 @@ public abstract class AbstractMarketplaceWizardBotTest {
 			bot.waitUntil(subShellResult, 100, 60);
 			List<Shell> subShells = subShellResult.getAllMatches();
 			for (Shell shell : subShells) {
-				if (shell == mpcShell.widget) {
+				//hidden shells, like the popups of drop-down or content proposal lists, are no open dialogs
+				if (shell == mpcShell.widget || !isVisible(shell)) {
 					continue;
 				}
 
@@ -353,6 +354,10 @@ public abstract class AbstractMarketplaceWizardBotTest {
 		return "";
 	}
 
+	private static boolean isVisible(Shell shell) {
+		return UIThreadRunnable.syncExec((Result<Boolean>) () -> !shell.isDisposed() && shell.isVisible());
+	}
+
 	private static String describeShell(SWTBotShell botShell) {
 		StringBuilder description = new StringBuilder("    Shell(\"").append(botShell.getText()).append("\")");
 
@@ -360,7 +365,8 @@ public abstract class AbstractMarketplaceWizardBotTest {
 			SWTBot childBot = botShell.bot();
 			@SuppressWarnings("unchecked")
 			Matcher<Label> labelMatcher = allOf(widgetOfType(Label.class));
-			List<? extends Label> labels = childBot.widgets(labelMatcher);
+			//use the finder directly, as SWTBot.widgets() waits until a matching widget appears
+			List<? extends Label> labels = childBot.getFinder().findControls(botShell.widget, labelMatcher, true);
 			for (Label label : labels) {
 				if (label != null) {//TODO why can this be null?
 					String labelText = new SWTBotLabel(label, labelMatcher).getText();
@@ -371,7 +377,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 			}
 			@SuppressWarnings("unchecked")
 			Matcher<Button> buttonMatcher = allOf(widgetOfType(Button.class));
-			List<? extends Button> buttons = childBot.widgets(buttonMatcher);
+			List<? extends Button> buttons = childBot.getFinder().findControls(botShell.widget, buttonMatcher, true);
 			boolean firstButton = true;
 			for (Button button : buttons) {
 				if (button != null) {
