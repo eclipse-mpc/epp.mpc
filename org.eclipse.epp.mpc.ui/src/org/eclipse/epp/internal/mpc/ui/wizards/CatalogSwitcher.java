@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -32,8 +32,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.ControlAdapter;
-import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Rectangle;
@@ -111,14 +110,11 @@ public class CatalogSwitcher extends Composite implements ISelectionProvider {
 		scrollArea.setExpandVertical(true);
 		scrollArea.setExpandHorizontal(true);
 		scrollArea.setMinHeight(MIN_SCROLL_HEIGHT);
-		scrollArea.addControlListener(new ControlAdapter() {
-			@Override
-			public void controlResized(ControlEvent e) {
-				Rectangle r = parent.getClientArea();
-				int scrollBarWidth = scrollArea.getVerticalBar().getSize().x;
-				scrollArea.setMinSize(marketplaceArea.computeSize(r.width - scrollBarWidth, SWT.DEFAULT));
-			}
-		});
+		scrollArea.addControlListener(ControlListener.controlResizedAdapter(e -> {
+			Rectangle r = parent.getClientArea();
+			int scrollBarWidth = scrollArea.getVerticalBar().getSize().x;
+			scrollArea.setMinSize(marketplaceArea.computeSize(r.width - scrollBarWidth, SWT.DEFAULT));
+		}));
 	}
 
 	private void createHeader(Composite parent) {

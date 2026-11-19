@@ -132,16 +132,12 @@ public class ServiceLocator implements IMarketplaceServiceLocator {
 	}
 
 	private void updateHttpClient(HttpClientService httpClient) {
-		applyServiceReferenceOperation(marketplaceServiceTracker, new ServiceReferenceOperation<IMarketplaceService>() {
-
-			@Override
-			public void apply(ServiceReference<IMarketplaceService> reference) {
-				ServiceRegistration<IMarketplaceService> registration = getDynamicServiceInstance(reference);
-				if (registration != null) {
-					IMarketplaceService service = ServiceUtil.getService(registration);
-					if (service instanceof DefaultMarketplaceService defaultService) {
-						defaultService.setHttpClient(httpClient);
-					}
+		applyServiceReferenceOperation(marketplaceServiceTracker, reference -> {
+			ServiceRegistration<IMarketplaceService> registration = getDynamicServiceInstance(reference);
+			if (registration != null) {
+				IMarketplaceService service = ServiceUtil.getService(registration);
+				if (service instanceof DefaultMarketplaceService defaultService) {
+					defaultService.setHttpClient(httpClient);
 				}
 			}
 		});

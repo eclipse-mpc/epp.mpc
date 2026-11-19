@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010,, 2018 Tasktop Technologies and others.
+ * Copyright (c) 2010, 2026 Tasktop Technologies and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -45,8 +45,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.SWTException;
-import org.eclipse.swt.accessibility.AccessibleAdapter;
-import org.eclipse.swt.accessibility.AccessibleEvent;
+import org.eclipse.swt.accessibility.AccessibleListener;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
@@ -166,12 +165,8 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 		this.connector = connector;
 		this.viewer = viewer;
 		createContent();
-		this.getAccessible().addAccessibleListener(new AccessibleAdapter() {
-			@Override
-			public void getName(AccessibleEvent e) {
-				e.result = getNameLabelText();
-			}
-		});
+		this.getAccessible().addAccessibleListener(AccessibleListener.getNameAdapter(
+				e -> e.result = getNameLabelText()));
 		propertyChangeListener = evt -> {
 			if (!isDisposed()) {
 				getDisplay().asyncExec(() -> {

@@ -76,8 +76,7 @@ import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
@@ -269,12 +268,7 @@ public class MarketplaceViewer extends CatalogViewer {
 		}
 		Button goButton = new Button(parent, SWT.PUSH);
 		goButton.setText(Messages.MarketplaceViewer_go);
-		goButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				doQuery();
-			}
-		});
+		goButton.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> doQuery()));
 	}
 
 	protected static void fixFindControlsLayout(Composite header) {

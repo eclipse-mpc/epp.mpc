@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -23,8 +23,7 @@ import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.accessibility.Accessible;
-import org.eclipse.swt.accessibility.AccessibleAdapter;
-import org.eclipse.swt.accessibility.AccessibleEvent;
+import org.eclipse.swt.accessibility.AccessibleListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
@@ -136,14 +135,11 @@ public class AbstractMarketplaceWizardDialog extends WizardDialog {
 	protected void createButtonsForButtonBar(Composite parent) {
 		super.createButtonsForButtonBar(parent);
 		if (backButton != null || nextButton != null) {
-			AccessibleAdapter adapter = new AccessibleAdapter() {
-				@Override
-				public void getName(AccessibleEvent e) {
-					final Button button = (Button) ((Accessible) e.getSource()).getControl();
-					final String text = button.getText();
-					e.result = text.replace('<', ' ').replace('>', ' ');
-				}
-			};
+			AccessibleListener adapter = AccessibleListener.getNameAdapter(e -> {
+				final Button button = (Button) ((Accessible) e.getSource()).getControl();
+				final String text = button.getText();
+				e.result = text.replace('<', ' ').replace('>', ' ');
+			});
 			if (backButton != null) {
 				backButton.getAccessible().addAccessibleListener(adapter);
 			}
