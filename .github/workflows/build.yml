@@ -31,7 +31,6 @@ jobs:
         run: >
           mvn -B verify
           -Dmaven.test.failure.ignore=true
-          -Dtycho.disableP2Mirrors=true
           -Dorg.eclipse.swt.browser.UseWebKitGTK=true
           -Dorg.eclipse.swt.browser.DefaultType=WebKit
           -Dtycho.localArtifacts=ignore
