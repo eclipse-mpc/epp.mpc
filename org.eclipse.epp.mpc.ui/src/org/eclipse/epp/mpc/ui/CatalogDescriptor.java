@@ -110,10 +110,10 @@ public final class CatalogDescriptor {
 					resource = resourceProvider.retrieveResource(requestSource, imageUrl);
 				} catch (URISyntaxException e) {
 					ILog.get().warn(NLS.bind(Messages.CatalogDescriptor_badUri,
-							new Object[] { catalog.getName(), catalog.getId(), resource }), e);
+							catalog.getName(), catalog.getId(), resource), e);
 				} catch (IOException e) {
 					ILog.get().warn(NLS.bind(Messages.CatalogDescriptor_downloadError,
-							new Object[] { catalog.getName(), catalog.getId(), resource }), e);
+							catalog.getName(), catalog.getId(), resource), e);
 				}
 			}
 			if (resource != null) {

@@ -665,7 +665,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 						StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			} catch (MalformedURLException e) {
 				IStatus status = Status.error(NLS.bind(
-						Messages.MarketplaceWizard_cannotOpenUrl, new Object[] { url, e.getMessage() }), e);
+						Messages.MarketplaceWizard_cannotOpenUrl, url, e.getMessage()), e);
 				MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			}
 		} else {
@@ -872,7 +872,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				} else {
 					status = Status.error(NLS.bind(
 							Messages.MarketplaceWizard_problemsPerformingProvisioningOperation,
-							new Object[] { cause.getMessage() }), cause);
+							cause.getMessage()), cause);
 				}
 				MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			} catch (InterruptedException e) {

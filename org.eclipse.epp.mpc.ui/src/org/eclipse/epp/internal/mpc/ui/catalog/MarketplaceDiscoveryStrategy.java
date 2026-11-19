@@ -312,10 +312,10 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 				resourceProvider.retrieveResource(requestSource, resource);
 			} catch (URISyntaxException e) {
 				ILog.get().warn(NLS.bind(Messages.MarketplaceDiscoveryStrategy_badUri,
-						new Object[] { catalogItem.getName(), catalogItem.getId(), resource }), e);
+						catalogItem.getName(), catalogItem.getId(), resource), e);
 			} catch (IOException e) {
 				ILog.get().warn(NLS.bind(Messages.MarketplaceDiscoveryStrategy_downloadError,
-						new Object[] { catalogItem.getName(), catalogItem.getId(), resource }), e);
+						catalogItem.getName(), catalogItem.getId(), resource), e);
 			}
 		}
 	}
