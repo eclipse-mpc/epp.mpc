@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ package org.eclipse.epp.internal.mpc.core.transport.httpclient;
 import java.util.List;
 
 import org.apache.hc.client5.http.auth.CredentialsStore;
+import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.cookie.CookieStore;
@@ -142,12 +143,15 @@ public class HttpClientFactory {
 				//See http://docs.oracle.com/javase/6/docs/api/java/net/SocketOptions.html?is-external=true#SO_LINGER
 				//and https://issues.apache.org/jira/browse/HTTPCLIENT-1497
 				.build();
+		ConnectionConfig defaultConnectionConfig = ConnectionConfig.custom()
+				.setConnectTimeout(Timeout.ofMilliseconds(connectTimeout))
+				.build();
 		RequestConfig defaultRequestConfig = RequestConfig.copy(RequestConfig.DEFAULT)
 				.setResponseTimeout(Timeout.ofMilliseconds(readTimeout))
-				.setConnectTimeout(Timeout.ofMilliseconds(connectTimeout))
 				.setConnectionRequestTimeout(Timeout.ofMilliseconds(connectionRequestTimeout))
 				.build();
 		connManager.setDefaultSocketConfig(defaultSocketConfig);
+		connManager.setDefaultConnectionConfig(defaultConnectionConfig);
 		builder.setConnectionManager(connManager);
 		builder.setDefaultRequestConfig(defaultRequestConfig);
 	}
