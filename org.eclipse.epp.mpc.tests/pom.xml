@@ -30,6 +30,8 @@
 					<configuration>
 						<useUIHarness>true</useUIHarness>
 						<useUIThread>false</useUIThread>
+						<!-- mockito optionally imports JUnit 4, which would otherwise make Tycho select its JUnit 4 provider -->
+						<providerHint>junit6</providerHint>
 						<forkedProcessTimeoutInSeconds>1500</forkedProcessTimeoutInSeconds>
 						<product>org.eclipse.sdk.ide</product>
 						<application>org.eclipse.ui.ide.workbench</application>
