@@ -308,8 +308,7 @@ public class DiscoveryItem<T extends CatalogItem> extends AbstractMarketplaceDis
 
 	private INode getCatalogItemNode() {
 		Object data = connector.getData();
-		if (data instanceof INode) {
-			INode node = (INode) data;
+		if (data instanceof INode node) {
 			return node;
 		}
 		return null;

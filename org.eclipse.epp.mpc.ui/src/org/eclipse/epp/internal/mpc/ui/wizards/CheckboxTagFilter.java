@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -87,8 +87,7 @@ public class CheckboxTagFilter extends AbstractTagFilter {
 		for (Control control : buttonContainer.getChildren()) {
 			final Object data = control.getData();
 			if (data instanceof Tag) {
-				if (control instanceof Button) {
-					Button checkbox = (Button) control;
+				if (control instanceof Button checkbox) {
 					checkbox.setSelection(getSelected().contains(data));
 				}
 			}

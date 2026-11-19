@@ -82,8 +82,7 @@ class CompositeProfileChangeOperation extends InstallOperation {
 			if (extraRequirements != null) {
 				request.addExtraRequirements(extraRequirements);
 			}
-			if (operationChangeRequest instanceof ProfileChangeRequest) {
-				ProfileChangeRequest internalRequest = (ProfileChangeRequest) operationChangeRequest;
+			if (operationChangeRequest instanceof ProfileChangeRequest internalRequest) {
 				Map<IInstallableUnit, List<String>> installableUnitProfilePropertiesToRemove = internalRequest.getInstallableUnitProfilePropertiesToRemove();
 				for (Entry<IInstallableUnit, List<String>> entry : installableUnitProfilePropertiesToRemove.entrySet()) {
 					List<String> properties = entry.getValue();

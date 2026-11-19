@@ -562,8 +562,7 @@ public abstract class AbstractMarketplaceWizardBotTest {
 	private AbstractTagFilter findFilter(Class<?> classifier) {
 		List<CatalogFilter> filters = getWizard().getConfiguration().getFilters();
 		for (CatalogFilter filter : filters) {
-			if (filter instanceof AbstractTagFilter) {
-				AbstractTagFilter tagFilter = (AbstractTagFilter) filter;
+			if (filter instanceof AbstractTagFilter tagFilter) {
 				List<Tag> choices = tagFilter.getChoices();
 				Object classification = choices.isEmpty() ? null : choices.get(0).getTagClassifier();
 				if (classification == classifier) {

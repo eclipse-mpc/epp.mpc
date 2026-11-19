@@ -144,10 +144,9 @@ public class MarketplaceCatalog extends Catalog {
 				if (monitor.isCanceled()) {
 					return Status.CANCEL_STATUS;
 				}
-				if (!(item instanceof MarketplaceNodeCatalogItem)) {
+				if (!(item instanceof MarketplaceNodeCatalogItem catalogItem)) {
 					continue;
 				}
-				MarketplaceNodeCatalogItem catalogItem = (MarketplaceNodeCatalogItem) item;
 				if (catalogItem.isInstalled()) {
 					if (setUpdatesAvailable(installedIUs, catalogItem)) {
 						updateCheckNeeded.add(catalogItem);
@@ -182,8 +181,7 @@ public class MarketplaceCatalog extends Catalog {
 		if (categories != null) {
 			//Might be null if run before discovery
 			for (CatalogCategory category : categories) {
-				if (category instanceof MarketplaceCategory) {
-					MarketplaceCategory marketplaceCategory = (MarketplaceCategory) category;
+				if (category instanceof MarketplaceCategory marketplaceCategory) {
 					if (marketplaceCategory.getContents() == Contents.FEATURED) {
 						includeInstalled = true;
 						break;
@@ -252,8 +250,7 @@ public class MarketplaceCatalog extends Catalog {
 				break;
 			}
 			SubMonitor childProgress = progress.newChild(1000);
-			if (discoveryStrategy instanceof MarketplaceDiscoveryStrategy) {
-				MarketplaceDiscoveryStrategy marketplaceDiscoveryStrategy = (MarketplaceDiscoveryStrategy) discoveryStrategy;
+			if (discoveryStrategy instanceof MarketplaceDiscoveryStrategy marketplaceDiscoveryStrategy) {
 				Map<String, IInstallableUnit> ius = marketplaceDiscoveryStrategy.computeInstalledIUs(childProgress);
 				installedIUs.putAll(ius);
 			}
@@ -506,7 +503,7 @@ public class MarketplaceCatalog extends Catalog {
 					status.add(Status.CANCEL_STATUS);
 					break;
 				}
-				if (discoveryStrategy instanceof MarketplaceDiscoveryStrategy) {
+				if (discoveryStrategy instanceof MarketplaceDiscoveryStrategy marketplaceStrategy) {
 					List<CatalogCategory> oldCategories = discoveryStrategy.getCategories();
 					List<CatalogItem> oldItems = discoveryStrategy.getItems();
 					List<Certification> oldCertifications = discoveryStrategy.getCertifications();
@@ -517,7 +514,6 @@ public class MarketplaceCatalog extends Catalog {
 					discoveryStrategy.setCertifications(certifications);
 					discoveryStrategy.setTags(tags);
 					try {
-						MarketplaceDiscoveryStrategy marketplaceStrategy = (MarketplaceDiscoveryStrategy) discoveryStrategy;
 						operation.run(marketplaceStrategy, progress.newChild(strategyTicks));
 
 					} catch (CoreException e) {
@@ -570,9 +566,8 @@ public class MarketplaceCatalog extends Catalog {
 					status.add(Status.CANCEL_STATUS);
 					break;
 				}
-				if (discoveryStrategy instanceof MarketplaceDiscoveryStrategy) {
+				if (discoveryStrategy instanceof MarketplaceDiscoveryStrategy marketplaceStrategy) {
 					try {
-						MarketplaceDiscoveryStrategy marketplaceStrategy = (MarketplaceDiscoveryStrategy) discoveryStrategy;
 						news = marketplaceStrategy.performNewsDiscovery(progress.newChild(strategyTicks));
 						if (news != null) {
 							break;
@@ -608,9 +603,9 @@ public class MarketplaceCatalog extends Catalog {
 	public void installErrorReport(IProgressMonitor monitor, IStatus result, Set<CatalogItem> items,
 			IInstallableUnit[] operationIUs, String resolutionDetails) {
 		for (AbstractDiscoveryStrategy discoveryStrategy : getDiscoveryStrategies()) {
-			if (discoveryStrategy instanceof MarketplaceDiscoveryStrategy) {
+			if (discoveryStrategy instanceof MarketplaceDiscoveryStrategy marketplaceStrategy) {
 				try {
-					((MarketplaceDiscoveryStrategy) discoveryStrategy).installErrorReport(monitor, result, items,
+					marketplaceStrategy.installErrorReport(monitor, result, items,
 							operationIUs, resolutionDetails);
 				} catch (CoreException e) {
 					// log only
@@ -631,8 +626,7 @@ public class MarketplaceCatalog extends Catalog {
 	public List<IMarket> getMarkets() {
 		List<IMarket> markets = new ArrayList<>();
 		for (CatalogCategory category : getCategories()) {
-			if (category instanceof MarketplaceCategory) {
-				MarketplaceCategory marketplaceCategory = (MarketplaceCategory) category;
+			if (category instanceof MarketplaceCategory marketplaceCategory) {
 				for (IMarket market : marketplaceCategory.getMarkets()) {
 					if (!markets.contains(market)) {
 						markets.add(market);

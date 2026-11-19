@@ -67,8 +67,8 @@ public class MarketplaceClientCore {
 		}
 		IStatus statusCause = computeWellknownProblemStatus(e);
 		if (statusCause == null) {
-			if (cause instanceof CoreException) {
-				statusCause = ((CoreException) cause).getStatus();
+			if (cause instanceof CoreException coreException) {
+				statusCause = coreException.getStatus();
 			} else {
 				statusCause = Status.error(cause.getMessage(), cause);
 			}
@@ -125,8 +125,8 @@ public class MarketplaceClientCore {
 				status = createConnectionProblemStatus(exception);
 				break;
 			}
-			if (exception instanceof CoreException) {
-				IStatus exceptionStatus = ((CoreException) exception).getStatus();
+			if (exception instanceof CoreException coreException) {
+				IStatus exceptionStatus = coreException.getStatus();
 				if (MarketplaceClientCore.BUNDLE_ID.equals(exceptionStatus.getPlugin())
 						&& exceptionStatus.getCode() == 503) {
 					//received service unavailable error from P2 transport
@@ -169,8 +169,7 @@ public class MarketplaceClientCore {
 
 	private static boolean isIOExceptionWithMessage(Throwable exception, String message) {
 		while (exception != null) {
-			if (exception instanceof IOException) {
-				IOException ioException = (IOException) exception;
+			if (exception instanceof IOException ioException) {
 				return message.equals(ioException.getMessage());
 			}
 			Throwable cause = exception.getCause();

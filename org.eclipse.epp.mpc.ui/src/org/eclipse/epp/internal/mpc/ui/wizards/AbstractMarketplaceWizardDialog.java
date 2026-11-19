@@ -40,8 +40,8 @@ public class AbstractMarketplaceWizardDialog extends WizardDialog {
 				boolean isForward = forward;
 				reset();
 				Object selectedPage = event.getSelectedPage();
-				if (selectedPage instanceof IWizardPageAction) {
-					((IWizardPageAction) selectedPage).enter(isForward);
+				if (selectedPage instanceof IWizardPageAction wizardPageAction) {
+					wizardPageAction.enter(isForward);
 				}
 			}
 		}
@@ -49,8 +49,8 @@ public class AbstractMarketplaceWizardDialog extends WizardDialog {
 		@Override
 		public void handlePageChanging(PageChangingEvent event) {
 			Object currentPage = event.getCurrentPage();
-			if (event.doit && forward != null && currentPage instanceof IWizardPageAction) {
-				event.doit = ((IWizardPageAction) currentPage).exit(forward);
+			if (event.doit && forward != null && currentPage instanceof IWizardPageAction wizardPageAction) {
+				event.doit = wizardPageAction.exit(forward);
 				if (!event.doit) {
 					forward = null;
 				}
@@ -115,9 +115,9 @@ public class AbstractMarketplaceWizardDialog extends WizardDialog {
 		} finally {
 			pageListener.reset();
 		}
-		if (fromPage instanceof FeatureSelectionWizardPage
-				&& ((FeatureSelectionWizardPage) fromPage).isInRemediationMode()) {
-			((FeatureSelectionWizardPage) fromPage).flipToDefaultComposite();
+		if (fromPage instanceof FeatureSelectionWizardPage featureSelectionWizardPage
+				&& featureSelectionWizardPage.isInRemediationMode()) {
+			featureSelectionWizardPage.flipToDefaultComposite();
 		}
 	}
 
@@ -199,8 +199,7 @@ public class AbstractMarketplaceWizardDialog extends WizardDialog {
 	}
 
 	public String getNextButtonLabel(IWizardPage page) {
-		if (page instanceof IWizardButtonLabelProvider) {
-			IWizardButtonLabelProvider labelProvider = (IWizardButtonLabelProvider) page;
+		if (page instanceof IWizardButtonLabelProvider labelProvider) {
 			String nextButtonLabel = labelProvider.getNextButtonLabel();
 			if (nextButtonLabel != null) {
 				return nextButtonLabel;
@@ -210,8 +209,7 @@ public class AbstractMarketplaceWizardDialog extends WizardDialog {
 	}
 
 	public String getBackButtonLabel(IWizardPage page) {
-		if (page instanceof IWizardButtonLabelProvider) {
-			IWizardButtonLabelProvider labelProvider = (IWizardButtonLabelProvider) page;
+		if (page instanceof IWizardButtonLabelProvider labelProvider) {
 			String backButtonLabel = labelProvider.getBackButtonLabel();
 			if (backButtonLabel != null) {
 				return backButtonLabel;

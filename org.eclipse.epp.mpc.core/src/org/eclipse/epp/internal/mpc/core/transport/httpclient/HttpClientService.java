@@ -102,10 +102,10 @@ public class HttpClientService {
 
 		if (requestConfig != null) {
 			builder = RequestConfig.copy(requestConfig);
-		} else if (request instanceof Configurable && ((Configurable) request).getConfig() != null) {
-			builder = RequestConfig.copy(((Configurable) request).getConfig());
-		} else if (client instanceof Configurable && ((Configurable) client).getConfig() != null) {
-			builder = RequestConfig.copy(((Configurable) client).getConfig());
+		} else if (request instanceof Configurable configurable && configurable.getConfig() != null) {
+			builder = RequestConfig.copy(configurable.getConfig());
+		} else if (client instanceof Configurable configurable && configurable.getConfig() != null) {
+			builder = RequestConfig.copy(configurable.getConfig());
 		} else {
 			builder = RequestConfig.custom();
 		}
@@ -126,8 +126,8 @@ public class HttpClientService {
 	}
 
 	private static ClassicHttpRequest setConfig(ClassicHttpRequest request, RequestConfig config) {
-		if (request instanceof HttpUriRequestBase) {
-			((HttpUriRequestBase) request).setConfig(config);
+		if (request instanceof HttpUriRequestBase httpUriRequestBase) {
+			httpUriRequestBase.setConfig(config);
 		} else {
 			// could not set the config, here
 			request = ClassicRequestBuilder.copy(request)/*.setConfig(config)*/.build();
@@ -136,8 +136,8 @@ public class HttpClientService {
 	}
 
 	public ClassicHttpRequest configureRequest(ClassicHttpRequest request) {
-		if (client instanceof Configurable && ((Configurable) client).getConfig() != null) {
-			return setConfig(request, ((Configurable) client).getConfig());
+		if (client instanceof Configurable configurable && configurable.getConfig() != null) {
+			return setConfig(request, configurable.getConfig());
 		}
 		return request;
 	}

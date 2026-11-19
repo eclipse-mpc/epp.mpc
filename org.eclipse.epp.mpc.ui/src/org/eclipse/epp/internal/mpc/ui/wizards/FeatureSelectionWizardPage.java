@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -77,12 +77,10 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 		public StyledString getStyledText(Object element) {
 			StyledString styledString = new StyledString();
 			String text = getText(element);
-			if (element instanceof CatalogItemEntry) {
+			if (element instanceof CatalogItemEntry entry) {
 				styledString.append(text);
-				CatalogItemEntry entry = (CatalogItemEntry) element;
 				styledString.append("  " + entry.getItem().getSiteUrl(), StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
-			} else if (element instanceof FeatureEntry) {
-				FeatureEntry entry = (FeatureEntry) element;
+			} else if (element instanceof FeatureEntry entry) {
 				if (entry.isOptional()) {
 					styledString.append(text);
 				} else {
@@ -109,8 +107,7 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 
 		@Override
 		public Image getImage(Object element) {
-			if (element instanceof FeatureEntry) {
-				FeatureEntry entry = (FeatureEntry) element;
+			if (element instanceof FeatureEntry entry) {
 				switch (entry.computeChangeOperation()) {
 				case UPDATE:
 					return MarketplaceClientUiResources.getInstance().getImageRegistry()
@@ -137,11 +134,9 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 
 		@Override
 		public String getText(Object element) {
-			if (element instanceof CatalogItemEntry) {
-				CatalogItemEntry entry = (CatalogItemEntry) element;
+			if (element instanceof CatalogItemEntry entry) {
 				return entry.getItem().getName();
-			} else if (element instanceof FeatureEntry) {
-				FeatureEntry entry = (FeatureEntry) element;
+			} else if (element instanceof FeatureEntry entry) {
 				return entry.getFeatureDescriptor().getName();
 			}
 			return element.toString();
@@ -167,8 +162,7 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 		public Object[] getElements(Object inputElement) {
 			if (inputElement == input && input != null) {
 				return ((SelectionModel) input).getCatalogItemEntries().toArray();
-			} else if (inputElement instanceof CatalogItemEntry) {
-				CatalogItemEntry itemEntry = (CatalogItemEntry) inputElement;
+			} else if (inputElement instanceof CatalogItemEntry itemEntry) {
 				List<FeatureEntry> children = itemEntry.getChildren();
 				children = filterChildren(itemEntry.getSelectedOperation(), children);
 				return children.toArray();
@@ -218,8 +212,8 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 
 		@Override
 		public Object getParent(Object element) {
-			if (element instanceof FeatureEntry) {
-				return ((FeatureEntry) element).getParent();
+			if (element instanceof FeatureEntry entry) {
+				return entry.getParent();
 			}
 			return input;
 		}
@@ -285,8 +279,8 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 				}
 				String s1;
 				String s2;
-				if (e1 instanceof CatalogItemEntry) {
-					s1 = ((CatalogItemEntry) e1).getItem().getName();
+				if (e1 instanceof CatalogItemEntry catalogItemEntry) {
+					s1 = catalogItemEntry.getItem().getName();
 					s2 = ((CatalogItemEntry) e2).getItem().getName();
 				} else {
 					FeatureEntry fe1 = (FeatureEntry) e1;
@@ -468,8 +462,8 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 	void updateMessage() {
 		ProfileChangeOperation profileChangeOperation = getWizard().getProfileChangeOperation();
 		if (profileChangeOperation != null) {
-			if (profileChangeOperation instanceof RemediationOperation
-					&& (((RemediationOperation) profileChangeOperation).getResolutionResult() == Status.OK_STATUS)
+			if (profileChangeOperation instanceof RemediationOperation remediationOperation
+					&& (remediationOperation.getResolutionResult() == Status.OK_STATUS)
 					&& (getWizard().getAdditionalVerificationPlan() == null
 					|| getWizard().getAdditionalVerificationPlan().getStatus().isOK())) {
 				if (remediationGroup == null) {
@@ -478,7 +472,7 @@ public class FeatureSelectionWizardPage extends WizardPage implements IWizardBut
 				}
 				setMessage(remediationGroup.getMessage(), IStatus.WARNING);
 				remediationGroup.getDetailsGroup().setDetailText(getWizard().getErrorMessage());
-				remediationGroup.update((RemediationOperation) profileChangeOperation);
+				remediationGroup.update(remediationOperation);
 				flipToRemediationComposite();
 			} else {
 				IStatus resolutionResult = profileChangeOperation.getResolutionResult();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -23,8 +23,8 @@ public class DiscoveryItemElementProvider implements IElementProvider {
 
 	@Override
 	public Element getElement(Object element, CSSEngine engine) {
-		if (element instanceof GradientCanvas) {
-			return new GradientCanvasElement((GradientCanvas) element, engine);
+		if (element instanceof GradientCanvas gradientCanvas) {
+			return new GradientCanvasElement(gradientCanvas, engine);
 		}
 
 		return null;

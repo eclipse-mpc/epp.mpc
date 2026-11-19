@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -329,10 +329,10 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		IWizardPage currentPage = container.getCurrentPage();
 		if (currentPage == MarketplacePage.this && currentPage.isPageComplete()) {
 			IWizardPage nextPage = getNextPage();
-			if (nextPage != null && nextPage instanceof FeatureSelectionWizardPage) {
+			if (nextPage != null && nextPage instanceof FeatureSelectionWizardPage featureSelectionWizardPage) {
 				//FIXME do we need this at all? Pages should be responsible for their completion
 				//state themselves...
-				((FeatureSelectionWizardPage) nextPage).setPageComplete(true);
+				featureSelectionWizardPage.setPageComplete(true);
 			}
 			if (nextPage != null && nextPage.getControl() != null && nextPage.getControl().isDisposed()) {
 				// page already disposed?
@@ -513,8 +513,8 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 	private ContentType getContentType(CTabItem tabItem) {
 		if (tabItem != null && !tabItem.isDisposed()) {
 			Object data = tabItem.getData(CONTENT_TYPE_KEY);
-			if (data instanceof ContentType) {
-				return (ContentType) data;
+			if (data instanceof ContentType type) {
+				return type;
 			}
 		}
 		return null;

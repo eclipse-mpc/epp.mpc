@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -80,10 +80,9 @@ public class Iu implements IIu {
 		if (obj == null) {
 			return false;
 		}
-		if (!(obj instanceof IIu)) {
+		if (!(obj instanceof IIu other)) {
 			return false;
 		}
-		IIu other = (IIu) obj;
 		if (id == null) {
 			if (other.getId() != null) {
 				return false;

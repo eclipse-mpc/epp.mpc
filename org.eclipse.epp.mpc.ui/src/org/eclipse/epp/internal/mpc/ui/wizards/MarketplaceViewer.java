@@ -117,8 +117,7 @@ public class MarketplaceViewer extends CatalogViewer {
 				// don't provide any categories unless it's featured
 				List<Object> items = new ArrayList<>(getCatalog().getItems());
 				for (CatalogCategory category : getCatalog().getCategories()) {
-					if (category instanceof MarketplaceCategory) {
-						MarketplaceCategory marketplaceCategory = (MarketplaceCategory) category;
+					if (category instanceof MarketplaceCategory marketplaceCategory) {
 						int pos = 0;
 						for(int i=0;i < items.size(); i++) {
 							if (!(items.get(i) instanceof UserActionCatalogItem)) {
@@ -251,8 +250,7 @@ public class MarketplaceViewer extends CatalogViewer {
 		fixFindControlsLayout(parent);
 		final int originalChildCount = parent.getChildren().length;
 		for (CatalogFilter filter : getConfiguration().getFilters()) {
-			if (filter instanceof MarketplaceFilter) {
-				MarketplaceFilter marketplaceFilter = (MarketplaceFilter) filter;
+			if (filter instanceof MarketplaceFilter marketplaceFilter) {
 				marketplaceFilter.createControl(parent);
 				marketplaceFilter.addPropertyChangeListener(event -> {
 					if (AbstractTagFilter.PROP_SELECTED.equals(event.getProperty())) {
@@ -274,8 +272,8 @@ public class MarketplaceViewer extends CatalogViewer {
 	protected static void fixFindControlsLayout(Composite header) {
 		TextSearchControl search = null;
 		for (Control control : header.getChildren()) {
-			if (control instanceof TextSearchControl) {
-				search = (TextSearchControl) control;
+			if (control instanceof TextSearchControl textSearch) {
+				search = textSearch;
 				break;
 			}
 		}
@@ -329,11 +327,9 @@ public class MarketplaceViewer extends CatalogViewer {
 		}
 		List<AbstractDiscoveryStrategy> discoveryStrategies = catalog.getDiscoveryStrategies();
 		for (AbstractDiscoveryStrategy discoveryStrategy : discoveryStrategies) {
-			if (discoveryStrategy instanceof MarketplaceDiscoveryStrategy) {
-				MarketplaceDiscoveryStrategy marketplaceDiscoveryStrategy = (MarketplaceDiscoveryStrategy) discoveryStrategy;
+			if (discoveryStrategy instanceof MarketplaceDiscoveryStrategy marketplaceDiscoveryStrategy) {
 				for (CatalogCategory catalogCategory : catalog.getCategories()) {
-					if (catalogCategory instanceof MarketplaceCategory) {
-						MarketplaceCategory marketplaceCategory = (MarketplaceCategory) catalogCategory;
+					if (catalogCategory instanceof MarketplaceCategory marketplaceCategory) {
 						//Don't overdo it - we only add one of these two, with updates having priority
 						//Usually, if you already have installed items (and those have updates), you're probably
 						//beyond needing hints to install your favorites... (and you'll get the chance on the next run anyway)
@@ -349,8 +345,8 @@ public class MarketplaceViewer extends CatalogViewer {
 			MarketplaceViewer.super.catalogUpdated(wasCancelled, wasError);
 
 			for (CatalogFilter filter : getConfiguration().getFilters()) {
-				if (filter instanceof MarketplaceFilter) {
-					((MarketplaceFilter) filter).catalogUpdated(wasCancelled);
+				if (filter instanceof MarketplaceFilter marketplaceFilter) {
+					marketplaceFilter.catalogUpdated(wasCancelled);
 				}
 			}
 			setFilters(queryData);
@@ -394,11 +390,10 @@ public class MarketplaceViewer extends CatalogViewer {
 	protected ControlListItem<?> doCreateViewerItem(Composite parent, Object element) {
 		ControlListItem<?> item;
 		boolean isCategory = false;
-		if (element instanceof CatalogItem) {
-			CatalogItem catalogItem = (CatalogItem) element;
-			if (catalogItem instanceof UserActionCatalogItem) {
+		if (element instanceof CatalogItem catalogItem) {
+			if (catalogItem instanceof UserActionCatalogItem userActionCatalogItem) {
 				//user action link
-				item = createUserActionViewerItem((UserActionCatalogItem) catalogItem, parent);
+				item = createUserActionViewerItem(userActionCatalogItem, parent);
 			} else if (catalogItem.getData() instanceof CatalogDescriptor) {
 				//legacy browse item
 				item = createBrowseItem(catalogItem, parent);
@@ -408,8 +403,7 @@ public class MarketplaceViewer extends CatalogViewer {
 				discoveryItem.setSelected(getCheckedItems().contains(catalogItem));
 				item = discoveryItem;
 			}
-		} else if (element instanceof MarketplaceCategory) {
-			MarketplaceCategory category = (MarketplaceCategory) element;
+		} else if (element instanceof MarketplaceCategory category) {
 			if (category.getContents() == Contents.FEATURED) {
 				category.setName(Messages.MarketplaceViewer_featured);
 			} else if (category.getContents() == Contents.POPULAR) {
@@ -481,8 +475,7 @@ public class MarketplaceViewer extends CatalogViewer {
 	private void setFilters(QueryData queryData) {
 		setFindText(queryData.queryText == null ? "" : queryData.queryText); //$NON-NLS-1$
 		for (CatalogFilter filter : getConfiguration().getFilters()) {
-			if (filter instanceof AbstractTagFilter) {
-				AbstractTagFilter tagFilter = (AbstractTagFilter) filter;
+			if (filter instanceof AbstractTagFilter tagFilter) {
 				if (tagFilter.getTagClassification() == ICategory.class) {
 					List<Tag> choices = tagFilter.getChoices();
 					Tag tag = choices.isEmpty() ? null : choices.get(0);
@@ -516,7 +509,7 @@ public class MarketplaceViewer extends CatalogViewer {
 	}
 
 	private static boolean matches(IIdentifiable data, final Object tagData) {
-		return tagData instanceof IIdentifiable && Identifiable.matches((IIdentifiable) tagData, data);
+		return tagData instanceof IIdentifiable identifiable && Identifiable.matches(identifiable, data);
 	}
 
 	public void reload() {
@@ -534,8 +527,7 @@ public class MarketplaceViewer extends CatalogViewer {
 
 		AbstractTagFilter marketFilter = null;
 		for (CatalogFilter filter : getConfiguration().getFilters()) {
-			if (filter instanceof AbstractTagFilter) {
-				AbstractTagFilter tagFilter = (AbstractTagFilter) filter;
+			if (filter instanceof AbstractTagFilter tagFilter) {
 				if (tagFilter.getTagClassification() == ICategory.class) {
 					Tag tag = tagFilter.getSelected().isEmpty() ? null : tagFilter.getSelected().iterator().next();
 					if (tag != null) {
@@ -797,8 +789,7 @@ public class MarketplaceViewer extends CatalogViewer {
 								String marketName = catalogBranding.getFeaturedMarketTabName();
 								if (marketName != null) {
 									for (CatalogFilter filter : getConfiguration().getFilters()) {
-										if (filter instanceof AbstractTagFilter) {
-											AbstractTagFilter tagFilter = (AbstractTagFilter) filter;
+										if (filter instanceof AbstractTagFilter tagFilter) {
 											if (tagFilter.getTagClassification() == ICategory.class) {
 												for (Tag tag : tagFilter.getChoices()) {
 													if (tag.getTagClassifier() != IMarket.class) {
@@ -1094,8 +1085,7 @@ public class MarketplaceViewer extends CatalogViewer {
 	protected static void setSeparatorVisible(CategoryItem<?> categoryItem, boolean visible) {
 		//FIXME introduce API in CategoryItem and then get rid of this
 		final Control childControl = categoryItem.getChildren()[0];
-		if (childControl instanceof GradientCanvas) {
-			GradientCanvas canvas = (GradientCanvas) childControl;
+		if (childControl instanceof GradientCanvas canvas) {
 			canvas.setSeparatorVisible(visible);
 		}
 	}

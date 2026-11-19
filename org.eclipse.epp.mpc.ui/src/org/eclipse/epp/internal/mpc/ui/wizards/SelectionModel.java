@@ -76,8 +76,7 @@ public class SelectionModel {
 	public boolean select(CatalogItem item, Operation operation) {
 		boolean changed = false;
 		Operation sanitizedOperation = operation;
-		if (operation != null && Operation.NONE != operation && item instanceof MarketplaceNodeCatalogItem) {
-			MarketplaceNodeCatalogItem nodeItem = (MarketplaceNodeCatalogItem) item;
+		if (operation != null && Operation.NONE != operation && item instanceof MarketplaceNodeCatalogItem nodeItem) {
 			List<Operation> availableOperations = nodeItem.getAvailableOperations();
 			if (!availableOperations.contains(operation)) {
 				sanitizedOperation = null;

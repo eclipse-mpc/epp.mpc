@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2020 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -33,15 +33,14 @@ public class NodeMatcher<T extends Widget> extends AbstractMatcher<T> {
 
 	@Override
 	protected boolean doMatch(Object obj) {
-		if (obj instanceof Widget) {
-			Widget w = (Widget) obj;
+		if (obj instanceof Widget w) {
 			Object data = w.getData();
 			INode node = null;
-			if (data instanceof CatalogItem) {
-				data = ((CatalogItem) data).getData();
+			if (data instanceof CatalogItem catalogItem) {
+				data = catalogItem.getData();
 			}
-			if (data instanceof INode) {
-				node = (INode) data;
+			if (data instanceof INode dataNode) {
+				node = dataNode;
 			}
 			return node != null && matcher.matches(node);
 		}
@@ -124,7 +123,7 @@ public class NodeMatcher<T extends Widget> extends AbstractMatcher<T> {
 
 		@Override
 		protected boolean doMatch(Object item) {
-			return item instanceof INode && doMatch(expected, getValue((INode) item));
+			return item instanceof INode itemNode && doMatch(expected, getValue(itemNode));
 		}
 
 		protected boolean doMatch(T expected, T actual) {
