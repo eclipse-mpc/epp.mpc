@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.epp.mpc.core.transport.http">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.4.0" init="1" name="org.eclipse.epp.mpc.core.transport.http">
    <service>
       <provide interface="org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientTransport"/>
       <provide interface="org.eclipse.epp.mpc.core.service.ITransport"/>
    </service>
-   <reference bind="bindHttpClientService" interface="org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientService" name="HttpClientService"/>
+   <reference cardinality="1..1" interface="org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientService" name="HttpClientService" parameter="0"/>
    <implementation class="org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientTransport"/>
 </scr:component>

@@ -37,6 +37,7 @@ import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.epp.internal.mpc.core.util.UserAgentUtil;
 import org.eclipse.epp.mpc.core.service.ITransport;
 import org.eclipse.epp.mpc.core.service.ServiceUnavailableException;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -76,15 +77,15 @@ public class HttpClientTransport implements ITransport {
 		USER_AGENT = UserAgentUtil.computeUserAgent();
 	}
 
-	private HttpClientService clientService;
+	private final HttpClientService clientService;
+
+	@Activate
+	public HttpClientTransport(@Reference(name = "HttpClientService") HttpClientService clientService) {
+		this.clientService = clientService;
+	}
 
 	public HttpClient getClient() {
 		return clientService.getClient();
-	}
-
-	@Reference
-	public void bindHttpClientService(HttpClientService service) {
-		this.clientService = service;
 	}
 
 	protected HttpRequest configureRequest(HttpUriRequest request) {

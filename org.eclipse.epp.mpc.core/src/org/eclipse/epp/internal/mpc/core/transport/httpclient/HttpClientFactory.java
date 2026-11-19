@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -24,25 +24,25 @@ import org.apache.hc.core5.http.HttpRequestInterceptor;
 import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.util.Timeout;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.FieldOption;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 @Component(name = "org.eclipse.epp.mpc.core.http.client.factory", service = { HttpClientFactory.class })
 public class HttpClientFactory {
 
-	@Reference(cardinality = ReferenceCardinality.MULTIPLE, policyOption = ReferencePolicyOption.GREEDY, policy = ReferencePolicy.STATIC, fieldOption = FieldOption.REPLACE)
-	private List<HttpClientCustomizer> customizers;
+	private final List<HttpClientCustomizer> customizers;
+
+	@Activate
+	public HttpClientFactory(
+			@Reference(name = "customizers", cardinality = ReferenceCardinality.MULTIPLE, policyOption = ReferencePolicyOption.GREEDY) List<HttpClientCustomizer> customizers) {
+		this.customizers = customizers;
+	}
 
 	public List<HttpClientCustomizer> getCustomizers() {
 		return customizers;
-	}
-
-	public void setCustomizers(List<HttpClientCustomizer> customizers) {
-		this.customizers = customizers;
 	}
 
 	public HttpServiceContext build() {

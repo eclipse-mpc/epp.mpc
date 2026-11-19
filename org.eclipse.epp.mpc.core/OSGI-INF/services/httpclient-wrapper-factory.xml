@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) 2014, 2018 The Eclipse Foundation and others.
+    Copyright (c) 2014, 2026 The Eclipse Foundation and others.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v2.0
     which accompanies this distribution, and is available at
@@ -11,11 +11,11 @@
     Contributors:
     	The Eclipse Foundation - initial API and implementation
  -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.epp.mpc.core.transport.http.wrapper">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.4.0" init="1" name="org.eclipse.epp.mpc.core.transport.http.wrapper">
    <implementation class="org.eclipse.epp.internal.mpc.core.util.FallbackTransportFactory"/>
    <service>
       <provide interface="org.eclipse.epp.mpc.core.service.ITransportFactory"/>
    </service>
-   <reference bind="bindPrimaryFactory" cardinality="1..1" interface="org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientTransportFactory" name="org.eclipse.epp.mpc.core.transport.http.factory" policy="static" unbind="unbindPrimaryFactory"/>
+   <reference cardinality="1..1" interface="org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientTransportFactory" name="org.eclipse.epp.mpc.core.transport.http.factory" parameter="0"/>
    <property name="service.ranking" type="Integer" value="1"/>
 </scr:component>
