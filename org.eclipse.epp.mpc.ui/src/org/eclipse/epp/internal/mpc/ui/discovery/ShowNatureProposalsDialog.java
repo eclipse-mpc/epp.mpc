@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -31,8 +31,7 @@ import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -100,15 +99,12 @@ final class ShowNatureProposalsDialog extends TitleAreaDialog {
 
 		Link preferencesLink = new Link(res, SWT.NONE);
 		preferencesLink.setText(Messages.MissingNatureDetector_linkToPreferences);
-		preferencesLink.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(getShell(),
-						ProjectNaturesPreferencePage.ID, null, null);
-				pref.setBlockOnOpen(false);
-				pref.open();
-			}
-		});
+		preferencesLink.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> {
+			PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(getShell(),
+					ProjectNaturesPreferencePage.ID, null, null);
+			pref.setBlockOnOpen(false);
+			pref.open();
+		}));
 		return res;
 	}
 

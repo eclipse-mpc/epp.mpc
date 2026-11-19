@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,6 @@ import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
 import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
@@ -174,15 +173,12 @@ class ItemButtonController {
 		MenuItem menuItem = new MenuItem(menu, SWT.PUSH);
 		menuItem.setData(state);
 		menuItem.setText(state.label);
-		menuItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (e.widget.isDisposed()) {
-					return;
-				}
-				buttonClicked((ButtonState) e.widget.getData());
+		menuItem.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> {
+			if (e.widget.isDisposed()) {
+				return;
 			}
-		});
+			buttonClicked((ButtonState) e.widget.getData());
+		}));
 	}
 
 	private void updateMenuItems() {

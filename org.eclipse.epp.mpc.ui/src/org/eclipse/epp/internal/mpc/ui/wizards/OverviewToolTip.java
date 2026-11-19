@@ -42,8 +42,7 @@ import org.eclipse.swt.SWTException;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
@@ -210,13 +209,10 @@ class OverviewToolTip extends ToolTip {
 			final Cursor handCursor = new Cursor(imageLabel.getDisplay(), SWT.CURSOR_HAND);
 			imageLabel.setCursor(handCursor);
 			imageLabel.addDisposeListener(e -> handCursor.dispose());
-			imageLabel.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseDown(MouseEvent e) {
-					OverviewToolTip.this.hide();
-					WorkbenchUtil.openUrl(overview.getScreenshot(), IWorkbenchBrowserSupport.AS_EXTERNAL);
-				}
-			});
+			imageLabel.addMouseListener(MouseListener.mouseDownAdapter(e -> {
+				OverviewToolTip.this.hide();
+				WorkbenchUtil.openUrl(overview.getScreenshot(), IWorkbenchBrowserSupport.AS_EXTERNAL);
+			}));
 
 			// creates a border
 			imageContainer.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY));

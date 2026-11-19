@@ -29,15 +29,12 @@ import org.eclipse.equinox.internal.p2.ui.discovery.util.WorkbenchUtil;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.accessibility.AccessibleAdapter;
-import org.eclipse.swt.accessibility.AccessibleEvent;
+import org.eclipse.swt.accessibility.AccessibleListener;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -73,12 +70,8 @@ public class ShareSolutionLink {
 		share.setImage(MarketplaceClientUiResources.getInstance().getImageRegistry()
 				.get(MarketplaceClientUiResources.ITEM_ICON_SHARE));
 		share.setToolTipText(Messages.ShareSolutionLink_Tooltip);
-		share.getAccessible().addAccessibleListener(new AccessibleAdapter() {
-			@Override
-			public void getName(AccessibleEvent e) {
-				e.result = Messages.ShareSolutionLink_Share;
-			}
-		});
+		share.getAccessible().addAccessibleListener(AccessibleListener.getNameAdapter(
+				e -> e.result = Messages.ShareSolutionLink_Share));
 		return share;
 	}
 
@@ -94,46 +87,28 @@ public class ShareSolutionLink {
 	private void createTweetMenu(final Menu popupMenu) {
 		MenuItem twitterItem = new MenuItem(popupMenu, SWT.POP_UP);
 		twitterItem.setText(Messages.ShareSolutionLink_Twitter);
-		twitterItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				String tweet = NLS.bind(Messages.ShareSolutionLink_tweet, catalogItem.getName(), getUrl());
-				WorkbenchUtil.openUrl("http://twitter.com/?status=" + tweet, IWorkbenchBrowserSupport.AS_EXTERNAL); //$NON-NLS-1$
-			}
-		});
+		twitterItem.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> {
+			String tweet = NLS.bind(Messages.ShareSolutionLink_tweet, catalogItem.getName(), getUrl());
+			WorkbenchUtil.openUrl("http://twitter.com/?status=" + tweet, IWorkbenchBrowserSupport.AS_EXTERNAL); //$NON-NLS-1$
+		}));
 	}
 
 	private void createMailMenu(final Menu popupMenu) {
 		MenuItem mailItem = new MenuItem(popupMenu, SWT.POP_UP);
 		mailItem.setText(Messages.ShareSolutionLink_EMail);
-		mailItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				openNewMail();
-			}
-		});
+		mailItem.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> openNewMail()));
 	}
 
 	private void createCopyLinkMenu(final Menu popupMenu) {
 		MenuItem copyItem = new MenuItem(popupMenu, SWT.POP_UP);
 		copyItem.setText(Messages.ShareSolutionLink_CopyToClipboard);
-		copyItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				copyLinkToClipboard();
-			}
-		});
+		copyItem.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> copyLinkToClipboard()));
 	}
 
 	private void createOpenInBrowserMenu(final Menu popupMenu) {
 		MenuItem browserItem = new MenuItem(popupMenu, SWT.POP_UP);
 		browserItem.setText(Messages.ShareSolutionLink_OpenInBrowser);
-		browserItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				openInBrowser();
-			}
-		});
+		browserItem.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> openInBrowser()));
 	}
 
 	protected void openInBrowser() {
@@ -252,12 +227,7 @@ public class ShareSolutionLink {
 
 	private static void attachMenu(final Control shareControl, final Menu popupMenu) {
 		shareControl.setMenu(popupMenu);
-		shareControl.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseUp(MouseEvent e) {
-				popupMenu.setVisible(true);
-			}
-		});
+		shareControl.addMouseListener(MouseListener.mouseUpAdapter(e -> popupMenu.setVisible(true)));
 	}
 
 	public void setShowText(boolean showText) {

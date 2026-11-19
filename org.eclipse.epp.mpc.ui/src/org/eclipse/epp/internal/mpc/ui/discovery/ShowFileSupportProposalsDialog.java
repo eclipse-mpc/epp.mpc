@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2018 Red Hat Inc.
+ * Copyright (c) 2016, 2026 Red Hat Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -21,8 +21,7 @@ import org.eclipse.jface.layout.LayoutConstants;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -91,24 +90,14 @@ public class ShowFileSupportProposalsDialog extends TitleAreaDialog {
 				.indent(0, LayoutConstants.getMargins().y)
 				.applyTo(showProposalsRadio);
 		showProposalsRadio.setText(Messages.MarketplaceOrAssociateDialog_showProposals);
-		showProposalsRadio.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				updateSelection();
-			}
-		});
+		showProposalsRadio.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> updateSelection()));
 
 		associateRadio = new Button(res, SWT.RADIO);
 		GridDataFactory.swtDefaults().align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(associateRadio);
 		associateRadio
 		.setText(NLS.bind(Messages.MarketplaceOrAssociateDialog_associate, fileExtensionLabel,
 				currentEditor.getLabel()));
-		associateRadio.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				updateSelection();
-			}
-		});
+		associateRadio.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> updateSelection()));
 
 		Link linkToPreferences = new Link(res, SWT.NONE);
 		GridDataFactory.swtDefaults()
@@ -117,18 +106,15 @@ public class ShowFileSupportProposalsDialog extends TitleAreaDialog {
 				.indent(0, LayoutConstants.getMargins().y)
 				.applyTo(linkToPreferences);
 		linkToPreferences.setText(Messages.MarketplaceOrAssociateDialog_linkToPreferences);
-		linkToPreferences.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(getShell(),
-						"org.eclipse.ui.preferencePages.FileEditors", null, //$NON-NLS-1$
-						null);
-				pref.setBlockOnOpen(false);
-				if (pref != null) {
-					pref.open();
-				}
+		linkToPreferences.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> {
+			PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(getShell(),
+					"org.eclipse.ui.preferencePages.FileEditors", null, //$NON-NLS-1$
+					null);
+			pref.setBlockOnOpen(false);
+			if (pref != null) {
+				pref.open();
 			}
-		});
+		}));
 
 		Point hint = res.computeSize(SWT.NONE, SWT.DEFAULT);
 		labelGridData.widthHint = hint.x + 20;
