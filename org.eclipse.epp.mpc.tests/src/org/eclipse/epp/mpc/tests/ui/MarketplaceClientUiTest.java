@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -13,28 +13,33 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.ConnectException;
 import java.net.NoRouteToHostException;
+import java.net.URI;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
-import org.eclipse.epp.internal.mpc.core.ServiceLocator;
 import org.eclipse.epp.internal.mpc.core.service.DefaultCatalogService;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCatalog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.commands.MarketplaceWizardCommand;
-import org.eclipse.epp.mpc.core.service.ICatalogService;
+import org.eclipse.epp.mpc.core.service.ServiceHelper;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.ui.PlatformUI;
 import org.junit.Test;
 
 /**
@@ -42,7 +47,7 @@ import org.junit.Test;
  */
 public class MarketplaceClientUiTest {
 
-	private static final String OFFLINE_HINT_TEXT = "Please check your Internet connection and retry";
+	private static final String OFFLINE_HINT_TEXT = "Please check your internet connection and retry";
 	private static final String UNREACHABLE_MARKETPLACE_URL = "http://marketplace.eclipse.invalid";
 
 	@Test
@@ -60,17 +65,16 @@ public class MarketplaceClientUiTest {
 		//UnknownHostException - should be treated as a hint for broken internet connection
 		status = MarketplaceClientCore.computeStatus(wrapInCoreException(new InvocationTargetException(
 				wrapInCoreException(new UnknownHostException("marketplace.eclipse.org")))), contextMessage);
-		expectedMessage = NLS.bind("{0}: {1}", contextMessage, OFFLINE_HINT_TEXT);
 		assertEquals(IStatus.ERROR, status.getSeverity());
-		assertTrue(status.getMessage().startsWith(expectedMessage));
+		assertOfflineHint(contextMessage, status);
 
 		//same with NoRouteToHostException and ConnectException
 		status = MarketplaceClientCore.computeStatus(new NoRouteToHostException("marketplace.eclipse.org"), contextMessage);
 		assertEquals(IStatus.ERROR, status.getSeverity());
-		assertTrue(status.getMessage().startsWith(expectedMessage));
+		assertOfflineHint(contextMessage, status);
 		status = MarketplaceClientCore.computeStatus(new ConnectException("marketplace.eclipse.org"), contextMessage);
 		assertEquals(IStatus.ERROR, status.getSeverity());
-		assertTrue(status.getMessage().startsWith(expectedMessage));
+		assertOfflineHint(contextMessage, status);
 
 		//Wrapped HTTP 503 in ECF transport - unwrap and report as-is
 		errorMessage = "Service temporarily unavailable";
@@ -79,7 +83,11 @@ public class MarketplaceClientUiTest {
 						wrapInCoreException(new RuntimeException("Root cause")))))), contextMessage);
 		expectedMessage = NLS.bind("{0}: {1}", contextMessage, errorMessage);
 		assertEquals(IStatus.ERROR, status.getSeverity());
-		assertTrue(status.getMessage().startsWith(expectedMessage));
+		assertThat(status.getMessage(), startsWith(expectedMessage));
+	}
+
+	private static void assertOfflineHint(String contextMessage, IStatus status) {
+		assertThat(status.getMessage(), allOf(startsWith(contextMessage + ": "), containsString(OFFLINE_HINT_TEXT)));
 	}
 
 	private static Exception wrapInCoreException(Throwable rootCause) {
@@ -91,21 +99,20 @@ public class MarketplaceClientUiTest {
 	public void testOfflineCatalogServiceErrors() throws Exception {
 		// since NoRouteToHost and ConnectExceptions are hard to fake and happen at pretty much the same place,
 		// we only simulate the UnknownHostException case here (by actually using an invalid host address)
-		final DefaultCatalogService catalogService = (DefaultCatalogService) ServiceLocator.getInstance()
+		DefaultCatalogService catalogService = (DefaultCatalogService) ServiceHelper.getMarketplaceServiceLocator()
 				.getCatalogService();
-		catalogService.setBaseUrl(new URL(UNREACHABLE_MARKETPLACE_URL));
+		URL originalBaseUrl = catalogService.getBaseUrl();
+		catalogService.setBaseUrl(new URI(UNREACHABLE_MARKETPLACE_URL).toURL());
 		try {
-			ServiceLocator.setInstance(new ServiceLocator() {
-				@Override
-				public ICatalogService getCatalogService() {
-					return catalogService;
-				}
-			});
-			IStatus status = new MarketplaceWizardCommand().installRemoteCatalogs();
+			// installRemoteCatalogs() uses busyCursorWhile(), which must be called on the UI thread
+			AtomicReference<IStatus> result = new AtomicReference<>();
+			PlatformUI.getWorkbench().getDisplay().syncExec(() -> result.set(new MarketplaceWizardCommand()
+					.installRemoteCatalogs()));
+			IStatus status = result.get();
 			assertEquals(IStatus.ERROR, status.getSeverity());
-			assertTrue(status.getMessage().contains(": " + OFFLINE_HINT_TEXT));
+			assertThat(status.getMessage(), containsString(OFFLINE_HINT_TEXT));
 		} finally {
-			ServiceLocator.setInstance(new ServiceLocator());
+			catalogService.setBaseUrl(originalBaseUrl);
 		}
 	}
 
@@ -113,10 +120,10 @@ public class MarketplaceClientUiTest {
 	public void testOfflineCatalogErrors() throws Exception {
 		final MarketplaceCatalog catalog = new MarketplaceCatalog();
 		catalog.getDiscoveryStrategies().add(
-				new MarketplaceDiscoveryStrategy(new CatalogDescriptor(new URL(UNREACHABLE_MARKETPLACE_URL),
+				new MarketplaceDiscoveryStrategy(new CatalogDescriptor(new URI(UNREACHABLE_MARKETPLACE_URL).toURL(),
 						"Unreachable Marketplace")));
 		IStatus status = catalog.performDiscovery(new NullProgressMonitor());
 		assertEquals(IStatus.ERROR, status.getSeverity());
-		assertTrue(status.getMessage().startsWith(OFFLINE_HINT_TEXT));
+		assertThat(status.getMessage(), containsString(OFFLINE_HINT_TEXT));
 	}
 }

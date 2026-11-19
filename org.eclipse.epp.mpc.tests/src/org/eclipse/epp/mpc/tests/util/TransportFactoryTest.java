@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2020 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -35,9 +35,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.hc.client5.http.auth.AuthSchemeFactory;
 import org.apache.hc.client5.http.auth.CredentialsProvider;
 import org.apache.hc.client5.http.auth.CredentialsStore;
-import org.apache.hc.client5.http.auth.StandardAuthScheme;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
@@ -50,17 +50,14 @@ import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.HttpRequestInterceptor;
 import org.apache.hc.core5.http.config.Lookup;
-import org.apache.hc.core5.http.protocol.BasicHttpContext;
 import org.apache.hc.core5.http.protocol.HttpContext;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.epp.internal.mpc.core.ServiceHelperImpl;
-import org.eclipse.epp.internal.mpc.core.transport.httpclient.ChainedCredentialsProvider;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientCustomizer;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientService;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientTransport;
 import org.eclipse.epp.internal.mpc.core.transport.httpclient.HttpClientTransportFactory;
-import org.eclipse.epp.internal.mpc.core.transport.httpclient.SynchronizedCredentialsProvider;
 import org.eclipse.epp.internal.mpc.core.util.FallbackTransportFactory;
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
 import org.eclipse.epp.internal.mpc.core.util.TransportFactory;
@@ -75,8 +72,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
-import org.mockito.internal.MockitoCore;
-import org.mockito.internal.util.MockUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
@@ -314,10 +309,9 @@ public class TransportFactoryTest {
 		BundleContext clientServiceContext = FrameworkUtil.getBundle(HttpClientService.class).getBundleContext();
 		List<ServiceRegistration<?>> registrations = new ArrayList<>();
 		for (int i = 0; i < customizers.length; i++) {
-			MockitoCore mockitoCore = new MockitoCore();
 			for (HttpClientCustomizer customizer : customizers) {
-				if (MockUtil.isMock(customizer)) {
-					mockitoCore.clearInvocations(customizer);
+				if (Mockito.mockingDetails(customizer).isMock()) {
+					Mockito.clearInvocations(customizer);
 				}
 			}
 			HttpClientCustomizer customizer = customizers[i];
@@ -355,12 +349,11 @@ public class TransportFactoryTest {
 		Assume.assumeThat(bundleContext.getProperty("osgi.os"), is("win32"));
 		HttpContext context = interceptRequest().getInterceptedContext();
 
-		Lookup<?> authRegistry = (Lookup<?>) context.getAttribute(HttpClientContext.AUTHSCHEME_REGISTRY);
-		CredentialsProvider credentialsProvider = (CredentialsProvider) context.getAttribute(
-				HttpClientContext.CREDS_PROVIDER);
+		Lookup<AuthSchemeFactory> authRegistry = HttpClientContext.castOrCreate(context).getAuthSchemeRegistry();
+		CredentialsProvider credentialsProvider = HttpClientContext.castOrCreate(context).getCredentialsProvider();
 
 		assertNotNull(authRegistry);
-		Object ntlmFactory = authRegistry.lookup(StandardAuthScheme.NTLM);
+		Object ntlmFactory = authRegistry.lookup("NTLM");
 		assertNotNull(ntlmFactory);
 		assertEquals("org.apache.hc.client5.http.impl.win.WindowsNTLMSchemeFactory", ntlmFactory.getClass().getName());
 
@@ -383,13 +376,9 @@ public class TransportFactoryTest {
 
 		HttpClientTransport httpClientTransport = createClient(mergedCustomizers);
 		HttpClient client = httpClientTransport.getClient();
-		HttpContext context = new BasicHttpContext();
-		try {
-			client.execute(new HttpGet("http://localhost/test"), context);
-			fail("Expected request execution to fail");
-		} catch (ConnectionClosedException ex) {
-			//ignore expected exception
-		}
+		HttpContext context = HttpClientContext.create();
+		assertThrows(ConnectionClosedException.class, () -> client.execute(new HttpGet("http://localhost/test"),
+				context, response -> null));
 		return abortRequestCustomizer;
 	}
 
@@ -418,21 +407,4 @@ public class TransportFactoryTest {
 		return null;
 	}
 
-	private static List<CredentialsProvider> listCredentialsProviders(CredentialsProvider provider) {
-		ArrayList<CredentialsProvider> providers = new ArrayList<>();
-		doListCredentialsProviders(provider, providers);
-		return providers;
-	}
-
-	private static void doListCredentialsProviders(CredentialsProvider provider, List<CredentialsProvider> providers) {
-		providers.add(provider);
-		if (provider instanceof SynchronizedCredentialsProvider) {
-			SynchronizedCredentialsProvider synced = (SynchronizedCredentialsProvider) provider;
-			doListCredentialsProviders(synced.getDelegate(), providers);
-		} else if (provider instanceof ChainedCredentialsProvider) {
-			ChainedCredentialsProvider chain = (ChainedCredentialsProvider) provider;
-			doListCredentialsProviders(chain.getFirst(), providers);
-			doListCredentialsProviders(chain.getSecond(), providers);
-		}
-	}
 }

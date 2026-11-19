@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.net.URI;
-import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,7 +56,7 @@ public class MarketplaceInfoTest {
 
 	public static MarketplaceNodeCatalogItem createTestItem() throws Exception {
 		MarketplaceNodeCatalogItem item = new MarketplaceNodeCatalogItem();
-		item.setMarketplaceUrl(new URL("https://marketplace.eclipse.org"));
+		item.setMarketplaceUrl(new URI("https://marketplace.eclipse.org").toURL());
 		item.setId("123");
 		Node node = new Node();
 		node.setId(item.getId());
@@ -66,7 +65,7 @@ public class MarketplaceInfoTest {
 		addIu(node, "com.example.test.a1");
 		addIu(node, "com.example.test.a2");
 		item.setData(node);
-		item.setInstallableUnits(node.getIus().getIu());
+		item.setInstallableUnits(node.getIus().getIuElements().stream().map(iu -> iu.getId()).toList());
 		return item;
 	}
 
