@@ -174,7 +174,7 @@ public class MarketplaceDiscoveryResources extends DiscoveryResources {
 	private Image safeCreateImage(String imagePath, URL url) {
 		try {
 			ImageDescriptor descriptor = ImageDescriptor.createFromURL(url);
-			Image image = resourceManager.createImage(descriptor);
+			Image image = resourceManager.create(descriptor);
 			return image;
 		} catch (DeviceResourceException ex) {
 			logFailedLoadingImage(imagePath, url, ex);
