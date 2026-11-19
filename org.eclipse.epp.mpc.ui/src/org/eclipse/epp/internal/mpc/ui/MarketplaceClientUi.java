@@ -28,7 +28,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
 import org.eclipse.equinox.p2.engine.IProfile;
 import org.eclipse.equinox.p2.engine.IProfileRegistry;
@@ -117,22 +116,6 @@ public class MarketplaceClientUi {
 			}
 		}
 		return exception;
-	}
-
-	/**
-	 * @deprecated Moved to {@link MarketplaceClientCore#computeStatus(Exception, String)}
-	 */
-	@Deprecated
-	public static IStatus computeStatus(Exception e, String message) {
-		return MarketplaceClientCore.computeStatus(e, message);
-	}
-
-	/**
-	 * @deprecated Moved to {@link MarketplaceClientCore#computeWellknownProblemStatus(Throwable)}
-	 */
-	@Deprecated
-	public static IStatus computeWellknownProblemStatus(Throwable exception) {
-		return MarketplaceClientCore.computeWellknownProblemStatus(exception);
 	}
 
 	public static BundleContext getBundleContext() {
