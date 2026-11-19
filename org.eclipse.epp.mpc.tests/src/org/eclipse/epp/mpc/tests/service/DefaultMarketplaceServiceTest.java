@@ -47,7 +47,6 @@ import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
 import org.eclipse.epp.mpc.core.service.QueryHelper;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -271,7 +270,6 @@ public class DefaultMarketplaceServiceTest {
 
 	@Test
 	@Tag("RemoteTests")
-	@Disabled //top favorites are not exposed in MPC anymore - this fails with a 503 due to the varnish cache failing
 	public void favorites() throws CoreException {
 		ISearchResult result = marketplaceService.topFavorites(new NullProgressMonitor());
 		assertSearchResultSanity(result);

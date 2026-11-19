@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import org.eclipse.epp.mpc.tests.service.xml.UnmarshallerTest;
 import org.eclipse.epp.mpc.tests.util.ProxyConfigurationTest;
 import org.eclipse.epp.mpc.tests.util.TextUtilTest;
 import org.eclipse.epp.mpc.tests.util.TransportFactoryTest;
+import org.eclipse.epp.mpc.tests.util.URLUtilTest;
 import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
 
@@ -30,6 +31,7 @@ import org.junit.platform.suite.api.Suite;
 	ProxyConfigurationTest.class, //
 	UnmarshallerTest.class, //
 	TextUtilTest.class, //
+	URLUtilTest.class, //
 	TransportFactoryTest.class, //
 	CatalogServiceTest.class, //
 	DefaultMarketplaceServiceTest.class, //
