@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.net.URL;
 import java.security.cert.Certificate;
 import java.text.MessageFormat;
@@ -473,8 +474,7 @@ public class SolutionCompatibilityFilterTest {
 		String contentPrefix = BASE_URL + "/content/";
 		for (int i = 0; i < details.length; i++) {
 			Object detail = details[i];
-			if (detail instanceof INode) {
-				INode node = (INode) detail;
+			if (detail instanceof INode node) {
 				String url = node.getUrl();
 				if (url != null) {
 					if (url.startsWith(contentPrefix)) {
@@ -486,8 +486,7 @@ public class SolutionCompatibilityFilterTest {
 				} else {
 					detail = node.getId();
 				}
-			} else if (detail instanceof Solution) {
-				Solution solution = (Solution) detail;
+			} else if (detail instanceof Solution solution) {
 				detail = solution.shortName();
 			}
 			details[i] = detail;
@@ -504,8 +503,7 @@ public class SolutionCompatibilityFilterTest {
 	}
 
 	private static void flatten(List<Object> flattened, Object value) {
-		if (value instanceof Object[]) {
-			Object[] child = (Object[]) value;
+		if (value instanceof Object[] child) {
 			for (Object object : child) {
 				flatten(flattened, object);
 			}
@@ -520,9 +518,8 @@ public class SolutionCompatibilityFilterTest {
 
 	@BeforeAll
 	public static void registerStageCredentials() {
-		IProvisioningAgent agent = (IProvisioningAgent) ServiceHelper.getService(Activator.getContext(),
-				IProvisioningAgent.SERVICE_NAME);
-		originalUIService = (UIServices) agent.getService(UIServices.SERVICE_NAME);
+		IProvisioningAgent agent = ServiceHelper.getService(Activator.getContext(), IProvisioningAgent.class);
+		originalUIService = agent.getService(UIServices.class);
 		credentialsUIService = new UIServices() {
 			@Override
 			public AuthenticationInfo getUsernamePassword(String location, AuthenticationInfo previousInfo) {
@@ -554,9 +551,8 @@ public class SolutionCompatibilityFilterTest {
 		UIServices credentialsService = credentialsUIService;
 		originalUIService = null;
 		credentialsUIService = null;
-		IProvisioningAgent agent = (IProvisioningAgent) ServiceHelper.getService(Activator.getContext(),
-				IProvisioningAgent.SERVICE_NAME);
-		Object currentUIService = agent.getService(UIServices.SERVICE_NAME);
+		IProvisioningAgent agent = ServiceHelper.getService(Activator.getContext(), IProvisioningAgent.class);
+		UIServices currentUIService = agent.getService(UIServices.class);
 		if (currentUIService == credentialsService && originalService != null) {
 			agent.registerService(UIServices.SERVICE_NAME, originalService);
 		}
@@ -762,7 +758,7 @@ public class SolutionCompatibilityFilterTest {
 				+ eclipseRelease + "_" + system + "]";
 		log("Starting test " + testName);
 		registerDumpingUnmarshaller();
-		marketplaceService = new DefaultMarketplaceService(new URL(BASE_URL));
+		marketplaceService = new DefaultMarketplaceService(new URI(BASE_URL).toURL());
 		marketplaceService.setRequestMetaParameters(computeRequestMetaParameters(system, eclipseRelease));
 	}
 
