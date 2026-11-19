@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -17,8 +17,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageGcDrawer;
 import org.eclipse.swt.graphics.Rectangle;
 import org.osgi.framework.Version;
 
@@ -77,20 +77,16 @@ public class Util {
 			newWidth = Math.min(maxWidth, (int) (bounds.width / heightRatio));
 		}
 
-		Image scaledImage = new Image(image.getDevice(), newWidth, newHeight);
-		GC gc = new GC(scaledImage);
-		try {
+		ImageGcDrawer drawer = (gc, width, height) -> {
 			gc.setAntialias(SWT.ON);
 			gc.setInterpolation(SWT.HIGH);
 			if (background != null) {
 				gc.setBackground(background);
-				gc.fillRectangle(0, 0, newWidth, newHeight);
+				gc.fillRectangle(0, 0, width, height);
 			}
-			gc.drawImage(image, 0, 0, bounds.width, bounds.height, 0, 0, newWidth, newHeight);
-		} finally {
-			gc.dispose();
-		}
-		return scaledImage;
+			gc.drawImage(image, 0, 0, bounds.width, bounds.height, 0, 0, width, height);
+		};
+		return new Image(image.getDevice(), drawer, newWidth, newHeight);
 	}
 
 	/**
