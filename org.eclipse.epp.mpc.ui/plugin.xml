@@ -66,7 +66,7 @@
             locationURI="menu:help?after=additions">
          <command
                commandId="org.eclipse.epp.mpc.ui.command.showMarketplaceWizard"
-               icon="icons/marketplace16.png"
+               icon="icons/marketplace16.svg"
                label="%command.open.label"
                style="push"
                tooltip="%command.open.tooltip">
@@ -84,7 +84,7 @@
          point="org.eclipse.mylyn.tasks.bugs.support">
       <product
             description="%support.description"
-            icon="icons/marketplace32.png"
+            icon="icons/marketplace32.svg"
             id="org.eclipse.epp.mpc"
             name="%support.name"
             providerId="org.eclipse"/>

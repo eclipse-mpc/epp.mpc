@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 The Eclipse Foundation and others.
+ * Copyright (c) 2018, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -162,15 +162,15 @@ public class MarketplaceClientUiResources {
 		imageRegistry.put(DEFAULT_MARKETPLACE_ICON,
 				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/marketplace_banner.png").get()); //$NON-NLS-1$
 		imageRegistry.put(IU_ICON,
-				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/iu_obj.png").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/iu_obj.svg").get()); //$NON-NLS-1$
 		imageRegistry.put(IU_ICON_UPDATE,
-				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/iu_update_obj.png").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/iu_update_obj.svg").get()); //$NON-NLS-1$
 		imageRegistry.put(IU_ICON_INSTALL,
-				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/iu_install_obj.png").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/iu_install_obj.svg").get()); //$NON-NLS-1$
 		imageRegistry.put(IU_ICON_UNINSTALL,
-				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/iu_uninstall_obj.png").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/iu_uninstall_obj.svg").get()); //$NON-NLS-1$
 		imageRegistry.put(IU_ICON_DISABLED,
-				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/iu_disabled_obj.png").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/iu_disabled_obj.svg").get()); //$NON-NLS-1$
 		{
 			ImageDescriptor errorOverlay = PlatformUI.getWorkbench()
 					.getSharedImages()
@@ -182,7 +182,7 @@ public class MarketplaceClientUiResources {
 		}
 
 		imageRegistry.put(NEWS_ICON_UPDATE,
-				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/news_update.png").get()); //$NON-NLS-1$
+				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/news_update.svg").get()); //$NON-NLS-1$
 		imageRegistry.put(ITEM_ICON_STAR,
 				imageDescriptorFromBundle(MarketplaceClientUiResources.class, "icons/star.png").get()); //$NON-NLS-1$
 		imageRegistry.put(ITEM_ICON_STAR_SELECTED,
