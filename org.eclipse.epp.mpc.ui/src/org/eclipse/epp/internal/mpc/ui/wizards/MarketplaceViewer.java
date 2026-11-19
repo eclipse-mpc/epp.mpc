@@ -244,6 +244,8 @@ public class MarketplaceViewer extends CatalogViewer {
 
 	@Override
 	protected void doCreateHeaderControls(Composite parent) {
+		// detect the browser before catalog items exist, see AbstractMarketplaceDiscoveryItem.isBrowserAvailable
+		AbstractMarketplaceDiscoveryItem.isBrowserAvailable(parent.getDisplay());
 		new StyleHelper().on(parent).setClass("MarketplaceSearchHeader"); //$NON-NLS-1$
 		header = parent;
 		header.setBackgroundMode(SWT.INHERIT_DEFAULT);
