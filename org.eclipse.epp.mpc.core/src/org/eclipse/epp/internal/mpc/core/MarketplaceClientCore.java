@@ -27,10 +27,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.FrameworkUtil;
 
 /**
  * @author David Green
@@ -45,10 +43,6 @@ public class MarketplaceClientCore {
 
 	private static final String PIPE_BROKEN_MESSAGE = "Pipe broken"; //$NON-NLS-1$
 
-	public static ILog getLog() {
-		return Platform.getLog(FrameworkUtil.getBundle(MarketplaceClientCore.class));
-	}
-
 	public static void error(String message, Throwable exception) {
 		if (message == null) {
 			message = NLS.bind(Messages.MarketplaceClientCore_unexpectedException, exception.getMessage());
@@ -59,7 +53,7 @@ public class MarketplaceClientCore {
 		} else {
 			status = new Status(IStatus.ERROR, BUNDLE_ID, IStatus.ERROR, message, exception);
 		}
-		getLog().log(status);
+		ILog.get().log(status);
 	}
 
 	public static void error(Throwable exception) {

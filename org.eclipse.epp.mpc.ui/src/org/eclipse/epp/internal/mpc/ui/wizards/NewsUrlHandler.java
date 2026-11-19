@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -20,8 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceCategory;
 import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IMarket;
@@ -71,7 +70,7 @@ public class NewsUrlHandler extends MarketplaceUrlHandler implements LocationLis
 								"   return hrefs;" + //$NON-NLS-1$
 								"})();"); //$NON-NLS-1$
 			} catch (SWTException ex) {
-				MarketplaceClientUi.log(IStatus.WARNING,
+				ILog.get().warn(
 						"Failed to process link targets on news page. Some links might not open in external browser.", //$NON-NLS-1$
 						ex);
 				NewsUrlHandler.this.documentLinks = null;

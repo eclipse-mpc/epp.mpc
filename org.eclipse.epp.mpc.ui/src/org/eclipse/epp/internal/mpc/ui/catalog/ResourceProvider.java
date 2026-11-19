@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -314,12 +315,12 @@ public class ResourceProvider {
 						if (e.getCause() instanceof OperationCanceledException) {
 							// canceled, nothing we want to do here
 						} else {
-							MarketplaceClientUi.log(IStatus.WARNING, Messages.ResourceProvider_downloadError, requestSource,
-									resourceUrl, e);
+							ILog.get().warn(NLS.bind(Messages.ResourceProvider_downloadError,
+									requestSource, resourceUrl), e);
 						}
 					} catch (CoreException e) {
-						MarketplaceClientUi.log(IStatus.WARNING, Messages.ResourceProvider_downloadError, requestSource,
-								resourceUrl, e);
+						ILog.get().warn(NLS.bind(Messages.ResourceProvider_downloadError, requestSource, resourceUrl),
+								e);
 					}
 					return Status.OK_STATUS;
 				}

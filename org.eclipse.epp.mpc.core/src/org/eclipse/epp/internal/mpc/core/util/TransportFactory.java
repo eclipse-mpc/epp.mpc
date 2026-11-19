@@ -28,6 +28,7 @@ import java.util.Set;
 
 import org.apache.hc.core5.http.NoHttpResponseException;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
@@ -294,7 +295,7 @@ public abstract class TransportFactory implements ITransportFactory {
 			serviceError.add(Status.error(Messages.TransportFactory_LegacyFallbacksError, ex));
 		}
 		//We log and throw, because the exception is lacking details
-		MarketplaceClientCore.getLog().log(serviceError);
+		ILog.get().log(serviceError);
 		CoreException coreException = new CoreException(serviceError);
 		throw new IllegalStateException(serviceError.toString(), coreException);
 	}
@@ -321,7 +322,7 @@ public abstract class TransportFactory implements ITransportFactory {
 					NLS.bind(Messages.TransportFactory_UseLegacyFallback, transportName)));
 		}
 		transportFallbackStatus.add(serviceError);
-		MarketplaceClientCore.getLog().log(transportFallbackStatus);
+		ILog.get().log(transportFallbackStatus);
 	}
 
 	private static MultiStatus diagnoseTransportServiceRegistration(BundleContext context,
@@ -398,7 +399,7 @@ public abstract class TransportFactory implements ITransportFactory {
 					factories.add(factory);
 				}
 			} catch (Throwable t) {
-				MarketplaceClientCore.getLog().log(Status.warning(
+				ILog.get().log(Status.warning(
 						Messages.TransportFactory_transportAvailabilityError, t));
 			}
 		}

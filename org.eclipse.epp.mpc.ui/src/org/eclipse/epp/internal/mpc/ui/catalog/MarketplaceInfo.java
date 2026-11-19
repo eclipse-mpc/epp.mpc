@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
@@ -360,7 +361,7 @@ public class MarketplaceInfo {
 			} catch (Throwable t) {
 				// ignore, fallback
 				IStatus status = Status.warning(Messages.MarketplaceInfo_LoadError, t);
-				MarketplaceClientUi.getLog().log(status);
+				ILog.get().log(status);
 				//try to delete broken file
 				loadFile.delete();
 				return null;

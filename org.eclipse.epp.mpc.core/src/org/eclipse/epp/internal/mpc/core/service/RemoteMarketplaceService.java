@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import java.text.MessageFormat;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -180,7 +181,7 @@ public class RemoteMarketplaceService<T> {
 					if (MarketplaceClientCore.isFailedDownloadException(e)) {
 						if (++retry < RETRY_COUNT) {
 							// retry on unreliable connections
-							MarketplaceClientCore.getLog().log(createStatus(IStatus.INFO, message, e));
+							ILog.get().log(createStatus(IStatus.INFO, message, e));
 							continue;
 						}
 						IStatus connectionProblemStatus = MarketplaceClientCore.createConnectionProblemStatus(e);

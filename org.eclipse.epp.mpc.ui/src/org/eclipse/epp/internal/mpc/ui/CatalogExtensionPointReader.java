@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
@@ -77,8 +78,7 @@ class CatalogExtensionPointReader {
 						descriptors.add(descriptor);
 					}
 				} catch (Exception e) {
-					MarketplaceClientUi.error(NLS.bind(
-							Messages.CatalogExtensionPointReader_cannotRegisterCatalog_bundle_reason,
+					ILog.get().error(NLS.bind(Messages.CatalogExtensionPointReader_cannotRegisterCatalog_bundle_reason,
 							element.getContributor().getName(), e.getMessage()), e);
 				}
 			}
