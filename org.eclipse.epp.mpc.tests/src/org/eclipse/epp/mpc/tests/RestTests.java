@@ -16,7 +16,6 @@ import org.eclipse.epp.mpc.tests.service.CatalogServiceTest;
 import org.eclipse.epp.mpc.tests.service.DefaultMarketplaceServiceTest;
 import org.eclipse.epp.mpc.tests.service.SolutionCompatibilityFilterTest;
 import org.eclipse.epp.mpc.tests.service.xml.UnmarshallerTest;
-import org.eclipse.epp.mpc.tests.util.ProxyConfigurationTest;
 import org.eclipse.epp.mpc.tests.util.TextUtilTest;
 import org.eclipse.epp.mpc.tests.util.TransportFactoryTest;
 import org.eclipse.epp.mpc.tests.util.URLUtilTest;
@@ -28,7 +27,6 @@ import org.junit.platform.suite.api.Suite;
  */
 @Suite
 @SelectClasses({ //
-	ProxyConfigurationTest.class, //
 	UnmarshallerTest.class, //
 	TextUtilTest.class, //
 	URLUtilTest.class, //

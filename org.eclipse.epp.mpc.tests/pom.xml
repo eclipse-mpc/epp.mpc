@@ -18,39 +18,8 @@
 	<properties>
 		<test-suite>org.eclipse.epp.mpc.tests.AllTests</test-suite>
 		<test-args>-ea</test-args>
-		<test-proxy></test-proxy>
 		<test-app-args></test-app-args>
 	</properties>
-
-	<profiles>
-		<profile>
-			<id>hudson.eclipse.org</id>
-			<activation>
-				<property>
-					<name>user.name</name>
-					<value>genie.mpc</value>
-				</property>
-			</activation>
-			<properties>
-				<test-proxy>-Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -Dhttp.nonProxyHosts=*.eclipse.org</test-proxy>
-			</properties>
-			<build>
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<groupId>org.eclipse.tycho</groupId>
-							<artifactId>tycho-surefire-plugin</artifactId>
-							<configuration>
-								<environmentVariables>
-									<SWT_GTK3>0</SWT_GTK3>
-								</environmentVariables>
-							</configuration>
-						</plugin>
-					</plugins>
-				</pluginManagement>
-			</build>
-		</profile>
-	</profiles>
 
 	<build>
 		<pluginManagement>
@@ -65,7 +34,7 @@
 						<product>org.eclipse.sdk.ide</product>
 						<application>org.eclipse.ui.ide.workbench</application>
 						<testClass>${test-suite}</testClass>
-						<argLine>-Xmx256m ${test-args} ${test-proxy}</argLine>
+						<argLine>-Xmx256m ${test-args}</argLine>
 						<appArgLine>${test-app-args}</appArgLine>
 						<!-- run all tests with a space in the application path (this is the osgi.install.area, but the configuration area should follow suit -->
 						<work>${project.build.directory}/work/test rcp</work>

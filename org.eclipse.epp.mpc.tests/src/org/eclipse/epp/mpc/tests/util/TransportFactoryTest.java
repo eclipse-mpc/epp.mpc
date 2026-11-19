@@ -21,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -69,6 +68,8 @@ import org.eclipse.epp.mpc.tests.LambdaMatchers;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.osgi.framework.BundleContext;
@@ -345,9 +346,8 @@ public class TransportFactoryTest {
 
 
 	@Test
+	@EnabledOnOs(OS.WINDOWS)
 	public void testHttpClientTransportWin32Support() throws Exception {
-		BundleContext bundleContext = FrameworkUtil.getBundle(TransportFactory.class).getBundleContext();
-		assumeTrue("win32".equals(bundleContext.getProperty("osgi.os")));
 		HttpContext context = interceptRequest().getInterceptedContext();
 
 		Lookup<AuthSchemeFactory> authRegistry = HttpClientContext.castOrCreate(context).getAuthSchemeRegistry();
