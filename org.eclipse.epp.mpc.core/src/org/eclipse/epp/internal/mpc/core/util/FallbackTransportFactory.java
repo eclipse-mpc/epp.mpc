@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
@@ -61,7 +62,7 @@ public class FallbackTransportFactory implements ITransportFactory {
 				throws FileNotFoundException, ServiceUnavailableException, CoreException {
 			connectionAttempts++;
 			if (connectionAttempts > 10 && connectionFailures / (double) connectionAttempts > 0.75) {
-				MarketplaceClientCore.getLog()
+				ILog.get()
 				.log(Status.info(NLS.bind(Messages.FallbackTransportFactory_disablingTransport, primaryTransport)));
 				primaryDisabled = true;
 			}
@@ -133,7 +134,7 @@ public class FallbackTransportFactory implements ITransportFactory {
 					String problemKey = ex.getClass().getName() + ": " + ex.getMessage() + "\n\t" //$NON-NLS-1$//$NON-NLS-2$
 							+ ex.getStackTrace()[0];
 					if (reportedProblems.add(problemKey)) {
-						MarketplaceClientCore.getLog()
+						ILog.get()
 						.log(MarketplaceClientCore.computeStatus(ex,
 								NLS.bind(Messages.FallbackTransportFactory_fallbackStream, primaryTransport,
 										fallbackTransport)));

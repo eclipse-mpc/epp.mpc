@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2019 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -297,9 +298,7 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
 			return catalogItem;
 		} catch (RuntimeException ex) {
-			MarketplaceClientUi.error(
-					NLS.bind(Messages.MarketplaceDiscoveryStrategy_ParseError,
-							node == null ? "null" : id), //$NON-NLS-1$
+			ILog.get().error(NLS.bind(Messages.MarketplaceDiscoveryStrategy_ParseError, node == null ? "null" : id), //$NON-NLS-1$
 					ex);
 			return null;
 		}
@@ -312,13 +311,11 @@ public class MarketplaceDiscoveryStrategy extends AbstractDiscoveryStrategy {
 			try {
 				resourceProvider.retrieveResource(requestSource, resource);
 			} catch (URISyntaxException e) {
-				MarketplaceClientUi.log(IStatus.WARNING, Messages.MarketplaceDiscoveryStrategy_badUri,
-						catalogItem.getName(),
-						catalogItem.getId(), resource, e);
+				ILog.get().warn(NLS.bind(Messages.MarketplaceDiscoveryStrategy_badUri,
+						new Object[] { catalogItem.getName(), catalogItem.getId(), resource }), e);
 			} catch (IOException e) {
-				MarketplaceClientUi.log(IStatus.WARNING, Messages.MarketplaceDiscoveryStrategy_downloadError,
-						catalogItem.getName(),
-						catalogItem.getId(), resource, e);
+				ILog.get().warn(NLS.bind(Messages.MarketplaceDiscoveryStrategy_downloadError,
+						new Object[] { catalogItem.getName(), catalogItem.getId(), resource }), e);
 			}
 		}
 	}

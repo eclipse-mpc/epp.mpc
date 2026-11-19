@@ -58,64 +58,13 @@ public class MarketplaceClientUi {
 
 	public static final String BUNDLE_ID = "org.eclipse.epp.mpc.ui"; //$NON-NLS-1$
 
-	public static ILog getLog() {
-		return Platform.getLog(Platform.getBundle(BUNDLE_ID));
-	}
-
-	public static void error(String message, Object... params) {
-		log(IStatus.ERROR, message, params);
-	}
-
-	public static void error(String message, Throwable exception) {
-		log(IStatus.ERROR, message, exception);
-	}
-
 	public static void error(Throwable exception) {
-		error(null, exception);
-	}
-
-	public static void log(int severity, String message) {
-		getLog().log(newStatus(severity, message, (Throwable) null));
-	}
-
-	public static void log(int severity, String message, Throwable exception) {
-		getLog().log(newStatus(severity, message, exception));
-	}
-
-	public static void log(int severity, String message, Object... params) {
-		getLog().log(newStatus(severity, message, params));
-	}
-
-	public static IStatus newStatus(int severity, String message, Object... params) {
-		String formattedMessage = message;
-		if (message != null && params != null && params.length > 0) {
-			formattedMessage = NLS.bind(message, params);
+		String exceptionMessage = exception.getMessage();
+		if (exceptionMessage == null) {
+			exceptionMessage = exception.getClass().getSimpleName();
 		}
-		Throwable exception = findException(params);
-		return newStatus(severity, formattedMessage, exception);
-	}
-
-	public static IStatus newStatus(int severity, String message, Throwable exception) {
-		if (message == null) {
-			String exceptionMessage = exception.getMessage();
-			if (exceptionMessage == null) {
-				exceptionMessage = exception.getClass().getSimpleName();
-			}
-			message = NLS.bind(Messages.MarketplaceClientUi_unexpectedException_reason, exceptionMessage);
-		}
-		IStatus status = new Status(severity, BUNDLE_ID, message, exception);
-		return status;
-	}
-
-	private static Throwable findException(Object... params) {
-		Throwable exception = null;
-		for (int i = params.length - 1; i >= 0; i--) {
-			if (params[i] instanceof Throwable) {
-				exception = (Throwable) params[i];
-				break;
-			}
-		}
-		return exception;
+		ILog.get().error(NLS.bind(Messages.MarketplaceClientUi_unexpectedException_reason, exceptionMessage),
+				exception);
 	}
 
 	public static BundleContext getBundleContext() {
@@ -198,12 +147,7 @@ public class MarketplaceClientUi {
 								}
 							}
 						}
-						ILog log = getLog();
-						if (log != null) {
-							log.log(status);
-						} else {
-							System.out.println(status);
-						}
+						ILog.get().log(status);
 					};
 					if (runIn(workbenchDisplay, logRunnable)) {
 						return;
@@ -212,12 +156,7 @@ public class MarketplaceClientUi {
 			}
 		}
 		//else just log
-		ILog log = getLog();
-		if (log != null) {
-			log.log(status);
-		} else {
-			System.out.println(status);
-		}
+		ILog.get().log(status);
 	}
 
 	private static boolean runIn(Display display, Runnable runnable) {

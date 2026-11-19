@@ -18,6 +18,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
 
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
 import org.eclipse.osgi.util.NLS;
@@ -113,7 +114,7 @@ public class ServiceUtil {
 				}
 			} else if (value != null) {
 				//wrong type, ignore
-				MarketplaceClientCore.getLog().log(
+				ILog.get().log(
 						Status.warning(NLS.bind(
 								Messages.ServiceUtil_ignoringIncompatibleServiceProperty, value, key)));
 			}

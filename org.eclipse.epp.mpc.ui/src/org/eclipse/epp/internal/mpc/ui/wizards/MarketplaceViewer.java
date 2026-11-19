@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -593,7 +594,7 @@ public class MarketplaceViewer extends CatalogViewer {
 			TextSearchControl textSearchControl = (TextSearchControl) filterTextField.get(this);
 			textSearchControl.getTextControl().setText(tag);
 		} catch (Exception e) {
-			MarketplaceClientUi.log(IStatus.WARNING, Messages.MarketplaceViewer_Could_not_change_find_text, e);
+			ILog.get().warn(Messages.MarketplaceViewer_Could_not_change_find_text, e);
 		}
 	}
 

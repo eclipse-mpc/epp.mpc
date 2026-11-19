@@ -22,11 +22,11 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.core.runtime.jobs.JobGroup;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.Messages;
 import org.eclipse.epp.mpc.core.model.INode;
@@ -59,7 +59,7 @@ public class MissingNatureDetector implements IStartup, IPropertyChangeListener 
 				showProposalsIfReady();
 			}
 		} catch (CoreException e) {
-			MarketplaceClientUi.getLog()
+			ILog.get()
 			.log(Status.error(e.getLocalizedMessage(), e));
 		}
 	};

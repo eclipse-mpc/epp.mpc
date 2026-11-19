@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
@@ -135,7 +136,7 @@ public abstract class MarketplaceUrlHandler {
 
 	public static boolean triggerInstall(SolutionInstallationInfo info) {
 		if (info.getRequestUrl() != null) {
-			MarketplaceClientUi.getLog().log(
+			ILog.get().log(
 					Status.info(NLS.bind(
 							Messages.MarketplaceUrlHandler_performInstallRequest, info.getRequestUrl())));
 		}

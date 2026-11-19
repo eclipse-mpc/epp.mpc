@@ -19,11 +19,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.Messages;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
@@ -88,7 +88,7 @@ final class DiscoverFileSupportJob extends Job {
 			IStatus status = Status.error(
 					NLS.bind(Messages.DiscoverFileSupportJob_discoveryFailed, getFileExtensionLabel(fileName)), ex);
 			// Do not return this status as it would show an error, e.g. when the user is currently offline
-			MarketplaceClientUi.getLog().log(status);
+			ILog.get().log(status);
 			return Status.CANCEL_STATUS;
 		}
 		if (nodes.isEmpty()) {

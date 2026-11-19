@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
@@ -199,7 +200,7 @@ public class MarketplaceCatalog extends Catalog {
 			try {
 				performUpdateCheckDiscovery(s, m);
 			} catch (CoreException e) {
-				MarketplaceClientUi.log(IStatus.INFO, Messages.MarketplaceCatalog_UpdateCheckDiscoveryError, e);
+				ILog.get().info(Messages.MarketplaceCatalog_UpdateCheckDiscoveryError, e);
 			}
 		}, finalUpdateCheckItems, categories, getCertifications(), getTags(), monitor);
 		return finalUpdateCheckItems;
@@ -281,8 +282,7 @@ public class MarketplaceCatalog extends Catalog {
 				}
 				catalogItemsThisSite.add(catalogItem);
 			} catch (URISyntaxException e) {
-				MarketplaceClientUi.log(IStatus.WARNING,
-						Messages.MarketplaceCatalog_InvalidRepositoryUrl, node.getName(), updateurl);
+				ILog.get().warn(NLS.bind(Messages.MarketplaceCatalog_InvalidRepositoryUrl, node.getName(), updateurl));
 				catalogItem.setAvailable(false);
 			}
 		}
@@ -373,9 +373,9 @@ public class MarketplaceCatalog extends Catalog {
 								NLS.bind(Messages.MarketplaceCatalog_ErrorReadingRepository, uri), e1);
 						for (MarketplaceNodeCatalogItem item4 : catalogItemsThisSite) {
 							item4.setAvailable(false);
-							errorStatus.add(MarketplaceClientUi.newStatus(IStatus.INFO, item4.getName()));
+							errorStatus.add(Status.info(item4.getName()));
 						}
-						MarketplaceClientUi.getLog().log(errorStatus);
+						ILog.get().log(errorStatus);
 					} catch (OperationCanceledException e2) {
 						// nothing to do
 					}

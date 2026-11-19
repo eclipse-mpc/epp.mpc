@@ -17,11 +17,11 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.Messages;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.epp.mpc.core.model.ISearchResult;
@@ -55,7 +55,7 @@ final class DiscoverNatureSupportJob extends Job {
 			nodes = new ArrayList<>(searchResult.getNodes());
 		} catch (CoreException ex) {
 			IStatus status = Status.error(NLS.bind(Messages.LookupByNatureJob_discoveryFailed, natureId), ex);
-			MarketplaceClientUi.getLog().log(status);
+			ILog.get().log(status);
 			// Do not return this status as it would show an error
 			return Status.CANCEL_STATUS;
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -33,6 +34,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.resource.LocalResourceManager;
 import org.eclipse.jface.resource.ResourceManager;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
@@ -157,9 +159,8 @@ public class MarketplaceDiscoveryResources extends DiscoveryResources {
 								}
 							}
 						} catch (Exception e) {
-							MarketplaceClientUi.log(IStatus.WARNING,
-									Messages.MarketplaceDiscoveryResources_FailedCreatingImage, imagePath,
-									discoverySource.getId(), e);
+							ILog.get().warn(NLS.bind(Messages.MarketplaceDiscoveryResources_FailedCreatingImage,
+									imagePath, discoverySource.getId()), e);
 							return Status.CANCEL_STATUS;//we don't want any additional logging or error popups...
 						}
 					}
@@ -185,6 +186,6 @@ public class MarketplaceDiscoveryResources extends DiscoveryResources {
 	}
 
 	private void logFailedLoadingImage(String imagePath, URL url, Exception ex) {
-		MarketplaceClientUi.log(IStatus.WARNING, Messages.MarketplaceDiscoveryResources_LoadImageError, imagePath, ex);
+		ILog.get().warn(NLS.bind(Messages.MarketplaceDiscoveryResources_LoadImageError, imagePath), ex);
 	}
 }

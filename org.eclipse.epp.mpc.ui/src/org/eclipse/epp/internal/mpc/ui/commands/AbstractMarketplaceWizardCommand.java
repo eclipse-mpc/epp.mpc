@@ -24,6 +24,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.epp.internal.mpc.core.MarketplaceClientCore;
@@ -109,7 +110,7 @@ public abstract class AbstractMarketplaceWizardCommand extends AbstractHandler i
 				} catch (Exception ex) {
 					// HOTFIX for bug 477269 - Display might get disposed during call to handle due to workspace shutdown or similar.
 					// In that case, just log...
-					MarketplaceClientUi.getLog().log(exitStatus);
+					ILog.get().log(exitStatus);
 				}
 				return null;
 			} else if (!remoteCatalogStatus.isOK()) {
@@ -185,9 +186,8 @@ public abstract class AbstractMarketplaceWizardCommand extends AbstractHandler i
 					try {
 						resourceProvider.retrieveResource(requestSource, catalogImageUrl);
 					} catch (Exception e) {
-						MarketplaceClientUi.log(IStatus.WARNING,
-								Messages.MarketplaceWizardCommand_FailedRetrievingCatalogImage, catalogName,
-								catalogImageUrl, e);
+						ILog.get().warn(NLS.bind(Messages.MarketplaceWizardCommand_FailedRetrievingCatalogImage,
+								catalogName, catalogImageUrl), e);
 					}
 				}
 				if (catalog.getBranding() != null && catalog.getBranding().getWizardIcon() != null) {
@@ -195,9 +195,8 @@ public abstract class AbstractMarketplaceWizardCommand extends AbstractHandler i
 					try {
 						resourceProvider.retrieveResource(requestSource, wizardIconUrl);
 					} catch (Exception e) {
-						MarketplaceClientUi.log(IStatus.WARNING,
-								Messages.MarketplaceWizardCommand_FailedRetrievingCatalogWizardIcon, catalogName,
-								wizardIconUrl, e);
+						ILog.get().warn(NLS.bind(Messages.MarketplaceWizardCommand_FailedRetrievingCatalogWizardIcon,
+								catalogName, wizardIconUrl), e);
 					}
 				}
 				CatalogDescriptor descriptor = new CatalogDescriptor(catalog);

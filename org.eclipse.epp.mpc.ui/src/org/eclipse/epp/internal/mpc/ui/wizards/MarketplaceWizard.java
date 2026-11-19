@@ -38,6 +38,7 @@ import java.util.Set;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -876,7 +877,8 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 				MarketplaceClientUi.handle(status, StatusManager.SHOW | StatusManager.BLOCK | StatusManager.LOG);
 			} catch (InterruptedException e) {
 				// canceled
-				MarketplaceClientUi.log(IStatus.CANCEL, Messages.MarketplaceWizard_ProvisioningOperationCancelled, e);
+				ILog.get().log(new Status(IStatus.CANCEL, MarketplaceWizard.class,
+						Messages.MarketplaceWizard_ProvisioningOperationCancelled, e));
 			} finally {
 				if (provisioningOperation != null) {
 					addedRepositoryLocations = provisioningOperation.getAddedRepositoryLocations();

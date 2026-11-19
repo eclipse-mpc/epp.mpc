@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -18,10 +18,9 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.epp.internal.mpc.core.util.URLUtil;
 import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
-import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUi;
 import org.eclipse.epp.internal.mpc.ui.MarketplaceClientUiResources;
 import org.eclipse.epp.internal.mpc.ui.catalog.ResourceProvider;
 import org.eclipse.epp.internal.mpc.ui.catalog.ResourceProvider.ResourceFuture;
@@ -110,12 +109,11 @@ public final class CatalogDescriptor {
 				try {
 					resource = resourceProvider.retrieveResource(requestSource, imageUrl);
 				} catch (URISyntaxException e) {
-					MarketplaceClientUi.log(IStatus.WARNING, Messages.CatalogDescriptor_badUri,
-							catalog.getName(), catalog.getId(), resource, e);
+					ILog.get().warn(NLS.bind(Messages.CatalogDescriptor_badUri,
+							new Object[] { catalog.getName(), catalog.getId(), resource }), e);
 				} catch (IOException e) {
-					MarketplaceClientUi.log(IStatus.WARNING,
-							Messages.CatalogDescriptor_downloadError, catalog.getName(),
-							catalog.getId(), resource, e);
+					ILog.get().warn(NLS.bind(Messages.CatalogDescriptor_downloadError,
+							new Object[] { catalog.getName(), catalog.getId(), resource }), e);
 				}
 			}
 			if (resource != null) {
