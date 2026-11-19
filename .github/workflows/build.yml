@@ -42,6 +42,7 @@ jobs:
       with:
         name: org.eclipse.epp.mpc.tests-target-screenshots
         path: org.eclipse.epp.mpc.tests/target/screenshots/**
+        if-no-files-found: ignore
         retention-days: 3
   
     - name: 'Upload Logs'
@@ -50,6 +51,7 @@ jobs:
       with:
         name: org.eclipse.epp.mpc.tests-log
         path: org.eclipse.epp.mpc.tests/target/work/data/.metadata/.log
+        include-hidden-files: true
         retention-days: 3
         
         
@@ -59,4 +61,5 @@ jobs:
       with:
         name: org.eclipse.epp.mpc.tests-log-all
         path: org.eclipse.epp.mpc.tests/target/work/data/.metadata/**
+        include-hidden-files: true
         retention-days: 3
