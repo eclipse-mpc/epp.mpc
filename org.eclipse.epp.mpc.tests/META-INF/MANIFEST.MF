@@ -23,8 +23,8 @@ Require-Bundle: org.eclipse.osgi;bundle-version="3.6.0",
  org.eclipse.equinox.p2.discovery,
  org.eclipse.jface;bundle-version="3.6.0",
  org.eclipse.ui;bundle-version="3.6.0",
- org.eclipse.swtbot.eclipse.finder;bundle-version="2.2.1",
- org.eclipse.swtbot.junit4_x;bundle-version="2.2.1",
+ org.eclipse.swtbot.eclipse.finder;bundle-version="4.0.0",
+ org.eclipse.swtbot.junit5_x;bundle-version="4.0.0",
  org.eclipse.equinox.p2.ui.discovery;bundle-version="1.0.0",
  org.hamcrest;bundle-version="3.0.0",
  org.eclipse.core.net;bundle-version="1.2.200",
@@ -46,5 +46,6 @@ Import-Package: org.apache.hc.client5.http.auth;version="[5.1.0,6.0.0)",
  org.eclipse.ecf.core.util,
  org.eclipse.ecf.filetransfer,
  org.eclipse.equinox.security.storage;version="1.0.0",
- org.osgi.service.component
+ org.osgi.service.component,
+ org.opentest4j;version="[1.0.0,2.0.0)"
 Automatic-Module-Name: org.eclipse.epp.mpc.tests

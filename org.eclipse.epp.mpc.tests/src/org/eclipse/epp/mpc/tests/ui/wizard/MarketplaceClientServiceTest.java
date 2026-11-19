@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,9 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui.wizard;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
 
@@ -23,8 +23,6 @@ import org.eclipse.epp.internal.mpc.ui.wizards.MarketplaceClientService;
 import org.eclipse.epp.mpc.core.model.ICategory;
 import org.eclipse.epp.mpc.core.model.IMarket;
 import org.eclipse.epp.mpc.core.service.QueryHelper;
-import org.eclipse.epp.mpc.tests.Categories.RemoteTests;
-import org.eclipse.epp.mpc.tests.Categories.UITests;
 import org.eclipse.epp.mpc.tests.ui.wizard.matcher.NodeMatcher;
 import org.eclipse.epp.mpc.tests.util.SWTBotComboAdapter;
 import org.eclipse.epp.mpc.ui.IMarketplaceClientConfiguration;
@@ -36,12 +34,13 @@ import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.eclipse.ui.PlatformUI;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 
-@Category({ RemoteTests.class, UITests.class })
+@Tag("RemoteTests")
+@Tag("UITests")
 public class MarketplaceClientServiceTest extends AbstractMarketplaceWizardBotTest {
 
 	private static final String ITEM_ID = "4123770";
@@ -53,7 +52,7 @@ public class MarketplaceClientServiceTest extends AbstractMarketplaceWizardBotTe
 	private MarketplaceClientService service;
 
 	@Override
-	@Before
+	@BeforeEach
 	public void setUp() {
 		service = new MarketplaceClientService();
 		config = service.newConfiguration();
