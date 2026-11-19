@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.6"?>
 <!--
-    Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+    Copyright (c) 2010, 2026 The Eclipse Foundation and others.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v2.0
     which accompanies this distribution, and is available at
@@ -89,8 +89,10 @@
             name="%support.name"
             providerId="org.eclipse"/>
          <mapping namespace="org.eclipse.epp.mpc" productId="org.eclipse.epp.mpc">
-            <property name="product" value="MPC"/>
-            <property name="component" value="wizard"/>
+            <repository
+                  kind="github"
+                  url="https://github.com/eclipse-mpc/epp.mpc/issues/">
+            </repository>
          </mapping>
    </extension>
    <extension
