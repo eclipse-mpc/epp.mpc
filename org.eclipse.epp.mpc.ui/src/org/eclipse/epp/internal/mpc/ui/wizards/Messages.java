@@ -153,6 +153,10 @@ class Messages extends NLS {
 
 	public static String InstallUpdatesNotificationItem_UpdateNowAction;
 
+	public static String InstalledPlaceholderItem_message;
+
+	public static String InstalledPlaceholderItem_search;
+
 	public static String ItemButtonController_change;
 
 	public static String ItemButtonController_changePending;
