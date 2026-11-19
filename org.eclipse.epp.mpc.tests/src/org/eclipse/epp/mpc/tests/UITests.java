@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests;
 
+import org.eclipse.epp.mpc.tests.ui.MarketplaceClientUiTest;
 import org.eclipse.epp.mpc.tests.ui.catalog.CatalogDescriptorTest;
 import org.eclipse.epp.mpc.tests.ui.catalog.MarketplaceInfoSerializationTest;
 import org.eclipse.epp.mpc.tests.ui.catalog.MarketplaceInfoTest;
@@ -29,8 +30,8 @@ import org.junit.platform.suite.api.Suite;
 	MarketplaceUrlHandlerTest.class, //
 	MarketplaceInfoTest.class, //
 	MarketplaceInfoSerializationTest.class, //
-	CatalogDescriptorTest.class //
-
+	CatalogDescriptorTest.class, //
+	MarketplaceClientUiTest.class //
 })
 public class UITests {
 

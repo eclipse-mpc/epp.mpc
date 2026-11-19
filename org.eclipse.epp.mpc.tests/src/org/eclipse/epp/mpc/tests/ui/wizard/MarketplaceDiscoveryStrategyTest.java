@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ package org.eclipse.epp.mpc.tests.ui.wizard;
 
 import static org.junit.Assert.assertNotNull;
 
+import java.net.URI;
 import java.net.URL;
 
 import org.eclipse.core.runtime.CoreException;
@@ -51,7 +52,7 @@ public class MarketplaceDiscoveryStrategyTest {
 
 	@Before
 	public void setUp() throws Exception {
-		catalogUrl = new URL("https://marketplace.eclipse.org");
+		catalogUrl = new URI("https://marketplace.eclipse.org").toURL();
 		catalogDescriptor = new CatalogDescriptor(catalogUrl, "Eclipse.org Marketplace");
 		CatalogRegistry.getInstance().register(catalogDescriptor);
 		catalog = new MarketplaceCatalog();
@@ -60,7 +61,7 @@ public class MarketplaceDiscoveryStrategyTest {
 	private void setupCatalog(final IMarketplaceService marketplaceService) {
 		discoveryStrategy = new MarketplaceDiscoveryStrategy(catalogDescriptor) {
 			@Override
-			public IMarketplaceService createMarketplaceService() {
+			public IMarketplaceService acquireMarketplaceService() {
 				return marketplaceService;
 			}
 		};
@@ -94,13 +95,14 @@ public class MarketplaceDiscoveryStrategyTest {
 		setupCatalog(marketplaceService);
 
 		testNode[0] = null;
-		catalog.performQuery(null, null, new URL(catalogUrl, "content/test").toExternalForm(),
+		catalog.performQuery(null, null, catalogUrl.toURI().resolve("content/test").toString(),
 				new NullProgressMonitor());
 		assertNotNull(testNode[0]);
 		assertNotNull(testNode[0].getUrl());
 
 		testNode[0] = null;
-		catalog.performQuery(null, null, new URL(catalogUrl, "node/12345").toExternalForm(), new NullProgressMonitor());
+		catalog.performQuery(null, null, catalogUrl.toURI().resolve("node/12345").toString(),
+				new NullProgressMonitor());
 		assertNotNull(testNode[0]);
 		assertNotNull(testNode[0].getId());
 	}

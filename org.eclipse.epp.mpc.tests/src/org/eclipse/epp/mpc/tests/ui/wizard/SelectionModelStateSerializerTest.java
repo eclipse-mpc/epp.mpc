@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2020 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -22,7 +22,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
 
@@ -55,11 +55,11 @@ public class SelectionModelStateSerializerTest {
 
 	@Before
 	public void setUp() throws Exception {
-		CatalogDescriptor catalogDescriptor = new CatalogDescriptor(new URL("https://marketplace.eclipse.org"),
+		CatalogDescriptor catalogDescriptor = new CatalogDescriptor(new URI("https://marketplace.eclipse.org").toURL(),
 				"Eclipse.org Marketplace");
 		discoveryStrategy = new MarketplaceDiscoveryStrategy(catalogDescriptor) {
 			@Override
-			public IMarketplaceService createMarketplaceService() {
+			public IMarketplaceService acquireMarketplaceService() {
 				DefaultMarketplaceService marketplaceService = new DefaultMarketplaceService(catalogDescriptor.getUrl());
 				Map<String, String> requestMetaParameters = ServiceLocator.computeDefaultRequestMetaParameters();
 				marketplaceService.setRequestMetaParameters(requestMetaParameters);

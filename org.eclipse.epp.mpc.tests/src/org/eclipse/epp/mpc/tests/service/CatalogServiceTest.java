@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,9 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,9 +23,7 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.epp.internal.mpc.core.ServiceLocator;
 import org.eclipse.epp.internal.mpc.core.model.Catalog;
-import org.eclipse.epp.internal.mpc.core.service.CatalogService;
 import org.eclipse.epp.internal.mpc.core.util.ServiceUtil;
 import org.eclipse.epp.mpc.core.model.ICatalog;
 import org.eclipse.epp.mpc.core.service.ICatalogService;
@@ -33,8 +33,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
@@ -43,11 +41,11 @@ import org.osgi.framework.ServiceRegistration;
 /**
  * @author Benjamin Muskalla
  */
-@RunWith(BlockJUnit4ClassRunner.class)
 public class CatalogServiceTest {
 
-	private final class MockCatalogService implements CatalogService {
-		public List<Catalog> listCatalogs(IProgressMonitor monitor) throws CoreException {
+	private static final class MockCatalogService implements ICatalogService {
+		@Override
+		public List<Catalog> listCatalogs(IProgressMonitor monitor) {
 			Catalog catalog = new Catalog();
 			catalog.setId("mock");
 			return Collections.singletonList(catalog);
@@ -89,12 +87,11 @@ public class CatalogServiceTest {
 		ServiceRegistration<ICatalogService> registration = bundleContext.registerService(ICatalogService.class,
 				new MockCatalogService(), ServiceUtil.serviceRanking(Integer.MAX_VALUE, null));
 		try {
-			catalogService = ServiceLocator.getInstance().getCatalogService();
+			catalogService = serviceLocator.getCatalogService();
 			List<? extends ICatalog> catalogs = catalogService.listCatalogs(null);
 			assertEquals(1, catalogs.size());
 			assertEquals("mock", catalogs.get(0).getId());
 		} finally {
-			//			ServiceLocator.setInstance(oldInstance);
 			registration.unregister();
 		}
 	}
