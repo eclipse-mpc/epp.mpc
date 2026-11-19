@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2018, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -17,9 +17,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import org.junit.rules.ExternalResource;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
-public class TemporaryEnvironment extends ExternalResource {
+/**
+ * Temporarily overrides system properties and restores their original values after each test.
+ */
+public class TemporaryEnvironment implements AfterEachCallback {
 
 	private static final Object MISSING_VALUE = new Object();
 
@@ -79,7 +83,7 @@ public class TemporaryEnvironment extends ExternalResource {
 	}
 
 	@Override
-	protected void after() {
+	public void afterEach(ExtensionContext context) {
 		resetAll();
 	}
 }

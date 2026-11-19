@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -13,12 +13,12 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui.catalog;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
@@ -35,6 +35,8 @@ import java.net.URLConnection;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.FileLocator;
@@ -45,11 +47,14 @@ import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
 import org.eclipse.epp.mpc.tests.ui.catalog.MarketplaceInfoSerializationTest.TestMarketplaceInfo.TestRegistryFile;
 import org.eclipse.epp.mpc.tests.util.TemporaryEnvironment;
 import org.eclipse.osgi.service.datalocation.Location;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.AnnotatedElementContext;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.io.TempDirFactory;
 
 /**
  * Test {@link MarketplaceInfo}
@@ -174,11 +179,24 @@ public class MarketplaceInfoSerializationTest {
 		}
 	}
 
-	@Rule
-	public TemporaryFolder testData = new TemporaryFolder(getWorkDir());
+	/**
+	 * Creates the temporary test data directory below the test runtime work directory instead of the system temp
+	 * directory.
+	 */
+	static class WorkDirTempDirFactory implements TempDirFactory {
+		@Override
+		public Path createTempDirectory(AnnotatedElementContext elementContext, ExtensionContext extensionContext)
+				throws Exception {
+			Path workDir = Files.createDirectories(getWorkDir().toPath());
+			return Files.createTempDirectory(workDir, "junit");
+		}
+	}
 
-	@Rule
-	public TemporaryEnvironment env = new TemporaryEnvironment();
+	@TempDir(factory = WorkDirTempDirFactory.class)
+	Path testData;
+
+	@RegisterExtension
+	final TemporaryEnvironment env = new TemporaryEnvironment();
 
 	private TestMarketplaceInfo catalogRegistry;
 
@@ -200,22 +218,23 @@ public class MarketplaceInfoSerializationTest {
 		}
 	}
 
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		catalogRegistry = spy(new TestMarketplaceInfo());
 
-		userHome = testData.newFolder("user home");
+		userHome = Files.createDirectories(testData.resolve("user home")).toFile();
 		env.set("user.home", userHome.getAbsolutePath());
 
-		configurationDirectory = testData.newFolder("user home", "my eclipse", "configuration");
+		configurationDirectory = Files.createDirectories(testData.resolve("user home").resolve("my eclipse").resolve(
+				"configuration")).toFile();
 		configurationLocation = mock(Location.class);
 		when(configurationLocation.getURL()).thenReturn(new URL(configurationDirectory.toURI().toString().replace("%20",
 				" ")));
 		when(catalogRegistry.getConfigurationLocation()).thenReturn(configurationLocation);
 	}
 
-	@Before
-	@After
+	@BeforeEach
+	@AfterEach
 	public void clearTestBundleRegistry() {
 		File dataFile = Platform.getBundle(MarketplaceClientUi.BUNDLE_ID).getBundleContext().getDataFile(
 				"MarketplaceInfo.xml");
@@ -332,8 +351,9 @@ public class MarketplaceInfoSerializationTest {
 		File registryFile = catalogRegistry.computeRegistryFile(true);
 		assertEquals(getUserHomeRegistryFile(), registryFile);
 		assertTrue(registryFile.isFile());
-		assertFalse(MessageFormat.format("Migration to new location failed, ''{0}'' still exists",
-				getLegacyUserHomeRegistryFile().getAbsolutePath()), getLegacyUserHomeRegistryFile().exists());
+		assertFalse(getLegacyUserHomeRegistryFile().exists(), MessageFormat.format(
+				"Migration to new location failed, ''{0}'' still exists",
+				getLegacyUserHomeRegistryFile().getAbsolutePath()));
 	}
 
 	@Test
@@ -348,8 +368,9 @@ public class MarketplaceInfoSerializationTest {
 		File registryFile = catalogRegistry.computeRegistryFile(true);
 		assertEquals(getUserHomeRegistryFile(), registryFile);
 		assertTrue(registryFile.isFile());
-		assertFalse(MessageFormat.format("Migration to new location failed, ''{0}'' still exists",
-				getLegacyUserHomeRegistryFile().getAbsolutePath()), getLegacyUserHomeRegistryFile().exists());
+		assertFalse(getLegacyUserHomeRegistryFile().exists(), MessageFormat.format(
+				"Migration to new location failed, ''{0}'' still exists",
+				getLegacyUserHomeRegistryFile().getAbsolutePath()));
 	}
 
 	@Test
@@ -389,10 +410,10 @@ public class MarketplaceInfoSerializationTest {
 		File registryFile = getUserHomeRegistryFile();
 		new MarketplaceInfo(catalogRegistry).save(registryFile);
 
-		assertTrue(MessageFormat.format("Registry file ''{0}'' does not exist", registryFile.getAbsolutePath()),
-				registryFile.exists());
-		assertTrue(MessageFormat.format("Registry file ''{0}'' is empty", registryFile.getAbsolutePath()), registryFile
-				.length() > 0);
+		assertTrue(registryFile.exists(),
+				MessageFormat.format("Registry file ''{0}'' does not exist", registryFile.getAbsolutePath()));
+		assertTrue(registryFile.length() > 0,
+				MessageFormat.format("Registry file ''{0}'' is empty", registryFile.getAbsolutePath()));
 
 		MarketplaceInfo loaded = loadMarketplaceInfo();
 		assertNotNull(loaded);
@@ -406,7 +427,7 @@ public class MarketplaceInfoSerializationTest {
 	@Test
 	public void loadNonExisting() {
 		MarketplaceInfo loaded = loadMarketplaceInfo();
-		assertNull("Unexpectedly loaded from " + loadPath(loaded), loaded);
+		assertNull(loaded, "Unexpectedly loaded from " + loadPath(loaded));
 	}
 
 	private static String loadPath(MarketplaceInfo loaded) {
@@ -424,7 +445,7 @@ public class MarketplaceInfoSerializationTest {
 	public void loadEmpty() throws Exception {
 		createEmptyRegistryFile(getUserHomeRegistryFile());
 		MarketplaceInfo loaded = loadMarketplaceInfo();
-		assertNull("Unexpectedly loaded from " + loadPath(loaded), loaded);
+		assertNull(loaded, "Unexpectedly loaded from " + loadPath(loaded));
 	}
 
 	@Test
@@ -433,7 +454,7 @@ public class MarketplaceInfoSerializationTest {
 		copyRegistryFile(registryFile, 20);
 
 		MarketplaceInfo loaded = loadMarketplaceInfo();
-		assertNull("Unexpectedly loaded from " + loadPath(loaded), loaded);
+		assertNull(loaded, "Unexpectedly loaded from " + loadPath(loaded));
 	}
 
 	@Test
@@ -446,9 +467,9 @@ public class MarketplaceInfoSerializationTest {
 				(byte) 0x92 });
 		os.close();
 		MarketplaceInfo loaded = loadMarketplaceInfo();
-		assertNull("Unexpectedly loaded from " + loadPath(loaded), loaded);
-		assertFalse(MessageFormat.format("Corrupted registry file ''{0}'' was not deleted", getUserHomeRegistryFile()
-				.getAbsolutePath()), getUserHomeRegistryFile().exists());
+		assertNull(loaded, "Unexpectedly loaded from " + loadPath(loaded));
+		assertFalse(getUserHomeRegistryFile().exists(), MessageFormat.format(
+				"Corrupted registry file ''{0}'' was not deleted", getUserHomeRegistryFile().getAbsolutePath()));
 	}
 
 	private TestRegistryFile setupRestrictedRegistry(File... writable) throws IOException {
