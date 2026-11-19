@@ -12,6 +12,11 @@ IEclipsePreferences#org-eclipse-epp-mpc-ui:org-eclipse-ui-themes { /* pseudo att
     color: #dddddd;
 }
 
+.MarketplacePlaceholder,
+.MarketplacePlaceholder * {
+    background-color: #383C3E;
+}
+
 .MarketplaceItem Link {
     color: #8B9498;
 }

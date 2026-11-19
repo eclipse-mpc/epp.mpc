@@ -117,6 +117,10 @@ public class MarketplaceViewer extends CatalogViewer {
 				// don't provide any categories unless it's featured
 				List<Object> items = new ArrayList<>(getCatalog().getItems());
 				for (CatalogCategory category : getCatalog().getCategories()) {
+					if (items.isEmpty() && category instanceof MarketplaceCategory marketplaceCategory
+							&& marketplaceCategory.getContents() == Contents.INSTALLED) {
+						return new Object[] { InstalledPlaceholderItem.ELEMENT };
+					}
 					if (category instanceof MarketplaceCategory marketplaceCategory) {
 						int pos = 0;
 						for(int i=0;i < items.size(); i++) {
@@ -392,6 +396,13 @@ public class MarketplaceViewer extends CatalogViewer {
 	protected ControlListItem<?> doCreateViewerItem(Composite parent, Object element) {
 		ControlListItem<?> item;
 		boolean isCategory = false;
+		if (element == InstalledPlaceholderItem.ELEMENT) {
+			MarketplacePage page = getWizard().getCatalogPage();
+			InstalledPlaceholderItem placeholder = new InstalledPlaceholderItem(parent,
+					page.hasTab(ContentType.SEARCH) ? () -> page.setActiveTab(ContentType.SEARCH) : null);
+			new StyleHelper().on(placeholder).addClass("MarketplacePlaceholder"); //$NON-NLS-1$
+			return placeholder;
+		}
 		if (element instanceof CatalogItem catalogItem) {
 			if (catalogItem instanceof UserActionCatalogItem userActionCatalogItem) {
 				//user action link

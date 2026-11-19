@@ -529,6 +529,11 @@ public class MarketplacePage extends CatalogPage implements IWizardButtonLabelPr
 		return currentTabItem;
 	}
 
+	boolean hasTab(ContentType content) {
+		CTabItem tabItem = getTabItem(content);
+		return tabItem != null && !tabItem.isDisposed();
+	}
+
 	private CTabItem getTabItem(ContentType content) {
 		switch (content) {
 		case INSTALLED:

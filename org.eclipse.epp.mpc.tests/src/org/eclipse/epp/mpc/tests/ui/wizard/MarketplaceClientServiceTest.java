@@ -86,6 +86,7 @@ public class MarketplaceClientServiceTest extends AbstractMarketplaceWizardBotTe
 		initWizardBot();
 		checkSelectedTab("Installed");
 		checkNoItems();
+		bot.label("Solutions you install from the Marketplace will be listed here.");
 	}
 
 	@Test
