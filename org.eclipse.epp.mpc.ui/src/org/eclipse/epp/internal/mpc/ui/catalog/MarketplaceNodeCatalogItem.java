@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -34,19 +34,13 @@ public class MarketplaceNodeCatalogItem extends CatalogItem {
 	private static final Field changeSupportField;
 
 	static {
-		Boolean accessible = null;
 		Field field = null;
 		try {
 			field = CatalogItem.class.getDeclaredField("changeSupport"); //$NON-NLS-1$
-			accessible = field.isAccessible();
 			field.setAccessible(true);
 		} catch (Exception e) {
 			field = null;
 			MarketplaceClientCore.error(Messages.MarketplaceNodeCatalogItem_changeSupportError, e);
-		} finally {
-			if (field != null && accessible != null && !accessible.equals(field.isAccessible())) {
-				field.setAccessible(accessible);
-			}
 		}
 		changeSupportField = field;
 	}
@@ -69,20 +63,14 @@ public class MarketplaceNodeCatalogItem extends CatalogItem {
 		return propertyChangeSupport;
 	}
 
-	private synchronized PropertyChangeSupport accessPropertyChangeSupport() {
-		Boolean accessible = null;
+	private PropertyChangeSupport accessPropertyChangeSupport() {
+		if (changeSupportField == null) {
+			return null;
+		}
 		try {
-			accessible = changeSupportField.isAccessible();
-			changeSupportField.setAccessible(true);
-			PropertyChangeSupport changeSupport = (PropertyChangeSupport) changeSupportField.get(this);
-			return changeSupport;
+			return (PropertyChangeSupport) changeSupportField.get(this);
 		} catch (Exception e) {
 			MarketplaceClientCore.error(Messages.MarketplaceNodeCatalogItem_changeSupportAccessError, e);
-		} finally {
-			if (changeSupportField != null && accessible != null
-					&& !accessible.equals(changeSupportField.isAccessible())) {
-				changeSupportField.setAccessible(accessible);
-			}
 		}
 		return null;
 	}

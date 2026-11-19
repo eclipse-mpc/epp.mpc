@@ -63,13 +63,8 @@ class CompositeProfileChangeOperation extends InstallOperation {
 		}
 		try {
 			Field requestField = ProfileChangeOperation.class.getDeclaredField("request"); //$NON-NLS-1$
-			boolean accessible = requestField.isAccessible();
-			try {
-				requestField.setAccessible(true);
-				requestField.set(this, request);
-			} finally {
-				requestField.setAccessible(accessible);
-			}
+			requestField.setAccessible(true);
+			requestField.set(this, request);
 		} catch (Exception e) {
 			status.add(new Status(IStatus.ERROR, MarketplaceClientUi.BUNDLE_ID,
 					Messages.CompositeProfileChangeOperation_ChangeRequestError, e));
