@@ -499,7 +499,7 @@ public class SolutionCompatibilityFilterTest {
 		for (Object object : values) {
 			flatten(flattened, object);
 		}
-		return flattened.toArray(new Object[flattened.size()]);
+		return flattened.toArray();
 	}
 
 	private static void flatten(List<Object> flattened, Object value) {

@@ -25,7 +25,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -292,8 +291,8 @@ public class DefaultMarketplaceServiceTest {
 	@Test
 	@Tag("RemoteTests")
 	public void related() throws Exception {
-		List<INode> basedOn = Arrays.asList(QueryHelper.nodeById("1139"), QueryHelper.nodeById("206"), QueryHelper
-				.nodeById("1147"));
+		List<INode> basedOn = List.of(QueryHelper.nodeById("1139"), QueryHelper.nodeById("206"),
+				QueryHelper.nodeById("1147"));
 		related(basedOn);
 	}
 
@@ -373,7 +372,7 @@ public class DefaultMarketplaceServiceTest {
 		INode idNode2 = QueryHelper.nodeById("1139");//Subversive
 		INode idNode3 = QueryHelper.nodeById("5321178");//M2E
 		INode urlNode = QueryHelper.nodeByUrl("https://marketplace.eclipse.org/content/egit-git-integration-eclipse");
-		List<INode> query = Arrays.asList(idNode1, idNode2, urlNode, idNode3);
+		List<INode> query = List.of(idNode1, idNode2, urlNode, idNode3);
 
 		List<INode> result = marketplaceService.getNodes(query, new NullProgressMonitor());
 		assertEquals(query.size(), result.size());

@@ -173,7 +173,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 				}
 				checkCancelled(monitor);
 
-				URI[] repositories = repositoryLocations == null ? new URI[0] : repositoryLocations.toArray(new URI[0]);
+				URI[] repositories = repositoryLocations == null ? new URI[0] : repositoryLocations.toArray(URI[]::new);
 				switch (operationType) {
 				case INSTALL:
 					operation = resolveInstall(monitor.newChild(500), ius, repositories);
@@ -261,7 +261,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 			IInstallableUnit installedIu = iUsById.get(iu.getId());
 			installedIus.add(installedIu);
 		}
-		return installedIus.toArray(new IInstallableUnit[installedIus.size()]);
+		return installedIus.toArray(IInstallableUnit[]::new);
 	}
 
 	public ProfileChangeOperation getOperation() {
@@ -334,9 +334,6 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 		Set<URI> previousRepositoryLocations = null;
 		for (ResolutionStrategy strategy : strategies) {
 			Set<URI> repositoryLocations = new HashSet<>(Arrays.asList(repositories));
-			if (strategy == ResolutionStrategy.SELECTED_REPOSITORIES) {
-				repositoryLocations.addAll(Arrays.asList(repositories));
-			}
 			if (dependenciesRepository != null) {
 				repositoryLocations.add(dependenciesRepository);
 			}
@@ -348,7 +345,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 			}
 			operation = operationFactory.create(installableUnits);
 			if (!repositoryLocations.isEmpty()) {
-				URI[] locations = repositoryLocations.toArray(new URI[repositoryLocations.size()]);
+				URI[] locations = repositoryLocations.toArray(URI[]::new);
 				operation.getProvisioningContext().setMetadataRepositories(locations);
 				operation.getProvisioningContext().setArtifactRepositories(locations);
 			}
@@ -378,7 +375,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 			// bug 306446 we never want to downgrade the installed version
 			pruneOlderVersions(installableUnits);
 
-			return installableUnits.toArray(new IInstallableUnit[installableUnits.size()]);
+			return installableUnits.toArray(IInstallableUnit[]::new);
 
 		} catch (URISyntaxException e) {
 			// should never happen, since we already validated URLs.
@@ -396,7 +393,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 
 			pruneNonUninstall(installableUnits);
 
-			return installableUnits.toArray(new IInstallableUnit[installableUnits.size()]);
+			return installableUnits.toArray(IInstallableUnit[]::new);
 
 		} finally {
 			monitor.done();

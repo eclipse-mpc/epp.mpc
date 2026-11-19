@@ -66,7 +66,7 @@ public abstract class TransportFactory implements ITransportFactory {
 
 	public static final String DISABLED_TRANSPORTS_KEY = "org.eclipse.epp.mpc.core.service.transport.disabled"; //$NON-NLS-1$
 
-	private static final String[] factoryClasses = new String[] { //
+	private static final String[] factoryClasses = { //
 			"org.eclipse.epp.internal.mpc.core.util.P2TransportFactory", // //$NON-NLS-1$
 			"org.eclipse.epp.internal.mpc.core.util.Eclipse36TransportFactory", // //$NON-NLS-1$
 	"org.eclipse.epp.internal.mpc.core.util.JavaPlatformTransportFactory" }; //$NON-NLS-1$

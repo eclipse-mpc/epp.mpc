@@ -107,7 +107,7 @@ import org.slf4j.LoggerFactory;
 @ExtendWith(AbstractMarketplaceWizardBotTest.ScreenshotOnFailureExtension.class)
 public abstract class AbstractMarketplaceWizardBotTest {
 
-	protected static final INode[] TEST_NODES = new INode[] { //
+	protected static final INode[] TEST_NODES = { //
 			testNode("206", "https://marketplace.eclipse.org/content/mylyn", "Mylyn"), //
 			testNode("2780381", "https://marketplace.eclipse.org/content/trace-compass", "Trace Compass"), //
 			testNode("2410217", "https://marketplace.eclipse.org/content/memory-analyzer-0", "Memory Analyzer"), //

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -80,9 +80,8 @@ public class MarketplaceWizardDialog extends AbstractMarketplaceWizardDialog {
 							Shell parentShell = activate(wizardDialog.getShell());
 							MessageDialog messageDialog = new MessageDialog(parentShell, Messages.MarketplaceWizardDialog_PromptPendingActionsTitle,
 									null, Messages.MarketplaceWizardDialog_PromptPendingActionsMessage,
-									MessageDialog.QUESTION_WITH_CANCEL, new String[] { IDialogConstants.YES_LABEL,
-											IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL },
-									SWT.NONE);
+									MessageDialog.QUESTION_WITH_CANCEL, SWT.NONE, IDialogConstants.YES_LABEL,
+									IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL);
 							int result = messageDialog.open();
 							switch (result) {
 							case 0: //yes

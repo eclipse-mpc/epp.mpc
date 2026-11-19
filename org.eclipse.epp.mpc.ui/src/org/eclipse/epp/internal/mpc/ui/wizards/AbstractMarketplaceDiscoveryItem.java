@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010,, 2018 Tasktop Technologies and others.
+ * Copyright (c) 2010, 2026 Tasktop Technologies and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -451,7 +451,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 				Rectangle bounds = image.getBounds();
 				if (bounds.width < 0.8 * MAX_IMAGE_WIDTH || bounds.width > MAX_IMAGE_WIDTH
 						|| bounds.height > MAX_IMAGE_HEIGHT) {
-					final Image[] scaledImage = new Image[] {
+					final Image[] scaledImage = {
 							Util.scaleImage(image, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT, background) };
 					if (image.getImageData().getTransparencyType() != SWT.TRANSPARENCY_NONE) {
 						//Need to repaint on background color change
