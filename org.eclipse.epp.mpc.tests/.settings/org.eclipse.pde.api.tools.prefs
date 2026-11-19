@@ -92,3 +92,4 @@ malformed_since_tag=Error
 missing_since_tag=Error
 report_api_breakage_when_major_version_incremented=Disabled
 report_resolution_errors_api_component=Warning
+missing_plugin_in_baseline=Ignore
