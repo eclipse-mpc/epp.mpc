@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -62,7 +62,7 @@ public class GradientCanvasPropertyHandler  extends AbstractCSSPropertySWTHandle
 					for (int i = 0; i < percents.length; i++) {
 						percents[i] = list.get(i).intValue();
 					}
-					canvas.setBackgroundGradient(colors.toArray(new Color[0]), percents,
+					canvas.setBackgroundGradient(colors.toArray(Color[]::new), percents,
 							grad.getVerticalGradient());
 				} else {
 					canvas.setBackgroundGradient(null, null, false);

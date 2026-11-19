@@ -446,7 +446,7 @@ public abstract class AbstractMarketplaceDiscoveryItem<T extends CatalogItem> ex
 				Rectangle bounds = image.getBounds();
 				if (bounds.width < 0.8 * MAX_IMAGE_WIDTH || bounds.width > MAX_IMAGE_WIDTH
 						|| bounds.height > MAX_IMAGE_HEIGHT) {
-					final Image[] scaledImage = new Image[] {
+					final Image[] scaledImage = {
 							Util.scaleImage(image, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT, background) };
 					if (image.getImageData().getTransparencyType() != SWT.TRANSPARENCY_NONE) {
 						//Need to repaint on background color change

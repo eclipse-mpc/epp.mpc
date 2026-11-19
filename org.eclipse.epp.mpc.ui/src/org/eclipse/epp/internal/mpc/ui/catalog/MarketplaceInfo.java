@@ -427,7 +427,7 @@ public class MarketplaceInfo {
 			files.add(userConfigFile);
 			files.add(legacyConfigFile);
 		}
-		return new RegistryFile(files.toArray(new File[files.size()]));
+		return new RegistryFile(files.toArray(File[]::new));
 	}
 
 	/**

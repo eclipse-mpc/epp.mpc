@@ -321,7 +321,7 @@ public class MarketplaceWizard extends DiscoveryWizard implements InstallProfile
 
 	protected void notifyNonInstallableItems(final List<? extends CatalogItem> noninstallableItems) {
 		MessageDialog dialog = new MessageDialog(getShell(), Messages.MarketplaceWizard_UnableToInstallSolutions, null, Messages.MarketplaceWizard_IncompatibleSolutionsMessage, MessageDialog.ERROR,
-				new String[] { IDialogConstants.OK_LABEL }, 0) {
+				0, IDialogConstants.OK_LABEL) {
 			@Override
 			protected Control createCustomArea(Composite parent) {
 				parent.setLayout(new GridLayout());

@@ -118,8 +118,8 @@ public class ShareSolutionLink {
 	protected void copyLinkToClipboard() {
 		Clipboard clipboard = new Clipboard(control.getDisplay());
 		TextTransfer textTransfer = TextTransfer.getInstance();
-		Transfer[] transfers = new Transfer[] { textTransfer };
-		Object[] data = new Object[] { getUrl() };
+		Transfer[] transfers = { textTransfer };
+		Object[] data = { getUrl() };
 		clipboard.setContents(data, transfers);
 		clipboard.dispose();
 	}
@@ -138,8 +138,8 @@ public class ShareSolutionLink {
 			if (copyToClipboard) {
 				Clipboard clipboard = new Clipboard(control.getDisplay());
 				TextTransfer textTransfer = TextTransfer.getInstance();
-				Transfer[] transfers = new Transfer[] { textTransfer };
-				Object[] data = new Object[] { body };
+				Transfer[] transfers = { textTransfer };
+				Object[] data = { body };
 				clipboard.setContents(data, transfers);
 				clipboard.dispose();
 			}
