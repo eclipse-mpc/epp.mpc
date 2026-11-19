@@ -474,8 +474,8 @@ public class SelectionModel {
 							old = null;
 						} else if (verify && !old.equals(operation)) {
 							IStatus error = Status.error(NLS.bind(
-									Messages.SelectionModel_Inconsistent_Actions, new Object[] {
-											featureEntry.getFeatureDescriptor().getName(), old, operation }));
+									Messages.SelectionModel_Inconsistent_Actions,
+									featureEntry.getFeatureDescriptor().getName(), old, operation));
 							throw new IllegalStateException(new CoreException(error));
 						}
 					}

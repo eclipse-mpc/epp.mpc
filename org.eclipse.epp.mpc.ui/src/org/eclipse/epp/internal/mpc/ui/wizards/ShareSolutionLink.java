@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2011, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -97,8 +97,7 @@ public class ShareSolutionLink {
 		twitterItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				String tweet = NLS.bind(Messages.ShareSolutionLink_tweet, new Object[] { catalogItem.getName(),
-						getUrl() });
+				String tweet = NLS.bind(Messages.ShareSolutionLink_tweet, catalogItem.getName(), getUrl());
 				WorkbenchUtil.openUrl("http://twitter.com/?status=" + tweet, IWorkbenchBrowserSupport.AS_EXTERNAL); //$NON-NLS-1$
 			}
 		});
@@ -151,7 +150,7 @@ public class ShareSolutionLink {
 	}
 
 	protected void openNewMail() {
-		String subject = NLS.bind(Messages.ShareSolutionLink_mailSubject, new Object[] { catalogItem.getName() });
+		String subject = NLS.bind(Messages.ShareSolutionLink_mailSubject, catalogItem.getName());
 		String body = computeMessage();
 		String recipient = Messages.ShareSolutionLink_recipient;
 		String mailToString = "mailto:" + recipient + "?subject=" + subject + "&body=" + body; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

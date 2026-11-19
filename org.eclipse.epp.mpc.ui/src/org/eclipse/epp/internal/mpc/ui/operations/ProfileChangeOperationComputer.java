@@ -506,8 +506,8 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 				if (detailedMessage.length() > 0) {
 					detailedMessage += Messages.ProvisioningOperation_commaSeparator;
 				}
-				detailedMessage += NLS.bind(Messages.ProvisioningOperation_unavailableFeatures, new Object[] {
-						descriptor.getName(), unavailableIds.toString(), descriptor.getSiteUrl() });
+				detailedMessage += NLS.bind(Messages.ProvisioningOperation_unavailableFeatures,
+						descriptor.getName(), unavailableIds.toString(), descriptor.getSiteUrl());
 			}
 		}
 
@@ -519,7 +519,7 @@ public class ProfileChangeOperationComputer extends AbstractProvisioningOperatio
 			.syncExec(() -> okayToProceed[0] = MessageDialog.openQuestion(WorkbenchUtil.getShell(),
 					Messages.ProvisioningOperation_proceedQuestion,
 					NLS.bind(Messages.ProvisioningOperation_unavailableSolutions_proceedQuestion,
-							new Object[] { finalMessage })));
+							finalMessage)));
 			if (!okayToProceed[0]) {
 				throw new CoreException(Status.error(NLS.bind(
 						Messages.ProvisioningOperation_unavailableSolutions, detailedMessage)));
