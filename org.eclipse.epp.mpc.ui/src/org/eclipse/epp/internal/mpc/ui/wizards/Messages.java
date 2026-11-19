@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -34,8 +34,6 @@ class Messages extends NLS {
 	public static String CatalogSwitcher_Header;
 
 	public static String CatalogSwitcher_retrieveMetaData;
-
-	public static String DiscoverFavoritesUserActionItem_subline;
 
 	public static String DiscoveryItem_AlreadyInstalled;
 
@@ -291,24 +289,6 @@ class Messages extends NLS {
 	public static String RatingTooltip_Dont_show_again;
 
 	public static String RatingTooltip_Note;
-
-	public static String RetryErrorActionItem_errorDetailsDialogTitle;
-
-	public static String RetryErrorActionItem_failedToLoadLabel;
-
-	public static String RetryErrorActionItem_failedToLoadMessage;
-
-	public static String RetryErrorActionItem_retryActionLabel;
-
-	public static String RetryErrorActionItem_retryTooltip;
-
-	public static String RetryErrorActionItem_showDetailsActionLabel;
-
-	public static String RetryErrorActionItem_showDetailsTooltip;
-
-	public static String RetryErrorActionItem_subline;
-
-	public static String RetryErrorActionItem_unsupportedLinkMessage;
 
 	public static String SelectionModel_cannotInstallRemoveConcurrently;
 

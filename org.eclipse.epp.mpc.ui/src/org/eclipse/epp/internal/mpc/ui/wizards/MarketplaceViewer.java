@@ -436,8 +436,6 @@ public class MarketplaceViewer extends CatalogViewer {
 		switch (userAction) {
 		case BROWSE:
 			return createBrowseItem(catalogItem, parent);
-		case RETRY_ERROR:
-			return new RetryErrorActionItem(parent, getResources(), catalogItem, this);
 		case UPDATE:
 			return new InstallUpdatesNotificationItem(parent, getResources(), catalogItem,
 					getWizard().getCatalogPage());
