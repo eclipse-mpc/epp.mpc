@@ -26,18 +26,15 @@ jobs:
         distribution: 'temurin'
     
     - name: Build
-      uses: GabrielBB/xvfb-action@v1
-      with:
-        run: >
-          mvn -B verify
-          -Dmaven.test.failure.ignore=true
-          -Dorg.eclipse.swt.browser.UseWebKitGTK=true
-          -Dorg.eclipse.swt.browser.DefaultType=WebKit
-          -Dtycho.localArtifacts=ignore
-          -Dsurefire.timeout=1500
-          -Dhttp.nonProxyHosts=localhost
+      run: >
+        xvfb-run -a mvn -B verify
+        -Dorg.eclipse.swt.browser.DefaultType=WebKit
+        -Dtycho.localArtifacts=ignore
+        -Dsurefire.timeout=1500
+        -Dhttp.nonProxyHosts=localhost
           
     - name: 'Upload Screenshots'
+      if: always()
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
       with:
         name: org.eclipse.epp.mpc.tests-target-screenshots
@@ -45,6 +42,7 @@ jobs:
         retention-days: 3
   
     - name: 'Upload Logs'
+      if: always()
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
       with:
         name: org.eclipse.epp.mpc.tests-log
@@ -53,6 +51,7 @@ jobs:
         
         
     - name: 'Upload Screenshots Backup'
+      if: always()
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
       with:
         name: org.eclipse.epp.mpc.tests-log-all
