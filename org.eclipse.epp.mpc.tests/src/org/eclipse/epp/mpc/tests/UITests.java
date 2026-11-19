@@ -14,6 +14,7 @@ package org.eclipse.epp.mpc.tests;
 
 import org.eclipse.epp.mpc.tests.ui.MarketplaceClientUiTest;
 import org.eclipse.epp.mpc.tests.ui.catalog.CatalogDescriptorTest;
+import org.eclipse.epp.mpc.tests.ui.catalog.MarketplaceCatalogTest;
 import org.eclipse.epp.mpc.tests.ui.catalog.MarketplaceInfoSerializationTest;
 import org.eclipse.epp.mpc.tests.ui.catalog.MarketplaceInfoTest;
 import org.eclipse.epp.mpc.tests.ui.wizard.MarketplaceDiscoveryStrategyTest;
@@ -33,7 +34,8 @@ import org.junit.platform.suite.api.Suite;
 	MarketplaceInfoSerializationTest.class, //
 	CatalogDescriptorTest.class, //
 	MarketplaceClientUiTest.class, //
-	MarketplaceDiscoveryStrategyTest.class //
+	MarketplaceDiscoveryStrategyTest.class, //
+	MarketplaceCatalogTest.class //
 })
 public class UITests {
 
