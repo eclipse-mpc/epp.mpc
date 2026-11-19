@@ -1,9 +1,9 @@
 package org.eclipse.epp.mpc.tests.util;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.eclipse.epp.internal.mpc.core.util.TextUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TextUtilTest {
 

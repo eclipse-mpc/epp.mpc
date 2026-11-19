@@ -17,10 +17,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URI;
 import java.util.Collections;
@@ -34,14 +34,13 @@ import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceDiscoveryStrategy;
 import org.eclipse.epp.internal.mpc.ui.wizards.SelectionModel;
 import org.eclipse.epp.internal.mpc.ui.wizards.SelectionModelStateSerializer;
 import org.eclipse.epp.mpc.core.service.IMarketplaceService;
-import org.eclipse.epp.mpc.tests.Categories.RemoteTests;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.epp.mpc.ui.Operation;
 import org.eclipse.equinox.internal.p2.discovery.model.CatalogItem;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 public class SelectionModelStateSerializerTest {
 
@@ -53,7 +52,7 @@ public class SelectionModelStateSerializerTest {
 
 	private SelectionModel selectionModel;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		CatalogDescriptor catalogDescriptor = new CatalogDescriptor(new URI("https://marketplace.eclipse.org").toURL(),
 				"Eclipse.org Marketplace");
@@ -72,13 +71,13 @@ public class SelectionModelStateSerializerTest {
 		selectionModel = new SelectionModel(() -> Collections.emptySet());
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		catalog.dispose();
 	}
 
 	@Test //(expected=AssertionError.class)//FIXME bug 487157: disabled until entries declare Neon compatibility
-	@Category(RemoteTests.class)
+	@Tag("RemoteTests")
 	public void testSerialize() {
 		catalog.performDiscovery(new NullProgressMonitor());
 		assertFalse(catalog.getItems().isEmpty());

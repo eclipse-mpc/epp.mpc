@@ -13,10 +13,10 @@
  *******************************************************************************/
 package org.eclipse.epp.mpc.tests.ui.catalog;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URI;
 import java.util.Collections;
@@ -34,8 +34,8 @@ import org.eclipse.epp.internal.mpc.ui.catalog.MarketplaceNodeCatalogItem;
 import org.eclipse.epp.mpc.core.model.INode;
 import org.eclipse.equinox.internal.p2.metadata.InstallableUnit;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test {@link MarketplaceInfo}
@@ -48,7 +48,7 @@ public class MarketplaceInfoTest {
 
 	private MarketplaceInfo catalogRegistry;
 
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		catalogRegistry = new MarketplaceInfo();
 		item = createTestItem();

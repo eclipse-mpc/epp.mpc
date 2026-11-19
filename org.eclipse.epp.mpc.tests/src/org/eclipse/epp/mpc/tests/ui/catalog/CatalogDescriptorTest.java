@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2020 The Eclipse Foundation and others.
+ * Copyright (c) 2010, 2026 The Eclipse Foundation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -15,9 +15,10 @@ package org.eclipse.epp.mpc.tests.ui.catalog;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -28,14 +29,14 @@ import org.eclipse.epp.internal.mpc.ui.CatalogRegistry;
 import org.eclipse.epp.mpc.core.service.ICatalogService;
 import org.eclipse.epp.mpc.ui.CatalogDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class CatalogDescriptorTest {
 
-	@Before
-	@After
+	@BeforeEach
+	@AfterEach
 	public void cleanRegistry() {
 		CatalogRegistry registry = CatalogRegistry.getInstance();
 		List<CatalogDescriptor> catalogs = new ArrayList<>(registry.getCatalogDescriptors());
@@ -91,9 +92,9 @@ public class CatalogDescriptorTest {
 		assertEquals(url.toString(), descriptor.getUrl().toString());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testCopyCtorNull() {
-		new CatalogDescriptor((CatalogDescriptor) null);
+		assertThrows(IllegalArgumentException.class, () -> new CatalogDescriptor((CatalogDescriptor) null));
 	}
 
 	/**
